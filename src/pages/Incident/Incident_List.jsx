@@ -3,6 +3,8 @@ Created Date: 2025-01-09
 Created By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
 Last Modified Date: 2025-01-09
 Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
+Last Modified Date: 2025-01-20
+Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
 Version: React v18
 ui number : 1.1
 Dependencies: Tailwind CSS
@@ -19,16 +21,17 @@ const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const rowsPerPage = 7;
-    const [fromDate, setFromDate] = useState(null); //for date
-    const [toDate, setToDate] = useState(null); // for date
-    const [error, setError] = useState(""); // for error message
+    const [fromDate, setFromDate] = useState(null); 
+    const [toDate, setToDate] = useState(null); 
+    const [error, setError] = useState("");
 
     const [status1, setStatus1] = useState("");
     const [status2, setStatus2] = useState("");
+    const [status3, setStatus3] = useState("");
 
 
 
-  // validation for date
+  
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       setError("The 'From' date cannot be later than the 'To' date.");
@@ -38,7 +41,7 @@ const Incident_List = () => {
     }
   };
 
-  // validation for date
+  
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
       setError("The 'To' date cannot be earlier than the 'From' date.");
@@ -51,37 +54,114 @@ const Incident_List = () => {
     const [appliedFilters, setAppliedFilters] = useState({
         actionType: "",
         status: "",
+        sourceType: "",
         dateRange: { from: "", to: "" }
     });
 
     const data = [
-        { caseID: "001", status: "Open", accountNo: "1234567890", action: "Pending Review", createdDTM: "2025-01-01" },
-        { caseID: "002", status: "Closed", accountNo: "9876543210", action: "Reviewed", createdDTM: "2025-01-02" },
-        { caseID: "003", status: "Pending", accountNo: "1122334455", action: "In Progress", createdDTM: "2025-01-03" },
-        { caseID: "004", status: "Open", accountNo: "5566778899", action: "Awaiting Approval", createdDTM: "2025-01-04" },
-        { caseID: "005", status: "Closed", accountNo: "9988776655", action: "Completed", createdDTM: "2025-01-05" },
-        { caseID: "006", status: "Pending", accountNo: "4433221100", action: "Pending Response", createdDTM: "2025-01-06" },
-        { caseID: "007", status: "Open", accountNo: "6655443322", action: "Action Required", createdDTM: "2025-01-07" },
-        { caseID: "008", status: "Pending", accountNo: "4433221100", action: "Pending Response", createdDTM: "2025-01-06" },
-        { caseID: "009", status: "Open", accountNo: "6655443322", action: "Action Required", createdDTM: "2025-01-07" },
+        {
+            caseID: 1,
+            action: "collect arrears",
+            status: "Incident Open",
+            accountNo: "123456789",
+            sourceType: "Pilot Suspended",
+            createdDTM: "2025-01-15",
+        },
+        {
+            caseID: 2,
+            action: "collect arrears and CPE",
+            status: "Incident Reject",
+            accountNo: "453766789",
+            sourceType: "Product Terminate",
+            createdDTM: "2025-01-18",
+        },
+        {
+            caseID: 3,
+            action: "collect CPE",
+            status: "Incident Open",
+            accountNo: "568484332",
+            sourceType: "Special",
+            createdDTM: "2025-01-20",
+        },
+        {
+            caseID: 4,
+            action: "collect arrears",
+            status: "Incident Open",
+            accountNo: "456875345",
+            sourceType: "Special",
+            createdDTM: "2025-01-12",
+        },
+        {
+            caseID: 5,
+            action: "collect arrears and CPE",
+            status: "Incident Reject",
+            accountNo: "321564785",
+            sourceType: "Pilot Suspended",
+            createdDTM: "2025-01-16",
+        },
+       
+        {
+            caseID: 6,
+            action: "collect arrears",
+            status: "Incident Open",
+            accountNo: "987654321",
+            sourceType: "Special",
+            createdDTM: "2025-01-17",
+        },
+        {
+            caseID: 7,
+            action: "collect arrears and CPE",
+            status: "Incident Reject",
+            accountNo: "245813902",
+            sourceType: "Product Terminate",
+            createdDTM: "2025-01-22",
+        },
+        {
+            caseID: 8,
+            action: "collect CPE",
+            status: "Incident Open",
+            accountNo: "135790246",
+            sourceType: "Pilot Suspended",
+            createdDTM: "2025-01-19",
+        },
+        {
+            caseID: 9,
+            action: "collect arrears",
+            status: "Incident Open",
+            accountNo: "321987654",
+            sourceType: "Special",
+            createdDTM: "2025-01-21",
+        },
+        {
+            caseID: 10,
+            action: "collect arrears and CPE",
+            status: "Incident Reject",
+            accountNo: "762514309",
+            sourceType: "Product Terminate",
+            createdDTM: "2025-01-23",
+        }
     ];
+    
 
 
     const filteredData = data
-        .filter((row) =>
-            Object.values(row)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-        )
-        .filter((row) =>
-            (appliedFilters.actionType ? row.action.toLowerCase() === appliedFilters.actionType.toLowerCase() : true) &&
-            (appliedFilters.status ? row.status.toLowerCase() === appliedFilters.status.toLowerCase() : true) &&
-            (appliedFilters.dateRange.from && appliedFilters.dateRange.to
-                ? new Date(row.createdDTM) >= new Date(appliedFilters.dateRange.from) && 
-                  new Date(row.createdDTM) <= new Date(appliedFilters.dateRange.to)
-                : true)
-        );
+    .filter((row) =>
+        Object.values(row)
+            .join(" ")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+    )
+    .filter((row) =>
+        (appliedFilters.actionType ? row.action.toLowerCase() === appliedFilters.actionType.toLowerCase() : true) &&
+        (appliedFilters.status ? row.status.toLowerCase() === appliedFilters.status.toLowerCase() : true) &&
+        (appliedFilters.sourceType ? row.sourceType.toLowerCase() === appliedFilters.sourceType.toLowerCase() : true) &&
+        (appliedFilters.dateRange.from && appliedFilters.dateRange.to
+            ? new Date(row.createdDTM) >= new Date(appliedFilters.dateRange.from) && 
+              new Date(row.createdDTM) <= new Date(appliedFilters.dateRange.to)
+            : true) 
+    
+    );
+
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
 
@@ -110,6 +190,7 @@ const Incident_List = () => {
         setAppliedFilters({
           actionType: status1,
           status: status2,
+          sourceType: status3,
           dateRange: { from: fromDate, to: toDate },
         });
       
@@ -148,13 +229,10 @@ const Incident_List = () => {
                         className={GlobalStyle.selectBox}
                     >
                         <option value="">Action Type</option>
-                        <option value="Pending Review">Pending Review</option>
-                        <option value="Reviewed">Reviewed</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Awaiting Approval">Awaiting Approval</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Pending Response">Pending Response</option>
-                        <option value="Action Required">Action Required</option>
+                        <option value="collect arrears">collect arrears</option>
+                        <option value="collect arrears and CPE">collect arrears and CPE</option>
+                        <option value="collect CPE">collect CPE</option>
+
                     </select>
 
 
@@ -164,9 +242,21 @@ const Incident_List = () => {
                         className={GlobalStyle.selectBox}
                     >
                         <option value="">Status</option>
-                        <option value="Open">Open</option>
-                        <option value="Closed">Closed</option>
-                        <option value="Pending">Pending</option>
+                        <option value="Incident Open">Incident Open</option>
+                        <option value="Incident Reject">Incident Reject</option>
+
+                    </select>
+
+                    <select
+                        value={status3}
+                        onChange={(e) => setStatus3(e.target.value)}
+                        className={GlobalStyle.selectBox}
+                    >
+                        <option value="">Source Type</option>
+                        <option value="Pilot Suspended">Pilot Suspended</option>
+                        <option value="Product Terminate">Product Terminate</option>
+                        <option value="Special">Special</option>
+
                     </select>
 
 
@@ -229,6 +319,9 @@ const Incident_List = () => {
                                 Action
                             </th>
                             <th scope="col" className={GlobalStyle.tableHeader}>
+                                Source Type
+                            </th>
+                            <th scope="col" className={GlobalStyle.tableHeader}>
                                 Created DTM
                             </th>
                         </tr>
@@ -236,13 +329,15 @@ const Incident_List = () => {
                     <tbody>
                         {paginatedData.map((log, index) => (
                             <tr
-                                key={index}
-                                className={`${index % 2 === 0 ? "bg-white bg-opacity-75" : "bg-gray-50 bg-opacity-50"} border-b`}
-                            >
+                            key={index}
+                            className={`${index % 2 === 0 ? "bg-white bg-opacity-75" : "bg-gray-50 bg-opacity-50"} border-b`}
+                        >
+                        
                                 <td className={GlobalStyle.tableData}>{log.caseID}</td>
                                 <td className={GlobalStyle.tableData}>{log.status}</td>
                                 <td className={GlobalStyle.tableData}>{log.accountNo}</td>
                                 <td className={GlobalStyle.tableData}>{log.action}</td>
+                                <td className={GlobalStyle.tableData}>{log.sourceType}</td>
                                 <td className={GlobalStyle.tableData}>{log.createdDTM}</td>
                             </tr>
                         ))}
