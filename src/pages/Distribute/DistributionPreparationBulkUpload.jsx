@@ -9,27 +9,41 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:  This page includes Total and Reject count and a table*/
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { get_count_by_drc_commision_rule } from '/src/services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 
 const DistributionPreparationBulkUpload = () => {
   const navigate = useNavigate();
-  const services = [
-    { type: "PEO TV", count: 4500 },
-    { type: "LTE", count: 4500 },
-    { type: "Fiber", count: 4500 },
-    { type: "Copper", count: 4500 },
-    { type: "Service A", count: 4500 },
-    { type: "Service B", count: 4500 },
-  ];
-
+  const [services, setServices] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [totalRules, setTotalRules] = useState(0)
   const recordsPerPage = 4;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await get_count_by_drc_commision_rule();
+        
+        const data = response.data || []; // Extract the "data" array from the response
+        setServices(data); 
+        const totalCount = data.reduce((sum, item) => sum + item.case_count, 0);
+        setTotalRules(totalCount);
+        
+      } catch (error) {
+        console.error(
+          "Error fetching case count by DRC commission rule:",
+          error.response?.data || error.message
+        );
+      }
+    };
+    fetchData();
+  }, []);
 
   //Search Filter logic
   const filteredData = services.filter((row) =>
@@ -74,15 +88,10 @@ const DistributionPreparationBulkUpload = () => {
                   {/* Summary Cards Container */}
              <div className={GlobalStyle.miniCountBarSubTopicContainer}>
                   {/* Total Count */}
+                <h2 className={GlobalStyle.headingMedium}>Total Case Count:</h2>
              <div className={GlobalStyle.miniCountBarMainBox}>
-                    <span>Total:</span>
-                    <p className={GlobalStyle.miniCountBarMainTopic}>1259</p>
+                    <p className={GlobalStyle.miniCountBarMainTopic}>{totalRules}</p>
              </div>
-                 {/* Rejects Count */}
-            <div className={GlobalStyle.miniCountBarMainBox}>
-                   <span>No Of Rejects:</span>
-                  <p className={GlobalStyle.miniCountBarMainTopic}>0</p>
-                </div>
                </div>
               </div>
 
@@ -106,10 +115,10 @@ const DistributionPreparationBulkUpload = () => {
               <thead className={GlobalStyle.thead}>
                 <tr>
                   <th scope="col" className={GlobalStyle.tableHeader}>
-                    Service Type
+                    Rule Base
                   </th>
                   <th scope="col" className={GlobalStyle.tableHeader}>
-                    No of Count
+                    No of count
                   </th>
                   <th scope="col" className={GlobalStyle.tableHeader}></th>
                 </tr>
@@ -127,12 +136,12 @@ const DistributionPreparationBulkUpload = () => {
                     <td
                       className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
                     >
-                      {service.type}
+                      {service.drc_commision_rule}
                     </td>
                     <td
                       className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
                     >
-                      {service.count}
+                      {service.case_count}
                     </td>
                     <td className={GlobalStyle.tableData}>
                       <button
@@ -141,14 +150,14 @@ const DistributionPreparationBulkUpload = () => {
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          width={20} // Using global style for size
-                          height={15} // Using global style for size
+                          width={34} 
+                          height={24} 
                           fill="none"
                         >
                           <path
                             fill="#001120"
-                            d="M3.57 24a2.99 2.99 0 0 1-2.167-.88C.802 22.531.5 21.825.5 21V3c0-.825.3-1.531.903-2.118A2.998 2.998 0 0 1 3.57 0h9.21l3.069 3h12.279c.844 0 1.567.294 2.169.882.601.588.902 1.294.9 2.118H3.57v15L7.253 9H33.5l-3.952 12.863a2.933 2.933 0 0 1-1.131 1.556 3.082 3.082 0 0 1-1.824.581H3.57Z"
-                          />
+                              d="M3.57 24a2.99 2.99 0 0 1-2.167-.88C.802 22.531.5 21.825.5 21V3c0-.825.3-1.531.903-2.118A2.998 2.998 0 0 1 3.57 0h9.21l3.069 3h12.279c.844 0 1.567.294 2.169.882.601.588.902 1.294.9 2.118H3.57v15L7.253 9H33.5l-3.952 12.863a2.933 2.933 0 0 1-1.131 1.556 3.082 3.082 0 0 1-1.824.581H3.57Z"
+                              />
                         </svg>
                       </button>
                     </td>
