@@ -20,7 +20,7 @@ const Sidebar = ({ onHoverChange }) => {
           label: "Dummy",
           subItems: [
             { label: "Distribute Preparation Bulk Upload", link: "/pages/Distribute/DistributionPreparationBulkUpload" },
-            { label: "Dummy", link: "/dashboard" },
+            { label: "Assign DRC (Distribution)", link: "/pages/Distribute/AssignDRC" },
           ],
         },
         { label: "Dummy", link: "/dashboard" },
