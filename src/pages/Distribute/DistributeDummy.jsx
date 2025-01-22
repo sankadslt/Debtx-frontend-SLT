@@ -32,6 +32,11 @@ const DistributeDummy = () => {
             label: "1 . A . 12 - Assign DRC ",
           },
           {
+            to: "/pages/Distribute/AssignedDRCSummary",
+            label: "1 . A . 13 - Case Distribution DRC Transactions ",
+          },
+
+          {
             to: "/pages/Distribute/DRCAssignManagerApproval",
             label: "1 . 15 - DRC Assign Manager Approval ",
           },
