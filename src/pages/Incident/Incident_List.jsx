@@ -3,6 +3,8 @@ Created Date: 2025-01-09
 Created By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
 Last Modified Date: 2025-01-09
 Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
+Last Modified Date: 2025-01-20
+Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
 Version: React v18
 ui number : 1.1
 Dependencies: Tailwind CSS
@@ -55,6 +57,7 @@ const Incident_List = () => {
     const rowsPerPage = 7;
     const [fromDate, setFromDate] = useState(null); 
     const [toDate, setToDate] = useState(null); 
+
     const [error, setError] = useState(""); 
     const [status1, setStatus1] = useState("");
     const [status2, setStatus2] = useState("");
@@ -67,7 +70,6 @@ const Incident_List = () => {
         From_Date: null,
         To_Date: null
     });
-
     const fetchData = async (filters) => {
         try {
             const response = await axios.post("http://localhost:5000/api/incident/List_Incidents", filters);
@@ -90,6 +92,7 @@ const Incident_List = () => {
     useEffect(() => {
         fetchData(activeFilters);
     }, [activeFilters]); // Added dependency array to prevent infinite loop
+
 
     const handleFromDateChange = (date) => {
         if (toDate && date > toDate) {
@@ -129,10 +132,9 @@ const Incident_List = () => {
     };
 
     const filteredData = data.filter((row) =>
-        Object.values(row)
-            .join(" ")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
+    const filteredData = data
+    .filter((row) =>
+      
     );
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -156,6 +158,7 @@ const Incident_List = () => {
     const HandleAddIncident = () => navigate("/add-incident");
     const HandleCreateTask = () => navigate("/add-incident");
 
+
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Incident Log</h2>
@@ -177,6 +180,8 @@ const Incident_List = () => {
                         <option value="collect arrears">collect arrears</option>
                         <option value="collect arrears and CPE">collect arrears and CPE</option>
                         <option value="collect CPE">collect CPE</option>
+
+
                     </select>
 
                     <select
@@ -187,6 +192,8 @@ const Incident_List = () => {
                         <option value="">Status</option>
                         <option value="Incident Open">Incident Open</option>
                         <option value="Incident Reject">Incident Reject</option>
+
+
                     </select>
 
                     <select
@@ -244,6 +251,7 @@ const Incident_List = () => {
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
+
                             <th className={GlobalStyle.tableHeader}>ID</th>
                             <th className={GlobalStyle.tableHeader}>Status</th>
                             <th className={GlobalStyle.tableHeader}>Account No.</th>
@@ -255,6 +263,7 @@ const Incident_List = () => {
                     <tbody>
                         {paginatedData.map((log, index) => (
                             <tr
+
                                 key={index}
                                 className={`${
                                     index % 2 === 0
@@ -262,6 +271,7 @@ const Incident_List = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                 } border-b`}
                             >
+
                                 <td className={GlobalStyle.tableData}>{log.caseID}</td>
                                 <td className={'${GlobalStyle.tableData} flex justify-center'}>
                                     <StatusIcon status={log.status} />
