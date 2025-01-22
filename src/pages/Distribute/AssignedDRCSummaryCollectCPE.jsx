@@ -87,6 +87,7 @@ export default function AssignedDRCSummaryCollectCPE() {
     });
 
     setFilteredData(filteredData);
+    
   };
   // Handle pagination
   const handlePrevNext = (direction) => {
@@ -98,35 +99,47 @@ export default function AssignedDRCSummaryCollectCPE() {
   };
 
   // Filtering the data based on search query
-  const filteredDataBySearch = currentData.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+  const filteredDataBySearch = searchQuery
+  ? filteredData.filter((row) =>
+      Object.values(row)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    )
+  : currentData;
 
-  // Select rows state
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
 
   const handleSelectAll = () => {
-    setSelectAll(!selectAll);
-    if (!selectAll) {
-      setSelectedRows(new Set(currentData.map((_, index) => index)));
-    } else {
-      setSelectedRows(new Set());
-    }
-  };
+  setSelectAll(!selectAll);
+  if (!selectAll) {
+    // Select all rows in the filtered data
+    setSelectedRows(new Set(filteredData.map((_, index) => index)));
+  } else {
+    // Deselect all rows
+    setSelectedRows(new Set());
+  }
+};
 
-  const handleRowSelect = (index) => {
-    const newSelectedRows = new Set(selectedRows);
-    if (newSelectedRows.has(index)) {
-      newSelectedRows.delete(index);
-    } else {
-      newSelectedRows.add(index);
-    }
-    setSelectedRows(newSelectedRows);
-  };
+const handleRowSelect = (index) => {
+  const newSelectedRows = new Set(selectedRows);
+
+  if (newSelectedRows.has(index)) {
+    newSelectedRows.delete(index);
+  } else {
+    newSelectedRows.add(index);
+  }
+
+  setSelectedRows(newSelectedRows);
+
+  // Automatically deselect the "Select All" checkbox if any row is deselected
+  if (newSelectedRows.size !== filteredData.length) {
+    setSelectAll(false);
+  } else {
+    setSelectAll(true);
+  }
+};
 
   function onSubmit() {
     alert("Create task and let me know");
@@ -152,15 +165,12 @@ export default function AssignedDRCSummaryCollectCPE() {
         <div className="flex gap-10">
           {" "}
           <div className="flex gap-4 h-[35px] mt-2">
-            <h1>DRC</h1>
             <select
               className={GlobalStyle.selectBox}
               value={drcFilter}
               onChange={(e) => setDrcFilter(e.target.value)}
             >
-              <option value="" selected>
-                ALL
-              </option>
+              <option value="">DRC</option>
               <option value="DRC1">DRC1</option>
               <option value="DRC2">DRC2</option>
               <option value="DRC3">DRC3</option>
@@ -220,7 +230,7 @@ export default function AssignedDRCSummaryCollectCPE() {
           <tbody>
             {filteredDataBySearch.map((item, index) => (
               <tr
-                key={item.caseId}
+                key={`${item.drc}-${index}`}
                 className={
                   index % 2 === 0
                     ? GlobalStyle.tableRowEven

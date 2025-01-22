@@ -21,7 +21,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; 
+import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { FaSearch } from "react-icons/fa";
 
 // Register necessary components for Chart.js pie chart
@@ -90,7 +90,7 @@ const AssignDRC = () => {
     casesAmount: "",
   });
 
-  //search fuction 
+  //search fuction
   const filteredSearchData = drcData.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -99,8 +99,6 @@ const AssignDRC = () => {
   );
   const location = useLocation();
   const navigate = useNavigate();
-
-  const { serviceType } = location.state || {};
 
   const handleEdit = (id) => {
     setEditMode(id);
@@ -144,21 +142,17 @@ const AssignDRC = () => {
         {/* Assign DRC Heading */}
         <h1 className={`${GlobalStyle.headingLarge}`}>Assign DRC</h1>
 
-        <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
-          Service Type: {serviceType || "PEO-TV"}
-        </h3>
-   
         {/* Service Type and Table */}
         <div className="relative">
           <div className="flex items-center my-10 space-x-4">
             {/* RTOM Dropdown */}
-             <select
+            <select
               className={`${GlobalStyle.selectBox}`}
               value={newEntry.RTOM}
               onChange={(e) =>
                 setNewEntry({ ...newEntry, RTOM: e.target.value })
               }
-             >
+            >
               <option value="" disabled>
                 RTOM
               </option>
@@ -209,16 +203,16 @@ const AssignDRC = () => {
               Add
             </button>
             <div className="flex-grow text-right">
-            <div className="flex justify-end">
-            <div
-                 className={`${GlobalStyle.countBarMainBox}`}
-                 style={{ width: "160px", textAlign: "center" }}
-            >
-                   Count: {totalDistributedAmount}
+              <div className="flex justify-end">
+                <div
+                  className={`${GlobalStyle.countBarMainBox}`}
+                  style={{ width: "160px", textAlign: "center" }}
+                >
+                  Count: {totalDistributedAmount}
                 </div>
-               </div>
               </div>
-             </div>
+            </div>
+          </div>
 
           <div className="flex">
             {/* Table */}
@@ -260,9 +254,7 @@ const AssignDRC = () => {
                         scope="col"
                         className={`${GlobalStyle.tableHeader} text-center`}
                         aria-label="Action"
-                      >
-                        Action
-                      </th>
+                      ></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -364,7 +356,6 @@ const AssignDRC = () => {
             <button
               onClick={handleProceed}
               className={`${GlobalStyle.buttonPrimary}`}
-              
             >
               Proceed
             </button>

@@ -2,7 +2,7 @@
 Created Date: 2025-01-07
 Created By: U.H.Nandali Linara
 Version: node 20
-ui number : 1.A.15
+ui number : 1.15
 Dependencies: tailwind css
 Related Files: (routes)
 Notes: This page includes a filter and a table */
@@ -11,7 +11,7 @@ Notes: This page includes a filter and a table */
 Created Date: 2025-01-07
 Created By: U.H.Nandali Linara
 Version: node 20
-ui number : 1.A.15
+ui number : 1.15
 Dependencies: tailwind css
 Related Files: (routes)
 Notes: This page includes a filter and a table */

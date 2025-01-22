@@ -19,12 +19,14 @@ const Sidebar = ({ onHoverChange }) => {
         {
           label: "Dummy",
           subItems: [
-            { label: "Distribute Preparation Bulk Upload", link: "/pages/Distribute/DistributionPreparationBulkUpload" },
-            { label: "Assign DRC (Distribution)", link: "/pages/Distribute/AssignDRC" },
-            { label: "DRC Assign Manager Approval", link: "/pages/Distribute/DRCAssignManagerApproval" },
+            { label: "Distribte Dummy", link: "/pages/Distribute/DistributeDummy" },
+           
+            
           ],
         },
-        { label: "Dummy", link: "/dashboard" },
+        { label: "Dummy",
+         },
+          
       ],
     },
   ];

@@ -28,16 +28,13 @@ import PageButton from "../pages/Incident/page_button";
  {/* Distribute Imports */}
  import AssignDRC from "../pages/Distribute/AssignDRC";
  import AssignDRCForCollectCPE from "../pages/Distribute/AssignDRCForCollectCPE";
- import AssignDRCsLOG from "../pages/Distribute/AssignDRCsLOG";
- import AssignedDRCSummary from "../pages/Distribute/AssignedDRCSummary";
+ import AssignedDRCSummary from "../pages/Distribute/CaseDistributionDRCTransactions";
  import AssignedDRCSummaryCollectCPE from "../pages/Distribute/AssignedDRCSummaryCollectCPE";
  import DistributionPreparationBulkUpload from "../pages/Distribute/DistributionPreparationBulkUpload";
  import DistributionPreparationOnlyCPECollect from "../pages/Distribute/DistributionPreparationOnlyCPECollect";
  import DRCAssignManagerApproval from "../pages/Distribute/DRCAssignManagerApproval";
- import IncidentFilter from "../pages/Distribute/IncidentFilter";
- import ReAssignDRC from "../pages/Distribute/ReAssignDRC";
  import DistributeDummy from "../pages/Distribute/DistributeDummy";
- import DistributeTORO from "../pages/Distribute/DistributeTORO";
+
 
 import Dummy from "../pages/DRC/Dummy";
 import AssignedCaseListforDRC from "../pages/DRC/Assigned case list for DRC";
@@ -85,16 +82,14 @@ const Routers = () => {
      {/* Distribute Routes */}
      <Route path="/pages/Distribute/AssignDRC" element={<ProtectedRoute element={<AssignDRC/>} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/AssignDRCForCollectCPE" element={<ProtectedRoute element={<AssignDRCForCollectCPE/>} allowedRoles={['superadmin']} />} />
-     <Route path="/pages/Distribute/AssignDRCsLOG" element={<ProtectedRoute element={<AssignDRCsLOG />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/AssignedDRCSummary" element={<ProtectedRoute element={<AssignedDRCSummary />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/AssignedDRCSummaryCollectCPE" element={<ProtectedRoute element={<AssignedDRCSummaryCollectCPE/>} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DistributionPreparationBulkUpload" element={<ProtectedRoute element={<DistributionPreparationBulkUpload />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DistributionPreparationOnlyCPECollect" element={<ProtectedRoute element={<DistributionPreparationOnlyCPECollect />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DRCAssignManagerApproval" element={<ProtectedRoute element={<DRCAssignManagerApproval />} allowedRoles={['superadmin']} />} />
-     <Route path="/pages/Distribute/IncidentFilter" element={<ProtectedRoute element={<IncidentFilter />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DistributeDummy" element={<ProtectedRoute element={<DistributeDummy />} allowedRoles={['superadmin']} />} />
-     <Route path="/pages/Distribute/ReAssignDRC" element={<ProtectedRoute element={<ReAssignDRC />} allowedRoles={['superadmin']} />} />
-     <Route path="/pages/Distribute/DistributeTORO" element={<ProtectedRoute element={<DistributeTORO />} allowedRoles={['superadmin']} />} />
+
+     
 
       {/* DRC Routes */}
       <Route path="/dummy" element={<ProtectedRoute element={<Dummy />} allowedRoles={['superadmin']} />} />
