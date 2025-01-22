@@ -87,6 +87,7 @@ export default function AssignedDRCSummaryCollectCPE() {
     });
 
     setFilteredData(filteredData);
+    
   };
   // Handle pagination
   const handlePrevNext = (direction) => {
@@ -111,32 +112,34 @@ export default function AssignedDRCSummaryCollectCPE() {
   const [selectedRows, setSelectedRows] = useState(new Set());
 
   const handleSelectAll = () => {
-    setSelectAll(!selectAll);
-    if (!selectAll) {
-      setSelectedRows(new Set(currentData.map((_, index) => index)));
-    } else {
-      setSelectedRows(new Set());
-    }
-  };
+  setSelectAll(!selectAll);
+  if (!selectAll) {
+    // Select all rows in the filtered data
+    setSelectedRows(new Set(filteredData.map((_, index) => index)));
+  } else {
+    // Deselect all rows
+    setSelectedRows(new Set());
+  }
+};
 
-  const handleRowSelect = (index) => {
-    const newSelectedRows = new Set(selectedRows);
+const handleRowSelect = (index) => {
+  const newSelectedRows = new Set(selectedRows);
 
-    if (newSelectedRows.has(index)) {
-      newSelectedRows.delete(index);
-    } else {
-      newSelectedRows.add(index);
-    }
+  if (newSelectedRows.has(index)) {
+    newSelectedRows.delete(index);
+  } else {
+    newSelectedRows.add(index);
+  }
 
-    setSelectedRows(newSelectedRows);
+  setSelectedRows(newSelectedRows);
 
-    // Automatically deselect the "Select All" checkbox if any row is deselected
-    if (newSelectedRows.size !== currentData.length) {
-      setSelectAll(false);
-    } else {
-      setSelectAll(true);
-    }
-  };
+  // Automatically deselect the "Select All" checkbox if any row is deselected
+  if (newSelectedRows.size !== filteredData.length) {
+    setSelectAll(false);
+  } else {
+    setSelectAll(true);
+  }
+};
 
   function onSubmit() {
     alert("Create task and let me know");
