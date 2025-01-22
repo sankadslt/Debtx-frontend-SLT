@@ -165,9 +165,7 @@ export default function AssignedDRCSummaryCollectCPE() {
               value={drcFilter}
               onChange={(e) => setDrcFilter(e.target.value)}
             >
-              <option value="" selected>
-                DRC
-              </option>
+              <option value="">DRC</option>
               <option value="DRC1">DRC1</option>
               <option value="DRC2">DRC2</option>
               <option value="DRC3">DRC3</option>
@@ -227,7 +225,7 @@ export default function AssignedDRCSummaryCollectCPE() {
           <tbody>
             {filteredDataBySearch.map((item, index) => (
               <tr
-                key={item.caseId}
+                key={`${item.drc}-${index}`}
                 className={
                   index % 2 === 0
                     ? GlobalStyle.tableRowEven
