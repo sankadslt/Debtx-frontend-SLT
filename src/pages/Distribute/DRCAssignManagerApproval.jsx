@@ -27,6 +27,7 @@ const DRCAssignManagerApproval = () => {
   // Sample data for the table
   const data = [
     {
+      status: "Pending assign agent approval",
       batchId: "C001",
       caseId: "C001",
       actionType: "Action",
@@ -37,6 +38,7 @@ const DRCAssignManagerApproval = () => {
       approvedOn: "mm/dd/yyyy",
     },
     {
+      status: "Pending assign agent approval",
       batchId: "",
       caseId: "C002",
       actionType: "Review",
@@ -47,6 +49,7 @@ const DRCAssignManagerApproval = () => {
       approvedOn: "mm/dd/yyyy",
     },
     {
+      status: "Pending assign agent approval",
       batchId: "",
       caseId: "C003",
       actionType: "Assignment",
@@ -57,6 +60,7 @@ const DRCAssignManagerApproval = () => {
       approvedOn: "mm/dd/yyyy",
     },
     {
+      status: "Pending assign agent approval",
       batchId: "",
       caseId: "C004",
       createdDate: "2024.11.08",
@@ -67,6 +71,7 @@ const DRCAssignManagerApproval = () => {
       approvedOn: "mm/dd/yyyy",
     },
     {
+      status: "Pending assign agent approval",
       batchId: "C003",
       caseId: "C006",
       createdDate: "2024.11.09",
@@ -77,6 +82,7 @@ const DRCAssignManagerApproval = () => {
       approvedOn: "mm/dd/yyyy",
     },
     {
+      status: "Pending assign agent approval",
       batchId: "C004",
       caseId: "C007",
       createdDate: "2024.11.09",
@@ -87,6 +93,7 @@ const DRCAssignManagerApproval = () => {
       approvedOn: "mm/dd/yyyy",
     },
     {
+      status: "Pending assign agent approval",
       batchId: "C005",
       caseId: "C008",
       createdDate: "2024.11.09",
@@ -97,6 +104,7 @@ const DRCAssignManagerApproval = () => {
       approvedOn: "mm/dd/yyyy",
     },
     {
+      status: "Pending assign agent approval",
       batchId: "C008",
       caseId: "C010",
       createdDate: "2024.11.09",
@@ -107,6 +115,7 @@ const DRCAssignManagerApproval = () => {
       approvedOn: "mm/dd/yyyy",
     },
     {
+      status: "Pending assign agent approval",
       batchId: "C011",
       caseId: "C011",
       createdDate: "2024.11.09",
@@ -296,6 +305,7 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}></th>
+              <th className={GlobalStyle.tableHeader}>Status</th>
               <th className={GlobalStyle.tableHeader}>Batch ID</th>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Action Type</th>
@@ -324,6 +334,7 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
           className="mx-auto"
         />
       </td>
+      <td className={GlobalStyle.tableData}>{item.status}</td>
       <td className={GlobalStyle.tableData}>{item.batchId}</td>
       <td className={GlobalStyle.tableData}>{item.caseId}</td>
       <td className={GlobalStyle.tableData}>{item.actionType}</td>
