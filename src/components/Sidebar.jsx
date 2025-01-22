@@ -22,9 +22,17 @@ const Sidebar = ({ onHoverChange }) => {
             { label: "Distribute Preparation Bulk Upload", link: "/pages/Distribute/DistributionPreparationBulkUpload" },
             { label: "Assign DRC (Distribution)", link: "/pages/Distribute/AssignDRC" },
             { label: "DRC Assign Manager Approval", link: "/pages/Distribute/DRCAssignManagerApproval" },
+            
           ],
         },
-        { label: "Dummy", link: "/dashboard" },
+        { label: "Dummy", 
+          subItems: [
+            { label: "Distribution Preparation (Only CPE Collect) - 1.C.11", link: "/pages/Distribute/DistributionPreparationOnlyCPECollect" },
+            { label: "Assign DRC for collect CPE - 1.C.12", link: "/pages/Distribute/AssignDRCForCollectCPE" },
+            { label: "Assign DRC Summary (CPE Collect) - 1.C.13", link: "/pages/Distribute/AssignedDRCSummaryCollectCPE" },
+          ],
+         },
+          
       ],
     },
   ];
