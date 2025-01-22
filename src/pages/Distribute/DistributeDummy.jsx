@@ -22,32 +22,7 @@ const DistributeDummy = () => {
         }}
       >
         {[
-          {
-            to: "/pages/Distribute/IncidentFilter",
-            label: (
-              <>
-                <span style={{ display: "inline-block", width: "100px" }}>
-                  1 . 7 . 1 -
-                </span>
-                Incident Filter Open Incidents
-                <br />
-                <span style={{ display: "inline-block", width: "100px" }}>
-                  1 . 7 . 2 -
-                </span>
-                Incident Filter Reject Incidents
-                <br />
-                <span style={{ display: "inline-block", width: "100px" }}>
-                  1 . 7 . 3 -
-                </span>
-                Incident Filter Collect CPE
-                <br />
-                <span style={{ display: "inline-block", width: "100px" }}>
-                  1 . 9 -
-                </span>
-                Incident Filter Direct LOD Sending Incidents  
-              </>
-            ),
-          },
+          
           {
             to: "/pages/Distribute/DistributionPreparationBulkUpload",
             label: "1 . A . 11 - Distribution Preparation Bulk Upload ",
@@ -57,20 +32,8 @@ const DistributeDummy = () => {
             label: "1 . A . 12 - Assign DRC ",
           },
           {
-            to: "/pages/Distribute/AssignedDRCSummary",
-            label: "1 . A . 13 - Assign Pending DRC Summary ",
-          },
-          {
             to: "/pages/Distribute/DRCAssignManagerApproval",
-            label: "1 . A . 15 - DRC Assign Manager Approval ",
-          },
-          {
-            to: "/pages/Distribute/AssignDRCsLOG",
-            label: "1 . A . 17 - Assign DRCs LOG ",
-          },
-          {
-            to: "/pages/Distribute/ReAssignDRC",
-            label: "1 . A . 18 - ReAssign DRC ",
+            label: "1 . 15 - DRC Assign Manager Approval ",
           },
           {
             to: "/pages/Distribute/DistributionPreparationOnlyCPECollect",
@@ -83,10 +46,6 @@ const DistributeDummy = () => {
           {
             to: "/pages/Distribute/AssignedDRCSummaryCollectCPE",
             label: "1 . C . 13 - Assigned DRC Summary (Collect CPE) ",
-          },
-          {
-            to: "/pages/Distribute/DistributeTORO",
-            label: "2 . 2 - Distribute To RO ",
           },
         ].map((link, index) => (
           <Link
