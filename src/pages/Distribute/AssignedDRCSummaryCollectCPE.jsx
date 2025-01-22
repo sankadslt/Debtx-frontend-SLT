@@ -105,7 +105,6 @@ export default function AssignedDRCSummaryCollectCPE() {
       .includes(searchQuery.toLowerCase())
   );
 
-  // Select rows state
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
 
@@ -120,12 +119,21 @@ export default function AssignedDRCSummaryCollectCPE() {
 
   const handleRowSelect = (index) => {
     const newSelectedRows = new Set(selectedRows);
+
     if (newSelectedRows.has(index)) {
       newSelectedRows.delete(index);
     } else {
       newSelectedRows.add(index);
     }
+
     setSelectedRows(newSelectedRows);
+
+    // Automatically deselect the "Select All" checkbox if any row is deselected
+    if (newSelectedRows.size !== currentData.length) {
+      setSelectAll(false);
+    } else {
+      setSelectAll(true);
+    }
   };
 
   function onSubmit() {
@@ -152,14 +160,13 @@ export default function AssignedDRCSummaryCollectCPE() {
         <div className="flex gap-10">
           {" "}
           <div className="flex gap-4 h-[35px] mt-2">
-            <h1>DRC</h1>
             <select
               className={GlobalStyle.selectBox}
               value={drcFilter}
               onChange={(e) => setDrcFilter(e.target.value)}
             >
               <option value="" selected>
-                ALL
+                DRC
               </option>
               <option value="DRC1">DRC1</option>
               <option value="DRC2">DRC2</option>
