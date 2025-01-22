@@ -79,7 +79,7 @@ const AssignDRC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [editMode, setEditMode] = useState(null);
   const [drcData, setDrcData] = useState([
-    { id: 1, name: "CMS", amount: 1000 },
+    { id: 1, name: "CMS", amount: 2000 },
     { id: 2, name: "TCM", amount: 1200 },
     { id: 3, name: "RE", amount: 900 },
     { id: 4, name: "CO LAN", amount: 1400 },
@@ -90,7 +90,7 @@ const AssignDRC = () => {
     casesAmount: "",
   });
 
-  //search fuction 
+  //search fuction
   const filteredSearchData = drcData.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -201,7 +201,14 @@ const AssignDRC = () => {
               <option>50,000 - 100,000</option>
               <option>&gt;100,000</option>
             </select>
-
+            <div
+              className={`${GlobalStyle.countBarMainBox}`}
+              style={{ width: "160px", textAlign: "center" }}
+            >
+              Total Count: {totalDistributedAmount}
+            </div>
+          </div>
+          <div className="flex items-center my-10 space-x-4">
             {/* DRC Dropdown */}
             <select
               className={`${GlobalStyle.selectBox}`}
@@ -241,21 +248,17 @@ const AssignDRC = () => {
             >
               Add
             </button>
-            <div className="flex-grow text-right">
-            <div className="flex justify-end">
-            <div
-            className={`${GlobalStyle.countBarMainBox}`}
+          </div>
+          <div
+            className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
             style={{ width: "160px", textAlign: "center" }}
-            >
-                  Count: {totalDistributedAmount}
-               </div>
-             </div>
-            </div>
-           </div>
+          >
+            Selected Count: {totalDistributedAmount}
+          </div>
 
-           <div className="flex">
+          <div className="flex">
             {/* Table */}
-             <div className="flex flex-col w-2/3">
+            <div className="flex flex-col w-2/3">
               <div className="flex justify-start mb-4">
                 <div className={GlobalStyle.searchBarContainer}>
                   <input
@@ -375,14 +378,6 @@ const AssignDRC = () => {
                         </td>
                       </tr>
                     )}
-                    <tr className="bg-[#F7F8FC]">
-                      <td
-                        colSpan="3"
-                        className={"text-center font-semibold py-6"}
-                      >
-                        Total Count: {totalDistributedAmount}
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -396,7 +391,7 @@ const AssignDRC = () => {
           <div className="text-right">
             <button
               onClick={handleProceed}
-              className={`${GlobalStyle.buttonPrimary}`}        
+              className={`${GlobalStyle.buttonPrimary}`}
             >
               Proceed
             </button>
