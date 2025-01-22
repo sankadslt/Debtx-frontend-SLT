@@ -98,12 +98,14 @@ export default function AssignedDRCSummaryCollectCPE() {
   };
 
   // Filtering the data based on search query
-  const filteredDataBySearch = currentData.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+  const filteredDataBySearch = searchQuery
+  ? filteredData.filter((row) =>
+      Object.values(row)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    )
+  : currentData;
 
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
