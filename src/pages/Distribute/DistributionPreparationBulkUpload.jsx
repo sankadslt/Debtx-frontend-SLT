@@ -70,7 +70,7 @@ const DistributionPreparationBulkUpload = () => {
   //Navigation
   const handleIconClick = (service) => {
     navigate("/pages/Distribute/AssignDRC", {
-      state: { serviceType: service.type, count: service.count },
+      state: { serviceType: service.drc_commision_rule, count: service.count },
     });
   };
 
@@ -148,17 +148,10 @@ const DistributionPreparationBulkUpload = () => {
                         onClick={() => handleIconClick(service)}
                         className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width={34} 
-                          height={24} 
-                          fill="none"
-                        >
-                          <path
-                            fill="#001120"
-                              d="M3.57 24a2.99 2.99 0 0 1-2.167-.88C.802 22.531.5 21.825.5 21V3c0-.825.3-1.531.903-2.118A2.998 2.998 0 0 1 3.57 0h9.21l3.069 3h12.279c.844 0 1.567.294 2.169.882.601.588.902 1.294.9 2.118H3.57v15L7.253 9H33.5l-3.952 12.863a2.933 2.933 0 0 1-1.131 1.556 3.082 3.082 0 0 1-1.824.581H3.57Z"
-                              />
-                        </svg>
+                        <img src="/src/assets/images/fileicon.png" 
+                                alt="file icon" 
+                                width={34} 
+                                 height={24}  />
                       </button>
                     </td>
                   </tr>
