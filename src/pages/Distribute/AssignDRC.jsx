@@ -78,6 +78,7 @@ const PieChart = () => {
 const AssignDRC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [editMode, setEditMode] = useState(null);
+  
   const [drcData, setDrcData] = useState([
     { id: 1, name: "CMS", amount: 0 },
     { id: 2, name: "TCM", amount: 0 },
@@ -89,6 +90,8 @@ const AssignDRC = () => {
     drc: "",
     casesAmount: "",
   });
+
+
 
   //search fuction
   const filteredSearchData = drcData.filter((row) =>
@@ -102,9 +105,7 @@ const AssignDRC = () => {
 
   const { serviceType } = location.state || {};
 
-  const handleEdit = (id) => {
-    setEditMode(id);
-  };
+  
 
 
   const handleChange = (e, field, id) => {
@@ -129,13 +130,19 @@ const AssignDRC = () => {
     }
   };
 
+  const handleRemove = (name) => {
+   
+    const updatedData = filteredSearchData.filter((drc) => drc.name !== name);
+    setDrcData(updatedData); 
+  };
+
   const totalDistributedAmount = drcData.reduce(
     (total, drc) => total + parseFloat(drc.amount),
     0
   );
 
   return (
-    <div className={`${GlobalStyle.fontPoppins} flex flex-col h-screen`}>
+    <div className={`${GlobalStyle.fontPoppins} flex flex-col `}>
       {/* Main Content */}
       <div className="flex-1 p-10">
         {/* Assign DRC Heading */}
@@ -180,80 +187,80 @@ const AssignDRC = () => {
 
         {/* Service Type and Table */}
         <div className="relative">
-          <div className="flex items-center my-10 space-x-4">
-            {/* Arrears Band Dropdown */}
-            <select
-              className={`${GlobalStyle.selectBox}`}
-              value={newEntry.arrearsBand}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, arrearsBand: e.target.value })
-              }
-              disabled={totalDistributedAmount > 0}
-            >
-              <option value="" disabled>
-                Arrears Band
-              </option>
-              <option>5,000 - 10,000</option>
-              <option>10,000 - 25,000</option>
-              <option>25,000 - 50,000</option>
-              <option>50,000 - 100,000</option>
-              <option>&gt;100,000</option>
-            </select>
-            <div
-              className={`${GlobalStyle.countBarMainBox}`}
-              style={{ width: "160px", textAlign: "center" }}
-            >
-              Total Count: 1000
-            </div>
-          </div>
-          <div className="flex items-center my-10 space-x-4">
-            {/* DRC Dropdown */}
-            <select
-              className={`${GlobalStyle.selectBox}`}
-              value={newEntry.drc}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, drc: e.target.value })
-              }
-            >
-              <option value="" disabled>
-                DRC
-              </option>
-              <option>CMS</option>
-              <option>TCM</option>
-              <option>RE</option>
-              <option>CO LAN</option>
-              <option>ACCIVA</option>
-              <option>VISONCOM</option>
-              <option>PROMPT</option>
-            </select>
+                <div className="flex items-center my-10 space-x-4">
+                  {/* Arrears Band Dropdown */}
+                  <select
+                    className={`${GlobalStyle.selectBox}`}
+                    value={newEntry.arrearsBand}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, arrearsBand: e.target.value })
+                    }
+                    disabled={totalDistributedAmount > 0}
+                  >
+                    <option value="" disabled>
+                      Arrears Band
+                    </option>
+                    <option>5,000 - 10,000</option>
+                    <option>10,000 - 25,000</option>
+                    <option>25,000 - 50,000</option>
+                    <option>50,000 - 100,000</option>
+                    <option>&gt;100,000</option>
+                  </select>
+                  <div
+                    className={`${GlobalStyle.countBarMainBox}`}
+                    style={{ width: "160px", textAlign: "center" }}
+                  >
+                    Total Count: 1000
+                  </div>
+                </div>
+                <div className="flex items-center my-10 space-x-4">
+                  {/* DRC Dropdown */}
+                  <select
+                    className={`${GlobalStyle.selectBox}`}
+                    value={newEntry.drc}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, drc: e.target.value })
+                    }
+                  >
+                    <option value="" disabled>
+                      DRC
+                    </option>
+                    <option>CMS</option>
+                    <option>TCM</option>
+                    <option>RE</option>
+                    <option>CO LAN</option>
+                    <option>ACCIVA</option>
+                    <option>VISONCOM</option>
+                    <option>PROMPT</option>
+                  </select>
 
-            {/* Input for "+ cases" */}
-            <input
-              type="number"
-              placeholder="+ cases"
-              className="py-1 px-4 w-32 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
-              min="0"
-              value={newEntry.casesAmount}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, casesAmount: e.target.value })
-              }
-            />
+                  {/* Input for "+ cases" */}
+                  <input
+                    type="number"
+                    placeholder="+ cases"
+                    className="py-1 px-4 w-32 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
+                    min="0"
+                    value={newEntry.casesAmount}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, casesAmount: e.target.value })
+                    }
+                  />
 
-            {/* Add Button */}
-            <button
-              className={`${GlobalStyle.buttonPrimary} w-[135px]`}
-              onClick={handleAdd}
-            >
-              Add
-            </button>
-            
-          </div>
-          <div
-            className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
-            style={{ width: "160px", textAlign: "center" }}
-          >
-            Selected Count: {totalDistributedAmount}
-          </div>
+                  {/* Add Button */}
+                  <button
+                    className={`${GlobalStyle.buttonPrimary} w-[135px]`}
+                    onClick={handleAdd}
+                  >
+                    Add
+                  </button>
+                  
+                </div>
+                <div
+                  className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
+                  style={{ width: "160px", textAlign: "center" }}
+                >
+                  Selected Count: {totalDistributedAmount}
+                </div>
 
           <div className="flex">
             {/* Table */}
@@ -351,14 +358,14 @@ const AssignDRC = () => {
                           </td>
                           <td className="px-6 py-4 text-center">
                             
-                              <button
-                              >
+                              <button onClick={() => handleRemove(drc.name)}> 
+                              
                                 <svg
                                       xmlns="http://www.w3.org/2000/svg"
                                       width={28}
                                       height={29}
                                       fill="none"
-                                      onClick={() => handleEdit(drc.id)}
+                                      
                                      
                                     >
                                       <path
