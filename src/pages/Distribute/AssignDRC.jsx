@@ -64,7 +64,7 @@ const PieChart = () => {
   };
 
   return (
-    <div className="w-1/3 p-6">
+    <div className={`${GlobalStyle.fontPoppins} w-1/3 p-6`}>
       <h2 className="text-xl font-semibold text-gray-800 mb-4 mt-[0px] text-center">
         Last 3 Months DRC Success
       </h2>
@@ -79,10 +79,10 @@ const AssignDRC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [editMode, setEditMode] = useState(null);
   const [drcData, setDrcData] = useState([
-    { id: 1, name: "CMS", amount: 2000 },
-    { id: 2, name: "TCM", amount: 1200 },
-    { id: 3, name: "RE", amount: 900 },
-    { id: 4, name: "CO LAN", amount: 1400 },
+    { id: 1, name: "CMS", amount: 0 },
+    { id: 2, name: "TCM", amount: 0 },
+    { id: 3, name: "RE", amount: 0 },
+    { id: 4, name: "CO LAN", amount: 10 },
   ]);
   const [newEntry, setNewEntry] = useState({
     arrearsBand: "",
@@ -106,9 +106,6 @@ const AssignDRC = () => {
     setEditMode(id);
   };
 
-  const handleSave = (id) => {
-    setEditMode(null);
-  };
 
   const handleChange = (e, field, id) => {
     const updatedData = drcData.map((drc) =>
@@ -191,6 +188,7 @@ const AssignDRC = () => {
               onChange={(e) =>
                 setNewEntry({ ...newEntry, arrearsBand: e.target.value })
               }
+              disabled={totalDistributedAmount > 0}
             >
               <option value="" disabled>
                 Arrears Band
@@ -205,7 +203,7 @@ const AssignDRC = () => {
               className={`${GlobalStyle.countBarMainBox}`}
               style={{ width: "160px", textAlign: "center" }}
             >
-              Total Count: {totalDistributedAmount}
+              Total Count: 1000
             </div>
           </div>
           <div className="flex items-center my-10 space-x-4">
@@ -248,6 +246,7 @@ const AssignDRC = () => {
             >
               Add
             </button>
+            
           </div>
           <div
             className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
@@ -293,11 +292,11 @@ const AssignDRC = () => {
                         Distributed Amount
                       </th>
                       <th
-                        scope="col"
+    
                         className={`${GlobalStyle.tableHeader} text-center`}
-                        aria-label="Action"
+                        
                       >
-                        Action
+                       
                       </th>
                     </tr>
                   </thead>
@@ -351,23 +350,27 @@ const AssignDRC = () => {
                             )}
                           </td>
                           <td className="px-6 py-4 text-center">
-                            {editMode === drc.id ? (
+                            
                               <button
-                                className={`${GlobalStyle.buttonPrimary}`}
-                                onClick={() => handleSave(drc.id)}
-                                aria-label="Save Changes"
                               >
-                                Save
+                                <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width={28}
+                                      height={29}
+                                      fill="none"
+                                      onClick={() => handleEdit(drc.id)}
+                                     
+                                    >
+                                      <path
+                                        fill="#000"
+                                        fillRule="evenodd"
+                                        d="M14 28.5a14 14 0 1 0 0-28 14 14 0 0 0 0 28ZM6.222 16.056h15.556v-3.112H6.222v3.112Z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                             
                               </button>
-                            ) : (
-                              <button
-                                className={`${GlobalStyle.buttonPrimary}`}
-                                onClick={() => handleEdit(drc.id)}
-                                aria-label="Edit Row"
-                              >
-                                Edit
-                              </button>
-                            )}
+                            
                           </td>
                         </tr>
                       ))
@@ -392,6 +395,7 @@ const AssignDRC = () => {
             <button
               onClick={handleProceed}
               className={`${GlobalStyle.buttonPrimary}`}
+              disabled={totalDistributedAmount !== 1000} 
             >
               Proceed
             </button>
