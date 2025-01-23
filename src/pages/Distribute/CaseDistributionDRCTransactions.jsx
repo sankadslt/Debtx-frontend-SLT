@@ -126,21 +126,7 @@ export default function AssignPendingDRCSummary() {
 
       {/* Filter Section */}
       <div className="flex justify-between gap-10 mt-16 mb-5">
-        <div>
-          {" "}
-          <div className="flex justify-start mb-4">
-            <div className={GlobalStyle.searchBarContainer}>
-              <input
-                type="text"
-                placeholder=""
-                value={searchQuery1}
-                onChange={(e) => setSearchQuery1(e.target.value)}
-                className={GlobalStyle.inputSearch}
-              />
-              <FaSearch className={GlobalStyle.searchBarIcon} />
-            </div>
-          </div>
-        </div>
+        
         <div className="flex gap-10">
           {" "}
           <div className="flex gap-4 h-[35px] mt-2">
@@ -206,6 +192,21 @@ export default function AssignPendingDRCSummary() {
 
       {/* Table*/}
       <div className="flex flex-col">
+      <div>
+          {" "}
+          <div className="flex justify-start mb-4">
+            <div className={GlobalStyle.searchBarContainer}>
+              <input
+                type="text"
+                placeholder=""
+                value={searchQuery1}
+                onChange={(e) => setSearchQuery1(e.target.value)}
+                className={GlobalStyle.inputSearch}
+              />
+              <FaSearch className={GlobalStyle.searchBarIcon} />
+            </div>
+          </div>
+        </div>
         <div className={`${GlobalStyle.tableContainer}  `}>
           <table className={GlobalStyle.table}>
             <thead className={`${GlobalStyle.thead}`}>
