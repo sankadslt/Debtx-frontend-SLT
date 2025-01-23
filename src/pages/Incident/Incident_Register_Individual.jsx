@@ -93,7 +93,7 @@ const Incident_Register_Individual = () => {
       <h1 className={GlobalStyle.headingLarge}>Incident Register</h1>
       <div className="flex justify-center">
         <div className={`${GlobalStyle.cardContainer} mt-4`}>
-          <h2 className={`${GlobalStyle.headingMedium} mb-6`}>Incident Details</h2>
+          <h2 className={`${GlobalStyle.headingMedium} mb-6 font-semibold`}>Incident Details</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Account Number */}
             <div className="flex gap-4">
