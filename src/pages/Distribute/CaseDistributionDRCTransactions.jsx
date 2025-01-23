@@ -138,37 +138,27 @@ export default function AssignPendingDRCSummary() {
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <h1 className={`${GlobalStyle.headingLarge}`}>
-        Assign Pending DRC Summary
+        Case Distribution 
       </h1>
+      <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
+          Service Type: PEO - TV
+      </h3>
+
 
       {/* Filter Section */}
       <div className="flex justify-between gap-10 mt-16 mb-5">
-        <div>
-          {" "}
-          <div className="flex justify-start mb-4">
-            <div className={GlobalStyle.searchBarContainer}>
-              <input
-                type="text"
-                placeholder=""
-                value={searchQuery1}
-                onChange={(e) => setSearchQuery1(e.target.value)}
-                className={GlobalStyle.inputSearch}
-              />
-              <FaSearch className={GlobalStyle.searchBarIcon} />
-            </div>
-          </div>
-        </div>
+       
         <div className="flex gap-10">
           {" "}
           <div className="flex gap-4 h-[35px] mt-2">
-            <h1>DRC</h1>
+            
             <select
               className={GlobalStyle.selectBox}
               value={drcFilter}
               onChange={(e) => setDrcFilter(e.target.value)}
             >
               <option value="" selected>
-                ALL
+                DRC
               </option>
               <option value="CMS">CMS</option>
               <option value="TCM">TCM</option>
@@ -200,6 +190,25 @@ export default function AssignPendingDRCSummary() {
               />
             </div>
           </div>
+          <div className="flex gap-4 h-[35px] mt-2">
+            
+            <select
+              className={GlobalStyle.selectBox}
+              value={drcFilter}
+              onChange={(e) => setDrcFilter(e.target.value)}
+            >
+              <option value="" selected>
+                Status
+              </option>
+              <option value="CMS">CMS</option>
+              <option value="TCM">TCM</option>
+              <option value="RE">RE</option>
+              <option value="CO LAN">CO LAN</option>
+              <option value="ACCIVA">ACCIVA</option>
+              <option value="VISONCOM">VISONCOM</option>
+              <option value="PROMPT">PROMPT</option>
+            </select>
+          </div>
           <button
             onClick={applyFilters}
             className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
@@ -211,6 +220,21 @@ export default function AssignPendingDRCSummary() {
 
       {/* Table*/}
       <div className="flex flex-col">
+      <div>
+          {" "}
+          <div className="flex justify-start mb-4">
+            <div className={GlobalStyle.searchBarContainer}>
+              <input
+                type="text"
+                placeholder=""
+                value={searchQuery1}
+                onChange={(e) => setSearchQuery1(e.target.value)}
+                className={GlobalStyle.inputSearch}
+              />
+              <FaSearch className={GlobalStyle.searchBarIcon} />
+            </div>
+          </div>
+        </div>
         <div className={`${GlobalStyle.tableContainer}  `}>
           <table className={GlobalStyle.table}>
             <thead className={`${GlobalStyle.thead}`}>
