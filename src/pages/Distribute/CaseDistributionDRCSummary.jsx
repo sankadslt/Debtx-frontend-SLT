@@ -15,7 +15,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+            
 
         },
         {
@@ -25,7 +25,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+            
         },
         {
             batchId: "B1",
@@ -34,7 +34,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+            
         },
         {
             batchId: "B1",
@@ -43,7 +43,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+            
         },
         {
             batchId: "B1",
@@ -52,7 +52,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+           
         },
         {
             batchId: "B1",
@@ -61,7 +61,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+            
         },
         {
             batchId: "B1",
@@ -70,7 +70,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+            
         },
         {
             batchId: "B1",
@@ -79,7 +79,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+            
         },
         {
             batchId: "B1",
@@ -88,7 +88,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            action_type: "Pending",
+            
         },
     ];
 
