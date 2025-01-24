@@ -34,6 +34,7 @@ import PageButton from "../pages/Incident/page_button";
  import DistributionPreparationOnlyCPECollect from "../pages/Distribute/DistributionPreparationOnlyCPECollect";
  import DRCAssignManagerApproval from "../pages/Distribute/DRCAssignManagerApproval";
  import DistributeDummy from "../pages/Distribute/DistributeDummy";
+ import CaseDistributionDRCTransactions1Batch from "../pages/Distribute/CaseDistributionDRCTransactions-1Batch";
 
 
 import Dummy from "../pages/DRC/Dummy";
@@ -88,6 +89,7 @@ const Routers = () => {
      <Route path="/pages/Distribute/DistributionPreparationOnlyCPECollect" element={<ProtectedRoute element={<DistributionPreparationOnlyCPECollect />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DRCAssignManagerApproval" element={<ProtectedRoute element={<DRCAssignManagerApproval />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DistributeDummy" element={<ProtectedRoute element={<DistributeDummy />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Distribute/CaseDistributionDRCTransactions-1Batch" element={<ProtectedRoute element={<CaseDistributionDRCTransactions1Batch />} allowedRoles={['superadmin']} />} />
 
      
 

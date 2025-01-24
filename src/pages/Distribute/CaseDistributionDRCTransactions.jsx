@@ -1,9 +1,9 @@
-// Purpose: This template is used for the Assign Pending DRC Summary page (1.A.13).
+// Purpose: This template is used for the Case Distribution Page (1.A.13).
 // Created Date: 2025-01-07
-// Created By: H.P.R Chandrasekara (hprchandrasekara@gmail.com)
-// Last Modified Date: 2025-01-07
-// Modified Date: 2025-01-07
-// Modified By: H.P.R Chandrasekara (hprchandrasekara@gmail.com)
+// Created By: Sanjaya Perera (sanjayaperera80@gmail.com)
+// Last Modified Date: 2025-01-23
+// Modified Date: 2025-01-23
+// Modified By: Sanjaya Perera (sanjayaperera80@gmail.com)
 // Version: node 11
 // ui number : 1.A.13
 // Dependencies: tailwind css
@@ -21,58 +21,40 @@ export default function AssignPendingDRCSummary() {
   // Initial Data
   const initialData1 = [
     {
-      drc: "TCM",
-      range1: "67",
-      range2: "34",
-      range3: "65",
-      range4: "578",
-      range5: "100",
+      drc: "B1",
+      range1: "...",
+      range2: "...",
+      range3: "...",
+      range4: "...",
+      range5: "...",
+      fwdforApprovedON: "...",
+      ApprovedON: "...",
+      ApprovedBY: "...",
       date: "2025-01-04",
     },
     {
-      drc: "CMS",
-      range1: "67",
-      range2: "56",
-      range3: "245",
-      range4: "789",
-      range5: "12",
+      drc: "B2",
+      range1: "...",
+      range2: "...",
+      range3: "...",
+      range4: "...",
+      range5: "...",
+      fwdforApprovedON: "...",
+      ApprovedON: "mm/dd/yyyy",
+      ApprovedBY: "Mr.Perera",
       date: "2025-01-08",
     },
     {
-      drc: "ACCIV",
-      range1: "67",
-      range2: "56",
-      range3: "245",
-      range4: "789",
-      range5: "12",
+      drc: "B3",
+      range1: "...",
+      range2: "...",
+      range3: "...",
+      range4: "...",
+      range5: "...",
+      fwdforApprovedON: "...",
+      ApprovedON: "...",
+      ApprovedBY: "...",
       date: "2025-01-02",
-    },
-    {
-      drc: "VISIONCOM",
-      range1: "67",
-      range2: "56",
-      range3: "245",
-      range4: "789",
-      range5: "12",
-      date: "2025-01-05",
-    },
-    {
-      drc: "PROMPT",
-      range1: "67",
-      range2: "56",
-      range3: "245",
-      range4: "789",
-      range5: "12",
-      date: "2025-01-03",
-    },
-    {
-      drc: "RE",
-      range1: "67",
-      range2: "56",
-      range3: "245",
-      range4: "789",
-      range5: "12",
-      date: "2025-01-01",
     },
   ];
 
@@ -137,46 +119,27 @@ export default function AssignPendingDRCSummary() {
 
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-      <h1 className={`${GlobalStyle.headingLarge}`}>
-        Assign Pending DRC Summary
-      </h1>
+      <h1 className={`${GlobalStyle.headingLarge}`}>Case distribution</h1>
+      <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
+        Service Type: PEO - TV
+      </h3>
 
       {/* Filter Section */}
       <div className="flex justify-between gap-10 mt-16 mb-5">
-        <div>
-          {" "}
-          <div className="flex justify-start mb-4">
-            <div className={GlobalStyle.searchBarContainer}>
-              <input
-                type="text"
-                placeholder=""
-                value={searchQuery1}
-                onChange={(e) => setSearchQuery1(e.target.value)}
-                className={GlobalStyle.inputSearch}
-              />
-              <FaSearch className={GlobalStyle.searchBarIcon} />
-            </div>
-          </div>
-        </div>
+        
         <div className="flex gap-10">
           {" "}
           <div className="flex gap-4 h-[35px] mt-2">
-            <h1>DRC</h1>
             <select
               className={GlobalStyle.selectBox}
               value={drcFilter}
               onChange={(e) => setDrcFilter(e.target.value)}
             >
-              <option value="" selected>
-                ALL
+              <option value="" selected className={GlobalStyle.inputText}>
+                DRC
               </option>
               <option value="CMS">CMS</option>
               <option value="TCM">TCM</option>
-              <option value="RE">RE</option>
-              <option value="CO LAN">CO LAN</option>
-              <option value="ACCIVA">ACCIVA</option>
-              <option value="VISONCOM">VISONCOM</option>
-              <option value="PROMPT">PROMPT</option>
             </select>
           </div>
           <div className="flex flex-col items-center mb-4">
@@ -200,6 +163,24 @@ export default function AssignPendingDRCSummary() {
               />
             </div>
           </div>
+          <div className="flex gap-4 h-[35px] mt-2">
+            <select
+              className={GlobalStyle.selectBox}
+              value={drcFilter}
+              onChange={(e) => setDrcFilter(e.target.value)}
+            >
+              <option value="" selected>
+                Status
+              </option>
+              <option value="CMS">CMS</option>
+              <option value="TCM">TCM</option>
+              <option value="RE">RE</option>
+              <option value="CO LAN">CO LAN</option>
+              <option value="ACCIVA">ACCIVA</option>
+              <option value="VISONCOM">VISONCOM</option>
+              <option value="PROMPT">PROMPT</option>
+            </select>
+          </div>
           <button
             onClick={applyFilters}
             className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
@@ -211,31 +192,43 @@ export default function AssignPendingDRCSummary() {
 
       {/* Table*/}
       <div className="flex flex-col">
+      <div>
+          {" "}
+          <div className="flex justify-start mb-4">
+            <div className={GlobalStyle.searchBarContainer}>
+              <input
+                type="text"
+                placeholder=""
+                value={searchQuery1}
+                onChange={(e) => setSearchQuery1(e.target.value)}
+                className={GlobalStyle.inputSearch}
+              />
+              <FaSearch className={GlobalStyle.searchBarIcon} />
+            </div>
+          </div>
+        </div>
         <div className={`${GlobalStyle.tableContainer}  `}>
           <table className={GlobalStyle.table}>
             <thead className={`${GlobalStyle.thead}`}>
               <tr className="border border-[#0087FF] border-opacity-15">
-                <th
-                  rowSpan="2"
-                  scope="col"
-                  className={`${GlobalStyle.tableHeader}`}
-                >
-                  DRC
+                <th className={GlobalStyle.tableHeader}>
+                  Case Distribution bstch ID
                 </th>
-                <th
-                  colSpan="5"
-                  scope="col"
-                  className={`${GlobalStyle.tableHeader}`}
-                >
-                  Case Amount (LKR)
+                <th className={GlobalStyle.tableHeader}>Created dtm</th>
+                <th className={GlobalStyle.tableHeader}>Action Type</th>
+                <th className={GlobalStyle.tableHeader}>
+                  Arrears Band(Selection Rule)
                 </th>
-              </tr>
-              <tr className="border border-[#0087FF] border-opacity-15">
-                <th className={GlobalStyle.tableHeader}>5,000 - 10,000</th>
-                <th className={GlobalStyle.tableHeader}>10,000 - 25,000</th>
-                <th className={GlobalStyle.tableHeader}>25,000 - 50,000</th>
-                <th className={GlobalStyle.tableHeader}>50,000 - 100,000</th>
-                <th className={GlobalStyle.tableHeader}>100,000+</th>
+                <th className={GlobalStyle.tableHeader}>
+                  Case Count(RuleBase Count)
+                </th>
+                <th className={GlobalStyle.tableHeader}>Total Arears</th>
+                <th className={GlobalStyle.tableHeader}>
+                  Forward for Approved on
+                </th>
+                <th className={GlobalStyle.tableHeader}>Approved on</th>
+                <th className={GlobalStyle.tableHeader}>Approved by</th>
+                <th className={GlobalStyle.tableHeader}></th>
               </tr>
             </thead>
             <tbody>
@@ -258,6 +251,12 @@ export default function AssignPendingDRCSummary() {
                   <td className={GlobalStyle.tableData}>{item.range3}</td>
                   <td className={GlobalStyle.tableData}>{item.range4}</td>
                   <td className={GlobalStyle.tableData}>{item.range5}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {item.fwdforApprovedON}
+                  </td>
+                  <td className={GlobalStyle.tableData}>{item.ApprovedON}</td>
+                  <td className={GlobalStyle.tableData}>{item.ApprovedBY}</td>
+                  <td className={GlobalStyle.tableData}>icons</td>
                 </tr>
               ))}
             </tbody>
