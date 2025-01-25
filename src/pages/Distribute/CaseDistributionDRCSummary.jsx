@@ -1,3 +1,13 @@
+/*Purpose: This template is used for the 1.A.14 - Case Distribution DRC Summary
+Created Date: 2025-01-25
+Created By: Udana (udanarajanayaka220@gmail.com)
+Version: node 20
+ui number : 1.A.14
+Dependencies: tailwind css
+Related Files: (routes)
+Notes: The following page conatins the codes */
+
+
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
