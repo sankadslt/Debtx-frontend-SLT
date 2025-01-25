@@ -25,7 +25,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            
+
 
         },
         {
@@ -35,7 +35,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            
+
         },
         {
             batchId: "B1",
@@ -44,7 +44,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            
+
         },
         {
             batchId: "B1",
@@ -53,7 +53,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            
+
         },
         {
             batchId: "B1",
@@ -62,7 +62,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-           
+
         },
         {
             batchId: "B1",
@@ -71,7 +71,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            
+
         },
         {
             batchId: "B1",
@@ -80,7 +80,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            
+
         },
         {
             batchId: "B1",
@@ -89,7 +89,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            
+
         },
         {
             batchId: "B1",
@@ -98,7 +98,7 @@ const CaseDistributionDRCSummary = () => {
             count: "5",
             total_arrears: "12",
             proceed_on: "100",
-            
+
         },
     ];
 
@@ -368,9 +368,41 @@ const CaseDistributionDRCSummary = () => {
                 </button>
             </div>
 
-            {/* Select All Data Checkbox and Buttons */}
-            <div className="flex justify-end items-center mt-4">
-                {/* Left-aligned button */}
+            {/* Button */}
+            <div className="flex justify-between">
+
+                {/* Button on the left */}
+                <button>
+
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={65}
+                        height={65}
+                        fill="none"
+
+                    >
+                        <circle
+                            cx={32.5}
+                            cy={32.5}
+                            r={32.45}
+                            fill="#B3CCE3"
+                            stroke="#58120E"
+                            strokeWidth={0.1}
+                            transform="rotate(-90 32.5 32.5)"
+                        />
+                        <path
+                            fill="#001120"
+                            d="m36.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L43.782 45.5l3.063-3.064L36.46 32.051Z"
+                        />
+                        <path
+                            fill="#001120"
+                            d="m23.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L30.782 45.5l3.063-3.064L23.46 32.051Z"
+                        />
+                    </svg>
+
+                </button>
+
+                {/* Right-aligned button */}
                 <button
                     onClick={handleCreateTask}
                     className={GlobalStyle.buttonPrimary} // Same style as Approve button
@@ -378,6 +410,9 @@ const CaseDistributionDRCSummary = () => {
 
                     Create Task and Let Me Know
                 </button>
+
+
+
 
             </div>
 
