@@ -44,6 +44,10 @@ const DistributeDummy = () => {
             label: "1 . A . 14 - Case Distribution DRC Summary ",
           },
           {
+            to: "/pages/Distribute/CaseDistributionDRCSummarywithRTOM",
+            label: "1 . A . 14 . 1 - Case Distribution DRC Summary with RTOM ",
+          },
+          {
             to: "/pages/Distribute/DRCAssignManagerApproval",
             label: "1 . 15 - DRC Assign Manager Approval ",
           },
