@@ -9,7 +9,7 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: This page includes a case count bar, filter , table and a pie chart  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
 import {
@@ -23,6 +23,7 @@ import {
 } from "chart.js";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import { FaSearch } from "react-icons/fa";
+import {fetchAllArrearsBands} from '/src/services/case/CaseServices.js';
 
 // Register necessary components for Chart.js pie chart
 ChartJS.register(
@@ -78,6 +79,8 @@ const PieChart = () => {
 const AssignDRC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [editMode, setEditMode] = useState(null);
+  const [arrearsBands, setArrearsBands] = useState([]);
+  const [selectedBand, setSelectedBand] = useState("");
   
   const [drcData, setDrcData] = useState([
     { id: 1, name: "CMS", amount: 0 },
@@ -92,6 +95,18 @@ const AssignDRC = () => {
   });
 
 
+  //fetch all arrears bands
+  useEffect(() => {
+    const fetchArrearsBands = async () => {
+      try {
+        const bands = await fetchAllArrearsBands();
+        setArrearsBands(bands);
+      } catch (error) {
+        console.error("Error fetching arrears bands:", error);
+      }
+    }
+    fetchArrearsBands();
+  }, []);
 
   //search fuction
   const filteredSearchData = drcData.filter((row) =>
@@ -200,11 +215,11 @@ const AssignDRC = () => {
                     <option value="" disabled>
                       Arrears Band
                     </option>
-                    <option>5,000 - 10,000</option>
-                    <option>10,000 - 25,000</option>
-                    <option>25,000 - 50,000</option>
-                    <option>50,000 - 100,000</option>
-                    <option>&gt;100,000</option>
+                    {arrearsBands.map(({ key, value }) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
                   </select>
                   <div
                     className={`${GlobalStyle.countBarMainBox}`}
