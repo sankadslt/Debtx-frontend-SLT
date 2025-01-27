@@ -15,3 +15,22 @@ export const get_count_by_drc_commision_rule = async () => {
     }
   };
 
+
+
+// Fetch all arrears bands
+export const fetchAllArrearsBands = async () => {
+  try {
+    const response = await axios.get(`${URL}/getAllArrearsBands`);
+    const data = response.data.data;
+
+    // Exclude the _id key and return both the key-value pairs
+    const arrearsBands = Object.entries(data)
+      .filter(([key]) => key !== "_id") // Exclude _id
+      .map(([key, value]) => ({ key, value })); // Return both the key and the value as an object
+
+    return arrearsBands; // Return an array of objects with key-value pairs
+  } catch (error) {
+    console.error("Error fetching arrears bands:", error.response?.data || error.message);
+    throw error;
+  }
+};
