@@ -23,11 +23,9 @@ import {
 } from "chart.js";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import { FaSearch } from "react-icons/fa";
-import {
-  fetchAllArrearsBands,
-  count_cases_rulebase_and_arrears_band,
-} from "/src/services/case/CaseServices.js";
+import { fetchAllArrearsBands , count_cases_rulebase_and_arrears_band} from "/src/services/case/CaseServices.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
+
 
 // Register necessary components for Chart.js pie chart
 ChartJS.register(
@@ -94,9 +92,12 @@ const AssignDRC = () => {
 
   const { serviceType } = location.state || {};
 
-  const [drcData, setDrcData] = useState([]);
+
+  const [drcData, setDrcData] = useState([
+    
+]);
   const [newEntry, setNewEntry] = useState({
-    arrearsBand: "",
+    
     drc: "",
     casesAmount: "",
     drcNames: "",
@@ -121,6 +122,7 @@ const AssignDRC = () => {
       try {
         const Names = await Active_DRC_Details();
         setDrcNames(Names);
+      
       } catch (error) {
         console.error("Error fetching drc names:", error);
       }
@@ -132,14 +134,12 @@ const AssignDRC = () => {
   useEffect(() => {
     const displayData = async () => {
       const effectiveServiceType = serviceType || "PEO TV"; // Use "PEO TV" as default
-      console.log("Service Type:", serviceType);
+      console.log ("Service Type:", serviceType);
       console.log("Effective Service Type:", effectiveServiceType);
       try {
-        const drcDetails = await count_cases_rulebase_and_arrears_band(
-          effectiveServiceType
-        );
+        const drcDetails = await count_cases_rulebase_and_arrears_band(effectiveServiceType);
         const { total, bandsAndCounts } = drcDetails;
-
+  
         setTotal(total);
         setBandsAndCounts(bandsAndCounts);
         console.log("bandsAndCounts:", bandsAndCounts);
@@ -147,9 +147,11 @@ const AssignDRC = () => {
         console.error("Failed to fetch and display data:", error);
       }
     };
-
+  
     displayData();
   }, [serviceType]);
+  
+  
 
   //search fuction
   const filteredSearchData = drcData.filter((row) =>
@@ -158,32 +160,31 @@ const AssignDRC = () => {
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
-
+ 
   const handleProceed = () => {
     alert("Proceeding to the next step...");
   };
 
   const handleAdd = () => {
-    const { arrearsBand, drc, casesAmount } = newEntry;
+    const { drc, casesAmount } = newEntry;
 
-    if (
-      arrearsBand &&
-      drc &&
-      casesAmount > 0 &&
-      casesAmount <= arrearsbandTotal
-    ) {
+    const numericCasesAmount = parseInt(casesAmount, 10);
+
+    if (totalDistributedAmount + numericCasesAmount > arrearsbandTotal) {
+      alert(
+        `The total distributed cases (${totalDistributedAmount + numericCasesAmount}) exceeds the limit of ${arrearsbandTotal}. Please adjust the number of cases.`
+      );
+      return;
+    }
+
+    if ( drc && numericCasesAmount) {
       setDrcData([
         ...drcData,
         { id: drcData.length + 1, name: drc, amount: parseFloat(casesAmount) },
       ]);
+      setNewEntry({  drc: "", casesAmount: "" }); // Clear inputs
 
-      // Deduct casesAmount from arrearsbandTotal
-      setArrearsbandTotal(arrearsbandTotal - casesAmount);
 
-      // Clear the form inputs
-      setNewEntry({ arrearsBand: "", drc: "", casesAmount: "" });
-    } else {
-      alert("Please enter valid DRC and case details!");
     }
   };
 
@@ -192,31 +193,21 @@ const AssignDRC = () => {
     setDrcData(updatedData);
   };
 
-  // Handle changes for DRC selection
-  const handleDRCChange = (e) => {
-    const selectedDRC = e.target.value;
-    setNewEntry((prev) => ({ ...prev, drc: selectedDRC }));
-  };
-
-  // Handle changes for case count
-  const handleCasesChange = (e) => {
-    const casesAmount = e.target.value;
-    setNewEntry((prev) => ({ ...prev, casesAmount }));
-  };
   const totalDistributedAmount = drcData.reduce(
     (total, drc) => total + parseFloat(drc.amount),
     0
   );
 
-  // Handle changes for arrears band
   const handleArrearsBandChange = (e) => {
     const selectedBand = e.target.value;
+    console.log("Selected Band:", selectedBand);
     setSelectedBand(selectedBand);
-    setNewEntry((prev) => ({ ...prev, arrearsBand: selectedBand }));
-
     const selectedBandCount = bandsAndCounts[selectedBand];
-    setArrearsbandTotal(selectedBandCount ?? 0);
+    setArrearsbandTotal(selectedBandCount ?? 0); 
+
+
   };
+
 
   return (
     <div className={`${GlobalStyle.fontPoppins} flex flex-col `}>
@@ -239,13 +230,13 @@ const AssignDRC = () => {
               <span>Total:</span>
               <p className={GlobalStyle.countBarMainTopic}>{total}</p>
             </div>
-            {/* Dynamically render bands and counts */}
-            {Object.entries(bandsAndCounts).map(([band, count]) => (
-              <div key={band} className={GlobalStyle.countBarSubBox}>
-                <span>{band}</span>
-                <p className={GlobalStyle.countBarSubTopic}>{count}</p>
-              </div>
-            ))}
+          {/* Dynamically render bands and counts */}
+          {Object.entries(bandsAndCounts).map(([band, count]) => (
+                    <div key={band} className={GlobalStyle.countBarSubBox}>
+                      <span>{band}</span>
+                      <p className={GlobalStyle.countBarSubTopic}>{count}</p>
+                    </div>
+          ))}
           </div>
         </div>
 
@@ -257,6 +248,7 @@ const AssignDRC = () => {
               className={`${GlobalStyle.selectBox}`}
               value={selectedBand}
               onChange={handleArrearsBandChange}
+              
               disabled={totalDistributedAmount > 0}
             >
               <option value="" hidden>
@@ -277,12 +269,14 @@ const AssignDRC = () => {
           </div>
           <div className="flex items-center my-10 space-x-4">
             {/* DRC Dropdown */}
-            {/* DRC Dropdown */}
             <select
               className={`${GlobalStyle.selectBox}`}
               value={newEntry.drc}
-              onChange={handleDRCChange}
-            >
+                onChange={(e) =>
+                  setNewEntry({ ...newEntry, drc: e.target.value })
+                }
+
+              >
               <option value="" hidden>
                 DRC
               </option>
@@ -298,16 +292,18 @@ const AssignDRC = () => {
               type="number"
               placeholder="+ cases"
               className="py-1 px-4 w-32 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
-              min="1"
-              max={arrearsbandTotal}
+              min="1" max={arrearsbandTotal}
               value={newEntry.casesAmount}
-              onChange={handleCasesChange}
+              onChange={(e) =>
+                setNewEntry({ ...newEntry, casesAmount: e.target.value })
+              }
             />
 
             {/* Add Button */}
             <button
               className={`${GlobalStyle.buttonPrimary} w-[135px]`}
               onClick={handleAdd}
+              disabled={totalDistributedAmount >= arrearsbandTotal}
             >
               Add
             </button>
@@ -372,7 +368,9 @@ const AssignDRC = () => {
                           }
                           aria-rowindex={drc.id}
                         >
-                          <td className={GlobalStyle.tableData}>{drc.name}</td>
+                          <td className={GlobalStyle.tableData}>
+                            {drc.name}
+                          </td>
                           <td className={GlobalStyle.tableData}>
                             {drc.amount}
                           </td>
