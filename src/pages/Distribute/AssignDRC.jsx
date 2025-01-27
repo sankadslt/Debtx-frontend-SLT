@@ -23,7 +23,8 @@ import {
 } from "chart.js";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import { FaSearch } from "react-icons/fa";
-import {fetchAllArrearsBands} from '/src/services/case/CaseServices.js';
+import { fetchAllArrearsBands } from "/src/services/case/CaseServices.js";
+import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 
 // Register necessary components for Chart.js pie chart
 ChartJS.register(
@@ -81,7 +82,8 @@ const AssignDRC = () => {
   const [editMode, setEditMode] = useState(null);
   const [arrearsBands, setArrearsBands] = useState([]);
   const [selectedBand, setSelectedBand] = useState("");
-  
+  const [drcNames, setDrcNames] = useState([]);
+
   const [drcData, setDrcData] = useState([
     { id: 1, name: "CMS", amount: 0 },
     { id: 2, name: "TCM", amount: 0 },
@@ -92,8 +94,8 @@ const AssignDRC = () => {
     arrearsBand: "",
     drc: "",
     casesAmount: "",
+    drcNames: "",
   });
-
 
   //fetch all arrears bands
   useEffect(() => {
@@ -104,9 +106,22 @@ const AssignDRC = () => {
       } catch (error) {
         console.error("Error fetching arrears bands:", error);
       }
-    }
+    };
     fetchArrearsBands();
   }, []);
+
+  //fetch all drc names
+  useEffect(() => {
+    const fetchDRCNames = async () => {
+      try {
+        const Names = await Active_DRC_Details();
+        setDrcNames(Names);
+      } catch (error) {
+        console.error("Error fetching drc names:", error);
+      }
+    };
+    fetchDRCNames();
+  });
 
   //search fuction
   const filteredSearchData = drcData.filter((row) =>
@@ -119,9 +134,6 @@ const AssignDRC = () => {
   const navigate = useNavigate();
 
   const { serviceType } = location.state || {};
-
-  
-
 
   const handleChange = (e, field, id) => {
     const updatedData = drcData.map((drc) =>
@@ -146,9 +158,8 @@ const AssignDRC = () => {
   };
 
   const handleRemove = (name) => {
-   
     const updatedData = filteredSearchData.filter((drc) => drc.name !== name);
-    setDrcData(updatedData); 
+    setDrcData(updatedData);
   };
 
   const totalDistributedAmount = drcData.reduce(
@@ -202,80 +213,77 @@ const AssignDRC = () => {
 
         {/* Service Type and Table */}
         <div className="relative">
-                <div className="flex items-center my-10 space-x-4">
-                  {/* Arrears Band Dropdown */}
-                  <select
-                    className={`${GlobalStyle.selectBox}`}
-                    value={newEntry.arrearsBand}
-                    onChange={(e) =>
-                      setNewEntry({ ...newEntry, arrearsBand: e.target.value })
-                    }
-                    disabled={totalDistributedAmount > 0}
-                  >
-                    <option value="" disabled>
-                      Arrears Band
-                    </option>
-                    {arrearsBands.map(({ key, value }) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                  <div
-                    className={`${GlobalStyle.countBarMainBox}`}
-                    style={{ width: "160px", textAlign: "center" }}
-                  >
-                    Total Count: 1000
-                  </div>
-                </div>
-                <div className="flex items-center my-10 space-x-4">
-                  {/* DRC Dropdown */}
-                  <select
-                    className={`${GlobalStyle.selectBox}`}
-                    value={newEntry.drc}
-                    onChange={(e) =>
-                      setNewEntry({ ...newEntry, drc: e.target.value })
-                    }
-                  >
-                    <option value="" disabled>
-                      DRC
-                    </option>
-                    <option>CMS</option>
-                    <option>TCM</option>
-                    <option>RE</option>
-                    <option>CO LAN</option>
-                    <option>ACCIVA</option>
-                    <option>VISONCOM</option>
-                    <option>PROMPT</option>
-                  </select>
+          <div className="flex items-center my-10 space-x-4">
+            {/* Arrears Band Dropdown */}
+            <select
+              className={`${GlobalStyle.selectBox}`}
+              value={newEntry.arrearsBand}
+              onChange={(e) =>
+                setNewEntry({ ...newEntry, arrearsBand: e.target.value })
+              }
+              disabled={totalDistributedAmount > 0}
+            >
+              <option value="" disabled>
+                Arrears Band
+              </option>
+              {arrearsBands.map(({ key, value }) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </select>
+            <div
+              className={`${GlobalStyle.countBarMainBox}`}
+              style={{ width: "160px", textAlign: "center" }}
+            >
+              Total Count: 1000
+            </div>
+          </div>
+          <div className="flex items-center my-10 space-x-4">
+            {/* DRC Dropdown */}
+            <select
+              className={`${GlobalStyle.selectBox}`}
+              value={newEntry.drcNames}
+              onChange={(e) =>
+                setNewEntry({ ...newEntry, drcNames: e.target.value })
+              }
+            >
+              <option value="" disabled>
+                DRC
+              </option>
+              {drcNames.map(({ key, value }) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </select>
 
-                  {/* Input for "+ cases" */}
-                  <input
-                    type="number"
-                    placeholder="+ cases"
-                    className="py-1 px-4 w-32 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
-                    min="0"
-                    value={newEntry.casesAmount}
-                    onChange={(e) =>
-                      setNewEntry({ ...newEntry, casesAmount: e.target.value })
-                    }
-                  />
+            {/* Input for "+ cases" */}
+            <input
+              type="number"
+              placeholder="+ cases"
+              className="py-1 px-4 w-32 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
+              min="0"
+              value={newEntry.casesAmount}
+              onChange={(e) =>
+                setNewEntry({ ...newEntry, casesAmount: e.target.value })
+              }
+            />
 
-                  {/* Add Button */}
-                  <button
-                    className={`${GlobalStyle.buttonPrimary} w-[135px]`}
-                    onClick={handleAdd}
-                  >
-                    Add
-                  </button>
-                  
-                </div>
-                <div
-                  className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
-                  style={{ width: "160px", textAlign: "center" }}
-                >
-                  Selected Count: {totalDistributedAmount}
-                </div>
+            {/* Add Button */}
+            <button
+              className={`${GlobalStyle.buttonPrimary} w-[135px]`}
+              onClick={handleAdd}
+            >
+              Add
+            </button>
+          </div>
+          <div
+            className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
+            style={{ width: "160px", textAlign: "center" }}
+          >
+            Selected Count: {totalDistributedAmount}
+          </div>
 
           <div className="flex">
             {/* Table */}
@@ -314,12 +322,8 @@ const AssignDRC = () => {
                         Distributed Amount
                       </th>
                       <th
-    
                         className={`${GlobalStyle.tableHeader} text-center`}
-                        
-                      >
-                       
-                      </th>
+                      ></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -372,27 +376,21 @@ const AssignDRC = () => {
                             )}
                           </td>
                           <td className="px-6 py-4 text-center">
-                            
-                              <button onClick={() => handleRemove(drc.name)}> 
-                              
-                                <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width={28}
-                                      height={29}
-                                      fill="none"
-                                      
-                                     
-                                    >
-                                      <path
-                                        fill="#000"
-                                        fillRule="evenodd"
-                                        d="M14 28.5a14 14 0 1 0 0-28 14 14 0 0 0 0 28ZM6.222 16.056h15.556v-3.112H6.222v3.112Z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                             
-                              </button>
-                            
+                            <button onClick={() => handleRemove(drc.name)}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={28}
+                                height={29}
+                                fill="none"
+                              >
+                                <path
+                                  fill="#000"
+                                  fillRule="evenodd"
+                                  d="M14 28.5a14 14 0 1 0 0-28 14 14 0 0 0 0 28ZM6.222 16.056h15.556v-3.112H6.222v3.112Z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
                           </td>
                         </tr>
                       ))
@@ -417,7 +415,7 @@ const AssignDRC = () => {
             <button
               onClick={handleProceed}
               className={`${GlobalStyle.buttonPrimary}`}
-              disabled={totalDistributedAmount !== 1000} 
+              disabled={totalDistributedAmount !== 1000}
             >
               Proceed
             </button>
