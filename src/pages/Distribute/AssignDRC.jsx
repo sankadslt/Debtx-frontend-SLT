@@ -86,7 +86,7 @@ const AssignDRC = () => {
   const [bandsAndCounts, setBandsAndCounts] = useState({});
   const [drcNames, setDrcNames] = useState([]);
   const [total, setTotal] = useState(0);
-
+  const [arrearsbandTotal, setArrearsbandTotal] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -94,11 +94,8 @@ const AssignDRC = () => {
 
 
   const [drcData, setDrcData] = useState([
-    { id: 1, name: "CMS", amount: 0 },
-    { id: 2, name: "TCM", amount: 0 },
-    { id: 3, name: "RE", amount: 0 },
-    { id: 4, name: "CO LAN", amount: 0 },
-  ]);
+    
+]);
   const [newEntry, setNewEntry] = useState({
     arrearsBand: "",
     drc: "",
@@ -164,16 +161,8 @@ const AssignDRC = () => {
       .includes(searchQuery.toLowerCase())
   );
  
-
-  const handleChange = (e, field, id) => {
-    const updatedData = drcData.map((drc) =>
-      drc.id === id ? { ...drc, [field]: e.target.value } : drc
-    );
-    setDrcData(updatedData);
-  };
-
   const handleProceed = () => {
-    navigate("/pages/Distribute/AssignedDRCSummary");
+    alert("Proceeding to the next step...");
   };
 
   const handleAdd = () => {
@@ -196,6 +185,15 @@ const AssignDRC = () => {
     (total, drc) => total + parseFloat(drc.amount),
     0
   );
+
+  const handleArrearsBandChange = (e) => {
+    const selectedBand = e.target.value;
+    console.log("Selected Band:", selectedBand);
+    setSelectedBand(selectedBand);
+    const selectedBandCount = bandsAndCounts[selectedBand];
+    setArrearsbandTotal(selectedBandCount ?? 0); 
+  };
+
 
   return (
     <div className={`${GlobalStyle.fontPoppins} flex flex-col `}>
@@ -234,17 +232,16 @@ const AssignDRC = () => {
             {/* Arrears Band Dropdown */}
             <select
               className={`${GlobalStyle.selectBox}`}
-              value={newEntry.arrearsBand}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, arrearsBand: e.target.value })
-              }
+              value={selectedBand}
+              onChange={handleArrearsBandChange}
+              
               disabled={totalDistributedAmount > 0}
             >
               <option value="" hidden>
                 Arrears Band
               </option>
               {arrearsBands.map(({ key, value }) => (
-                <option key={key} value={key}>
+                <option key={key} value={value}>
                   {value}
                 </option>
               ))}
@@ -253,17 +250,14 @@ const AssignDRC = () => {
               className={`${GlobalStyle.countBarMainBox}`}
               style={{ width: "160px", textAlign: "center" }}
             >
-              Total Count: 1000
+              Total Count: {arrearsbandTotal}
             </div>
           </div>
           <div className="flex items-center my-10 space-x-4">
             {/* DRC Dropdown */}
             <select
               className={`${GlobalStyle.selectBox}`}
-              value={newEntry.drcNames}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, drcNames: e.target.value })
-              }
+              
             >
               <option value="" hidden>
                 DRC
@@ -280,11 +274,8 @@ const AssignDRC = () => {
               type="number"
               placeholder="+ cases"
               className="py-1 px-4 w-32 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
-              min="0"
-              value={newEntry.casesAmount}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, casesAmount: e.target.value })
-              }
+              min="0" max={arrearsbandTotal}
+             
             />
 
             {/* Add Button */}
@@ -356,41 +347,10 @@ const AssignDRC = () => {
                           aria-rowindex={drc.id}
                         >
                           <td className={GlobalStyle.tableData}>
-                            {editMode === drc.id ? (
-                              <select
-                                value={drc.name}
-                                onChange={(e) =>
-                                  handleChange(e, "name", drc.id)
-                                }
-                                className={`${GlobalStyle.selectBox}`}
-                                aria-label="Select DRC Name"
-                              >
-                                <option>CMS</option>
-                                <option>TCM</option>
-                                <option>RE</option>
-                                <option>CO LAN</option>
-                                <option>ACCIVA</option>
-                                <option>VISONCOM</option>
-                                <option>PROMPT</option>
-                              </select>
-                            ) : (
-                              drc.name
-                            )}
+                            {drc.name}
                           </td>
                           <td className={GlobalStyle.tableData}>
-                            {editMode === drc.id ? (
-                              <input
-                                type="number"
-                                className={`${GlobalStyle.inputText}`}
-                                value={drc.amount}
-                                onChange={(e) =>
-                                  handleChange(e, "amount", drc.id)
-                                }
-                                aria-label="Enter Distributed Amount"
-                              />
-                            ) : (
-                              drc.amount
-                            )}
+                            {drc.amount}
                           </td>
                           <td className="px-6 py-4 text-center">
                             <button onClick={() => handleRemove(drc.name)}>
@@ -432,7 +392,7 @@ const AssignDRC = () => {
             <button
               onClick={handleProceed}
               className={`${GlobalStyle.buttonPrimary}`}
-              disabled={totalDistributedAmount !== 1000}
+              disabled={totalDistributedAmount !== arrearsbandTotal}
             >
               Proceed
             </button>
