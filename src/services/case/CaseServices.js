@@ -34,3 +34,31 @@ export const fetchAllArrearsBands = async () => {
     throw error;
   }
 };
+
+
+export const count_cases_rulebase_and_arrears_band = async (drcCommissionRule) => {
+  try {
+    const response = await axios.post(`${URL}/count_cases_rulebase_and_arrears_band`, {
+      drc_commision_rule: drcCommissionRule,
+    });
+
+    const data = response.data.data;
+
+    // Convert bands and counts into key-value pairs
+    const bandsAndCounts = data.Arrears_Bands.reduce((acc, band) => {
+      acc[band.band] = band.count; // Use band as the key and count as the value
+      return acc;
+    }, {});
+
+    return {
+      total: data.Total,
+      bandsAndCounts, // Key-value pairs
+    };
+  } catch (error) {
+    console.error(
+      "Error fetching the count_cases_rulebase_and_arrears_band:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
