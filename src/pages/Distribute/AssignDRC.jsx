@@ -23,8 +23,9 @@ import {
 } from "chart.js";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import { FaSearch } from "react-icons/fa";
-import { fetchAllArrearsBands } from "/src/services/case/CaseServices.js";
+import { fetchAllArrearsBands , count_cases_rulebase_and_arrears_band} from "/src/services/case/CaseServices.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
+
 
 // Register necessary components for Chart.js pie chart
 ChartJS.register(
@@ -82,13 +83,21 @@ const AssignDRC = () => {
   const [editMode, setEditMode] = useState(null);
   const [arrearsBands, setArrearsBands] = useState([]);
   const [selectedBand, setSelectedBand] = useState("");
+  const [bandsAndCounts, setBandsAndCounts] = useState({});
   const [drcNames, setDrcNames] = useState([]);
+  const [total, setTotal] = useState(0);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { serviceType } = location.state || {};
+
 
   const [drcData, setDrcData] = useState([
     { id: 1, name: "CMS", amount: 0 },
     { id: 2, name: "TCM", amount: 0 },
     { id: 3, name: "RE", amount: 0 },
-    { id: 4, name: "CO LAN", amount: 10 },
+    { id: 4, name: "CO LAN", amount: 0 },
   ]);
   const [newEntry, setNewEntry] = useState({
     arrearsBand: "",
@@ -116,12 +125,36 @@ const AssignDRC = () => {
       try {
         const Names = await Active_DRC_Details();
         setDrcNames(Names);
+      
       } catch (error) {
         console.error("Error fetching drc names:", error);
       }
     };
     fetchDRCNames();
   });
+
+  //fetch count cases rulebase and arrears band
+  useEffect(() => {
+    const displayData = async () => {
+      const effectiveServiceType = serviceType || "PEO TV"; // Use "PEO TV" as default
+      console.log ("Service Type:", serviceType);
+      console.log("Effective Service Type:", effectiveServiceType);
+      try {
+        const drcDetails = await count_cases_rulebase_and_arrears_band(effectiveServiceType);
+        const { total, bandsAndCounts } = drcDetails;
+  
+        setTotal(total);
+        setBandsAndCounts(bandsAndCounts);
+        console.log("bandsAndCounts:", bandsAndCounts);
+      } catch (error) {
+        console.error("Failed to fetch and display data:", error);
+      }
+    };
+  
+    displayData();
+  }, [serviceType]);
+  
+  
 
   //search fuction
   const filteredSearchData = drcData.filter((row) =>
@@ -130,10 +163,7 @@ const AssignDRC = () => {
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const { serviceType } = location.state || {};
+ 
 
   const handleChange = (e, field, id) => {
     const updatedData = drcData.map((drc) =>
@@ -186,28 +216,15 @@ const AssignDRC = () => {
           <div className={GlobalStyle.countBarSubTopicContainer}>
             <div className={GlobalStyle.countBarMainBox}>
               <span>Total:</span>
-              <p className={GlobalStyle.countBarMainTopic}>1259</p>
+              <p className={GlobalStyle.countBarMainTopic}>{total}</p>
             </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>5,000 - 10,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>100</p>
-            </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>10,000 - 25,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>250</p>
-            </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>25,000 - 50,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>800</p>
-            </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>50,000 - 100,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>61</p>
-            </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>&gt; 100,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>98</p>
-            </div>
+          {/* Dynamically render bands and counts */}
+          {Object.entries(bandsAndCounts).map(([band, count]) => (
+                    <div key={band} className={GlobalStyle.countBarSubBox}>
+                      <span>{band}</span>
+                      <p className={GlobalStyle.countBarSubTopic}>{count}</p>
+                    </div>
+          ))}
           </div>
         </div>
 
@@ -223,7 +240,7 @@ const AssignDRC = () => {
               }
               disabled={totalDistributedAmount > 0}
             >
-              <option value="" disabled>
+              <option value="" hidden>
                 Arrears Band
               </option>
               {arrearsBands.map(({ key, value }) => (
@@ -248,7 +265,7 @@ const AssignDRC = () => {
                 setNewEntry({ ...newEntry, drcNames: e.target.value })
               }
             >
-              <option value="" disabled>
+              <option value="" hidden>
                 DRC
               </option>
               {drcNames.map(({ key, value }) => (
