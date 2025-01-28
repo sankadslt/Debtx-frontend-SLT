@@ -52,6 +52,10 @@ const DistributeDummy = () => {
             label: "1 . 15 - DRC Assign Manager Approval ",
           },
           {
+            to: "../pages/Distribute/AmendAssignedDRC",
+            label: " 1 . A . 15 - Amend Assigned DRC",
+          },
+          {
             to: "/pages/Distribute/DistributionPreparationOnlyCPECollect",
             label: "1 . C . 11 - Distribution Preparation (Only CPE Collect) ",
           },
