@@ -19,17 +19,18 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import axios from "axios";
+import PropTypes from "prop-types";
 
 // Status Icon Component
 const StatusIcon = ({ status }) => {
     const getStatusIcon = (status) => {
         switch (status?.toLowerCase()) {
-            case 'incident open':
-                return '/src/assets/images/incidents/Incident_Open.png';
-            case 'incident reject':
-                return '/src/assets/images/incidents/Incident_Reject.png';
-            case 'incident inprogress':
-                return '/src/assets/images/incidents/Incident_InProgress.png';
+            case "incident open":
+                return "/src/assets/images/incidents/Incident_Open.png";
+            case "incident reject":
+                return "/src/assets/images/incidents/Incident_Reject.png";
+            case "incident inprogress":
+                return "/src/assets/images/incidents/Incident_InProgress.png";
             default:
                 return null;
         }
@@ -131,11 +132,15 @@ const Incident_List = () => {
         setCurrentPage(0);
     };
 
+    
     const filteredData = data.filter((row) =>
-    const filteredData = data
-    .filter((row) =>
-      
+        String(row.caseID).toLowerCase().includes(searchQuery.toLowerCase()) || 
+        String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.accountNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.action).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase())
     );
+    
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
@@ -155,7 +160,7 @@ const Incident_List = () => {
     };
 
     const navigate = useNavigate();
-    const HandleAddIncident = () => navigate("/add-incident");
+    const HandleAddIncident = () => navigate("/incident/register");
     const HandleCreateTask = () => navigate("/add-incident");
 
 
@@ -322,6 +327,10 @@ const Incident_List = () => {
             </div>
         </div>
     );
+};
+
+StatusIcon.propTypes = {
+    status: PropTypes.string.isRequired,
 };
 
 export default Incident_List;
