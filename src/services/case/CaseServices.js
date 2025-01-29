@@ -62,3 +62,31 @@ export const count_cases_rulebase_and_arrears_band = async (drcCommissionRule) =
     throw error;
   }
 };
+
+export const Case_Distribution_Among_Agents = async (requestData) => {
+  try {
+      // Validate the requestData
+      if (!requestData || typeof requestData !== 'object' || Object.keys(requestData).length === 0) {
+          throw new Error("Invalid request data provided.");
+      }
+
+      // Make the API request
+      const response = await axios.post(`${URL}/Case_Distribution_Among_Agents`, requestData);
+
+      // Validate the response structure
+      if (response.data && response.data.status === 'success') {
+          return response.data.data; // Return the required data
+      } else {
+          console.error("Error in API response:", response.data?.message || "Unknown error");
+          throw new Error(response.data?.message || "Failed to fetch case distribution.");
+      }
+  } catch (error) {
+      console.error("Error fetching case distribution among agents:", error.response?.data || error.message);
+      throw error;
+  }
+};
+
+
+
+
+
