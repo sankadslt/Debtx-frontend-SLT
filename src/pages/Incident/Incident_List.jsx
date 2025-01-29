@@ -37,14 +37,14 @@ const StatusIcon = ({ status }) => {
     };
 
     const iconPath = getStatusIcon(status);
-    
+
     if (!iconPath) {
         return <span>{status}</span>;
     }
 
     return (
-        <img 
-            src={iconPath} 
+        <img
+            src={iconPath}
             alt={status}
             className="w-6 h-6"
             title={status}
@@ -56,15 +56,15 @@ const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const rowsPerPage = 7;
-    const [fromDate, setFromDate] = useState(null); 
-    const [toDate, setToDate] = useState(null); 
+    const [fromDate, setFromDate] = useState(null);
+    const [toDate, setToDate] = useState(null);
 
-    const [error, setError] = useState(""); 
+    const [error, setError] = useState("");
     const [status1, setStatus1] = useState("");
     const [status2, setStatus2] = useState("");
     const [status3, setStatus3] = useState("");
     const [data, setData] = useState([]);
- 
+
     const [activeFilters, setActiveFilters] = useState({
         Actions: "",
         Incident_Status: "",
@@ -74,7 +74,7 @@ const Incident_List = () => {
     const fetchData = async (filters) => {
         try {
             const response = await axios.post("http://localhost:5000/api/incident/List_Incidents", filters);
-            
+
             const mappedData = response.data.incidents.map(incident => ({
                 caseID: incident.Incident_Id,
                 status: incident.Incident_Status,
@@ -83,7 +83,7 @@ const Incident_List = () => {
                 sourceType: incident.Source_Type,
                 createdDTM: new Date(incident.Created_Dtm).toLocaleString()
             }));
-            
+
             setData(mappedData);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -124,24 +124,24 @@ const Incident_List = () => {
         const newFilters = {
             Actions: status1,
             Incident_Status: status2,
-            From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null, 
+            From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
             To_Date: toDate ? toDate.toISOString().split("T")[0] : null
         };
-        
+
         console.log("Filters before sending:", newFilters);
-setActiveFilters(newFilters);
-setCurrentPage(0);
+        setActiveFilters(newFilters);
+        setCurrentPage(0);
     };
 
-    
+
     const filteredData = data.filter((row) =>
-        String(row.caseID).toLowerCase().includes(searchQuery.toLowerCase()) || 
+        String(row.caseID).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.accountNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.action).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
+
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
@@ -162,66 +162,9 @@ setCurrentPage(0);
 
     const navigate = useNavigate();
     const HandleAddIncident = () => navigate("/incident/register");
-    const [isLoading, setIsLoading] = useState(false);
 
-    const HandleCreateTask = async () => {
-        console.log("Button clicked");
-        
-        // Validate inputs first
-        if (!status1 || !status2 || !fromDate || !toDate) {
-            alert("Please select all required filters (Action Type, Status, and Date range)");
-            return;
-        }
-    
-        setIsLoading(true);
-        
-        try {
-            const payload = {
-                DRC_Action: status1,
-                Incident_Status: status2,
-                From_Date: fromDate.toISOString(),
-                To_Date: toDate.toISOString()
-            };
-    
-            console.log("Sending payload:", payload);
-    
-            // You might need to update this URL based on your actual API endpoint
-            const response = await axios.post(
-                "http://localhost:5000/api/task/Task_for_DownLoad_Incidents",
-                payload,
-                {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-    
-            console.log("Response:", response.data);
-    
-            if (response.data.status === "success") {
-                alert("Task created successfully!");
-                // Optionally refresh the data
-                fetchData(activeFilters);
-            } else {
-                alert("Failed to create task. Please try again.");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            
-            if (error.response) {
-                // The request was made but the server responded with an error
-                alert(`Error: ${error.response.data.message || 'Server error'}`);
-            } else if (error.request) {
-                // The request was made but no response was received
-                alert("No response from server. Please check if the server is running.");
-            } else {
-                // Something happened in setting up the request
-                alert("Error creating task. Please try again.");
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
+
+
 
 
     return (
@@ -330,11 +273,10 @@ setCurrentPage(0);
                             <tr
 
                                 key={index}
-                                className={`${
-                                    index % 2 === 0
+                                className={`${index % 2 === 0
                                         ? "bg-white bg-opacity-75"
                                         : "bg-gray-50 bg-opacity-50"
-                                } border-b`}
+                                    } border-b`}
                             >
 
                                 <td className={GlobalStyle.tableData}>{log.caseID}</td>
@@ -380,15 +322,14 @@ setCurrentPage(0);
                 </div>
             )}
 
-<div className="flex justify-end mt-6">
-    <button 
-        onClick={HandleCreateTask} 
-        className={`${GlobalStyle.buttonPrimary} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        disabled={isLoading}
-    >
-        {isLoading ? 'Creating task...' : 'Create task and let me know'}
-    </button>
-</div>
+            <div className="flex justify-end mt-6">
+                <button
+
+                    className={GlobalStyle.buttonPrimary}
+                >
+                    {'Create task and let me know'}
+                </button>
+            </div>
         </div>
     );
 };
