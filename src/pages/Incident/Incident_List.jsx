@@ -300,42 +300,19 @@ const Incident_List = () => {
                 </table>
             </div>
 
-            {filteredData.length > rowsPerPage && (
-                <div className={GlobalStyle.navButtonContainer}>
-                    <button
-                        className={GlobalStyle.navButton}
-                        onClick={handlePrevPage}
-                        disabled={currentPage === 0}
-                    >
-                        <FaArrowLeft />
-                    </button>
-                    <span>
-                        Page {currentPage + 1} of {pages}
-                    </span>
-                    <button
-                        className={GlobalStyle.navButton}
-                        onClick={handleNextPage}
-                        disabled={currentPage === pages - 1}
-                    >
-                        <FaArrowRight />
-                    </button>
-                </div>
-            )}
-
-            <div className="flex justify-end mt-6">
-                <button
-
-                    className={GlobalStyle.buttonPrimary}
-                >
-                    {'Create task and let me know'}
-                </button>
-            </div>
-        </div>
-    );
-};
-
-StatusIcon.propTypes = {
-    status: PropTypes.string.isRequired,
+      <div className="flex justify-between mt-6">
+        <button onClick={handlePrevPage} disabled={currentPage === 0}>
+          <FaArrowLeft />
+        </button>
+        <span className="text-gray-700">
+          Page {currentPage + 1} of {pages}
+        </span>
+        <button onClick={handleNextPage} disabled={currentPage === pages - 1}>
+          <FaArrowRight />
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default Incident_List;
