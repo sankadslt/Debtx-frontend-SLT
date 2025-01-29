@@ -124,12 +124,13 @@ const Incident_List = () => {
         const newFilters = {
             Actions: status1,
             Incident_Status: status2,
-            From_Date: fromDate ? fromDate.toISOString() : null,
-            To_Date: toDate ? toDate.toISOString() : null
+            From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null, 
+            To_Date: toDate ? toDate.toISOString().split("T")[0] : null
         };
         
-        setActiveFilters(newFilters);
-        setCurrentPage(0);
+        console.log("Filters before sending:", newFilters);
+setActiveFilters(newFilters);
+setCurrentPage(0);
     };
 
     
@@ -161,7 +162,66 @@ const Incident_List = () => {
 
     const navigate = useNavigate();
     const HandleAddIncident = () => navigate("/incident/register");
-    const HandleCreateTask = () => navigate("/add-incident");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const HandleCreateTask = async () => {
+        console.log("Button clicked");
+        
+        // Validate inputs first
+        if (!status1 || !status2 || !fromDate || !toDate) {
+            alert("Please select all required filters (Action Type, Status, and Date range)");
+            return;
+        }
+    
+        setIsLoading(true);
+        
+        try {
+            const payload = {
+                DRC_Action: status1,
+                Incident_Status: status2,
+                From_Date: fromDate.toISOString(),
+                To_Date: toDate.toISOString()
+            };
+    
+            console.log("Sending payload:", payload);
+    
+            // You might need to update this URL based on your actual API endpoint
+            const response = await axios.post(
+                "http://localhost:5000/api/task/Task_for_DownLoad_Incidents",
+                payload,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+    
+            console.log("Response:", response.data);
+    
+            if (response.data.status === "success") {
+                alert("Task created successfully!");
+                // Optionally refresh the data
+                fetchData(activeFilters);
+            } else {
+                alert("Failed to create task. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            
+            if (error.response) {
+                // The request was made but the server responded with an error
+                alert(`Error: ${error.response.data.message || 'Server error'}`);
+            } else if (error.request) {
+                // The request was made but no response was received
+                alert("No response from server. Please check if the server is running.");
+            } else {
+                // Something happened in setting up the request
+                alert("Error creating task. Please try again.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
 
     return (
@@ -320,11 +380,15 @@ const Incident_List = () => {
                 </div>
             )}
 
-            <div className="flex justify-end mt-6">
-                <button onClick={HandleCreateTask} className={GlobalStyle.buttonPrimary}>
-                    Create task and let me know
-                </button>
-            </div>
+<div className="flex justify-end mt-6">
+    <button 
+        onClick={HandleCreateTask} 
+        className={`${GlobalStyle.buttonPrimary} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        disabled={isLoading}
+    >
+        {isLoading ? 'Creating task...' : 'Create task and let me know'}
+    </button>
+</div>
         </div>
     );
 };
