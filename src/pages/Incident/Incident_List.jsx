@@ -311,6 +311,12 @@ const Incident_List = () => {
           <FaArrowRight />
         </button>
       </div>
+       {/* Create task button */}
+       <div className="flex justify-end mt-6">
+                <button onClick={HandleCreateTask} className={GlobalStyle.buttonPrimary}>
+                    Create task and let me know
+                </button>
+            </div>
     </div>
   );
 };
