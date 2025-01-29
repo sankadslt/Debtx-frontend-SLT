@@ -23,7 +23,7 @@ import {
 } from "chart.js";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import { FaSearch } from "react-icons/fa";
-import { fetchAllArrearsBands , count_cases_rulebase_and_arrears_band} from "/src/services/case/CaseServices.js";
+import { fetchAllArrearsBands , count_cases_rulebase_and_arrears_band , Case_Distribution_Among_Agents} from "/src/services/case/CaseServices.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 
 
@@ -89,6 +89,7 @@ const AssignDRC = () => {
   const [arrearsbandTotal, setArrearsbandTotal] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+  const [selectedBandKey, setSelectedBandKey] = useState(null);
 
   const { serviceType } = location.state || {};
 
@@ -161,9 +162,7 @@ const AssignDRC = () => {
       .includes(searchQuery.toLowerCase())
   );
  
-  const handleProceed = () => {
-    alert("Proceeding to the next step...");
-  };
+  
 
   const handleAdd = () => {
     const { drc, casesAmount } = newEntry;
@@ -202,10 +201,42 @@ const AssignDRC = () => {
     const selectedBand = e.target.value;
     console.log("Selected Band:", selectedBand);
     setSelectedBand(selectedBand);
+
     const selectedBandCount = bandsAndCounts[selectedBand];
     setArrearsbandTotal(selectedBandCount ?? 0); 
 
+    const band = arrearsBands.find((band) => band.value === selectedBand);
+    if (band) {
+    setSelectedBandKey(band.key);
+    console.log("Selected Band Key:", band.key);
+  }
 
+  };
+
+  const handleProceed = () => {
+    
+    const drcList = filteredSearchData.map((drc) => ({
+      
+      DRC: drc.name,
+      Count: drc.amount,
+    }));
+
+    const requestData = {
+      drc_commision_rule: serviceType || "PEO TV",
+      current_arrears_band: selectedBandKey,
+      drc_list: drcList,
+    };
+
+    console.log("Request Data:", requestData);
+
+    try{
+      const response = Case_Distribution_Among_Agents(requestData);
+      console.log("Response:", response);
+
+    } catch (error) {
+      console.error("Error in sending the data:", error);
+    }
+    
   };
 
 
