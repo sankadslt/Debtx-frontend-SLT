@@ -13,13 +13,12 @@ Notes: This template uses Tailwind CSS */
 
 import { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import Swal from "sweetalert2"; // Import SweetAlert
-import { createIncident } from "../../services/Incidents/incidentService.js"; // Import the API service
-
+import Swal from "sweetalert2";
+import { createIncident } from "../../services/Incidents/incidentService.js";
 const Incident_Register_Individual = () => {
   const [accountNo, setAccountNo] = useState("");
   const [actionType, setActionType] = useState("");
-  const [sourceType, setSourceType] = useState(""); // Added Source_Type
+  const [sourceType, setSourceType] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(3); // Default value is 3
   const [loggedInUser] = useState("Admin"); // Replace with dynamic user retrieval logic
   const [errors, setErrors] = useState({});
@@ -27,6 +26,14 @@ const Incident_Register_Individual = () => {
   const validateForm = () => {
     const newErrors = {};
 
+
+
+    // Account number validation
+    if (!accountNo) {
+        newErrors.accountNo = "Account number is required.";
+      } else if (accountNo.length > 10) {
+        newErrors.accountNo = "Account number must be 10 characters or fewer.";
+      }
     if (!accountNo) newErrors.accountNo = "Account number is required.";
     if (!actionType) newErrors.actionType = "Action type is required.";
     if (!sourceType) newErrors.sourceType = "Source type is required.";
@@ -79,13 +86,27 @@ const Incident_Register_Individual = () => {
       setCalendarMonth(3); // Reset to default value
       setErrors({});
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to create incident.";
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: errorMessage,
-      });
-    }
+        console.log("Error response:", error);  // Log full error for debugging
+        
+        const errorCode = error.code;  // Access directly from error object
+        const errorMessage = error.message;  // Access directly from error object
+      
+        // Show specific error for duplicate account numbers
+        if (errorCode === "DUPLICATE_ACCOUNT") {
+          Swal.fire({
+            icon: "error",
+            title: "Duplicate Account",
+            text: errorMessage || "The account number is already associated with an incident.",
+          });
+        } else {
+          // Show generic error
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: errorMessage || "Failed to create incident.",
+          });
+        }
+      }
   };
 
   return (
@@ -117,7 +138,7 @@ const Incident_Register_Individual = () => {
                 onChange={(e) => setActionType(e.target.value)}
                 className={GlobalStyle.selectBox}
               >
-                <option value="">Select an action</option>
+                <option value="">Action</option>
                 <option value="collect arrears">Collect Arrears</option>
                 <option value="collect arrears and CPE">Collect Arrears and CPE</option>
                 <option value="collect CPE">Collect CPE</option>
@@ -134,7 +155,7 @@ const Incident_Register_Individual = () => {
                 onChange={(e) => setSourceType(e.target.value)}
                 className={GlobalStyle.selectBox}
               >
-                <option value="">Select source type</option>
+                <option value="">Source type</option>
                 <option value="Pilot Suspended">Pilot Suspended</option>
                 <option value="Product Terminate">Product Terminate</option>
                 <option value="Special">Special</option>
@@ -166,7 +187,7 @@ const Incident_Register_Individual = () => {
             {errors.calendarMonth && <p className="text-red-500">{errors.calendarMonth}</p>}
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div className="pt-4 flex justify-end">
               <button type="submit" className={GlobalStyle.buttonPrimary}>
                 Submit
               </button>
