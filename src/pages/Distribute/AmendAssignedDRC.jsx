@@ -1,6 +1,8 @@
 /*Purpose: This template is used for the 1.A.15 - Amend Assigned DRC
 Created Date: 2025-01-28
 Created By: Malindu (mhssc20@gmail.com)
+Last Modified Date: 2025-01-30
+Modified By:  Malindu (mhssc20@gmail.com)
 Version: node 20
 ui number : 1.A.15
 Dependencies: tailwind css
@@ -66,6 +68,7 @@ export default function AmendAssignedDRC() {
                     <div className={`${GlobalStyle.cardContainer}`}>
                         <p className="mb-2"><strong>Batch ID:</strong></p>
                         <p className="mb-2"><strong>Create DTM:</strong></p>
+                        <p className="mb-2"><strong>DRC Commission Rule:</strong></p>
                         <p className="mb-2"><strong>Arrears Band:</strong></p>
                         <p className="mb-2"><strong>Action Type:</strong></p>
                         <p className="mb-2"><strong>Case Count:</strong></p>
