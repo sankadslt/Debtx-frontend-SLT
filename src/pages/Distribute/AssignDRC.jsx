@@ -29,6 +29,7 @@ import {
   Case_Distribution_Among_Agents,
 } from "/src/services/case/CaseServices.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
+import Swal from "sweetalert2";
 
 // Register necessary components for Chart.js pie chart
 ChartJS.register(
@@ -227,6 +228,17 @@ const AssignDRC = () => {
       console.log("Response:", response);
     } catch (error) {
       console.error("Error in sending the data:", error);
+
+      const errorMessage = error?.response?.data?.message || 
+                             error?.message || 
+                             "Something went wrong!";
+
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: errorMessage,
+            confirmButtonColor: "#d33",
+        });
     }
   };
 
