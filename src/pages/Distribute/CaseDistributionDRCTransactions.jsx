@@ -10,12 +10,13 @@
 // Related Files:  app.js (routes)
 // Notes:.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { fetchAllArrearsBands } from "/src/services/case/CaseServices.js";
 
 export default function AssignPendingDRCSummary() {
   // Initial Data
@@ -112,6 +113,19 @@ export default function AssignPendingDRCSummary() {
   const startIndex1 = (currentPage1 - 1) * itemsPerPage1;
   const endIndex1 = startIndex1 + itemsPerPage1;
   const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
+  const [arrearsBands, setArrearsBands] = useState([]);
+
+  useEffect(() => {
+    const fetchArrearsBands = async () => {
+      try {
+        const bands = await fetchAllArrearsBands();
+        setArrearsBands(bands);
+      } catch (error) {
+        console.error("Error fetching arrears bands:", error);
+      }
+    };
+    fetchArrearsBands();
+  }, []);
 
   function onclick() {
     alert("Create task and let me know");
@@ -126,20 +140,36 @@ export default function AssignPendingDRCSummary() {
 
       {/* Filter Section */}
       <div className="flex justify-between gap-10 mt-16 mb-5">
-        
         <div className="flex gap-10">
           {" "}
+          <div className="flex gap-4 h-[35px] mt-2">
+            <select className={`${GlobalStyle.selectBox}`}>
+              <option value="" hidden>
+                Arrears Band
+              </option>
+              {arrearsBands.map(({ key, value }) => (
+                <option key={key} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="flex gap-4 h-[35px] mt-2">
             <select
               className={GlobalStyle.selectBox}
               value={drcFilter}
               onChange={(e) => setDrcFilter(e.target.value)}
             >
-              <option value="" selected className={GlobalStyle.inputText}>
-                DRC
+              <option value="" selected>
+                Service Type
               </option>
               <option value="CMS">CMS</option>
               <option value="TCM">TCM</option>
+              <option value="RE">RE</option>
+              <option value="CO LAN">CO LAN</option>
+              <option value="ACCIVA">ACCIVA</option>
+              <option value="VISONCOM">VISONCOM</option>
+              <option value="PROMPT">PROMPT</option>
             </select>
           </div>
           <div className="flex flex-col items-center mb-4">
@@ -163,24 +193,6 @@ export default function AssignPendingDRCSummary() {
               />
             </div>
           </div>
-          <div className="flex gap-4 h-[35px] mt-2">
-            <select
-              className={GlobalStyle.selectBox}
-              value={drcFilter}
-              onChange={(e) => setDrcFilter(e.target.value)}
-            >
-              <option value="" selected>
-                Status
-              </option>
-              <option value="CMS">CMS</option>
-              <option value="TCM">TCM</option>
-              <option value="RE">RE</option>
-              <option value="CO LAN">CO LAN</option>
-              <option value="ACCIVA">ACCIVA</option>
-              <option value="VISONCOM">VISONCOM</option>
-              <option value="PROMPT">PROMPT</option>
-            </select>
-          </div>
           <button
             onClick={applyFilters}
             className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
@@ -192,7 +204,7 @@ export default function AssignPendingDRCSummary() {
 
       {/* Table*/}
       <div className="flex flex-col">
-      <div>
+        <div>
           {" "}
           <div className="flex justify-start mb-4">
             <div className={GlobalStyle.searchBarContainer}>
@@ -216,6 +228,7 @@ export default function AssignPendingDRCSummary() {
                 </th>
                 <th className={GlobalStyle.tableHeader}>Created dtm</th>
                 <th className={GlobalStyle.tableHeader}>Action Type</th>
+                <th className={GlobalStyle.tableHeader}> DRC Commision rule</th>
                 <th className={GlobalStyle.tableHeader}>
                   Arrears Band(Selection Rule)
                 </th>
@@ -226,8 +239,8 @@ export default function AssignPendingDRCSummary() {
                 <th className={GlobalStyle.tableHeader}>
                   Forward for Approved on
                 </th>
-                <th className={GlobalStyle.tableHeader}>Approved on</th>
-                <th className={GlobalStyle.tableHeader}>Approved by</th>
+                <th className={GlobalStyle.tableHeader}>Distributed Status </th>
+                <th className={GlobalStyle.tableHeader}>Approval </th>
                 <th className={GlobalStyle.tableHeader}></th>
               </tr>
             </thead>
