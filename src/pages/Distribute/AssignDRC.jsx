@@ -213,31 +213,29 @@ const AssignDRC = () => {
 
   };
 
-  const handleProceed = () => {
-    
+  const handleProceed = async () => {  
     const drcList = filteredSearchData.map((drc) => ({
-      
-      DRC: drc.name,
-      Count: drc.amount,
+        DRC: drc.name,
+        Count: drc.amount,
     }));
 
     const requestData = {
-      drc_commision_rule: serviceType || "PEO TV",
-      current_arrears_band: selectedBandKey,
-      drc_list: drcList,
+        drc_commision_rule: serviceType || "PEO TV",
+        current_arrears_band: selectedBandKey,
+        drc_list: drcList,
     };
 
     console.log("Request Data:", requestData);
 
-    try{
-      const response = Case_Distribution_Among_Agents(requestData);
-      console.log("Response:", response);
+    try {
+        const response = await Case_Distribution_Among_Agents(requestData);  // Use 'await' here
+        console.log("Response:", response);
 
     } catch (error) {
-      console.error("Error in sending the data:", error);
+        console.error("Error in sending the data:", error);
     }
-    
-  };
+};
+
 
 
   return (
