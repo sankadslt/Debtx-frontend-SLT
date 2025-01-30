@@ -60,6 +60,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
                     <div className={`${GlobalStyle.cardContainer}`}>
                         <p className="mb-2"><strong>Batch ID:</strong></p>
                         <p className="mb-2"><strong>Create DTM:</strong></p>
+                        <p className="mb-2"><strong>DRC Commission Rule:</strong></p>
                         <p className="mb-2"><strong>Arrears Band:</strong></p>
                         <p className="mb-2"><strong>Action Type:</strong></p>
                         <p className="mb-2"><strong>Case Count:</strong></p>
