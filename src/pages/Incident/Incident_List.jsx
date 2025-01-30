@@ -51,12 +51,12 @@ const Incident_List = () => {
         setIsLoading(true);
         setError("");
         try {
-            console.log("Sending filters:", filters); // Add this line
+            console.log("Sending filters:", filters);
             const response = await axios.post(
                 "http://localhost:5000/api/incident/List_Incidents", 
                 filters
             );
-            console.log("Response:", response.data); // Add this line
+            console.log("Response:", response.data);
             
             if (response.data.status === "success") {
                 const mappedData = response.data.incidents.map(incident => ({
@@ -84,7 +84,7 @@ const Incident_List = () => {
 
     useEffect(() => {
         fetchData(activeFilters);
-    }, [activeFilters]); // Added dependency array to prevent infinite loop
+    }, [activeFilters]);
 
 
     const handleFromDateChange = (date) => {
@@ -114,7 +114,7 @@ const Incident_List = () => {
     
         const formatDate = (date) => {
             if (!date) return null;
-            // Create a new date object and adjust for local timezone
+        
             const d = new Date(date);
             d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
             return d.toISOString();
@@ -144,7 +144,7 @@ const Incident_List = () => {
         String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.accountNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.action).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase()) // Ensure Source_Type is filtered
+        String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase())
     );
     
 

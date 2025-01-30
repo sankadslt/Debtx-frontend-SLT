@@ -1,4 +1,4 @@
-// src/components/StatusIcon.jsx
+
 import PropTypes from "prop-types";
 
 const StatusIcon = ({ status }) => {
