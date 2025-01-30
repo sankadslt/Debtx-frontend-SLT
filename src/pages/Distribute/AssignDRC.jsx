@@ -208,7 +208,7 @@ const AssignDRC = () => {
     }
   };
 
-  const handleProceed = () => {
+  const handleProceed = async () => {
     const drcList = filteredSearchData.map((drc) => ({
       DRC: drc.name,
       Count: drc.amount,
@@ -223,7 +223,7 @@ const AssignDRC = () => {
     console.log("Request Data:", requestData);
 
     try {
-      const response = Case_Distribution_Among_Agents(requestData);
+      const response = await Case_Distribution_Among_Agents(requestData); // Use 'await' here
       console.log("Response:", response);
     } catch (error) {
       console.error("Error in sending the data:", error);
