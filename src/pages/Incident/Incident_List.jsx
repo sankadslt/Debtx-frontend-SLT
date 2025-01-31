@@ -20,37 +20,10 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import axios from "axios";
 import PropTypes from "prop-types";
+import StatusIcon from '../../components/StatusIcon';
 
-// Status Icon Component
-const StatusIcon = ({ status }) => {
-    const getStatusIcon = (status) => {
-        switch (status?.toLowerCase()) {
-            case "incident open":
-                return "/src/assets/images/incidents/Incident_Open.png";
-            case "incident reject":
-                return "/src/assets/images/incidents/Incident_Reject.png";
-            case "incident inprogress":
-                return "/src/assets/images/incidents/Incident_InProgress.png";
-            default:
-                return null;
-        }
-    };
+<StatusIcon status="Incident Open" />
 
-    const iconPath = getStatusIcon(status);
-
-    if (!iconPath) {
-        return <span>{status}</span>;
-    }
-
-    return (
-        <img
-            src={iconPath}
-            alt={status}
-            className="w-6 h-6"
-            title={status}
-        />
-    );
-};
 
 const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -64,35 +37,54 @@ const Incident_List = () => {
     const [status2, setStatus2] = useState("");
     const [status3, setStatus3] = useState("");
     const [data, setData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [activeFilters, setActiveFilters] = useState({
         Actions: "",
         Incident_Status: "",
+        Source_Type: "",
         From_Date: null,
         To_Date: null
     });
+    
     const fetchData = async (filters) => {
+        setIsLoading(true);
+        setError("");
         try {
-            const response = await axios.post("http://localhost:5000/api/incident/List_Incidents", filters);
-
-            const mappedData = response.data.incidents.map(incident => ({
-                caseID: incident.Incident_Id,
-                status: incident.Incident_Status,
-                accountNo: incident.Account_Num,
-                action: incident.Actions,
-                sourceType: incident.Source_Type,
-                createdDTM: new Date(incident.Created_Dtm).toLocaleString()
-            }));
-
-            setData(mappedData);
+            console.log("Sending filters:", filters);
+            const response = await axios.post(
+                "http://localhost:5000/api/incident/List_Incidents", 
+                filters
+            );
+            console.log("Response:", response.data);
+            
+            if (response.data.status === "success") {
+                const mappedData = response.data.incidents.map(incident => ({
+                    caseID: incident.Incident_Id,
+                    status: incident.Incident_Status,
+                    accountNo: incident.Account_Num,
+                    action: incident.Actions,
+                    sourceType: incident.Source_Type,
+                    createdDTM: new Date(incident.Created_Dtm).toLocaleString()
+                }));
+                setData(mappedData);
+            }
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error("Detailed error:", {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status
+            });
+            setError(error.response?.data?.message || "An error occurred while fetching data");
+        } finally {
+            setIsLoading(false);
         }
     };
+    
 
     useEffect(() => {
         fetchData(activeFilters);
-    }, [activeFilters]); // Added dependency array to prevent infinite loop
+    }, [activeFilters]);
 
 
     const handleFromDateChange = (date) => {
@@ -113,25 +105,38 @@ const Incident_List = () => {
         }
     };
 
+    
     const handleFilter = () => {
         if ((fromDate && !toDate) || (!fromDate && toDate)) {
             setError("Both 'From' and 'To' dates must be selected together.");
             return;
         }
-
-        setError("");
-
+    
+        const formatDate = (date) => {
+            if (!date) return null;
+        
+            const d = new Date(date);
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            return d.toISOString();
+        };
+    
         const newFilters = {
             Actions: status1,
             Incident_Status: status2,
-            From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
-            To_Date: toDate ? toDate.toISOString().split("T")[0] : null
+            Source_Type: status3,
+            From_Date: fromDate ? formatDate(fromDate) : null,
+            To_Date: toDate ? formatDate(toDate) : null
         };
-
-        console.log("Filters before sending:", newFilters);
+    
+        console.log("Sending filters:", {
+            originalDates: { fromDate, toDate },
+            formattedDates: { From_Date: newFilters.From_Date, To_Date: newFilters.To_Date }
+        });
+    
         setActiveFilters(newFilters);
         setCurrentPage(0);
     };
+    
 
 
     const filteredData = data.filter((row) =>
@@ -141,6 +146,7 @@ const Incident_List = () => {
         String(row.action).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase())
     );
+    
 
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -162,9 +168,16 @@ const Incident_List = () => {
 
     const navigate = useNavigate();
     const HandleAddIncident = () => navigate("/incident/register");
+    const HandleCreateTask = () => navigate("/incident/register");
 
 
-
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
 
 
     return (
@@ -205,15 +218,16 @@ const Incident_List = () => {
                     </select>
 
                     <select
-                        value={status3}
-                        onChange={(e) => setStatus3(e.target.value)}
-                        className={GlobalStyle.selectBox}
-                    >
-                        <option value="">Source Type</option>
-                        <option value="Pilot Suspended">Pilot Suspended</option>
-                        <option value="Product Terminate">Product Terminate</option>
-                        <option value="Special">Special</option>
-                    </select>
+    value={status3}
+    onChange={(e) => setStatus3(e.target.value)}
+    className={GlobalStyle.selectBox}
+>
+    <option value="">Source Type</option>
+    <option value="Pilot Suspended">Pilot Suspended</option>
+    <option value="Product Terminate">Product Terminate</option>
+    <option value="Special">Special</option>
+</select>
+
 
                     <div className="flex flex-col mb-4">
                         <div className={GlobalStyle.datePickerContainer}>
