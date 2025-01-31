@@ -11,44 +11,49 @@ Related Files:
 Notes: This template uses Tailwind CSS */
 
 
+
+
 import { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import { createIncident } from "../../services/Incidents/incidentService.js";
+
 const Incident_Register_Individual = () => {
   const [accountNo, setAccountNo] = useState("");
   const [actionType, setActionType] = useState("");
   const [sourceType, setSourceType] = useState("");
-  const [calendarMonth, setCalendarMonth] = useState(3); // Default value is 3
-  const [loggedInUser] = useState("Admin"); // Replace with dynamic user retrieval logic
+  const [telephoneNo, setTelephoneNo] = useState("");
+  const [calendarMonth, setCalendarMonth] = useState(3);
+  const [loggedInUser] = useState("Admin"); 
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
     const newErrors = {};
 
-
-
-    // Account number validation
     if (!accountNo) {
-        newErrors.accountNo = "Account number is required.";
-      } else if (accountNo.length > 10) {
-        newErrors.accountNo = "Account number must be 10 characters or fewer.";
-      }
-    if (!accountNo) newErrors.accountNo = "Account number is required.";
+      newErrors.accountNo = "Account number is required.";
+    } else if (accountNo.length > 10) {
+      newErrors.accountNo = "Account number must be 10 characters or fewer.";
+    }
+
+    
+    if (!telephoneNo) {
+      newErrors.telephoneNo = "Telephone number is required.";
+    } else if (!/^\d{10}$/.test(telephoneNo)) {
+      newErrors.telephoneNo = "Telephone number must be exactly 10 digits.";
+    }
+
     if (!actionType) newErrors.actionType = "Action type is required.";
     if (!sourceType) newErrors.sourceType = "Source type is required.";
     if (calendarMonth < 1 || calendarMonth > 3)
-        newErrors.calendarMonth = "Calendar month must be between 1 and 3.";
+      newErrors.calendarMonth = "Calendar month must be between 1 and 3.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleMonthChange = (increment) => {
-    setCalendarMonth((prev) => {
-      const newValue = Math.min(3, Math.max(1, prev + (increment ? 1 : -1))); // Ensure range is 1-3
-      return newValue;
-    });
+    setCalendarMonth((prev) => Math.min(3, Math.max(1, prev + (increment ? 1 : -1))));
   };
 
   const handleSubmit = async (e) => {
@@ -65,9 +70,10 @@ const Incident_Register_Individual = () => {
 
     const incidentData = {
       Account_Num: accountNo,
+      Telephone_No: telephoneNo,
       DRC_Action: actionType,
-      Monitor_Months: calendarMonth, // Ensure the value is within 1-3
-      Created_By: loggedInUser, // Dynamically set logged-in user
+      Monitor_Months: calendarMonth,
+      Created_By: loggedInUser,
       Source_Type: sourceType,
     };
 
@@ -81,32 +87,20 @@ const Incident_Register_Individual = () => {
 
       // Clear form
       setAccountNo("");
+      setTelephoneNo("");
       setActionType("");
       setSourceType("");
-      setCalendarMonth(3); // Reset to default value
+      setCalendarMonth(3);
       setErrors({});
     } catch (error) {
-        console.log("Error response:", error);  // Log full error for debugging
-        
-        const errorCode = error.code;  // Access directly from error object
-        const errorMessage = error.message;  // Access directly from error object
-      
-        // Show specific error for duplicate account numbers
-        if (errorCode === "DUPLICATE_ACCOUNT") {
-          Swal.fire({
-            icon: "error",
-            title: "Duplicate Account",
-            text: errorMessage || "The account number is already associated with an incident.",
-          });
-        } else {
-          // Show generic error
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: errorMessage || "Failed to create incident.",
-          });
-        }
-      }
+      console.log("Error response:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to create incident.",
+      });
+    }
   };
 
   return (
@@ -138,11 +132,7 @@ const Incident_Register_Individual = () => {
                 onChange={(e) => setActionType(e.target.value)}
                 className={GlobalStyle.selectBox}
               >
-<<<<<<< HEAD
-                <option value="">Action Type</option>
-=======
                 <option value="">Action</option>
->>>>>>> 48902a12f272506efa20dcc1918126f0b210cfa9
                 <option value="collect arrears">Collect Arrears</option>
                 <option value="collect arrears and CPE">Collect Arrears and CPE</option>
                 <option value="collect CPE">Collect CPE</option>
@@ -150,19 +140,17 @@ const Incident_Register_Individual = () => {
             </div>
             {errors.actionType && <p className="text-red-500">{errors.actionType}</p>}
 
-            {/* Telephone Number */}
             <div className="flex gap-4">
-              <label htmlFor="accountNo" className="w-[150px]">Telephone No</label>
+              <label htmlFor="telephoneNo" className="w-[150px]">Telephone No</label>
               <input
-                // id="accountNo"
-                // type="text"
-                // value={accountNo}
-                // onChange={(e) => setAccountNo(e.target.value)}
+                id="telephoneNo"
+                type="text"
+                value={telephoneNo}
+                onChange={(e) => setTelephoneNo(e.target.value)}
                 className={GlobalStyle.inputText}
               />
             </div>
-            {errors.accountNo && <p className="text-red-500">{errors.accountNo}</p>}
-
+            {errors.telephoneNo && <p className="text-red-500">{errors.telephoneNo}</p>}
 
             {/* Source Type */}
             <div className="flex gap-4">
@@ -173,11 +161,7 @@ const Incident_Register_Individual = () => {
                 onChange={(e) => setSourceType(e.target.value)}
                 className={GlobalStyle.selectBox}
               >
-<<<<<<< HEAD
-                <option value="">Source Type</option>
-=======
                 <option value="">Source type</option>
->>>>>>> 48902a12f272506efa20dcc1918126f0b210cfa9
                 <option value="Pilot Suspended">Pilot Suspended</option>
                 <option value="Product Terminate">Product Terminate</option>
                 <option value="Special">Special</option>
@@ -189,19 +173,11 @@ const Incident_Register_Individual = () => {
             <div className="flex items-center gap-4 mb-4">
               <label className="whitespace-nowrap w-[150px]">Calendar Month</label>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleMonthChange(false)}
-                  className={GlobalStyle.buttonPrimary}
-                >
+                <button type="button" onClick={() => handleMonthChange(false)} className={GlobalStyle.buttonPrimary}>
                   -
                 </button>
                 <span className="w-8 text-center">{calendarMonth}</span>
-                <button
-                  type="button"
-                  onClick={() => handleMonthChange(true)}
-                  className={GlobalStyle.buttonPrimary}
-                >
+                <button type="button" onClick={() => handleMonthChange(true)} className={GlobalStyle.buttonPrimary}>
                   +
                 </button>
               </div>
