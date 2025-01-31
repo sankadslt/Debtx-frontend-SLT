@@ -219,6 +219,8 @@ const AssignDRC = () => {
       drc_commision_rule: serviceType || "PEO TV",
       current_arrears_band: selectedBandKey,
       drc_list: drcList,
+      created_by: "Sys",
+
     };
 
     console.log("Request Data:", requestData);
