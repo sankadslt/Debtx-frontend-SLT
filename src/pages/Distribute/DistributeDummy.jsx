@@ -23,6 +23,10 @@ const DistributeDummy = () => {
       >
         {[
           {
+            to: "/pages/Distribute/filtered-incident",
+            label: "1 . 7 - Filtered Incidents",
+          },
+          {
             to: "/pages/Distribute/IncidentFilter",
             label: (
               <>

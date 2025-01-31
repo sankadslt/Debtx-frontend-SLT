@@ -24,6 +24,7 @@ import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 import PageButton from "../pages/Incident/page_button";
+import FilteredIncidents from "../pages/Incident/Filterd_Incidents"
 
  {/* Distribute Imports */}
  import AssignDRC from "../pages/Distribute/AssignDRC";
@@ -72,7 +73,7 @@ const Routers = () => {
       <Route path="/drc/period-extension" element={<ProtectedRoute element = {<ValidityPeriodExtension/>} allowedRoles={['superadmin']} />} />
       <Route path="/drs/logs/reuest-response-logs" element={<ProtectedRoute element = {<RequestResponseLog/>} allowedRoles={['superadmin']} />}/>
 
-      {/* incient team4 */}
+      {/* incident team4 */}
       <Route path="/incident" element={<ProtectedRoute element={<PageButton />} allowedRoles={['superadmin']} />} />
       <Route path="/Incident/Case_List" element={<ProtectedRoute element={<Case_List />} allowedRoles={['superadmin']} />} />
       <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
@@ -81,6 +82,7 @@ const Routers = () => {
       <Route path="/incident/upload-log" element={<ProtectedRoute element={<SupBulkUploadLog />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/file-download" element={<ProtectedRoute element={<Incident_File_Download />} allowedRoles={['superadmin']} />} />
+      
 
      {/* Distribute Routes */}
      <Route path="/pages/Distribute/AssignDRC" element={<ProtectedRoute element={<AssignDRC/>} allowedRoles={['superadmin']} />} />
@@ -95,6 +97,7 @@ const Routers = () => {
      <Route path="/pages/Distribute/DistributeDummy" element={<ProtectedRoute element={<DistributeDummy />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/ReAssignDRC" element={<ProtectedRoute element={<ReAssignDRC />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DistributeTORO" element={<ProtectedRoute element={<DistributeTORO />} allowedRoles={['superadmin']} />} />
+     <Route path="/pages/Distribute/filtered-incident" element={<ProtectedRoute element={<FilteredIncidents/>} allowedRoles={['superadmin']}/>}/>
 
       {/* DRC Routes */}
       <Route path="/dummy" element={<ProtectedRoute element={<Dummy />} allowedRoles={['superadmin']} />} />
