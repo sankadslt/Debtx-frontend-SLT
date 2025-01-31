@@ -117,13 +117,27 @@ const Incident_Register_Individual = () => {
                 onChange={(e) => setActionType(e.target.value)}
                 className={GlobalStyle.selectBox}
               >
-                <option value="">Select an action</option>
+                <option value="">Action Type</option>
                 <option value="collect arrears">Collect Arrears</option>
                 <option value="collect arrears and CPE">Collect Arrears and CPE</option>
                 <option value="collect CPE">Collect CPE</option>
               </select>
             </div>
             {errors.actionType && <p className="text-red-500">{errors.actionType}</p>}
+
+            {/* Telephone Number */}
+            <div className="flex gap-4">
+              <label htmlFor="accountNo" className="w-[150px]">Telephone No</label>
+              <input
+                // id="accountNo"
+                // type="text"
+                // value={accountNo}
+                // onChange={(e) => setAccountNo(e.target.value)}
+                className={GlobalStyle.inputText}
+              />
+            </div>
+            {errors.accountNo && <p className="text-red-500">{errors.accountNo}</p>}
+
 
             {/* Source Type */}
             <div className="flex gap-4">
@@ -134,7 +148,7 @@ const Incident_Register_Individual = () => {
                 onChange={(e) => setSourceType(e.target.value)}
                 className={GlobalStyle.selectBox}
               >
-                <option value="">Select source type</option>
+                <option value="">Source Type</option>
                 <option value="Pilot Suspended">Pilot Suspended</option>
                 <option value="Product Terminate">Product Terminate</option>
                 <option value="Special">Special</option>
