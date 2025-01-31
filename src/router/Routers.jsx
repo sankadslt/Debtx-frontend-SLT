@@ -16,6 +16,13 @@ import ValidityPeriodExtension from "../pages/Request/ValidityPeriodExtension";
 import RequestResponseLog from "../pages/Request/RequestResponseLog";
 
 
+//DISTRIBUTION
+import OpenIncident from "../pages/Distribution/OpenIncident";
+import CollectOnlyCPECollect from "../pages/Distribution/CollectOnlyCPECollect";
+import DirectLODSendingIncident from "../pages/Distribution/DirectLODSendingIncident";
+import RejectIncident from "../pages/Distribution/RejectIncident";
+import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
+
 
 const Routers = () => {
   return (
@@ -36,6 +43,16 @@ const Routers = () => {
       <Route path="/drc/period-extension" element={<ProtectedRoute element = {<ValidityPeriodExtension/>} allowedRoles={['superadmin']} />} />
       <Route path="/drs/logs/reuest-response-logs" element={<ProtectedRoute element = {<RequestResponseLog/>} allowedRoles={['superadmin']} />}/>
 
+
+
+      {/* //DISTRIBUTION */}
+      <Route path = "/Distribution/open-incident" element={<OpenIncident />} />
+      <Route path = "/Distribution/collect-only-cpe-collect" element={<CollectOnlyCPECollect />} />
+      <Route path = "/Distribution/direct-lod-sending-incident" element={<DirectLODSendingIncident />} />
+      <Route path = "/Distribution/reject-incident" element={<RejectIncident />} />
+      <Route path = "/Distribution/reject-incident-log" element={<RejectIncidentlog />} />
+
+    
     </Routes>
   );
 };
