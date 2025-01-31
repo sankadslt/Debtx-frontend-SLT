@@ -15,6 +15,9 @@ import ForwardMediationBoard from "../pages/Request/ForwardMediationBoard";
 import ValidityPeriodExtension from "../pages/Request/ValidityPeriodExtension";
 import RequestResponseLog from "../pages/Request/RequestResponseLog";
 
+import Incident_List from "../pages/Incident/Incident_List";
+import Incident_Register_Individual from "../pages/Incident/Incident_Register_Individual";
+
 
 
 const Routers = () => {
@@ -35,6 +38,10 @@ const Routers = () => {
       <Route path="/drc/mediation-board" element={<ProtectedRoute element={<ForwardMediationBoard />} allowedRoles={['superadmin']} />} />
       <Route path="/drc/period-extension" element={<ProtectedRoute element = {<ValidityPeriodExtension/>} allowedRoles={['superadmin']} />} />
       <Route path="/drs/logs/reuest-response-logs" element={<ProtectedRoute element = {<RequestResponseLog/>} allowedRoles={['superadmin']} />}/>
+
+      <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
+      <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
+
 
     </Routes>
   );
