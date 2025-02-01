@@ -46,18 +46,18 @@ const Incident_List = () => {
         From_Date: null,
         To_Date: null
     });
-    
+
     const fetchData = async (filters) => {
         setIsLoading(true);
         setError("");
         try {
             console.log("Sending filters:", filters);
             const response = await axios.post(
-                "http://localhost:5000/api/incident/List_Incidents", 
+                "http://localhost:5000/api/incident/List_Incidents",
                 filters
             );
             console.log("Response:", response.data);
-            
+
             if (response.data.status === "success") {
                 const mappedData = response.data.incidents.map(incident => ({
                     caseID: incident.Incident_Id,
@@ -80,7 +80,7 @@ const Incident_List = () => {
             setIsLoading(false);
         }
     };
-    
+
 
     useEffect(() => {
         fetchData(activeFilters);
@@ -105,21 +105,21 @@ const Incident_List = () => {
         }
     };
 
-    
+
     const handleFilter = () => {
         if ((fromDate && !toDate) || (!fromDate && toDate)) {
             setError("Both 'From' and 'To' dates must be selected together.");
             return;
         }
-    
+
         const formatDate = (date) => {
             if (!date) return null;
-        
+
             const d = new Date(date);
             d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
             return d.toISOString();
         };
-    
+
         const newFilters = {
             Actions: status1,
             Incident_Status: status2,
@@ -127,16 +127,16 @@ const Incident_List = () => {
             From_Date: fromDate ? formatDate(fromDate) : null,
             To_Date: toDate ? formatDate(toDate) : null
         };
-    
+
         console.log("Sending filters:", {
             originalDates: { fromDate, toDate },
             formattedDates: { From_Date: newFilters.From_Date, To_Date: newFilters.To_Date }
         });
-    
+
         setActiveFilters(newFilters);
         setCurrentPage(0);
     };
-    
+
 
 
     const filteredData = data.filter((row) =>
@@ -146,7 +146,7 @@ const Incident_List = () => {
         String(row.action).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
+
 
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -218,15 +218,15 @@ const Incident_List = () => {
                     </select>
 
                     <select
-    value={status3}
-    onChange={(e) => setStatus3(e.target.value)}
-    className={GlobalStyle.selectBox}
->
-    <option value="">Source Type</option>
-    <option value="Pilot Suspended">Pilot Suspended</option>
-    <option value="Product Terminate">Product Terminate</option>
-    <option value="Special">Special</option>
-</select>
+                        value={status3}
+                        onChange={(e) => setStatus3(e.target.value)}
+                        className={GlobalStyle.selectBox}
+                    >
+                        <option value="">Source Type</option>
+                        <option value="Pilot Suspended">Pilot Suspended</option>
+                        <option value="Product Terminate">Product Terminate</option>
+                        <option value="Special">Special</option>
+                    </select>
 
 
                     <div className="flex flex-col mb-4">
@@ -288,8 +288,8 @@ const Incident_List = () => {
 
                                 key={index}
                                 className={`${index % 2 === 0
-                                        ? "bg-white bg-opacity-75"
-                                        : "bg-gray-50 bg-opacity-50"
+                                    ? "bg-white bg-opacity-75"
+                                    : "bg-gray-50 bg-opacity-50"
                                     } border-b`}
                             >
 
@@ -314,29 +314,29 @@ const Incident_List = () => {
                 </table>
             </div>
 
-      <div className="flex justify-between mt-6">
-        <button onClick={handlePrevPage} disabled={currentPage === 0}>
-          <FaArrowLeft />
-        </button>
-        <span className="text-gray-700">
-          Page {currentPage + 1} of {pages}
-        </span>
-        <button onClick={handleNextPage} disabled={currentPage === pages - 1}>
-          <FaArrowRight />
-        </button>
-      </div>
-       {/* Create task button */}
-       <div className="flex justify-end mt-6">
+            <div className={GlobalStyle.navButtonContainer}>
+                <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
+                    <FaArrowLeft />
+                </button>
+                <span className="text-gray-700">
+                    Page {currentPage + 1} of {pages}
+                </span>
+                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === pages - 1}>
+                    <FaArrowRight />
+                </button>
+            </div>
+            {/* Create task button */}
+            <div className="flex justify-end mt-6">
                 <button onClick={HandleCreateTask} className={GlobalStyle.buttonPrimary}>
                     Create task and let me know
                 </button>
             </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 StatusIcon.propTypes = {
-  status: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
 };
 
 export default Incident_List;
