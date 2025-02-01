@@ -35,6 +35,9 @@ const Incident_List = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isCreatingTask, setIsCreatingTask] = useState(false);
 
+    const [selectedRows, setSelectedRows] = useState({});
+    const [selectAll, setSelectAll] = useState(false);
+
     const [activeFilters, setActiveFilters] = useState({
         Actions: "",
         Incident_Status: "",
@@ -43,7 +46,7 @@ const Incident_List = () => {
         To_Date: null
     });
 
-    // Keep your existing fetchData function
+    
     const fetchData = async (filters) => {
         setIsLoading(true);
         setError("");
@@ -78,8 +81,7 @@ const Incident_List = () => {
         }
     };
 
-    // Keep all your existing functions for date handling, filtering, etc.
-    // Add new HandleCreateTask function
+
     const HandleCreateTask = async () => {
         if (isCreatingTask) return;
         
@@ -87,7 +89,7 @@ const Incident_List = () => {
             setIsCreatingTask(true);
             setError("");
 
-            // Create tasks for current page incidents
+
             const taskPromises = paginatedData.map(async (incident) => {
                 const taskData = {
                     Template_Task_Id: "TASK_INCIDENT",
@@ -117,12 +119,17 @@ const Incident_List = () => {
         }
     };
 
-    // Keep your existing useEffect
+
     useEffect(() => {
         fetchData(activeFilters);
     }, [activeFilters]);
 
-    // Keep all your existing handlers
+    useEffect(() => {
+        setSelectedRows({});
+        setSelectAll(false);
+    }, [currentPage, activeFilters]);
+
+
     const handleFromDateChange = (date) => {
         if (toDate && date > toDate) {
             setError("The 'From' date cannot be later than the 'To' date.");
@@ -166,7 +173,7 @@ const Incident_List = () => {
         setCurrentPage(0);
     };
 
-    // Keep your existing data filtering logic
+
     const filteredData = data.filter((row) =>
         String(row.caseID).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -195,7 +202,7 @@ const Incident_List = () => {
     const navigate = useNavigate();
     const HandleAddIncident = () => navigate("/incident/register");
 
-    // Keep your existing loading check
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -204,7 +211,33 @@ const Incident_List = () => {
         );
     }
 
-    // Keep your existing return statement with updated Create Task button
+      
+      const handleSelectAll = () => {
+        const newSelectedRows = {};
+        if (!selectAll) {
+           
+            paginatedData.forEach(row => {
+                newSelectedRows[row.caseID] = true;
+            });
+        }
+        setSelectAll(!selectAll);
+        setSelectedRows(newSelectedRows);
+    };
+
+    
+    const handleRowSelect = (caseID) => {
+        setSelectedRows(prev => {
+            const newSelectedRows = { ...prev };
+            newSelectedRows[caseID] = !newSelectedRows[caseID];
+            return newSelectedRows;
+        });
+        const allSelected = paginatedData.every(row => selectedRows[row.caseID]);
+        setSelectAll(allSelected);
+    };
+
+
+
+
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Incident Log</h2>
@@ -215,7 +248,7 @@ const Incident_List = () => {
                 </button>
             </div>
 
-            {/* Keep your existing filter section */}
+           
             <div className="w-full mb-8 mt-8">
                 <div className="flex items-center justify-end w-full space-x-6">
                     <select
@@ -268,7 +301,7 @@ const Incident_List = () => {
                                 className={GlobalStyle.inputText}
                             />
                         </div>
-                        
+                        {error && <span className={GlobalStyle.errorText}>{error}</span>}
                     </div>
 
                     <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>
@@ -294,6 +327,14 @@ const Incident_List = () => {
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
+                        <th className={GlobalStyle.tableHeader}>
+                                <input
+                                    type="checkbox"
+                                    checked={selectAll}
+                                    onChange={handleSelectAll}
+                                    className="w-4 h-4 cursor-pointer"
+                                />
+                            </th>
                             <th className={GlobalStyle.tableHeader}>ID</th>
                             <th className={GlobalStyle.tableHeader}>Status</th>
                             <th className={GlobalStyle.tableHeader}>Account No.</th>
@@ -311,6 +352,14 @@ const Incident_List = () => {
                                     : "bg-gray-50 bg-opacity-50"
                                     } border-b`}
                             >
+                                <td className={`${GlobalStyle.tableData} text-center`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={!!selectedRows[log.caseID]}
+                                        onChange={() => handleRowSelect(log.caseID)}
+                                        className="w-4 h-4 cursor-pointer"
+                                    />
+                                </td>
                                 <td className={GlobalStyle.tableData}>{log.caseID}</td>
                                 <td className={'${GlobalStyle.tableData} flex justify-center'}>
                                     <StatusIcon status={log.status} />
@@ -344,7 +393,7 @@ const Incident_List = () => {
                 </button>
             </div>
 
-            {/* Updated Create Task button */}
+           
             <div className="flex justify-end mt-6">
                 <button 
                     onClick={HandleCreateTask} 
