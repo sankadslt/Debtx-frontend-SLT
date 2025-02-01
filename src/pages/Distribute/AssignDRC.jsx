@@ -31,56 +31,7 @@ import {
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Swal from "sweetalert2";
 
-// Register necessary components for Chart.js pie chart
-ChartJS.register(
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend
-);
 
-const PieChart = () => {
-  // Data for Pie Chart
-  const pieChartData = {
-    labels: ["CMS", "TCM", "RE", "CO LAN", "ACCIVA", "VISONCOM", "PROMPT"],
-    datasets: [
-      {
-        data: [3000, 2000, 1500, 2500, 1200, 900, 2000],
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-          "#FF99FF",
-        ],
-        hoverBackgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-          "#FF99FF",
-        ],
-      },
-    ],
-  };
-
-  return (
-    <div className={`${GlobalStyle.fontPoppins} w-1/3 p-6`}>
-      <h2 className="text-xl font-semibold text-gray-800 mb-4 mt-[0px] text-center">
-        Last 3 Months DRC Success
-      </h2>
-      <div className="chart-container mt-[-10px]">
-        <Pie data={pieChartData} />
-      </div>
-    </div>
-  );
-};
 
 const AssignDRC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -243,6 +194,14 @@ const AssignDRC = () => {
         });
     }
   };
+
+  const handlepiechart1 = () => {
+    alert("Pie Chart 1 clicked");
+  }
+
+  const handlepiechart2 = () => {
+    alert("Pie Chart 2 clicked");
+  }
 
   return (
     <div className={`${GlobalStyle.fontPoppins} flex flex-col `}>
@@ -437,8 +396,13 @@ const AssignDRC = () => {
               </div>
             </div>
 
-            {/* Pie Chart */}
-            <PieChart />
+            {/* Pie Chart Buttons */}
+            <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
+               Pie Chart 1
+            </button>
+            <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
+               Pie Chart 2
+            </button>
           </div>
 
           {/* Proceed Button */}
