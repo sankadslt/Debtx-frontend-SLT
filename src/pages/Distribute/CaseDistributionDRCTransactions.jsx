@@ -21,7 +21,7 @@ import one from "/src/assets/images/imagefor1.a.13(one).png";
 import two from "/src/assets/images/imagefor1.a.13(two).png";
 import three from "/src/assets/images/imagefor1.a.13(three).png";
 import four from "/src/assets/images/imagefor1.a.13(four).png";
-
+import { Tooltip } from "react-tooltip";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution } from "/src/services/case/CaseServices.js";
@@ -170,12 +170,14 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
       setCurrentPage1(currentPage1 + 1);
     }
   };
+
+  const formatDate = (isoString) => {
+    return isoString ? new Date(isoString).toISOString().split("T")[0] : null;
+  };
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <h1 className={`${GlobalStyle.headingLarge}`}>Case distribution</h1>
-      <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
-        Service Type: PEO - TV
-      </h3>
+      
 
       {/* Filter Section */}
       <div className="flex justify-between gap-10 mt-16 mb-5">
@@ -291,7 +293,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     {item.case_distribution_batch_id}
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "90px", whiteSpace: "nowrap" }}>
-                    {new Date(item.created_dtm).toLocaleString()}
+                    {new Date(item.created_dtm).toLocaleDateString()}
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "75px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
@@ -342,11 +344,23 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     <button>
                     <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "1px" }} />
                     </button>
-                    <button>
-                    <img src={four} width={15} height={15} alt="Forward " style={{ position: "relative", top: "2px",  left: "1px" }} />
-                    </button>
-
-
+                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`}>
+                    <img
+                      src={four}
+                      width={15}
+                      height={15}
+                      alt="Forward"
+                      style={{ position: "relative", top: "2px", left: "1px" }}
+                    />
+                  </button>
+                  <Tooltip id={`tooltip-${item.case_distribution_batch_id}`} place="top">
+                  {item.forward_for_approvals_on && 
+                      <div>Forward for Approval on: {formatDate(item.forward_for_approvals_on)}</div>
+                    }
+                      {item.approved_by && <div>Approved by: {item.approved_by}</div>}
+                      {item.approved_on && <div>Approved on: {formatDate(item.approved_on)}</div>}
+                      {item.proceed_on && <div>Proceeded on: {formatDate(item.proceed_on)}</div>}
+                  </Tooltip>
                   </td>
                 </tr>
               ))
