@@ -1,7 +1,16 @@
-//UI NO: 1.7.1
-//UI NAME:Open Incident for distribution
+/*
+Purpose: 
+Created Date: 2025.01.21
+Created By: K.K.C sakumini
+Last Modified Date: 2025.01.22
+Modified By:K.K.C Sakumini
+Version: node 11
+ui number : 1.7.1
+Dependencies: tailwind css
+Related Files: 
+Notes: 
 
-
+*/
 import { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { Link, useNavigate } from "react-router-dom";

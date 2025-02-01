@@ -1,5 +1,16 @@
-//UI NO:1.7.2
-//UI NAME:Pending Reject Incidents
+/*
+Purpose: 
+Created Date: 2025.01.23
+Created By: Nadali Linara
+Last Modified Date: 2025.01.25
+Modified By:Buthmi Mithara
+Version: node 11
+ui number : 1.7.2
+Dependencies: tailwind css
+Related Files: 
+Notes: 
+
+*/
 
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";

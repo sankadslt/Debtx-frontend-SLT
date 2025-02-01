@@ -1,5 +1,16 @@
-//UI NO:1.7.4
-//UI NAME:Rejected Incident Log
+/*
+Purpose: 
+Created Date: 2025.01.24
+Created By: Nadali Linara
+Last Modified Date: 2025.01.26
+Modified By:buthmi mithara
+Version: node 11
+ui number : 1.7.4
+Dependencies: tailwind css
+Related Files: 
+Notes: 
+
+*/
 
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";

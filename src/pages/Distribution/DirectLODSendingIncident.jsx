@@ -1,5 +1,17 @@
-//UI NO:1.9
-//UI NAME:Direct LOD sending Incidents
+
+/*
+Purpose: 
+Created Date: 2025.01.22
+Created By: K.K.C sakumini
+Last Modified Date: 2025.01.23
+Modified By:Buthmi Mithara
+Version: node 11
+ui number : 1.9
+Dependencies: tailwind css
+Related Files: 
+Notes: 
+
+*/
 
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";

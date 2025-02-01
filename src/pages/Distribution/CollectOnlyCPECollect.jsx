@@ -1,5 +1,17 @@
-//UI NO:1.7.3
-//UI NAME: Collect Only CPE Collect
+
+/*
+Purpose: 
+Created Date: 2025.01.22
+Created By: Buthmi Mithara
+Last Modified Date: 2025.01.24
+Modified By:Nadali Linara
+Version: node 11
+ui number : 1.7.3
+Dependencies: tailwind css
+Related Files: 
+Notes: 
+
+*/
 
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
