@@ -86,6 +86,38 @@ export const Case_Distribution_Among_Agents = async (requestData) => {
   }
 };
 
+export const List_Case_Distribution_DRC_Summary = async (requestdata) => {
+  try {
+    const response = await axios.post(`${URL}/List_Case_Distribution_DRC_Summary`, requestdata);
+
+    console.log("Full API Response:", response);  // Debugging
+    console.log("Response Data:", response.data); // Debugging
+
+    // Return response.data directly, since it's already an array
+    return response.data;
+  }
+  catch (error) {
+    console.error("Error fetching case distribution DRC summary:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const Create_Task_For_case_distribution = async (payload) => {
+  try{
+    const response = await axios.post(`${URL}/Create_Task_For_case_distribution`, payload);
+    return response.data;
+  }
+  catch (error){
+    console.error("Error creating task for case distribution:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+
+
+
 
 
 
