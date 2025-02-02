@@ -35,6 +35,9 @@ import PageButton from "../pages/Incident/page_button";
  import DRCAssignManagerApproval from "../pages/Distribute/DRCAssignManagerApproval";
  import DistributeDummy from "../pages/Distribute/DistributeDummy";
  import CaseDistributionDRCTransactions1Batch from "../pages/Distribute/CaseDistributionDRCTransactions-1Batch";
+ import CaseDistributionDRCSummary from "../pages/Distribute/CaseDistributionDRCSummary";
+ import CaseDistributionDRCSummarywithRTOM from "../pages/Distribute/CaseDistributionDRCSummarywithRTOM";
+ import AmendAssignedDRC from "../pages/Distribute/AmendAssignedDRC";
 
 
 import Dummy from "../pages/DRC/Dummy";
@@ -89,7 +92,10 @@ const Routers = () => {
      <Route path="/pages/Distribute/DistributionPreparationOnlyCPECollect" element={<ProtectedRoute element={<DistributionPreparationOnlyCPECollect />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DRCAssignManagerApproval" element={<ProtectedRoute element={<DRCAssignManagerApproval />} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/DistributeDummy" element={<ProtectedRoute element={<DistributeDummy />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/CaseDistributionDRCTransactions-1Batch" element={<ProtectedRoute element={<CaseDistributionDRCTransactions1Batch />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Distribute/CaseDistributionDRCTransactions-1Batch" element={<ProtectedRoute element={<CaseDistributionDRCTransactions1Batch />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Distribute/CaseDistributionDRCSummary" element={<ProtectedRoute element={<CaseDistributionDRCSummary />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Distribute/AmendAssignedDRC" element={<ProtectedRoute element={<AmendAssignedDRC />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Distribute/CaseDistributionDRCSummarywithRTOM" element={<ProtectedRoute element={<CaseDistributionDRCSummarywithRTOM />} allowedRoles={['superadmin']} />} />
 
      
 
