@@ -93,8 +93,8 @@ export const List_Case_Distribution_DRC_Summary = async (requestdata) => {
     console.log("Full API Response:", response);  // Debugging
     console.log("Response Data:", response.data); // Debugging
 
-    // Return response.data directly, since it's already an array
-    return response.data;
+    
+    return response.data; // Return response.data directly, since it's already an array
   }
   catch (error) {
     console.error("Error fetching case distribution DRC summary:", error.response?.data || error.message);
