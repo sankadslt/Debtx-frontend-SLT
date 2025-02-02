@@ -22,6 +22,13 @@ import Incident_List from "../pages/Incident/Incident_List";
 import Incident_Register_Individual from "../pages/Incident/Incident_Register_Individual";
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 
+//DISTRIBUTION
+import OpenIncident from "../pages/Distribution/OpenIncident";
+import CollectOnlyCPECollect from "../pages/Distribution/CollectOnlyCPECollect";
+import DirectLODSendingIncident from "../pages/Distribution/DirectLODSendingIncident";
+import RejectIncident from "../pages/Distribution/RejectIncident";
+import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
+
 
 const Routers = () => {
   return (
@@ -42,10 +49,14 @@ const Routers = () => {
       <Route path="/drc/period-extension" element={<ProtectedRoute element = {<ValidityPeriodExtension/>} allowedRoles={['superadmin']} />} />
       <Route path="/drs/logs/reuest-response-logs" element={<ProtectedRoute element = {<RequestResponseLog/>} allowedRoles={['superadmin']} />}/>
 
-      <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
-      <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
-      <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
 
+      {/* //DISTRIBUTION */}
+      <Route path = "/Distribution/open-incident" element={<OpenIncident />} />
+      <Route path = "/Distribution/collect-only-cpe-collect" element={<CollectOnlyCPECollect />} />
+      <Route path = "/Distribution/direct-lod-sending-incident" element={<DirectLODSendingIncident />} />
+      <Route path = "/Distribution/reject-incident" element={<RejectIncident />} />
+      <Route path = "/Distribution/reject-incident-log" element={<RejectIncidentlog />} />
+        
     </Routes>
   );
 };
