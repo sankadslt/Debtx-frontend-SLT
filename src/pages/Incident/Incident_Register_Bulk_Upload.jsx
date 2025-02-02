@@ -5,6 +5,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 const Incident_Register_Bulk_Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [actionType, setActionType] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -23,23 +24,37 @@ const Incident_Register_Bulk_Upload = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append("File_Name", selectedFile.name);
-        formData.append("File_Type", actionType);
-        formData.append("File_Content", selectedFile);
-        formData.append("Created_By", "User123"); // Replace with actual user data
+        const reader = new FileReader();
+        reader.readAsText(selectedFile);
+        reader.onload = async () => {
+            const fileContent = reader.result;
+            setLoading(true);
+            
+            const payload = {
+                File_Name: selectedFile.name,
+                File_Type: actionType,
+                File_Content: fileContent,
+                Created_By: "User123" // Replace with actual user data
+            };
 
-        try {
-            const response = await axios.post(
-                "http://localhost:5000/api/incident/upload_drs_file", 
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-            );
-            alert(response.data.message);
-        } catch (error) {
-            console.error("Error uploading file:", error);
-            alert("File upload failed!");
-        }
+            try {
+                const response = await axios.post(
+                    "http://localhost:5000/api/incident/upload_drs_file", 
+                    payload,
+                    { headers: { "Content-Type": "application/json" } }
+                );
+                alert(response.data.message);
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                alert("File upload failed!");
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        reader.onerror = () => {
+            alert("Failed to read file content.");
+        };
     };
 
     return (
@@ -50,7 +65,7 @@ const Incident_Register_Bulk_Upload = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Action Type Dropdown */}
                         <div className="flex gap-4 justify-center">
-                            <select className={GlobalStyle.selectBox} onChange={handleActionTypeChange}>
+                            <select className={GlobalStyle.selectBox} onChange={handleActionTypeChange} value={actionType}>
                                 <option value="">Action Type</option>
                                 <option value="Incident Creation">Incident Creation</option>
                                 <option value="Incident Reject">Incident Reject</option>
@@ -77,8 +92,9 @@ const Incident_Register_Bulk_Upload = () => {
                             <button
                                 type="submit"
                                 className={GlobalStyle.buttonPrimary}
+                                disabled={loading}
                             >
-                                Submit
+                                {loading ? "Uploading..." : "Submit"}
                             </button>
                         </div>
                     </form>
