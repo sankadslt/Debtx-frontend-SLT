@@ -1,6 +1,3 @@
-
-
-
 import { Routes, Route } from "react-router-dom";
 
 import Login from "../components/Login";
@@ -18,9 +15,6 @@ import ForwardMediationBoard from "../pages/Request/ForwardMediationBoard";
 import ValidityPeriodExtension from "../pages/Request/ValidityPeriodExtension";
 import RequestResponseLog from "../pages/Request/RequestResponseLog";
 
-import Incident_List from "../pages/Incident/Incident_List";
-import Incident_Register_Individual from "../pages/Incident/Incident_Register_Individual";
-import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
@@ -50,13 +44,15 @@ const Routers = () => {
       <Route path="/drs/logs/reuest-response-logs" element={<ProtectedRoute element = {<RequestResponseLog/>} allowedRoles={['superadmin']} />}/>
 
 
+
       {/* //DISTRIBUTION */}
       <Route path = "/Distribution/open-incident" element={<OpenIncident />} />
       <Route path = "/Distribution/collect-only-cpe-collect" element={<CollectOnlyCPECollect />} />
       <Route path = "/Distribution/direct-lod-sending-incident" element={<DirectLODSendingIncident />} />
       <Route path = "/Distribution/reject-incident" element={<RejectIncident />} />
       <Route path = "/Distribution/reject-incident-log" element={<RejectIncidentlog />} />
-        
+
+    
     </Routes>
   );
 };
