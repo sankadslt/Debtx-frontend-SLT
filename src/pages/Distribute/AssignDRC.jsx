@@ -81,6 +81,8 @@ const AssignDRC = () => {
     fetchDRCNames();
   });
 
+  
+
   //fetch count cases rulebase and arrears band
   useEffect(() => {
     const displayData = async () => {
