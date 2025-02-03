@@ -20,6 +20,8 @@ import DatePicker from "react-datepicker";
 import axios from "axios";
 import PropTypes from "prop-types";
 import StatusIcon from '../../components/StatusIcon';
+import { fetchIncidents } from "../../services/Incidents/incidentService";
+
 
 const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -51,35 +53,15 @@ const Incident_List = () => {
         setIsLoading(true);
         setError("");
         try {
-            console.log("Sending filters:", filters);
-            const response = await axios.post(
-                "http://localhost:5000/api/incident/List_Incidents",
-                filters
-            );
-            console.log("Response:", response.data);
-
-            if (response.data.status === "success") {
-                const mappedData = response.data.incidents.map(incident => ({
-                    caseID: incident.Incident_Id,
-                    status: incident.Incident_Status,
-                    accountNo: incident.Account_Num,
-                    action: incident.Actions,
-                    sourceType: incident.Source_Type,
-                    createdDTM: new Date(incident.Created_Dtm).toLocaleString()
-                }));
-                setData(mappedData);
-            }
+            const incidents = await fetchIncidents(filters);
+            setData(incidents);
         } catch (error) {
-            console.error("Detailed error:", {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status
-            });
-            setError(error.response?.data?.message || "An error occurred while fetching data");
+            setError(error);
         } finally {
             setIsLoading(false);
         }
     };
+    
 
 
     const HandleCreateTask = async () => {
@@ -123,6 +105,7 @@ const Incident_List = () => {
     useEffect(() => {
         fetchData(activeFilters);
     }, [activeFilters]);
+    
 
     useEffect(() => {
         setSelectedRows({});
