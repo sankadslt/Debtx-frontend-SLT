@@ -15,45 +15,39 @@ import { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import { createIncident } from "../../services/Incidents/incidentService.js";
+
 const Incident_Register_Individual = () => {
   const [accountNo, setAccountNo] = useState("");
   const [actionType, setActionType] = useState("");
   const [sourceType, setSourceType] = useState("");
-  const [calendarMonth, setCalendarMonth] = useState(3); // Default value is 3
-  const [loggedInUser] = useState("Admin"); // Replace with dynamic user retrieval logic
+  const [calendarMonth, setCalendarMonth] = useState(3);
+  const [contactNumber, setContactNumber] = useState(""); // New state for Contact Number
+  const [loggedInUser] = useState("Admin");
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
     const newErrors = {};
 
-
-
-    // Account number validation
     if (!accountNo) {
-        newErrors.accountNo = "Account number is required.";
-      } else if (accountNo.length > 10) {
-        newErrors.accountNo = "Account number must be 10 characters or fewer.";
-      }
-    if (!accountNo) newErrors.accountNo = "Account number is required.";
+      newErrors.accountNo = "Account number is required.";
+    } else if (accountNo.length > 10) {
+      newErrors.accountNo = "Account number must be 10 characters or fewer.";
+    }
     if (!actionType) newErrors.actionType = "Action type is required.";
     if (!sourceType) newErrors.sourceType = "Source type is required.";
     if (calendarMonth < 1 || calendarMonth > 3)
-        newErrors.calendarMonth = "Calendar month must be between 1 and 3.";
+      newErrors.calendarMonth = "Calendar month must be between 1 and 3.";
+    
+    if (actionType === "collect CPE" && !contactNumber) {
+      newErrors.contactNumber = "Contact number is required when collecting CPE.";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleMonthChange = (increment) => {
-    setCalendarMonth((prev) => {
-      const newValue = Math.min(3, Math.max(1, prev + (increment ? 1 : -1))); // Ensure range is 1-3
-      return newValue;
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       Swal.fire({
         icon: "error",
@@ -66,9 +60,10 @@ const Incident_Register_Individual = () => {
     const incidentData = {
       Account_Num: accountNo,
       DRC_Action: actionType,
-      Monitor_Months: calendarMonth, // Ensure the value is within 1-3
-      Created_By: loggedInUser, // Dynamically set logged-in user
+      Monitor_Months: calendarMonth,
+      Created_By: loggedInUser,
       Source_Type: sourceType,
+      ...(actionType === "collect CPE" && { Contact_Number: contactNumber }), // Include Contact Number only when needed
     };
 
     try {
@@ -79,34 +74,19 @@ const Incident_Register_Individual = () => {
         text: `Incident ID: ${response.data.Incident_Id} created successfully.`,
       });
 
-      // Clear form
       setAccountNo("");
       setActionType("");
       setSourceType("");
-      setCalendarMonth(3); // Reset to default value
+      setCalendarMonth(3);
+      setContactNumber("");
       setErrors({});
     } catch (error) {
-        console.log("Error response:", error);  // Log full error for debugging
-        
-        const errorCode = error.code;  // Access directly from error object
-        const errorMessage = error.message;  // Access directly from error object
-      
-        // Show specific error for duplicate account numbers
-        if (errorCode === "DUPLICATE_ACCOUNT") {
-          Swal.fire({
-            icon: "error",
-            title: "Duplicate Account",
-            text: errorMessage || "The account number is already associated with an incident.",
-          });
-        } else {
-          // Show generic error
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: errorMessage || "Failed to create incident.",
-          });
-        }
-      }
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to create incident.",
+      });
+    }
   };
 
   return (
@@ -116,28 +96,15 @@ const Incident_Register_Individual = () => {
         <div className={`${GlobalStyle.cardContainer} mt-4`}>
           <h2 className={`${GlobalStyle.headingMedium} mb-6`}>Incident Details</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Account Number */}
             <div className="flex gap-4">
               <label htmlFor="accountNo" className="w-[150px]">Account No</label>
-              <input
-                id="accountNo"
-                type="text"
-                value={accountNo}
-                onChange={(e) => setAccountNo(e.target.value)}
-                className={GlobalStyle.inputText}
-              />
+              <input id="accountNo" type="text" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} className={GlobalStyle.inputText} />
             </div>
             {errors.accountNo && <p className="text-red-500">{errors.accountNo}</p>}
 
-            {/* Action Type */}
             <div className="flex gap-4">
               <label htmlFor="actionType" className="w-[150px]">Action</label>
-              <select
-                id="actionType"
-                value={actionType}
-                onChange={(e) => setActionType(e.target.value)}
-                className={GlobalStyle.selectBox}
-              >
+              <select id="actionType" value={actionType} onChange={(e) => setActionType(e.target.value)} className={GlobalStyle.selectBox}>
                 <option value="">Action</option>
                 <option value="collect arrears">Collect Arrears</option>
                 <option value="collect arrears and CPE">Collect Arrears and CPE</option>
@@ -146,15 +113,17 @@ const Incident_Register_Individual = () => {
             </div>
             {errors.actionType && <p className="text-red-500">{errors.actionType}</p>}
 
-            {/* Source Type */}
+            {actionType === "collect CPE" && (
+              <div className="flex gap-4">
+                <label htmlFor="contactNumber" className="w-[150px]">Contact Number</label>
+                <input id="contactNumber" type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} className={GlobalStyle.inputText} />
+              </div>
+            )}
+            {errors.contactNumber && <p className="text-red-500">{errors.contactNumber}</p>}
+
             <div className="flex gap-4">
               <label htmlFor="sourceType" className="w-[150px]">Source Type</label>
-              <select
-                id="sourceType"
-                value={sourceType}
-                onChange={(e) => setSourceType(e.target.value)}
-                className={GlobalStyle.selectBox}
-              >
+              <select id="sourceType" value={sourceType} onChange={(e) => setSourceType(e.target.value)} className={GlobalStyle.selectBox}>
                 <option value="">Source type</option>
                 <option value="Pilot Suspended">Pilot Suspended</option>
                 <option value="Product Terminate">Product Terminate</option>
@@ -163,34 +132,17 @@ const Incident_Register_Individual = () => {
             </div>
             {errors.sourceType && <p className="text-red-500">{errors.sourceType}</p>}
 
-            {/* Calendar Month */}
             <div className="flex items-center gap-4 mb-4">
               <label className="whitespace-nowrap w-[150px]">Calendar Month</label>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleMonthChange(false)}
-                  className={GlobalStyle.buttonPrimary}
-                >
-                  -
-                </button>
+                <button type="button" onClick={() => setCalendarMonth((prev) => Math.max(1, prev - 1))} className={GlobalStyle.buttonPrimary}>-</button>
                 <span className="w-8 text-center">{calendarMonth}</span>
-                <button
-                  type="button"
-                  onClick={() => handleMonthChange(true)}
-                  className={GlobalStyle.buttonPrimary}
-                >
-                  +
-                </button>
+                <button type="button" onClick={() => setCalendarMonth((prev) => Math.min(3, prev + 1))} className={GlobalStyle.buttonPrimary}>+</button>
               </div>
             </div>
-            {errors.calendarMonth && <p className="text-red-500">{errors.calendarMonth}</p>}
 
-            {/* Submit Button */}
             <div className="pt-4 flex justify-end">
-              <button type="submit" className={GlobalStyle.buttonPrimary}>
-                Submit
-              </button>
+              <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button>
             </div>
           </form>
         </div>
