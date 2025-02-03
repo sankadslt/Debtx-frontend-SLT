@@ -89,8 +89,8 @@ Once your task is complete, create a pull request (PR) to merge your individual 
 1. Go to the repository on GitHub.
 2. Navigate to the Pull Requests section.
 3. Click "New Pull Request".
-4. Set the base branch to the team’s feature branch (e.g., `team1`).
-5. Set your branch (e.g., `team1/sachin`) as the compare branch.
+4. Set the base branch to the team’s feature branch (e.g., `UIname1-UINo1`).
+5. Set your branch (e.g., `Yourname-UINo1`) as the compare branch.
 6. Provide a clear description of your changes and reference the ui number 
 7. Request a code review from a  team lead.
 
