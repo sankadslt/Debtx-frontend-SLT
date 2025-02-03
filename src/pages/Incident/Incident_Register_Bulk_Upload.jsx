@@ -6,13 +6,15 @@ Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
 Last Modified Date: 2025-01-20
 Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
              Vihanga Jayawardena (vihangaeshan2002@gmail.com)
+             Janendra Chamodi ( apjanendra@gmail.com)
 Version: React v18
 ui number : 1.1
-Dependencies: Tailwind CSS
+Dependencies: Tailwind CSS, SweetAlert2
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
 import { useState } from "react";
+import Swal from "sweetalert2";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
 
@@ -34,7 +36,11 @@ const Incident_Register_Bulk_Upload = () => {
         event.preventDefault();
 
         if (!selectedFile || !actionType) {
-            alert("Please select both an action type and a file");
+            Swal.fire({
+                icon: "warning",
+                title: "Missing Information",
+                text: "Please select both an action type and a file.",
+            });
             return;
         }
 
@@ -53,17 +59,29 @@ const Incident_Register_Bulk_Upload = () => {
 
             try {
                 const response = await incidentRegisterBulkUpload(incidentData);
-                alert(response.message);
+                Swal.fire({
+                    icon: "success",
+                    title: "Success",
+                    text: response.message,
+                });
             } catch (error) {
                 console.error("Error uploading file:", error);
-                alert("File upload failed!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Upload Failed",
+                    text: "File upload failed! Please try again.",
+                });
             } finally {
                 setLoading(false);
             }
         };
         
         reader.onerror = () => {
-            alert("Failed to read file content.");
+            Swal.fire({
+                icon: "error",
+                title: "File Read Error",
+                text: "Failed to read file content.",
+            });
         };
     };
 
