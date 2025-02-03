@@ -13,6 +13,7 @@ Related Files:
 Notes: This template uses Tailwind CSS */
 
 import { useState } from "react";
+import axios from "axios";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
 
@@ -44,6 +45,7 @@ const Incident_Register_Bulk_Upload = () => {
             const fileContent = reader.result;
             setLoading(true);
             
+
             const incidentData = {
                 File_Name: selectedFile.name,
                 File_Type: actionType,
@@ -113,5 +115,7 @@ const Incident_Register_Bulk_Upload = () => {
         </div>
     );
 };
+
+
 
 export default Incident_Register_Bulk_Upload;
