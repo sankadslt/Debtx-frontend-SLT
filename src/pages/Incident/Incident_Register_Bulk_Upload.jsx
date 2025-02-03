@@ -1,3 +1,17 @@
+/*Purpose:
+Created Date: 2025-01-09
+Created By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
+Last Modified Date: 2025-01-09
+Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
+Last Modified Date: 2025-01-20
+Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
+             Vihanga Jayawardena (vihangaeshan2002@gmail.com)
+Version: React v18
+ui number : 1.1
+Dependencies: Tailwind CSS
+Related Files: 
+Notes: This template uses Tailwind CSS */
+
 import { useState } from "react";
 import axios from "axios";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
