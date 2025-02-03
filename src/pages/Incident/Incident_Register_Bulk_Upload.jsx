@@ -15,6 +15,7 @@ Notes: This template uses Tailwind CSS */
 import { useState } from "react";
 import axios from "axios";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
 
 const Incident_Register_Bulk_Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -44,7 +45,8 @@ const Incident_Register_Bulk_Upload = () => {
             const fileContent = reader.result;
             setLoading(true);
             
-            const payload = {
+
+            const incidentData = {
                 File_Name: selectedFile.name,
                 File_Type: actionType,
                 File_Content: fileContent,
@@ -52,12 +54,8 @@ const Incident_Register_Bulk_Upload = () => {
             };
 
             try {
-                const response = await axios.post(
-                    "http://localhost:5000/api/incident/upload_drs_file", 
-                    payload,
-                    { headers: { "Content-Type": "application/json" } }
-                );
-                alert(response.data.message);
+                const response = await incidentRegisterBulkUpload(incidentData);
+                alert(response.message);
             } catch (error) {
                 console.error("Error uploading file:", error);
                 alert("File upload failed!");
@@ -117,5 +115,7 @@ const Incident_Register_Bulk_Upload = () => {
         </div>
     );
 };
+
+
 
 export default Incident_Register_Bulk_Upload;
