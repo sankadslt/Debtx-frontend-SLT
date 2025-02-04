@@ -70,6 +70,10 @@ const Routers = () => {
       <Route path = "/Distribution/reject-incident" element={<RejectIncident />} />
       <Route path = "/Distribution/reject-incident-log" element={<RejectIncidentlog />} />
 
+
+
+     
+
      {/* Distribute Routes */}
      <Route path="/pages/Distribute/AssignDRC" element={<ProtectedRoute element={<AssignDRC/>} allowedRoles={['superadmin']} />} />
      <Route path="/pages/Distribute/AssignDRCForCollectCPE" element={<ProtectedRoute element={<AssignDRCForCollectCPE/>} allowedRoles={['superadmin']} />} />
@@ -86,6 +90,7 @@ const Routers = () => {
 
     {/* //INCIDENT */}
     <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
+
       <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
         
