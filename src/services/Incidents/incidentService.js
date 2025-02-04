@@ -19,3 +19,40 @@ export const createIncident = async (incidentData) => {
     throw error.response?.data || error; // Throw detailed error for handling
   }
 };
+export const incidentRegisterBulkUpload = async (incidentData) => {
+  try {
+    const response = await axios.post(`${INCIDENT_URL}/Upload_DRS_File`, incidentData);
+    return response.data; // Return the success response
+  } catch (error) {
+    console.error("Error creating incident:", error.response?.data || error.message);
+    throw error.response?.data || error; // Throw detailed error for handling
+  }
+};
+
+export const fetchIncidents = async (filters) => {
+  try {
+    console.log("Sending filters:", filters);
+    const response = await axios.post(`${INCIDENT_URL}/List_Incidents`, filters);
+    console.log("Response:", response.data);
+
+    if (response.data.status === "success") {
+      return response.data.incidents.map((incident) => ({
+        caseID: incident.Incident_Id,
+        status: incident.Incident_Status,
+        accountNo: incident.Account_Num,
+        action: incident.Actions,
+        sourceType: incident.Source_Type,
+        createdDTM: new Date(incident.Created_Dtm).toLocaleString(),
+      }));
+    } else {
+      throw new Error("Failed to fetch incidents");
+    }
+  } catch (error) {
+    console.error("Detailed error:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error.response?.data?.message || "An error occurred while fetching data";
+  }
+};
