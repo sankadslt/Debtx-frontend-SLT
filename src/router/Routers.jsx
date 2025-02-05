@@ -21,6 +21,8 @@ import RequestResponseLog from "../pages/Request/RequestResponseLog";
 import Incident_List from "../pages/Incident/Incident_List";
 import Incident_Register_Individual from "../pages/Incident/Incident_Register_Individual";
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
+import Incident_File_Download from "../pages/Incident/Incident_File_Download";
+import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
@@ -62,6 +64,8 @@ const Routers = () => {
       <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
+      <Route path="/incident/file-download" element={<ProtectedRoute element={<Incident_File_Download />} allowedRoles={['superadmin']} />} />
+      <Route path="/incident/upload-log" element={<ProtectedRoute element={<SupBulkUploadLog />} allowedRoles={['superadmin']} />} />
         
     </Routes>
   );
