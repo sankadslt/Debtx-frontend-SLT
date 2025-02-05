@@ -11,97 +11,55 @@ Related Files:
 Notes: 
 
 */
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { Link, useNavigate } from "react-router-dom";
+import { Link} from "react-router-dom";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band} from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/Open_No_Agent.png"
 
 
 export default function OpenIncident() {
   const [searchQuery, setSearchQuery] = useState(""); // for searching
   const [selectAllData, setSelectAllData] = useState(false);
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);  
+  const [distributionData, setDistributionData] = useState({});
+  const [ setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const rowsPerPage = 7;
 
 
-  const data = [
-    {
-      id: "RC001",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "54000",
-      source_type: "pilot - suspended",
-    },
-    {
-      id: "RC002",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "7000",
-      source_type: "special",
-    },
-    {
-      id: "RC003",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "5000",
-      source_type: "product terminal",
-    },
-    {
-      id: "RC004",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "4000",
-      source_type: "pilot - suspended",
-    },
-    {
-      id: "RC005",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "60000",
-      source_type: "pilot - suspended",
-    },
-    {
-      id: "RC006",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "54000",
-      source_type: "pilot - suspended",
-    },
-    {
-      id: "RC007",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "56000",
-      source_type: "special",
-    },
-    {
-      id: "RC008",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "54000",
-      source_type: "pilot - suspended",
-    },
-    {
-      id: "RC009",
-      status: "open no agent",
-      account_number: "0115678",
-      action: "arreas collect",
-      amount: "60000",
-      source_type: "special",
-    },
-  ];
-
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        
+        const response = await List_Distribution_Ready_Incidents();
+        
+        setData(response.data);
+  
+        
+       
+        const data = await distribution_ready_incidents_group_by_arrears_band();
+        setDistributionData(data);
+        console.log(distributionData); 
+        const totalCount = Object.values(distributionData).reduce(
+          (sum, count) => sum + count,
+          0
+        );
+        
+       
+        setTotal(totalCount);
+      } catch (error) {
+        setError(error.message || "Failed to fetch data.");
+      }
+    };
+  
+    fetchData();
+  }, []); 
+  
   const filteredData = data.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -109,9 +67,10 @@ export default function OpenIncident() {
       .includes(searchQuery.toLowerCase())
   );
 
-  const navi = () => {
-    navigate("/lod/ftl-log/preview");
-  };
+ 
+  // const navi = () => {
+  //   navigate("/lod/ftl-log/preview");
+  // };
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
@@ -131,11 +90,11 @@ export default function OpenIncident() {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  const handleRowCheckboxChange = (id) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter((id) => id !== id));
+  const handleRowCheckboxChange = (Incident_Id) => {
+    if (selectedRows.includes(Incident_Id)) {
+      setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
     } else {
-      setSelectedRows([...selectedRows, id]);
+      setSelectedRows([...selectedRows, Incident_Id]);
     }
   };
 
@@ -143,7 +102,7 @@ export default function OpenIncident() {
     if (selectAllData) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(data.map((row) => row.id));
+      setSelectedRows(data.map((row) => row.Incident_Id));
     }
     setSelectAllData(!selectAllData);
   };
@@ -176,32 +135,32 @@ export default function OpenIncident() {
             <div className={`${GlobalStyle.countBarMainBox} py-2 px-6`}>
               {" "}
               <span>Total:</span>
-              <p className={GlobalStyle.countBarMainTopic}>1259</p>
+              <p className={GlobalStyle.countBarMainTopic}>{total}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
               {" "}
               <span>5,000 - 10,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>100</p>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-5_10"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
               {" "}
               <span>10,000 - 25,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>250</p>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-10_25"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
               {" "}
               <span>25,000 - 50,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>800</p>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-25_50"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
               {" "}
               <span>50,000 - 100,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>61</p>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-50_100"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
               {" "}
               <span>&gt; 100,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>98</p>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-100_"] || 0}</p>
             </div>
           </div>
         </div>
@@ -222,88 +181,75 @@ export default function OpenIncident() {
           </div>
         </div>
 
-        {/* table */}
+       
         <div className={GlobalStyle.tableContainer}>
-          <table className={GlobalStyle.table}>
-            <thead className={GlobalStyle.thead}>
-              <tr>
-                <th scope="col" className={GlobalStyle.tableHeader}></th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  ID
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Status
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Account No
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Action
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Amount
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Source Type
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.map((row, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
-                >
-                  <td className={GlobalStyle.tableData}>
-                    <input
-                      type="checkbox"
-                      className={"rounded-lg"}
-                      checked={selectedRows.includes(row.id)}
-                      onChange={() => handleRowCheckboxChange(row.id)}
-                    />
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    <a href={`#${row.id}`} className="hover:underline">
-                      {row.id}
-                    </a>
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    <div className="flex justify-center items-center h-full">
-                      {row.status === "open no agent" && (
-                        <div title="open no agent" aria-label="open no agent">
-                          <img
-                            src={Open_No_Agent}
-                            alt="open no agent"
-                            className="w-5 h-5"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    {row.account_number}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{row.action}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {new Intl.NumberFormat("en-US").format(row.amount)}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{row.source_type}</td>
-                </tr>
-              ))}
-              {paginatedData.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="text-center py-4">
-                    No results found
-                  </td>
-                </tr>
+  <table className={GlobalStyle.table}>
+    <thead className={GlobalStyle.thead}>
+      <tr>
+        <th className={GlobalStyle.tableHeader}></th>
+        <th className={GlobalStyle.tableHeader}>ID</th>
+        <th className={GlobalStyle.tableHeader}>Status</th>
+        <th className={GlobalStyle.tableHeader}>Account No</th>
+        <th className={GlobalStyle.tableHeader}>Action</th>
+        <th className={GlobalStyle.tableHeader}>Amount</th>
+        <th className={GlobalStyle.tableHeader}>Source Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {paginatedData.map((row, index) => (
+        <tr
+          key={index}
+          className={`${
+            index % 2 === 0
+              ? "bg-white bg-opacity-75"
+              : "bg-gray-50 bg-opacity-50"
+          } border-b`}
+        >
+          <td className={GlobalStyle.tableData}>
+            <input
+              type="checkbox"
+              className="rounded-lg"
+              checked={selectedRows.includes(row.Incident_Id)}
+              onChange={() => handleRowCheckboxChange(row.Incident_Id)}
+            />
+          </td>
+          <td className={GlobalStyle.tableData}>
+            <a href={`#${row.Incident_Id}`} className="hover:underline">
+              {row.Incident_Id}
+            </a>
+          </td>
+          <td className={GlobalStyle.tableData}>
+            <div className="flex justify-center items-center h-full">
+              {row.Incident_Status === "open no agent" && (
+                <div title="open no agent" aria-label="open no agent">
+                  <img
+                    src={Open_No_Agent}
+                    alt="open no agent"
+                    className="w-5 h-5"
+                  />
+                </div>
               )}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </td>
+          <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
+          <td className={GlobalStyle.tableData}>{row.Action}</td>
+          <td className={GlobalStyle.tableData}>
+            {new Intl.NumberFormat("en-US").format(row.Arrears)}
+          </td>
+          <td className={GlobalStyle.tableData}>{row.Source_Type}</td>
+        </tr>
+      ))}
+      {paginatedData.length === 0 && (
+        <tr>
+          <td colSpan="7" className="text-center py-4">
+            No results found
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
         {/* Navigation Buttons */}
         {filteredData.length > rowsPerPage && (
           <div className={GlobalStyle.navButtonContainer}>
