@@ -13,94 +13,80 @@ Notes:
 
 */
 
-import React, { useState } from "react";
+
+
+import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
+import { List_Incidents_CPE_Collect } from "../../services/Incidents/incidentService";
 
 export default function CollectOnlyCPECollect() {
-  const navigate = useNavigate();
-
-  // Table data exactly matching the image
-  const tableData = [
-    {
-      id: "C001",
-      status: "Open CPE Collect",
-      account_no: "0115678",
-      amount: "500",
-      source_type: "Pilot - Suspended",
-    },
-    {
-      id: "C002",
-      status: "Open CPE Collect",
-      account_no: "8765946",
-      amount: "590",
-      source_type: "Special",
-    },
-    {
-      id: "C003",
-      status: "Open CPE Collect",
-      account_no: "3754918",
-      amount: "900",
-      source_type: "Product Terminate",
-    },
-  ];
-
-  // Filter state
-  const [fromDate, setFromDate] = useState(null); //for date
+  const [incidents, setIncidents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
-  const [error, setError] = useState("");
+
   const [selectAllData, setSelectAllData] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0); // Changed to 0-based indexing
-  const [selectedSource, setSelectedSource] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
 
-  const rowsPerPage = 7; // Number of rows per page
+  const rowsPerPage = 7;
 
-  // validation for date
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await List_Incidents_CPE_Collect();
+        setIncidents(result.data);
+      } catch (err) {
+        setError(err.message || "Failed to fetch incidents.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return <p>Loading incidents...</p>;
+  if (error) return <p>Error: {error}</p>;
+
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       setError("The 'From' date cannot be later than the 'To' date.");
     } else {
-      setError("");
+      setError(null);
       setFromDate(date);
     }
   };
 
-  // validation for date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
       setError("The 'To' date cannot be earlier than the 'From' date.");
     } else {
-      setError("");
+      setError(null);
       setToDate(date);
     }
   };
 
-  //search fuction
-  const filteredData = tableData.filter((row) =>
+  const filteredData = incidents.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
 
-  // Calculate total pages
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
   const handlePrevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 0) setCurrentPage(currentPage - 1);
   };
 
   const handleNextPage = () => {
-    if (currentPage < pages - 1) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < pages - 1) setCurrentPage(currentPage + 1);
   };
 
   const startIndex = currentPage * rowsPerPage;
@@ -108,18 +94,16 @@ export default function CollectOnlyCPECollect() {
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
   const handleRowCheckboxChange = (id) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
-    } else {
-      setSelectedRows([...selectedRows, id]);
-    }
+    setSelectedRows((prev) =>
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+    );
   };
 
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
-      setSelectedRows([]); // Clear all selections
+      setSelectedRows([]);
     } else {
-      setSelectedRows(filteredData.map((row) => row.id)); // Select all visible rows
+      setSelectedRows(filteredData.map((row) => row.Incident_Id));
     }
     setSelectAllData(!selectAllData);
   };
@@ -200,90 +184,64 @@ export default function CollectOnlyCPECollect() {
           </div>
         </div>
         <div className={GlobalStyle.tableContainer}>
-          <table className={GlobalStyle.table}>
-            <thead className={GlobalStyle.thead}>
-              <tr>
-                <th scope="col" className={GlobalStyle.tableHeader}></th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  ID
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Status
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Account No.
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Action
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.map((row, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
-                >
-                  <td className={GlobalStyle.tableData}>
-                    <input
-                      type="checkbox"
-                      className={"rounded-lg"}
-                      checked={selectedRows.includes(row.id)}
-                      onChange={() => handleRowCheckboxChange(row.id)}
+        <table className={GlobalStyle.table}>
+          <thead className={GlobalStyle.thead}>
+            <tr>
+              <th>Select</th>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Account No.</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedData.map((row) => (
+              <tr key={row.Incident_Id} className="border-b">
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.includes(row.Incident_Id)}
+                    onChange={() => handleRowCheckboxChange(row.Incident_Id)}
+                  />
+                </td>
+                <td>
+                  <a href={`#${row.Incident_Id}`} className="hover:underline">
+                    {row.Incident_Id}
+                  </a>
+                </td>
+                <td>
+                  {row.Incident_Status?.toLowerCase() === "open cpe collect" ? (
+                    <img
+                      src={Open_CPE_Collect}
+                      alt="Open CPE Collect"
+                      className="w-5 h-5"
                     />
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    <a href={`#${row.id}`} className="hover:underline">
-                      {row.id}
-                    </a>
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    <div className="flex justify-center items-center h-full">
-                      {row.status.toLowerCase() === "open cpe collect" && (
-                        <div
-                          title="Open CPE Collect"
-                          aria-label="Open CPE Collect"
-                        >
-                          <img
-                            src={Open_CPE_Collect}
-                            alt="Open CPE Collect"
-                            className="w-5 h-5"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </td>
-
-                  <td className={GlobalStyle.tableData}>{row.account_no}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {new Intl.NumberFormat("en-US").format(row.action)}
-                  </td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-center px-6 py-4`}
+                  ) : (
+                    <span>No Status Icon</span>
+                  )}
+                </td>
+                <td>{row.Account_Num || "N/A"}</td>
+                <td>
+                  <button
+                    className={`${GlobalStyle.buttonPrimary} mx-auto`}
+                    onClick={() =>
+                      console.log("Action triggered for", row.Incident_Id)
+                    }
                   >
-                    <button
-                      className={`${GlobalStyle.buttonPrimary} mx-auto`}
-                      onClick={""}
-                    >
-                      Proceed
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {paginatedData.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="text-center py-4">
-                    No results found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    Proceed
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {paginatedData.length === 0 && (
+              <tr>
+                <td colSpan="5" className="text-center py-4">
+                  No results found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
         </div>
       </div>
 

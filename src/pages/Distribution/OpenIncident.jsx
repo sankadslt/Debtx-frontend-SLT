@@ -220,7 +220,7 @@ export default function OpenIncident() {
           </td>
           <td className={GlobalStyle.tableData}>
             <div className="flex justify-center items-center h-full">
-              {row.Incident_Status === "open no agent" && (
+              {row.Incident_Status === "Open No Agent" && (
                 <div title="open no agent" aria-label="open no agent">
                   <img
                     src={Open_No_Agent}
