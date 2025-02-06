@@ -13,40 +13,41 @@ Notes:
 
 */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Direct_LOD from "../../assets/images/Direct_LOD.png";
+import { List_incidents_Direct_LOD } from "../../services/distribution/distributionService.js";
 
 export default function DirectLODSendingIncident() {
   const navigate = useNavigate();
 
   // Table data exactly matching the image
-  const tableData = [
-    {
-      id: "RC001",
-      status: "Direct LOD",
-      account_no: "0115678",
-      amount: "1500",
-      source_type: "Pilot - Suspended",
-    },
-    {
-      id: "RC002",
-      status: "Direct LOD",
-      account_no: "8765946",
-      amount: "590",
-      source_type: "Special",
-    },
-    {
-      id: "RC003",
-      status: "Direct LOD",
-      account_no: "3754918",
-      amount: "900",
-      source_type: "Product Terminate",
-    },
-  ];
+  // const tableData = [
+  //   {
+  //     id: "RC001",
+  //     status: "Direct LOD",
+  //     account_no: "0115678",
+  //     amount: "1500",
+  //     source_type: "Pilot - Suspended",
+  //   },
+  //   {
+  //     id: "RC002",
+  //     status: "Direct LOD",
+  //     account_no: "8765946",
+  //     amount: "590",
+  //     source_type: "Special",
+  //   },
+  //   {
+  //     id: "RC003",
+  //     status: "Direct LOD",
+  //     account_no: "3754918",
+  //     amount: "900",
+  //     source_type: "Product Terminate",
+  //   },
+  // ];
 
   // Filter state
   const [fromDate, setFromDate] = useState(null); //for date
@@ -57,9 +58,42 @@ export default function DirectLODSendingIncident() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0); // Changed to 0-based indexing
   const [selectedSource, setSelectedSource] = useState("");
+  const [tableData, setTableData] = useState([]);
+  const [isloading, setIsLoading] = useState(true);
+  const [filteredData, setFilteredData] = useState(tableData)
 
   const rowsPerPage = 7; // Number of rows per page
 
+  const fetchData = async () => {
+    try {
+      const response = await List_incidents_Direct_LOD();
+      const formattedData = response?.data.map((item) => {
+        
+        const createdDateStr = item.Created_Dtm.replace(" ", "T");  
+        const createdDate = new Date(createdDateStr);
+        
+        return {
+          id: item.Incident_Id || "N/A",
+          status: item.Incident_Status || "N/A",
+          account_no: item.Account_Num || "N/A",
+          amount: item.Arrears || "N/A",
+          source_type: item?.Source_Type || "N/A",
+          created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A"
+        };
+      });
+      setTableData(formattedData);
+      setIsLoading(false);
+    } catch {
+      setError("Failed to fetch DRC details. Please try again later.");
+      setIsLoading(false);
+    }
+  };
+  
+
+  useEffect(() => {
+      fetchData();
+  }, []);
+  
   // validation for date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
@@ -81,12 +115,16 @@ export default function DirectLODSendingIncident() {
   };
 
   //search fuction
-  const filteredData = tableData.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    setFilteredData(
+      tableData.filter((row) =>
+        Object.values(row)
+          .join(" ")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [searchQuery, tableData]);
 
   // Calculate total pages
   const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -123,7 +161,26 @@ export default function DirectLODSendingIncident() {
     }
     setSelectAllData(!selectAllData);
   };
-
+  // console.log(selectedRows, "sr")
+  // console.log(selectAllData,"all")
+  const handleFilterClick = () => {
+    setFilteredData(tableData.filter((row) => {
+      const createdDate = new Date(row.created_dtm);
+      console.log(fromDate,"fd")
+      console.log(toDate,"td")
+      console.log(createdDate,"cd")
+      
+      const isWithinDateRange =
+        (!fromDate || createdDate >= fromDate) &&
+        (!toDate || createdDate <= toDate);
+        
+      const isSourceMatch =
+        !selectedSource || row.source_type === selectedSource;
+  
+      return isWithinDateRange && isSourceMatch;
+    }));
+  };
+  
   return (
     <div className={GlobalStyle.fontPoppins}>
       <div className="flex justify-between items-center w-full">
@@ -178,7 +235,7 @@ export default function DirectLODSendingIncident() {
         {/* Filter Button */}
         <button
           className={`${GlobalStyle.buttonPrimary} h-[35px]`}
-          onClick={() => {}}
+          onClick={handleFilterClick}
         >
           Filter
         </button>
@@ -218,6 +275,9 @@ export default function DirectLODSendingIncident() {
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Source Type
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Created DTM
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}></th>
               </tr>
@@ -265,6 +325,7 @@ export default function DirectLODSendingIncident() {
                   </td>
 
                   <td className={GlobalStyle.tableData}>{row.source_type}</td>
+                  <td className={GlobalStyle.tableData}>{row.created_dtm}</td>
                   <td
                     className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                   >

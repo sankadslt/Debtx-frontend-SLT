@@ -19,7 +19,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import axios from "axios";
 import PropTypes from "prop-types";
-import StatusIcon from '../../components/StatusIcon';
+//import StatusIcon from '../../components/StatusIcon';
 import { fetchIncidents } from "../../services/Incidents/incidentService";
 
 
@@ -345,7 +345,7 @@ const Incident_List = () => {
                                 </td>
                                 <td className={GlobalStyle.tableData}>{log.caseID}</td>
                                 <td className={'${GlobalStyle.tableData} flex justify-center'}>
-                                    <StatusIcon status={log.status} />
+                                    {/* <StatusIcon status={log.status} /> */}
                                 </td>
                                 <td className={GlobalStyle.tableData}>{log.accountNo}</td>
                                 <td className={GlobalStyle.tableData}>{log.action}</td>
@@ -390,8 +390,8 @@ const Incident_List = () => {
     );
 };
 
-StatusIcon.propTypes = {
-    status: PropTypes.string.isRequired,
-};
+// StatusIcon.propTypes = {
+//     status: PropTypes.string.isRequired,
+// };
 
 export default Incident_List;
