@@ -56,3 +56,24 @@ export const fetchIncidents = async (filters) => {
     throw error.response?.data?.message || "An error occurred while fetching data";
   }
 };
+
+export const List_Distribution_Ready_Incidents = async () => {
+  try {
+    const response = await axios.post(`${INCIDENT_URL}/List_Distribution_Ready_Incidents`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching incidents:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+
+export const distribution_ready_incidents_group_by_arrears_band= async () => {
+  try {
+    const response = await axios.post(`${INCIDENT_URL}/distribution_ready_incidents_group_by_arrears_band`);
+    return response.data.data.Distribution_ready_incidents_by_AB;
+  } catch (error) {
+    
+    throw error.response?.data || error;
+  }
+};
