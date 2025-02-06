@@ -26,6 +26,7 @@ import CollectOnlyCPECollect from "../pages/Distribution/CollectOnlyCPECollect";
 import DirectLODSendingIncident from "../pages/Distribution/DirectLODSendingIncident";
 import RejectIncident from "../pages/Distribution/RejectIncident";
 import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
+import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
 
  {/* Distribute Imports */}
  import AssignDRC from "../pages/Distribute/AssignDRC";
@@ -69,6 +70,7 @@ const Routers = () => {
       <Route path = "/Distribution/direct-lod-sending-incident" element={<DirectLODSendingIncident />} />
       <Route path = "/Distribution/reject-incident" element={<RejectIncident />} />
       <Route path = "/Distribution/reject-incident-log" element={<RejectIncidentlog />} />
+      <Route path = "/Distribution/filtered-incident" element={<ProtectedRoute element={<FilteredIncidents/>} allowedRoles={['superadmin']}/>}/>
 
 
 
