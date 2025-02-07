@@ -66,32 +66,37 @@ const Incident_List = () => {
 
     const HandleCreateTask = async () => {
         if (isCreatingTask) return;
-        
+    
         try {
             setIsCreatingTask(true);
             setError("");
-
-
-            const taskPromises = paginatedData.map(async (incident) => {
-                const taskData = {
-                    Template_Task_Id: "TASK_INCIDENT",
-                    task_type: incident.action,
-                    Created_By: "Admin",
-                    task_status: "open",
-                    parameters: {
-                        incident_id: incident.caseID,
-                        account_no: incident.accountNo,
-                        source_type: incident.sourceType,
-                        incident_status: incident.status
-                    }
-                };
-
-                return await axios.post("http://localhost:5000/api/task/create", taskData);
-            });
-
-            await Promise.all(taskPromises);
-            alert("Tasks created successfully!");
+    
+            const selectedIncidents = paginatedData.filter(incident => selectedRows[incident.caseID]);
+    
+            if (selectedIncidents.length === 0) {
+                alert("No incidents selected.");
+                setIsCreatingTask(false);
+                return;
+            }
+    
+           
+            const requestData = {
+                DRC_Action: selectedIncidents[0]?.action || '',
+                Incident_Status: selectedIncidents[0]?.status || '',
+                From_Date: fromDate ? new Date(fromDate).toISOString() : null,
+                To_Date: toDate ? new Date(toDate).toISOString() : null,
+                Created_By: "Admin",
+                selected_incidents: selectedIncidents.map(incident => incident.caseID)
+            };
+    
+            const response = await axios.post("http://localhost:5000/api/task/Task_for_Download_Incidents", requestData);
             
+            if (response.data.Task_Id) {
+                alert(`Task created successfully! Task ID: ${response.data.Task_Id}`);
+            } else {
+                throw new Error("No Task ID received from server");
+            }
+    
         } catch (error) {
             console.error("Error creating tasks:", error);
             setError("Failed to create tasks: " + (error.response?.data?.message || error.message));
@@ -100,7 +105,8 @@ const Incident_List = () => {
             setIsCreatingTask(false);
         }
     };
-
+    
+    
 
     useEffect(() => {
         fetchData(activeFilters);
