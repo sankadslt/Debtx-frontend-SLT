@@ -37,7 +37,7 @@ export const fetchIncidents = async (filters) => {
 
     if (response.data.status === "success") {
       return response.data.incidents.map((incident) => ({
-        caseID: incident.Incident_Id,
+        incidentID: incident.Incident_Id,
         status: incident.Incident_Status,
         accountNo: incident.Account_Num,
         action: incident.Actions,
