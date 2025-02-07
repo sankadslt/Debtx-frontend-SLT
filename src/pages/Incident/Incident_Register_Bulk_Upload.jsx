@@ -50,6 +50,7 @@ const Incident_Register_Bulk_Upload = () => {
             const fileContent = reader.result;
             setLoading(true);
             
+
             const incidentData = {
                 File_Name: selectedFile.name,
                 File_Type: actionType,

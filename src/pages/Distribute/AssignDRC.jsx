@@ -9,7 +9,7 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: This page includes a case count bar, filter , table and a pie chart  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
 import {
@@ -23,113 +23,123 @@ import {
 } from "chart.js";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import { FaSearch } from "react-icons/fa";
+import {
+  fetchAllArrearsBands,
+  count_cases_rulebase_and_arrears_band,
+  Case_Distribution_Among_Agents,
+} from "/src/services/case/CaseServices.js";
+import { Active_DRC_Details } from "/src/services/drc/Drc.js";
+import Swal from "sweetalert2";
 
-// Register necessary components for Chart.js pie chart
-ChartJS.register(
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend
-);
 
-const PieChart = () => {
-  // Data for Pie Chart
-  const pieChartData = {
-    labels: ["CMS", "TCM", "RE", "CO LAN", "ACCIVA", "VISONCOM", "PROMPT"],
-    datasets: [
-      {
-        data: [3000, 2000, 1500, 2500, 1200, 900, 2000],
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-          "#FF99FF",
-        ],
-        hoverBackgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-          "#FF99FF",
-        ],
-      },
-    ],
-  };
-
-  return (
-    <div className="w-1/3 p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4 mt-[0px] text-center">
-        Last 3 Months DRC Success
-      </h2>
-      <div className="chart-container mt-[-10px]">
-        <Pie data={pieChartData} />
-      </div>
-    </div>
-  );
-};
 
 const AssignDRC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [editMode, setEditMode] = useState(null);
-  const [drcData, setDrcData] = useState([
-    { id: 1, name: "CMS", amount: 1000 },
-    { id: 2, name: "TCM", amount: 1200 },
-    { id: 3, name: "RE", amount: 900 },
-    { id: 4, name: "CO LAN", amount: 1400 },
-  ]);
+  const [arrearsBands, setArrearsBands] = useState([]);
+  const [selectedBand, setSelectedBand] = useState("");
+  const [bandsAndCounts, setBandsAndCounts] = useState({});
+  const [drcNames, setDrcNames] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [arrearsbandTotal, setArrearsbandTotal] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [selectedBandKey, setSelectedBandKey] = useState(null);
+
+  const { serviceType } = location.state || {};
+
+  const [drcData, setDrcData] = useState([]);
   const [newEntry, setNewEntry] = useState({
-    arrearsBand: "",
     drc: "",
     casesAmount: "",
+    drcNames: "",
   });
 
-  //search fuction 
+  //fetch all arrears bands
+  useEffect(() => {
+    const fetchArrearsBands = async () => {
+      try {
+        const bands = await fetchAllArrearsBands();
+        setArrearsBands(bands);
+      } catch (error) {
+        console.error("Error fetching arrears bands:", error);
+      }
+    };
+    fetchArrearsBands();
+  }, []);
+
+  //fetch all drc names
+  useEffect(() => {
+    const fetchDRCNames = async () => {
+      try {
+        const Names = await Active_DRC_Details();
+        setDrcNames(Names);
+      } catch (error) {
+        console.error("Error fetching drc names:", error);
+      }
+    };
+    fetchDRCNames();
+  });
+
+  
+
+  //fetch count cases rulebase and arrears band
+  useEffect(() => {
+    const displayData = async () => {
+      const effectiveServiceType = serviceType || "PEO TV"; // Use "PEO TV" as default
+      console.log("Service Type:", serviceType);
+      console.log("Effective Service Type:", effectiveServiceType);
+      try {
+        const drcDetails = await count_cases_rulebase_and_arrears_band(
+          effectiveServiceType
+        );
+        const { total, bandsAndCounts } = drcDetails;
+
+        setTotal(total);
+        setBandsAndCounts(bandsAndCounts);
+        console.log("bandsAndCounts:", bandsAndCounts);
+      } catch (error) {
+        console.error("Failed to fetch and display data:", error);
+      }
+    };
+
+    displayData();
+  }, [serviceType]);
+
+  //search fuction
   const filteredSearchData = drcData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const { serviceType } = location.state || {};
-
-  const handleEdit = (id) => {
-    setEditMode(id);
-  };
-
-  const handleSave = (id) => {
-    setEditMode(null);
-  };
-
-  const handleChange = (e, field, id) => {
-    const updatedData = drcData.map((drc) =>
-      drc.id === id ? { ...drc, [field]: e.target.value } : drc
-    );
-    setDrcData(updatedData);
-  };
-
-  const handleProceed = () => {
-    navigate("/pages/Distribute/AssignedDRCSummary");
-  };
 
   const handleAdd = () => {
-    const { arrearsBand, drc, casesAmount } = newEntry;
-    if (arrearsBand && drc && casesAmount) {
+    const { drc, casesAmount } = newEntry;
+
+    const numericCasesAmount = parseInt(casesAmount, 10);
+
+    if (totalDistributedAmount + numericCasesAmount > arrearsbandTotal) {
+      alert(
+        `The total distributed cases (${
+          totalDistributedAmount + numericCasesAmount
+        }) exceeds the limit of ${arrearsbandTotal}. Please adjust the number of cases.`
+      );
+      return;
+    }
+
+    if (drc && numericCasesAmount) {
       setDrcData([
         ...drcData,
         { id: drcData.length + 1, name: drc, amount: parseFloat(casesAmount) },
       ]);
-      setNewEntry({ arrearsBand: "", drc: "", casesAmount: "" }); // Clear inputs
+      setNewEntry({ drc: "", casesAmount: "" }); // Clear inputs
     }
+  };
+
+  const handleRemove = (name) => {
+    const updatedData = filteredSearchData.filter((drc) => drc.name !== name);
+    setDrcData(updatedData);
   };
 
   const totalDistributedAmount = drcData.reduce(
@@ -137,8 +147,66 @@ const AssignDRC = () => {
     0
   );
 
+  const handleArrearsBandChange = (e) => {
+    const selectedBand = e.target.value;
+    console.log("Selected Band:", selectedBand);
+    setSelectedBand(selectedBand);
+
+    const selectedBandCount = bandsAndCounts[selectedBand];
+    setArrearsbandTotal(selectedBandCount ?? 0);
+
+    const band = arrearsBands.find((band) => band.value === selectedBand);
+    if (band) {
+      setSelectedBandKey(band.key);
+      console.log("Selected Band Key:", band.key);
+    }
+  };
+
+  const handleProceed = async () => {
+    const drcList = filteredSearchData.map((drc) => ({
+      DRC: drc.name,
+      Count: drc.amount,
+    }));
+
+    const requestData = {
+      drc_commision_rule: serviceType || "PEO TV",
+      current_arrears_band: selectedBandKey,
+      drc_list: drcList,
+      created_by: "Sys",
+
+    };
+
+    console.log("Request Data:", requestData);
+
+    try {
+      const response = await Case_Distribution_Among_Agents(requestData); // Use 'await' here
+      console.log("Response:", response);
+    } catch (error) {
+      console.error("Error in sending the data:", error);
+
+      const errorMessage = error?.response?.data?.message || 
+                             error?.message || 
+                             "Something went wrong!";
+
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: errorMessage,
+            confirmButtonColor: "#d33",
+        });
+    }
+  };
+
+  const handlepiechart1 = () => {
+    alert("Pie Chart 1 clicked");
+  }
+
+  const handlepiechart2 = () => {
+    alert("Pie Chart 2 clicked");
+  }
+
   return (
-    <div className={`${GlobalStyle.fontPoppins} flex flex-col h-screen`}>
+    <div className={`${GlobalStyle.fontPoppins} flex flex-col `}>
       {/* Main Content */}
       <div className="flex-1 p-10">
         {/* Assign DRC Heading */}
@@ -156,28 +224,15 @@ const AssignDRC = () => {
           <div className={GlobalStyle.countBarSubTopicContainer}>
             <div className={GlobalStyle.countBarMainBox}>
               <span>Total:</span>
-              <p className={GlobalStyle.countBarMainTopic}>1259</p>
+              <p className={GlobalStyle.countBarMainTopic}>{total}</p>
             </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>5,000 - 10,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>100</p>
-            </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>10,000 - 25,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>250</p>
-            </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>25,000 - 50,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>800</p>
-            </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>50,000 - 100,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>61</p>
-            </div>
-            <div className={GlobalStyle.countBarSubBox}>
-              <span>&gt; 100,000</span>
-              <p className={GlobalStyle.countBarSubTopic}>98</p>
-            </div>
+            {/* Dynamically render bands and counts */}
+            {Object.entries(bandsAndCounts).map(([band, count]) => (
+              <div key={band} className={GlobalStyle.countBarSubBox}>
+                <span>{band}</span>
+                <p className={GlobalStyle.countBarSubTopic}>{count}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -187,21 +242,27 @@ const AssignDRC = () => {
             {/* Arrears Band Dropdown */}
             <select
               className={`${GlobalStyle.selectBox}`}
-              value={newEntry.arrearsBand}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, arrearsBand: e.target.value })
-              }
+              value={selectedBand}
+              onChange={handleArrearsBandChange}
+              disabled={totalDistributedAmount > 0}
             >
-              <option value="" disabled>
+              <option value="" hidden>
                 Arrears Band
               </option>
-              <option>5,000 - 10,000</option>
-              <option>10,000 - 25,000</option>
-              <option>25,000 - 50,000</option>
-              <option>50,000 - 100,000</option>
-              <option>&gt;100,000</option>
+              {arrearsBands.map(({ key, value }) => (
+                <option key={key} value={value}>
+                  {value}
+                </option>
+              ))}
             </select>
-
+            <div
+              className={`${GlobalStyle.countBarMainBox}`}
+              style={{ width: "160px", textAlign: "center" }}
+            >
+              Total Count: {arrearsbandTotal}
+            </div>
+          </div>
+          <div className="flex items-center my-10 space-x-4">
             {/* DRC Dropdown */}
             <select
               className={`${GlobalStyle.selectBox}`}
@@ -210,16 +271,14 @@ const AssignDRC = () => {
                 setNewEntry({ ...newEntry, drc: e.target.value })
               }
             >
-              <option value="" disabled>
+              <option value="" hidden>
                 DRC
               </option>
-              <option>CMS</option>
-              <option>TCM</option>
-              <option>RE</option>
-              <option>CO LAN</option>
-              <option>ACCIVA</option>
-              <option>VISONCOM</option>
-              <option>PROMPT</option>
+              {drcNames.map(({ key, value }) => (
+                <option key={key} value={value}>
+                  {value}
+                </option>
+              ))}
             </select>
 
             {/* Input for "+ cases" */}
@@ -227,7 +286,8 @@ const AssignDRC = () => {
               type="number"
               placeholder="+ cases"
               className="py-1 px-4 w-32 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
-              min="0"
+              min="1"
+              max={arrearsbandTotal}
               value={newEntry.casesAmount}
               onChange={(e) =>
                 setNewEntry({ ...newEntry, casesAmount: e.target.value })
@@ -238,24 +298,21 @@ const AssignDRC = () => {
             <button
               className={`${GlobalStyle.buttonPrimary} w-[135px]`}
               onClick={handleAdd}
+              disabled={totalDistributedAmount >= arrearsbandTotal}
             >
               Add
             </button>
-            <div className="flex-grow text-right">
-            <div className="flex justify-end">
-            <div
-            className={`${GlobalStyle.countBarMainBox}`}
+          </div>
+          <div
+            className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
             style={{ width: "160px", textAlign: "center" }}
-            >
-                  Count: {totalDistributedAmount}
-               </div>
-             </div>
-            </div>
-           </div>
+          >
+            Selected Count: {totalDistributedAmount}
+          </div>
 
-           <div className="flex">
+          <div className="flex">
             {/* Table */}
-             <div className="flex flex-col w-2/3">
+            <div className="flex flex-col w-2/3">
               <div className="flex justify-start mb-4">
                 <div className={GlobalStyle.searchBarContainer}>
                   <input
@@ -290,12 +347,8 @@ const AssignDRC = () => {
                         Distributed Amount
                       </th>
                       <th
-                        scope="col"
                         className={`${GlobalStyle.tableHeader} text-center`}
-                        aria-label="Action"
-                      >
-                        Action
-                      </th>
+                      ></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -310,61 +363,26 @@ const AssignDRC = () => {
                           }
                           aria-rowindex={drc.id}
                         >
+                          <td className={GlobalStyle.tableData}>{drc.name}</td>
                           <td className={GlobalStyle.tableData}>
-                            {editMode === drc.id ? (
-                              <select
-                                value={drc.name}
-                                onChange={(e) =>
-                                  handleChange(e, "name", drc.id)
-                                }
-                                className={`${GlobalStyle.selectBox}`}
-                                aria-label="Select DRC Name"
-                              >
-                                <option>CMS</option>
-                                <option>TCM</option>
-                                <option>RE</option>
-                                <option>CO LAN</option>
-                                <option>ACCIVA</option>
-                                <option>VISONCOM</option>
-                                <option>PROMPT</option>
-                              </select>
-                            ) : (
-                              drc.name
-                            )}
-                          </td>
-                          <td className={GlobalStyle.tableData}>
-                            {editMode === drc.id ? (
-                              <input
-                                type="number"
-                                className={`${GlobalStyle.inputText}`}
-                                value={drc.amount}
-                                onChange={(e) =>
-                                  handleChange(e, "amount", drc.id)
-                                }
-                                aria-label="Enter Distributed Amount"
-                              />
-                            ) : (
-                              drc.amount
-                            )}
+                            {drc.amount}
                           </td>
                           <td className="px-6 py-4 text-center">
-                            {editMode === drc.id ? (
-                              <button
-                                className={`${GlobalStyle.buttonPrimary}`}
-                                onClick={() => handleSave(drc.id)}
-                                aria-label="Save Changes"
+                            <button onClick={() => handleRemove(drc.name)}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={28}
+                                height={29}
+                                fill="none"
                               >
-                                Save
-                              </button>
-                            ) : (
-                              <button
-                                className={`${GlobalStyle.buttonPrimary}`}
-                                onClick={() => handleEdit(drc.id)}
-                                aria-label="Edit Row"
-                              >
-                                Edit
-                              </button>
-                            )}
+                                <path
+                                  fill="#000"
+                                  fillRule="evenodd"
+                                  d="M14 28.5a14 14 0 1 0 0-28 14 14 0 0 0 0 28ZM6.222 16.056h15.556v-3.112H6.222v3.112Z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
                           </td>
                         </tr>
                       ))
@@ -375,28 +393,26 @@ const AssignDRC = () => {
                         </td>
                       </tr>
                     )}
-                    <tr className="bg-[#F7F8FC]">
-                      <td
-                        colSpan="3"
-                        className={"text-center font-semibold py-6"}
-                      >
-                        Total Count: {totalDistributedAmount}
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* Pie Chart */}
-            <PieChart />
+            {/* Pie Chart Buttons */}
+            <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
+               Pie Chart 1
+            </button>
+            <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
+               Pie Chart 2
+            </button>
           </div>
 
           {/* Proceed Button */}
           <div className="text-right">
             <button
               onClick={handleProceed}
-              className={`${GlobalStyle.buttonPrimary}`}        
+              className={`${GlobalStyle.buttonPrimary}`}
+              disabled={totalDistributedAmount !== arrearsbandTotal}
             >
               Proceed
             </button>

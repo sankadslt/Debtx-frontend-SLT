@@ -1,20 +1,11 @@
-/* Purpose: This template is used for the 1.A.15 DRC Assign Manager Approval
-Created Date: 2025-01-07
-Created By: U.H.Nandali Linara
+/*Purpose: This template is used for the 1.A.14.1 - Case Distribution DRC Summary with RTOM
+Created Date: 2025-01-28
+Created By: Udana (udanarajanayaka220@gmail.com)
 Version: node 20
-ui number : 1.15
+ui number : 1.A.14.1
 Dependencies: tailwind css
 Related Files: (routes)
-Notes: This page includes a filter and a table */
-
-/* Purpose: This template is used for the 1.A.15 DRC Assign Manager Approval
-Created Date: 2025-01-07
-Created By: U.H.Nandali Linara
-Version: node 20
-ui number : 1.15
-Dependencies: tailwind css
-Related Files: (routes)
-Notes: This page includes a filter and a table */
+Notes: The following page conatins the codes */
 
 
 import React, { useState } from "react";
@@ -23,107 +14,81 @@ import "react-datepicker/dist/react-datepicker.css";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 
-const DRCAssignManagerApproval = () => {
+
+const CaseDistributionDRCSummarywithRTOM = () => {
   // Sample data for the table
   const data = [
     {
-      status: "Pending assign agent approval",
-      batchId: "C001",
-      caseId: "C001",
-      actionType: "Action",
-      createdDate: "2024.11.05",
+      batchSeq: "S1",
+      createdDtm: "A1",
       drc: "CMS",
+      rtom: "A",
       caseAmount: "100",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      arrearsAmount: "10",
     },
     {
-      status: "Pending assign agent approval",
-      batchId: "",
-      caseId: "C002",
-      actionType: "Review",
-      createdDate: "2024.11.06",
-      drc: "RE",
+      batchSeq: "S2",
+      createdDtm: "A1",
+      drc: "CMS",
+      rtom: "B",
       caseAmount: "100",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      arrearsAmount: "10",
     },
     {
-      status: "Pending assign agent approval",
-      batchId: "",
-      caseId: "C003",
-      actionType: "Assignment",
-      createdDate: "2024.11.07",
-      drc: "CO LAN",
+      batchSeq: "S2",
+      createdDtm: "A1",
+      drc: "CMS",
+      rtom: "A",
       caseAmount: "100",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      arrearsAmount: "10",
     },
     {
-      status: "Pending assign agent approval",
-      batchId: "",
-      caseId: "C004",
-      createdDate: "2024.11.08",
-      actionType: "Verification",
-      drc: "ACCIVA",
-      caseAmount: "600",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      batchSeq: "S4",
+      createdDtm: "A1",
+      drc: "CMS",
+      rtom: "A",
+      caseAmount: "100",
+      arrearsAmount: "10",
     },
     {
-      status: "Pending assign agent approval",
-      batchId: "C003",
-      caseId: "C006",
-      createdDate: "2024.11.09",
-      actionType: "Approval",
-      drc: "PROMPT",
-      caseAmount: "800",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      batchSeq: "S5",
+      createdDtm: "A1",
+      drc: "CMS",
+      rtom: "A",
+      caseAmount: "100",
+      arrearsAmount: "10",
     },
     {
-      status: "Pending assign agent approval",
-      batchId: "C004",
-      caseId: "C007",
-      createdDate: "2024.11.09",
-      actionType: "Approval",
-      drc: "PROMPT",
-      caseAmount: "900",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      batchSeq: "S6",
+      createdDtm: "A1",
+      drc: "CMS",
+      rtom: "A",
+      caseAmount: "100",
+      arrearsAmount: "10",
     },
     {
-      status: "Pending assign agent approval",
-      batchId: "C005",
-      caseId: "C008",
-      createdDate: "2024.11.09",
-      actionType: "Approval",
-      drc: "PROMPT",
-      caseAmount: "1000",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      batchSeq: "S7",
+      createdDtm: "A1",
+      drc: "CMS",
+      rtom: "A",
+      caseAmount: "100",
+      arrearsAmount: "10",
     },
     {
-      status: "Pending assign agent approval",
-      batchId: "C008",
-      caseId: "C010",
-      createdDate: "2024.11.09",
-      actionType: "Approval",
-      drc: "PROMPT",
-      caseAmount: "1300",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      batchSeq: "S8",
+      createdDtm: "A1",
+      drc: "CMS",
+      rtom: "A",
+      caseAmount: "100",
+      arrearsAmount: "10",
     },
     {
-      status: "Pending assign agent approval",
-      batchId: "C011",
-      caseId: "C011",
-      createdDate: "2024.11.09",
-      actionType: "Approval",
-      drc: "PROMPT",
-      caseAmount: "1400",
-      approvedBy: "Pending",
-      approvedOn: "mm/dd/yyyy",
+      batchSeq: "S8",
+      createdDtm: "A1",
+      drc: "CMS",
+      rtom: "A",
+      caseAmount: "100",
+      arrearsAmount: "10",
     },
   ];
 
@@ -147,12 +112,12 @@ const DRCAssignManagerApproval = () => {
       .includes(searchQuery.toLowerCase())
   );
 
-// Apply pagination to the search-filtered data
-const currentData = filteredDataBySearch.slice(
-  indexOfFirstRecord,
-  indexOfLastRecord
-);
-const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
+  // Apply pagination to the search-filtered data
+  const currentData = filteredDataBySearch.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
+  const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
 
   // Modified handleDRCChange to only update state without filtering
   const handleDRCChange = (e) => {
@@ -210,7 +175,7 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
   const handleCreateTask = () => {
     alert("Create Task and Let Me Know button clicked!");
   };
-  
+
   const handleApprove = () => {
     alert("Approve button clicked!");
   };
@@ -218,7 +183,7 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
-      <h1 className={GlobalStyle.headingLarge}>DRC Assign Manager Approval</h1>
+      <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary</h1>
 
       {/* Filter Section */}
       <div className="flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4">
@@ -238,7 +203,7 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
           )}
         </select>
 
-        
+
 
         {/* Date Picker */}
         <div className="flex items-center gap-2">
@@ -305,47 +270,41 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}></th>
-              <th className={GlobalStyle.tableHeader}>Status</th>
-              <th className={GlobalStyle.tableHeader}>Batch ID</th>
-              <th className={GlobalStyle.tableHeader}>Case ID</th>
-              <th className={GlobalStyle.tableHeader}>Action Type</th>
-              <th className={GlobalStyle.tableHeader}>Created Date</th>
+              <th className={GlobalStyle.tableHeader}>Batch seq.</th>
+              <th className={GlobalStyle.tableHeader}>Created dtm</th>
               <th className={GlobalStyle.tableHeader}>DRC</th>
+              <th className={GlobalStyle.tableHeader}>RTOM</th>
               <th className={GlobalStyle.tableHeader}>Case Count</th>
-              <th className={GlobalStyle.tableHeader}>Approved By</th>
-              <th className={GlobalStyle.tableHeader}>Approved On</th>
+              <th className={GlobalStyle.tableHeader}>Arrears Amount</th>
             </tr>
           </thead>
           <tbody>
-  {currentData.map((item, index) => (
-    <tr
-      key={item.caseId}
-      className={
-        index % 2 === 0
-          ? GlobalStyle.tableRowEven
-          : GlobalStyle.tableRowOdd
-      }
-    >
-      <td className="text-center">
-        <input
-          type="checkbox"
-          checked={selectedRows.has(index)}
-          onChange={() => handleRowSelect(index)}
-          className="mx-auto"
-        />
-      </td>
-      <td className={GlobalStyle.tableData}>{item.status}</td>
-      <td className={GlobalStyle.tableData}>{item.batchId}</td>
-      <td className={GlobalStyle.tableData}>{item.caseId}</td>
-      <td className={GlobalStyle.tableData}>{item.actionType}</td>
-      <td className={GlobalStyle.tableData}>{item.createdDate}</td>
-      <td className={GlobalStyle.tableData}>{item.drc}</td>
-      <td className={GlobalStyle.tableData}>{item.caseAmount}</td>
-      <td className={GlobalStyle.tableData}>{item.approvedBy}</td>
-      <td className={GlobalStyle.tableData}>{item.approvedOn}</td>
-    </tr>
-  ))}
-</tbody>
+            {currentData.map((item, index) => (
+              <tr
+                key={item.caseId}
+                className={
+                  index % 2 === 0
+                    ? GlobalStyle.tableRowEven
+                    : GlobalStyle.tableRowOdd
+                }
+              >
+                <td className="text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.has(index)}
+                    onChange={() => handleRowSelect(index)}
+                    className="mx-auto"
+                  />
+                </td>
+                <td className={GlobalStyle.tableData}>{item.batchSeq}</td>
+                <td className={GlobalStyle.tableData}>{item.createdDtm}</td>
+                <td className={GlobalStyle.tableData}>{item.drc}</td>
+                <td className={GlobalStyle.tableData}>{item.rtom}</td>
+                <td className={GlobalStyle.tableData}>{item.caseAmount}</td>
+                <td className={GlobalStyle.tableData}>{item.arrearsAmount}</td>
+              </tr>
+            ))}
+          </tbody>
 
         </table>
       </div>
@@ -355,9 +314,8 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
         <button
           onClick={() => handlePrevNext("prev")}
           disabled={currentPage === 1}
-          className={`${GlobalStyle.navButton} ${
-            currentPage === 1 ? "cursor-not-allowed" : ""
-          }`}
+          className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+            }`}
         >
           <FaArrowLeft />
         </button>
@@ -367,49 +325,66 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
         <button
           onClick={() => handlePrevNext("next")}
           disabled={currentPage === totalPages}
-          className={`${GlobalStyle.navButton} ${
-            currentPage === totalPages ? "cursor-not-allowed" : ""
-          }`}
+          className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+            }`}
         >
           <FaArrowRight />
         </button>
       </div>
-    
-{/* Select All Data Checkbox and Buttons */}
-<div className="flex justify-between items-center mt-4">
-  {/* Left-aligned button */}
-  <button
-    onClick={handleCreateTask}
-    className={GlobalStyle.buttonPrimary} // Same style as Approve button
-  >
-    Create Task and Let Me Know
-  </button>
 
-  {/* Right-aligned checkbox and Approve button */}
-  <div className="flex items-center gap-4">
-    <label className="flex items-center gap-2">
-      <input
-        type="checkbox"
-        className="rounded-lg"
-        checked={selectAll}
-        onChange={handleSelectAll}
-      />
-      Select All Data
-    </label>
 
-    <button
-      onClick={handleApprove}
-      className={GlobalStyle.buttonPrimary}
-      disabled={selectedRows.size === 0}
-    >
-      Approve
-    </button>
-  </div>
-</div>
+      {/* Button */}
+      <div className="flex justify-between">
+
+        {/* Button on the left */}
+        <button>
+
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={65}
+            height={65}
+            fill="none"
+
+          >
+            <circle
+              cx={32.5}
+              cy={32.5}
+              r={32.45}
+              fill="#B3CCE3"
+              stroke="#58120E"
+              strokeWidth={0.1}
+              transform="rotate(-90 32.5 32.5)"
+            />
+            <path
+              fill="#001120"
+              d="m36.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L43.782 45.5l3.063-3.064L36.46 32.051Z"
+            />
+            <path
+              fill="#001120"
+              d="m23.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L30.782 45.5l3.063-3.064L23.46 32.051Z"
+            />
+          </svg>
+
+        </button>
+
+        {/* Right-aligned button */}
+        <button
+          onClick={handleCreateTask}
+          className={GlobalStyle.buttonPrimary} // Same style as Approve button
+        >
+
+          Create Task and Let Me Know
+        </button>
+
+
+
+
+      </div>
+
 
     </div>
   );
 };
 
-export default DRCAssignManagerApproval;
+export default CaseDistributionDRCSummarywithRTOM;
 
