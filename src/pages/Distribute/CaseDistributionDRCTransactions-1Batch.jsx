@@ -11,25 +11,38 @@ Notes: The following page conatins the codes */
 
 
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-
-
+import { List_all_transaction_seq_of_batch_id ,Create_Task_For_case_distribution_transaction } from "/src/services/case/CaseServices.js";
 
 export default function CaseDistributionDRCTransactions1Batch() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { BatchID } = location.state || {};
     const [searchQuery, setSearchQuery] = useState("");
+    const [transaction, setTransaction] = useState([]);
 
-    const cpeData = [
-        { batchseq: "S1", DRC: "DRC1", RTOM: "AD" , CaseCount: "100", TotalArrears: "25000" },
-        { batchseq: "S2", DRC: "DRC2", RTOM: "GM" , CaseCount: "200", TotalArrears: "50000" },
-        { batchseq: "S3", DRC: "DRC3", RTOM: "KU" , CaseCount: "300", TotalArrears: "75000" },
-        { batchseq: "S4", DRC: "DRC4", RTOM: "AD" , CaseCount: "400", TotalArrears: "100000" },
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = { case_distribution_batch_id: BatchID || "2" };
+                const response = await List_all_transaction_seq_of_batch_id(data);
+                console.log("Response", response);
+                if (response.status === "success") {
+                    setTransaction(response.data || []);  // Ensure `data` is always an array
+                } else {
+                    console.error("Error in API response:", response.message || "Unknown error");
+                }
+            } catch (error) {
+                console.error("Error fetching case distribution DRC summary:", error.response?.data || error.message);
+            }
+        };
+        fetchData();
+    }, [BatchID]);
 
-        
-    ];
+
 
     const handleonclick = () => {
         alert("Task created successfully");
@@ -39,14 +52,15 @@ export default function CaseDistributionDRCTransactions1Batch() {
         alert("Icon clicked");
     };
 
+    const batchSeqDetails = transaction[0]?.batch_seq_details || [];
+
     //search function
-    const filteredData = cpeData.filter((row) =>
+    const filteredData = batchSeqDetails.filter((row) =>
         Object.values(row)
             .join("")
             .toLowerCase()
             .includes(searchQuery.toLowerCase())
     );
-
 
     return (
         <div className={GlobalStyle.fontPoppins}>
@@ -56,19 +70,17 @@ export default function CaseDistributionDRCTransactions1Batch() {
             </div>
 
             {/* Card Section */}
-            <div className="flex flex-col items-center justify-center mb-4">
+            {transaction.length > 0 && transaction[0] && (
+                <div className="flex flex-col items-center justify-center mb-4">
                     <div className={`${GlobalStyle.cardContainer}`}>
-                        <p className="mb-2"><strong>Batch ID:</strong></p>
-                        <p className="mb-2"><strong>Create DTM:</strong></p>
-                        <p className="mb-2"><strong>DRC Commission Rule:</strong></p>
-                        <p className="mb-2"><strong>Arrears Band:</strong></p>
-                        <p className="mb-2"><strong>Action Type:</strong></p>
-                        <p className="mb-2"><strong>Case Count:</strong></p>
-                        <p className="mb-2"><strong>Total Arrears Amount:</strong></p>
-                        
+                        <p className="mb-2"><strong>Batch ID:</strong> {transaction[0]?.case_distribution_batch_id || "N/A"}</p>
+                        <p className="mb-2"><strong>DRC Commission Rule:</strong> {transaction[0]?.drc_commision_rule || "N/A"}</p>
+                        <p className="mb-2"><strong>Arrears Band:</strong> {transaction[0]?.current_arrears_band || "N/A"}</p>
+                        <p className="mb-2"><strong>Case Count:</strong> {transaction[0]?.rulebase_count || "N/A"}</p>
+                        <p className="mb-2"><strong>Total Arrears Amount:</strong> {transaction[0]?.rulebase_arrears_sum || "N/A"}</p>
                     </div>
                 </div>
-
+            )}
             {/* Table Section */}
             <div className="flex flex-col">
                 {/* Search Bar Section */}
@@ -89,27 +101,46 @@ export default function CaseDistributionDRCTransactions1Batch() {
                         <thead className={GlobalStyle.thead}>
                             <tr>
                                 <th className={GlobalStyle.tableHeader}>Batch Seq.</th>
-                                <th className={GlobalStyle.tableHeader}>DRC</th>
-                                <th className={GlobalStyle.tableHeader}>RTOM</th>
+                                <th className={GlobalStyle.tableHeader}>Created DTM</th>
+                                <th className={GlobalStyle.tableHeader}>Action Type</th>
                                 <th className={GlobalStyle.tableHeader}>Case Count</th>
                                 <th className={GlobalStyle.tableHeader}>Total Arrears</th>
+                                <th className={GlobalStyle.tableHeader}></th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredData.map((item, index) => (
                                 <tr
-                                    key={item.date}
+                                    key={item.batch_seq}
                                     className={
                                         index % 2 === 0
                                             ? GlobalStyle.tableRowEven
                                             : GlobalStyle.tableRowOdd
                                     }
                                 >
-                                    <td className={GlobalStyle.tableData}>{item.batchseq}</td>
-                                    <td className={GlobalStyle.tableData}>{item.DRC}</td>
-                                    <td className={GlobalStyle.tableData}>{item.RTOM}</td>
-                                    <td className={GlobalStyle.tableData}>{item.CaseCount}</td>
-                                    <td className={GlobalStyle.tableData}>{item.TotalArrears}</td>
+                                    <td className={GlobalStyle.tableData}>{item.batch_seq}</td>
+                                    <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString()}</td>
+                                    <td className={GlobalStyle.tableData}>{item.action_type}</td>
+                                    <td className={GlobalStyle.tableData}>{item.batch_seq_rulebase_count}</td>
+                                    <td className={GlobalStyle.tableData}>{item.batch_seq_rulebase_arrears_sum}</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <button>
+                                        <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width={26}
+                                                height={29}
+                                                fill="none"
+                                                
+                                            >
+                                                <path
+                                                fill="#000"
+                                                fillRule="evenodd"
+                                                d="M13 .32c7.18 0 13 5.821 13 13 0 7.18-5.82 13-13 13s-13-5.82-13-13c0-7.179 5.82-13 13-13Zm5.85 11.05a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Z"
+                                                clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
