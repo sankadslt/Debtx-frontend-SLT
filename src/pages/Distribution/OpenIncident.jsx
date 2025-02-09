@@ -20,7 +20,7 @@ import Open_No_Agent from "../../assets/images/Open_No_Agent.png"
 
 
 export default function OpenIncident() {
-  const [searchQuery, setSearchQuery] = useState(""); // for searching
+  const [searchQuery, setSearchQuery] = useState(""); 
   const [selectAllData, setSelectAllData] = useState(false);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);  
@@ -58,7 +58,7 @@ export default function OpenIncident() {
     };
   
     fetchData();
-  }, []); 
+  }); 
   
   const filteredData = data.filter((row) =>
     Object.values(row)
