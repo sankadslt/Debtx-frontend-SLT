@@ -4,18 +4,19 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/case`;
 
-// get_count_by_drc_commision_rule  
+// get_count_by_drc_commision_rule
 export const get_count_by_drc_commision_rule = async () => {
-    try {
-      const response = await axios.get(`${URL}/get_count_by_drc_commision_rule`);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching case count by DRC commission rule:", error.response?.data || error.message);
-      throw error;
-    }
-  };
-
-
+  try {
+    const response = await axios.get(`${URL}/get_count_by_drc_commision_rule`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching case count by DRC commission rule:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
 
 // Fetch all arrears bands
 export const fetchAllArrearsBands = async () => {
@@ -30,17 +31,24 @@ export const fetchAllArrearsBands = async () => {
 
     return arrearsBands; // Return an array of objects with key-value pairs
   } catch (error) {
-    console.error("Error fetching arrears bands:", error.response?.data || error.message);
+    console.error(
+      "Error fetching arrears bands:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
 
-
-export const count_cases_rulebase_and_arrears_band = async (drcCommissionRule) => {
+export const count_cases_rulebase_and_arrears_band = async (
+  drcCommissionRule
+) => {
   try {
-    const response = await axios.post(`${URL}/count_cases_rulebase_and_arrears_band`, {
-      drc_commision_rule: drcCommissionRule,
-    });
+    const response = await axios.post(
+      `${URL}/count_cases_rulebase_and_arrears_band`,
+      {
+        drc_commision_rule: drcCommissionRule,
+      }
+    );
 
     const data = response.data.data;
 
@@ -65,66 +73,108 @@ export const count_cases_rulebase_and_arrears_band = async (drcCommissionRule) =
 
 export const Case_Distribution_Among_Agents = async (requestData) => {
   try {
-      // Validate the requestData
-      if (!requestData || typeof requestData !== 'object' || Object.keys(requestData).length === 0) {
-          throw new Error("Invalid request data provided.");
-      }
+    // Validate the requestData
+    if (
+      !requestData ||
+      typeof requestData !== "object" ||
+      Object.keys(requestData).length === 0
+    ) {
+      throw new Error("Invalid request data provided.");
+    }
 
-      // Make the API request
-      const response = await axios.post(`${URL}/Case_Distribution_Among_Agents`, requestData);
+    // Make the API request
+    const response = await axios.post(
+      `${URL}/Case_Distribution_Among_Agents`,
+      requestData
+    );
 
-      // Validate the response structure
-      if (response.data && response.data.status === 'success') {
-          return response.data.data; // Return the required data
-      } else {
-          console.error("Error in API response:", response.data?.message || "Unknown error");
-          throw new Error(response.data?.message || "Failed to fetch case distribution.");
-      }
+    // Validate the response structure
+    if (response.data && response.data.status === "success") {
+      return response.data.data; // Return the required data
+    } else {
+      console.error(
+        "Error in API response:",
+        response.data?.message || "Unknown error"
+      );
+      throw new Error(
+        response.data?.message || "Failed to fetch case distribution."
+      );
+    }
   } catch (error) {
-      console.error("Error fetching case distribution among agents:", error.response?.data || error.message);
-      throw error;
+    console.error(
+      "Error fetching case distribution among agents:",
+      error.response?.data || error.message
+    );
+    throw error;
   }
 };
 
 export const List_Case_Distribution_DRC_Summary = async (requestdata) => {
   try {
-    const response = await axios.post(`${URL}/List_Case_Distribution_DRC_Summary`, requestdata);
+    const response = await axios.post(
+      `${URL}/List_Case_Distribution_DRC_Summary`,
+      requestdata
+    );
 
-    console.log("Full API Response:", response);  // Debugging
+    console.log("Full API Response:", response); // Debugging
     console.log("Response Data:", response.data); // Debugging
 
-    
     return response.data; // Return response.data directly, since it's already an array
-  }
-  catch (error) {
-    console.error("Error fetching case distribution DRC summary:", error.response?.data || error.message);
+  } catch (error) {
+    console.error(
+      "Error fetching case distribution DRC summary:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
 
 export const Create_Task_For_case_distribution = async (payload) => {
-  try{
-    const response = await axios.post(`${URL}/Create_Task_For_case_distribution`, payload);
+  try {
+    const response = await axios.post(
+      `${URL}/Create_Task_For_case_distribution`,
+      payload
+    );
     return response.data;
-  }
-  catch (error){
-    console.error("Error creating task for case distribution:", error.response?.data || error.message);
+  } catch (error) {
+    console.error(
+      "Error creating task for case distribution:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
 
-
 export const List_all_transaction_seq_of_batch_id = async (data) => {
   try {
-    const response = await axios.post(`${URL}/List_all_transaction_seq_of_batch_id`, data);
+    const response = await axios.post(
+      `${URL}/List_all_transaction_seq_of_batch_id`,
+      data
+    );
     return response.data;
   } catch (error) {
-    console.error("Error fetching all transaction sequence of batch ID:", error.response?.data || error.message);
+    console.error(
+      "Error fetching all transaction sequence of batch ID:",
+      error.response?.data || error.message
+    );
     throw error;
   }
-}
+};
 
-
-
-
-
+export const Create_Task_For_case_distribution_transaction = async (
+  payload
+) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Create_Task_For_case_distribution_transaction`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating task for case distribution transaction:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
