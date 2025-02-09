@@ -114,9 +114,15 @@ export const Create_Task_For_case_distribution = async (payload) => {
 };
 
 
-
-
-
+export const List_all_transaction_seq_of_batch_id = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/List_all_transaction_seq_of_batch_id`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all transaction sequence of batch ID:", error.response?.data || error.message);
+    throw error;
+  }
+}
 
 
 
