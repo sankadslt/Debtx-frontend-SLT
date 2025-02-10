@@ -147,12 +147,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
               <tr>
                 <th className={GlobalStyle.tableHeader}>RTOM</th>
                 <th className={GlobalStyle.tableHeader}>DRC 1</th>
-                <th className={GlobalStyle.tableHeader}   >
-                <img src={minus} width={17} height={17} alt="Summary" style={{ position: "relative",  left: "65px"}} />
+                <th className={`${GlobalStyle.tableHeader} flex justify-center items-center`} >
+                <img src={minus} width={17} height={17} alt="Min"  />
                 </th>
                 <th className={GlobalStyle.tableHeader}>DRC 2</th>
-                <th className={GlobalStyle.tableHeader}>
-                <img src={plus} width={17} height={17} alt="Summary" style={{ position: "relative",  left: "65px"}} />
+                <th className={`${GlobalStyle.tableHeader} flex justify-center items-center`}>
+                <img src={plus} width={17} height={17} alt="Plus"  />
                 </th>
               </tr>
             </thead>
