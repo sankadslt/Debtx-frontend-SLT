@@ -51,7 +51,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
   const handleonclick = () => {
     const payload = {
       case_distribution_batch_id: BatchID || "2",
-      created_by: "Sys",
+      Created_By: "Sys",
     };
     try {
       const response = Create_Task_For_case_distribution_transaction(payload);
@@ -73,7 +73,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
   };
 
   const handleoniconclick = () => {
-    alert("Icon clicked");
+    navigate("/pages/Distribute/AssignedDRCSummary");
   };
 
   const batchSeqDetails = transaction[0]?.batch_seq_details || [];
