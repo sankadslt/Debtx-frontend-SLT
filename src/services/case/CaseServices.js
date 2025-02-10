@@ -210,3 +210,19 @@ export const Create_Task_For_case_distribution_transaction_array = async (payloa
     throw error;
   }
 };
+
+export const Case_Distribution_Details_With_Drc_Rtom_ByBatchId = async (data) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Case_Distribution_Details_With_Drc_Rtom_ByBatchId`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching case distribution details with DRC RTOM by batch ID:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
