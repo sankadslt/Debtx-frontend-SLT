@@ -48,21 +48,21 @@ export default function CaseDistributionDRCTransactions1Batch() {
     fetchData();
   }, [BatchID]);
 
-  const handleonclick = () => {
+  const handleonclick = async () => {
     const payload = {
-      case_distribution_batch_id: BatchID || "2",
+      case_distribution_batch_id: BatchID || 2,
       Created_By: "Sys",
     };
+    
+    console.log("Payload", payload);
     try {
-      const response = Create_Task_For_case_distribution_transaction(payload);
+      const response = await Create_Task_For_case_distribution_transaction(payload); 
       console.log("Response", response);
+  
       if (response.status === "success") {
         console.log("Task created successfully");
       } else {
-        console.error(
-          "Error in API response:",
-          response.message || "Unknown error"
-        );
+        console.error("Error in API response:", response.message || "Unknown error");
       }
     } catch (error) {
       console.error(
@@ -71,6 +71,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
       );
     }
   };
+  
 
   const handleoniconclick = () => {
     navigate("/pages/Distribute/AssignedDRCSummary");
