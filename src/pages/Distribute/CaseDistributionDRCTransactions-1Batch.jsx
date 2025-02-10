@@ -77,6 +77,13 @@ export default function CaseDistributionDRCTransactions1Batch() {
     navigate("/pages/Distribute/AssignedDRCSummary");
   };
 
+
+  const handletableiconclick = (Batchseq) => {
+    navigate("/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)", {
+        state: { BatchID, Batchseq } 
+    });
+};
+
   const batchSeqDetails = transaction[0]?.batch_seq_details || [];
 
   //search function
@@ -170,7 +177,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
                     {item.batch_seq_rulebase_arrears_sum}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    <button>
+                    <button  onClick={() => handletableiconclick(item.batch_seq)}>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width={26}
