@@ -78,12 +78,20 @@ export const distribution_ready_incidents_group_by_arrears_band= async () => {
   }
 };
 
-export const List_Incidents_CPE_Collect = async () => {
+
+
+export const List_Incidents_CPE_Collect = async (filters) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/List_Incidents_CPE_Collect`);
-    return response.data; 
+    const response = await axios.post(
+      `${INCIDENT_URL}/List_Incidents_CPE_Collect`,
+      filters // Pass the filters as the request body
+    );
+    return response.data;
   } catch (error) {
-    console.error("Error fetching CPE Collect incidents:", error.response?.data || error.message);
-    throw error.response?.data || error; 
+    console.error(
+      "Error fetching CPE Collect incidents:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
   }
 };
