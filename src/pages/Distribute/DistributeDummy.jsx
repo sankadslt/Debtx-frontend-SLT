@@ -40,6 +40,10 @@ const DistributeDummy = () => {
             label: "1 . A . 13 . 1 - Case Distribution DRC Transactions - 1 Batch ",
           },
           {
+            to: "/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)",
+            label: "1 . A . 13 . 2 - Case Distribution DRC Transactions - (1 Batch) ",
+          },
+          {
             to: "/pages/Distribute/CaseDistributionDRCSummary",
             label: "1 . A . 14 - Case Distribution DRC Summary ",
           },
