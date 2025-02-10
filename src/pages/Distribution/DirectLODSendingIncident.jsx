@@ -146,6 +146,7 @@ export default function DirectLODSendingIncident() {
             icon: 'success',
             confirmButtonText: 'OK'
           });
+          fetchData();
         }  
       }catch(error){
         Swal.fire({
@@ -200,6 +201,7 @@ export default function DirectLODSendingIncident() {
           icon: 'success',
           confirmButtonText: 'OK'
         });
+        fetchData();
       }
     }catch(error){
       Swal.fire({
