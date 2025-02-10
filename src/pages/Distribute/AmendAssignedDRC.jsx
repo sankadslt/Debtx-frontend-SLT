@@ -20,6 +20,7 @@ import Plusc from "../../assets/images/plusc.png";
 import {
   List_all_transaction_seq_of_batch_id,
   Case_Distribution_Details_With_Drc_Rtom_ByBatchId,
+  Exchange_DRC_RTOM_Cases
 } from "/src/services/case/CaseServices.js";
 
 export default function AmendAssignedDRC() {
@@ -90,8 +91,43 @@ export default function AmendAssignedDRC() {
     fetchDetails();
   }, [BatchID]);
 
-  const handleonclick = () => {
-    alert("Submit successfully");
+  const handleonclick = async() => {
+    
+    const drc_list = cpeData.map((item) => ({
+            plus_drc_id: Number(item.DRC2), // Ensure this is a number
+            plus_drc: "Drc A",
+            plus_rulebase_count: Number(item.DRC1Count), // Ensure this is a number
+            minus_drc_id: Number(item.DRC1), // Ensure this is a number
+            minus_drc: "Drc B",
+            minus_rulebase_count: Number(item.DRC2Count), // Ensure this is a number
+            rtom: item.RTOM,
+        }));
+    console.log("DRC List", drc_list);
+    const payload = {
+        case_distribution_batch_id: BatchID || 1,
+        drc_list: drc_list,
+        created_by: "sys",
+        };
+    console.log("Payload", payload);
+
+    try {
+        const response = await Exchange_DRC_RTOM_Cases(payload);
+        if (response.status === "success") {
+            console.log("Success", response);
+            setCpeData([]); // Clear table data after successful submission
+            
+        } else {
+            console.error(
+            "Error in API response:",
+            response.message || "Unknown error"
+            );
+        }
+        } catch (error) {
+        console.error(
+            "Error exchanging DRC RTOM cases:",
+            error.response?.data || error.message
+        );
+    }
   };
 
   const handledeleteclick = (RTOM, DRC1, DRC2) => {
@@ -111,7 +147,7 @@ export default function AmendAssignedDRC() {
 
     const entry = {
       RTOM: newEntry.RTOM,
-      DRC1: newEntry.DRC1,
+      DRC1: newEntry.DRC1, 
       DRC1Count: newEntry.Count,
       DRC2: newEntry.DRC2,
       DRC2Count: newEntry.Count,
