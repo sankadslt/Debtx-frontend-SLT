@@ -189,11 +189,11 @@ export default function AmendAssignedDRC() {
               <option value="" hidden>
                 DRC
               </option>
-            {drcData.map((item) => (
+              {drcData.map((item) => (
                 <option key={item.drc_id} value={item.drc_id}>
-                    {`${item.drc_id}`}
+                  {`${item.drc_id}`}
                 </option>
-                ))}
+              ))}
             </select>
           </div>
           {/* dropdown */}
@@ -208,9 +208,11 @@ export default function AmendAssignedDRC() {
               <option value="" hidden>
                 RTOM
               </option>
-              <option value="RTOM1">RTOM1</option>
-              <option value="RTOM2">RTOM2</option>
-              <option value="RTOM3">RTOM3</option>
+              {drcData.map((item) => (
+                <option key={item.rtom} value={item.rtom}>
+                  {`${item.rtom}`}
+                </option>
+              ))}
             </select>
           </div>
           {/* textbox */}
@@ -243,9 +245,11 @@ export default function AmendAssignedDRC() {
               <option value="" hidden>
                 DRC
               </option>
-              <option value="DRC1">DRC1</option>
-              <option value="DRC2">DRC2</option>
-              <option value="DRC3">DRC3</option>
+              {drcData.map((item) => (
+                <option key={item.drc_id} value={item.drc_id}>
+                  {`${item.drc_id}`}
+                </option>
+              ))}
             </select>
           </div>
         </div>
