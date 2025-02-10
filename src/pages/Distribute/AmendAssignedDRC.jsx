@@ -143,8 +143,13 @@ export default function AmendAssignedDRC() {
     if (!newEntry.RTOM || !newEntry.DRC1 || !newEntry.Count || !newEntry.DRC2) {
       alert("Please fill all fields before adding.");
       return;
-    }
-
+    } 
+    
+    if (parseInt(newEntry.Count, 10) > assignedCaseCount) {
+        alert("Entered case count cannot be greater than the assigned case count.");
+        return;
+      }
+      
     const entry = {
       RTOM: newEntry.RTOM,
       DRC1: newEntry.DRC1, 
@@ -166,6 +171,14 @@ export default function AmendAssignedDRC() {
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
+
+    const assignedCaseCount = drcData
+    .filter(
+      (item) =>
+        item.drc_id == newEntry.DRC1 && item.rtom == newEntry.RTOM
+    )
+    .reduce((total, item) => total + item.case_count, 0) || 0;
+
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -257,21 +270,19 @@ export default function AmendAssignedDRC() {
           {/* textbox */}
           <div className="flex gap-7">
             <h1 className={GlobalStyle.headingMedium}>
-              Assigned case count:{" "}
-              {drcData
-                .filter(
-                  (item) =>
-                    item.drc_id == newEntry.DRC1 && item.rtom == newEntry.RTOM
-                )
-                .reduce((total, item) => total + item.case_count, 0) || 0}
+              Assigned case count:{assignedCaseCount}
+              
             </h1>
             <input
               type="number"
               placeholder="Enter case count"
               className={GlobalStyle.inputText}
               value={newEntry.Count}
+              min="1"
               onChange={(e) =>
+                
                 setNewEntry({ ...newEntry, Count: e.target.value })
+                
               }
             />
           </div>
@@ -303,6 +314,8 @@ export default function AmendAssignedDRC() {
           <button
             onClick={handleaddclick}
             className={`${GlobalStyle.buttonPrimary} w-[80px] h-[35px]`}
+            
+            
           >
             Add
           </button>
