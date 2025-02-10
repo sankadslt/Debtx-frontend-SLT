@@ -13,8 +13,8 @@ import { useNavigate , useLocation } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import {get_distribution_array_of_a_transaction,Create_Task_For_case_distribution_transaction_array } from "/src/services/case/CaseServices.js";
-import minus from "/src/assets/images/imagefor1.a.13.2(minus).png";
-import plus from "/src/assets/images/imagefor1.a.13.2(plus).png";
+import minus from "/src/assets/images/minorbw.png";
+import plus from "/src/assets/images/plusbw.png";
 
 export default function CaseDistributionDRCTransactions1Batch() {
   const navigate = useNavigate();
@@ -148,11 +148,11 @@ export default function CaseDistributionDRCTransactions1Batch() {
                 <th className={GlobalStyle.tableHeader}>RTOM</th>
                 <th className={GlobalStyle.tableHeader}>DRC 1</th>
                 <th className={GlobalStyle.tableHeader}   >
-                <img src={minus} width={17} height={17} alt="Summary" style={{ position: "relative",  left: "53px"}} />
+                <img src={minus} width={17} height={17} alt="Summary" style={{ position: "relative",  left: "65px"}} />
                 </th>
                 <th className={GlobalStyle.tableHeader}>DRC 2</th>
                 <th className={GlobalStyle.tableHeader}>
-                <img src={plus} width={17} height={17} alt="Summary" style={{ position: "relative",  left: "53px"}} />
+                <img src={plus} width={17} height={17} alt="Summary" style={{ position: "relative",  left: "65px"}} />
                 </th>
               </tr>
             </thead>
