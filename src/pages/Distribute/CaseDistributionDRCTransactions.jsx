@@ -168,6 +168,13 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
     });
     console.log("Case Distribution batch ID:", batchID);
 };
+
+  const handleonexchangeclick = (batchID) => {
+    navigate("/pages/Distribute/AmendAssignedDRC", { 
+      state: { BatchID: batchID },
+    });
+    console.log("Case Distribution batch ID:", batchID);
+};
   const handlePrevNext1 = (direction) => {
     if (direction === "prev" && currentPage1 > 1) {
       setCurrentPage1(currentPage1 - 1);
@@ -344,7 +351,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     <button onClick={() => handleonsummaryclick(item.case_distribution_batch_id)} >
                     <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "1px"}} />
                     </button>
-                    <button>
+                    <button onClick={() => handleonexchangeclick(item.case_distribution_batch_id)}>
                     <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} />
                     </button>
                     <button>
