@@ -18,7 +18,7 @@ import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
 import { List_Incidents_CPE_Collect } from "../../services/Incidents/incidentService";
-import { Create_Task } from "../../services/tasks/TaskService.js";
+import { Create_Task } from "../../services/task/taskService.js";
 
 export default function CollectOnlyCPECollect() {
   const [fromDate, setFromDate] = useState(null);
