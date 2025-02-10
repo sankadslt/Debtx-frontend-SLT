@@ -23,7 +23,7 @@ import PropTypes from "prop-types";
 import Swal from "sweetalert2";
 import StatusIcon from '../../components/StatusIcon';
 import { fetchIncidents } from "../../services/Incidents/incidentService";
-import { Task_for_Download_Incidents } from "../../services/Tasks/taskService.js";
+import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
 
 const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
