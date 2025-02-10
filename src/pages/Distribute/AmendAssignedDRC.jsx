@@ -204,15 +204,18 @@ export default function AmendAssignedDRC() {
               onChange={(e) =>
                 setNewEntry({ ...newEntry, RTOM: e.target.value })
               }
+              disabled={!newEntry.DRC1}
             >
               <option value="" hidden>
                 RTOM
               </option>
-              {drcData.map((item) => (
-                <option key={item.rtom} value={item.rtom}>
-                  {`${item.rtom}`}
-                </option>
-              ))}
+              {drcData
+                .filter((item) => item.drc_id == newEntry.DRC1) 
+                .map((item) => (
+                    <option key={item.rtom} value={item.rtom}>
+                    {`${item.rtom}`}
+                    </option>
+                ))}
             </select>
           </div>
           {/* textbox */}
