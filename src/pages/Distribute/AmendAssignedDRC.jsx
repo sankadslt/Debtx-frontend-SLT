@@ -71,7 +71,7 @@ export default function AmendAssignedDRC() {
         console.log("Data", data);
         const response =
           await Case_Distribution_Details_With_Drc_Rtom_ByBatchId(data);
-        console.log("Response", response);
+        console.log("Retrival", response);
         if (response.status === "success") {
           setdrcData(response.data || []); // Ensure `data` is always an array
         } else {
@@ -189,9 +189,11 @@ export default function AmendAssignedDRC() {
               <option value="" hidden>
                 DRC
               </option>
-              <option value="DRC1">DRC1</option>
-              <option value="DRC2">DRC2</option>
-              <option value="DRC3">DRC3</option>
+            {drcData.map((item) => (
+                <option key={item.drc_id} value={item.drc_id}>
+                    {`${item.drc_id}`}
+                </option>
+                ))}
             </select>
           </div>
           {/* dropdown */}
