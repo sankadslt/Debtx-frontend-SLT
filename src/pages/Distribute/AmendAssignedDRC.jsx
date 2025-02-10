@@ -210,18 +210,24 @@ export default function AmendAssignedDRC() {
                 RTOM
               </option>
               {drcData
-                .filter((item) => item.drc_id == newEntry.DRC1) 
+                .filter((item) => item.drc_id == newEntry.DRC1)
                 .map((item) => (
-                    <option key={item.rtom} value={item.rtom}>
+                  <option key={item.rtom} value={item.rtom}>
                     {`${item.rtom}`}
-                    </option>
+                  </option>
                 ))}
             </select>
           </div>
           {/* textbox */}
           <div className="flex gap-7">
             <h1 className={GlobalStyle.headingMedium}>
-              Assigned case count : 0
+              Assigned case count:{" "}
+              {drcData
+                .filter(
+                  (item) =>
+                    item.drc_id == newEntry.DRC1 && item.rtom == newEntry.RTOM
+                )
+                .reduce((total, item) => total + item.case_count, 0) || 0}
             </h1>
             <input
               type="number"
