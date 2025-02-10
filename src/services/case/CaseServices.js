@@ -195,9 +195,7 @@ export const get_distribution_array_of_a_transaction = async (data) => {
   }
 };
 
-export const Create_Task_For_case_distribution_transaction_array = async (
-  payload
-) => {
+export const Create_Task_For_case_distribution_transaction_array = async (payload) => {
   try {
     const response = await axios.post(
       `${URL}/Create_Task_For_case_distribution_transaction_array`,
@@ -213,9 +211,7 @@ export const Create_Task_For_case_distribution_transaction_array = async (
   }
 };
 
-export const Case_Distribution_Details_With_Drc_Rtom_ByBatchId = async (
-  data
-) => {
+export const Case_Distribution_Details_With_Drc_Rtom_ByBatchId = async (data) => {
   try {
     const response = await axios.post(
       `${URL}/Case_Distribution_Details_With_Drc_Rtom_ByBatchId`,
@@ -231,9 +227,9 @@ export const Case_Distribution_Details_With_Drc_Rtom_ByBatchId = async (
   }
 };
 
-export const Exchange_DRC_RTOM_Cases = async (data) => {
+export const Exchange_DRC_RTOM_Cases = async (payload) => {
   try {
-    const response = await axios.post(`${URL}/Exchange_DRC_RTOM_Cases`, data);
+    const response = await axios.post(`${URL}/Exchange_DRC_RTOM_Cases`, payload);
     return response.data;
   } catch (error) {
     console.error(
