@@ -1,7 +1,7 @@
 /*Purpose: This template is used for the 1.A.13.2 - Case Distribution For DRC Transactions - 1 Batch UI
-Created Date: 2025-01-07
+Created Date: 2025-02-10
 Created By: Chamithu (chamithujayathilaka2003@gmail.com)
-Last Modified Date: 2025-01-23
+Last Modified Date: 2025-02-10
 Version: node 20
 ui number : 1.A.13.2
 Dependencies: tailwind css
