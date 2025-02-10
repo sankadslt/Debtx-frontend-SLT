@@ -19,7 +19,8 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Direct_LOD from "../../assets/images/Direct_LOD.png";
-import { List_incidents_Direct_LOD } from "../../services/distribution/distributionService.js";
+import { List_incidents_Direct_LOD, Create_Task_Download_Direct_LOD_Sending, Forward_Direct_LOD, Create_Task_Forward_Direct_LOD } from "../../services/distribution/distributionService.js";
+import Swal from "sweetalert2";
 
 export default function DirectLODSendingIncident() {
   const navigate = useNavigate();
@@ -60,13 +61,18 @@ export default function DirectLODSendingIncident() {
   const [selectedSource, setSelectedSource] = useState("");
   const [tableData, setTableData] = useState([]);
   const [isloading, setIsLoading] = useState(true);
-  const [filteredData, setFilteredData] = useState(tableData)
+  const [filteredData, setFilteredData] = useState(tableData);
 
   const rowsPerPage = 7; // Number of rows per page
 
   const fetchData = async () => {
     try {
-      const response = await List_incidents_Direct_LOD();
+      const filters= {
+        Source_Type:selectedSource,
+        FromDate:fromDate,
+        ToDate:toDate
+      }
+      const response = await List_incidents_Direct_LOD(filters);
       const formattedData = response?.data.map((item) => {
         
         const createdDateStr = item.Created_Dtm.replace(" ", "T");  
@@ -88,11 +94,122 @@ export default function DirectLODSendingIncident() {
       setIsLoading(false);
     }
   };
-  
 
   useEffect(() => {
-      fetchData();
+    fetchData();
   }, []);
+  
+  const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
+
+    if(!source_type && !fromDate && !toDate){
+      Swal.fire({
+        title: 'Warning',
+        text: 'Missing Parameters',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
+    }else{
+    try{
+      const filteredParams = {
+        Source_Type:source_type,
+        FromDate:fromDate,
+        ToDate:toDate
+      }
+      const response = await Create_Task_Download_Direct_LOD_Sending(filteredParams);
+      if(response.status===201){
+        Swal.fire({ 
+          title: 'Success',
+          text: 'Task successfully created',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      }
+    }catch(error){
+      Swal.fire({
+        title: 'Error',
+        text: 'Error creating task',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  }
+  };
+
+  const handleProceed = async (Incident_Id)=>{
+    if (selectedRows.includes(Incident_Id)) {
+      try{
+        const response = await Forward_Direct_LOD(Incident_Id);
+        if(response.status===201){
+          Swal.fire({ 
+            title: 'Success',
+            text: response.data.message,
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
+        }  
+      }catch(error){
+        Swal.fire({
+          title: 'Error',
+          text: error.message,
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      } 
+    } else {
+      Swal.fire({
+        title: 'Warning',
+        text: 'Row not selected',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
+    }
+  }
+
+  const handleCreate = async()=>{
+    try{
+      if(filteredData.length>10){
+        try{
+          const parameters = {
+            Status:"Direct LOD",
+            Inncident_Ids:selectedRows,
+          }
+          const response = await Create_Task_Forward_Direct_LOD(parameters);
+          if(response.status===201){
+            Swal.fire({ 
+              title: 'Success',
+              text: 'Successfully created task to forward the direct LOD incidents',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
+          }
+        }catch(error){
+          Swal.fire({
+            title: 'Error',
+            text: 'Error creating task',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+      }else{
+        for (const row of selectedRows) {
+          await Forward_Direct_LOD(row); 
+        }
+        Swal.fire({ 
+          title: 'Success',
+          text: "Successfully forwarded the direct LOD incidents",
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      }
+    }catch(error){
+      Swal.fire({
+        title: 'Error',
+        text: "Internal server error",
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }   
+  }
   
   // validation for date
   const handleFromDateChange = (date) => {
@@ -161,15 +278,10 @@ export default function DirectLODSendingIncident() {
     }
     setSelectAllData(!selectAllData);
   };
-  // console.log(selectedRows, "sr")
-  // console.log(selectAllData,"all")
+
   const handleFilterClick = () => {
     setFilteredData(tableData.filter((row) => {
-      const createdDate = new Date(row.created_dtm);
-      console.log(fromDate,"fd")
-      console.log(toDate,"td")
-      console.log(createdDate,"cd")
-      
+      const createdDate = new Date(row.created_dtm); 
       const isWithinDateRange =
         (!fromDate || createdDate >= fromDate) &&
         (!toDate || createdDate <= toDate);
@@ -187,12 +299,16 @@ export default function DirectLODSendingIncident() {
         <h1 className={`${GlobalStyle.headingLarge} m-0`}>
           Direct LOD sending Incidents
         </h1>
-        <Link
+        <button
           className={`${GlobalStyle.buttonPrimary}`}
-          to="/lod/ftllod/ftllod/downloadcreateftllod"
+          onClick={()=>{handleCreateTaskForDownload({
+            source_type: selectedSource, 
+            fromDate: fromDate, 
+            toDate: toDate
+          })}}
         >
           Create task and let me know
-        </Link>
+        </button>
       </div>
 
       {/* Filter Section */}
@@ -331,7 +447,7 @@ export default function DirectLODSendingIncident() {
                   >
                     <button
                       className={`${GlobalStyle.buttonPrimary} mx-auto`}
-                      onClick={""}
+                      onClick={()=>{handleProceed(row.id)}}
                     >
                       Proceed
                     </button>
@@ -388,12 +504,12 @@ export default function DirectLODSendingIncident() {
           Select All Data
         </label>
 
-        <Link
+        <button
           className={`${GlobalStyle.buttonPrimary} ml-4`}
-          to="/lod/ftllod/ftllod/downloadcreateftllod"
+          onClick={handleCreate}
         >
           Create
-        </Link>
+        </button>
       </div>
     </div>
   );

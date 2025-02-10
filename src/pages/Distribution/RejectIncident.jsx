@@ -15,91 +15,137 @@ Notes:
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Import GlobalStyle
 import Reject_Pending from "../../assets/images/Reject_Pending.png";
+import { List_F1_filtered_incidents } from "../../services/distribution/distributionService.js";
 
 export default function RejectIncident() {
   const navigate = useNavigate();
 
   // Table data
-  const tableData = [
-    {
-      id: "RC001",
-      status: "Reject Pending4",
-      account_no: "12345",
-      filtered_reason: "Credit-class = VIP",
-      rejected_on: "2024-11-01",
-      source_type: "pilot-suspended",
-    },
-    {
-      id: "RC002",
-      status: "Reject Pending4",
-      account_no: "12345",
-      filtered_reason: "Customer Type = slt",
-      rejected_on: "2024-11-01",
-      source_type: "pilot-suspended",
-    },
-    {
-      id: "RC003",
-      status: "Reject Pending4",
-      account_no: "12345",
-      filtered_reason: "Credit-class = VIP",
-      rejected_on: "2024-11-01",
-      source_type: "pilot-suspended",
-    },
-    {
-      id: "RC001",
-      status: "Reject Pending4",
-      account_no: "12345",
-      filtered_reason: "Credit-class = VIP",
-      rejected_on: "2024-11-01",
-      source_type: "pilot-suspended",
-    },
-    {
-      id: "RC003",
-      status: "Reject Pending4",
-      account_no: "12345",
-      filtered_reason: "Customer Type = slt",
-      rejected_on: "2024-11-01",
-      source_type: "pilot-suspended",
-    },
-    {
-      id: "RC002",
-      status: "Reject Pending4",
-      account_no: "12345",
-      filtered_reason: "Credit-class = VIP",
-      rejected_on: "2024-11-01",
-      source_type: "pilot-suspended",
-    },
-    {
-      id: "RC002",
-      status: "Reject Pending4",
-      account_no: "12345",
-      filtered_reason: "Credit-class = VIP",
-      rejected_on: "2024-11-01",
-      source_type: "pilot-suspended",
-    },
-    {
-      id: "RC002",
-      status: "Reject Pending4",
-      account_no: "12345",
-      filtered_reason: "Credit-class = VIP",
-      rejected_on: "2024-11-01",
-      source_type: "pilot-suspended",
-    },
-  ];
+  // const tableData = [
+  //   {
+  //     id: "RC001",
+  //     status: "Reject Pending4",
+  //     account_no: "12345",
+  //     filtered_reason: "Credit-class = VIP",
+  //     rejected_on: "2024-11-01",
+  //     source_type: "pilot-suspended",
+  //   },
+  //   {
+  //     id: "RC002",
+  //     status: "Reject Pending4",
+  //     account_no: "12345",
+  //     filtered_reason: "Customer Type = slt",
+  //     rejected_on: "2024-11-01",
+  //     source_type: "pilot-suspended",
+  //   },
+  //   {
+  //     id: "RC003",
+  //     status: "Reject Pending4",
+  //     account_no: "12345",
+  //     filtered_reason: "Credit-class = VIP",
+  //     rejected_on: "2024-11-01",
+  //     source_type: "pilot-suspended",
+  //   },
+  //   {
+  //     id: "RC001",
+  //     status: "Reject Pending4",
+  //     account_no: "12345",
+  //     filtered_reason: "Credit-class = VIP",
+  //     rejected_on: "2024-11-01",
+  //     source_type: "pilot-suspended",
+  //   },
+  //   {
+  //     id: "RC003",
+  //     status: "Reject Pending4",
+  //     account_no: "12345",
+  //     filtered_reason: "Customer Type = slt",
+  //     rejected_on: "2024-11-01",
+  //     source_type: "pilot-suspended",
+  //   },
+  //   {
+  //     id: "RC002",
+  //     status: "Reject Pending4",
+  //     account_no: "12345",
+  //     filtered_reason: "Credit-class = VIP",
+  //     rejected_on: "2024-11-01",
+  //     source_type: "pilot-suspended",
+  //   },
+  //   {
+  //     id: "RC002",
+  //     status: "Reject Pending4",
+  //     account_no: "12345",
+  //     filtered_reason: "Credit-class = VIP",
+  //     rejected_on: "2024-11-01",
+  //     source_type: "pilot-suspended",
+  //   },
+  //   {
+  //     id: "RC002",
+  //     status: "Reject Pending4",
+  //     account_no: "12345",
+  //     filtered_reason: "Credit-class = VIP",
+  //     rejected_on: "2024-11-01",
+  //     source_type: "pilot-suspended",
+  //   },
+  // ];
 
   // Filter state
   const [fromDate, setFromDate] = useState(null); //for date
   const [toDate, setToDate] = useState(null);
   const [error, setError] = useState("");
+  const [tableData, setTableData] = useState([]);
   const [filteredData, setFilteredData] = useState(tableData);
   const [selectAllData, setSelectAllData] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = async () => {
+      try {
+        const response = await List_F1_filtered_incidents();
+        const formattedData = response?.data.map((item) => {
+          
+          const createdDateStr = item.Created_Dtm.replace(" ", "T");  
+          const createdDate = new Date(createdDateStr);
+
+          const rejectedDateStr = item.Rejected_Dtm.replace(" ", "T");  
+          const rejectedDate = new Date(rejectedDateStr);
+          
+          
+          return {
+            id: item.Incident_Id || "N/A",
+            status: item.Incident_Status || "N/A",
+            account_no: item.Account_Num || "N/A",
+            filtered_reason: item.Filtered_Reason || "N/A",
+            source_type: item?.Source_Type || "N/A",
+            rejected_on: isNaN(rejectedDate) ? "N/A" : rejectedDate.toLocaleString() || "N/A",
+            created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A"
+          };
+        });
+        setTableData(formattedData);
+        setIsLoading(false);
+      } catch {
+        setError("Failed to fetch DRC details. Please try again later.");
+        setIsLoading(false);
+      }
+    };
+    
+   useEffect(() => {
+        fetchData();
+    }, []);
+  console.log(tableData, "tdpj")
+  //   if (isLoading) {
+  //     return (
+  //         <div className="flex justify-center items-center h-64">
+  //             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  //         </div>
+  //     );
+  // }
 
   // validation for date
   const handleFromDateChange = (date) => {

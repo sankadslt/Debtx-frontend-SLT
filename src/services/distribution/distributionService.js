@@ -2,13 +2,68 @@ import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL; 
 const URL = `${BASE_URL}/incident`;
+const TASK_URL = `${BASE_URL}/task`;
 
-export const List_incidents_Direct_LOD = async () => {
+export const List_incidents_Direct_LOD = async (filters) => {
     try {
-      const response = await axios.post(`${URL}/List_incidents_Direct_LOD`);
+      const response = await axios.post(`${URL}/List_incidents_Direct_LOD`, filters);
       return response.data; 
     } catch (error) {
       console.error("Error fetching Direct LOD incidents:", error.response?.data || error.message);
       throw error.response?.data || error; 
     }
- };
+};
+
+ export const Create_Task_Download_Direct_LOD_Sending = async (filteredParams) => {
+    try {
+        const taskData = {
+            Template_Task_Id: 23,
+            task_type: "Create Direct LOD Incident Sending  List for Download",
+            Created_By: "FrontendUser", 
+            task_status: "open",
+            ...filteredParams,
+        };
+        const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+        return response; 
+    } catch (error) {
+        console.error("Error creating task:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+ }
+
+ export const List_F1_filtered_incidents = async () => {
+    try {
+      const response = await axios.post(`${URL}/List_F1_filted_Incidents`);
+      return response.data; 
+    } catch (error) {
+      console.error("Error fetching F1 filtered incidents:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+};
+
+export const Forward_Direct_LOD = async (Incident_Id) => {
+    try {
+      const response = await axios.post(`${URL}/Forward_Direct_LOD`, {Incident_Id});
+      return response; 
+    } catch (error) {
+      console.error("Error forwarding Direct LOD incidents:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+};
+
+export const Create_Task_Forward_Direct_LOD = async (parameters) => {
+    try {
+        const taskData = {
+            Template_Task_Id: 16,
+            task_type: "Create Case from Incident Open LOD",
+            Created_By: "FrontendUser", 
+            task_status: "open",
+            ...parameters,
+        };
+        const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+        return response; 
+    } catch (error) {
+        console.error("Error creating task:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+ }
