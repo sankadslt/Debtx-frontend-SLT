@@ -8,56 +8,88 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: The following page conatins the codes */
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState , useEffect } from "react";
+import { useNavigate , useLocation } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import {get_distribution_array_of_a_transaction,Create_Task_For_case_distribution_transaction_array } from "/src/services/case/CaseServices.js";
+import minus from "/src/assets/images/imagefor1.a.13.2(minus).png";
+import plus from "/src/assets/images/imagefor1.a.13.2(plus).png";
 
 export default function CaseDistributionDRCTransactions1Batch() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { BatchID, Batchseq } = location.state || {};
+  console.log("BatchID", BatchID);
+  console.log("Batchseq", Batchseq);
   const [searchQuery, setSearchQuery] = useState("");
+  const [transactions, setTransactions] = useState([]);
 
-  const cpeData = [
-    {
-      batchseq: "S1",
-      DRC: "DRC1",
-      RTOM: "AD",
-      DRC_2: "100",
-      TotalArrears: "25000",
-    },
-    {
-      batchseq: "S2",
-      DRC: "DRC2",
-      RTOM: "GM",
-      DRC_2: "200",
-      TotalArrears: "50000",
-    },
-    {
-      batchseq: "S3",
-      DRC: "DRC3",
-      RTOM: "KU",
-      DRC_2: "300",
-      TotalArrears: "75000",
-    },
-    {
-      batchseq: "S4",
-      DRC: "DRC4",
-      RTOM: "AD",
-      DRC_2: "400",
-      TotalArrears: "100000",
-    },
-  ];
+  useEffect(() => {
+  const fetchTransactions = async () => {
+    try {
+      const data = {
+        case_distribution_batch_id: BatchID || 1,
+        batch_seq: Batchseq || 2,
+      };
+      const response = await get_distribution_array_of_a_transaction(data);
 
-  const handleonclick = () => {
-    alert("Task created successfully");
+      if (response.status === "success") {
+        setTransactions(response.data);
+        console.log("Response", response);
+      } else {
+        setError("No data found.");
+      }
+    } catch (err) {
+      console.error("Error fetching transactions:", err);
+      setError("Failed to fetch data.");
+    }
+  };
+
+  fetchTransactions();
+}, [BatchID, Batchseq]);
+
+  const handleonclick = async() => {
+    
+    const payload = {
+        case_distribution_batch_id: BatchID || 2,
+        batch_seq: Batchseq || 2,
+        Created_By: "Sys",
+      };
+    console.log("Payload", payload);
+    try{
+        const response = await Create_Task_For_case_distribution_transaction_array(payload);
+        console.log("Response", response);
+
+        if (response.status === "success") {
+            console.log("Task created successfully");
+            }
+        else {
+            console.error("Error in API response:", response.message || "Unknown error");
+            }
+
+    }
+    catch (error) {
+        console.error(
+            "Error creating task for case distribution transaction:",
+            error.response?.data || error.message
+        );
+    }
+
   };
 
   const handleoniconclick = () => {
-    alert("Icon clicked");
+    navigate("/pages/Distribute/AssignedDRCSummary");
   };
 
+  const batchSeqDetails = transactions[0]?.batch_seq_details || [];
+  const allDistributions = batchSeqDetails.flatMap(
+    (batch) => batch.array_of_distributions || []
+  );
+
+  console.log("allDistributions", allDistributions);
   //search function
-  const filteredData = cpeData.filter((row) =>
+  const filteredData = allDistributions.filter((row) =>
     Object.values(row)
       .join("")
       .toLowerCase()
@@ -75,21 +107,21 @@ export default function CaseDistributionDRCTransactions1Batch() {
       <div className="flex flex-col items-center justify-center mb-4">
         <div className={`${GlobalStyle.cardContainer}`}>
           <p className="mb-2">
-            <strong>Batch ID:</strong>
+            <strong>Batch ID:</strong> {transactions[0]?.case_distribution_batch_id || "N/A"}
           </p>
 
           <p className="mb-2">
-            <strong>DRC Commission Rule:</strong>
+            <strong>DRC Commission Rule:</strong> {transactions[0]?.drc_commision_rule || "N/A"}
           </p>
           <p className="mb-2">
-            <strong>Arrears Band:</strong>
+            <strong>Arrears Band:</strong> {transactions[0]?.current_arrears_band || "N/A"}
           </p>
 
           <p className="mb-2">
-            <strong>Case Count:</strong>
+            <strong>Case Count:</strong> {transactions[0]?.rulebase_count|| "N/A"}
           </p>
           <p className="mb-2">
-            <strong>Total Arrears Amount:</strong>
+            <strong>Total Arrears Amount:</strong> {transactions[0]?.rulebase_arrears_sum || "N/A"}
           </p>
         </div>
       </div>
@@ -115,34 +147,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
               <tr>
                 <th className={GlobalStyle.tableHeader}>RTOM</th>
                 <th className={GlobalStyle.tableHeader}>DRC 1</th>
-                <th className={GlobalStyle.tableHeader}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={23}
-                    height={24}
-                    fill="none"
-                  >
-                    <path
-                      fill="#000"
-                      fillRule="evenodd"
-                      d="M11.5 23.5a11.501 11.501 0 1 0 0-23.002 11.501 11.501 0 0 0 0 23.002ZM5.111 13.278H17.89v-2.556H5.11v2.556Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                <th className={GlobalStyle.tableHeader}   >
+                <img src={minus} width={17} height={17} alt="Summary" style={{ position: "relative",  left: "53px"}} />
                 </th>
                 <th className={GlobalStyle.tableHeader}>DRC 2</th>
                 <th className={GlobalStyle.tableHeader}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={23}
-                    height={24}
-                    fill="none"
-                  >
-                    <path
-                      fill="#000"
-                      d="M11.5.5C5.149.5 0 5.649 0 12s5.149 11.5 11.5 11.5S23 18.351 23 12 17.851.5 11.5.5Zm5.75 12.65h-4.6v4.6h-2.3v-4.6h-4.6v-2.3h4.6v-4.6h2.3v4.6h4.6v2.3Z"
-                    />
-                  </svg>
+                <img src={plus} width={17} height={17} alt="Summary" style={{ position: "relative",  left: "53px"}} />
                 </th>
               </tr>
             </thead>
@@ -156,12 +166,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
                       : GlobalStyle.tableRowOdd
                   }
                 >
-                  <td className={GlobalStyle.tableData}>{item.RTOM}</td>
-                  <td className={GlobalStyle.tableData}>{item.DRC}</td>
-                  <td className={GlobalStyle.tableData}>{item.batchseq}</td>
+                  <td className={GlobalStyle.tableData}>{item.rtom}</td>
+                  <td className={GlobalStyle.tableData}>{item.minus_drc}</td>
+                  <td className={GlobalStyle.tableData}>{item.minus_rulebase_count}</td>
 
-                  <td className={GlobalStyle.tableData}>{item.DRC_2}</td>
-                  <td className={GlobalStyle.tableData}>{item.TotalArrears}</td>
+                  <td className={GlobalStyle.tableData}>{item.plus_drc}</td>
+                  <td className={GlobalStyle.tableData}>{item.plus_rulebase_count}</td>
                 </tr>
               ))}
             </tbody>
