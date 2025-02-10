@@ -178,3 +178,35 @@ export const Create_Task_For_case_distribution_transaction = async (
     throw error;
   }
 };
+
+export const get_distribution_array_of_a_transaction = async (data) => {
+  try {
+    const response = await axios.post(
+      `${URL}/get_distribution_array_of_a_transaction`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching distribution array of a transaction:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const Create_Task_For_case_distribution_transaction_array = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Create_Task_For_case_distribution_transaction_array`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating task for case distribution transaction array:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
