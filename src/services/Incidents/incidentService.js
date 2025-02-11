@@ -95,3 +95,23 @@ export const List_Incidents_CPE_Collect = async (filters) => {
     throw error.response?.data || error;
   }
 };
+
+export const getF1FilteredIncidentsCount = async () => {
+  const response = await axios.post(`${INCIDENT_URL}/total_F1_filtered_Incidents`);
+  return response.data?.data?.F1_filtered_incident_total;
+};
+
+export const getDistributionReadyIncidentsCount = async () => {
+  const response = await axios.post(`${INCIDENT_URL}/total_distribution_ready_incidents`);
+  return response.data?.data?.Distribution_ready_total;
+};
+
+export const getCPECollectIncidentsCount = async () => {
+  const response = await axios.post(`${INCIDENT_URL}/total_incidents_CPE_Collect`);
+  return response.data?.data?.Distribution_ready_total;
+};
+
+export const getDirectLODIncidentsCount = async () => {
+  const response = await axios.post(`${INCIDENT_URL}/total_incidents_Direct_LOD`);
+  return response.data?.data?.Distribution_ready_total;
+};

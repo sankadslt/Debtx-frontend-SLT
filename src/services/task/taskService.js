@@ -31,3 +31,22 @@ export const Task_for_Download_Incidents = async (incidentData) => {
         throw error.response?.data || error;
     }
   };
+
+  export const Create_Task_for_OpenNoAgent = async (filteredParams) => {
+    try {
+      const taskData = {
+        Template_Task_Id: 21,
+        task_type: "Create incident open for distribution download",
+        Created_By: "FrontendUser", 
+        task_status: "open",
+        Incident_Status: "Open No Agent",
+        ...filteredParams,
+      };
+  
+      const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating task:", error);
+      throw error.response?.data || error;
+    }
+  };

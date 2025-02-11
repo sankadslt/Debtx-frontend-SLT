@@ -4,65 +4,93 @@ Created By: Susinidu (susinidusachinthana@gmail.com)
 Last Modified Date: 2025-30-01
 Modified Date: 2025-22-01
 Modified By: Susinidu (susinidusachinthana@gmail.com)
-              K.H.Lasandi Randini 
+            K.H.Lasandi Randini 
 Version: node 22
 ui number : 1.7
 Dependencies: tailwind css
 Related Files: 
 Notes:  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import GlobalStyle from "../../assets/prototype/GlobalStyle"
+import {
+  getF1FilteredIncidentsCount,
+  getDistributionReadyIncidentsCount,
+  getCPECollectIncidentsCount,
+  getDirectLODIncidentsCount,
+} from "../../services/Incidents/incidentService";
+import GlobalStyle from "../../assets/prototype/GlobalStyle";
 
 const FilteredIncident = () => {
   const navigate = useNavigate();
-  const cases = [
-    { type: "Open for Distribution", count: 4500 },
-    { type: "Reject pending Cases", count: 3000 },
-    { type: "Direct OLD", count: 150 },
-    { type: "Collect CPE", count: 100 },
-  ];
+  const [cases, setCases] = useState([
+    { type: "Open for Distribution", count: 0 },
+    { type: "Reject pending Cases", count: 0 },
+    { type: "Direct LOD", count: 0 },
+    { type: "Collect CPE", count: 0 },
+  ]);
 
-  const [currentPage, setCurrentPage] = useState(1);
+  useEffect(() => {
+    const fetchIncidentCounts = async () => {
+      try {
+        const [
+          openCount,
+          rejectCount,
+          directLODCount,
+          collectCPECount,
+        ] = await Promise.all([
+          getDistributionReadyIncidentsCount(),
+          getF1FilteredIncidentsCount(),
+          getDirectLODIncidentsCount(),
+          getCPECollectIncidentsCount(),
+        ]);
+
+        setCases([
+          { type: "Open for Distribution", count: openCount || 0 },
+          { type: "Reject pending Cases", count: rejectCount || 0 },
+          { type: "Direct LOD", count: directLODCount || 0 },
+          { type: "Collect CPE", count: collectCPECount || 0 },
+        ]);
+      } catch (error) {
+        console.error("Error fetching incident counts:", error);
+      }
+    };
+
+    fetchIncidentCounts();
+  }, []);
+
   const recordsPerPage = 4;
+  const [currentPage, setCurrentPage] = useState(1);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-
   const currentCases = cases.slice(indexOfFirstRecord, indexOfLastRecord);
 
-  //Navigation
   const handleIconClick = (type, count) => {
     let path = "";
-  
+
     if (type === "Open for Distribution") {
-      path = "#";
+      path = "/Distribution/open-incident";
     } else if (type === "Reject pending Cases") {
-      path = "#";
-    } else if (type === "Direct OLD") {
-      path = "#";
+      path = "/Distribution/reject-incident";
+    } else if (type === "Direct LOD") {
+      path = "/Distribution/direct-lod-sending-incident";
     } else if (type === "Collect CPE") {
-      path = "#";
+      path = "/Distribution/collect-only-cpe-collect";
     }
-  
-    // Navigate to the appropriate path with state
+
     navigate(path, {
       state: { casesType: type, count: count },
     });
   };
-  
 
-  //main
   return (
     <div className={GlobalStyle.fontPoppins}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          
           <div>
             <h1 className={GlobalStyle.headingLarge}>Filtered Incidents</h1>
           </div>
 
-          {/* Table Section */}
           <div className="flex items-center justify-center min-h-full pt-20">
             <div className={GlobalStyle.cardContainer}>
               <table className={GlobalStyle.table}>
@@ -87,26 +115,25 @@ const FilteredIncident = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td
-                        className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
-                      >
+                      <td className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}>
                         {cases.type}
                       </td>
-                      <td
-                        className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
-                      >
+                      <td className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}>
                         {cases.count.toLocaleString()}
                       </td>
 
                       <td className={GlobalStyle.tableData}>
-                        {/* Pass the type and count for each case */}
                         <button
-                          onClick={() =>
-                            handleIconClick(cases.type, cases.count)
-                          }
+                          onClick={() => handleIconClick(cases.type, cases.count)}
                           className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                         >
-                          <img src="../../../src/assets/images/Open.png" alt="Open Icon" title="Open" width={20} height={15} />
+                          <img
+                            src="../../../src/assets/images/Open.png"
+                            alt="Open Icon"
+                            title="Open"
+                            width={20}
+                            height={15}
+                          />
                         </button>
                       </td>
                     </tr>
@@ -122,7 +149,6 @@ const FilteredIncident = () => {
               </table>
             </div>
           </div>
-
         </main>
       </div>
     </div>

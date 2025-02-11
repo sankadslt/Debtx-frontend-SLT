@@ -20,6 +20,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
 import { List_Incidents_CPE_Collect } from "../../services/Incidents/incidentService";
 import { Create_Task } from "../../services/task/taskService.js";
+import Swal from "sweetalert2";
 
 export default function CollectOnlyCPECollect() {
   const [fromDate, setFromDate] = useState(null);
@@ -31,8 +32,7 @@ export default function CollectOnlyCPECollect() {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedSource, setSelectedSource] = useState("");
   const [tableData, setTableData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-const [ taskMessage,setTaskMessage] = useState(""); 
+  const [setIsLoading] = useState(false); 
   const rowsPerPage = 7;
 
   useEffect(() => {
@@ -48,7 +48,7 @@ const [ taskMessage,setTaskMessage] = useState("");
       }
     };
     fetchData();
-  }, []);
+  });
 
     const handleFilter = async () => {
       try {
@@ -67,12 +67,19 @@ const [ taskMessage,setTaskMessage] = useState("");
     };
 
     
+  
     // const handleCreateTask = async () => {
     //   const filteredParams = {
     //     Source_Type: selectedSource || null,
     //     From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
     //     To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
     //   };
+    
+    //   // Check if all parameters are empty
+    //   if (!filteredParams.Source_Type && !filteredParams.From_Date && !filteredParams.To_Date) {
+    //     setTaskMessage("Please provide at least one filter parameter to create a task.");
+    //     return;
+    //   }
     
     //   console.log("Filtered Params:", filteredParams);
     
@@ -92,6 +99,45 @@ const [ taskMessage,setTaskMessage] = useState("");
     //     );
     //   }
     // };
+      
+    // const handleCreateTask = async () => {
+    //   const filteredParams = {
+    //     Source_Type: selectedSource || null,
+    //     From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
+    //     To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
+    //   };
+    
+    //   if (!filteredParams.Source_Type && !filteredParams.From_Date && !filteredParams.To_Date) {
+        
+    //     return;
+    //   }
+    //   console.log("Filtered Params:", filteredParams);
+    //   try {
+    //     const response = await Create_Task(filteredParams);
+    
+    //     if (response?.Task_Id) {
+    //       Swal.fire({
+    //         title: "Task Created Successfully!",
+    //         text: `Task ID: ${response.Task_Id}`,
+    //         icon: "success",
+    //         confirmButtonText: "OK",
+    //       });
+    //       // Refresh task blocks by re-fetching data
+    //       const updatedResponse = await List_Incidents_CPE_Collect();
+    //       setTableData(updatedResponse.data);
+    //     } else {
+    //       throw new Error("Task ID is missing in the response.");
+    //     }
+    //   } catch (err) {
+    //     Swal.fire({
+    //       title: "Error",
+    //       text: `Failed to create task. Error: ${err.message || "Unknown error"}`,
+    //       icon: "error",
+    //       confirmButtonText: "OK",
+    //     });
+    //   }
+    // };
+
     const handleCreateTask = async () => {
       const filteredParams = {
         Source_Type: selectedSource || null,
@@ -99,32 +145,48 @@ const [ taskMessage,setTaskMessage] = useState("");
         To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
       };
     
-      // Check if all parameters are empty
       if (!filteredParams.Source_Type && !filteredParams.From_Date && !filteredParams.To_Date) {
-        setTaskMessage("Please provide at least one filter parameter to create a task.");
+        Swal.fire({
+          title: "Validation Error",
+          text: "Please provide at least one filter parameter to create a task.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
         return;
       }
     
-      console.log("Filtered Params:", filteredParams);
-    
       try {
         const response = await Create_Task(filteredParams);
-        console.log("Task Creation Response:", response);
     
         if (response?.Task_Id) {
-          setTaskMessage(`Task created successfully! Task ID: ${response.Task_Id}`);
+          Swal.fire({
+            title: "Task Created Successfully!",
+            text: `Task ID: ${response.Task_Id}`,
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+    
+          // Clear filter states
+      setFromDate(null);
+      setToDate(null);
+      setSelectedSource("");
+
+          // Re-fetch updated task data
+          const updatedResponse = await List_Incidents_CPE_Collect();
+          setTableData(updatedResponse.data); // Refresh task blocks with new data
         } else {
           throw new Error("Task ID is missing in the response.");
         }
       } catch (err) {
-        console.error("Error creating task:", err);
-        setTaskMessage(
-          `Failed to create task. Error: ${err.message || "Unknown error"}`
-        );
+        Swal.fire({
+          title: "Error",
+          text: `Failed to create task. Error: ${err.message || "Unknown error"}`,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
     };
-      
-  
+    
   const filteredData = tableData.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -285,7 +347,7 @@ const [ taskMessage,setTaskMessage] = useState("");
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((row, index) => (
+              {paginatedData?.map((row, index) => (
                 <tr
                   key={index}
                   className={`${
@@ -325,9 +387,8 @@ const [ taskMessage,setTaskMessage] = useState("");
                   </td>
 
                   <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {new Intl.NumberFormat("en-US").format(row.Action)}
-                  </td>
+                 
+                  <td className={GlobalStyle.tableData}>{row.Action}</td>
                   <td className={GlobalStyle.tableData}>{row.Source_Type}</td>
                   <td
                     className={`${GlobalStyle.tableData} text-center px-6 py-4`}
