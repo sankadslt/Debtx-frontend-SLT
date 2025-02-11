@@ -4,6 +4,7 @@ Created Date: 2025.01.21
 Created By: K.K.C sakumini
 Last Modified Date: 2025.01.22
 Modified By:K.K.C Sakumini
+            K.H.Lasandi Randini  
 Version: node 11
 ui number : 1.7.1
 Dependencies: tailwind css
@@ -17,7 +18,8 @@ import { Link} from "react-router-dom";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band} from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/Open_No_Agent.png"
-
+import { Create_Task_for_OpenNoAgent } from "../../services/task/taskService";
+import Swal from "sweetalert2";
 
 export default function OpenIncident() {
   const [searchQuery, setSearchQuery] = useState(""); 
@@ -28,6 +30,8 @@ export default function OpenIncident() {
   const [ setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
+
+
   //const navigate = useNavigate();
   const rowsPerPage = 7;
 
@@ -60,6 +64,37 @@ export default function OpenIncident() {
     fetchData();
   }); 
   
+  const handleCreateTask = async () => {
+    try {
+      const taskParams = {
+        // Any additional task parameters if needed
+      };
+  
+      // Call the service function to create the task
+      const response = await Create_Task_for_OpenNoAgent(taskParams);
+  
+      Swal.fire({
+        title: "Task Created Successfully!",
+        text: `Task ID: ${response.Task_Id}`,
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+  
+      // Clear selected rows and reload data
+      setSelectedRows([]);
+      const updatedResponse = await List_Distribution_Ready_Incidents();
+      setData(updatedResponse.data);
+    } catch (err) {
+      Swal.fire({
+        title: "Error",
+        text: `Failed to create task. Error: ${err.message || "Unknown error"}`,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+  
+
   const filteredData = data.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -114,12 +149,13 @@ export default function OpenIncident() {
           <h1 className={`${GlobalStyle.headingLarge} m-0 mb-4`}>
             Incidents Open for Distribution
           </h1>
-          <Link
-            className={`${GlobalStyle.buttonPrimary}`}
-            to="/lod/ftllod/ftllod/downloadcreateftllod"
-          >
-            Create task and let me know
-          </Link>
+          <button
+          className={`${GlobalStyle.buttonPrimary} pr-4`}
+         onClick={handleCreateTask}
+       
+        >
+          Create task and let me know
+        </button>
         </div>
 
         {/* Case Count Bar */}
