@@ -240,7 +240,7 @@ export default function AmendAssignedDRC() {
               </option>
               {drcData.map((item) => (
                 <option key={item.drc_id} value={item.drc_id}>
-                  {`${item.drc_id}`}
+                  {`${item.drc_name}`}
                 </option>
               ))}
             </select>
@@ -303,7 +303,7 @@ export default function AmendAssignedDRC() {
               </option>
               {drcData.map((item) => (
                 <option key={item.drc_id} value={item.drc_id}>
-                  {`${item.drc_id}`}
+                  {`${item.drc_name}`}
                 </option>
               ))}
             </select>
