@@ -78,12 +78,40 @@ export const distribution_ready_incidents_group_by_arrears_band= async () => {
   }
 };
 
-export const List_Incidents_CPE_Collect = async () => {
+
+
+export const List_Incidents_CPE_Collect = async (filters) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/List_Incidents_CPE_Collect`);
-    return response.data; 
+    const response = await axios.post(
+      `${INCIDENT_URL}/List_Incidents_CPE_Collect`,
+      filters // Pass the filters as the request body
+    );
+    return response.data;
   } catch (error) {
-    console.error("Error fetching CPE Collect incidents:", error.response?.data || error.message);
-    throw error.response?.data || error; 
+    console.error(
+      "Error fetching CPE Collect incidents:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
   }
+};
+
+export const getF1FilteredIncidentsCount = async () => {
+  const response = await axios.post(`${INCIDENT_URL}/total_F1_filtered_Incidents`);
+  return response.data?.data?.F1_filtered_incident_total;
+};
+
+export const getDistributionReadyIncidentsCount = async () => {
+  const response = await axios.post(`${INCIDENT_URL}/total_distribution_ready_incidents`);
+  return response.data?.data?.Distribution_ready_total;
+};
+
+export const getCPECollectIncidentsCount = async () => {
+  const response = await axios.post(`${INCIDENT_URL}/total_incidents_CPE_Collect`);
+  return response.data?.data?.Distribution_ready_total;
+};
+
+export const getDirectLODIncidentsCount = async () => {
+  const response = await axios.post(`${INCIDENT_URL}/total_incidents_Direct_LOD`);
+  return response.data?.data?.Distribution_ready_total;
 };
