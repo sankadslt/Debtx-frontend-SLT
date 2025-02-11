@@ -35,6 +35,7 @@ export default function AmendAssignedDRC() {
     DRC2: "",
     RTOM: "",
     Count: "",
+    
   });
   console.log("BatchID", BatchID);
 
@@ -68,7 +69,7 @@ export default function AmendAssignedDRC() {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const data = { case_distribution_batch_id: BatchID || 208 };
+        const data = { case_distribution_batch_id: BatchID || 2 };
         console.log("Data", data);
         const response =
           await Case_Distribution_Details_With_Drc_Rtom_ByBatchId(data);
@@ -92,17 +93,17 @@ export default function AmendAssignedDRC() {
   }, [BatchID]);
 
   const handleonclick = async() => {
-    
+
     const drc_list = cpeData.map((item) => ({
-            plus_drc_id: Number(item.DRC2), // Ensure this is a number
-            plus_drc: "Drc A",
+            plus_drc_id: item.DRC2ID  , // Ensure this is a number
+            plus_drc: item.DRC2,
             plus_rulebase_count: Number(item.DRC1Count), // Ensure this is a number
-            minus_drc_id: Number(item.DRC1), // Ensure this is a number
-            minus_drc: "Drc B",
+            minus_drc_id:  item.DRC1ID, // Ensure this is a number
+            minus_drc: item.DRC1,
             minus_rulebase_count: Number(item.DRC2Count), // Ensure this is a number
             rtom: item.RTOM,
         }));
-    console.log("DRC List", drc_list);
+    
     const payload = {
         case_distribution_batch_id: BatchID || 1,
         drc_list: drc_list,
@@ -153,15 +154,18 @@ export default function AmendAssignedDRC() {
     const entry = {
       RTOM: newEntry.RTOM,
       DRC1: newEntry.DRC1, 
+      DRC1ID: newEntry.selectedDRCID,
       DRC1Count: newEntry.Count,
       DRC2: newEntry.DRC2,
+      DRC2ID: newEntry.selectedDRCID2,
       DRC2Count: newEntry.Count,
     };
 
+    
     setCpeData([...cpeData, entry]); // Add new entry to table data
 
     // Clear input fields after adding
-    setNewEntry({ RTOM: "", DRC1: "", Count: "", DRC2: "" });
+    setNewEntry({ RTOM: "", DRC1: "", Count: "", DRC2: "" , });
   };
 
   //search function
@@ -175,10 +179,27 @@ export default function AmendAssignedDRC() {
     const assignedCaseCount = drcData
     .filter(
       (item) =>
-        item.drc_id == newEntry.DRC1 && item.rtom == newEntry.RTOM
+        item.drc_name == newEntry.DRC1 && item.rtom == newEntry.RTOM
     )
     .reduce((total, item) => total + item.case_count, 0) || 0;
 
+
+    console.log("filteredData", filteredData);
+  const handleselectchangeDRC1 = (e) => {
+    const selectedDRCName = e.target.value;
+    const selectedDRCID = drcData.find((item) => item.drc_name === selectedDRCName);
+    setNewEntry({ ...newEntry,
+       DRC1: selectedDRCName,
+       selectedDRCID: selectedDRCID ? selectedDRCID.drc_id : null});
+  };
+
+  const handleselectchangeDRC2 = (e) => {
+    const selectedDRCName2 = e.target.value;
+    const selectedDRCID2 = drcData.find((item) => item.drc_name === selectedDRCName2);
+    setNewEntry({ ...newEntry,
+       DRC2: selectedDRCName2,
+       selectedDRCID2: selectedDRCID2 ? selectedDRCID2.drc_id : null});
+  };
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -231,19 +252,19 @@ export default function AmendAssignedDRC() {
             <select
               className={GlobalStyle.selectBox}
               value={newEntry.DRC1}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, DRC1: e.target.value })
-              }
+              
+              onChange={handleselectchangeDRC1}
             >
               <option value="" hidden>
                 DRC
               </option>
               {drcData.map((item) => (
-                <option key={item.drc_id} value={item.drc_id}>
+                <option key={item.drc_id} value={item.drc_name}>
                   {`${item.drc_name}`}
                 </option>
               ))}
             </select>
+            
           </div>
           {/* dropdown */}
           <div className="flex gap-10">
@@ -259,7 +280,7 @@ export default function AmendAssignedDRC() {
                 RTOM
               </option>
               {drcData
-                .filter((item) => item.drc_id == newEntry.DRC1)
+                .filter((item) => item.drc_name == newEntry.DRC1)
                 .map((item) => (
                   <option key={item.rtom} value={item.rtom}>
                     {`${item.rtom}`}
@@ -294,15 +315,13 @@ export default function AmendAssignedDRC() {
             <select
               className={GlobalStyle.selectBox}
               value={newEntry.DRC2}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, DRC2: e.target.value })
-              }
+              onChange={handleselectchangeDRC2}
             >
               <option value="" hidden>
                 DRC
               </option>
               {drcData.map((item) => (
-                <option key={item.drc_id} value={item.drc_id}>
+                <option key={item.drc_id} value={item.dr_name}>
                   {`${item.drc_name}`}
                 </option>
               ))}
