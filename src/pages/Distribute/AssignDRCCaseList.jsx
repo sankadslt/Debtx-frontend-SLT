@@ -5,9 +5,9 @@
 // Modified Date: 2024-01-07
 // Modified By: H.P.R Chandrasekara (hprchandrasekara@gmail.com)
 // Version: node 11
-// ui number :1.A.17
+// ui number :1.17
 // Dependencies: tailwind css
-// Related Files:  app.js (routes)
+// Related Files:  router.js.js (routes)
 // Notes:.
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
