@@ -41,8 +41,8 @@ import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
  import CaseDistributionDRCSummary from "../pages/Distribute/CaseDistributionDRCSummary";
  import CaseDistributionDRCSummarywithRTOM from "../pages/Distribute/CaseDistributionDRCSummarywithRTOM";
  import AmendAssignedDRC from "../pages/Distribute/AmendAssignedDRC";
-
-
+ import ReAssignDRC from "../pages/Distribute/ReAssignDRC";
+ import AssignDRCCaseList from "../pages/Distribute/AssignDRCCaseList";
 const Routers = () => {
   return (
     <Routes>
@@ -89,7 +89,8 @@ const Routers = () => {
     <Route path="/pages/Distribute/CaseDistributionDRCSummary" element={<ProtectedRoute element={<CaseDistributionDRCSummary />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/Distribute/AmendAssignedDRC" element={<ProtectedRoute element={<AmendAssignedDRC />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/Distribute/CaseDistributionDRCSummarywithRTOM" element={<ProtectedRoute element={<CaseDistributionDRCSummarywithRTOM />} allowedRoles={['superadmin']} />} />
-
+    <Route path="/pages/Distribute/ReAssignDRC" element={<ReAssignDRC />} />
+    <Route path="/pages/Distribute/AssignDRCCaseList" element={<AssignDRCCaseList />} />
     {/* //INCIDENT */}
     <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
 
