@@ -114,6 +114,28 @@ export const Create_Task_For_case_distribution = async (payload) => {
 };
 
 
+// List Cases Owned By DRC // - nimaaa
+export const List_CasesOwened_By_DRC = async (drc_id) => {
+  try {
+    if (!drc_id) {
+      throw new Error("drc_id is required.");
+    }
+
+    const response = await axios.post(`${URL}/List_CasesOwened_By_DRC`, {
+      drc_id,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching cases owned by DRC:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+
 
 
 
