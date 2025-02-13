@@ -15,11 +15,11 @@ Notes:
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
+
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
-import { List_Incidents_CPE_Collect } from "../../services/Incidents/incidentService";
-import { Create_Task } from "../../services/task/taskService.js";
+import { List_Incidents_CPE_Collect,Forward_CPE_Collect } from "../../services/Incidents/incidentService";
+import { Create_Task,Create_Task_for_Forward_CPECollect } from "../../services/task/taskService.js";
 import Swal from "sweetalert2";
 
 export default function CollectOnlyCPECollect() {
@@ -32,112 +32,112 @@ export default function CollectOnlyCPECollect() {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedSource, setSelectedSource] = useState("");
   const [tableData, setTableData] = useState([]);
-  const [setIsLoading] = useState(false); 
+  const [isProcessing, setIsProcessing] = useState(false);
+const [isLocked, setIsLocked] = useState(false);
+
   const rowsPerPage = 7;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await List_Incidents_CPE_Collect();
-        setTableData(response.data);
-      } catch (err) {
-        setError(err.message || "Failed to fetch incidents.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  });
 
-    const handleFilter = async () => {
-      try {
-        const filters = {
-          Source_Type: selectedSource || null,
-          From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
-          To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
-        };
-  
-        const response = await List_Incidents_CPE_Collect(filters);
-        setTableData(response.data); 
-        setCurrentPage(0); 
-      } catch (err) {
-        setError(err.message || "Failed to fetch filtered incidents.");
-      }
-    };
-
-    
-  
-    // const handleCreateTask = async () => {
-    //   const filteredParams = {
-    //     Source_Type: selectedSource || null,
-    //     From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
-    //     To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
-    //   };
-    
-    //   // Check if all parameters are empty
-    //   if (!filteredParams.Source_Type && !filteredParams.From_Date && !filteredParams.To_Date) {
-    //     setTaskMessage("Please provide at least one filter parameter to create a task.");
-    //     return;
-    //   }
-    
-    //   console.log("Filtered Params:", filteredParams);
-    
-    //   try {
-    //     const response = await Create_Task(filteredParams);
-    //     console.log("Task Creation Response:", response);
-    
-    //     if (response?.Task_Id) {
-    //       setTaskMessage(`Task created successfully! Task ID: ${response.Task_Id}`);
-    //     } else {
-    //       throw new Error("Task ID is missing in the response.");
-    //     }
-    //   } catch (err) {
-    //     console.error("Error creating task:", err);
-    //     setTaskMessage(
-    //       `Failed to create task. Error: ${err.message || "Unknown error"}`
-    //     );
-    //   }
-    // };
+  const fetchData = async () => {
+    try {
       
-    // const handleCreateTask = async () => {
-    //   const filteredParams = {
-    //     Source_Type: selectedSource || null,
-    //     From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
-    //     To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
-    //   };
-    
-    //   if (!filteredParams.Source_Type && !filteredParams.From_Date && !filteredParams.To_Date) {
-        
-    //     return;
-    //   }
-    //   console.log("Filtered Params:", filteredParams);
+      const response = await List_Incidents_CPE_Collect();
+      setTableData(response.data);
+    } catch (err) {
+      setError(err.message || "Failed to fetch incidents.");
+    } 
+   
+  };
+  
+  useEffect(() => {
+    fetchData();
+  }, []); 
+
+  const handleFilterClick = () => {
+    const from = fromDate ? new Date(fromDate) : null;
+    const to = toDate ? new Date(toDate) : null;
+  
+    if (!selectedSource && !from && !to) {
+      Swal.fire({
+        title: "Missing Filters",
+        text: "Please select a Source Type or provide both From Date and To Date.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+  
+    if ((from && !to) || (!from && to)) {
+      Swal.fire({
+        title: "Incomplete Date Range",
+        text: "Both From Date and To Date must be selected together.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+  
+    if (selectedSource || (from && to)) {
+      if (from && to) {
+        const monthDiff =
+          (to.getFullYear() - from.getFullYear()) * 12 +
+          (to.getMonth() - from.getMonth());
+  
+        if (monthDiff > 1 || (monthDiff === 1 && to.getDate() > from.getDate())) {
+          Swal.fire({
+            title: "Long Date Range",
+            text: "The selected date range exceeds one month. Consider creating a task instead.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Create Task",
+            cancelButtonText: "Cancel",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              handleCreateTask(); // Trigger task creation
+            }
+          });
+          return;
+        }
+      }
+      handleFilter();  // Call the existing filter function if validation passes
+    }
+  };
+
+  
+  const handleFilter = async () => {
+    try {
+      const filters = {
+        Source_Type: selectedSource || null,
+        From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
+        To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
+      };
+  
+      const response = await List_Incidents_CPE_Collect(filters);
+      setTableData(response.data); 
+      setCurrentPage(0); 
+    } catch (err) {
+      setError(err.message || "Failed to fetch filtered incidents.");
+    }
+  };
+  
+  
+    // const handleFilter = async () => {
     //   try {
-    //     const response = await Create_Task(filteredParams);
-    
-    //     if (response?.Task_Id) {
-    //       Swal.fire({
-    //         title: "Task Created Successfully!",
-    //         text: `Task ID: ${response.Task_Id}`,
-    //         icon: "success",
-    //         confirmButtonText: "OK",
-    //       });
-    //       // Refresh task blocks by re-fetching data
-    //       const updatedResponse = await List_Incidents_CPE_Collect();
-    //       setTableData(updatedResponse.data);
-    //     } else {
-    //       throw new Error("Task ID is missing in the response.");
-    //     }
+    //     const filters = {
+    //       Source_Type: selectedSource || null,
+    //       From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
+    //       To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
+    //     };
+  
+    //     const response = await List_Incidents_CPE_Collect(filters);
+    //     setTableData(response.data); 
+    //     setCurrentPage(0); 
     //   } catch (err) {
-    //     Swal.fire({
-    //       title: "Error",
-    //       text: `Failed to create task. Error: ${err.message || "Unknown error"}`,
-    //       icon: "error",
-    //       confirmButtonText: "OK",
-    //     });
+    //     setError(err.message || "Failed to fetch filtered incidents.");
     //   }
     // };
 
+    
     const handleCreateTask = async () => {
       const filteredParams = {
         Source_Type: selectedSource || null,
@@ -166,14 +166,14 @@ export default function CollectOnlyCPECollect() {
             confirmButtonText: "OK",
           });
     
-          // Clear filter states
+          
       setFromDate(null);
       setToDate(null);
       setSelectedSource("");
 
-          // Re-fetch updated task data
+          
           const updatedResponse = await List_Incidents_CPE_Collect();
-          setTableData(updatedResponse.data); // Refresh task blocks with new data
+          setTableData(updatedResponse.data); 
         } else {
           throw new Error("Task ID is missing in the response.");
         }
@@ -187,6 +187,126 @@ export default function CollectOnlyCPECollect() {
       }
     };
     
+// const forwardCPECollect= async () => {
+//     if (selectedRows.length === 0) {
+//       Swal.fire({
+//         title: "Warning",
+//         text: "Please select at least one incident.",
+//         icon: "warning",
+//         confirmButtonText: "OK",
+//       });
+//       return;
+//     }
+  
+//     try {
+//       if (selectedRows.length > 10) {
+        
+//         const taskParams = {
+//           Incident_Status: "Open CPE Collect",
+//         };
+  
+//         console.log("Task Params:", taskParams); 
+  
+//         const response = await Create_Task_for_Forward_CPECollect(taskParams);
+  
+//         console.log("Response from Create_Task:", response); 
+  
+//         Swal.fire({
+//           title: "Task Created Successfully!",
+//           text: `Task created to handle ${selectedRows.length} incidents.`,
+//           icon: "success",
+//           confirmButtonText: "OK",
+//         });
+//       } else {
+       
+//         const response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
+  
+//         console.log("Response from Create_Case:", response);
+  
+//         Swal.fire({
+//           title: "Cases Created Successfully!",
+//           text: `Successfully created ${response.cases.length} cases.`,
+//           icon: "success",
+//           confirmButtonText: "OK",
+//         });
+//       }
+  
+      
+//       setSelectedRows([]);
+//       await fetchData(); 
+//     } catch (error) {
+//       console.error("Error in handleCaseforIncident:", error); 
+//       Swal.fire({
+//         title: "Error",
+//         text: error.message || "Failed to perform the action.",
+//         icon: "error",
+//         confirmButtonText: "OK",
+//       });
+//     }
+//   };
+
+const forwardCPECollect = async () => {
+  if (selectedRows.length === 0) {
+    Swal.fire({
+      title: "Warning",
+      text: "Please select at least one incident.",
+      icon: "warning",
+      confirmButtonText: "OK",
+    });
+    return;
+  }
+
+  setIsProcessing(true);  // Disable UI interactions during API call
+
+  try {
+    if (selectedRows.length > 10) {
+      const taskParams = {
+        Incident_Status: "Open CPE Collect",
+        Incident_Ids: selectedRows,  // Include all selected rows
+      };
+
+      console.log("Task Params:", taskParams);
+
+      const response = await Create_Task_for_Forward_CPECollect(taskParams);
+
+      console.log("Response from Create_Task:", response);
+
+      Swal.fire({
+        title: "Task Created Successfully!",
+        text: `Task created to handle ${selectedRows.length} incidents.`,
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+
+      setIsLocked(true);  // Lock the table after task creation
+    } else {
+      const response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
+
+      console.log("Response from Create_Case:", response);
+
+      Swal.fire({
+        title: "Cases Created Successfully!",
+        text: `Successfully created ${response.cases.length} cases.`,
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+    }
+
+    setSelectedRows([]);  // Clear selected rows after action
+  } catch (error) {
+    console.error("Error in forwardCPECollect:", error);
+    Swal.fire({
+      title: "Error",
+      text: error.message || "Failed to perform the action.",
+      icon: "error",
+      confirmButtonText: "OK",
+    });
+  } finally {
+    setIsProcessing(false);  // Re-enable UI interactions
+    await fetchData();       // Refresh data to update table state
+  }
+};
+
   const filteredData = tableData.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -212,13 +332,23 @@ export default function CollectOnlyCPECollect() {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
+  // const handleRowCheckboxChange = (Incident_Id) => {
+  //   if (selectedRows.includes(Incident_Id)) {
+  //     setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
+  //   } else {
+  //     setSelectedRows([...selectedRows, Incident_Id]);
+  //   }
+  // };
+
   const handleRowCheckboxChange = (Incident_Id) => {
+    if (isLocked) return;  // Prevent selection if locked
     if (selectedRows.includes(Incident_Id)) {
       setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
     } else {
       setSelectedRows([...selectedRows, Incident_Id]);
     }
   };
+  
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
       setSelectedRows([]);
@@ -262,9 +392,9 @@ export default function CollectOnlyCPECollect() {
         </button>
       </div>
 
-      {/* Filter Section */}
+     
       <div className="flex justify-end gap-10 my-12 items-center">
-        {/* Source Dropdown */}
+      
         <div className="flex items-center gap-4">
           <label>Source:</label>
           <select
@@ -279,7 +409,7 @@ export default function CollectOnlyCPECollect() {
           </select>
         </div>
 
-        {/* Date Picker Section */}
+       
         <div className="flex items-center gap-4">
           <label>Date:</label>
           <DatePicker
@@ -299,18 +429,24 @@ export default function CollectOnlyCPECollect() {
           {error && <span className={GlobalStyle.errorText}>{error}</span>}
         </div>
 
-        {/* Filter Button */}
-        <button
+       
+        {/* <button
           className={`${GlobalStyle.buttonPrimary} h-[35px]`}
           onClick={handleFilter}
         >
           Filter
-        </button>
+        </button> */}
+        <button
+  className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+  onClick={handleFilterClick}   // Use handleFilterClick here
+>
+  Filter
+</button>
       </div>
 
-      {/* Table Section */}
+     
       <div className="flex flex-col">
-        {/* Search Bar Section */}
+        
       <div className="mb-4 flex justify-start">
         <div className={GlobalStyle.searchBarContainer}>
           <input
@@ -393,12 +529,20 @@ export default function CollectOnlyCPECollect() {
                   <td
                     className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                   >
-                    <button
+                    {/* <button
                       className={`${GlobalStyle.buttonPrimary} mx-auto`}
-                      onClick={""}
+                      onClick={forwardCPECollect}
                     >
                       Proceed
-                    </button>
+                    </button> */}
+                    <button
+  className={`${GlobalStyle.buttonPrimary} ml-4`}
+  onClick={forwardCPECollect}
+  disabled={isProcessing || selectedRows.length === 0 || isLocked}
+>
+  Proceed
+</button>
+
                   </td>
                 </tr>
               ))}
@@ -414,7 +558,7 @@ export default function CollectOnlyCPECollect() {
         </div>
       </div>
 
-      {/* Navigation Buttons */}
+     
       {tableData.length > rowsPerPage && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
@@ -438,7 +582,7 @@ export default function CollectOnlyCPECollect() {
       )}
 
       <div className="flex justify-end items-center w-full mt-6">
-        {/* Select All Data Checkbox */}
+        
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -448,18 +592,19 @@ export default function CollectOnlyCPECollect() {
               tableData.every((row) =>
                 selectedRows.includes(row.Incident_Id)
               )
-            } // Reflect selection state
+            }
             onChange={handleSelectAllDataChange}
           />
           Select All Data
         </label>
-
-        <Link
-          className={`${GlobalStyle.buttonPrimary} ml-4`}
-          to="/lod/ftllod/ftllod/downloadcreateftllod"
-        >
-          Proceed
-        </Link>
+    
+        <button
+  className={`${GlobalStyle.buttonPrimary} ml-4`}
+  onClick={forwardCPECollect}
+  disabled={isProcessing || selectedRows.length === 0 || isLocked}
+>
+  Proceed
+</button>
       </div>
     </div>
   );
