@@ -71,6 +71,14 @@ const DistributeDummy = () => {
             to: "/pages/Distribute/AssignedDRCSummaryCollectCPE",
             label: "1 . C . 13 - Assigned DRC Summary (Collect CPE) ",
           },
+          {
+            to: "/pages/Distribute/AssignDRCCaseList",
+            label: "1.17 - Assigned DRC Summary (Collect CPE) ",
+          },
+          {
+            to: "/pages/Distribute/ReAssignDRC",
+            label: "1.18 - Assigned DRC Summary (Collect CPE) ",
+          },
         ].map((link, index) => (
           <Link
             key={index}
