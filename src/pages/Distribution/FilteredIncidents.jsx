@@ -60,7 +60,7 @@ const FilteredIncident = () => {
   }, []);
 
   const recordsPerPage = 4;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage] = useState(1);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentCases = cases.slice(indexOfFirstRecord, indexOfLastRecord);

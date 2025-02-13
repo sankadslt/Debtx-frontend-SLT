@@ -40,6 +40,7 @@ export const Task_for_Download_Incidents = async (incidentData) => {
         Created_By: "FrontendUser", 
         task_status: "open",
         Incident_Status: "Open No Agent",
+        proceed_Dtm: "null",
         ...filteredParams,
       };
   
@@ -50,3 +51,42 @@ export const Task_for_Download_Incidents = async (incidentData) => {
       throw error.response?.data || error;
     }
   };
+
+  export const Create_Task_for_Create_CaseFromIncident = async (filteredParams) => {
+    try {
+      const taskData = {
+        Template_Task_Id: 15,
+        task_type: "Create Case from Incident Direct NO Agent",
+        Created_By: "FrontendUser",
+        task_status: "open",
+        Incident_Status: "Open No Agent",
+        ...filteredParams,
+      };
+  
+      const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating task:", error.message || error);
+      throw error.response?.data || error;
+    }
+  };
+  
+  export const Create_Task_for_Forward_CPECollect = async (filteredParams) => {
+    try {
+      const taskData = {
+        Template_Task_Id: 17,
+        task_type: "Create Case from Incident Open CPE Collect",
+        Created_By: "FrontendUser",
+        task_status: "open",
+        Incident_Status: "Open CPE Collect",
+        ...filteredParams,
+      };
+  
+      const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating task:", error.message || error);
+      throw error.response?.data || error;
+    }
+  };
+  
