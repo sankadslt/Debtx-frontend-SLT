@@ -22,7 +22,6 @@ const DistributeDummy = () => {
         }}
       >
         {[
-          
           {
             to: "/pages/Distribute/DistributionPreparationBulkUpload",
             label: "1 . A . 11 - Distribution Preparation Bulk Upload ",
@@ -37,11 +36,13 @@ const DistributeDummy = () => {
           },
           {
             to: "/pages/Distribute/CaseDistributionDRCTransactions-1Batch",
-            label: "1 . A . 13 . 1 - Case Distribution DRC Transactions - 1 Batch ",
+            label:
+              "1 . A . 13 . 1 - Case Distribution DRC Transactions - 1 Batch ",
           },
           {
             to: "/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)",
-            label: "1 . A . 13 . 2 - Case Distribution DRC Transactions - (1 Batch) ",
+            label:
+              "1 . A . 13 . 2 - Case Distribution DRC Transactions - (1 Batch) ",
           },
           {
             to: "/pages/Distribute/CaseDistributionDRCSummary",
@@ -78,6 +79,10 @@ const DistributeDummy = () => {
           {
             to: "/pages/Distribute/ReAssignDRC",
             label: "1.18 - Assigned DRC Summary (Collect CPE) ",
+          },
+          {
+            to: "/pages/Distribute/DRCAssignManagerApproval2",
+            label: "1.15.1 - DRC Assign Manager Approval 2",
           },
         ].map((link, index) => (
           <Link
