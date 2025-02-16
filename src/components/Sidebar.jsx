@@ -11,35 +11,34 @@ const Sidebar = ({ onHoverChange }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
-    // Load user role from accessToken
-    const loadUserRole = async () => {
-      let token = localStorage.getItem("accessToken");
-      if (!token) {
-        setUserRole(null);
-        return;
-      }
-  
-      try {
-        let decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
-  
-        if (decoded.exp < currentTime) {
-          token = await refreshAccessToken();
-          if (!token) return;
-          decoded = jwtDecode(token);
-        }
-  
-        setUserRole(decoded.role);
-      } catch (error) {
-        console.error("Invalid token:", error);
-        setUserRole(null);
-      }
-    };
+  // Load user role from accessToken
+  const loadUserRole = async () => {
+    let token = localStorage.getItem("accessToken");
+    if (!token) {
+      setUserRole(null);
+      return;
+    }
 
-    useEffect(() => {
-      loadUserRole();
-    }, [localStorage.getItem("accessToken")]);
-  
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        token = await refreshAccessToken();
+        if (!token) return;
+        decoded = jwtDecode(token);
+      }
+
+      setUserRole(decoded.role);
+    } catch (error) {
+      console.error("Invalid token:", error);
+      setUserRole(null);
+    }
+  };
+
+  useEffect(() => {
+    loadUserRole();
+  }, [localStorage.getItem("accessToken")]);
 
   // Menu structure with nested subtopics
   const menuItems = [
@@ -52,28 +51,37 @@ const Sidebar = ({ onHoverChange }) => {
         {
           label: "Dummy",
           subItems: [
-            { label: "Distribte Dummy", link: "/pages/Distribute/DistributeDummy" },
-            { label: "Dummy", link: "/dashboard" },
+            { label: "Distribte Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
+            { label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
           ],
         },
-        { label: "Dummy", link: "/dashboard" },
+        { label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
       ],
     },
   ];
 
-    // Filter menu items based on user role
-    const filteredMenuItems = userRole ? menuItems.filter(item => item.roles.includes(userRole)) : [];
-
+  // Filter menu items based on user role
+  const filteredMenuItems = userRole ? menuItems.filter(item => item.roles.includes(userRole)) : [];
 
   // Handle submenu toggle on click
-  const handleClick = (level, index) => {
+  const handleClick = (level, index, hasSubItems) => {
     const updatedExpandedItems = [...expandedItems];
-    if (updatedExpandedItems[level] === index) {
-      updatedExpandedItems.splice(level);
+
+    // Collapse all submenus if clicking a link
+    if (!hasSubItems) {
+      setIsHovered(false);
+      onHoverChange(false);
+      updatedExpandedItems.splice(0);
     } else {
-      updatedExpandedItems[level] = index;
-      updatedExpandedItems.splice(level + 1);
+      // Toggle submenu on click if it has subitems
+      if (updatedExpandedItems[level] === index) {
+        updatedExpandedItems.splice(level);
+      } else {
+        updatedExpandedItems[level] = index;
+        updatedExpandedItems.splice(level + 1);
+      }
     }
+
     setExpandedItems(updatedExpandedItems);
   };
 
@@ -98,22 +106,32 @@ const Sidebar = ({ onHoverChange }) => {
       <ul className={`ml-8 mt-2 space-y-2 ${!isHovered ? "hidden" : ""}`}>
         {subItems.map((subItem, subIndex) => {
           const isExpanded = expandedItems[level] === subIndex;
-          return (
-            <li key={subIndex}>
-              <Link
-                to={subItem.link || "#"}
-                onClick={() => handleClick(level, subIndex)}
-                className="block px-3 py-2 rounded-lg text-sm font-medium transition"
-              >
-                {subItem.label}
-              </Link>
-              {isExpanded && subItem.subItems && (
-                <div className="ml-4">
-                  {renderSubItems(subItem.subItems, level + 1)}
-                </div>
-              )}
-            </li>
-          );
+
+          // Check if user role allows access to subItem
+          const isAccessible = subItem.roles ? subItem.roles.includes(userRole) : true;
+
+          // If subItem is accessible, render it
+          if (isAccessible) {
+            return (
+              <li key={subIndex}>
+                <Link
+                  to={subItem.link || "#"}
+                  onClick={() => handleClick(level, subIndex, !!subItem.subItems)}
+                  className="block px-3 py-2 rounded-lg text-sm font-medium transition"
+                >
+                  {subItem.label}
+                </Link>
+                {isExpanded && subItem.subItems && (
+                  <div className="ml-4">
+                    {renderSubItems(subItem.subItems, level + 1)}
+                  </div>
+                )}
+              </li>
+            );
+          }
+
+          // If not accessible, do not render
+          return null;
         })}
       </ul>
     );
@@ -140,7 +158,7 @@ const Sidebar = ({ onHoverChange }) => {
             <li key={index}>
               <Link
                 to={item.link || "#"}
-                onClick={() => handleClick(0, index)}
+                onClick={() => handleClick(0, index, !!item.subItems)}
                 className={`flex items-center gap-x-4 px-3 py-2 rounded-lg text-base font-medium transition ${
                   isActive ? "bg-blue-400 shadow-lg" : "hover:bg-blue-400"
                 }`}
