@@ -1,39 +1,45 @@
-/*Purpose: This template is used for the 1.15.1 - DRC Assign Manager Approval 
-Created Date: 2025-02-17
-Created By: Sanjaya (sanjayaperera80@gmail.com)
-Last Modified Date: 2025-02-17
-Version: node 20
-ui number : 1.15.1
-Dependencies: tailwind css
-Related Files: (routes)
-Notes: The following page conatins the codes */
-
 import { useState } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-export default function DRCAssignManagerApproval2() {
+export default function DRCAssignManagerApproval3() {
   const data = [
     {
-      batchID: "C001",
-      createdDate: "2025.01.05",
-      drc: "PEO",
-      caseCount: "100",
-      totalArrears: "100000",
+      caseId: "",
+      createdOn: "2025.11.05",
+      createdBy: "ID123",
+      approvalType: "-",
+      approvalStatus: "open",
+      approvalBy: "ID123",
+      remark: "",
     },
     {
-      batchID: "",
-      createdDate: "2025.11.05",
-      drc: "VOICE",
-      caseCount: "",
-      totalArrears: "",
+      caseId: "C001",
+      createdOn: "2025.11.05",
+      createdBy: "",
+      approvalType: "-",
+      approvalStatus: "Approve",
+      approvalBy: "",
+      remark: "",
+    },
+    {
+      caseId: "",
+      createdOn: "",
+      createdBy: "",
+      approvalType: "-",
+      approvalStatus: "Reject",
+      approvalBy: "",
+      remark: "",
     },
   ];
 
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [filteredData, setFilteredData] = useState(data);
-
+  const [drcFilter, setDrcFilter] = useState(""); // DRC filter state
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
@@ -41,7 +47,26 @@ export default function DRCAssignManagerApproval2() {
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+  // Filter data based on selected filters
+  const applyFilters = () => {
+    const filteredData = data.filter((item) => {
+      const itemDate = new Date(item.createdDate.split(".").join("-")); // Convert item date to Date object
 
+      // Apply DRC filter
+      const isDRCMatch = drcFilter
+        ? item.drc.toLowerCase().includes(drcFilter.toLowerCase())
+        : true;
+
+      // Apply Date Range filter
+      const isDateInRange =
+        (!startDate || itemDate >= new Date(startDate)) &&
+        (!endDate || itemDate <= new Date(endDate));
+
+      return isDRCMatch && isDateInRange;
+    });
+
+    setFilteredData(filteredData);
+  };
   // Handle pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
@@ -100,7 +125,7 @@ export default function DRCAssignManagerApproval2() {
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
-      <h1 className={GlobalStyle.headingLarge}> DRC Assign Approval</h1>
+      <h1 className={GlobalStyle.headingLarge}>Assigned DRC Summary</h1>
       <div className="flex justify-between mt-16 mb-6">
         <div className="flex justify-start mb-8">
           <div className={GlobalStyle.searchBarContainer}>
@@ -113,6 +138,49 @@ export default function DRCAssignManagerApproval2() {
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
+        </div>
+
+        <div className="flex gap-10">
+          {" "}
+          <div className="flex gap-4 h-[35px] mt-2">
+            <select
+              className={GlobalStyle.selectBox}
+              value={drcFilter}
+              onChange={(e) => setDrcFilter(e.target.value)}
+            >
+              <option value="">Select Approve Type</option>
+              <option value="oprion1">O1</option>
+              <option value="option2">O2</option>
+              <option value="option3">O3</option>
+            </select>
+          </div>
+          <div className="flex flex-col items-center mb-4">
+            <div className={GlobalStyle.datePickerContainer}>
+              <label className={GlobalStyle.dataPickerDate}>Date </label>
+
+              <DatePicker
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="dd/mm/yyyy"
+                className={GlobalStyle.inputText}
+              />
+
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="dd/mm/yyyy"
+                className={GlobalStyle.inputText}
+              />
+            </div>
+          </div>
+          <button
+            onClick={applyFilters}
+            className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
+          >
+            Filter
+          </button>
         </div>
       </div>
 
@@ -131,11 +199,13 @@ export default function DRCAssignManagerApproval2() {
                   className="mx-auto"
                 /> */}
               </th>
-              <th className={GlobalStyle.tableHeader}>Batch ID</th>
-              <th className={GlobalStyle.tableHeader}>Created Date</th>
-              <th className={GlobalStyle.tableHeader}>DRC Commission rule</th>
-              <th className={GlobalStyle.tableHeader}>Case count</th>
-              <th className={GlobalStyle.tableHeader}>Total Arrears</th>
+              <th className={GlobalStyle.tableHeader}>Case ID</th>
+              <th className={GlobalStyle.tableHeader}>Created on</th>
+              <th className={GlobalStyle.tableHeader}>Created by</th>
+              <th className={GlobalStyle.tableHeader}>Approve Type</th>
+              <th className={GlobalStyle.tableHeader}>Approve Status</th>
+              <th className={GlobalStyle.tableHeader}>Approve By</th>
+              <th className={GlobalStyle.tableHeader}>Remark</th>
             </tr>
           </thead>
           <tbody>
@@ -156,11 +226,13 @@ export default function DRCAssignManagerApproval2() {
                     className="mx-auto"
                   />
                 </td>
-                <td className={GlobalStyle.tableData}>{item.batchID}</td>
-                <td className={GlobalStyle.tableData}>{item.createdDate}</td>
-                <td className={GlobalStyle.tableData}>{item.drc}</td>
-                <td className={GlobalStyle.tableData}>{item.caseCount}</td>
-                <td className={GlobalStyle.tableData}>{item.totalArrears}</td>
+                <td className={GlobalStyle.tableData}>{item.caseID}</td>
+                <td className={GlobalStyle.tableData}>{item.createdOn}</td>
+                <td className={GlobalStyle.tableData}>{item.createdBy}</td>
+                <td className={GlobalStyle.tableData}>{item.approvalType}</td>
+                <td className={GlobalStyle.tableData}>{item.approvalStatus}</td>
+                <td className={GlobalStyle.tableData}>{item.approvalBy}</td>
+                <td className={GlobalStyle.tableData}>{item.remark}</td>
               </tr>
             ))}
           </tbody>
@@ -206,17 +278,16 @@ export default function DRCAssignManagerApproval2() {
         </label>
 
         {/* Approve Button */}
-        <button
-          onClick={onSubmit}
-          className={GlobalStyle.buttonPrimary}
-          //   disabled={selectedRows.size === 0} // Disable if no rows are selected
-        >
+        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
+          Reject
+        </button>
+        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
           Approve
         </button>
       </div>
       <div>
         <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
-          Create task and let me know
+          Create Task and Let me know
         </button>
       </div>
     </div>

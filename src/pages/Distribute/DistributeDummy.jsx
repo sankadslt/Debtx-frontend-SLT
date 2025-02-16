@@ -84,6 +84,10 @@ const DistributeDummy = () => {
             to: "/pages/Distribute/DRCAssignManagerApproval2",
             label: "1.15.1 - DRC Assign Manager Approval 2",
           },
+          {
+            to: "/pages/Distribute/DRCAssignManagerApproval3",
+            label: "1.15.2 - DRC Assign Manager Approval 3",
+          },
         ].map((link, index) => (
           <Link
             key={index}

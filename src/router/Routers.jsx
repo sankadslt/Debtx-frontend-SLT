@@ -45,8 +45,8 @@ import CaseDistributionDRCSummarywithRTOM from "../pages/Distribute/CaseDistribu
 import AmendAssignedDRC from "../pages/Distribute/AmendAssignedDRC";
 import ReAssignDRC from "../pages/Distribute/ReAssignDRC";
 import AssignDRCCaseList from "../pages/Distribute/AssignDRCCaseList";
-// import DRCAssignManagerApproval2 from "../pages/Distribute/DRCAssignManagerApproval2";
 import DRCAssignManagerApproval2 from "../pages/Distribute/DRCAssignManagerApproval2";
+import DRCAssignManagerApproval3 from "../pages/Distribute/DRCAssignManagerApproval3";
 
 const Routers = () => {
   return (
@@ -287,6 +287,11 @@ const Routers = () => {
       <Route
         path="/pages/Distribute/DRCAssignManagerApproval2"
         element={<DRCAssignManagerApproval2 />}
+      />
+
+      <Route
+        path="/pages/Distribute/DRCAssignManagerApproval3"
+        element={<DRCAssignManagerApproval3 />}
       />
 
       {/* //INCIDENT */}
