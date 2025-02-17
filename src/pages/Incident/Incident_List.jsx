@@ -20,8 +20,10 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import axios from "axios";
 import PropTypes from "prop-types";
+
 import Swal from "sweetalert2";
 import StatusIcon from '../../components/StatusIcon';
+
 import { fetchIncidents } from "../../services/Incidents/incidentService";
 import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
 
@@ -228,6 +230,7 @@ const Incident_List = () => {
                         </tr>
                     </thead>
                     <tbody>
+
                         {paginatedData.length > 0 ? (
                             paginatedData.map((log, index) => (
                                 <tr
@@ -248,6 +251,7 @@ const Incident_List = () => {
                                 </tr>
                             ))
                         ) : (
+
                             <tr>
                                 <td colSpan="6" className="text-center py-4">
                                     No data matching the criteria.
@@ -284,8 +288,8 @@ const Incident_List = () => {
     );
 };
 
-StatusIcon.propTypes = {
-    status: PropTypes.string.isRequired,
-};
+// StatusIcon.propTypes = {
+//     status: PropTypes.string.isRequired,
+// };
 
 export default Incident_List;
