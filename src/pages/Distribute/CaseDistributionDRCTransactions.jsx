@@ -310,8 +310,8 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "75px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.action_type === "distribution" && <img src="/src/assets/images/distributed.png" width={20} height={15} alt="Distributed" />}
-                    {item.action_type === "ammend" && <img src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />}
+                    {item.batch_seq_details?.[0]?.action_type === "distribution" && <img src="/src/assets/images/distributed.png" width={20} height={15} alt="Distributed" />}
+                    {item.batch_seq_details?.[0]?.action_type === "ammend" && <img src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />}
                     </div>
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "120px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -328,10 +328,10 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.crd_distribution_status?.[0]?.crd_distribution_status === "Open" && <img src="/src/assets/images/open.png" width={20} height={15} alt="Open" />}
-                    {item.crd_distribution_status?.[0]?.crd_distribution_status === "Complete" && <img src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />}
-                    {item.crd_distribution_status?.[0]?.crd_distribution_status === "Error" && <img src="/src/assets/images/error.png" width={20} height={15} alt="Error" />}
-                    {item.crd_distribution_status?.[0]?.crd_distribution_status === "InProgress" && <img src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />}
+                    {item.status?.[0]?.crd_distribution_status === "Open" && <img src="/src/assets/images/open.png" width={20} height={15} alt="Open" />}
+                    {item.status?.[0]?.crd_distribution_status === "Complete" && <img src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />}
+                    {item.status?.[0]?.crd_distribution_status === "Error" && <img src="/src/assets/images/error.png" width={20} height={15} alt="Error" />}
+                    {item.status?.[0]?.crd_distribution_status === "InProgress" && <img src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />}
                     </div>
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
