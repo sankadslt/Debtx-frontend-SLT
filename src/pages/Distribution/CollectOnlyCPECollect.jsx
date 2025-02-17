@@ -18,8 +18,8 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
-import { List_Incidents_CPE_Collect,Forward_CPE_Collect } from "../../services/Incidents/incidentService";
-import { Create_Task,Create_Task_for_Forward_CPECollect } from "../../services/task/taskService.js";
+import { List_Incidents_CPE_Collect,Forward_CPE_Collect,getOpenTaskCountforCPECollect } from "../../services/Incidents/incidentService";
+import { Create_Task,Create_Task_for_Forward_CPECollect} from "../../services/task/taskService.js";
 import Swal from "sweetalert2";
 
 export default function CollectOnlyCPECollect() {
@@ -33,7 +33,7 @@ export default function CollectOnlyCPECollect() {
   const [selectedSource, setSelectedSource] = useState("");
   const [tableData, setTableData] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
-const [isLocked, setIsLocked] = useState(false);
+const [openTaskCount, setOpenTaskCount] = useState(0); 
 
   const rowsPerPage = 7;
 
@@ -52,7 +52,21 @@ const [isLocked, setIsLocked] = useState(false);
   useEffect(() => {
     fetchData();
   }, []); 
+  
+  const fetchOpenTaskCount = async () => {
+    try {
+      const data = await getOpenTaskCountforCPECollect();
+      setOpenTaskCount(data.openTaskCount || 0);
+      console.log("Open Task Count Response:", data.openTaskCount );
+    } catch (error) {
+      console.error("Error fetching open task count:", error);
+    }
+  };
 
+  useEffect(() => {
+    fetchOpenTaskCount();
+  }, []);
+  
   const handleFilterClick = () => {
     const from = fromDate ? new Date(fromDate) : null;
     const to = toDate ? new Date(toDate) : null;
@@ -245,6 +259,142 @@ const [isLocked, setIsLocked] = useState(false);
 //     }
 //   };
 
+// const forwardCPECollect = async () => {
+//   if (selectedRows.length === 0) {
+//     Swal.fire({
+//       title: "Warning",
+//       text: "Please select at least one incident.",
+//       icon: "warning",
+//       confirmButtonText: "OK",
+//     });
+//     return;
+//   }
+
+//   setIsProcessing(true);  // Disable UI interactions during API call
+
+//   try {
+//     if (selectedRows.length > 10) {
+//       const taskParams = {
+//         Incident_Status: "Open CPE Collect",
+//         Incident_Ids: selectedRows,  // Include all selected rows
+//       };
+
+//       console.log("Task Params:", taskParams);
+
+//       const response = await Create_Task_for_Forward_CPECollect(taskParams);
+
+//       console.log("Response from Create_Task:", response);
+
+//       Swal.fire({
+//         title: "Task Created Successfully!",
+//         text: `Task created to handle ${selectedRows.length} incidents.`,
+//         icon: "success",
+//         confirmButtonText: "OK",
+//       });
+
+      
+//     } else {
+//       const response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
+
+//       console.log("Response from Create_Case:", response);
+
+//       Swal.fire({
+//         title: "Cases Created Successfully!",
+//         text: `Successfully created ${response.cases.length} cases.`,
+//         icon: "success",
+//         confirmButtonText: "OK",
+//       });
+//     }
+
+//     setSelectedRows([]);  // Clear selected rows after action
+//   } catch (error) {
+//     console.error("Error in forwardCPECollect:", error);
+//     Swal.fire({
+//       title: "Error",
+//       text: error.message || "Failed to perform the action.",
+//       icon: "error",
+//       confirmButtonText: "OK",
+//     });
+//   } finally {
+//     setIsProcessing(false);  // Re-enable UI interactions
+//     await fetchData();       // Refresh data to update table state
+//   }
+// };
+// const forwardCPECollect = async () => {
+//   if (selectedRows.length === 0) {
+//     Swal.fire({
+//       title: "Warning",
+//       text: "Please select at least one incident.",
+//       icon: "warning",
+//       confirmButtonText: "OK",
+//     });
+//     return;
+//   }
+
+//   setIsProcessing(true); // Disable UI interactions during API call
+
+//   try {
+//     // Fetch Open Task Count Before Proceeding
+//     const taskCountResponse = await getOpenTaskCountforCPECollect();
+//     console.log("Task Count Response:", taskCountResponse);
+//     if (taskCountResponse.openTaskCount > 0) {
+//       Swal.fire({
+//         title: "Task Already in Progress",
+//         text: `There are already ${taskCountResponse.openTaskCount} open tasks. Please wait until they are completed before proceeding.`,
+//         icon: "warning",
+//         confirmButtonText: "OK",
+//       });
+//       // setIsProcessing(false);
+//       return;
+//     }
+
+//     if (selectedRows.length > 10) {
+//       const taskParams = {
+//         Incident_Status: "Open CPE Collect",
+//         Incident_Ids: selectedRows, // Include all selected rows
+//       };
+
+//       console.log("Task Params:", taskParams);
+
+//       const response = await Create_Task_for_Forward_CPECollect(taskParams);
+
+//       console.log("Response from Create_Task:", response);
+
+//       Swal.fire({
+//         title: "Task Created Successfully!",
+//         text: `Task created to handle ${selectedRows.length} incidents.`,
+//         icon: "success",
+//         confirmButtonText: "OK",
+//       });
+//     } else {
+//       const response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
+
+//       console.log("Response from Create_Case:", response);
+
+//       Swal.fire({
+//         title: "Cases Created Successfully!",
+//         text: `Successfully created ${response.cases.length} cases.`,
+//         icon: "success",
+//         confirmButtonText: "OK",
+//       });
+//     }
+
+//     setSelectedRows([]); // Clear selected rows after action
+//   } catch (error) {
+//     console.error("Error in forwardCPECollect:", error);
+//     Swal.fire({
+//       title: "Error",
+//       text: error.message || "Failed to perform the action.",
+//       icon: "error",
+//       confirmButtonText: "OK",
+//     });
+//   } finally {
+//     setIsProcessing(false); // Re-enable UI interactions
+//     await fetchData(); // Refresh data to update table state
+//     await fetchOpenTaskCount(); // Refresh task count
+//   }
+// };
+
 const forwardCPECollect = async () => {
   if (selectedRows.length === 0) {
     Swal.fire({
@@ -256,13 +406,29 @@ const forwardCPECollect = async () => {
     return;
   }
 
-  setIsProcessing(true);  // Disable UI interactions during API call
+  setIsProcessing(true); // Disable UI interactions during API call
 
   try {
+    const latestCount = await fetchOpenTaskCount();  // Ensure this function returns a value
+
+    console.log("Latest Open Task Count:", latestCount);
+
+    if (latestCount > 0) {
+      Swal.fire({
+        title: "Task Already in Progress",
+        text: `There are already ${latestCount} open tasks. Please wait until they are completed before proceeding.`,
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+
+      setIsProcessing(false);
+      return;
+    }
+
     if (selectedRows.length > 10) {
       const taskParams = {
         Incident_Status: "Open CPE Collect",
-        Incident_Ids: selectedRows,  // Include all selected rows
+        Incident_Ids: selectedRows, // Include all selected rows
       };
 
       console.log("Task Params:", taskParams);
@@ -277,8 +443,6 @@ const forwardCPECollect = async () => {
         icon: "success",
         confirmButtonText: "OK",
       });
-
-      setIsLocked(true);  // Lock the table after task creation
     } else {
       const response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
 
@@ -292,7 +456,7 @@ const forwardCPECollect = async () => {
       });
     }
 
-    setSelectedRows([]);  // Clear selected rows after action
+    setSelectedRows([]); // Clear selected rows after action
   } catch (error) {
     console.error("Error in forwardCPECollect:", error);
     Swal.fire({
@@ -302,8 +466,9 @@ const forwardCPECollect = async () => {
       confirmButtonText: "OK",
     });
   } finally {
-    setIsProcessing(false);  // Re-enable UI interactions
-    await fetchData();       // Refresh data to update table state
+    await fetchData(); // Refresh table data
+    await fetchOpenTaskCount(); // 🔹 Ensure `openTaskCount` is updated again
+    setIsProcessing(false); // Re-enable UI interactions
   }
 };
 
@@ -332,22 +497,22 @@ const forwardCPECollect = async () => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  // const handleRowCheckboxChange = (Incident_Id) => {
-  //   if (selectedRows.includes(Incident_Id)) {
-  //     setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
-  //   } else {
-  //     setSelectedRows([...selectedRows, Incident_Id]);
-  //   }
-  // };
-
   const handleRowCheckboxChange = (Incident_Id) => {
-    if (isLocked) return;  // Prevent selection if locked
     if (selectedRows.includes(Incident_Id)) {
       setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
     } else {
       setSelectedRows([...selectedRows, Incident_Id]);
     }
   };
+
+  // const handleRowCheckboxChange = (Incident_Id) => {
+  //   if (isLocked) return;  // Prevent selection if locked
+  //   if (selectedRows.includes(Incident_Id)) {
+  //     setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
+  //   } else {
+  //     setSelectedRows([...selectedRows, Incident_Id]);
+  //   }
+  // };
   
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
@@ -535,14 +700,20 @@ const forwardCPECollect = async () => {
                     >
                       Proceed
                     </button> */}
-                    <button
+                    {/* <button
   className={`${GlobalStyle.buttonPrimary} ml-4`}
   onClick={forwardCPECollect}
   disabled={isProcessing || selectedRows.length === 0 || isLocked}
 >
   Proceed
+</button> */}
+<button
+  className={`${GlobalStyle.buttonPrimary} ml-4`}
+  onClick={forwardCPECollect}
+  disabled={isProcessing || selectedRows.length === 0 || openTaskCount > 0}
+>
+  Proceed
 </button>
-
                   </td>
                 </tr>
               ))}
@@ -597,11 +768,18 @@ const forwardCPECollect = async () => {
           />
           Select All Data
         </label>
-    
+{/*     
         <button
   className={`${GlobalStyle.buttonPrimary} ml-4`}
   onClick={forwardCPECollect}
   disabled={isProcessing || selectedRows.length === 0 || isLocked}
+>
+  Proceed
+</button> */}
+<button
+  className={`${GlobalStyle.buttonPrimary} ml-4`}
+  onClick={forwardCPECollect}
+  disabled={isProcessing || selectedRows.length === 0 || openTaskCount > 0}
 >
   Proceed
 </button>

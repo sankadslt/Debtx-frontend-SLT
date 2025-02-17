@@ -135,3 +135,14 @@ export const Forward_CPE_Collect = async (requestData) => {
     throw error.response?.data || error;
   }
 };
+
+export const getOpenTaskCountforCPECollect = async () => {
+  try {
+    const response = await axios.get(`${INCIDENT_URL}/Open_Task_Count_for_CPE_Collect`);
+    console.log("Open Task Count Response:", response.data); // Debugging
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching open task count:", error.response?.data || error.message);
+    return { openTaskCount: 0 }; // Prevent breaking the UI
+  }
+};
