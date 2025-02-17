@@ -288,8 +288,8 @@ const Incident_List = () => {
     );
 };
 
-// StatusIcon.propTypes = {
-//     status: PropTypes.string.isRequired,
-// };
+StatusIcon.propTypes = {
+    status: PropTypes.string.isRequired,
+};
 
 export default Incident_List;
