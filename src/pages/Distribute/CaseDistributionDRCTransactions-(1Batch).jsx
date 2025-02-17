@@ -15,6 +15,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import {get_distribution_array_of_a_transaction,Create_Task_For_case_distribution_transaction_array } from "/src/services/case/CaseServices.js";
 import minus from "/src/assets/images/minorbw.png";
 import plus from "/src/assets/images/plusbw.png";
+import Swal from "sweetalert2";
 
 export default function CaseDistributionDRCTransactions1Batch() {
   const navigate = useNavigate();
@@ -63,6 +64,13 @@ export default function CaseDistributionDRCTransactions1Batch() {
 
         if (response.status === "success") {
             console.log("Task created successfully");
+
+            Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: "Task created successfully",
+                confirmButtonColor: "#28a745",
+            });
             }
         else {
             console.error("Error in API response:", response.message || "Unknown error");
@@ -74,6 +82,14 @@ export default function CaseDistributionDRCTransactions1Batch() {
             "Error creating task for case distribution transaction:",
             error.response?.data || error.message
         );
+
+        const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: errorMessage,
+            confirmButtonColor: "#d33",
+        });
     }
 
   };
