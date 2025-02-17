@@ -38,11 +38,12 @@ import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
  import DRCAssignManagerApproval from "../pages/Distribute/DRCAssignManagerApproval";
  import DistributeDummy from "../pages/Distribute/DistributeDummy";
  import CaseDistributionDRCTransactions1Batch from "../pages/Distribute/CaseDistributionDRCTransactions-1Batch";
+ import CaseDistributionDRCTransactionsBatch from "../pages/Distribute/CaseDistributionDRCTransactions-(1Batch)";
  import CaseDistributionDRCSummary from "../pages/Distribute/CaseDistributionDRCSummary";
  import CaseDistributionDRCSummarywithRTOM from "../pages/Distribute/CaseDistributionDRCSummarywithRTOM";
  import AmendAssignedDRC from "../pages/Distribute/AmendAssignedDRC";
-
-
+ import ReAssignDRC from "../pages/Distribute/ReAssignDRC";
+ import AssignDRCCaseList from "../pages/Distribute/AssignDRCCaseList";
 const Routers = () => {
   return (
     <Routes>
@@ -90,12 +91,17 @@ const Routers = () => {
     <Route path="/pages/Distribute/AmendAssignedDRC" element={<ProtectedRoute element={<AmendAssignedDRC />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/Distribute/CaseDistributionDRCSummarywithRTOM" element={<ProtectedRoute element={<CaseDistributionDRCSummarywithRTOM />} allowedRoles={['superadmin']} />} />
 
+    <Route path="/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)" element={<ProtectedRoute element={<CaseDistributionDRCTransactionsBatch />} allowedRoles={['superadmin']} />} />
+
+    <Route path="/pages/Distribute/ReAssignDRC" element={<ReAssignDRC />} />
+    <Route path="/pages/Distribute/AssignDRCCaseList" element={<AssignDRCCaseList />} />
     {/* //INCIDENT */}
     <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
 
       <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
         
+
 
     
     </Routes>
