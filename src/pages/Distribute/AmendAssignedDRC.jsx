@@ -22,6 +22,7 @@ import {
   Case_Distribution_Details_With_Drc_Rtom_ByBatchId,
   Exchange_DRC_RTOM_Cases
 } from "/src/services/case/CaseServices.js";
+import Swal from "sweetalert2";
 
 export default function AmendAssignedDRC() {
   const navigate = useNavigate();
@@ -117,6 +118,12 @@ export default function AmendAssignedDRC() {
             console.log("Success", response);
             setCpeData([]); // Clear table data after successful submission
             
+            Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "DRC RTOM cases exchanged successfully",
+            confirmButtonColor: "#28a745",
+            });
         } else {
             console.error(
             "Error in API response:",
@@ -128,6 +135,13 @@ export default function AmendAssignedDRC() {
             "Error exchanging DRC RTOM cases:",
             error.response?.data || error.message
         );
+        const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: errorMessage,
+            confirmButtonColor: "#d33",
+        });
     }
   };
 

@@ -181,16 +181,23 @@ const AssignDRC = () => {
     try {
       const response = await Case_Distribution_Among_Agents(requestData); // Use 'await' here
       console.log("Response:", response);
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data sent successfully.",
+        confirmButtonColor: "#28a745",
+      });
     } catch (error) {
       console.error("Error in sending the data:", error);
 
       const errorMessage = error?.response?.data?.message || 
                              error?.message || 
-                             "Something went wrong!";
+                             "An error occurred. Please try again.";
 
         Swal.fire({
             icon: "error",
-            title: "Oops...",
+            title: "Error",
             text: errorMessage,
             confirmButtonColor: "#d33",
         });
