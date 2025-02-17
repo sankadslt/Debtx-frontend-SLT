@@ -12,57 +12,192 @@ Notes:
 
 */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import "react-datepicker/dist/react-datepicker.css";
 import Incident_Reject from "../../assets/images/Incident_Reject.png";
+import { Create_Rejected_List_for_Download, List_Reject_Incident } from "../../services/distribution/distributionService.js";
+import Swal from "sweetalert2";
 
 export default function RejectIncidentlog() {
   const navigate = useNavigate();
 
   // Table data exactly matching the image
-  const tableData = [
-    {
-      id: "RC001",
-      status: "Incident Reject",
-      account_no: "0115678",
-      filtered_reason: "credit class",
-      reject_owned: "9/10/2024",
-      reject_by: "7634",
-    },
-    {
-      id: "RC002",
-      status: "Incident Reject",
-      account_no: "0115678",
-      filtered_reason: "customer type",
-      reject_owned: "9/10/2024",
-      reject_by: "3476",
-    },
-    {
-      id: "RC003",
-      status: "Incident Reject",
-      account_no: "0115678",
-      filtered_reason: "credit class",
-      reject_owned: "9/10/2024",
-      reject_by: "7634",
-    },
-  ];
+  // const tableData = [
+  //   {
+  //     id: "RC001",
+  //     status: "Incident Reject",
+  //     account_no: "0115678",
+  //     filtered_reason: "credit class",
+  //     reject_owned: "9/10/2024",
+  //     reject_by: "7634",
+  //   },
+  //   {
+  //     id: "RC002",
+  //     status: "Incident Reject",
+  //     account_no: "0115678",
+  //     filtered_reason: "customer type",
+  //     reject_owned: "9/10/2024",
+  //     reject_by: "3476",
+  //   },
+  //   {
+  //     id: "RC003",
+  //     status: "Incident Reject",
+  //     account_no: "0115678",
+  //     filtered_reason: "credit class",
+  //     reject_owned: "9/10/2024",
+  //     reject_by: "7634",
+  //   },
+  // ];
 
   // Filter state
   const [fromDate, setFromDate] = useState(null); //for date
   const [toDate, setToDate] = useState(null);
   const [error, setError] = useState("");
+  const [tableData, setTableData] = useState([]);
   const [selectAllData, setSelectAllData] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0); // Changed to 0-based indexing
-  const [selectedSource, setSelectedSource] = useState("");
+  const [selectedAction, setSelectedAction] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const rowsPerPage = 7; // Number of rows per page
 
+  const fetchData = async () => {
+      try {
+          const filters= {
+            Action_Type:selectedAction,
+            FromDate:fromDate,
+            ToDate:toDate
+          }
+          const response = await List_Reject_Incident(filters);
+          const formattedData = response?.data.map((item) => {
+            
+            const createdDateStr = typeof item.Created_Dtm === "string" ? item.Created_Dtm.replace(" ", "T") : item.Created_Dtm;
+            const rejectedDateStr = typeof item.Rejected_Dtm === "string" ? item.Rejected_Dtm.replace(" ", "T") : item.Rejected_Dtm;
+            const createdDate = createdDateStr ? new Date(createdDateStr) : null;
+            const rejectedDate = rejectedDateStr ? new Date(rejectedDateStr) : null;
+            return {
+              id: item.Incident_Id || "N/A",
+              status: "Incident Reject",
+              account_no: item.Account_Num || "N/A",
+              filtered_reason: item.Filtered_Reason || "N/A",
+              source_type: item?.Source_Type || "N/A",
+              reject_by: item.Rejected_By ||"N/A",
+              reject_dtm: isNaN(rejectedDate) ? "N/A" : rejectedDate.toLocaleString() || "N/A",
+              created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A"
+            };
+          });
+          setTableData(formattedData);
+          setIsLoading(false);
+      } catch {
+          setError("Failed to fetch DRC details. Please try again later.");
+          setIsLoading(false);
+      }
+    };
+      
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleFilterClick = () => {
+    const from = fromDate ? new Date(fromDate) : null;
+    const to = toDate ? new Date(toDate) : null;
+        
+      if (!selectedAction && !from && !to) {
+          Swal.fire({
+            title: "Missing Filters",
+            text: "Please select a Source Type or provide both From Date and To Date.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          return;
+      }
+      
+      if ((from && !to) || (!from && to)) {
+          Swal.fire({
+            title: "Incomplete Date Range",
+            text: "Both From Date and To Date must be selected together.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          return;
+      }
+      
+      if (selectedAction || (from && to)) {
+        if (from && to) {
+          const monthDiff = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+      
+            if (monthDiff > 1 || (monthDiff === 1 && to.getDate() > from.getDate())) {
+              Swal.fire({
+                title: "Long Date Range",
+                text: "The selected date range exceeds one month. Consider creating a task instead.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Create Task",
+                cancelButtonText: "Cancel",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  
+                } else {
+                  
+                }
+              });
+              return;
+            }
+          }
+          fetchData(); 
+        }
+  };
+  
+  const handleCreateTaskForDownload = async({action_type, fromDate, toDate}) => {
+    
+      if(!action_type && !fromDate && !toDate){
+            Swal.fire({
+              title: 'Warning',
+              text: 'Missing Parameters',
+              icon: 'warning',
+              confirmButtonText: 'OK'
+            });
+          }
+          else if ((fromDate && !toDate) || (!fromDate && toDate)) {
+            Swal.fire({
+              title: "Incomplete Date Range",
+              text: "Both From Date and To Date must be selected together.",
+              icon: "warning",
+              confirmButtonText: "OK",
+            });
+            return;
+          } else{
+          try{
+            const filteredParams = {
+              Action_Type:action_type,
+              FromDate:fromDate,
+              ToDate:toDate
+            }
+            const response = await Create_Rejected_List_for_Download(filteredParams);
+            if(response.status===201){
+              Swal.fire({ 
+                title: 'Success',
+                text: 'Task successfully created',
+                icon: 'success',
+                confirmButtonText: 'OK'
+              });
+            }
+          }catch(error){
+            Swal.fire({
+              title: 'Error',
+              text: 'Error creating task',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
+          }
+    };
   // validation for date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
@@ -141,13 +276,13 @@ export default function RejectIncidentlog() {
         <div className="flex items-center gap-4">
           <select
             className={GlobalStyle.inputText}
-            value={selectedSource}
-            onChange={(e) => setSelectedSource(e.target.value)}
+            value={selectedAction}
+            onChange={(e) => setSelectedAction(e.target.value)}
           >
             <option value="">Action Type</option>
-            <option value="Select 1">Select 1</option>
-            <option value="Select 2">Select 2</option>
-            <option value="Select 3">Select 3</option>
+            <option value="collect arrears">Collect Arrears</option>
+            <option value="collect arrears and CPE">Collect Arrears and CPE</option>
+            <option value="collect CPE">Collect CPE</option>
           </select>
         </div>
 
@@ -174,7 +309,7 @@ export default function RejectIncidentlog() {
         {/* Filter Button */}
         <button
           className={`${GlobalStyle.buttonPrimary} h-[35px]`}
-          onClick={() => {}}
+          onClick={handleFilterClick}
         >
           Filter
         </button>
@@ -213,10 +348,13 @@ export default function RejectIncidentlog() {
                   Filtered Reason
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  Reject Owned
+                  Rejected By
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  Reject By
+                  Rejected Dtm
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Created Dtm
                 </th>
               </tr>
             </thead>
@@ -264,9 +402,10 @@ export default function RejectIncidentlog() {
                   <td className={GlobalStyle.tableData}>
                     {row.filtered_reason}
                   </td>
-
-                  <td className={GlobalStyle.tableData}>{row.reject_owned}</td>
                   <td className={GlobalStyle.tableData}>{row.reject_by}</td>
+                  <td className={GlobalStyle.tableData}>{row.reject_dtm}</td>
+                  <td className={GlobalStyle.tableData}>{row.created_dtm}</td>
+                  
                 </tr>
               ))}
               {paginatedData.length === 0 && (
@@ -319,12 +458,16 @@ export default function RejectIncidentlog() {
           Select All Data
         </label>
 
-        <Link
+        <button
           className={`${GlobalStyle.buttonPrimary} ml-4`}
-          to="/lod/ftllod/ftllod/downloadcreateftllod"
+          onClick={()=>{handleCreateTaskForDownload({
+            action_type: selectedAction, 
+            fromDate: fromDate, 
+            toDate: toDate
+          })}}
         >
           Create Task Let Me Know
-        </Link>
+        </button>
       </div>
     </div>
   );
