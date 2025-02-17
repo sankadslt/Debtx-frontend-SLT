@@ -115,3 +115,23 @@ export const getDirectLODIncidentsCount = async () => {
   const response = await axios.post(`${INCIDENT_URL}/total_incidents_Direct_LOD`);
   return response.data?.data?.Distribution_ready_total;
 };
+
+export const Create_Case_for_incident = async (requestData) => {
+  try {
+    const response = await axios.post(`${INCIDENT_URL}/Create_Case_for_incident`, requestData);
+    return response.data; // Returns the created cases
+  } catch (error) {
+    console.error("Error in Create_Case_for_incident service:", error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const Forward_CPE_Collect = async (requestData) => {
+  try {
+    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`, requestData);
+    return response.data; 
+  } catch (error) {
+    console.error("Error in Forward_CPE_Collect service:", error.message);
+    throw error.response?.data || error;
+  }
+};

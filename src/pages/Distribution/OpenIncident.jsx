@@ -14,11 +14,11 @@ Notes:
 */
 import { useState,useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { Link} from "react-router-dom";
+
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band} from "../../services/Incidents/incidentService";
+import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band,Create_Case_for_incident} from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/Open_No_Agent.png"
-import { Create_Task_for_OpenNoAgent } from "../../services/task/taskService";
+import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident } from "../../services/task/taskService";
 import Swal from "sweetalert2";
 
 export default function OpenIncident() {
@@ -30,47 +30,41 @@ export default function OpenIncident() {
   const [ setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [isProcessing,setIsProcessing] = useState(false); 
+const [isLocked, setIsLocked] = useState(false);
 
-
-  //const navigate = useNavigate();
   const rowsPerPage = 7;
 
+const fetchData = async () => {
+  try {
+    const response = await List_Distribution_Ready_Incidents();
+    setData(response.data);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        
-        const response = await List_Distribution_Ready_Incidents();
-        
-        setData(response.data);
-  
-        
-       
-        const data = await distribution_ready_incidents_group_by_arrears_band();
-        setDistributionData(data);
-        console.log(distributionData); 
-        const totalCount = Object.values(distributionData).reduce(
-          (sum, count) => sum + count,
-          0
-        );
-        
-       
-        setTotal(totalCount);
-      } catch (error) {
-        setError(error.message || "Failed to fetch data.");
-      }
-    };
-  
-    fetchData();
-  }); 
-  
+    const distributionResponse = await distribution_ready_incidents_group_by_arrears_band();
+    setDistributionData(distributionResponse);
+    
+    const totalCount = Object.values(distributionResponse).reduce(
+      (sum, count) => sum + count,
+      0
+    );
+    setTotal(totalCount);
+  } catch (error) {
+    setError(error.message || "Failed to fetch data.");
+  }
+};
+
+
+useEffect(() => {
+  fetchData();
+});
+
   const handleCreateTask = async () => {
     try {
       const taskParams = {
-        // Any additional task parameters if needed
+       
       };
   
-      // Call the service function to create the task
+    
       const response = await Create_Task_for_OpenNoAgent(taskParams);
   
       Swal.fire({
@@ -80,7 +74,7 @@ export default function OpenIncident() {
         confirmButtonText: "OK",
       });
   
-      // Clear selected rows and reload data
+     
       setSelectedRows([]);
       const updatedResponse = await List_Distribution_Ready_Incidents();
       setData(updatedResponse.data);
@@ -94,6 +88,121 @@ export default function OpenIncident() {
     }
   };
   
+  // const handleCaseforIncident = async () => {
+  //   if (selectedRows.length === 0) {
+  //     Swal.fire({
+  //       title: "Warning",
+  //       text: "Please select at least one incident.",
+  //       icon: "warning",
+  //       confirmButtonText: "OK",
+  //     });
+  //     return;
+  //   }
+  
+  //   try {
+  //     if (selectedRows.length > 10) {
+  //       // Create task for selected incidents
+  //       const taskParams = {
+  //         Incident_Status: "Open No Agent",
+        
+  //       };
+  
+  //       console.log("Task Params:", taskParams);
+  
+  //       const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
+  
+  //       console.log("Response from Create_Task:", response);
+  
+  //       Swal.fire({
+  //         title: "Task Created Successfully!",
+  //         text: `Task created to handle ${selectedRows.length} incidents.`,
+  //         icon: "success",
+  //         confirmButtonText: "OK",
+  //       });
+  //     } else {
+  //       // Create cases for incidents
+  //       const response = await Create_Case_for_incident({ Incident_Ids: selectedRows });
+  
+  //       console.log("Response from Create_Case:", response); // Debug: Log the backend response
+  
+  //       Swal.fire({
+  //         title: "Cases Created Successfully!",
+  //         text: `Successfully created ${response.cases.length} cases.`,
+  //         icon: "success",
+  //         confirmButtonText: "OK",
+  //       });
+  //     }
+  
+  //     // Clear selected rows after task or case creation
+  //     setSelectedRows([]);
+  //     await fetchData(); // Ensure data is refreshed after actions
+  //   } catch (error) {
+  //     console.error("Error in handleCaseforIncident:", error); // Debug: Log the error
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: error.message || "Failed to perform the action.",
+  //       icon: "error",
+  //       confirmButtonText: "OK",
+  //     });
+  //   }
+  // };
+  const handleCaseforIncident = async () => {
+    if (selectedRows.length === 0) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select at least one incident.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+  
+    setIsProcessing(true);
+  
+    try {
+      if (selectedRows.length > 10) {
+        const taskParams = {
+          Incident_Status: "Open No Agent",
+        };
+  
+        const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
+          console.log("Response from Create_Task:", response);
+        Swal.fire({
+          title: "Task Created Successfully!",
+          text: `Task created to handle ${selectedRows.length} incidents.`,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      } else {
+        const response = await Create_Case_for_incident({ Incident_Ids: selectedRows });
+  
+        Swal.fire({
+          title: "Cases Created Successfully!",
+          text: `Successfully created ${response.cases.length} cases.`,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      }
+  
+      // Clear selected rows after action
+      setSelectedRows([]);
+      setIsLocked(true);  // Lock the table until data is refreshed
+    } catch (error) {
+      console.error("Error in handleCaseforIncident:", error);
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Action failed: Another set in progress.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setIsProcessing(false);
+      await fetchData();  
+    }
+  };
+  
+  
+ 
 
   const filteredData = data.filter((row) =>
     Object.values(row)
@@ -125,14 +234,22 @@ export default function OpenIncident() {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
+  // const handleRowCheckboxChange = (Incident_Id) => {
+  //   if (selectedRows.includes(Incident_Id)) {
+  //     setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
+  //   } else {
+  //     setSelectedRows([...selectedRows, Incident_Id]);
+  //   }
+  // };
   const handleRowCheckboxChange = (Incident_Id) => {
+    if (isLocked) return;  // Prevent any selection if table is locked
     if (selectedRows.includes(Incident_Id)) {
       setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
     } else {
       setSelectedRows([...selectedRows, Incident_Id]);
     }
   };
-
+  
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
       setSelectedRows([]);
@@ -320,13 +437,19 @@ export default function OpenIncident() {
             />
             Select All
           </label>
-
-          <Link
-            className={`${GlobalStyle.buttonPrimary} ml-4`}
-            to="/lod/ftllod/ftllod/downloadcreateftllod"
-          >
-            Proceed
-          </Link>
+          <button
+  className={`${GlobalStyle.buttonPrimary} ml-4`}
+  onClick={handleCaseforIncident}
+  disabled={isProcessing || selectedRows.length === 0 || isLocked}
+>
+  Proceed
+</button>
+          {/* <button
+  className={`${GlobalStyle.buttonPrimary} ml-4`}
+  onClick={handleCaseforIncident}
+>
+  Proceed
+</button> */}
         </div>
       </div>
     </>
