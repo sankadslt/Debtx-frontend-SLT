@@ -16,6 +16,8 @@ import {
   List_all_transaction_seq_of_batch_id,
   Create_Task_For_case_distribution_transaction,
 } from "/src/services/case/CaseServices.js";
+import Swal from "sweetalert2";
+
 
 export default function CaseDistributionDRCTransactions1Batch() {
   const navigate = useNavigate();
@@ -61,6 +63,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
   
       if (response.status === "success") {
         console.log("Task created successfully");
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Task created successfully",
+          confirmButtonColor: "#28a745",
+        });
       } else {
         console.error("Error in API response:", response.message || "Unknown error");
       }
@@ -69,6 +77,14 @@ export default function CaseDistributionDRCTransactions1Batch() {
         "Error creating task for case distribution transaction:",
         error.response?.data || error.message
       );
+
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
     }
   };
   
