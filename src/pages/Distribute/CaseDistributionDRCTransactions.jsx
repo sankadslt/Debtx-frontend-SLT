@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution } from "/src/services/case/CaseServices.js";
+import Swal from "sweetalert2";
 
 
 export default function AssignPendingDRCSummary() {
@@ -156,8 +157,27 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
    try {
       const response = await Create_Task_For_case_distribution(payload);
       console.log("Create Task Response:", response);
+
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Task created successfully.",
+          confirmButtonColor: "#28a745",
+        });
+      }
+      
     } catch (error) {
       console.error("Error creating task for case distribution:", error);
+
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
+
     }
 
   };
