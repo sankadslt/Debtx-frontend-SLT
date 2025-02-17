@@ -1,3 +1,13 @@
+/*Purpose: This template is used for the 1.15.2 - DRC Assign Manager Approval 
+Created Date: 2025-02-17
+Created By: Sanjaya (sanjayaperera80@gmail.com)
+Last Modified Date: 2025-02-17
+Version: node 20
+ui number : 1.15.2
+Dependencies: tailwind css
+Related Files: (routes)
+Notes: The following page conatins the codes */
+
 import { useState } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
