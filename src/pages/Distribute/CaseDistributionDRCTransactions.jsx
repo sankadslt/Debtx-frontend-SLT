@@ -331,7 +331,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   <td className={GlobalStyle.tableData} style={{ width: "75px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
                     {item.batch_seq_details?.[0]?.action_type === "distribution" && <img src="/src/assets/images/distributed.png" width={20} height={15} alt="Distributed" />}
-                    {item.batch_seq_details?.[0]?.action_type === "ammend" && <img src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />}
+                    {item.batch_seq_details?.[0]?.action_type === "amend" && <img src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />}
                     </div>
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "120px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
