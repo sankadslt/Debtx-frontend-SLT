@@ -19,7 +19,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Direct_LOD from "../../assets/images/Direct_LOD.png";
-import { List_incidents_Direct_LOD, Create_Task_Download_Direct_LOD_Sending, Forward_Direct_LOD, Create_Task_Forward_Direct_LOD } from "../../services/distribution/distributionService.js";
+import { List_incidents_Direct_LOD, Create_Task_Download_Direct_LOD_Sending, Forward_Direct_LOD, Create_Task_Forward_Direct_LOD, Open_Task_Count_Forward_Direct_LOD } from "../../services/distribution/distributionService.js";
 import Swal from "sweetalert2";
 
 export default function DirectLODSendingIncident() {
@@ -146,83 +146,106 @@ export default function DirectLODSendingIncident() {
     }
   };
 
-  const handleProceed = async (Incident_Id)=>{
-    if (selectedRows.includes(Incident_Id)) {
-      try{
-        const response = await Forward_Direct_LOD(Incident_Id);
-        if(response.status===201){
-          Swal.fire({ 
-            title: 'Success',
-            text: response.data.message,
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-          fetchData();
-        }  
-      }catch(error){
-        Swal.fire({
-          title: 'Error',
-          text: error.message,
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-      } 
-    } else {
+  const handleProceed = async (Incident_Id) => {
+    if (!selectedRows.includes(Incident_Id)) {
       Swal.fire({
-        title: 'Warning',
-        text: 'Row not selected',
-        icon: 'warning',
-        confirmButtonText: 'OK'
+        title: "Warning",
+        text: "Row not selected",
+        icon: "warning",
+        confirmButtonText: "OK",
       });
+      return;
     }
-  }
-
-  const handleCreate = async()=>{
-    try{
-      if(filteredData.length>10){
-        try{
-          const parameters = {
-            Status:"Direct LOD",
-            Inncident_Ids:selectedRows,
-          }
-          const response = await Create_Task_Forward_Direct_LOD(parameters);
-          if(response.status===201){
-            Swal.fire({ 
-              title: 'Success',
-              text: 'Successfully created task to forward the direct LOD incidents',
-              icon: 'success',
-              confirmButtonText: 'OK'
-            });
-          }
-        }catch(error){
-          Swal.fire({
-            title: 'Error',
-            text: 'Error creating task',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-        }
-      }else{
-        for (const row of selectedRows) {
-          await Forward_Direct_LOD(row); 
-        }
-        Swal.fire({ 
-          title: 'Success',
-          text: "Successfully forwarded the direct LOD incidents",
-          icon: 'success',
-          confirmButtonText: 'OK'
+    try {
+      const openTaskCount = await Open_Task_Count_Forward_Direct_LOD();
+      if (openTaskCount > 0) {
+        Swal.fire({
+          title: "Warning",
+          text: "A task is already in progress.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      const response = await Forward_Direct_LOD(Incident_Id);
+      if (response.status === 201) {
+        Swal.fire({
+          title: "Success",
+          text: response.data.message,
+          icon: "success",
+          confirmButtonText: "OK",
         });
         fetchData();
       }
-    }catch(error){
+    } catch (error) {
       Swal.fire({
-        title: 'Error',
-        text: "Internal server error",
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error",
+        text: error.message,
+        icon: "error",
+        confirmButtonText: "OK",
       });
-    }   
-  }
+    }
+  };
+  
+
+  const handleCreate = async () => {
+    try {
+      if (filteredData.length === 0) {
+        Swal.fire({
+          title: "Warning",
+          text: "No data.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      const openTaskCount = await Open_Task_Count_Forward_Direct_LOD();
+      if (openTaskCount > 0) {
+        Swal.fire({
+          title: "Warning",
+          text: "A task is already in progress.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      if (filteredData.length > 10) {
+        const parameters = {
+          Status: "Direct LOD",
+          Inncident_Ids: selectedRows,
+        };
+  
+        const response = await Create_Task_Forward_Direct_LOD(parameters);
+        if (response.status === 201) {
+          Swal.fire({
+            title: "Success",
+            text: "Successfully created task to forward the direct LOD incidents",
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+        }
+      } else {
+        for (const row of selectedRows) {
+          await Forward_Direct_LOD(row);
+        }
+        Swal.fire({
+          title: "Success",
+          text: "Successfully forwarded the direct LOD incidents",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+  
+        fetchData();
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "Internal server error",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
   
   // validation for date
   const handleFromDateChange = (date) => {
@@ -330,10 +353,12 @@ export default function DirectLODSendingIncident() {
             cancelButtonText: "Cancel",
           }).then((result) => {
             if (result.isConfirmed) {
-              
-            } else {
-              
-            }
+              handleCreateTaskForDownload({
+                source_type: selectedSource, 
+                fromDate: fromDate, 
+                toDate: toDate
+              })
+            } 
           });
           return;
         }

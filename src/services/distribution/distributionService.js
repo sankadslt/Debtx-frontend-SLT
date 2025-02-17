@@ -186,3 +186,17 @@ export const Create_Rejected_List_for_Download = async (filteredParams) => {
       throw error.response?.data || error; 
     }
 }
+
+export const Open_Task_Count_Forward_Direct_LOD = async () => {
+  try {
+      const taskData = {
+          Template_Task_Id: 16,
+          task_type: "Create Case from Incident Open LOD",
+      };
+      const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
+      return response.data.openTaskCount; 
+  } catch (error) {
+      console.error("Error fetching open task count:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+}
