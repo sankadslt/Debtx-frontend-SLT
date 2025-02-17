@@ -9,25 +9,91 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useState } from "react";
+
+ 
+
+import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 
+
 const SupBulkUploadLog = () => {
- 
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
     const [error, setError] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [status, setStatus] = useState("");
-    const [filterStatus, setFilterStatus] = useState("");
-    const [filterFromDate, setFilterFromDate] = useState(null);
-    const [filterToDate, setFilterToDate] = useState(null);
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
     const rowsPerPage = 7;
 
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const requestBody = {};
+
+            if (fromDate) {
+                requestBody.From_Date = fromDate.toISOString();
+            }
+
+            if (toDate) {
+                requestBody.To_Date = toDate.toISOString();
+            }
+
+            if (status) {
+                requestBody.status = status;
+            }
+
+            const response = await fetch('http://localhost:5000/api/incident/List_Transaction_Logs_Upload_Files', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const result = await response.json();
+
+            if (result.status === "success") {
+                const transformedData = result.data.map(item => ({
+                    dateTime: new Date(item.Uploaded_Dtm).toLocaleDateString(),
+                    createdTime: new Date(item.Uploaded_Dtm).toLocaleTimeString(),
+                    uploadedBy: item.Uploaded_By || 'N/A',
+                    fileName: item.File_Name || 'N/A',
+                    type: item.File_Type || 'N/A',
+                    status: item.File_Status || 'N/A'
+                }));
+                setData(transformedData);
+            } else {
+                setData([]);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setError(error.message || 'Failed to fetch data');
+            setData([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Handle client-side search
+    const filteredData = data.filter((row) => {
+        return Object.values(row)
+            .join(" ")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+    });
+
+    // Client-side pagination
+    const pages = Math.ceil(filteredData.length / rowsPerPage);
+    const startIndex = currentPage * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
 
     const handleFromDateChange = (date) => {
         if (toDate && date > toDate) {
@@ -47,57 +113,19 @@ const SupBulkUploadLog = () => {
         }
     };
 
-
-    const data = [
-        {
-            dateTime: "2024.11.04",
-            createdTime: "1 pm",
-            uploadedBy: "ABCD",
-            fileName: "Unit Collection 11.05.csv",
-            type: "Incident creation",
-            status: "Success"
-        },
-        {
-            dateTime: "2024.11.04",
-            createdTime: "2 pm",
-            uploadedBy: "EFGH",
-            fileName: "Bulk Upload 11.05.csv",
-            type: "Incident update",
-            status: "Failed"
-        },
-
-    ];
-
-   
     const handleFilter = () => {
-        setFilterStatus(status);
-        setFilterFromDate(fromDate);
-        setFilterToDate(toDate);
         setCurrentPage(0);
+        fetchData();
     };
 
-  
-    const filteredData = data.filter((row) => {
-        const matchesSearch = Object.values(row)
-            .join(" ")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase());
-        const matchesStatus = !filterStatus || row.status.toLowerCase() === filterStatus.toLowerCase();
-
-     
-        const rowDate = new Date(row.dateTime);
-        const matchesDateRange = (!filterFromDate || rowDate >= filterFromDate) &&
-            (!filterToDate || rowDate <= filterToDate);
-
-        return matchesSearch && matchesStatus && matchesDateRange;
-    });
-
- 
-    const pages = Math.ceil(filteredData.length / rowsPerPage);
-    const startIndex = currentPage * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedData = filteredData.slice(startIndex, endIndex);
-
+    const handleClearFilters = () => {
+        setFromDate(null);
+        setToDate(null);
+        setStatus("");
+        setSearchQuery("");
+        setCurrentPage(0);
+        fetchData();
+    };
 
     const handlePrevPage = () => {
         if (currentPage > 0) setCurrentPage(currentPage - 1);
@@ -107,28 +135,16 @@ const SupBulkUploadLog = () => {
         if (currentPage < pages - 1) setCurrentPage(currentPage + 1);
     };
 
- 
-    const handleUploadClick = () => {
-        
-        console.log("Upload button clicked");
-    };
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     return (
         <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-            <h1 className={GlobalStyle.headingLarge}>Incident Upload Log</h1>
-
-            {/* Upload Button */}
-            <div className="flex justify-end mb-6">
-                <button 
-                    className={GlobalStyle.buttonPrimary}
-                    onClick={handleUploadClick}
-                >
-                    Upload a new file
-                </button>
-            </div>
+            <h1 className={`${GlobalStyle.headingLarge} mb-6`}>Incident Upload Log</h1>
 
             {/* Filters Section */}
-            <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-col gap-4 mb-8">
                 <div className="flex items-center gap-4">
                     <span>Status:</span>
                     <select
@@ -137,8 +153,8 @@ const SupBulkUploadLog = () => {
                         className={GlobalStyle.selectBox}
                     >
                         <option value="">All</option>
-                        <option value="success">Success</option>
-                        <option value="failed">Failed</option>
+                        <option value="Open">Open</option>
+                        <option value="Close">Close</option>
                     </select>
 
                     <label className={GlobalStyle.dataPickerDate}>Date:</label>
@@ -163,10 +179,15 @@ const SupBulkUploadLog = () => {
                     >
                         Filter
                     </button>
+                    <button
+                        className={GlobalStyle.buttonPrimary}
+                        onClick={handleClearFilters}
+                    >
+                        Clear Filters
+                    </button>
                 </div>
                 {error && <span className={GlobalStyle.errorText}>{error}</span>}
             </div>
-
 
             {/* Table Section */}
             <div className="flex flex-col">
@@ -175,7 +196,7 @@ const SupBulkUploadLog = () => {
                     <div className={GlobalStyle.searchBarContainer}>
                         <input
                             type="text"
-                            placeholder=""
+                            placeholder="Search..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className={GlobalStyle.inputSearch}
@@ -184,46 +205,59 @@ const SupBulkUploadLog = () => {
                     </div>
                 </div>
 
-
-                {/* Table */}
-                <div className={GlobalStyle.tableContainer}>
-                    <table className={GlobalStyle.table}>
-                        <thead className={GlobalStyle.thead}>
-                            <tr>
-                                <th className={GlobalStyle.tableHeader}>Date & time</th>
-                                <th className={GlobalStyle.tableHeader}>Created Time</th>
-                                <th className={GlobalStyle.tableHeader}>Uploaded By</th>
-                                <th className={GlobalStyle.tableHeader}>Status</th>
-                                <th className={GlobalStyle.tableHeader}>File Name</th>
-                                <th className={GlobalStyle.tableHeader}>Type</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginatedData.map((row, index) => (
-                                <tr
-                                    key={index}
-                                    className={index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd}
-                                >
-                                    <td className={GlobalStyle.tableData}>{row.dateTime}</td>
-                                    <td className={GlobalStyle.tableData}>{row.createdTime}</td>
-                                    <td className={GlobalStyle.tableData}>{row.uploadedBy}</td>
-                                    <td className={GlobalStyle.tableData}>
-                                        <span
-                                            className={`px-2 py-1 rounded-full ${row.status.toLowerCase() === "success"
-                                                ? "bg-green-100 text-green-800"
-                                                : "bg-red-100 text-red-800"
-                                                }`}
-                                        >
-                                            {row.status}
-                                        </span>
-                                    </td>
-                                    <td className={GlobalStyle.tableData}>{row.fileName}</td>
-                                    <td className={GlobalStyle.tableData}>{row.type}</td>
+                {/* Loading State */}
+                {loading ? (
+                    <div className="text-center py-4">Loading...</div>
+                ) : (
+                    /* Table */
+                    <div className={GlobalStyle.tableContainer}>
+                        <table className={GlobalStyle.table}>
+                            <thead className={GlobalStyle.thead}>
+                                <tr>
+                                    <th className={GlobalStyle.tableHeader}>Date & time</th>
+                                    <th className={GlobalStyle.tableHeader}>Created Time</th>
+                                    <th className={GlobalStyle.tableHeader}>Uploaded By</th>
+                                    <th className={GlobalStyle.tableHeader}>Status</th>
+                                    <th className={GlobalStyle.tableHeader}>File Name</th>
+                                    <th className={GlobalStyle.tableHeader}>Type</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {paginatedData.length > 0 ? (
+                                    paginatedData.map((row, index) => (
+                                        <tr
+                                            key={index}
+                                            className={index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd}
+                                        >
+                                            <td className={GlobalStyle.tableData}>{row.dateTime}</td>
+                                            <td className={GlobalStyle.tableData}>{row.createdTime}</td>
+                                            <td className={GlobalStyle.tableData}>{row.uploadedBy}</td>
+                                            <td className={GlobalStyle.tableData}>
+                                                <span
+                                                    className={`px-2 py-1 rounded-full ${
+                                                        row.status === "Open"
+                                                            ? "bg-yellow-100 text-yellow-800"
+                                                            : "bg-green-100 text-green-800"
+                                                    }`}
+                                                >
+                                                    {row.status}
+                                                </span>
+                                            </td>
+                                            <td className={GlobalStyle.tableData}>{row.fileName}</td>
+                                            <td className={GlobalStyle.tableData}>{row.type}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-4">
+                                            No data available. Try clearing the filters to see all records.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 {/* Pagination */}
                 {filteredData.length > rowsPerPage && (
