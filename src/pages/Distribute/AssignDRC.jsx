@@ -187,6 +187,8 @@ const AssignDRC = () => {
         title: "Success",
         text: "Data sent successfully.",
         confirmButtonColor: "#28a745",
+      }).then(() => {
+        navigate("/pages/Distribute/AssignedDRCSummary");
       });
     } catch (error) {
       console.error("Error in sending the data:", error);
