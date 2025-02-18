@@ -131,32 +131,16 @@ const Routers = () => {
       />
 
       {/* //DISTRIBUTION */}
-      <Route path="/Distribution/open-incident" element={<OpenIncident />} />
-      <Route
-        path="/Distribution/collect-only-cpe-collect"
-        element={<CollectOnlyCPECollect />}
-      />
-      <Route
-        path="/Distribution/direct-lod-sending-incident"
-        element={<DirectLODSendingIncident />}
-      />
-      <Route
-        path="/Distribution/reject-incident"
-        element={<RejectIncident />}
-      />
-      <Route
-        path="/Distribution/reject-incident-log"
-        element={<RejectIncidentlog />}
-      />
-      <Route
-        path="/Distribution/filtered-incident"
-        element={
-          <ProtectedRoute
-            element={<FilteredIncidents />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
+      <Route path = "/Distribution/open-incident" element={<ProtectedRoute element={<OpenIncident/>} allowedRoles={['superadmin']}/>}/>
+      <Route path = "/Distribution/collect-only-cpe-collect"  element={<ProtectedRoute element={<CollectOnlyCPECollect />} allowedRoles={['superadmin']}/>}/>
+      <Route path = "/Distribution/direct-lod-sending-incident" element={<DirectLODSendingIncident />} />
+      <Route path = "/Distribution/reject-incident" element={<RejectIncident />} />
+      <Route path = "/Distribution/reject-incident-log" element={<RejectIncidentlog />} />
+      <Route path = "/Distribution/filtered-incident" element={<ProtectedRoute element={<FilteredIncidents/>} allowedRoles={['superadmin']}/>}/>
+
+
+
+     
 
       {/* Distribute Routes */}
       <Route
