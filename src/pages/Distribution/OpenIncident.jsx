@@ -54,9 +54,9 @@ const fetchData = async () => {
 };
 
 
-useEffect(() => {
-  fetchData();
-});
+ useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleCreateTask = async () => {
     try {
