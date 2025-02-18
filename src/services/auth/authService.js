@@ -68,3 +68,21 @@ export const logoutUser = async () => {
     throw error.response?.data || error;
   }
 };
+
+// Fetch user data using stored access token
+export const getUserData = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) throw new Error("No access token found");
+
+    const response = await axios.get(`${AUTH_URL}/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
