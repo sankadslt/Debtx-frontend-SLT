@@ -25,6 +25,7 @@ import { Tooltip } from "react-tooltip";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution } from "/src/services/case/CaseServices.js";
 import Swal from "sweetalert2";
 
@@ -145,12 +146,14 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
   };
 
   const handlecreatetaskandletmeknow = async () => {
+    const userId = await getLoggedUserId();
+
     const payload = {
       current_arrears_band : selectedBandKey || "null",
       date_from : startDate || "null",
       date_to : endDate || "null",
       drc_commision_rule: selectedService || "null",
-      Created_By: "Sys",
+      Created_By: userId,
     };
 
     console.log("Create Task Payload:", payload);

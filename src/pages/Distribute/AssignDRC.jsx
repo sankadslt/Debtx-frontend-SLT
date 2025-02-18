@@ -28,6 +28,7 @@ import {
   count_cases_rulebase_and_arrears_band,
   Case_Distribution_Among_Agents,
 } from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Swal from "sweetalert2";
 
@@ -163,6 +164,8 @@ const AssignDRC = () => {
   };
 
   const handleProceed = async () => {
+    const userId = await getLoggedUserId();
+
     const drcList = filteredSearchData.map((drc) => ({
       DRC: drc.name,
       Count: drc.amount,
@@ -172,7 +175,7 @@ const AssignDRC = () => {
       drc_commision_rule: serviceType || "PEO TV",
       current_arrears_band: selectedBandKey,
       drc_list: drcList,
-      created_by: "Sys",
+      created_by: userId,
 
     };
 

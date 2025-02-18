@@ -16,6 +16,7 @@ import {
   get_distribution_array_of_a_transaction,
   Create_Task_For_case_distribution_transaction_array,
 } from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 import minus from "/src/assets/images/minorbw.png";
 import plus from "/src/assets/images/plusbw.png";
 import Swal from "sweetalert2";
@@ -54,10 +55,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
   }, [BatchID, Batchseq]);
 
   const handleonclick = async () => {
+    const userId = await getLoggedUserId();
+
     const payload = {
       case_distribution_batch_id: BatchID || 2,
       batch_seq: Batchseq || 2,
-      Created_By: "Sys",
+      Created_By: userId,
     };
     console.log("Payload", payload);
     try {

@@ -16,6 +16,7 @@ import {
   List_all_transaction_seq_of_batch_id,
   Create_Task_For_case_distribution_transaction,
 } from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 
 
@@ -51,9 +52,11 @@ export default function CaseDistributionDRCTransactions1Batch() {
   }, [BatchID]);
 
   const handleonclick = async () => {
+    const userId = await getLoggedUserId();
+
     const payload = {
       case_distribution_batch_id: BatchID || 2,
-      Created_By: "Sys",
+      Created_By: userId ,
     };
     
     console.log("Payload", payload);

@@ -22,6 +22,7 @@ import {
   Case_Distribution_Details_With_Drc_Rtom_ByBatchId,
   Exchange_DRC_RTOM_Cases
 } from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 
 export default function AmendAssignedDRC() {
@@ -94,6 +95,7 @@ export default function AmendAssignedDRC() {
   }, [BatchID]);
 
   const handleonclick = async() => {
+    const user_id = await getLoggedUserId();
 
     const drc_list = cpeData.map((item) => ({
             plus_drc_id: item.DRC2ID  , // Ensure this is a number
@@ -108,7 +110,7 @@ export default function AmendAssignedDRC() {
     const payload = {
         case_distribution_batch_id: BatchID || 1,
         drc_list: drc_list,
-        created_by: "sys",
+        created_by: user_id,
         };
     console.log("Payload", payload);
 
