@@ -309,7 +309,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
               <th className={GlobalStyle.tableHeader} style={{ width: "120px", fontSize : "10px" }}>DRC Commission Rule</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "120px",fontSize : "10px" }}>Arrears Band (Selection Rule)</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Case Count (RuleBase count)</th>
-              <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th>
+              {/* <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th> */}
               <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Distributed Status</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Approval</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "60px",fontSize : "10px" }}></th>
@@ -343,9 +343,9 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   <td className={GlobalStyle.tableData} style={{ width: "90px", textAlign: "center" }}>
                     {item.rulebase_count}
                   </td>
-                  <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
+                  {/* <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                     {item.rulebase_arrears_sum}
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
                     {item.status?.[0]?.crd_distribution_status === "Open" && <img src="/src/assets/images/open.png" width={20} height={15} alt="Open" />}
