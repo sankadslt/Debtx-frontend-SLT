@@ -90,3 +90,16 @@ export const Task_for_Download_Incidents = async (incidentData) => {
     }
   };
   
+  export const Open_Task_Count_Forward_CPE_Collect = async () => { 
+    try {
+        const taskData = {
+            Template_Task_Id: 17, 
+            task_type: "Create Case from Incident Open CPE Collect",
+        };
+        const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
+        return response.data.openTaskCount; 
+    } catch (error) {
+        console.error("Error fetching open task count:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+  }

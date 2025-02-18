@@ -18,8 +18,8 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
-import { List_Incidents_CPE_Collect,Forward_CPE_Collect,getOpenTaskCountforCPECollect } from "../../services/Incidents/incidentService";
-import { Create_Task,Create_Task_for_Forward_CPECollect} from "../../services/task/taskService.js";
+import { List_Incidents_CPE_Collect,Forward_CPE_Collect } from "../../services/Incidents/incidentService";
+import { Create_Task,Create_Task_for_Forward_CPECollect, Open_Task_Count_Forward_CPE_Collect} from "../../services/task/taskService.js";
 import Swal from "sweetalert2";
 
 export default function CollectOnlyCPECollect() {
@@ -51,11 +51,12 @@ const [openTaskCount, setOpenTaskCount] = useState(0);
   
   useEffect(() => {
     fetchData();
+    fetchOpenTaskCount();
   }, []); 
   
   const fetchOpenTaskCount = async () => {
     try {
-      const data = await getOpenTaskCountforCPECollect();
+      const data = await Open_Task_Count_Forward_CPE_Collect();
       setOpenTaskCount(data.openTaskCount || 0);
       console.log("Open Task Count Response:", data.openTaskCount );
     } catch (error) {
@@ -63,9 +64,7 @@ const [openTaskCount, setOpenTaskCount] = useState(0);
     }
   };
 
-  useEffect(() => {
-    fetchOpenTaskCount();
-  }, []);
+ 
   
   const handleFilterClick = () => {
     const from = fromDate ? new Date(fromDate) : null;
@@ -135,22 +134,6 @@ const [openTaskCount, setOpenTaskCount] = useState(0);
   };
   
   
-    // const handleFilter = async () => {
-    //   try {
-    //     const filters = {
-    //       Source_Type: selectedSource || null,
-    //       From_Date: fromDate ? fromDate.toISOString().split("T")[0] : null,
-    //       To_Date: toDate ? toDate.toISOString().split("T")[0] : null,
-    //     };
-  
-    //     const response = await List_Incidents_CPE_Collect(filters);
-    //     setTableData(response.data); 
-    //     setCurrentPage(0); 
-    //   } catch (err) {
-    //     setError(err.message || "Failed to fetch filtered incidents.");
-    //   }
-    // };
-
     
     const handleCreateTask = async () => {
       const filteredParams = {
@@ -201,125 +184,8 @@ const [openTaskCount, setOpenTaskCount] = useState(0);
       }
     };
     
-// const forwardCPECollect= async () => {
-//     if (selectedRows.length === 0) {
-//       Swal.fire({
-//         title: "Warning",
-//         text: "Please select at least one incident.",
-//         icon: "warning",
-//         confirmButtonText: "OK",
-//       });
-//       return;
-//     }
-  
-//     try {
-//       if (selectedRows.length > 10) {
-        
-//         const taskParams = {
-//           Incident_Status: "Open CPE Collect",
-//         };
-  
-//         console.log("Task Params:", taskParams); 
-  
-//         const response = await Create_Task_for_Forward_CPECollect(taskParams);
-  
-//         console.log("Response from Create_Task:", response); 
-  
-//         Swal.fire({
-//           title: "Task Created Successfully!",
-//           text: `Task created to handle ${selectedRows.length} incidents.`,
-//           icon: "success",
-//           confirmButtonText: "OK",
-//         });
-//       } else {
-       
-//         const response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
-  
-//         console.log("Response from Create_Case:", response);
-  
-//         Swal.fire({
-//           title: "Cases Created Successfully!",
-//           text: `Successfully created ${response.cases.length} cases.`,
-//           icon: "success",
-//           confirmButtonText: "OK",
-//         });
-//       }
-  
-      
-//       setSelectedRows([]);
-//       await fetchData(); 
-//     } catch (error) {
-//       console.error("Error in handleCaseforIncident:", error); 
-//       Swal.fire({
-//         title: "Error",
-//         text: error.message || "Failed to perform the action.",
-//         icon: "error",
-//         confirmButtonText: "OK",
-//       });
-//     }
-//   };
 
-// const forwardCPECollect = async () => {
-//   if (selectedRows.length === 0) {
-//     Swal.fire({
-//       title: "Warning",
-//       text: "Please select at least one incident.",
-//       icon: "warning",
-//       confirmButtonText: "OK",
-//     });
-//     return;
-//   }
 
-//   setIsProcessing(true);  // Disable UI interactions during API call
-
-//   try {
-//     if (selectedRows.length > 10) {
-//       const taskParams = {
-//         Incident_Status: "Open CPE Collect",
-//         Incident_Ids: selectedRows,  // Include all selected rows
-//       };
-
-//       console.log("Task Params:", taskParams);
-
-//       const response = await Create_Task_for_Forward_CPECollect(taskParams);
-
-//       console.log("Response from Create_Task:", response);
-
-//       Swal.fire({
-//         title: "Task Created Successfully!",
-//         text: `Task created to handle ${selectedRows.length} incidents.`,
-//         icon: "success",
-//         confirmButtonText: "OK",
-//       });
-
-      
-//     } else {
-//       const response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
-
-//       console.log("Response from Create_Case:", response);
-
-//       Swal.fire({
-//         title: "Cases Created Successfully!",
-//         text: `Successfully created ${response.cases.length} cases.`,
-//         icon: "success",
-//         confirmButtonText: "OK",
-//       });
-//     }
-
-//     setSelectedRows([]);  // Clear selected rows after action
-//   } catch (error) {
-//     console.error("Error in forwardCPECollect:", error);
-//     Swal.fire({
-//       title: "Error",
-//       text: error.message || "Failed to perform the action.",
-//       icon: "error",
-//       confirmButtonText: "OK",
-//     });
-//   } finally {
-//     setIsProcessing(false);  // Re-enable UI interactions
-//     await fetchData();       // Refresh data to update table state
-//   }
-// };
 // const forwardCPECollect = async () => {
 //   if (selectedRows.length === 0) {
 //     Swal.fire({
@@ -334,17 +200,19 @@ const [openTaskCount, setOpenTaskCount] = useState(0);
 //   setIsProcessing(true); // Disable UI interactions during API call
 
 //   try {
-//     // Fetch Open Task Count Before Proceeding
-//     const taskCountResponse = await getOpenTaskCountforCPECollect();
-//     console.log("Task Count Response:", taskCountResponse);
-//     if (taskCountResponse.openTaskCount > 0) {
+//     const latestCount = await fetchOpenTaskCount();  // Ensure this function returns a value
+
+//     console.log("Latest Open Task Count:", latestCount);
+
+//     if (latestCount > 0) {
 //       Swal.fire({
 //         title: "Task Already in Progress",
-//         text: `There are already ${taskCountResponse.openTaskCount} open tasks. Please wait until they are completed before proceeding.`,
+//         text: `There are already ${latestCount} open tasks. Please wait until they are completed before proceeding.`,
 //         icon: "warning",
 //         confirmButtonText: "OK",
 //       });
-//       // setIsProcessing(false);
+
+//       setIsProcessing(false);
 //       return;
 //     }
 
@@ -389,9 +257,43 @@ const [openTaskCount, setOpenTaskCount] = useState(0);
 //       confirmButtonText: "OK",
 //     });
 //   } finally {
+//     await fetchData(); // Refresh table data
+//     await fetchOpenTaskCount(); // 🔹 Ensure `openTaskCount` is updated again
 //     setIsProcessing(false); // Re-enable UI interactions
-//     await fetchData(); // Refresh data to update table state
-//     await fetchOpenTaskCount(); // Refresh task count
+//   }
+// };
+
+
+// const forwardCPECollect = async () => {
+//   if (selectedRows.length === 0) {
+//     Swal.fire({ title: "Warning", text: "Please select at least one incident.", icon: "warning", confirmButtonText: "OK" });
+//     return;
+//   }
+
+//   setIsProcessing(true);
+
+//   try {
+//     await fetchOpenTaskCount();
+//     if (openTaskCount > 0) {
+//       Swal.fire({ title: "Task in Progress", text: `There are already ${openTaskCount} open tasks.`, icon: "warning", confirmButtonText: "OK" });
+//       return;
+//     }
+
+//     if (selectedRows.length > 10) {
+//       const taskParams = { Incident_Status: "Open CPE Collect", Incident_Ids: selectedRows };
+//       await Create_Task_for_Forward_CPECollect(taskParams);
+//       Swal.fire({ title: "Task Created!", text: `Task created for ${selectedRows.length} incidents.`, icon: "success", confirmButtonText: "OK" });
+//     } else {
+//       await Forward_CPE_Collect({ Incident_Ids: selectedRows });
+//       Swal.fire({ title: "Success", text: "Incidents forwarded successfully.", icon: "success", confirmButtonText: "OK" });
+//     }
+//     setSelectedRows([]);
+//   } catch (error) {
+//     Swal.fire({ title: "Error", text: error.message || "Failed to perform the action.", icon: "error", confirmButtonText: "OK" });
+//   } finally {
+//     await fetchData();
+//     await fetchOpenTaskCount();
+//     setIsProcessing(false);
 //   }
 // };
 
@@ -406,35 +308,25 @@ const forwardCPECollect = async () => {
     return;
   }
 
-  setIsProcessing(true); // Disable UI interactions during API call
+  setIsProcessing(true);
 
   try {
-    const latestCount = await fetchOpenTaskCount();  // Ensure this function returns a value
-
-    console.log("Latest Open Task Count:", latestCount);
-
-    if (latestCount > 0) {
+    await fetchOpenTaskCount();
+    if (openTaskCount > 0) {
       Swal.fire({
-        title: "Task Already in Progress",
-        text: `There are already ${latestCount} open tasks. Please wait until they are completed before proceeding.`,
+        title: "Task in Progress",
+        text: `There are already ${openTaskCount} open tasks.`,
         icon: "warning",
         confirmButtonText: "OK",
       });
-
       setIsProcessing(false);
       return;
     }
 
+    let response;
     if (selectedRows.length > 10) {
-      const taskParams = {
-        Incident_Status: "Open CPE Collect",
-        Incident_Ids: selectedRows, // Include all selected rows
-      };
-
-      console.log("Task Params:", taskParams);
-
-      const response = await Create_Task_for_Forward_CPECollect(taskParams);
-
+      const taskParams = { Incident_Status: "Open CPE Collect", Incident_Ids: selectedRows };
+      response = await Create_Task_for_Forward_CPECollect(taskParams);
       console.log("Response from Create_Task:", response);
 
       Swal.fire({
@@ -444,16 +336,24 @@ const forwardCPECollect = async () => {
         confirmButtonText: "OK",
       });
     } else {
-      const response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
+      response = await Forward_CPE_Collect({ Incident_Ids: selectedRows });
+      console.log("Response from Forward_CPE_Collect:", response);
 
-      console.log("Response from Create_Case:", response);
-
-      Swal.fire({
-        title: "Cases Created Successfully!",
-        text: `Successfully created ${response.cases.length} cases.`,
-        icon: "success",
-        confirmButtonText: "OK",
-      });
+      if (response && response.cases) {
+        Swal.fire({
+          title: "Cases Created Successfully!",
+          text: `Successfully created ${response.cases.length} cases.`,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      } else {
+        Swal.fire({
+          title: "Success",
+          text: "Incidents forwarded successfully.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      }
     }
 
     setSelectedRows([]); // Clear selected rows after action
@@ -466,9 +366,9 @@ const forwardCPECollect = async () => {
       confirmButtonText: "OK",
     });
   } finally {
-    await fetchData(); // Refresh table data
-    await fetchOpenTaskCount(); // 🔹 Ensure `openTaskCount` is updated again
-    setIsProcessing(false); // Re-enable UI interactions
+    await fetchData();
+    await fetchOpenTaskCount();
+    setIsProcessing(false);
   }
 };
 
