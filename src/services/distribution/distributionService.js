@@ -18,10 +18,11 @@ export const List_incidents_Direct_LOD = async (filters) => {
  export const Create_Task_Download_Direct_LOD_Sending = async (filteredParams) => {
     try {
         const user = await getUserData();
+        console.log(user,"???/")
         const taskData = {
             Template_Task_Id: 23,
             task_type: "Create Direct LOD Incident Sending  List for Download",
-            Created_By: user.username, 
+            Created_By: user.user_id, 
             task_status: "open",
             ...filteredParams,
         };
@@ -60,7 +61,7 @@ export const Create_Task_Forward_Direct_LOD = async (parameters) => {
         const taskData = {
             Template_Task_Id: 16,
             task_type: "Create Case from Incident Open LOD",
-            Created_By: user.username, 
+            Created_By: user.user_id,  
             task_status: "open",
             ...parameters,
         };
@@ -78,7 +79,7 @@ export const Create_Task_Forward_Direct_LOD = async (parameters) => {
         const taskData = {
             Template_Task_Id: 22,
             task_type: "Create Pending Reject List for Downloard",
-            Created_By: user.username, 
+            Created_By: user.user_id, 
             task_status: "open",
             ...filteredParams,
         };
@@ -116,7 +117,7 @@ export const Create_Task_Forward_F1_Filtered = async (parameters) => {
         const taskData = {
             Template_Task_Id: 19,
             task_type: "Create Case from Incident F1 Move Forward",
-            Created_By: user.username, 
+            Created_By: user.user_id, 
             task_status: "open",
             ...parameters,
         };
@@ -134,7 +135,7 @@ export const Create_Task_Forward_F1_Filtered = async (parameters) => {
         const taskData = {
             Template_Task_Id: 18,
             task_type: "Create Case from Incident Reject All",
-            Created_By: user.username, 
+            Created_By: user.user_id, 
             task_status: "open",
             ...parameters,
         };
@@ -174,7 +175,7 @@ export const Create_Rejected_List_for_Download = async (filteredParams) => {
       const taskData = {
           Template_Task_Id: 25,
           task_type: "Create Rejected List for Download",
-          Created_By: user.username, 
+          Created_By: user.user_id, 
           task_status: "open",
           ...filteredParams,
       };
