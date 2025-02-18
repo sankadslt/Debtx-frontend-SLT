@@ -1,48 +1,66 @@
-/*Purpose: This template is used for the 1.15.1 - DRC Assign Manager Approval 
+/* 
+Purpose: This template is used for the 1.15.1 - DRC Assign Manager Approval 
 Created Date: 2025-02-17
 Created By: Sanjaya (sanjayaperera80@gmail.com)
 Last Modified Date: 2025-02-17
 Version: node 20
-ui number : 1.15.1
-Dependencies: tailwind css
+UI Number: 1.15.1
+Dependencies: Tailwind CSS
 Related Files: (routes)
-Notes: The following page conatins the codes */
+Notes: The following page contains the code 
+*/
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
+import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import { ListAllBatchDetails } from "/src/services/distribution/distributionService.js";
 import "react-datepicker/dist/react-datepicker.css";
+
 export default function DRCAssignManagerApproval2() {
-  const data = [
-    {
-      batchID: "C001",
-      createdDate: "2025.01.05",
-      drc: "PEO",
-      caseCount: "100",
-      totalArrears: "100000",
-    },
-    {
-      batchID: "",
-      createdDate: "2025.11.05",
-      drc: "VOICE",
-      caseCount: "",
-      totalArrears: "",
-    },
-  ];
-
-  // State for search query and filtered data
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
-  const [filteredData, setFilteredData] = useState(data);
-
-  // Pagination state
+  // State variables to manage data, search, pagination, and selections
+  const [data, setData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectedRows, setSelectedRows] = useState(new Set());
   const recordsPerPage = 5;
+
+  // Fetch batch details when the component mounts
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const batchData = await ListAllBatchDetails();
+        setData(batchData);
+        setFilteredData(batchData);
+      } catch (error) {
+        console.error("Error fetching batch details:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
+  // Filter data when searchQuery changes
+  useEffect(() => {
+    setFilteredData(
+      searchQuery
+        ? data.filter((row) =>
+            Object.values(row)
+              .join(" ")
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+          )
+        : data
+    );
+  }, [searchQuery, data]);
+
+  // Pagination logic
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
 
-  // Handle pagination
+  // Handle previous and next page navigation
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -51,62 +69,45 @@ export default function DRCAssignManagerApproval2() {
     }
   };
 
-  // Filtering the data based on search query
-  const filteredDataBySearch = searchQuery
-    ? filteredData.filter((row) =>
-        Object.values(row)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      )
-    : currentData;
-
-  const [selectAll, setSelectAll] = useState(false);
-  const [selectedRows, setSelectedRows] = useState(new Set());
-
+  // Handle selecting all rows
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
     if (!selectAll) {
-      // Select all rows in the filtered data
       setSelectedRows(new Set(filteredData.map((_, index) => index)));
     } else {
-      // Deselect all rows
       setSelectedRows(new Set());
     }
   };
 
+  // Handle individual row selection
   const handleRowSelect = (index) => {
     const newSelectedRows = new Set(selectedRows);
-
     if (newSelectedRows.has(index)) {
       newSelectedRows.delete(index);
     } else {
       newSelectedRows.add(index);
     }
-
     setSelectedRows(newSelectedRows);
-
-    // Automatically deselect the "Select All" checkbox if any row is deselected
-    if (newSelectedRows.size !== filteredData.length) {
-      setSelectAll(false);
-    } else {
-      setSelectAll(true);
-    }
+    setSelectAll(newSelectedRows.size === filteredData.length);
   };
 
+  // Function triggered on approval
   function onSubmit() {
     alert("Create task and let me know");
   }
+
   return (
     <div className={GlobalStyle.fontPoppins}>
-      {/* Title */}
-      <h1 className={GlobalStyle.headingLarge}> DRC Assign Approval</h1>
+      {/* Page Header */}
+      <h1 className={GlobalStyle.headingLarge}>DRC Assign Approval</h1>
+
+      {/* Search Bar */}
       <div className="flex justify-between mt-16 mb-6">
         <div className="flex justify-start mb-8">
           <div className={GlobalStyle.searchBarContainer}>
             <input
               type="text"
-              placeholder=""
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={GlobalStyle.inputSearch}
@@ -116,44 +117,35 @@ export default function DRCAssignManagerApproval2() {
         </div>
       </div>
 
-      {/* Search Section */}
-
-      {/* Table Section */}
+      {/* Table Display */}
       <div className={GlobalStyle.tableContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>
-                {/* <input
-                  type="checkbox"
-                  checked={selectAll}
-                  onChange={handleSelectAll}
-                  className="mx-auto"
-                /> */}
+                <input 
+                  type="checkbox" 
+                  checked={selectAll} 
+                  onChange={handleSelectAll} 
+                  className="mx-auto" 
+                />
               </th>
               <th className={GlobalStyle.tableHeader}>Batch ID</th>
               <th className={GlobalStyle.tableHeader}>Created Date</th>
-              <th className={GlobalStyle.tableHeader}>DRC Commission rule</th>
-              <th className={GlobalStyle.tableHeader}>Case count</th>
+              <th className={GlobalStyle.tableHeader}>DRC Commission Rule</th>
+              <th className={GlobalStyle.tableHeader}>Case Count</th>
               <th className={GlobalStyle.tableHeader}>Total Arrears</th>
             </tr>
           </thead>
           <tbody>
-            {filteredDataBySearch.map((item, index) => (
-              <tr
-                key={`${item.drc}-${index}`}
-                className={
-                  index % 2 === 0
-                    ? GlobalStyle.tableRowEven
-                    : GlobalStyle.tableRowOdd
-                }
-              >
+            {currentData.map((item, index) => (
+              <tr key={index} className={index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd}>
                 <td className="text-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.has(index)}
-                    onChange={() => handleRowSelect(index)}
-                    className="mx-auto"
+                  <input 
+                    type="checkbox" 
+                    checked={selectedRows.has(index)} 
+                    onChange={() => handleRowSelect(index)} 
+                    className="mx-auto" 
                   />
                 </td>
                 <td className={GlobalStyle.tableData}>{item.batchID}</td>
@@ -167,55 +159,50 @@ export default function DRCAssignManagerApproval2() {
         </table>
       </div>
 
-      {/* Pagination Section */}
+      {/* Pagination Controls */}
       <div className={GlobalStyle.navButtonContainer}>
-        <button
-          onClick={() => handlePrevNext("prev")}
-          disabled={currentPage === 1}
-          className={`${GlobalStyle.navButton} ${
-            currentPage === 1 ? "cursor-not-allowed" : ""
-          }`}
+        <button 
+          onClick={() => handlePrevNext("prev")} 
+          disabled={currentPage === 1} 
+          className={GlobalStyle.navButton}
         >
           <FaArrowLeft />
         </button>
-        <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => handlePrevNext("next")}
-          disabled={currentPage === totalPages}
-          className={`${GlobalStyle.navButton} ${
-            currentPage === totalPages ? "cursor-not-allowed" : ""
-          }`}
+        <span className={GlobalStyle.pageIndicator}>Page {currentPage} of {totalPages}</span>
+        <button 
+          onClick={() => handlePrevNext("next")} 
+          disabled={currentPage === totalPages} 
+          className={GlobalStyle.navButton}
         >
           <FaArrowRight />
         </button>
       </div>
 
-      {/* Select All Data Checkbox and Approve Button */}
+      {/* Approve & Select All Buttons */}
       <div className="flex justify-end gap-4 mt-4">
-        {/* Select All Data Checkbox */}
         <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            className="rounded-lg"
-            checked={selectAll}
-            onChange={handleSelectAll}
+          <input 
+            type="checkbox" 
+            className="rounded-lg" 
+            checked={selectAll} 
+            onChange={handleSelectAll} 
           />
           Select All Data
         </label>
-
-        {/* Approve Button */}
-        <button
-          onClick={onSubmit}
+        <button 
+          onClick={onSubmit} 
           className={GlobalStyle.buttonPrimary}
-          //   disabled={selectedRows.size === 0} // Disable if no rows are selected
         >
           Approve
         </button>
       </div>
+
+      {/* Extra Button for Task Creation */}
       <div>
-        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
+        <button 
+          onClick={onSubmit} 
+          className={GlobalStyle.buttonPrimary}
+        >
           Create task and let me know
         </button>
       </div>

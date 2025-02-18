@@ -3,6 +3,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL; 
 const URL = `${BASE_URL}/incident`;
 const TASK_URL = `${BASE_URL}/task`;
+const CASE_URL = `${BASE_URL}/case`;
 
 export const List_incidents_Direct_LOD = async (filters) => {
     try {
@@ -151,3 +152,19 @@ export const List_Incidents_CPE_Collect = async (filters) => {
     }
 };
 
+
+export const ListAllBatchDetails = async () => {
+  try {
+    const response = await axios.get(`${CASE_URL}/List_All_Batch_Details`);
+    return response.data.map((item) => ({
+      batchID: item.case_distribution_details.case_distribution_batch_id,
+      createdDate: new Date(item.created_on).toLocaleDateString(),
+      drc: item.case_distribution_details.drc_commision_rule,
+      caseCount: item.case_distribution_details.rulebase_count,
+      totalArrears: item.case_distribution_details.rulebase_arrears_sum,
+    }));
+  } catch (error) {
+    console.error("Error fetching batch details:", error.response?.data || error.message);
+    throw error;
+  }
+};
