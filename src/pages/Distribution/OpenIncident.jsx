@@ -18,7 +18,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band,Create_Case_for_incident} from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/Open_No_Agent.png"
-import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident } from "../../services/task/taskService";
+import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident , Open_Task_Count_Incident_To_Case} from "../../services/task/taskService";
 import Swal from "sweetalert2";
 
 export default function OpenIncident() {
@@ -31,7 +31,7 @@ export default function OpenIncident() {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
   const [isProcessing,setIsProcessing] = useState(false); 
-const [isLocked, setIsLocked] = useState(false);
+
 
   const rowsPerPage = 7;
 
@@ -146,6 +146,61 @@ useEffect(() => {
   //     });
   //   }
   // };
+  // const handleCaseforIncident = async () => {
+  //   if (selectedRows.length === 0) {
+  //     Swal.fire({
+  //       title: "Warning",
+  //       text: "Please select at least one incident.",
+  //       icon: "warning",
+  //       confirmButtonText: "OK",
+  //     });
+  //     return;
+  //   }
+  
+  //   setIsProcessing(true);
+  
+  //   try {
+  //     if (selectedRows.length > 10) {
+  //       const taskParams = {
+  //         Incident_Status: "Open No Agent",
+  //       };
+  
+  //       const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
+  //         console.log("Response from Create_Task:", response);
+  //       Swal.fire({
+  //         title: "Task Created Successfully!",
+  //         text: `Task created to handle ${selectedRows.length} incidents.`,
+  //         icon: "success",
+  //         confirmButtonText: "OK",
+  //       });
+  //     } else {
+  //       const response = await Create_Case_for_incident({ Incident_Ids: selectedRows });
+  
+  //       Swal.fire({
+  //         title: "Cases Created Successfully!",
+  //         text: `Successfully created ${response.cases.length} cases.`,
+  //         icon: "success",
+  //         confirmButtonText: "OK",
+  //       });
+  //     }
+  
+  //     // Clear selected rows after action
+  //     setSelectedRows([]);
+  //     setIsLocked(true);  // Lock the table until data is refreshed
+  //   } catch (error) {
+  //     console.error("Error in handleCaseforIncident:", error);
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: error.message || "Action failed: Another set in progress.",
+  //       icon: "error",
+  //       confirmButtonText: "OK",
+  //     });
+  //   } finally {
+  //     setIsProcessing(false);
+  //     await fetchData();  
+  //   }
+  // };
+  
   const handleCaseforIncident = async () => {
     if (selectedRows.length === 0) {
       Swal.fire({
@@ -160,13 +215,25 @@ useEffect(() => {
     setIsProcessing(true);
   
     try {
+      const openTaskCount = await Open_Task_Count_Incident_To_Case();
+      if (openTaskCount > 0) {
+        Swal.fire({
+          title: "Action Blocked",
+          text: "There are existing open tasks. Please resolve them before proceeding.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        setIsProcessing(false);
+        return;
+      }
+  
       if (selectedRows.length > 10) {
         const taskParams = {
           Incident_Status: "Open No Agent",
         };
   
         const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-          console.log("Response from Create_Task:", response);
+        console.log("Response from Create_Task:", response);
         Swal.fire({
           title: "Task Created Successfully!",
           text: `Task created to handle ${selectedRows.length} incidents.`,
@@ -184,9 +251,7 @@ useEffect(() => {
         });
       }
   
-      // Clear selected rows after action
       setSelectedRows([]);
-      setIsLocked(true);  // Lock the table until data is refreshed
     } catch (error) {
       console.error("Error in handleCaseforIncident:", error);
       Swal.fire({
@@ -200,7 +265,6 @@ useEffect(() => {
       await fetchData();  
     }
   };
-  
   
  
 
@@ -234,15 +298,9 @@ useEffect(() => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  // const handleRowCheckboxChange = (Incident_Id) => {
-  //   if (selectedRows.includes(Incident_Id)) {
-  //     setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
-  //   } else {
-  //     setSelectedRows([...selectedRows, Incident_Id]);
-  //   }
-  // };
+ 
   const handleRowCheckboxChange = (Incident_Id) => {
-    if (isLocked) return;  // Prevent any selection if table is locked
+     // Prevent any selection if table is locked
     if (selectedRows.includes(Incident_Id)) {
       setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
     } else {
@@ -440,7 +498,7 @@ useEffect(() => {
           <button
   className={`${GlobalStyle.buttonPrimary} ml-4`}
   onClick={handleCaseforIncident}
-  disabled={isProcessing || selectedRows.length === 0 || isLocked}
+  disabled={isProcessing || selectedRows.length === 0 }
 >
   Proceed
 </button>
