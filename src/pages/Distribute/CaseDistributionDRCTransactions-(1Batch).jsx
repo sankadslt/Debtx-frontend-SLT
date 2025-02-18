@@ -128,26 +128,21 @@ export default function CaseDistributionDRCTransactions1Batch() {
       <div className="flex flex-col items-center justify-center mb-4">
         <div className={`${GlobalStyle.cardContainer}`}>
           <p className="mb-2">
-            <strong>Batch ID:</strong>{" "}
-            {transactions[0]?.case_distribution_batch_id || "N/A"}
+          <strong>Batch ID:</strong> {transactions[0]?.case_distribution_batch_id || "N/A"}
           </p>
 
           <p className="mb-2">
-            <strong>DRC Commission Rule:</strong>{" "}
-            {transactions[0]?.drc_commision_rule || "N/A"}
+          <strong>DRC Commission Rule:</strong> {transactions[0]?.drc_commision_rule || "N/A"}
           </p>
           <p className="mb-2">
-            <strong>Arrears Band:</strong>{" "}
-            {transactions[0]?.current_arrears_band || "N/A"}
+          <strong>Arrears Band:</strong> {transactions[0]?.current_arrears_band || "N/A"}
           </p>
 
           <p className="mb-2">
-            <strong>Case Count:</strong>{" "}
-            {transactions[0]?.rulebase_count || "N/A"}
+          <strong>Case Count:</strong> {transactions[0]?.rulebase_count|| "N/A"}
           </p>
           <p className="mb-2">
-            <strong>Total Arrears Amount:</strong>{" "}
-            {transactions[0]?.rulebase_arrears_sum || "N/A"}
+          <strong>Total Arrears Amount:</strong> {transactions[0]?.rulebase_arrears_sum || "N/A"}
           </p>
         </div>
       </div>
