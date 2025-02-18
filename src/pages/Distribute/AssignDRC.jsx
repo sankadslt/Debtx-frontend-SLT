@@ -28,6 +28,7 @@ import {
   count_cases_rulebase_and_arrears_band,
   Case_Distribution_Among_Agents,
 } from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Swal from "sweetalert2";
 
@@ -163,6 +164,8 @@ const AssignDRC = () => {
   };
 
   const handleProceed = async () => {
+    const userId = await getLoggedUserId();
+
     const drcList = filteredSearchData.map((drc) => ({
       DRC: drc.name,
       Count: drc.amount,
@@ -172,7 +175,7 @@ const AssignDRC = () => {
       drc_commision_rule: serviceType || "PEO TV",
       current_arrears_band: selectedBandKey,
       drc_list: drcList,
-      created_by: "Sys",
+      created_by: userId,
 
     };
 
@@ -181,16 +184,25 @@ const AssignDRC = () => {
     try {
       const response = await Case_Distribution_Among_Agents(requestData); // Use 'await' here
       console.log("Response:", response);
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data sent successfully.",
+        confirmButtonColor: "#28a745",
+      }).then(() => {
+        navigate("/pages/Distribute/AssignedDRCSummary");
+      });
     } catch (error) {
       console.error("Error in sending the data:", error);
 
       const errorMessage = error?.response?.data?.message || 
                              error?.message || 
-                             "Something went wrong!";
+                             "An error occurred. Please try again.";
 
         Swal.fire({
             icon: "error",
-            title: "Oops...",
+            title: "Error",
             text: errorMessage,
             confirmButtonColor: "#d33",
         });

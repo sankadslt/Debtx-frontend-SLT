@@ -16,6 +16,9 @@ import {
   List_all_transaction_seq_of_batch_id,
   Create_Task_For_case_distribution_transaction,
 } from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
+import Swal from "sweetalert2";
+
 
 export default function CaseDistributionDRCTransactions1Batch() {
   const navigate = useNavigate();
@@ -49,9 +52,11 @@ export default function CaseDistributionDRCTransactions1Batch() {
   }, [BatchID]);
 
   const handleonclick = async () => {
+    const userId = await getLoggedUserId();
+
     const payload = {
       case_distribution_batch_id: BatchID || 2,
-      Created_By: "Sys",
+      Created_By: userId ,
     };
     
     console.log("Payload", payload);
@@ -61,6 +66,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
   
       if (response.status === "success") {
         console.log("Task created successfully");
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Task created successfully",
+          confirmButtonColor: "#28a745",
+        });
       } else {
         console.error("Error in API response:", response.message || "Unknown error");
       }
@@ -69,6 +80,14 @@ export default function CaseDistributionDRCTransactions1Batch() {
         "Error creating task for case distribution transaction:",
         error.response?.data || error.message
       );
+
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
     }
   };
   
@@ -121,10 +140,10 @@ export default function CaseDistributionDRCTransactions1Batch() {
               <strong>Case Count:</strong>{" "}
               {transaction[0]?.rulebase_count || "N/A"}
             </p>
-            <p className="mb-2">
+            {/* <p className="mb-2">
               <strong>Total Arrears Amount:</strong>{" "}
               {transaction[0]?.rulebase_arrears_sum || "N/A"}
-            </p>
+            </p> */}
           </div>
         </div>
       )}
@@ -151,7 +170,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
                 <th className={GlobalStyle.tableHeader}>Created DTM</th>
                 <th className={GlobalStyle.tableHeader}>Action Type</th>
                 <th className={GlobalStyle.tableHeader}>Case Count</th>
-                <th className={GlobalStyle.tableHeader}>Total Arrears</th>
+                {/* <th className={GlobalStyle.tableHeader}>Total Arrears</th> */}
                 <th className={GlobalStyle.tableHeader}></th>
               </tr>
             </thead>
@@ -173,9 +192,9 @@ export default function CaseDistributionDRCTransactions1Batch() {
                   <td className={GlobalStyle.tableData}>
                     {item.batch_seq_rulebase_count}
                   </td>
-                  <td className={GlobalStyle.tableData}>
+                  {/* <td className={GlobalStyle.tableData}>
                     {item.batch_seq_rulebase_arrears_sum}
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData}>
                     <button  onClick={() => handletableiconclick(item.batch_seq)}>
                       <svg

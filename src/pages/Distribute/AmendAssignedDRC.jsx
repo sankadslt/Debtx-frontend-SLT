@@ -22,6 +22,8 @@ import {
   Case_Distribution_Details_With_Drc_Rtom_ByBatchId,
   Exchange_DRC_RTOM_Cases
 } from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
+import Swal from "sweetalert2";
 
 export default function AmendAssignedDRC() {
   const navigate = useNavigate();
@@ -93,6 +95,7 @@ export default function AmendAssignedDRC() {
   }, [BatchID]);
 
   const handleonclick = async() => {
+    const user_id = await getLoggedUserId();
 
     const drc_list = cpeData.map((item) => ({
             plus_drc_id: item.DRC2ID  , // Ensure this is a number
@@ -107,7 +110,7 @@ export default function AmendAssignedDRC() {
     const payload = {
         case_distribution_batch_id: BatchID || 1,
         drc_list: drc_list,
-        created_by: "sys",
+        created_by: user_id,
         };
     console.log("Payload", payload);
 
@@ -117,6 +120,12 @@ export default function AmendAssignedDRC() {
             console.log("Success", response);
             setCpeData([]); // Clear table data after successful submission
             
+            Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "DRC RTOM cases exchanged successfully",
+            confirmButtonColor: "#28a745",
+            });
         } else {
             console.error(
             "Error in API response:",
@@ -128,6 +137,13 @@ export default function AmendAssignedDRC() {
             "Error exchanging DRC RTOM cases:",
             error.response?.data || error.message
         );
+        const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: errorMessage,
+            confirmButtonColor: "#d33",
+        });
     }
   };
 
@@ -236,10 +252,10 @@ export default function AmendAssignedDRC() {
             <strong>Case Count: </strong>{" "}
             {transaction[0]?.rulebase_count || "N/A"}
           </p>
-          <p className="mb-2">
+          {/* <p className="mb-2">
             <strong>Total Arrears Amount: </strong>{" "}
             {transaction[0]?.rulebase_arrears_sum || "N/A"}
-          </p>
+          </p> */}
         </div>
       </div>
 
@@ -258,11 +274,11 @@ export default function AmendAssignedDRC() {
               <option value="" hidden>
                 DRC
               </option>
-              {drcData.map((item) => (
-                <option key={item.drc_id} value={item.drc_name}>
-                  {`${item.drc_name}`}
-                </option>
-              ))}
+              {[...new Set(drcData.map((item) => item.drc_name))].map((item) => (
+               <option key={item} value={item}>
+                  {`${item}`}
+                </option> 
+               ))} 
             </select>
             
           </div>
@@ -320,11 +336,11 @@ export default function AmendAssignedDRC() {
               <option value="" hidden>
                 DRC
               </option>
-              {drcData.map((item) => (
-                <option key={item.drc_id} value={item.dr_name}>
-                  {`${item.drc_name}`}
-                </option>
-              ))}
+              {[...new Set(drcData.map((item) => item.drc_name))].map((item) => (
+               <option key={item} value={item}>
+                  {`${item}`}
+                </option> 
+               ))}
             </select>
           </div>
         </div>

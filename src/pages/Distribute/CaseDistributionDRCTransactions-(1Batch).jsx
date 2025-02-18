@@ -8,13 +8,18 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: The following page conatins the codes */
 
-import React, { useState , useEffect } from "react";
-import { useNavigate , useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import {get_distribution_array_of_a_transaction,Create_Task_For_case_distribution_transaction_array } from "/src/services/case/CaseServices.js";
+import {
+  get_distribution_array_of_a_transaction,
+  Create_Task_For_case_distribution_transaction_array,
+} from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 import minus from "/src/assets/images/minorbw.png";
 import plus from "/src/assets/images/plusbw.png";
+import Swal from "sweetalert2";
 
 export default function CaseDistributionDRCTransactions1Batch() {
   const navigate = useNavigate();
@@ -26,56 +31,75 @@ export default function CaseDistributionDRCTransactions1Batch() {
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-  const fetchTransactions = async () => {
-    try {
-      const data = {
-        case_distribution_batch_id: BatchID || 1,
-        batch_seq: Batchseq || 2,
-      };
-      const response = await get_distribution_array_of_a_transaction(data);
-
-      if (response.status === "success") {
-        setTransactions(response.data);
-        console.log("Response", response);
-      } else {
-        setError("No data found.");
-      }
-    } catch (err) {
-      console.error("Error fetching transactions:", err);
-      setError("Failed to fetch data.");
-    }
-  };
-
-  fetchTransactions();
-}, [BatchID, Batchseq]);
-
-  const handleonclick = async() => {
-    
-    const payload = {
-        case_distribution_batch_id: BatchID || 2,
-        batch_seq: Batchseq || 2,
-        Created_By: "Sys",
-      };
-    console.log("Payload", payload);
-    try{
-        const response = await Create_Task_For_case_distribution_transaction_array(payload);
-        console.log("Response", response);
+    const fetchTransactions = async () => {
+      try {
+        const data = {
+          case_distribution_batch_id: BatchID || 1,
+          batch_seq: Batchseq || 2,
+        };
+        const response = await get_distribution_array_of_a_transaction(data);
 
         if (response.status === "success") {
-            console.log("Task created successfully");
-            }
-        else {
-            console.error("Error in API response:", response.message || "Unknown error");
-            }
+          setTransactions(response.data);
+          console.log("Response", response);
+        } else {
+          setError("No data found.");
+        }
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+        setError("Failed to fetch data.");
+      }
+    };
 
-    }
-    catch (error) {
+    fetchTransactions();
+  }, [BatchID, Batchseq]);
+
+  const handleonclick = async () => {
+    const userId = await getLoggedUserId();
+
+    const payload = {
+      case_distribution_batch_id: BatchID || 2,
+      batch_seq: Batchseq || 2,
+      Created_By: userId,
+    };
+    console.log("Payload", payload);
+    try {
+      const response =
+        await Create_Task_For_case_distribution_transaction_array(payload);
+      console.log("Response", response);
+
+      if (response.status === "success") {
+        console.log("Task created successfully");
+
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Task created successfully",
+          confirmButtonColor: "#28a745",
+        });
+      } else {
         console.error(
-            "Error creating task for case distribution transaction:",
-            error.response?.data || error.message
+          "Error in API response:",
+          response.message || "Unknown error"
         );
-    }
+      }
+    } catch (error) {
+      console.error(
+        "Error creating task for case distribution transaction:",
+        error.response?.data || error.message
+      );
 
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
+    }
   };
 
   const handleoniconclick = () => {
@@ -107,22 +131,24 @@ export default function CaseDistributionDRCTransactions1Batch() {
       <div className="flex flex-col items-center justify-center mb-4">
         <div className={`${GlobalStyle.cardContainer}`}>
           <p className="mb-2">
-            <strong>Batch ID:</strong> {transactions[0]?.case_distribution_batch_id || "N/A"}
+          <strong>Batch ID:</strong> {transactions[0]?.case_distribution_batch_id || "N/A"}
           </p>
 
           <p className="mb-2">
-            <strong>DRC Commission Rule:</strong> {transactions[0]?.drc_commision_rule || "N/A"}
+          <strong>DRC Commission Rule:</strong> {transactions[0]?.drc_commision_rule || "N/A"}
           </p>
           <p className="mb-2">
-            <strong>Arrears Band:</strong> {transactions[0]?.current_arrears_band || "N/A"}
+          <strong>Arrears Band:</strong> {transactions[0]?.current_arrears_band || "N/A"}
           </p>
 
           <p className="mb-2">
-            <strong>Case Count:</strong> {transactions[0]?.rulebase_count|| "N/A"}
+          <strong>Case Count:</strong> {transactions[0]?.rulebase_count|| "N/A"}
           </p>
+
           <p className="mb-2">
-            <strong>Total Arrears Amount:</strong> {transactions[0]?.rulebase_arrears_sum || "N/A"}
+          <strong>Total Arrears Amount:</strong> {transactions[0]?.rulebase_arrears_sum || "N/A"}
           </p>
+
         </div>
       </div>
 
@@ -145,15 +171,30 @@ export default function CaseDistributionDRCTransactions1Batch() {
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
-                <th className={GlobalStyle.tableHeader}>RTOM</th>
-                <th className={GlobalStyle.tableHeader}>DRC 1</th>
-                <th className={`${GlobalStyle.tableHeader} flex justify-center items-center`} >
-                <img src={minus} width={17} height={17} alt="Min"  />
-                </th>
-                <th className={GlobalStyle.tableHeader}>DRC 2</th>
-                <th className={`${GlobalStyle.tableHeader} flex justify-center items-center`}>
-                <img src={plus} width={17} height={17} alt="Plus"  />
-                </th>
+                {Batchseq === 1 ? (
+                  <>
+                    <th className={GlobalStyle.tableHeader}>DRC</th>
+                    <th className={GlobalStyle.tableHeader}>
+                      Distribution Amount
+                    </th>
+                  </>
+                ) : (
+                  <>
+                    <th className={GlobalStyle.tableHeader}>RTOM</th>
+                    <th className={GlobalStyle.tableHeader}>DRC 1</th>
+                    <th
+                      className={`${GlobalStyle.tableHeader} flex justify-center items-center`}
+                    >
+                      <img src={minus} width={17} height={17} alt="Min" />
+                    </th>
+                    <th className={GlobalStyle.tableHeader}>DRC 2</th>
+                    <th
+                      className={`${GlobalStyle.tableHeader} flex justify-center items-center`}
+                    >
+                      <img src={plus} width={17} height={17} alt="Plus" />
+                    </th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -166,19 +207,34 @@ export default function CaseDistributionDRCTransactions1Batch() {
                       : GlobalStyle.tableRowOdd
                   }
                 >
-                  <td className={GlobalStyle.tableData}>{item.rtom}</td>
-                  <td className={GlobalStyle.tableData}>{item.minus_drc}</td>
-                  <td className={GlobalStyle.tableData}>{item.minus_rulebase_count}</td>
-
-                  <td className={GlobalStyle.tableData}>{item.plus_drc}</td>
-                  <td className={GlobalStyle.tableData}>{item.plus_rulebase_count}</td>
+                  {Batchseq === 1 ? (
+                    <>
+                      <td className={GlobalStyle.tableData}>{item.drc}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.rulebase_count}
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className={GlobalStyle.tableData}>{item.rtom}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.minus_drc}
+                      </td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.minus_rulebase_count}
+                      </td>
+                      <td className={GlobalStyle.tableData}>{item.plus_drc}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.plus_rulebase_count}
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
-
       {/* Button */}
       <div className="flex justify-between">
         {/* Button on the left */}
