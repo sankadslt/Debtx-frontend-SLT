@@ -425,7 +425,7 @@ export default function RejectIncident() {
         </div>
 
         {/* Filter Section */}
-        <div className="flex justify-between items-center gap-x-4 my-8">
+        <div className="flex justify-end gap-10 my-12 items-center">
           {/* Source Selection */}
           <div className="flex items-center gap-4">
             <label>Source:</label>

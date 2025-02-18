@@ -190,10 +190,10 @@ export default function DirectLODSendingIncident() {
 
   const handleCreate = async () => {
     try {
-      if (filteredData.length === 0) {
+      if (selectedRows.length === 0) {
         Swal.fire({
           title: "Warning",
-          text: "No data.",
+          text: "No record selected.",
           icon: "warning",
           confirmButtonText: "OK",
         });
