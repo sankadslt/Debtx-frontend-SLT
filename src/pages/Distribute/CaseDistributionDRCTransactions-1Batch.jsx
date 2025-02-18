@@ -137,10 +137,10 @@ export default function CaseDistributionDRCTransactions1Batch() {
               <strong>Case Count:</strong>{" "}
               {transaction[0]?.rulebase_count || "N/A"}
             </p>
-            <p className="mb-2">
+            {/* <p className="mb-2">
               <strong>Total Arrears Amount:</strong>{" "}
               {transaction[0]?.rulebase_arrears_sum || "N/A"}
-            </p>
+            </p> */}
           </div>
         </div>
       )}
@@ -167,7 +167,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
                 <th className={GlobalStyle.tableHeader}>Created DTM</th>
                 <th className={GlobalStyle.tableHeader}>Action Type</th>
                 <th className={GlobalStyle.tableHeader}>Case Count</th>
-                <th className={GlobalStyle.tableHeader}>Total Arrears</th>
+                {/* <th className={GlobalStyle.tableHeader}>Total Arrears</th> */}
                 <th className={GlobalStyle.tableHeader}></th>
               </tr>
             </thead>
@@ -189,9 +189,9 @@ export default function CaseDistributionDRCTransactions1Batch() {
                   <td className={GlobalStyle.tableData}>
                     {item.batch_seq_rulebase_count}
                   </td>
-                  <td className={GlobalStyle.tableData}>
+                  {/* <td className={GlobalStyle.tableData}>
                     {item.batch_seq_rulebase_arrears_sum}
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData}>
                     <button  onClick={() => handletableiconclick(item.batch_seq)}>
                       <svg

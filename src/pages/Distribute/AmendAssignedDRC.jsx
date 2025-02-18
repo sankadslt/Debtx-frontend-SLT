@@ -250,10 +250,10 @@ export default function AmendAssignedDRC() {
             <strong>Case Count: </strong>{" "}
             {transaction[0]?.rulebase_count || "N/A"}
           </p>
-          <p className="mb-2">
+          {/* <p className="mb-2">
             <strong>Total Arrears Amount: </strong>{" "}
             {transaction[0]?.rulebase_arrears_sum || "N/A"}
-          </p>
+          </p> */}
         </div>
       </div>
 
