@@ -19,7 +19,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Import GlobalStyle
 import Reject_Pending from "../../assets/images/Reject_Pending.png";
-import { Create_Task_Download_Pending_Reject, Create_Task_Forward_F1_Filtered, Create_Task_Reject_F1_Filtered, Forward_F1_Filtered, List_F1_filtered_incidents, Reject_F1_Filtered } from "../../services/distribution/distributionService.js";
+import { Create_Task_Download_Pending_Reject, Create_Task_Forward_F1_Filtered, Create_Task_Reject_F1_Filtered, Forward_F1_Filtered, List_F1_filtered_incidents, Open_Task_Count_Forward_F1_Filtered, Open_Task_Count_Reject_F1_Filtered, Reject_F1_Filtered } from "../../services/distribution/distributionService.js";
 import Swal from "sweetalert2";
 
 export default function RejectIncident() {
@@ -182,9 +182,11 @@ export default function RejectIncident() {
               cancelButtonText: "Cancel",
             }).then((result) => {
               if (result.isConfirmed) {
-                
-              } else {
-                
+                handleCreateTaskForDownload({
+                  source_type: selectedSource, 
+                  fromDate: fromDate, 
+                  toDate: toDate
+                })   
               }
             });
             return;
@@ -197,7 +199,7 @@ export default function RejectIncident() {
 
   const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
   
-    if(!source_type && !fromDate && !toDate){
+        if(!source_type && !fromDate && !toDate){
           Swal.fire({
             title: 'Warning',
             text: 'Missing Parameters',
@@ -241,10 +243,29 @@ export default function RejectIncident() {
     };
 
   const handleReject= async (Incident_Id)=>{
-        if (selectedRows.includes(Incident_Id)) {
-          try{
+        if(!selectedRows.includes(Incident_Id)){
+          Swal.fire({
+            title: 'Warning',
+            text: 'Row not selected',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
+
+        try{
+            const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
+            if (openTaskCount > 0) {
+                    Swal.fire({
+                      title: "Warning",
+                      text: "A task is already in progress.",
+                      icon: "warning",
+                      confirmButtonText: "OK",
+                    });
+                    return;
+            }
             const response = await Reject_F1_Filtered(Incident_Id);
-            console.log(response)
+           
             if(response.status===200){
               Swal.fire({ 
                 title: 'Success',
@@ -254,28 +275,39 @@ export default function RejectIncident() {
               });
               fetchData();
             }  
-          }catch(error){
+        }catch(error){
             Swal.fire({
               title: 'Error',
               text: error.message,
               icon: 'error',
               confirmButtonText: 'OK'
             });
-          } 
-        } else {
-          Swal.fire({
-            title: 'Warning',
-            text: 'Row not selected',
-            icon: 'warning',
-            confirmButtonText: 'OK'
-          });
-        }
+        } 
   }
 
   const handleRejectAll = async()=>{
+    
       try{
+        if (selectedRows.length === 0) {
+          Swal.fire({
+            title: "Warning",
+            text: "No record selected.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+        const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
+        if (openTaskCount > 0) {
+              Swal.fire({
+                  title: "Warning",
+                  text: "A task is already in progress.",
+                  icon: "warning",
+                  confirmButtonText: "OK",
+              });
+          return;
+        }
         if(filteredData.length>10){
-          try{
             const parameters = {
               Status:"Reject Pending",
             }
@@ -288,14 +320,6 @@ export default function RejectIncident() {
                 confirmButtonText: 'OK'
               });
             }
-          }catch(error){
-            Swal.fire({
-              title: 'Error',
-              text: 'Error creating task',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
         }else{
           for (const row of selectedRows) {
             await Reject_F1_Filtered(row); 
@@ -320,8 +344,27 @@ export default function RejectIncident() {
 
     const handleMoveForward = async()=>{
       try{
+        if (selectedRows.length === 0) {
+          Swal.fire({
+            title: "Warning",
+            text: "No record selected.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+        const openTaskCount = await Open_Task_Count_Forward_F1_Filtered();
+        if (openTaskCount > 0) {
+              Swal.fire({
+                  title: "Warning",
+                  text: "A task is already in progress.",
+                  icon: "warning",
+                  confirmButtonText: "OK",
+              });
+          return;
+        }
+
         if(filteredData.length>10){
-          try{
             const parameters = {
               Status:"Reject Pending",
             }
@@ -334,14 +377,7 @@ export default function RejectIncident() {
                 confirmButtonText: 'OK'
               });
             }
-          }catch(error){
-            Swal.fire({
-              title: 'Error',
-              text: 'Error creating task',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
+         
         }else{
           for (const row of selectedRows) {
             await Forward_F1_Filtered(row); 

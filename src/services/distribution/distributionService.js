@@ -18,7 +18,6 @@ export const List_incidents_Direct_LOD = async (filters) => {
  export const Create_Task_Download_Direct_LOD_Sending = async (filteredParams) => {
     try {
         const user = await getUserData();
-       
         const taskData = {
             Template_Task_Id: 23,
             task_type: "Create Direct LOD Incident Sending  List for Download",
@@ -192,6 +191,35 @@ export const Open_Task_Count_Forward_Direct_LOD = async () => {
       const taskData = {
           Template_Task_Id: 16,
           task_type: "Create Case from Incident Open LOD",
+      };
+      const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
+      return response.data.openTaskCount; 
+  } catch (error) {
+      console.error("Error fetching open task count:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+}
+
+export const Open_Task_Count_Reject_F1_Filtered = async () => {
+  try {
+      const taskData = {
+          Template_Task_Id: 18,
+          task_type: "Create Case from Incident Reject All",
+      };
+      const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
+      console.log(response)
+      return response.data.openTaskCount; 
+  } catch (error) {
+      console.error("Error fetching open task count:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+}
+
+export const Open_Task_Count_Forward_F1_Filtered = async () => {
+  try {
+      const taskData = {
+          Template_Task_Id: 19,
+          task_type: "Create Case from Incident F1 Move Forward",
       };
       const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
       return response.data.openTaskCount; 

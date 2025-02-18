@@ -142,10 +142,12 @@ export default function RejectIncidentlog() {
                 cancelButtonText: "Cancel",
               }).then((result) => {
                 if (result.isConfirmed) {
-                  
-                } else {
-                  
-                }
+                  handleCreateTaskForDownload({
+                    action_type: selectedAction, 
+                    fromDate: fromDate, 
+                    toDate: toDate
+                  })
+                } 
               });
               return;
             }
