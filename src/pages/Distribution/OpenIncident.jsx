@@ -10,8 +10,8 @@ ui number : 1.7.1
 Dependencies: tailwind css
 Related Files: 
 Notes: 
-
 */
+
 import { useState,useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 
@@ -88,118 +88,6 @@ useEffect(() => {
     }
   };
   
-  // const handleCaseforIncident = async () => {
-  //   if (selectedRows.length === 0) {
-  //     Swal.fire({
-  //       title: "Warning",
-  //       text: "Please select at least one incident.",
-  //       icon: "warning",
-  //       confirmButtonText: "OK",
-  //     });
-  //     return;
-  //   }
-  
-  //   try {
-  //     if (selectedRows.length > 10) {
-  //       // Create task for selected incidents
-  //       const taskParams = {
-  //         Incident_Status: "Open No Agent",
-        
-  //       };
-  
-  //       console.log("Task Params:", taskParams);
-  
-  //       const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-  
-  //       console.log("Response from Create_Task:", response);
-  
-  //       Swal.fire({
-  //         title: "Task Created Successfully!",
-  //         text: `Task created to handle ${selectedRows.length} incidents.`,
-  //         icon: "success",
-  //         confirmButtonText: "OK",
-  //       });
-  //     } else {
-  //       // Create cases for incidents
-  //       const response = await Create_Case_for_incident({ Incident_Ids: selectedRows });
-  
-  //       console.log("Response from Create_Case:", response); // Debug: Log the backend response
-  
-  //       Swal.fire({
-  //         title: "Cases Created Successfully!",
-  //         text: `Successfully created ${response.cases.length} cases.`,
-  //         icon: "success",
-  //         confirmButtonText: "OK",
-  //       });
-  //     }
-  
-  //     // Clear selected rows after task or case creation
-  //     setSelectedRows([]);
-  //     await fetchData(); // Ensure data is refreshed after actions
-  //   } catch (error) {
-  //     console.error("Error in handleCaseforIncident:", error); // Debug: Log the error
-  //     Swal.fire({
-  //       title: "Error",
-  //       text: error.message || "Failed to perform the action.",
-  //       icon: "error",
-  //       confirmButtonText: "OK",
-  //     });
-  //   }
-  // };
-  // const handleCaseforIncident = async () => {
-  //   if (selectedRows.length === 0) {
-  //     Swal.fire({
-  //       title: "Warning",
-  //       text: "Please select at least one incident.",
-  //       icon: "warning",
-  //       confirmButtonText: "OK",
-  //     });
-  //     return;
-  //   }
-  
-  //   setIsProcessing(true);
-  
-  //   try {
-  //     if (selectedRows.length > 10) {
-  //       const taskParams = {
-  //         Incident_Status: "Open No Agent",
-  //       };
-  
-  //       const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-  //         console.log("Response from Create_Task:", response);
-  //       Swal.fire({
-  //         title: "Task Created Successfully!",
-  //         text: `Task created to handle ${selectedRows.length} incidents.`,
-  //         icon: "success",
-  //         confirmButtonText: "OK",
-  //       });
-  //     } else {
-  //       const response = await Create_Case_for_incident({ Incident_Ids: selectedRows });
-  
-  //       Swal.fire({
-  //         title: "Cases Created Successfully!",
-  //         text: `Successfully created ${response.cases.length} cases.`,
-  //         icon: "success",
-  //         confirmButtonText: "OK",
-  //       });
-  //     }
-  
-  //     // Clear selected rows after action
-  //     setSelectedRows([]);
-  //     setIsLocked(true);  // Lock the table until data is refreshed
-  //   } catch (error) {
-  //     console.error("Error in handleCaseforIncident:", error);
-  //     Swal.fire({
-  //       title: "Error",
-  //       text: error.message || "Action failed: Another set in progress.",
-  //       icon: "error",
-  //       confirmButtonText: "OK",
-  //     });
-  //   } finally {
-  //     setIsProcessing(false);
-  //     await fetchData();  
-  //   }
-  // };
   
   const handleCaseforIncident = async () => {
     if (selectedRows.length === 0) {
@@ -275,10 +163,6 @@ useEffect(() => {
       .includes(searchQuery.toLowerCase())
   );
 
- 
-  // const navi = () => {
-  //   navigate("/lod/ftl-log/preview");
-  // };
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
@@ -300,7 +184,7 @@ useEffect(() => {
 
  
   const handleRowCheckboxChange = (Incident_Id) => {
-     // Prevent any selection if table is locked
+     
     if (selectedRows.includes(Incident_Id)) {
       setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
     } else {
@@ -333,7 +217,7 @@ useEffect(() => {
         </button>
         </div>
 
-        {/* Case Count Bar */}
+    
         <div className={`${GlobalStyle.caseCountBar}`}>
           <div className="flex mb-2">
             {" "}
@@ -378,7 +262,7 @@ useEffect(() => {
       </div>
 
       <div className="flex flex-col">
-        {/* Search Bar Section */}
+        
         <div className="mb-4 flex justify-start">
           <div className={GlobalStyle.searchBarContainer}>
             <input
@@ -461,7 +345,7 @@ useEffect(() => {
   </table>
 </div>
 
-        {/* Navigation Buttons */}
+       
         {filteredData.length > rowsPerPage && (
           <div className={GlobalStyle.navButtonContainer}>
             <button
@@ -485,7 +369,7 @@ useEffect(() => {
         )}
 
         <div className="flex justify-end items-center w-full mt-6">
-          {/* Select All Data Checkbox */}
+          
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -502,12 +386,7 @@ useEffect(() => {
 >
   Proceed
 </button>
-          {/* <button
-  className={`${GlobalStyle.buttonPrimary} ml-4`}
-  onClick={handleCaseforIncident}
->
-  Proceed
-</button> */}
+
         </div>
       </div>
     </>
