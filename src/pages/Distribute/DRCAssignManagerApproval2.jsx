@@ -14,7 +14,10 @@ import { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { ListAllBatchDetails } from "/src/services/distribution/distributionService.js";
+import { Approve_Batch_or_Batches } from "/src/services/distribution/distributionService.js";
+import { Create_Task_For_Batch_Approval } from "/src/services/distribution/distributionService.js";
 import "react-datepicker/dist/react-datepicker.css";
+import { getUserData } from "/src/services/auth/authService.js";
 
 export default function DRCAssignManagerApproval2() {
   // State variables to manage data, search, pagination, and selections
@@ -92,8 +95,59 @@ export default function DRCAssignManagerApproval2() {
   };
 
   // Function triggered on approval
-  function onSubmit() {
-    alert("Create task and let me know");
+  async function onSubmit() {
+    try {
+      const userData = await getUserData();
+      const selectedBatchIDs = Array.from(selectedRows).map(
+        (index) => currentData[index]?.batchID
+      );
+  
+      console.log("Selected Batch IDs:", selectedBatchIDs);
+      console.log("Approved By:", userData.name);
+  
+      if (selectedBatchIDs.length === 0) {
+        alert(`User: ${userData.name} (${userData.email})\nNo batch selected!`);
+        return;
+      }
+  
+      // Ensure the request payload matches the expected API structure
+      const response = await Approve_Batch_or_Batches(selectedBatchIDs, userData.name);
+  
+      console.log("API Response:", response);
+  
+      if (response.status === 200) {
+        alert("Batches approved successfully!");
+      } else {
+        alert("Approval failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error approving batches:", error);
+      alert("Error while approving. Check console for details.");
+    }
+  }
+  
+
+  async function onCreateTask() {
+    const selectedBatchIDs = Array.from(selectedRows).map(
+      (index) => currentData[index]?.batchID
+    );
+
+    if (selectedBatchIDs.length === 0) {
+      alert("No batch selected!");
+      return;
+    }
+
+    try {
+      const response = await Create_Task_For_Batch_Approval(
+        selectedBatchIDs,
+        "manager_1"
+      );
+      alert(
+        "Task created successfully!\nResponse: " + JSON.stringify(response.data)
+      );
+    } catch (error) {
+      alert("Failed to create task.\nError: " + JSON.stringify(error));
+    }
   }
 
   return (
@@ -123,11 +177,11 @@ export default function DRCAssignManagerApproval2() {
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>
-                <input 
-                  type="checkbox" 
-                  checked={selectAll} 
-                  onChange={handleSelectAll} 
-                  className="mx-auto" 
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={handleSelectAll}
+                  className="mx-auto"
                 />
               </th>
               <th className={GlobalStyle.tableHeader}>Batch ID</th>
@@ -139,13 +193,20 @@ export default function DRCAssignManagerApproval2() {
           </thead>
           <tbody>
             {currentData.map((item, index) => (
-              <tr key={index} className={index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd}>
+              <tr
+                key={index}
+                className={
+                  index % 2 === 0
+                    ? GlobalStyle.tableRowEven
+                    : GlobalStyle.tableRowOdd
+                }
+              >
                 <td className="text-center">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedRows.has(index)} 
-                    onChange={() => handleRowSelect(index)} 
-                    className="mx-auto" 
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.has(index)}
+                    onChange={() => handleRowSelect(index)}
+                    className="mx-auto"
                   />
                 </td>
                 <td className={GlobalStyle.tableData}>{item.batchID}</td>
@@ -161,17 +222,19 @@ export default function DRCAssignManagerApproval2() {
 
       {/* Pagination Controls */}
       <div className={GlobalStyle.navButtonContainer}>
-        <button 
-          onClick={() => handlePrevNext("prev")} 
-          disabled={currentPage === 1} 
+        <button
+          onClick={() => handlePrevNext("prev")}
+          disabled={currentPage === 1}
           className={GlobalStyle.navButton}
         >
           <FaArrowLeft />
         </button>
-        <span className={GlobalStyle.pageIndicator}>Page {currentPage} of {totalPages}</span>
-        <button 
-          onClick={() => handlePrevNext("next")} 
-          disabled={currentPage === totalPages} 
+        <span className={GlobalStyle.pageIndicator}>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => handlePrevNext("next")}
+          disabled={currentPage === totalPages}
           className={GlobalStyle.navButton}
         >
           <FaArrowRight />
@@ -181,28 +244,22 @@ export default function DRCAssignManagerApproval2() {
       {/* Approve & Select All Buttons */}
       <div className="flex justify-end gap-4 mt-4">
         <label className="flex items-center gap-2">
-          <input 
-            type="checkbox" 
-            className="rounded-lg" 
-            checked={selectAll} 
-            onChange={handleSelectAll} 
+          <input
+            type="checkbox"
+            className="rounded-lg"
+            checked={selectAll}
+            onChange={handleSelectAll}
           />
           Select All Data
         </label>
-        <button 
-          onClick={onSubmit} 
-          className={GlobalStyle.buttonPrimary}
-        >
+        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
           Approve
         </button>
       </div>
 
       {/* Extra Button for Task Creation */}
       <div>
-        <button 
-          onClick={onSubmit} 
-          className={GlobalStyle.buttonPrimary}
-        >
+        <button onClick={onCreateTask} className={GlobalStyle.buttonPrimary}>
           Create task and let me know
         </button>
       </div>
