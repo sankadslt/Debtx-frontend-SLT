@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getLoggedUserId, getUserData } from "../auth/authService";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/incident`;
@@ -21,27 +22,24 @@ export const List_incidents_Direct_LOD = async (filters) => {
   }
 };
 
-export const Create_Task_Download_Direct_LOD_Sending = async (
-  filteredParams
-) => {
-  try {
-    const taskData = {
-      Template_Task_Id: 23,
-      task_type: "Create Direct LOD Incident Sending  List for Download",
-      Created_By: "FrontendUser",
-      task_status: "open",
-      ...filteredParams,
-    };
-    const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
-    return response;
-  } catch (error) {
-    console.error(
-      "Error creating task:",
-      error.response?.data || error.message
-    );
-    throw error.response?.data || error;
-  }
-};
+ export const Create_Task_Download_Direct_LOD_Sending = async (filteredParams) => {
+    try {
+        const user = await getUserData();
+        console.log(user,"???/")
+        const taskData = {
+            Template_Task_Id: 23,
+            task_type: "Create Direct LOD Incident Sending  List for Download",
+            Created_By: user.user_id, 
+            task_status: "open",
+            ...filteredParams,
+        };
+        const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+        return response; 
+    } catch (error) {
+        console.error("Error creating task:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+ }
 
 export const List_F1_filtered_incidents = async (filters) => {
   try {
@@ -76,44 +74,40 @@ export const Forward_Direct_LOD = async (Incident_Id) => {
 };
 
 export const Create_Task_Forward_Direct_LOD = async (parameters) => {
-  try {
-    const taskData = {
-      Template_Task_Id: 16,
-      task_type: "Create Case from Incident Open LOD",
-      Created_By: "FrontendUser",
-      task_status: "open",
-      ...parameters,
-    };
-    const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
-    return response;
-  } catch (error) {
-    console.error(
-      "Error creating task:",
-      error.response?.data || error.message
-    );
-    throw error.response?.data || error;
-  }
-};
+    try {
+        const user = await getUserData();
+        const taskData = {
+            Template_Task_Id: 16,
+            task_type: "Create Case from Incident Open LOD",
+            Created_By: user.user_id,  
+            task_status: "open",
+            ...parameters,
+        };
+        const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+        return response; 
+    } catch (error) {
+        console.error("Error creating task:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+ }
 
-export const Create_Task_Download_Pending_Reject = async (filteredParams) => {
-  try {
-    const taskData = {
-      Template_Task_Id: 22,
-      task_type: "Create Pending Reject List for Downloard",
-      Created_By: "FrontendUser",
-      task_status: "open",
-      ...filteredParams,
-    };
-    const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
-    return response;
-  } catch (error) {
-    console.error(
-      "Error creating task:",
-      error.response?.data || error.message
-    );
-    throw error.response?.data || error;
-  }
-};
+ export const Create_Task_Download_Pending_Reject = async (filteredParams) => {
+    try {
+        const user = await getUserData();
+        const taskData = {
+            Template_Task_Id: 22,
+            task_type: "Create Pending Reject List for Downloard",
+            Created_By: user.user_id, 
+            task_status: "open",
+            ...filteredParams,
+        };
+        const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+        return response; 
+    } catch (error) {
+        console.error("Error creating task:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+}
 
 export const Forward_F1_Filtered = async (Incident_Id) => {
   try {
@@ -146,44 +140,40 @@ export const Reject_F1_Filtered = async (Incident_Id) => {
 };
 
 export const Create_Task_Forward_F1_Filtered = async (parameters) => {
-  try {
-    const taskData = {
-      Template_Task_Id: 19,
-      task_type: "Create Case from Incident F1 Move Forward",
-      Created_By: "FrontendUser",
-      task_status: "open",
-      ...parameters,
-    };
-    const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
-    return response;
-  } catch (error) {
-    console.error(
-      "Error creating task:",
-      error.response?.data || error.message
-    );
-    throw error.response?.data || error;
-  }
-};
+    try {
+        const user = await getUserData();
+        const taskData = {
+            Template_Task_Id: 19,
+            task_type: "Create Case from Incident F1 Move Forward",
+            Created_By: user.user_id, 
+            task_status: "open",
+            ...parameters,
+        };
+        const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+        return response; 
+    } catch (error) {
+        console.error("Error creating task:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+ }
 
-export const Create_Task_Reject_F1_Filtered = async (parameters) => {
-  try {
-    const taskData = {
-      Template_Task_Id: 18,
-      task_type: "Create Case from Incident Reject All",
-      Created_By: "FrontendUser",
-      task_status: "open",
-      ...parameters,
-    };
-    const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
-    return response;
-  } catch (error) {
-    console.error(
-      "Error creating task:",
-      error.response?.data || error.message
-    );
-    throw error.response?.data || error;
-  }
-};
+ export const Create_Task_Reject_F1_Filtered = async (parameters) => {
+    try {
+        const user = await getUserData();
+        const taskData = {
+            Template_Task_Id: 18,
+            task_type: "Create Case from Incident Reject All",
+            Created_By: user.user_id, 
+            task_status: "open",
+            ...parameters,
+        };
+        const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+        return response; 
+    } catch (error) {
+        console.error("Error creating task:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+ }
 
 export const List_Incidents_CPE_Collect = async (filters) => {
   try {
@@ -247,6 +237,77 @@ export const Approve_Batch_or_Batches = async (
   }
 };
 
+export const List_Reject_Incident = async (filters) => {
+  try {
+    const response = await axios.post(`${URL}/List_Reject_Incident`, filters);
+    console.log(response)
+    return response.data; 
+  } catch (error) {
+    console.error("Error fetching rejected incidents:", error.response?.data || error.message);
+    throw error.response?.data || error; 
+  }
+};
+
+export const Create_Rejected_List_for_Download = async (filteredParams) => {
+  try {
+      const user = await getUserData();
+      const taskData = {
+          Template_Task_Id: 25,
+          task_type: "Create Rejected List for Download",
+          Created_By: user.user_id, 
+          task_status: "open",
+          ...filteredParams,
+      };
+      const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+      return response; 
+  } catch (error) {
+      console.error("Error creating task:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+}
+
+export const Open_Task_Count_Forward_Direct_LOD = async () => {
+  try {
+      const taskData = {
+          Template_Task_Id: 16,
+          task_type: "Create Case from Incident Open LOD",
+      };
+      const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
+      return response.data.openTaskCount; 
+  } catch (error) {
+      console.error("Error fetching open task count:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+}
+
+export const Open_Task_Count_Reject_F1_Filtered = async () => {
+  try {
+      const taskData = {
+          Template_Task_Id: 18,
+          task_type: "Create Case from Incident Reject All",
+      };
+      const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
+      console.log(response)
+      return response.data.openTaskCount; 
+  } catch (error) {
+      console.error("Error fetching open task count:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+}
+
+export const Open_Task_Count_Forward_F1_Filtered = async () => {
+  try {
+      const taskData = {
+          Template_Task_Id: 19,
+          task_type: "Create Case from Incident F1 Move Forward",
+      };
+      const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
+      return response.data.openTaskCount; 
+  } catch (error) {
+      console.error("Error fetching open task count:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+}
 export const Create_Task_For_Batch_Approval = async (
   approverReferences,
   createdBy
