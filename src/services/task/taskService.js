@@ -103,3 +103,17 @@ export const Task_for_Download_Incidents = async (incidentData) => {
         throw error.response?.data || error; 
       }
   }
+
+  export const Open_Task_Count_Incident_To_Case = async () => { 
+    try {
+        const taskData = {
+            Template_Task_Id: 15, 
+            task_type: "Create Case from Incident Direct NO Agent",
+        };
+        const response = await axios.post(`${TASK_URL}/Open_Task_Count`, taskData);
+        return response.data.openTaskCount; 
+    } catch (error) {
+        console.error("Error fetching open task count:", error.response?.data || error.message);
+        throw error.response?.data || error; 
+      }
+  }

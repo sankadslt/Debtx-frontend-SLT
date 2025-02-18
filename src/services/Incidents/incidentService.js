@@ -126,16 +126,16 @@ export const Create_Case_for_incident = async (requestData) => {
   }
 };
 
-export const Forward_CPE_Collect = async (requestData) => {
+
+export const Forward_CPE_Collect = async (Incident_Id) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`, requestData);
-    return response.data; 
+    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`, {Incident_Id});
+    return response; 
   } catch (error) {
-    console.error("Error in Forward_CPE_Collect service:", error.message);
-    throw error.response?.data || error;
+    console.error("Error forwarding CPE Collect incidents:", error.response?.data || error.message);
+    throw error.response?.data || error; 
   }
 };
-
 export const getOpenTaskCountforCPECollect = async () => {
   try {
     const response = await axios.get(`${INCIDENT_URL}/Open_Task_Count_for_CPE_Collect`);
