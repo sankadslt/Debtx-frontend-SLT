@@ -82,153 +82,153 @@ export default function CollectOnlyCPECollect() {
     fetchData();
   }, []);
 
-  const handleCreateTaskForDownload = async ({
-    source_type,
-    fromDate,
-    toDate,
-  }) => {
-    if (!source_type && !fromDate && !toDate) {
-      Swal.fire({
-        title: "Warning",
-        text: "Missing Parameters",
-        icon: "warning",
-        confirmButtonText: "OK",
-      });
-    } else if ((fromDate && !toDate) || (!fromDate && toDate)) {
-      Swal.fire({
-        title: "Incomplete Date Range",
-        text: "Both From Date and To Date must be selected together.",
-        icon: "warning",
-        confirmButtonText: "OK",
-      });
-      return;
-    } else {
-      try {
-        const filteredParams = {
-          Source_Type: source_type,
-          FromDate: fromDate,
-          ToDate: toDate,
-        };
-        const response = await Create_Task(filteredParams);
-        if (response.status === 201) {
-          Swal.fire({
-            title: "Success",
-            text: "Task successfully created",
-            icon: "success",
-            confirmButtonText: "OK",
-          });
-        }
-      } catch (error) {
-        Swal.fire({
-          title: "Error",
-          text: error.message,
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-      }
-    }
-  };
-
-  const handleProceed = async (Incident_Id) => {
-    if (!selectedRows.includes(Incident_Id)) {
-      Swal.fire({
-        title: "Warning",
-        text: "Row not selected",
-        icon: "warning",
-        confirmButtonText: "OK",
-      });
-      return;
-    }
-    try {
-      const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
-      if (openTaskCount > 0) {
-        Swal.fire({
-          title: "Warning",
-          text: "A task is already in progress.",
-          icon: "warning",
-          confirmButtonText: "OK",
-        });
-        return;
-      }
-      const response = await Forward_CPE_Collect(Incident_Id);
-      if (response.status === 201) {
-        Swal.fire({
-          title: "Success",
-          text: response.data.message,
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-        fetchData();
-      }
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.message,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
-  };
-
-  const handleCreate = async () => {
-    try {
-      if (filteredData.length === 0) {
-        Swal.fire({
-          title: "Warning",
-          text: "No data.",
-          icon: "warning",
-          confirmButtonText: "OK",
-        });
-        return;
-      }
-      const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
-      if (openTaskCount > 0) {
-        Swal.fire({
-          title: "Warning",
-          text: "A task is already in progress.",
-          icon: "warning",
-          confirmButtonText: "OK",
-        });
-        return;
-      }
-      if (filteredData.length > 10) {
-        const parameters = {
-          Status: "Direct LOD",
-          Inncident_Ids: selectedRows,
-        };
-
-        const response = await Create_Task_for_Forward_CPECollect(parameters);
-        if (response.status === 201) {
-          Swal.fire({
-            title: "Success",
-            text: "Successfully created task to forward the direct LOD incidents",
-            icon: "success",
-            confirmButtonText: "OK",
-          });
-        }
-      } else {
-        for (const row of selectedRows) {
-          await Forward_CPE_Collect(row);
-        }
-        Swal.fire({
-          title: "Success",
-          text: "Successfully forwarded the direct LOD incidents",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-
-        fetchData();
-      }
-    } catch {
-      Swal.fire({
-        title: "Error",
-        text: "Internal server error",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
-  };
-
+  const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
+ 
+     if(!source_type && !fromDate && !toDate){
+       Swal.fire({
+         title: 'Warning',
+         text: 'Missing Parameters',
+         icon: 'warning',
+         confirmButtonText: 'OK'
+       });
+     }
+     else if ((fromDate && !toDate) || (!fromDate && toDate)) {
+       Swal.fire({
+         title: "Incomplete Date Range",
+         text: "Both From Date and To Date must be selected together.",
+         icon: "warning",
+         confirmButtonText: "OK",
+       });
+       return;
+     } else{
+     try{
+       const filteredParams = {
+         Source_Type:source_type,
+         FromDate:fromDate,
+         ToDate:toDate
+       }
+       const response = await Create_Task(filteredParams);
+       if(response.status===201){
+         Swal.fire({ 
+           title: 'Success',
+           text: 'Task successfully created',
+           icon: 'success',
+           confirmButtonText: 'OK'
+         });
+       }
+     }catch{
+       Swal.fire({
+         title: 'Error',
+         text: 'Error creating task',
+         icon: 'error',
+         confirmButtonText: 'OK'
+       });
+     }
+     }
+   };
+ 
+    const handleProceed = async (Incident_Id) => {
+       if (!selectedRows.includes(Incident_Id)) {
+         Swal.fire({
+           title: "Warning",
+           text: "Row not selected",
+           icon: "warning",
+           confirmButtonText: "OK",
+         });
+         return;
+       }
+       try {
+         const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
+         if (openTaskCount > 0) {
+           Swal.fire({
+             title: "Warning",
+             text: "A task is already in progress.",
+             icon: "warning",
+             confirmButtonText: "OK",
+           });
+           return;
+         }
+         const response = await Forward_CPE_Collect(Incident_Id);
+         if (response.status === 201) {
+           Swal.fire({
+             title: "Success",
+             text: response.data.message,
+             icon: "success",
+             confirmButtonText: "OK",
+           });
+           fetchData();
+         }
+       } catch (error) {
+         Swal.fire({
+           title: "Error",
+           text: error.message,
+           icon: "error",
+           confirmButtonText: "OK",
+         });
+       }
+     };
+     
+   
+     const handleCreate = async () => {
+       try {
+         if (filteredData.length === 0) {
+           Swal.fire({
+             title: "Warning",
+             text: "No data.",
+             icon: "warning",
+             confirmButtonText: "OK",
+           });
+           return;
+         }
+         const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
+         if (openTaskCount > 0) {
+           Swal.fire({
+             title: "Warning",
+             text: "A task is already in progress.",
+             icon: "warning",
+             confirmButtonText: "OK",
+           });
+           return;
+         }
+         if (filteredData.length > 10) {
+           const parameters = {
+             Status: "Direct LOD",
+             Inncident_Ids: selectedRows,
+           };
+     
+           const response = await Create_Task_for_Forward_CPECollect(parameters);
+           if (response.status === 201) {
+             Swal.fire({
+               title: "Success",
+               text: "Successfully created task to forward collect CPE Only incidents",
+               icon: "success",
+               confirmButtonText: "OK",
+             });
+           }
+         } else {
+           for (const row of selectedRows) {
+             await Forward_CPE_Collect(row);
+           }
+           Swal.fire({
+             title: "Success",
+             text: "Successfully forwarded the Collect CPE Only incidents",
+             icon: "success",
+             confirmButtonText: "OK",
+           });
+     
+           fetchData();
+         }
+       } catch {
+         Swal.fire({
+           title: "Error",
+           text: "Internal server error",
+           icon: "error",
+           confirmButtonText: "OK",
+         });
+       }
+     };
+  
+     
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       setError("The 'From' date cannot be later than the 'To' date.");
