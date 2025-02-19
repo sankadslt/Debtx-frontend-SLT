@@ -239,3 +239,16 @@ export const Exchange_DRC_RTOM_Cases = async (payload) => {
     throw error;
   }
 };
+
+export const Batch_Forward_for_Proceed = async (payload) => {
+  try {
+    const response = await axios.post(`${URL}/Batch_Forward_for_Proceed`, payload);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching case distribution details with DRC RTOM by transaction:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
