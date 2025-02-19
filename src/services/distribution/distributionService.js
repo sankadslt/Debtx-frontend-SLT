@@ -270,3 +270,107 @@ export const Create_Task_For_Batch_Approval = async (
     throw error.response?.data || error;
   }
 };
+
+export const List_DRC_Assign_Manager_Approval = async (
+  approverType,
+  dateFrom,
+  dateTo
+
+) => {
+  try {
+    const requestData = {
+      approver_type : approverType,  
+      date_from : dateFrom,
+      date_to : dateTo, 
+    };
+
+    const response = await axios.post(
+      `${CASE_URL}/List_DRC_Assign_Manager_Approval`,
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      "Error creating task:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
+export const Approve_DRC_Assign_Manager_Approval = async (
+  approverReferences,
+  approvedBy
+
+) => {
+  try {
+    const requestData = {
+      approver_references : approverReferences,  
+      approved_by : approvedBy,
+    };
+
+    const response = await axios.post(
+      `${CASE_URL}/Approve_DRC_Assign_Manager_Approval`,
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      "Error creating task:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
+export const Reject_DRC_Assign_Manager_Approval = async (
+  approverReferences,
+  approvedBy
+
+) => {
+  try {
+    const requestData = {
+      approver_references : approverReferences,  
+      approved_by : approvedBy,
+    };
+
+    const response = await axios.post(
+      `${CASE_URL}/Reject_DRC_Assign_Manager_Approval`,
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      "Error creating task:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
+export const Create_task_for_DRC_Assign_Manager_Approval = async (
+  approverReferences,
+  CreatedBy
+
+) => {
+  try {
+    const requestData = {
+      approver_references : approverReferences,  
+      Created_By : CreatedBy,
+    };
+
+    const response = await axios.post(
+      `${CASE_URL}/Create_task_for_DRC_Assign_Manager_Approval`,
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      "Error creating task:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
+
