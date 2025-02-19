@@ -145,9 +145,9 @@ export default function CaseDistributionDRCTransactions1Batch() {
           <strong>Case Count:</strong> {transactions[0]?.rulebase_count|| "N/A"}
           </p>
 
-          <p className="mb-2">
+          {/* <p className="mb-2">
           <strong>Total Arrears Amount:</strong> {transactions[0]?.rulebase_arrears_sum || "N/A"}
-          </p>
+          </p> */}
 
         </div>
       </div>
