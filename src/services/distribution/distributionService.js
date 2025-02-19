@@ -25,7 +25,7 @@ export const List_incidents_Direct_LOD = async (filters) => {
  export const Create_Task_Download_Direct_LOD_Sending = async (filteredParams) => {
     try {
         const user = await getUserData();
-        console.log(user,"???/")
+       
         const taskData = {
             Template_Task_Id: 23,
             task_type: "Create Direct LOD Incident Sending  List for Download",
