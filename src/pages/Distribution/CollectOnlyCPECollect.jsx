@@ -189,7 +189,7 @@ const [isloading, setIsLoading] = useState(true);
            if (response.status === 201) {
              Swal.fire({
                title: "Success",
-               text: "Successfully created task to forward the direct LOD incidents",
+               text: "Successfully created task to forward collect CPE Only incidents",
                icon: "success",
                confirmButtonText: "OK",
              });
@@ -200,7 +200,7 @@ const [isloading, setIsLoading] = useState(true);
            }
            Swal.fire({
              title: "Success",
-             text: "Successfully forwarded the direct LOD incidents",
+             text: "Successfully forwarded the Collect CPE Only incidents",
              icon: "success",
              confirmButtonText: "OK",
            });
