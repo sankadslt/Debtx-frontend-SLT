@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
-import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution } from "/src/services/case/CaseServices.js";
+import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution, Batch_Forward_for_Proceed } from "/src/services/case/CaseServices.js";
 import Swal from "sweetalert2";
 
 
@@ -145,6 +145,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
     console.log("Service type :",e.target.value);
   };
 
+ 
   const handlecreatetaskandletmeknow = async () => {
     const userId = await getLoggedUserId();
 
@@ -161,7 +162,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
       const response = await Create_Task_For_case_distribution(payload);
       console.log("Create Task Response:", response);
 
-      if (response.status === 200) {
+      if (response.status = "success") {
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -183,6 +184,43 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
 
     }
 
+  };
+  const handleonforwardclick = (batchID) => {
+    Swal.fire({
+    title: "Are you sure you want to proceed?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes",
+    confirmButtonColor: "#28a745",
+    cancelButtonText: "No",
+    cancelButtonColor: "#d33",
+    }).then((result) => {
+    if (result.isConfirmed) {
+    const forwardForProceed = async () => {
+    try {
+      const userId = await getLoggedUserId();
+      const payload = {
+        case_distribution_batch_id: [batchID],
+        Proceed_by: userId,
+      };
+      console.log("Forward for Proceed Payload:", payload);
+      const response = await Batch_Forward_for_Proceed(payload);
+      console.log("Forward for Proceed Response:", response);
+      navigate("/pages/Distribute/DRCAssignManagerApproval2")
+    } catch (error){
+      console.error (error)
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
+  forwardForProceed();
+  }
+  });
   };
 
   const handleonsummaryclick = (batchID) => {
@@ -207,6 +245,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
     }
   };
 
+  
   const formatDate = (isoString) => {
     return isoString ? new Date(isoString).toISOString().split("T")[0] : null;
   };
@@ -380,7 +419,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     <button>
                     <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "1px" }} />
                     </button>
-                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`}>
+                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_batch_id)}>
                     <img
                       src={four}
                       width={15}
