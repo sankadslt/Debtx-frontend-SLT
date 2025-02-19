@@ -128,13 +128,14 @@ const FilteredIncident = () => {
                           className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                         >
                           <img
-                            src="../../../src/assets/images/Open.png"
+                            src="/src/assets/images/fileicon.png" 
                             alt="Open Icon"
                             title="Open"
                             width={20}
                             height={15}
                           />
                         </button>
+                      
                       </td>
                     </tr>
                   ))}

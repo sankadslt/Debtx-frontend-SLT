@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { MdSpaceDashboard } from "react-icons/md";
 import { IoIosListBox } from "react-icons/io";
+import {MdSpeakerNotes} from "react-icons/md"
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../services/auth/authService";
@@ -42,7 +43,30 @@ const Sidebar = ({ onHoverChange }) => {
 
   // Menu structure with nested subtopics
   const menuItems = [
+    //dashboard
     { icon: MdSpaceDashboard, label: "Dashboard", link: "/dashboard", roles: ["superadmin", "admin", "user"], subItems: [] },
+
+
+    //userList
+    {
+      icon: IoIosListBox,
+      label: "User List",
+      roles: ["superadmin", "admin", "user"],
+      subItems: [
+       
+        { label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { label: "DRC List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { label: "RO List", link: "/dashboard", roles: ["superadmin", "admin"] },
+      ],
+    },
+
+    //filterincident
+    { icon: MdSpaceDashboard, label: "Filter Incident", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin", "user"], subItems: [] },
+
+    //Distribute
+    { icon: MdSpeakerNotes, label: " Distribution", link: "/pages/Distribute/DistributionPreparationBulkUpload", roles: ["superadmin", "admin", "user"], subItems: [] },
+
+    //sample
     {
       icon: IoIosListBox,
       label: "Dummy",

@@ -25,7 +25,9 @@ import { Tooltip } from "react-tooltip";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution } from "/src/services/case/CaseServices.js";
+import Swal from "sweetalert2";
 
 
 export default function AssignPendingDRCSummary() {
@@ -144,20 +146,41 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
   };
 
   const handlecreatetaskandletmeknow = async () => {
+    const userId = await getLoggedUserId();
+
     const payload = {
       current_arrears_band : selectedBandKey || "null",
       date_from : startDate || "null",
       date_to : endDate || "null",
       drc_commision_rule: selectedService || "null",
-      Created_By: "Sys",
+      Created_By: userId,
     };
 
     console.log("Create Task Payload:", payload);
    try {
       const response = await Create_Task_For_case_distribution(payload);
       console.log("Create Task Response:", response);
+
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Task created successfully.",
+          confirmButtonColor: "#28a745",
+        });
+      }
+      
     } catch (error) {
       console.error("Error creating task for case distribution:", error);
+
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
+
     }
 
   };
@@ -289,7 +312,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
               <th className={GlobalStyle.tableHeader} style={{ width: "120px", fontSize : "10px" }}>DRC Commission Rule</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "120px",fontSize : "10px" }}>Arrears Band (Selection Rule)</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Case Count (RuleBase count)</th>
-              <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th>
+              {/* <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th> */}
               <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Distributed Status</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Approval</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "60px",fontSize : "10px" }}></th>
@@ -310,8 +333,8 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "75px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.action_type === "distribution" && <img src="/src/assets/images/distributed.png" width={20} height={15} alt="Distributed" />}
-                    {item.action_type === "ammend" && <img src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />}
+                    {item.batch_seq_details?.[0]?.action_type === "distribution" && <img src="/src/assets/images/distributed.png" width={20} height={15} alt="Distributed" />}
+                    {item.batch_seq_details?.[0]?.action_type === "amend" && <img src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />}
                     </div>
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "120px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -323,15 +346,15 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   <td className={GlobalStyle.tableData} style={{ width: "90px", textAlign: "center" }}>
                     {item.rulebase_count}
                   </td>
-                  <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
+                  {/* <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                     {item.rulebase_arrears_sum}
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.crd_distribution_status?.[0]?.crd_distribution_status === "Open" && <img src="/src/assets/images/open.png" width={20} height={15} alt="Open" />}
-                    {item.crd_distribution_status?.[0]?.crd_distribution_status === "Complete" && <img src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />}
-                    {item.crd_distribution_status?.[0]?.crd_distribution_status === "Error" && <img src="/src/assets/images/error.png" width={20} height={15} alt="Error" />}
-                    {item.crd_distribution_status?.[0]?.crd_distribution_status === "InProgress" && <img src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />}
+                    {item.status?.[0]?.crd_distribution_status === "Open" && <img src="/src/assets/images/open.png" width={20} height={15} alt="Open" />}
+                    {item.status?.[0]?.crd_distribution_status === "Complete" && <img src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />}
+                    {item.status?.[0]?.crd_distribution_status === "Error" && <img src="/src/assets/images/error.png" width={20} height={15} alt="Error" />}
+                    {item.status?.[0]?.crd_distribution_status === "InProgress" && <img src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />}
                     </div>
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
