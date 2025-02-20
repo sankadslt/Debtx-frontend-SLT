@@ -187,7 +187,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
   };
   const handleonforwardclick = (batchID) => {
     Swal.fire({
-    title: "Are you sure you want to proceed?",
+    title: "Are you sure you want to forward for Approval?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Yes",
@@ -345,6 +345,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
         <table className={`${GlobalStyle.table}`}>
           <thead className={`${GlobalStyle.thead}`}>
             <tr className="border border-[#0087FF] border-opacity-15">
+            <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Distributed Status</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "80px", fontSize : "10px" }}>Case Distribution Batch ID</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Created dtm</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "75px", fontSize : "10px" }}>Action Type</th>
@@ -352,7 +353,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
               <th className={GlobalStyle.tableHeader} style={{ width: "120px",fontSize : "10px" }}>Arrears Band (Selection Rule)</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Case Count (RuleBase count)</th>
               {/* <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th> */}
-              <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Distributed Status</th>
+              
               <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Approval</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "60px",fontSize : "10px" }}></th>
             </tr>
@@ -364,6 +365,14 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   className={index % 2 === 0 ? 
                   GlobalStyle.tableRowEven : 
                   GlobalStyle.tableRowOdd}>
+                  <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
+                    {item.status?.[0]?.crd_distribution_status === "Open" && <img src="/src/assets/images/open.png" width={20} height={15} alt="Open" />}
+                    {item.status?.[0]?.crd_distribution_status === "Complete" && <img src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />}
+                    {item.status?.[0]?.crd_distribution_status === "Error" && <img src="/src/assets/images/error.png" width={20} height={15} alt="Error" />}
+                    {item.status?.[0]?.crd_distribution_status === "InProgress" && <img src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />}
+                    </div>
+                  </td>
                   <td className={GlobalStyle.tableData} style={{ width: "80px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {item.case_distribution_batch_id}
                   </td>
@@ -388,14 +397,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   {/* <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                     {item.rulebase_arrears_sum}
                   </td> */}
-                  <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.status?.[0]?.crd_distribution_status === "Open" && <img src="/src/assets/images/open.png" width={20} height={15} alt="Open" />}
-                    {item.status?.[0]?.crd_distribution_status === "Complete" && <img src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />}
-                    {item.status?.[0]?.crd_distribution_status === "Error" && <img src="/src/assets/images/error.png" width={20} height={15} alt="Error" />}
-                    {item.status?.[0]?.crd_distribution_status === "InProgress" && <img src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />}
-                    </div>
-                  </td>
+                  
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
                     {item.forward_for_approvals_on && !item.approved_on && !item.proceed_on && (
