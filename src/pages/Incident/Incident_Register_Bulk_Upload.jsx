@@ -13,12 +13,13 @@ Dependencies: Tailwind CSS, SweetAlert2
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
+
+
 import { useState } from "react";
 import Swal from "sweetalert2";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
 import { jwtDecode } from "jwt-decode";
-
 
 const Incident_Register_Bulk_Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -34,6 +35,24 @@ const Incident_Register_Bulk_Upload = () => {
         setActionType(event.target.value);
     };
 
+    const getCurrentUser = () => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+            throw new Error("No access token found");
+        }
+
+        try {
+            const decoded = jwtDecode(token);
+            if (!decoded.username) {
+                throw new Error("Username not found in token");
+            }
+            return decoded.username;
+        } catch (error) {
+            console.error("Error decoding token:", error);
+            throw new Error("Invalid token");
+        }
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
     
@@ -46,58 +65,56 @@ const Incident_Register_Bulk_Upload = () => {
             return;
         }
     
-     
-        const token = localStorage.getItem("accessToken"); 
-        let username = "Unknown User"; 
-    
-        if (token) {
-            try {
-                const decoded = jwtDecode(token); 
-                username = decoded.username;
-            } catch (error) {
-                console.error("Error decoding token:", error);
-            }
-        }
-    
-        const reader = new FileReader();
-        reader.readAsText(selectedFile);
-        reader.onload = async () => {
-            const fileContent = reader.result;
-            setLoading(true);
-    
-            const incidentData = {
-                File_Name: selectedFile.name,
-                File_Type: actionType,
-                File_Content: fileContent,
-                Created_By: username,
+        try {
+            const username = getCurrentUser();
+            const reader = new FileReader();
+            
+            reader.readAsText(selectedFile);
+            reader.onload = async () => {
+                const fileContent = reader.result;
+                setLoading(true);
+        
+                const incidentData = {
+                    File_Name: selectedFile.name,
+                    File_Type: actionType,
+                    File_Content: fileContent,
+                    Created_By: username,
+                };
+        
+                try {
+                    const response = await incidentRegisterBulkUpload(incidentData);
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success",
+                        text: response.message,
+                    });
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Upload Failed",
+                        text: error.message || "File upload failed! Please try again.",
+                    });
+                } finally {
+                    setLoading(false);
+                }
             };
-    
-            try {
-                const response = await incidentRegisterBulkUpload(incidentData);
-                Swal.fire({
-                    icon: "success",
-                    title: "Success",
-                    text: response.message,
-                });
-            } catch (error) {
-                console.error("Error uploading file:", error);
+        
+            reader.onerror = () => {
                 Swal.fire({
                     icon: "error",
-                    title: "Upload Failed",
-                    text: "File upload failed! Please try again.",
+                    title: "File Read Error",
+                    text: "Failed to read file content.",
                 });
-            } finally {
-                setLoading(false);
-            }
-        };
-    
-        reader.onerror = () => {
+            };
+        } catch (error) {
+            console.error("Authentication error:", error);
             Swal.fire({
                 icon: "error",
-                title: "File Read Error",
-                text: "Failed to read file content.",
+                title: "Authentication Error",
+                text: error.message || "Please log in again to continue.",
             });
-        };
+        }
     };
 
     return (

@@ -21,7 +21,7 @@ const Incident_Register_Individual = () => {
   const [actionType, setActionType] = useState("");
   const [sourceType, setSourceType] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(3);
-  const [contactNumber, setContactNumber] = useState(""); // New state for Contact Number
+  const [contactNumber, setContactNumber] = useState(""); 
   const [loggedInUser] = useState("Admin");
   const [errors, setErrors] = useState({});
 
@@ -63,7 +63,7 @@ const Incident_Register_Individual = () => {
       Monitor_Months: calendarMonth,
       Created_By: loggedInUser,
       Source_Type: sourceType,
-      ...(actionType === "collect CPE" && { Contact_Number: contactNumber }), // Include Contact Number only when needed
+      ...(actionType === "collect CPE" && { Contact_Number: contactNumber }),
     };
 
     try {
