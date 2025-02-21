@@ -4,6 +4,7 @@ import Login from "../components/Login";
 import Register from "../components/Register";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Unauthorized from "../components/Unauthorized";
+import CreateTask from "../pages/createTasks";
 
 import Dashboard from "../pages/Dashboard";
 import PrototypeA from "../assets/prototype/prototypeA";
@@ -54,6 +55,7 @@ const Routers = () => {
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/create-task" element={<CreateTask />} />
 
       {/* Prototype Routes */}
       <Route
