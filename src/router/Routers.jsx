@@ -20,6 +20,8 @@ import Incident_Register_Individual from "../pages/Incident/Incident_Register_In
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 
+
+
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
 import CollectOnlyCPECollect from "../pages/Distribution/CollectOnlyCPECollect";
@@ -28,112 +30,46 @@ import RejectIncident from "../pages/Distribution/RejectIncident";
 import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
 import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
 
-{
-  /* Distribute Imports */
-}
-import AssignDRC from "../pages/Distribute/AssignDRC";
-import AssignDRCForCollectCPE from "../pages/Distribute/AssignDRCForCollectCPE";
-import AssignedDRCSummary from "../pages/Distribute/CaseDistributionDRCTransactions";
-import AssignedDRCSummaryCollectCPE from "../pages/Distribute/AssignedDRCSummaryCollectCPE";
-import DistributionPreparationBulkUpload from "../pages/Distribute/DistributionPreparationBulkUpload";
-import DistributionPreparationOnlyCPECollect from "../pages/Distribute/DistributionPreparationOnlyCPECollect";
-import DRCAssignManagerApproval from "../pages/Distribute/DRCAssignManagerApproval";
-import DistributeDummy from "../pages/Distribute/DistributeDummy";
-import CaseDistributionDRCTransactions1Batch from "../pages/Distribute/CaseDistributionDRCTransactions-1Batch";
-import CaseDistributionDRCTransactionsBatch from "../pages/Distribute/CaseDistributionDRCTransactions-(1Batch)";
-import CaseDistributionDRCSummary from "../pages/Distribute/CaseDistributionDRCSummary";
-import CaseDistributionDRCSummarywithRTOM from "../pages/Distribute/CaseDistributionDRCSummarywithRTOM";
-import AmendAssignedDRC from "../pages/Distribute/AmendAssignedDRC";
-import ReAssignDRC from "../pages/Distribute/ReAssignDRC";
-import AssignDRCCaseList from "../pages/Distribute/AssignDRCCaseList";
-import DRCAssignManagerApproval2 from "../pages/Distribute/DRCAssignManagerApproval2";
-import DRCAssignManagerApproval3 from "../pages/Distribute/DRCAssignManagerApproval3";
-
+ {/* Distribute Imports */}
+ import AssignDRC from "../pages/Distribute/AssignDRC";
+ import AssignDRCForCollectCPE from "../pages/Distribute/AssignDRCForCollectCPE";
+ import AssignedDRCSummary from "../pages/Distribute/CaseDistributionDRCTransactions";
+ import AssignedDRCSummaryCollectCPE from "../pages/Distribute/AssignedDRCSummaryCollectCPE";
+ import DistributionPreparationBulkUpload from "../pages/Distribute/DistributionPreparationBulkUpload";
+ import DistributionPreparationOnlyCPECollect from "../pages/Distribute/DistributionPreparationOnlyCPECollect";
+ import DRCAssignManagerApproval from "../pages/Distribute/DRCAssignManagerApproval";
+ import DistributeDummy from "../pages/Distribute/DistributeDummy";
+ import CaseDistributionDRCTransactions1Batch from "../pages/Distribute/CaseDistributionDRCTransactions-1Batch";
+ import CaseDistributionDRCTransactionsBatch from "../pages/Distribute/CaseDistributionDRCTransactions-(1Batch)";
+ import CaseDistributionDRCSummary from "../pages/Distribute/CaseDistributionDRCSummary";
+ import CaseDistributionDRCSummarywithRTOM from "../pages/Distribute/CaseDistributionDRCSummarywithRTOM";
+ import AmendAssignedDRC from "../pages/Distribute/AmendAssignedDRC";
+ import ReAssignDRC from "../pages/Distribute/ReAssignDRC";
+ import AssignDRCCaseList from "../pages/Distribute/AssignDRCCaseList";
 const Routers = () => {
   return (
     <Routes>
+
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/unauthorized" element={<Unauthorized/>} />
 
       {/* Prototype Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute
-            element={<Dashboard />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
-      <Route
-        path="/prototypeA"
-        element={
-          <ProtectedRoute
-            element={<PrototypeA />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
-      <Route
-        path="/prototypeB"
-        element={
-          <ProtectedRoute
-            element={<PrototypeB />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
-      <Route
-        path="/prototypeC"
-        element={
-          <ProtectedRoute
-            element={<PrototypeC />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
+      <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} allowedRoles={['superadmin']} />} />
+      <Route path="/prototypeA" element={<ProtectedRoute element={<PrototypeA />} allowedRoles={['superadmin']} />} />
+      <Route path="/prototypeB" element={<ProtectedRoute element={<PrototypeB />} allowedRoles={['superadmin']} />} />
+      <Route path="/prototypeC" element={<ProtectedRoute element={<PrototypeC />} allowedRoles={['superadmin']} />} />
 
-      <Route
-        path="/additional_request_log"
-        element={
-          <ProtectedRoute
-            element={<RecoveryOfficerRequests />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
-      <Route
-        path="/drc/mediation-board"
-        element={
-          <ProtectedRoute
-            element={<ForwardMediationBoard />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
-      <Route
-        path="/drc/period-extension"
-        element={
-          <ProtectedRoute
-            element={<ValidityPeriodExtension />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
-      <Route
-        path="/drs/logs/reuest-response-logs"
-        element={
-          <ProtectedRoute
-            element={<RequestResponseLog />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
+      <Route path="/additional_request_log" element={<ProtectedRoute element={<RecoveryOfficerRequests />} allowedRoles={['superadmin']} />} />
+      <Route path="/drc/mediation-board" element={<ProtectedRoute element={<ForwardMediationBoard />} allowedRoles={['superadmin']} />} />
+      <Route path="/drc/period-extension" element={<ProtectedRoute element = {<ValidityPeriodExtension/>} allowedRoles={['superadmin']} />} />
+      <Route path="/drs/logs/reuest-response-logs" element={<ProtectedRoute element = {<RequestResponseLog/>} allowedRoles={['superadmin']} />}/>
+
+
 
       {/* //DISTRIBUTION */}
-      <Route path = "/Distribution/open-incident" element={<ProtectedRoute element={<OpenIncident/>} allowedRoles={['superadmin']}/>}/>
-      <Route path = "/Distribution/collect-only-cpe-collect"  element={<ProtectedRoute element={<CollectOnlyCPECollect />} allowedRoles={['superadmin']}/>}/>
+      <Route path = "/Distribution/open-incident" element={<OpenIncident />} />
+      <Route path = "/Distribution/collect-only-cpe-collect" element={<CollectOnlyCPECollect />} />
       <Route path = "/Distribution/direct-lod-sending-incident" element={<DirectLODSendingIncident />} />
       <Route path = "/Distribution/reject-incident" element={<RejectIncident />} />
       <Route path = "/Distribution/reject-incident-log" element={<RejectIncidentlog />} />
@@ -142,7 +78,6 @@ const Routers = () => {
 
 
      
-
 
      {/* Distribute Routes */}
      <Route path="/pages/Distribute/AssignDRC" element={<ProtectedRoute element={<AssignDRC/>} allowedRoles={['superadmin']} />} />
@@ -168,10 +103,11 @@ const Routers = () => {
       <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/upload-log" element={<ProtectedRoute element={<SupBulkUploadLog />} allowedRoles={['superadmin']} />} />
+      
         
 
 
-
+    
     </Routes>
   );
 };
