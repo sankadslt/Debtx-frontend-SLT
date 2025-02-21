@@ -6,6 +6,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Unauthorized from "../components/Unauthorized";
 import CreateTask from "../pages/createTasks";
 import UserProfile from "../pages/userProfile";
+import Chart from "../pages/Chart";
 
 import Dashboard from "../pages/Dashboard";
 import PrototypeA from "../assets/prototype/prototypeA";
@@ -58,6 +59,7 @@ const Routers = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/create-task" element={<CreateTask />} />
       <Route path="/user-profile" element={<UserProfile />} />
+      <Route path="/chart" element={<Chart />} />
 
       {/* Prototype Routes */}
       <Route
