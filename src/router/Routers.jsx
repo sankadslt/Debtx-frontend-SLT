@@ -4,6 +4,8 @@ import Login from "../components/Login";
 import Register from "../components/Register";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Unauthorized from "../components/Unauthorized";
+import CreateTask from "../pages/createTasks";
+import UserProfile from "../pages/userProfile";
 
 import Dashboard from "../pages/Dashboard";
 import PrototypeA from "../assets/prototype/prototypeA";
@@ -52,7 +54,11 @@ const Routers = () => {
 
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/unauthorized" element={<Unauthorized/>} />
+
+      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/create-task" element={<CreateTask />} />
+      <Route path="/user-profile" element={<UserProfile />} />
+
 
       {/* Prototype Routes */}
       <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} allowedRoles={['superadmin']} />} />
