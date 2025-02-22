@@ -31,6 +31,7 @@ import {
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Swal from "sweetalert2";
+import Chart from "/src/pages/Chart.jsx";
 
 
 
@@ -46,7 +47,7 @@ const AssignDRC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedBandKey, setSelectedBandKey] = useState(null);
-
+  const [showPopup, setShowPopup] = useState(false);
   const { serviceType } = location.state || {};
 
   const [drcData, setDrcData] = useState([]);
@@ -225,11 +226,11 @@ const AssignDRC = () => {
   };
 
   const handlepiechart1 = () => {
-    alert("Pie Chart 1 clicked");
-  }
+    setShowPopup(true); // Open chart popup
+  };
 
   const handlepiechart2 = () => {
-    alert("Pie Chart 2 clicked");
+    setShowPopup(true); // Open chart popup
   }
 
   return (
@@ -430,12 +431,19 @@ const AssignDRC = () => {
             </div>
 
             {/* Pie Chart Buttons */}
+            <div>
             <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
                Pie Chart 1
             </button>
+             <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
+            </div>
+            <div>
             <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
                Pie Chart 2
             </button>
+            <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
+            </div>
+            
           </div>
 
           {/* Proceed Button */}
