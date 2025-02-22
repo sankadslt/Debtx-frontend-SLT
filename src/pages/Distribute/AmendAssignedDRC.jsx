@@ -260,7 +260,8 @@ export default function AmendAssignedDRC() {
       </div>
 
       {/* case count Bar */}
-      <div className={`${GlobalStyle.miniCaseCountBar} `}>
+      <div className="flex justify-center items-center w-full">
+      <div className={`${GlobalStyle.miniCaseCountBar}  `}>
         <div className="flex px-3 py-2 items-center  gap-10 ">
           <img src={Minorc} alt="Icon" className="w-[20px] h-[20px] " />
           {/* dropdown */}
@@ -355,6 +356,7 @@ export default function AmendAssignedDRC() {
             Add
           </button>
         </div>
+      </div>
       </div>
 
       {/* Table Section */}
