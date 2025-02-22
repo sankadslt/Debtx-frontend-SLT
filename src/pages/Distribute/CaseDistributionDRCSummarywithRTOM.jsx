@@ -59,12 +59,13 @@ const CaseDistributionDRCSummarywithRTOM = () => {
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary</h1>
-
-      {/* Filter Section */}
-      <div className="flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4"></div>
+      <div className=" py-5 mt-2 ml-10 w-fit ">
+        <h2 className={GlobalStyle.headingMedium}>Batch-B1</h2>
+        <h2 className={GlobalStyle.headingMedium}>TCM(DRC Name)</h2>
+      </div>
 
       {/* Search Section */}
-      <div className="flex justify-start mb-4">
+      <div className="flex py-2 items-center justify-start gap-2 mt-2 mb-4">
         <div className={GlobalStyle.searchBarContainer}>
           <input
             type="text"
