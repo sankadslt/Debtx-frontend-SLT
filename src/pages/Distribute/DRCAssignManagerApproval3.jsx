@@ -244,6 +244,7 @@ export default function DRCAssignManagerApproval3() {
                 <td className={GlobalStyle.tableData}>{item.approvalType}</td>
                 <td className={GlobalStyle.tableData}>{item.approvalStatus}</td>
                 <td className={GlobalStyle.tableData}>{item.approvalBy}</td>
+                <td className={GlobalStyle.tableData}>{item.remark}</td>
                 <td className={GlobalStyle.tableData}>
                   <button>
                     <img
