@@ -11,31 +11,20 @@ Related Files: (routes)
 Notes: The following page contains the code 
 */
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
+import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; 
 import "react-datepicker/dist/react-datepicker.css";
+import {List_All_Batch_Details} from "/src/services/case/CaseServices.js";
+
 export default function DRCAssignManagerApproval2() {
-  const data = [
-    {
-      batchID: "C001",
-      createdDate: "2025.01.05",
-      drc: "PEO",
-      caseCount: "100",
-      totalArrears: "100000",
-    },
-    {
-      batchID: "",
-      createdDate: "2025.11.05",
-      drc: "VOICE",
-      caseCount: "",
-      totalArrears: "",
-    },
-  ];
+
+
+
 
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState([]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,6 +33,21 @@ export default function DRCAssignManagerApproval2() {
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await List_All_Batch_Details();
+        setFilteredData(response);
+        console.log("All batch details:", response);
+      } catch (error) {
+        console.error("Error fetching all batch details:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
+
 
   // Handle pagination
   const handlePrevNext = (direction) => {
@@ -127,12 +131,7 @@ export default function DRCAssignManagerApproval2() {
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>
-                {/* <input
-                  type="checkbox"
-                  checked={selectAll}
-                  onChange={handleSelectAll}
-                  className="mx-auto"
-                /> */}
+               
               </th>
               <th className={GlobalStyle.tableHeader}>Batch ID</th>
               <th className={GlobalStyle.tableHeader}>Created Date</th>
@@ -159,10 +158,10 @@ export default function DRCAssignManagerApproval2() {
                     className="mx-auto"
                   />
                 </td>
-                <td className={GlobalStyle.tableData}>{item.batchID}</td>
-                <td className={GlobalStyle.tableData}>{item.createdDate}</td>
-                <td className={GlobalStyle.tableData}>{item.drc}</td>
-                <td className={GlobalStyle.tableData}>{item.caseCount}</td>
+                <td className={GlobalStyle.tableData}>{item.case_distribution_details?.case_distribution_batch_id || "N/A"}</td>
+                <td className={GlobalStyle.tableData}>{new Date (item.created_on).toLocaleDateString()}</td>
+                <td className={GlobalStyle.tableData}> {item.case_distribution_details?.drc_commision_rule || "N/A"}</td>
+                <td className={GlobalStyle.tableData}>{item.case_distribution_details?.rulebase_count || "N/A"}</td>
                 <td className={GlobalStyle.tableData}>{item.totalArrears}</td>
               </tr>
             ))}
