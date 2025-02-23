@@ -1,6 +1,6 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-
+ 
 const BASE_URL = import.meta.env.VITE_BASE_URL ; // Base URL from environment variables
 const AUTH_URL = `${BASE_URL}/auth`; // Auth endpoint
 

@@ -19,6 +19,8 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
+import { getUserData } from "../../services/auth/authService.js";
+
 
 const Incident_Register_Bulk_Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -32,6 +34,19 @@ const Incident_Register_Bulk_Upload = () => {
 
     const handleActionTypeChange = (event) => {
         setActionType(event.target.value);
+    };
+
+    const getCurrentUser = async () => {
+        try {
+            const userData = await getUserData();
+            if (!userData?.username) {
+                throw new Error("Username not found in user data");
+            }
+            return userData.username;
+        } catch (error) {
+            console.error("Error getting user data:", error);
+            throw new Error("Failed to get user information");
+        }
     };
 
     
@@ -49,7 +64,7 @@ const Incident_Register_Bulk_Upload = () => {
         }
     
         try {
-            
+            const username = getCurrentUser();
             const reader = new FileReader();
             
             reader.readAsText(selectedFile);
@@ -61,6 +76,7 @@ const Incident_Register_Bulk_Upload = () => {
                     File_Name: selectedFile.name,
                     File_Type: actionType,
                     File_Content: fileContent,
+                    Created_By: username,
                     
                 };
         

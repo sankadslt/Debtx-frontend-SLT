@@ -15,6 +15,7 @@ import { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import { createIncident } from "../../services/Incidents/incidentService.js";
+import { getUserData } from "../../services/auth/authService.js";
 
 const Incident_Register_Individual = () => {
   const [accountNo, setAccountNo] = useState("");
@@ -46,47 +47,63 @@ const Incident_Register_Individual = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      Swal.fire({
-        icon: "error",
-        title: "Validation Error",
-        text: "Please fill in all required fields and ensure valid input.",
-      });
-      return;
+  const getCurrentUser = async () => {
+    try {
+        const userData = await getUserData();
+        if (!userData?.username) {
+            throw new Error("Username not found in user data");
+        }
+        return userData.username;
+    } catch (error) {
+        console.error("Error getting user data:", error);
+        throw new Error("Failed to get user information");
     }
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) {
+    Swal.fire({
+      icon: "error",
+      title: "Validation Error",
+      text: "Please fill in all required fields and ensure valid input.",
+    });
+    return;
+  }
+
+  try {
+    const username = await getCurrentUser();
 
     const incidentData = {
       Account_Num: accountNo,
       DRC_Action: actionType,
       Monitor_Months: calendarMonth,
       Source_Type: sourceType,
+      Created_By: username,  // Add this line
       ...(actionType === "collect CPE" && { Contact_Number: contactNumber }),
     };
 
-    try {
-      const response = await createIncident(incidentData);
-      Swal.fire({
-        icon: "success",
-        title: "Incident Created",
-        text: `Incident ID: ${response.data.Incident_Id} created successfully.`,
-      });
+    const response = await createIncident(incidentData);
+    Swal.fire({
+      icon: "success",
+      title: "Incident Created",
+      text: `Incident ID: ${response.data.Incident_Id} created successfully.`,
+    });
 
-      // Reset form
-      setAccountNo("");
-      setActionType("");
-      setSourceType("");
-      setCalendarMonth(3);
-      setContactNumber("");
-      setErrors({});
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "Failed to create incident.",
-      });
-    }
+    // Reset form
+    setAccountNo("");
+    setActionType("");
+    setSourceType("");
+    setCalendarMonth(3);
+    setContactNumber("");
+    setErrors({});
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.message || "Failed to create incident.",
+    });
+  }
 };
 
   return (
