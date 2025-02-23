@@ -13,6 +13,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import one from "/src/assets/images/imagefor1.a.13(one).png";
 export default function DRCAssignManagerApproval3() {
   const data = [
     {
@@ -216,6 +217,7 @@ export default function DRCAssignManagerApproval3() {
               <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Approve By</th>
               <th className={GlobalStyle.tableHeader}>Remark</th>
+              <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
           <tbody>
@@ -242,7 +244,17 @@ export default function DRCAssignManagerApproval3() {
                 <td className={GlobalStyle.tableData}>{item.approvalType}</td>
                 <td className={GlobalStyle.tableData}>{item.approvalStatus}</td>
                 <td className={GlobalStyle.tableData}>{item.approvalBy}</td>
-                <td className={GlobalStyle.tableData}>{item.remark}</td>
+                <td className={GlobalStyle.tableData}>
+                  <button>
+                    <img
+                      src={one}
+                      width={15}
+                      height={15}
+                      alt="Summary"
+                      style={{ position: "relative", top: "4px", right: "2px" }}
+                    />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
