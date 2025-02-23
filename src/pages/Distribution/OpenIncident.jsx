@@ -327,7 +327,7 @@ const fetchData = async () => {
             </div>
           </td>
           <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
-          <td className={GlobalStyle.tableData}>{row.Action}</td>
+          <td className={GlobalStyle.tableData}>{row.Actions}</td>
           <td className={GlobalStyle.tableData}>
             {new Intl.NumberFormat("en-US").format(row.Arrears)}
           </td>
