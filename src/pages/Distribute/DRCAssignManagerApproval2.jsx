@@ -11,60 +11,41 @@ Related Files: (routes)
 Notes: The following page contains the code 
 */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { ListAllBatchDetails } from "/src/services/distribution/distributionService.js";
-import { Approve_Batch_or_Batches } from "/src/services/distribution/distributionService.js";
-import { Create_Task_For_Batch_Approval } from "/src/services/distribution/distributionService.js";
+import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import "react-datepicker/dist/react-datepicker.css";
-import { getUserData } from "/src/services/auth/authService.js";
-
 export default function DRCAssignManagerApproval2() {
-  // State variables to manage data, search, pagination, and selections
-  const [data, setData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
+  const data = [
+    {
+      batchID: "C001",
+      createdDate: "2025.01.05",
+      drc: "PEO",
+      caseCount: "100",
+      totalArrears: "100000",
+    },
+    {
+      batchID: "",
+      createdDate: "2025.11.05",
+      drc: "VOICE",
+      caseCount: "",
+      totalArrears: "",
+    },
+  ];
+
+  // State for search query and filtered data
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [filteredData, setFilteredData] = useState(data);
+
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectAll, setSelectAll] = useState(false);
-  const [selectedRows, setSelectedRows] = useState(new Set());
   const recordsPerPage = 5;
-
-  // Fetch batch details when the component mounts
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const batchData = await ListAllBatchDetails();
-        setData(batchData);
-        setFilteredData(batchData);
-      } catch (error) {
-        console.error("Error fetching batch details:", error);
-      }
-    }
-    fetchData();
-  }, []);
-
-  // Filter data when searchQuery changes
-  useEffect(() => {
-    setFilteredData(
-      searchQuery
-        ? data.filter((row) =>
-            Object.values(row)
-              .join(" ")
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase())
-          )
-        : data
-    );
-  }, [searchQuery, data]);
-
-  // Pagination logic
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
 
-  // Handle previous and next page navigation
+  // Handle pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -73,96 +54,62 @@ export default function DRCAssignManagerApproval2() {
     }
   };
 
-  // Handle selecting all rows
+  // Filtering the data based on search query
+  const filteredDataBySearch = searchQuery
+    ? filteredData.filter((row) =>
+        Object.values(row)
+          .join(" ")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    : currentData;
+
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectedRows, setSelectedRows] = useState(new Set());
+
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
     if (!selectAll) {
+      // Select all rows in the filtered data
       setSelectedRows(new Set(filteredData.map((_, index) => index)));
     } else {
+      // Deselect all rows
       setSelectedRows(new Set());
     }
   };
 
-  // Handle individual row selection
   const handleRowSelect = (index) => {
     const newSelectedRows = new Set(selectedRows);
+
     if (newSelectedRows.has(index)) {
       newSelectedRows.delete(index);
     } else {
       newSelectedRows.add(index);
     }
+
     setSelectedRows(newSelectedRows);
-    setSelectAll(newSelectedRows.size === filteredData.length);
+
+    // Automatically deselect the "Select All" checkbox if any row is deselected
+    if (newSelectedRows.size !== filteredData.length) {
+      setSelectAll(false);
+    } else {
+      setSelectAll(true);
+    }
   };
 
-  // Function triggered on approval
-  async function onSubmit() {
-    try {
-      const userData = await getUserData();
-      const selectedBatchIDs = Array.from(selectedRows).map(
-        (index) => currentData[index]?.batchID
-      );
-  
-      console.log("Selected Batch IDs:", selectedBatchIDs);
-      console.log("Approved By:", userData.name);
-  
-      if (selectedBatchIDs.length === 0) {
-        alert(`User: ${userData.name} (${userData.email})\nNo batch selected!`);
-        return;
-      }
-  
-      // Ensure the request payload matches the expected API structure
-      const response = await Approve_Batch_or_Batches(selectedBatchIDs, userData.name);
-  
-      console.log("API Response:", response);
-  
-      if (response.status === 200) {
-        alert("Batches approved successfully!");
-      } else {
-        alert("Approval failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error approving batches:", error);
-      alert("Error while approving. Check console for details.");
-    }
+  function onSubmit() {
+    alert("Create task and let me know");
   }
-  
-
-  async function onCreateTask() {
-    const selectedBatchIDs = Array.from(selectedRows).map(
-      (index) => currentData[index]?.batchID
-    );
-
-    if (selectedBatchIDs.length === 0) {
-      alert("No batch selected!");
-      return;
-    }
-
-    try {
-      const response = await Create_Task_For_Batch_Approval(
-        selectedBatchIDs,
-        "manager_1"
-      );
-      alert(
-        "Task created successfully!\nResponse: " + JSON.stringify(response.data)
-      );
-    } catch (error) {
-      alert("Failed to create task.\nError: " + JSON.stringify(error));
-    }
-  }
-
   return (
     <div className={GlobalStyle.fontPoppins}>
-      {/* Page Header */}
-      <h1 className={GlobalStyle.headingLarge}>DRC Assign Approval</h1>
-
-      {/* Search Bar */}
+      {/* Title */}
+      <h1 className={GlobalStyle.headingLarge}> DRC Assign Approval</h1>
       <div className="flex justify-between mt-16 mb-6">
         <div className="flex justify-start mb-8">
           <div className={GlobalStyle.searchBarContainer}>
             <input
               type="text"
-              placeholder="Search..."
+              placeholder=""
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={GlobalStyle.inputSearch}
@@ -172,30 +119,32 @@ export default function DRCAssignManagerApproval2() {
         </div>
       </div>
 
-      {/* Table Display */}
+      {/* Search Section */}
+
+      {/* Table Section */}
       <div className={GlobalStyle.tableContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>
-                <input
+                {/* <input
                   type="checkbox"
                   checked={selectAll}
                   onChange={handleSelectAll}
                   className="mx-auto"
-                />
+                /> */}
               </th>
               <th className={GlobalStyle.tableHeader}>Batch ID</th>
               <th className={GlobalStyle.tableHeader}>Created Date</th>
-              <th className={GlobalStyle.tableHeader}>DRC Commission Rule</th>
-              <th className={GlobalStyle.tableHeader}>Case Count</th>
+              <th className={GlobalStyle.tableHeader}>DRC Commission rule</th>
+              <th className={GlobalStyle.tableHeader}>Case count</th>
               <th className={GlobalStyle.tableHeader}>Total Arrears</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item, index) => (
+            {filteredDataBySearch.map((item, index) => (
               <tr
-                key={index}
+                key={`${item.drc}-${index}`}
                 className={
                   index % 2 === 0
                     ? GlobalStyle.tableRowEven
@@ -221,29 +170,34 @@ export default function DRCAssignManagerApproval2() {
         </table>
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination Section */}
       <div className={GlobalStyle.navButtonContainer}>
         <button
           onClick={() => handlePrevNext("prev")}
           disabled={currentPage === 1}
-          className={GlobalStyle.navButton}
+          className={`${GlobalStyle.navButton} ${
+            currentPage === 1 ? "cursor-not-allowed" : ""
+          }`}
         >
           <FaArrowLeft />
         </button>
-        <span className={GlobalStyle.pageIndicator}>
+        <span className={`${GlobalStyle.pageIndicator} mx-4`}>
           Page {currentPage} of {totalPages}
         </span>
         <button
           onClick={() => handlePrevNext("next")}
           disabled={currentPage === totalPages}
-          className={GlobalStyle.navButton}
+          className={`${GlobalStyle.navButton} ${
+            currentPage === totalPages ? "cursor-not-allowed" : ""
+          }`}
         >
           <FaArrowRight />
         </button>
       </div>
 
-      {/* Approve & Select All Buttons */}
+      {/* Select All Data Checkbox and Approve Button */}
       <div className="flex justify-end gap-4 mt-4">
+        {/* Select All Data Checkbox */}
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -253,14 +207,18 @@ export default function DRCAssignManagerApproval2() {
           />
           Select All Data
         </label>
-        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
+
+        {/* Approve Button */}
+        <button
+          onClick={onSubmit}
+          className={GlobalStyle.buttonPrimary}
+          //   disabled={selectedRows.size === 0} // Disable if no rows are selected
+        >
           Approve
         </button>
       </div>
-
-      {/* Extra Button for Task Creation */}
       <div>
-        <button onClick={onCreateTask} className={GlobalStyle.buttonPrimary}>
+        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
           Create task and let me know
         </button>
       </div>
