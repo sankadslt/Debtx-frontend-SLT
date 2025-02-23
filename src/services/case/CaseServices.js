@@ -252,3 +252,16 @@ export const Batch_Forward_for_Proceed = async (payload) => {
     throw error;
   }
 };
+
+export const List_All_Batch_Details = async () => {
+  try {
+    const response = await axios.get(`${URL}/List_All_Batch_Details`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching all batch details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
