@@ -5,20 +5,17 @@ import { fetchChartData } from "../services/chart/chartService";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const Chart = () => {
-  const [showPopup, setShowPopup] = useState(false);
+const Chart = ({ showPopup, setShowPopup }) => {
   const [chartData, setChartData] = useState(null);
   const popupRef = useRef(null);
 
   const datasetColors = ["#4F46E5", "#1bd33f", "#F43F5E"];
 
-  // Fetch data from the backend API
+  // Fetch data when popup is shown
   useEffect(() => {
     const getChartData = async () => {
       try {
-        const data = await fetchChartData(); // Use the service function
-
-        // Add colors to datasets
+        const data = await fetchChartData();
         const updatedDatasets = data.datasets.map((dataset, index) => ({
           ...dataset,
           backgroundColor: datasetColors[index] || "#cccccc",
@@ -30,10 +27,10 @@ const Chart = () => {
       }
     };
 
-    if (showPopup) getChartData(); // Fetch only when popup is shown
+    if (showPopup) getChartData();
   }, [showPopup]);
 
-  // Handle clicks outside the popup
+  // Close modal if clicking outside
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (popupRef.current && !popupRef.current.contains(e.target)) {
@@ -46,16 +43,7 @@ const Chart = () => {
   }, [showPopup]);
 
   return (
-    <div className="text-white min-h-screen py-8 px-4">
-      {/* Button to Show Popup */}
-      <button
-        onClick={() => setShowPopup(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition-all"
-      >
-        Show Chart
-      </button>
-
-      {/* Popup Modal */}
+    <>
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div ref={popupRef} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl relative">
@@ -92,7 +80,7 @@ const Chart = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
