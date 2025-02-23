@@ -22,7 +22,7 @@ const Incident_Register_Individual = () => {
   const [sourceType, setSourceType] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(3);
   const [contactNumber, setContactNumber] = useState(""); 
-  const [loggedInUser] = useState("Admin");
+  
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -61,7 +61,6 @@ const Incident_Register_Individual = () => {
       Account_Num: accountNo,
       DRC_Action: actionType,
       Monitor_Months: calendarMonth,
-      Created_By: loggedInUser,
       Source_Type: sourceType,
       ...(actionType === "collect CPE" && { Contact_Number: contactNumber }),
     };
@@ -74,6 +73,7 @@ const Incident_Register_Individual = () => {
         text: `Incident ID: ${response.data.Incident_Id} created successfully.`,
       });
 
+      // Reset form
       setAccountNo("");
       setActionType("");
       setSourceType("");
@@ -87,7 +87,7 @@ const Incident_Register_Individual = () => {
         text: error.message || "Failed to create incident.",
       });
     }
-  };
+};
 
   return (
     <div className={`p-6 ${GlobalStyle.fontPoppins}`}>

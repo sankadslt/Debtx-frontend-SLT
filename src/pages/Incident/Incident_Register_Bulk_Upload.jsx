@@ -19,7 +19,6 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
-import { jwtDecode } from "jwt-decode";
 
 const Incident_Register_Bulk_Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -35,23 +34,7 @@ const Incident_Register_Bulk_Upload = () => {
         setActionType(event.target.value);
     };
 
-    const getCurrentUser = () => {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-            throw new Error("No access token found");
-        }
-
-        try {
-            const decoded = jwtDecode(token);
-            if (!decoded.username) {
-                throw new Error("Username not found in token");
-            }
-            return decoded.username;
-        } catch (error) {
-            console.error("Error decoding token:", error);
-            throw new Error("Invalid token");
-        }
-    };
+    
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -66,7 +49,7 @@ const Incident_Register_Bulk_Upload = () => {
         }
     
         try {
-            const username = getCurrentUser();
+            
             const reader = new FileReader();
             
             reader.readAsText(selectedFile);
@@ -78,7 +61,7 @@ const Incident_Register_Bulk_Upload = () => {
                     File_Name: selectedFile.name,
                     File_Type: actionType,
                     File_Content: fileContent,
-                    Created_By: username,
+                    
                 };
         
                 try {
