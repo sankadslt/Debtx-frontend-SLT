@@ -90,6 +90,7 @@ const fetchData = async () => {
   
   
   const handleCaseforIncident = async () => {
+   
     if (selectedRows.length === 0) {
       Swal.fire({
         title: "Warning",
@@ -97,6 +98,18 @@ const fetchData = async () => {
         icon: "warning",
         confirmButtonText: "OK",
       });
+      return;
+    }
+    const confirmResult = await Swal.fire({
+      title: "Confirmation",
+      text: "Are you sure you want to proceed with all selected cases?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Proceed",
+      cancelButtonText: "No",
+    });
+  
+    if (!confirmResult.isConfirmed) {
       return;
     }
   

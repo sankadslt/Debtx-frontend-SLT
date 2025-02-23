@@ -170,8 +170,17 @@ export default function CollectOnlyCPECollect() {
      
    
      const handleCreate = async () => {
+      if (selectedRows.length === 0) {
+        Swal.fire({
+          title: "Warning",
+          text: "Row not selected",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
        try {
-         if (filteredData.length === 0) {
+         if (selectedRows.length === 0) {
            Swal.fire({
              title: "Warning",
              text: "No data.",
@@ -190,12 +199,11 @@ export default function CollectOnlyCPECollect() {
            });
            return;
          }
-         if (filteredData.length > 10) {
-           const parameters = {
-             Status: "Direct LOD",
-             Inncident_Ids: selectedRows,
-           };
-     
+         if (selectedRows.length > 10) {  // Change filteredData.length to selectedRows.length
+          const parameters = {
+            Status: "Open CPE Collect",
+            Incident_Ids: selectedRows,  // Fix typo "Inncident_Ids" → "Incident_Ids"
+          };
            const response = await Create_Task_for_Forward_CPECollect(parameters);
            if (response.status === 201) {
              Swal.fire({
