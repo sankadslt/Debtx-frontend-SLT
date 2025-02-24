@@ -16,39 +16,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import { List_DRC_Assign_Manager_Approval } from "../../services/case/CaseServices"; // Importing List_DRC_Assign_Manager_Approval from CaseServices
 import one from "/src/assets/images/imagefor1.a.13(one).png";
 export default function DRCAssignManagerApproval3() {
-  const data = [
-    {
-      caseId: "",
-      createdOn: "2025.11.05",
-      createdBy: "ID123",
-      approvalType: "-",
-      approvalStatus: "open",
-      approvalBy: "ID123",
-      remark: "",
-    },
-    {
-      caseId: "C001",
-      createdOn: "2025.11.05",
-      createdBy: "",
-      approvalType: "-",
-      approvalStatus: "Approve",
-      approvalBy: "",
-      remark: "",
-    },
-    {
-      caseId: "",
-      createdOn: "",
-      createdBy: "",
-      approvalType: "-",
-      approvalStatus: "Reject",
-      approvalBy: "",
-      remark: "",
-    },
-  ];
+  
 
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState([]);
   const [drcFilter, setDrcFilter] = useState(""); // DRC filter state
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -107,20 +79,20 @@ export default function DRCAssignManagerApproval3() {
     setSelectAll(!selectAll);
     if (!selectAll) {
       // Select all rows in the filtered data
-      setSelectedRows(new Set(filteredData.map((_, index) => index)));
+      setSelectedRows(new Set(filteredDataBySearch.map((row) => row.approver_reference)));
     } else {
       // Deselect all rows
       setSelectedRows(new Set());
     }
   };
 
-  const handleRowSelect = (index) => {
+  const handleRowSelect = (caseid) => {
     const newSelectedRows = new Set(selectedRows);
 
-    if (newSelectedRows.has(index)) {
-      newSelectedRows.delete(index);
+    if (newSelectedRows.has(caseid)) {
+      newSelectedRows.delete(caseid);
     } else {
-      newSelectedRows.add(index);
+      newSelectedRows.add(caseid);
     }
 
     setSelectedRows(newSelectedRows);
@@ -228,51 +200,65 @@ export default function DRCAssignManagerApproval3() {
             </tr>
           </thead>
           <tbody>
-            {filteredDataBySearch.map((item, index) => (
-              <tr
-                key={`${item.drc}-${index}`}
-                className={
-                  index % 2 === 0
-                    ? GlobalStyle.tableRowEven
-                    : GlobalStyle.tableRowOdd
-                }
-              >
-                <td className="text-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.has(index)}
-                    onChange={() => handleRowSelect(index)}
-                    className="mx-auto"
-                  />
-                </td>
-                <td className={GlobalStyle.tableData}>
-                  {item.approver_reference}
-                </td>
-                <td className={GlobalStyle.tableData}>
-                  {new Date(item.created_on).toLocaleDateString()}
-                </td>
-                <td className={GlobalStyle.tableData}>{item.created_by}</td>
-                <td className={GlobalStyle.tableData}>{item.approver_type}</td>
-                <td className={GlobalStyle.tableData}>
-                  {item.approve_status?.status || "N/A"}
-                </td>
-                <td className={GlobalStyle.tableData}>{item.approved_by}</td>
-                <td className={GlobalStyle.tableData}>
-                  {item.remark?.remark || "N/A"}
-                </td>
-                <td className={GlobalStyle.tableData}>
-                  <button>
-                    <img
-                      src={one}
-                      width={15}
-                      height={15}
-                      alt="Summary"
-                      style={{ position: "relative", top: "4px", right: "2px" }}
+            {filteredDataBySearch.length >0 ? (
+              filteredDataBySearch.map((item, index) => (
+                <tr
+                  key={`${item.drc}-${index}`}
+                  className={
+                    index % 2 === 0
+                      ? GlobalStyle.tableRowEven
+                      : GlobalStyle.tableRowOdd
+                  }
+                >
+                  <td className="text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.has(item.approver_reference)}
+                      onChange={() => handleRowSelect(item.approver_reference)}
+                      className="mx-auto"
                     />
-                  </button>
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    {item.approver_reference}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    {new Date(item.created_on).toLocaleDateString()}
+                  </td>
+                  <td className={GlobalStyle.tableData}>{item.created_by}</td>
+                  <td className={GlobalStyle.tableData}>{item.approver_type}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {item.approver_status
+                      ? item.approver_status
+                      : "Pending Approval"}
+  
+                  </td>
+                  <td className={GlobalStyle.tableData}>{item.approved_by}</td>
+                  <td className={GlobalStyle.tableData}>
+                  {item.remark.length > 0
+                    ? item.remark[item.remark.length - 1].remark
+                    : "N/A"}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    <button>
+                      <img
+                        src={one}
+                        width={15}
+                        height={15}
+                        alt="Summary"
+                        style={{ position: "relative", top: "4px", right: "2px" }}
+                      />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9" className={GlobalStyle.tableData}>
+                  No data available
                 </td>
               </tr>
-            ))}
+            )}
+            
           </tbody>
         </table>
       </div>
