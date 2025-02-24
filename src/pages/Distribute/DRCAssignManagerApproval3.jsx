@@ -155,12 +155,18 @@ export default function DRCAssignManagerApproval3() {
       });
       setSelectAll(false);
       setSelectedRows(new Set());
+      applyFilters();
     } catch (error) {
       console.error("Error approving batch:", error);
+      
+      const errorMessage = error?.response?.data?.message || 
+                             error?.message || 
+                             "An error occurred. Please try again.";
+
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "An error occurred while approving the selected records.",
+        text: errorMessage,
         confirmButtonColor: "#f1c40f",
       });
     }
@@ -174,7 +180,7 @@ export default function DRCAssignManagerApproval3() {
       Swal.fire({
         icon: "warning",
         title: "Warning",
-        text: "Please select at least one record to approve.",
+        text: "Please select at least one record to reject.",
         confirmButtonColor: "#f1c40f",
       });
       return;
@@ -190,17 +196,23 @@ export default function DRCAssignManagerApproval3() {
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "Selected records have been approved successfully.",
+        text: "Selected records have been rejected.",
         confirmButtonColor: "#28a745",
       });
       setSelectAll(false);
       setSelectedRows(new Set());
+      applyFilters();
     } catch (error) {
       console.error("Error approving batch:", error);
+      
+      const errorMessage = error?.response?.data?.message || 
+                             error?.message || 
+                             "An error occurred. Please try again.";
+
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "An error occurred while approving the selected records.",
+        text: errorMessage,
         confirmButtonColor: "#f1c40f",
       });
     }
@@ -214,7 +226,7 @@ export default function DRCAssignManagerApproval3() {
       Swal.fire({
         icon: "warning",
         title: "Warning",
-        text: "Please select at least one record to approve.",
+        text: "Please select at least one record .",
         confirmButtonColor: "#f1c40f",
       });
       return;
@@ -232,17 +244,24 @@ export default function DRCAssignManagerApproval3() {
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "Selected records have been approved successfully.",
+        text: "Data sent successfully.",
         confirmButtonColor: "#28a745",
       });
       setSelectAll(false);
       setSelectedRows(new Set());
+      applyFilters();
     } catch (error) {
       console.error("Error approving batch:", error);
+        
+      const errorMessage = error?.response?.data?.message || 
+      error?.message || 
+      "An error occurred. Please try again.";
+
+
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "An error occurred while approving the selected records.",
+        text: errorMessage,
         confirmButtonColor: "#f1c40f",
       });
     }
