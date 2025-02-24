@@ -13,6 +13,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { List_DRC_Assign_Manager_Approval } from "../../services/case/CaseServices"; // Importing List_DRC_Assign_Manager_Approval from CaseServices
 import one from "/src/assets/images/imagefor1.a.13(one).png";
 export default function DRCAssignManagerApproval3() {
   const data = [
@@ -53,30 +54,32 @@ export default function DRCAssignManagerApproval3() {
   const [endDate, setEndDate] = useState(null);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5;
+  const recordsPerPage = 2;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
   // Filter data based on selected filters
-  const applyFilters = () => {
-    const filteredData = data.filter((item) => {
-      const itemDate = new Date(item.createdDate.split(".").join("-")); // Convert item date to Date object
+  const applyFilters = async () => {
+    const payload = {};
+    if (drcFilter) {
+      payload.approver_type = drcFilter;
+    }
+    if (startDate) {
+      payload.date_from = startDate;
+    }
+    if (endDate) {
+      payload.date_to = endDate;
+    }
 
-      // Apply DRC filter
-      const isDRCMatch = drcFilter
-        ? item.drc.toLowerCase().includes(drcFilter.toLowerCase())
-        : true;
+    console.log("Filtered Request Data:", payload);
 
-      // Apply Date Range filter
-      const isDateInRange =
-        (!startDate || itemDate >= new Date(startDate)) &&
-        (!endDate || itemDate <= new Date(endDate));
-
-      return isDRCMatch && isDateInRange;
-    });
-
-    setFilteredData(filteredData);
+    try {
+      const response = await List_DRC_Assign_Manager_Approval(payload);
+      setFilteredData(response);
+    } catch (error) {
+      console.error("Error fetching DRC assign manager approval:", error);
+    }
   };
   // Handle pagination
   const handlePrevNext = (direction) => {
@@ -130,6 +133,10 @@ export default function DRCAssignManagerApproval3() {
     }
   };
 
+  const handleOnApproveTypeChange = (e) => {
+    setDrcFilter(e.target.value);
+  };
+
   function onSubmit() {
     alert("Create task and let me know");
   }
@@ -157,12 +164,12 @@ export default function DRCAssignManagerApproval3() {
             <select
               className={GlobalStyle.selectBox}
               value={drcFilter}
-              onChange={(e) => setDrcFilter(e.target.value)}
+              onChange={handleOnApproveTypeChange}
             >
               <option value="" hidden>
                 Select Approve Type
               </option>
-              <option value="oprion1">DRC_ReAssign</option>
+              <option value="DRC_ReAssign">DRC_ReAssign</option>
             </select>
           </div>
           <div className="flex flex-col items-center mb-4">
@@ -238,13 +245,21 @@ export default function DRCAssignManagerApproval3() {
                     className="mx-auto"
                   />
                 </td>
-                <td className={GlobalStyle.tableData}>{item.caseID}</td>
-                <td className={GlobalStyle.tableData}>{item.createdOn}</td>
-                <td className={GlobalStyle.tableData}>{item.createdBy}</td>
-                <td className={GlobalStyle.tableData}>{item.approvalType}</td>
-                <td className={GlobalStyle.tableData}>{item.approvalStatus}</td>
-                <td className={GlobalStyle.tableData}>{item.approvalBy}</td>
-                <td className={GlobalStyle.tableData}>{item.remark}</td>
+                <td className={GlobalStyle.tableData}>
+                  {item.approver_reference}
+                </td>
+                <td className={GlobalStyle.tableData}>
+                  {new Date(item.created_on).toLocaleDateString()}
+                </td>
+                <td className={GlobalStyle.tableData}>{item.created_by}</td>
+                <td className={GlobalStyle.tableData}>{item.approver_type}</td>
+                <td className={GlobalStyle.tableData}>
+                  {item.approve_status?.status || "N/A"}
+                </td>
+                <td className={GlobalStyle.tableData}>{item.approved_by}</td>
+                <td className={GlobalStyle.tableData}>
+                  {item.remark?.remark || "N/A"}
+                </td>
                 <td className={GlobalStyle.tableData}>
                   <button>
                     <img
