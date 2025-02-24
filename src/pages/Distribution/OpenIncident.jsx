@@ -14,12 +14,15 @@ Notes:
 
 import { useState,useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-
+import { useNavigate } from "react-router-dom";
+import { getUserData } from "../../services/auth/authService";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band,Create_Case_for_incident} from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/Open_No_Agent.png"
 import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident , Open_Task_Count_Incident_To_Case} from "../../services/task/taskService";
 import Swal from "sweetalert2";
+ 
+ 
 
 export default function OpenIncident() {
   const [searchQuery, setSearchQuery] = useState(""); 
@@ -31,9 +34,24 @@ export default function OpenIncident() {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
   const [isProcessing,setIsProcessing] = useState(false); 
-
+const [user, setUser] = useState(null);
+const navigate = useNavigate();
 
   const rowsPerPage = 7;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await getUserData();
+        setUser(userData);
+      } catch (err) {
+        console.error("Failed to fetch user data", err);
+      }
+    };
+
+    fetchUser();
+    fetchData();
+  }, []);
 
 const fetchData = async () => {
   try {
@@ -54,9 +72,10 @@ const fetchData = async () => {
 };
 
 
- useEffect(() => {
-    fetchData();
-  }, []);
+//  useEffect(() => {
+ 
+//     fetchData();
+//   }, []);
 
   const handleCreateTask = async () => {
     try {
@@ -90,6 +109,7 @@ const fetchData = async () => {
   
   
   const handleCaseforIncident = async () => {
+   
     if (selectedRows.length === 0) {
       Swal.fire({
         title: "Warning",
@@ -97,6 +117,20 @@ const fetchData = async () => {
         icon: "warning",
         confirmButtonText: "OK",
       });
+      return;  
+    }
+  
+    
+    const confirmResult = await Swal.fire({
+      title: "Confirmation",
+      text: "Are you sure you want to proceed with all selected cases?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Proceed",
+      cancelButtonText: "No",
+    });
+  
+    if (!confirmResult.isConfirmed) {
       return;
     }
   
@@ -129,7 +163,10 @@ const fetchData = async () => {
           confirmButtonText: "OK",
         });
       } else {
-        const response = await Create_Case_for_incident({ Incident_Ids: selectedRows });
+        const response = await Create_Case_for_incident({
+          Incident_Ids: selectedRows,
+          Proceed_By: user.user_id,
+        });
   
         Swal.fire({
           title: "Cases Created Successfully!",
@@ -367,8 +404,15 @@ const fetchData = async () => {
             </button>
           </div>
         )}
-
-        <div className="flex justify-end items-center w-full mt-6">
+  <div className="flex justify-start items-center w-full  ">
+            <button
+              className={`${GlobalStyle.buttonPrimary} `} 
+              onClick={() => navigate(-1)}
+            >
+              ← Back
+            </button>
+          </div>
+        <div className="flex justify-end items-center w-full ">
           
           <label className="flex items-center gap-2">
             <input
