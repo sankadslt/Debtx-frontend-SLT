@@ -245,8 +245,9 @@ export default function DRCAssignManagerApproval2() {
               <th className={GlobalStyle.tableHeader}>Total Arrears</th>
             </tr>
           </thead>
-          <tbody>
-          {currentData.map((item, index) => (
+          <tbody> 
+          {currentData.length > 0 ? (
+            currentData.map((item, index) => (
 
               <tr
                 key={`${item.drc}-${index}`}
@@ -271,7 +272,15 @@ export default function DRCAssignManagerApproval2() {
                 <td className={GlobalStyle.tableData}>{item.case_distribution_details?.rulebase_count || "N/A"}</td>
                 <td className={GlobalStyle.tableData}>{item.totalArrears}</td>
               </tr>
-            ))}
+            ))
+            ) : (
+              <tr>
+                <td colSpan="6" className={GlobalStyle.tableData}>
+                  No data available
+                </td>
+              </tr>
+            )
+          }
           </tbody>
         </table>
       </div>
