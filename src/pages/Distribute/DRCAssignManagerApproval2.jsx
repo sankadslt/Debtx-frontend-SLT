@@ -15,12 +15,12 @@ import { useState , useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; 
 import "react-datepicker/dist/react-datepicker.css";
-import {List_All_Batch_Details} from "/src/services/case/CaseServices.js";
+import {List_All_Batch_Details , Approve_Batch_or_Batches , Create_task_for_batch_approval} from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
+import Swal from "sweetalert2";
+
 
 export default function DRCAssignManagerApproval2() {
-
-
-
 
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
@@ -28,25 +28,41 @@ export default function DRCAssignManagerApproval2() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5;
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await List_All_Batch_Details();
-        setFilteredData(response);
-        console.log("All batch details:", response);
-      } catch (error) {
-        console.error("Error fetching all batch details:", error);
-      }
+  const recordsPerPage = 1;
+  const fetchData = async () => {
+    try {
+      const response = await List_All_Batch_Details();
+      setFilteredData(response);
+      console.log("All batch details:", response);
+    } catch (error) {
+      console.error("Error fetching all batch details:", error);
     }
+  };
+  
+  // Fetch data on component mount
+  useEffect(() => {
     fetchData();
   }, []);
+  
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
 
+  const filteredDataBySearch = searchQuery
+  
+  ? filteredData.filter((item) => {
+      const batchId = item.case_distribution_details?.case_distribution_batch_id || "N/A";
+      const createdDate = new Date(item.created_on).toLocaleDateString();
+      const commissionRule = item.case_distribution_details?.drc_commision_rule || "N/A";
+      const ruleBaseCount = item.case_distribution_details?.rulebase_count || "N/A";
+
+      const rowString = `${batchId} ${createdDate} ${commissionRule} ${ruleBaseCount}`.toLowerCase();
+      return rowString.includes(searchQuery.toLowerCase());
+    })
+  : filteredData;
+
+    
+  const currentData = filteredDataBySearch.slice(indexOfFirstRecord, indexOfLastRecord);
+  const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
 
 
   // Handle pagination
@@ -58,39 +74,40 @@ export default function DRCAssignManagerApproval2() {
     }
   };
 
-  // Filtering the data based on search query
-  const filteredDataBySearch = searchQuery
-    ? filteredData.filter((row) =>
-        Object.values(row)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      )
-    : currentData;
+  
 
   const [selectAll, setSelectAll] = useState(false);
-  const [selectedRows, setSelectedRows] = useState(new Set());
+  const [selectedRows, setSelectedRows] = useState(new Set())
 
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
     if (!selectAll) {
       // Select all rows in the filtered data
-      setSelectedRows(new Set(filteredData.map((_, index) => index)));
+      setSelectedRows(new Set(filteredDataBySearch.map(item => item.case_distribution_details?.case_distribution_batch_id || "N/A")));
     } else {
       // Deselect all rows
       setSelectedRows(new Set());
     }
   };
 
-  const handleRowSelect = (index) => {
+  const handleRowSelect = (batchId) => {
+
     const newSelectedRows = new Set(selectedRows);
-
-    if (newSelectedRows.has(index)) {
-      newSelectedRows.delete(index);
+  
+    if (newSelectedRows.has(batchId)) {
+      newSelectedRows.delete(batchId);
     } else {
-      newSelectedRows.add(index);
-    }
-
+      if (newSelectedRows.size >=5) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "You can only select 5 records at a time.",
+          confirmButtonColor: "#f1c40f",
+        });
+        return;
+      }
+      newSelectedRows.add(batchId);
+    }  
     setSelectedRows(newSelectedRows);
 
     // Automatically deselect the "Select All" checkbox if any row is deselected
@@ -100,9 +117,97 @@ export default function DRCAssignManagerApproval2() {
       setSelectAll(true);
     }
   };
+  
+  console.log("Selected rows:", selectedRows);
+  
+  
+  const onapprovebuttonclick = async () => {
+    const userId = await getLoggedUserId();
+    const batchIds = Array.from(selectedRows);
+    console.log("Selected batch IDs:", batchIds);
+    if (batchIds.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please select at least one record to approve.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+    const payload = {
+      approver_references : batchIds,
+      approved_by : userId,
+    }
+    console.log("Payload:", payload);
+    try {
+          const response = await Approve_Batch_or_Batches (payload); // Use 'await' here
+          console.log("Response:", response);
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Data sent successfully.",
+            confirmButtonColor: "#28a745",
+          });
+          fetchData();
+          
+        } catch (error) {
+          console.error("Error in sending the data:", error);
+    
+          const errorMessage = error?.response?.data?.message || 
+                                 error?.message || 
+                                 "An error occurred. Please try again.";
+    
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: errorMessage,
+                confirmButtonColor: "#d33",
+            });
+        }
+  }
 
-  function onSubmit() {
-    alert("Create task and let me know");
+  const onSubmit = async () => {
+    const userId = await getLoggedUserId();
+    const batchIds = Array.from(selectedRows);
+
+    if (batchIds.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please select at least one record to approve.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+    const payload = {
+      approver_references : batchIds,
+      Created_By : userId,
+    }
+    try {
+      const response = await Create_task_for_batch_approval (payload); // Use 'await' here
+      console.log("Response:", response);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data sent successfully.",
+        confirmButtonColor: "#28a745",
+      });
+      fetchData();
+    } catch (error) {
+      console.error("Error in sending the data:", error);
+
+      const errorMessage = error?.response?.data?.message || 
+                             error?.message || 
+                             "An error occurred. Please try again.";
+
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: errorMessage,
+            confirmButtonColor: "#d33",
+        });
+    }
+
   }
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -141,7 +246,8 @@ export default function DRCAssignManagerApproval2() {
             </tr>
           </thead>
           <tbody>
-            {filteredDataBySearch.map((item, index) => (
+          {currentData.map((item, index) => (
+
               <tr
                 key={`${item.drc}-${index}`}
                 className={
@@ -152,9 +258,10 @@ export default function DRCAssignManagerApproval2() {
               >
                 <td className="text-center">
                   <input
+                            
                     type="checkbox"
-                    checked={selectedRows.has(index)}
-                    onChange={() => handleRowSelect(index)}
+                    checked={selectedRows.has(item.case_distribution_details?.case_distribution_batch_id || "N/A")}
+                    onChange={() => handleRowSelect(item.case_distribution_details?.case_distribution_batch_id || "N/A")}
                     className="mx-auto"
                   />
                 </td>
@@ -209,7 +316,7 @@ export default function DRCAssignManagerApproval2() {
 
         {/* Approve Button */}
         <button
-          onClick={onSubmit}
+          onClick={onapprovebuttonclick}
           className={GlobalStyle.buttonPrimary}
           //   disabled={selectedRows.size === 0} // Disable if no rows are selected
         >
