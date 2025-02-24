@@ -149,7 +149,7 @@ export default function DRCAssignManagerApproval3() {
         icon: "success",
         title: "Success",
         text: "Selected records have been approved successfully.",
-        confirmButtonColor: "#f1c40f",
+        confirmButtonColor: "#28a745",
       });
       setSelectAll(false);
       setSelectedRows(new Set());
