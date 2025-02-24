@@ -15,6 +15,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { List_DRC_Assign_Manager_Approval } from "../../services/case/CaseServices"; // Importing List_DRC_Assign_Manager_Approval from CaseServices
 import one from "/src/assets/images/imagefor1.a.13(one).png";
+import Swal from "sweetalert2";
 export default function DRCAssignManagerApproval3() {
   
 
@@ -92,6 +93,15 @@ export default function DRCAssignManagerApproval3() {
     if (newSelectedRows.has(caseid)) {
       newSelectedRows.delete(caseid);
     } else {
+          if (newSelectedRows.size >=5) {
+            Swal.fire({
+              icon: "warning",
+              title: "Warning",
+              text: "You can only select 5 records at a time.",
+              confirmButtonColor: "#f1c40f",
+            });
+            return;
+          }
       newSelectedRows.add(caseid);
     }
 
