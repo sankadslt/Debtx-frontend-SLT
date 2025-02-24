@@ -13,13 +13,15 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { List_DRC_Assign_Manager_Approval } from "../../services/case/CaseServices";
-import {getLoggedUserId} from "/src/services/auth/authService.js";
+import {
+  List_DRC_Assign_Manager_Approval,
+  Approve_DRC_Assign_Manager_Approval,
+} from "../../services/case/CaseServices";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
 import one from "/src/assets/images/imagefor1.a.13(one).png";
 import Swal from "sweetalert2";
-export default function DRCAssignManagerApproval3() {
-  
 
+export default function DRCAssignManagerApproval3() {
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [filteredData, setFilteredData] = useState([]);
@@ -81,7 +83,9 @@ export default function DRCAssignManagerApproval3() {
     setSelectAll(!selectAll);
     if (!selectAll) {
       // Select all rows in the filtered data
-      setSelectedRows(new Set(filteredDataBySearch.map((row) => row.approver_reference)));
+      setSelectedRows(
+        new Set(filteredDataBySearch.map((row) => row.approver_reference))
+      );
     } else {
       // Deselect all rows
       setSelectedRows(new Set());
@@ -94,15 +98,15 @@ export default function DRCAssignManagerApproval3() {
     if (newSelectedRows.has(caseid)) {
       newSelectedRows.delete(caseid);
     } else {
-          if (newSelectedRows.size >=5) {
-            Swal.fire({
-              icon: "warning",
-              title: "Warning",
-              text: "You can only select 5 records at a time.",
-              confirmButtonColor: "#f1c40f",
-            });
-            return;
-          }
+      if (newSelectedRows.size >= 5) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "You can only select 5 records at a time.",
+          confirmButtonColor: "#f1c40f",
+        });
+        return;
+      }
       newSelectedRows.add(caseid);
     }
 
@@ -118,6 +122,46 @@ export default function DRCAssignManagerApproval3() {
 
   const handleOnApproveTypeChange = (e) => {
     setDrcFilter(e.target.value);
+  };
+
+  const onApproveButtonClick = async () => {
+    const userId = await getLoggedUserId();
+    const batchIds = Array.from(selectedRows);
+    console.log("Selected batch IDs:", batchIds);
+    if (batchIds.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please select at least one record to approve.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+    const payload = {
+      approver_references: batchIds,
+      approved_by: userId,
+    };
+    console.log("Approve payload:", payload);
+    try {
+      const response = await Approve_DRC_Assign_Manager_Approval(payload);
+      console.log("Approve response:", response);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Selected records have been approved successfully.",
+        confirmButtonColor: "#f1c40f",
+      });
+      setSelectAll(false);
+      setSelectedRows(new Set());
+    } catch (error) {
+      console.error("Error approving batch:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An error occurred while approving the selected records.",
+        confirmButtonColor: "#f1c40f",
+      });
+    }
   };
 
   function onSubmit() {
@@ -211,7 +255,7 @@ export default function DRCAssignManagerApproval3() {
             </tr>
           </thead>
           <tbody>
-            {filteredDataBySearch.length >0 ? (
+            {filteredDataBySearch.length > 0 ? (
               filteredDataBySearch.map((item, index) => (
                 <tr
                   key={`${item.drc}-${index}`}
@@ -236,18 +280,19 @@ export default function DRCAssignManagerApproval3() {
                     {new Date(item.created_on).toLocaleDateString()}
                   </td>
                   <td className={GlobalStyle.tableData}>{item.created_by}</td>
-                  <td className={GlobalStyle.tableData}>{item.approver_type}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {item.approver_type}
+                  </td>
                   <td className={GlobalStyle.tableData}>
                     {item.approver_status
                       ? item.approver_status
                       : "Pending Approval"}
-  
                   </td>
                   <td className={GlobalStyle.tableData}>{item.approved_by}</td>
                   <td className={GlobalStyle.tableData}>
-                  {item.remark.length > 0
-                    ? item.remark[item.remark.length - 1].remark
-                    : "N/A"}
+                    {item.remark.length > 0
+                      ? item.remark[item.remark.length - 1].remark
+                      : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
                     <button>
@@ -256,7 +301,11 @@ export default function DRCAssignManagerApproval3() {
                         width={15}
                         height={15}
                         alt="Summary"
-                        style={{ position: "relative", top: "4px", right: "2px" }}
+                        style={{
+                          position: "relative",
+                          top: "4px",
+                          right: "2px",
+                        }}
                       />
                     </button>
                   </td>
@@ -269,7 +318,6 @@ export default function DRCAssignManagerApproval3() {
                 </td>
               </tr>
             )}
-            
           </tbody>
         </table>
       </div>
@@ -316,7 +364,10 @@ export default function DRCAssignManagerApproval3() {
         <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
           Reject
         </button>
-        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
+        <button
+          onClick={onApproveButtonClick}
+          className={GlobalStyle.buttonPrimary}
+        >
           Approve
         </button>
       </div>
