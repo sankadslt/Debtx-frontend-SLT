@@ -160,9 +160,7 @@ export default function DRCAssignManagerApproval3() {
               onChange={(e) => setDrcFilter(e.target.value)}
             >
               <option value="">Select Approve Type</option>
-              <option value="oprion1">O1</option>
-              <option value="option2">O2</option>
-              <option value="option3">O3</option>
+              <option value="oprion1">DRC Re Assign</option>
             </select>
           </div>
           <div className="flex flex-col items-center mb-4">
