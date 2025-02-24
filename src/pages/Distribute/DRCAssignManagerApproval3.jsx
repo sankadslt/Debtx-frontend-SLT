@@ -16,6 +16,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import {
   List_DRC_Assign_Manager_Approval,
   Approve_DRC_Assign_Manager_Approval,
+  Reject_DRC_Assign_Manager_Approval,
 } from "../../services/case/CaseServices";
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import one from "/src/assets/images/imagefor1.a.13(one).png";
@@ -144,6 +145,46 @@ export default function DRCAssignManagerApproval3() {
     console.log("Approve payload:", payload);
     try {
       const response = await Approve_DRC_Assign_Manager_Approval(payload);
+      console.log("Approve response:", response);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Selected records have been approved successfully.",
+        confirmButtonColor: "#28a745",
+      });
+      setSelectAll(false);
+      setSelectedRows(new Set());
+    } catch (error) {
+      console.error("Error approving batch:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An error occurred while approving the selected records.",
+        confirmButtonColor: "#f1c40f",
+      });
+    }
+  };
+
+  const onRejectButtonClick = async () => {
+    const userId = await getLoggedUserId();
+    const batchIds = Array.from(selectedRows);
+    console.log("Selected batch IDs:", batchIds);
+    if (batchIds.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please select at least one record to approve.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+    const payload = {
+      approver_references: batchIds,
+      approved_by: userId,
+    };
+    console.log("Approve payload:", payload);
+    try {
+      const response = await Reject_DRC_Assign_Manager_Approval(payload);
       console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
@@ -361,7 +402,10 @@ export default function DRCAssignManagerApproval3() {
         </label>
 
         {/* Approve Button */}
-        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
+        <button
+          onClick={onRejectButtonClick}
+          className={GlobalStyle.buttonPrimary}
+        >
           Reject
         </button>
         <button
