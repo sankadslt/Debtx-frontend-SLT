@@ -159,7 +159,7 @@ export default function DRCAssignManagerApproval3() {
               value={drcFilter}
               onChange={(e) => setDrcFilter(e.target.value)}
             >
-              <option value="">Select Approve Type</option>
+              <option value= "" hidden>Select Approve Type</option>
               <option value="oprion1">DRC Re Assign</option>
             </select>
           </div>
