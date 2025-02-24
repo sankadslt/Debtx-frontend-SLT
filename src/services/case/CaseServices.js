@@ -265,3 +265,31 @@ export const List_All_Batch_Details = async () => {
     throw error;
   }
 }
+
+export const Approve_Batch_or_Batches = async(payload) => {
+  try {
+    const response = await axios.post (`${URL}/Approve_Batch_or_Batches`, payload);
+    return response.data;
+  }
+  catch (error) {
+    console.error(
+      "Error approving batch or batches:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+export const Create_task_for_batch_approval = async(payload) => {
+  try {
+    const response = await axios.post (`${URL}/Create_task_for_batch_approval`, payload);
+    return response.data;
+  }
+  catch (error) {
+    console.error(
+      "Error creating task for batch approval:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
