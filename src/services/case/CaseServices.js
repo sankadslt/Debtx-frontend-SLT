@@ -371,3 +371,52 @@ export const Create_task_for_DRC_Assign_Manager_Approval = async (payload) => {
     throw error;
   }
 };
+
+export const List_Case_Distribution_Details = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_Case_Distribution_Details`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching case distribution details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+
+export const Create_Task_For_case_distribution_drc_summery = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Create_Task_For_case_distribution_drc_summery`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating task for case distribution drc summery:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+export const List_Case_Distribution_Details_With_Rtoms = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_Case_Distribution_Details_With_Rtoms`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching case distribution details with RTOMs:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
