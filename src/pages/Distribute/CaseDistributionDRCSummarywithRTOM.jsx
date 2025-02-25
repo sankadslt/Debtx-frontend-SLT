@@ -62,7 +62,7 @@ const CaseDistributionDRCSummarywithRTOM = () => {
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary</h1>
       <div className=" py-5 mt-2 ml-10 w-fit ">
-        <h2 className={GlobalStyle.headingMedium}>Batch- {batchId || "undefines"}</h2>
+        <h2 className={GlobalStyle.headingMedium}>Batch- {batchId || "undefined"}</h2>
         <h2 className={GlobalStyle.headingMedium}>{drcname || "undefined"}</h2>
       </div>
 
