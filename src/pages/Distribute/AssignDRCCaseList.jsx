@@ -332,9 +332,11 @@ import { FaArrowLeft, FaArrowRight, FaSearch, FaCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { List_CasesOwened_By_DRC } from "../../services/case/CaseServices";
+import { List_CasesOwened_By_DRC , Create_Task_For_Assigned_drc_case_list_download } from "../../services/case/CaseServices";
 import { FaUserEdit, FaUndo } from "react-icons/fa"; 
 import {getLoggedUserId} from "/src/services/auth/authService.js";
+import Swal from "sweetalert2";
+
 
 
 export default function AssignDRCsLOG() {
@@ -367,6 +369,8 @@ export default function AssignDRCsLOG() {
   const [filterType, setFilterType] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
+
+
   const filteredCases = cases.filter((row) => 
     Object.values(row)
       .join(" ")
@@ -376,6 +380,50 @@ export default function AssignDRCsLOG() {
 
   const itemsPerPage = 4;
   const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
+
+  const handlestartdatechange = (date) => {
+    setStartDate(date);
+    if (endDate) checkdatediffrence(date, endDate);
+  };
+
+  const handleenddatechange = (date) => {
+    if (startDate) {
+      checkdatediffrence(startDate, date);
+    }
+    setEndDate(date);
+
+  }
+
+  const checkdatediffrence = (startDate, endDate) => {
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    const diffInMs = end - start;
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+    const diffInMonths = diffInDays / 30;
+  
+    if (diffInMonths > 1) {
+      Swal.fire({
+        title: "Date Range Exceeded",
+        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        confirmButtonColor: "#28a745",
+        cancelButtonText: "No",
+        cancelButtonColor: "#d33",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          
+          endDate = endDate;
+        } else {
+          setEndDate(null);
+          console.log("Dates cleared");
+        }
+      }
+      );
+
+    }
+  };
 
   // Filter handler
   const handleFilter = () => {
@@ -464,14 +512,14 @@ export default function AssignDRCsLOG() {
               <label className={GlobalStyle.dataPickerDate}>Date </label>
               <DatePicker
                 selected={startDate}
-                onChange={(date) => setStartDate(date)}
+                onChange={handlestartdatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="dd/MM/yyyy"
                 className={GlobalStyle.inputText}
               />
               <DatePicker
                 selected={endDate}
-                onChange={(date) => setEndDate(date)}
+                onChange={handleenddatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="dd/MM/yyyy"
                 className={GlobalStyle.inputText}
