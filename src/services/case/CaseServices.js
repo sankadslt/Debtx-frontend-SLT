@@ -446,3 +446,19 @@ export const List_Case_Distribution_Details_With_Rtoms = async (payload) => {
   }
 }
 
+export const Create_Task_For_Assigned_drc_case_list_download = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Create_Task_For_Assigned_drc_case_list_download`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating task for assigned DRC case list download:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
