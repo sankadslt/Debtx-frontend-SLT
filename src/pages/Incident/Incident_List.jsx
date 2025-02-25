@@ -13,17 +13,13 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
-import axios from "axios";
-import PropTypes from "prop-types";
-
 import Swal from "sweetalert2";
-import StatusIcon from '../../components/StatusIcon';
-
 import { fetchIncidents } from "../../services/Incidents/incidentService";
 import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
 
@@ -42,6 +38,36 @@ const Incident_List = () => {
     const [isFiltered, setIsFiltered] = useState(false);
     const navigate = useNavigate();
 
+    const getStatusIcon = (status) => {
+        switch (status?.toLowerCase()) {
+            case "incident open":
+                return "/src/assets/images/incidents/Incident_Open.png";
+            case "incident reject":
+                return "/src/assets/images/incidents/Incident_Reject.png";
+            case "incident inprogress":
+                return "/src/assets/images/incidents/Incident_InProgress.png";
+            default:
+                return null;
+        }
+    };
+
+    const renderStatusIcon = (status) => {
+        const iconPath = getStatusIcon(status);
+        
+        if (!iconPath) {
+            return <span>{status}</span>;
+        }
+
+        return (
+            <img
+                src={iconPath}
+                alt={status}
+                className="w-6 h-6"
+                title={status}
+            />
+        );
+    };
+
     const fetchData = async (filters) => {
         setIsLoading(true);
         try {
@@ -57,23 +83,25 @@ const Incident_List = () => {
     };
 
     const handleFilter = async () => {
-        try { if (!fromDate || !toDate) {
-            Swal.fire("Error", "Both 'From' and 'To' dates are required.", "error");
-            return;
+        try {
+            if (!fromDate || !toDate) {
+                Swal.fire("Error", "Both 'From' and 'To' dates are required.", "error");
+                return;
+            }
+            const filters = {
+                Actions: status1,
+                Incident_Status: status2,
+                Source_Type: status3,
+                From_Date: fromDate.toISOString(),
+                To_Date: toDate.toISOString()
+            };
+            await fetchData(filters);
+        } catch (error) {
+            Swal.fire("Error", error.message || "No incidents matching the criteria", "error");
         }
-        const filters = {
-            Actions: status1,
-            Incident_Status: status2,
-            Source_Type: status3,
-            From_Date: fromDate.toISOString(),
-            To_Date: toDate.toISOString()
-        };
-        await fetchData(filters);
-    } catch (error) { Swal.fire("Error", error.message || "No incidents matching the criteria", "error")}
-};
+    };
 
     const HandleCreateTask = async () => {
-
         if (!fromDate || !toDate) {
             Swal.fire("Error", "Both 'From' and 'To' dates are required.", "error");
             return;
@@ -83,12 +111,11 @@ const Incident_List = () => {
             return;
         }
 
-
-
         const adjustToLocalISO = (date) => {
             const offset = date.getTimezoneOffset() * 60000;
             return new Date(date.getTime() - offset).toISOString();
         };
+        
         const requestData = {
             DRC_Action: status1,
             Incident_Status: status2,
@@ -123,23 +150,6 @@ const Incident_List = () => {
         );
     }
 
-    const handleFromDateChange = (date) => {
-        if (toDate && date > toDate) {
-            setError("The 'From' date cannot be later than the 'To' date.");
-        } else {
-            setError("");
-            setFromDate(date);
-        }
-    };
-
-    const handleToDateChange = (date) => {
-        if (fromDate && date < fromDate) {
-            setError("The 'To' date cannot be earlier than the 'From' date.");
-        } else {
-            setError("");
-            setToDate(date);
-        }
-    };
     const filteredData = data.filter((row) =>
         String(row.incidentID).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -147,10 +157,12 @@ const Incident_List = () => {
         String(row.action).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase())
     );
+    
     const pages = Math.ceil(filteredData.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, endIndex);
+    
     const handlePrevPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
@@ -163,8 +175,6 @@ const Incident_List = () => {
         }
     };
 
-
-
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Incident Log</h2>
@@ -176,32 +186,32 @@ const Incident_List = () => {
             </div>
 
             <div className="w-full mb-8 mt-8">
-            <div className="flex items-center justify-end w-full space-x-6">
-                <select value={status1} onChange={(e) => setStatus1(e.target.value)} className={GlobalStyle.selectBox}>
-                    <option value="">Action Type</option>
-                    <option value="collect arrears">collect arrears</option>
-                    <option value="collect arrears and CPE">collect arrears and CPE</option>
-                    <option value="collect CPE">collect CPE</option>
-                </select>
+                <div className="flex items-center justify-end w-full space-x-6">
+                    <select value={status1} onChange={(e) => setStatus1(e.target.value)} className={GlobalStyle.selectBox}>
+                        <option value="">Action Type</option>
+                        <option value="collect arrears">collect arrears</option>
+                        <option value="collect arrears and CPE">collect arrears and CPE</option>
+                        <option value="collect CPE">collect CPE</option>
+                    </select>
 
-                <select value={status2} onChange={(e) => setStatus2(e.target.value)} className={GlobalStyle.selectBox}>
-                    <option value="">Status</option>
-                    <option value="Incident Open">Incident Open</option>
-                    <option value="Incident Reject">Incident Reject</option>
-                </select>
+                    <select value={status2} onChange={(e) => setStatus2(e.target.value)} className={GlobalStyle.selectBox}>
+                        <option value="">Status</option>
+                        <option value="Incident Open">Incident Open</option>
+                        <option value="Incident Reject">Incident Reject</option>
+                    </select>
 
-                <select value={status3} onChange={(e) => setStatus3(e.target.value)} className={GlobalStyle.selectBox}>
-                    <option value="">Source Type</option>
-                    <option value="Pilot Suspended">Pilot Suspended</option>
-                    <option value="Product Terminate">Product Terminate</option>
-                    <option value="Special">Special</option>
-                </select>
+                    <select value={status3} onChange={(e) => setStatus3(e.target.value)} className={GlobalStyle.selectBox}>
+                        <option value="">Source Type</option>
+                        <option value="Pilot Suspended">Pilot Suspended</option>
+                        <option value="Product Terminate">Product Terminate</option>
+                        <option value="Special">Special</option>
+                    </select>
 
-                <DatePicker selected={fromDate} onChange={setFromDate} dateFormat="dd/MM/yyyy" placeholderText="From Date" className={GlobalStyle.inputText} />
-                <DatePicker selected={toDate} onChange={setToDate} dateFormat="dd/MM/yyyy" placeholderText="To Date" className={GlobalStyle.inputText} />
+                    <DatePicker selected={fromDate} onChange={setFromDate} dateFormat="dd/MM/yyyy" placeholderText="From Date" className={GlobalStyle.inputText} />
+                    <DatePicker selected={toDate} onChange={setToDate} dateFormat="dd/MM/yyyy" placeholderText="To Date" className={GlobalStyle.inputText} />
 
-                <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
-            </div>
+                    <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
+                </div>
             </div>
 
             <div className="mb-4 flex justify-start">
@@ -230,7 +240,6 @@ const Incident_List = () => {
                         </tr>
                     </thead>
                     <tbody>
-
                         {paginatedData.length > 0 ? (
                             paginatedData.map((log, index) => (
                                 <tr
@@ -238,11 +247,11 @@ const Incident_List = () => {
                                     className={`${index % 2 === 0
                                         ? "bg-white bg-opacity-75"
                                         : "bg-gray-50 bg-opacity-50"
-                                        } border-b`}
+                                    } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.incidentID}</td>
-                                    <td className={'${GlobalStyle.tableData} flex justify-center mt-2'}>
-                                        <StatusIcon status={log.status} />
+                                    <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
+                                        {renderStatusIcon(log.status)}
                                     </td>
                                     <td className={GlobalStyle.tableData}>{log.accountNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.action}</td>
@@ -251,7 +260,6 @@ const Incident_List = () => {
                                 </tr>
                             ))
                         ) : (
-
                             <tr>
                                 <td colSpan="6" className="text-center py-4">
                                     No data matching the criteria.
@@ -274,7 +282,6 @@ const Incident_List = () => {
                 </button>
             </div>
 
-           
             <div className="flex justify-end mt-6">
                 <button 
                     onClick={HandleCreateTask} 
@@ -286,10 +293,9 @@ const Incident_List = () => {
             </div>
         </div>
     );
+
+    
 };
 
-StatusIcon.propTypes = {
-    status: PropTypes.string.isRequired,
-};
 
 export default Incident_List;
