@@ -7,36 +7,30 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: The following page conatins the codes */
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import { Active_DRC_Details } from "/src/services/drc/Drc.js";
+import {List_Case_Distribution_Details , Create_Task_For_case_distribution_drc_summery} from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
+import Swal from "sweetalert2";
 
 const CaseDistributionDRCSummary = () => {
-  // Sample data for the table
-  const data = [
-    {
-      batchId: "B1",
-      created_dtm: "C002",
-      drc: "CMS",
-      count: "5",
-      total_arrears: "12",
-      proceed_on: "100",
-    },
-    {
-      batchId: "B2",
-      created_dtm: "C001",
-      drc: "RTOM",
-      count: "5",
-      total_arrears: "12",
-      proceed_on: "100",
-    },
-  ];
+
 
   // State for filters and table
   const [selectedDRC, setSelectedDRC] = useState("");
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDRCKey, setSelectedDRCKey] = useState("");
+  const [drcNames, setDrcNames] = useState([]);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const batchId = location.state?.BatchID;
+
+
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,53 +51,161 @@ const CaseDistributionDRCSummary = () => {
     indexOfLastRecord
   );
 
+   useEffect(() => {
+      const fetchDRCNames = async () => {
+        try {
+          const Names = await Active_DRC_Details();
+          setDrcNames(Names);
+        } catch (error) {
+          console.error("Error fetching drc names:", error);
+        }
+      };
+      fetchDRCNames();
+    });
+
+
   // Modified handleDRCChange to only update state without filtering
-  const handleDRCChange = (e) => {
+  const handleDRCChange = (e) =>  {
     const selectedValue = e.target.value;
-    setSelectedDRC(selectedValue);
+  
+    // Find the corresponding key from drcNames
+    const selectedDRCObject = drcNames.find(({ value }) => value === selectedValue);
+    
+    if (selectedDRCObject) {
+      const selectedKey = selectedDRCObject.id;
+      
+      // Store both value and key in state (if needed)
+      setSelectedDRC(selectedValue);
+      setSelectedDRCKey(selectedKey);
+  
+      console.log("Selected DRC: ", selectedValue);
+      console.log("Selected DRC ID: ", selectedKey);
+    }
   };
+
+  useEffect(() => {
+    const payload = {
+      case_distribution_batch_id: batchId || "2",
+    };
+    const fetchFilteredData = async () => {
+      try {
+        const filteredData = await List_Case_Distribution_Details(payload);
+        setFilteredData(filteredData);
+      } catch (error) {
+        console.error("Error fetching filtered data:", error);
+        setFilteredData([]);
+      }
+    }
+    fetchFilteredData();
+  }, [batchId]);
 
   // Handle filter action - all filtering happens here
   const handleFilter = () => {
-    const filtered = data.filter((item) => {
-      const drcMatch = selectedDRC === "" || item.drc === selectedDRC;
-
-      return drcMatch;
-    });
-    setFilteredData(filtered);
-    setCurrentPage(1);
+    const payload = {
+      case_distribution_batch_id: batchId || "2",
+      drc_id: selectedDRCKey,
+    };
+    console.log("Filter payload: ", payload);
+    const fetchFilteredData = async () => {
+      try {
+        const filteredData = await List_Case_Distribution_Details(payload);
+        setFilteredData(filteredData);
+      } catch (error) {
+        console.error("Error fetching filtered data:", error);
+        setFilteredData([]);
+      }
+    }
+    fetchFilteredData();
   };
 
-  const handleCreateTask = () => {
-    alert("Create Task and Let Me Know button clicked!");
+  // Handle create task action
+  const handleCreateTask = async () => {
+    const userId = await getLoggedUserId();
+    const payload = {
+      drc_id: selectedDRCKey,
+      Created_By: userId,
+    };
+    console.log("Create task payload: ", payload);
+    if (!selectedDRCKey) {
+      Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Select a DRC to create a task",
+                confirmButtonColor: "#d33",
+              });
+          return;
+
+    } 
+    const createTask = async () => {
+      try {
+        const response = await Create_Task_For_case_distribution_drc_summery(payload);
+        console.log("Create task response: ", response);
+        Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Data sent successfully.",
+          confirmButtonColor: "#28a745",
+        });
+      } catch (error) {
+        console.error("Error creating task:", error);
+
+        const errorMessage = error?.response?.data?.message || 
+                                 error?.message || 
+                                 "An error occurred. Please try again.";
+
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+        });
+      }
+    };
+    createTask();
   };
 
-  const handleCreateTasks = () => {
-    alert("Create Task and Let Me Know button clicked!");
+  const handleonbuttonclicked = ( drc_name , drc_id ) => {
+    navigate("/pages/Distribute/CaseDistributionDRCSummarywithRTOM", {
+      state:  {BatchID: batchId || "2" , DRCName: drc_name , DRCID: drc_id},
+      
+  });
+    console.log("Name: ", drc_name);
+    console.log("ID: ", drc_id);
+    console.log("Batch ID: ", batchId);
+
   };
+
+
+  const handleonbacknuttonclick = () => {
+    navigate("/pages/Distribute/AssignedDRCSummary", {
+  });
+  }
+
+
 
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary</h1>
-      <h2 className={GlobalStyle.headingMedium}>Batch-B1</h2>
+      <h2 className={GlobalStyle.headingMedium}>Batch - {batchId || "Undefined"} </h2>
 
       {/* Filter Section */}
       <div className="flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4">
         {/* DRC Select Dropdown */}
         <select
           className={GlobalStyle.selectBox}
-          value={selectedDRC}
+          value={selectedDRC} 
           onChange={handleDRCChange}
-        >
-          <option value="">DRC</option>
-          {["CMS", "TCM", "RE", "CO LAN", "ACCIVA", "VISONCOM", "PROMPT"].map(
-            (drc) => (
-              <option key={drc} value={drc}>
-                {drc}
+        > 
+           <option value="" hidden>
+                DRC
               </option>
-            )
-          )}
+              {drcNames.map(({ key, value }) => (
+                <option key={key} value={value}>
+                  {value}
+                </option>
+              ))}
+          
         </select>
 
         {/* Filter Button */}
@@ -143,39 +245,50 @@ const CaseDistributionDRCSummary = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item, index) => (
-              <tr
-                key={item.caseId}
-                className={
-                  index % 2 === 0
-                    ? GlobalStyle.tableRowEven
-                    : GlobalStyle.tableRowOdd
-                }
-              >
-                <td className={GlobalStyle.tableData}>{item.created_dtm}</td>
-                <td className={GlobalStyle.tableData}>{item.drc}</td>
-                <td className={GlobalStyle.tableData}>{item.count}</td>
-                <td className={GlobalStyle.tableData}>{item.total_arrears}</td>
-                <td className={GlobalStyle.tableData}>{item.proceed_on}</td>
-                <td className="px-6 py-4 text-center">
-                  <button onClick={handleCreateTasks}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={26}
-                      height={29}
-                      fill="none"
-                    >
-                      <path
-                        fill="#000"
-                        fillRule="evenodd"
-                        d="M13 .32c7.18 0 13 5.821 13 13 0 7.18-5.82 13-13 13s-13-5.82-13-13c0-7.179 5.82-13 13-13Zm5.85 11.05a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {currentData.length >0?  (
+              currentData.map((item, index) => (
+                <tr
+                  key={item.caseId}
+                  className={
+                    index % 2 === 0
+                      ? GlobalStyle.tableRowEven
+                      : GlobalStyle.tableRowOdd
+                  }
+                >
+                  <td className={GlobalStyle.tableData}>{new Date (item.created_dtm).toLocaleDateString()}</td>
+                  <td className={GlobalStyle.tableData}>{item.drc_name}</td>
+                  <td className={GlobalStyle.tableData}>{item.case_count}</td>
+                  <td className={GlobalStyle.tableData}>{item.tot_arrease}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {item.proceed_on ? new Date(item.proceed_on).toLocaleDateString() : ""}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)}>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={26}
+                        height={29}
+                        fill="none"
+                      >
+                        <path
+                          fill="#000"
+                          fillRule="evenodd"
+                          d="M13 .32c7.18 0 13 5.821 13 13 0 7.18-5.82 13-13 13s-13-5.82-13-13c0-7.179 5.82-13 13-13Zm5.85 11.05a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              ))): (
+                <tr>
+                  <td colSpan={6} className={GlobalStyle.tableData}>
+                    No data found
+                  </td>
+                </tr>
+            )
+            }
+            
           </tbody>
         </table>
       </div>
@@ -193,7 +306,7 @@ const CaseDistributionDRCSummary = () => {
         </button>
       </div>
       {/* Button on the left */}
-      <button>
+      <button onClick={handleonbacknuttonclick}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width={65}
