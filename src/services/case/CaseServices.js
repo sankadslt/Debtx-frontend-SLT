@@ -263,6 +263,9 @@ export const Batch_Forward_for_Proceed = async (payload) => {
   }
 };
 
+
+// List Cases Owned By DRC // - nimaaa
+
 export const List_CasesOwened_By_DRC = async (requestData) => {
   try {
     const response = await axios.post(`${URL}/List_CasesOwened_By_DRC`, requestData);
@@ -282,6 +285,8 @@ export const List_CasesOwened_By_DRC = async (requestData) => {
     throw error;
   }
 };
+
+
 
 export const List_All_Batch_Details = async () => {
   try {
@@ -440,3 +445,4 @@ export const List_Case_Distribution_Details_With_Rtoms = async (payload) => {
     throw error;
   }
 }
+
