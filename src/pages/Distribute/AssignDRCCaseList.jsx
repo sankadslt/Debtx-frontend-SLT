@@ -333,6 +333,8 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { List_CasesOwened_By_DRC } from "../../services/case/CaseServices";
+import { FaUserEdit, FaUndo } from "react-icons/fa"; 
+import {getLoggedUserId} from "/src/services/auth/authService.js";
 
 
 export default function AssignDRCsLOG() {
@@ -548,20 +550,20 @@ export default function AssignDRCsLOG() {
                     </td>
                     <td className={GlobalStyle.tableData}>
                     <button
-                        className={GlobalStyle.buttonPrimary} // Prevents text from wrapping
-                        onClick={() =>
-                          navigate(
-                           `/pages/Distribute/ReAssignDRC?caseId=${caseItem.case_id}&accountNo=${caseItem.account_no}`
-                          )
-                        }
-                      >
-                        Re-Assign
-                      </button>
-                      <button className={GlobalStyle.buttonPrimary}>
-                        {" "}
-                        {/* Increased width */}
-                        Withdraw
-                      </button>
+                    className={GlobalStyle.buttonPrimary}
+                    onClick={() =>
+                    navigate(
+                    `/pages/Distribute/ReAssignDRC?caseId=${caseItem.case_id}&accountNo=${caseItem.account_no}`
+                     )
+                    }
+                     title="Re-Assign" // Shows tooltip on hover
+                    >
+                    <FaUserEdit /> {/* Icon for Re-Assign */}
+                    </button>
+
+                    <button className={GlobalStyle.buttonPrimary} title="Withdraw">
+                    <FaUndo /> {/* Icon for Withdraw */}
+                    </button>
                     </td>
                   </tr>
                 ))
