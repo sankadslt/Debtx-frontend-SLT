@@ -16,8 +16,7 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: This page includes a filter and a table */
 
-
-import React, { useState } from "react";
+import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
@@ -147,12 +146,12 @@ const DRCAssignManagerApproval = () => {
       .includes(searchQuery.toLowerCase())
   );
 
-// Apply pagination to the search-filtered data
-const currentData = filteredDataBySearch.slice(
-  indexOfFirstRecord,
-  indexOfLastRecord
-);
-const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
+  // Apply pagination to the search-filtered data
+  const currentData = filteredDataBySearch.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
+  const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
 
   // Modified handleDRCChange to only update state without filtering
   const handleDRCChange = (e) => {
@@ -164,7 +163,8 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
   const handleFilter = () => {
     const filtered = data.filter((item) => {
       const drcMatch = selectedDRC === "" || item.drc === selectedDRC;
-      const createdDateValid = !fromDate || new Date(item.createdDate) >= new Date(fromDate);
+      const createdDateValid =
+        !fromDate || new Date(item.createdDate) >= new Date(fromDate);
       const approvedOnValid =
         !toDate ||
         item.approvedOn === "mm/dd/yyyy" ||
@@ -210,7 +210,7 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
   const handleCreateTask = () => {
     alert("Create Task and Let Me Know button clicked!");
   };
-  
+
   const handleApprove = () => {
     alert("Approve button clicked!");
   };
@@ -237,8 +237,6 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
             )
           )}
         </select>
-
-        
 
         {/* Date Picker */}
         <div className="flex items-center gap-2">
@@ -267,13 +265,11 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
           onChange={handleDRCChange}
         >
           <option value="">Status</option>
-          {["Pending", "Approved", "Rejected"].map(
-            (drc) => (
-              <option key={drc} value={drc}>
-                {drc}
-              </option>
-            )
-          )}
+          {["Pending", "Approved", "Rejected"].map((drc) => (
+            <option key={drc} value={drc}>
+              {drc}
+            </option>
+          ))}
         </select>
 
         {/* Filter Button */}
@@ -317,36 +313,35 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
             </tr>
           </thead>
           <tbody>
-  {currentData.map((item, index) => (
-    <tr
-      key={item.caseId}
-      className={
-        index % 2 === 0
-          ? GlobalStyle.tableRowEven
-          : GlobalStyle.tableRowOdd
-      }
-    >
-      <td className="text-center">
-        <input
-          type="checkbox"
-          checked={selectedRows.has(index)}
-          onChange={() => handleRowSelect(index)}
-          className="mx-auto"
-        />
-      </td>
-      <td className={GlobalStyle.tableData}>{item.status}</td>
-      <td className={GlobalStyle.tableData}>{item.batchId}</td>
-      <td className={GlobalStyle.tableData}>{item.caseId}</td>
-      <td className={GlobalStyle.tableData}>{item.actionType}</td>
-      <td className={GlobalStyle.tableData}>{item.createdDate}</td>
-      <td className={GlobalStyle.tableData}>{item.drc}</td>
-      <td className={GlobalStyle.tableData}>{item.caseAmount}</td>
-      <td className={GlobalStyle.tableData}>{item.approvedBy}</td>
-      <td className={GlobalStyle.tableData}>{item.approvedOn}</td>
-    </tr>
-  ))}
-</tbody>
-
+            {currentData.map((item, index) => (
+              <tr
+                key={item.caseId}
+                className={
+                  index % 2 === 0
+                    ? GlobalStyle.tableRowEven
+                    : GlobalStyle.tableRowOdd
+                }
+              >
+                <td className="text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.has(index)}
+                    onChange={() => handleRowSelect(index)}
+                    className="mx-auto"
+                  />
+                </td>
+                <td className={GlobalStyle.tableData}>{item.status}</td>
+                <td className={GlobalStyle.tableData}>{item.batchId}</td>
+                <td className={GlobalStyle.tableData}>{item.caseId}</td>
+                <td className={GlobalStyle.tableData}>{item.actionType}</td>
+                <td className={GlobalStyle.tableData}>{item.createdDate}</td>
+                <td className={GlobalStyle.tableData}>{item.drc}</td>
+                <td className={GlobalStyle.tableData}>{item.caseAmount}</td>
+                <td className={GlobalStyle.tableData}>{item.approvedBy}</td>
+                <td className={GlobalStyle.tableData}>{item.approvedOn}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
@@ -374,42 +369,40 @@ const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
           <FaArrowRight />
         </button>
       </div>
-    
-{/* Select All Data Checkbox and Buttons */}
-<div className="flex justify-between items-center mt-4">
-  {/* Left-aligned button */}
-  <button
-    onClick={handleCreateTask}
-    className={GlobalStyle.buttonPrimary} // Same style as Approve button
-  >
-    Create Task and Let Me Know
-  </button>
 
-  {/* Right-aligned checkbox and Approve button */}
-  <div className="flex items-center gap-4">
-    <label className="flex items-center gap-2">
-      <input
-        type="checkbox"
-        className="rounded-lg"
-        checked={selectAll}
-        onChange={handleSelectAll}
-      />
-      Select All Data
-    </label>
+      {/* Select All Data Checkbox and Buttons */}
+      <div className="flex justify-between items-center mt-4">
+        {/* Left-aligned button */}
+        <button
+          onClick={handleCreateTask}
+          className={GlobalStyle.buttonPrimary} // Same style as Approve button
+        >
+          Create Task and Let Me Know
+        </button>
 
-    <button
-      onClick={handleApprove}
-      className={GlobalStyle.buttonPrimary}
-      disabled={selectedRows.size === 0}
-    >
-      Approve
-    </button>
-  </div>
-</div>
+        {/* Right-aligned checkbox and Approve button */}
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              className="rounded-lg"
+              checked={selectAll}
+              onChange={handleSelectAll}
+            />
+            Select All Data
+          </label>
 
+          <button
+            onClick={handleApprove}
+            className={GlobalStyle.buttonPrimary}
+            disabled={selectedRows.size === 0}
+          >
+            Approve
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default DRCAssignManagerApproval;
-

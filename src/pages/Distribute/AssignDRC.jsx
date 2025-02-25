@@ -31,6 +31,7 @@ import {
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Swal from "sweetalert2";
+import Chart from "/src/pages/Chart.jsx";
 
 
 
@@ -46,7 +47,7 @@ const AssignDRC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedBandKey, setSelectedBandKey] = useState(null);
-
+  const [showPopup, setShowPopup] = useState(false);
   const { serviceType } = location.state || {};
 
   const [drcData, setDrcData] = useState([]);
@@ -115,26 +116,41 @@ const AssignDRC = () => {
       .includes(searchQuery.toLowerCase())
   );
 
-  const handleAdd = () => {
-    const { drc, casesAmount } = newEntry;
 
+  const handleAdd = () => {
+    const { drc, drckey, casesAmount } = newEntry;
+    console.log("New Entry:", newEntry);
     const numericCasesAmount = parseInt(casesAmount, 10);
 
     if (totalDistributedAmount + numericCasesAmount > arrearsbandTotal) {
-      alert(
-        `The total distributed cases (${
+      
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `The total distributed cases (${
           totalDistributedAmount + numericCasesAmount
-        }) exceeds the limit of ${arrearsbandTotal}. Please adjust the number of cases.`
-      );
+        }) exceeds the limit of the Total count ${arrearsbandTotal}. Please adjust the entered number of cases.`,
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    if (totalDistributedAmount >= arrearsbandTotal) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Cannot Add More, The total Count and The selected count are equal.",
+        confirmButtonColor: "#d33",
+      });
       return;
     }
 
     if (drc && numericCasesAmount) {
       setDrcData([
         ...drcData,
-        { id: drcData.length + 1, name: drc, amount: parseFloat(casesAmount) },
+        { id: drcData.length + 1, name: drc, amount: parseFloat(casesAmount), drckey: drckey },
       ]);
-      setNewEntry({ drc: "", casesAmount: "" }); // Clear inputs
+      setNewEntry({ drc: "", casesAmount: ""  }); // Clear inputs
     }
   };
 
@@ -168,6 +184,7 @@ const AssignDRC = () => {
 
     const drcList = filteredSearchData.map((drc) => ({
       DRC: drc.name,
+      DRC_ID: drc.drckey,
       Count: drc.amount,
     }));
 
@@ -176,7 +193,6 @@ const AssignDRC = () => {
       current_arrears_band: selectedBandKey,
       drc_list: drcList,
       created_by: userId,
-
     };
 
     console.log("Request Data:", requestData);
@@ -210,11 +226,11 @@ const AssignDRC = () => {
   };
 
   const handlepiechart1 = () => {
-    alert("Pie Chart 1 clicked");
-  }
+    setShowPopup(true); // Open chart popup
+  };
 
   const handlepiechart2 = () => {
-    alert("Pie Chart 2 clicked");
+    setShowPopup(true); // Open chart popup
   }
 
   return (
@@ -279,9 +295,12 @@ const AssignDRC = () => {
             <select
               className={`${GlobalStyle.selectBox}`}
               value={newEntry.drc}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, drc: e.target.value })
-              }
+              onChange={(e) =>{
+                const selectedDRC = drcNames.find((drc) => drc.value === e.target.value);
+                setNewEntry({ ...newEntry, 
+                  drckey: selectedDRC.key,
+                  drc: selectedDRC.value });
+              }}
             >
               <option value="" hidden>
                 DRC
@@ -307,13 +326,14 @@ const AssignDRC = () => {
             />
 
             {/* Add Button */}
+           
             <button
               className={`${GlobalStyle.buttonPrimary} w-[135px]`}
               onClick={handleAdd}
-              disabled={totalDistributedAmount >= arrearsbandTotal}
             >
               Add
             </button>
+            
           </div>
           <div
             className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
@@ -411,12 +431,19 @@ const AssignDRC = () => {
             </div>
 
             {/* Pie Chart Buttons */}
+            <div>
             <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
                Pie Chart 1
             </button>
+             <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
+            </div>
+            <div>
             <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
                Pie Chart 2
             </button>
+            <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
+            </div>
+            
           </div>
 
           {/* Proceed Button */}

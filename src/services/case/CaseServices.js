@@ -240,22 +240,13 @@ export const Exchange_DRC_RTOM_Cases = async (payload) => {
   }
 };
 
-
-// List Cases Owned By DRC // - nimaaa
-export const List_CasesOwened_By_DRC = async (requestData) => {
+export const Batch_Forward_for_Proceed = async (payload) => {
   try {
-    const response = await axios.post(`${URL}/List_CasesOwened_By_DRC`, requestData);
-
-    // Validate response structure
-    if (response.data && response.data.status === "success") {
-      return response.data.Cases; // Return the cases data
-    } else {
-      console.error("Error in API response:", response.data?.message || "Unknown error");
-      throw new Error(response.data?.message || "Failed to retrieve case details.");
-    }
+    const response = await axios.post(`${URL}/Batch_Forward_for_Proceed`, payload);
+    return response.data;
   } catch (error) {
     console.error(
-      "Error fetching cases owned by DRC:",
+      "Error fetching case distribution details with DRC RTOM by transaction:",
       error.response?.data || error.message
     );
     throw error;

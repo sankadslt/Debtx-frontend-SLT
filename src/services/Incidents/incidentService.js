@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getUserData } from "../auth/authService";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
 const INCIDENT_URL = `${BASE_URL}/incident`;
@@ -129,7 +130,12 @@ export const Create_Case_for_incident = async (requestData) => {
 
 export const Forward_CPE_Collect = async (Incident_Id) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`, {Incident_Id});
+     const user = await getUserData();
+
+    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`,  { 
+      Incident_Id, 
+      Proceed_By : user.user_id,
+    });
     return response; 
   } catch (error) {
     console.error("Error forwarding CPE Collect incidents:", error.response?.data || error.message);
