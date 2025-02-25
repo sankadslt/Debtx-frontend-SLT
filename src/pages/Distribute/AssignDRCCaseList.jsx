@@ -444,7 +444,7 @@ export default function AssignDRCsLOG() {
               onChange={(e) => setFilterType(e.target.value)}
               className={`${GlobalStyle.selectBox} h-[36px]`}
             >
-              <option value="">Select</option>
+              <option value="" hidden>Select</option>
               <option value="Account No">Account No</option>
               <option value="Case ID">Case ID</option>
             </select>
