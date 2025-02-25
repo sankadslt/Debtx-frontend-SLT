@@ -13,7 +13,7 @@ Notes:
 
 */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
@@ -23,8 +23,6 @@ import { List_incidents_Direct_LOD, Create_Task_Download_Direct_LOD_Sending, For
 import Swal from "sweetalert2";
 
 export default function DirectLODSendingIncident() {
-  const navigate = useNavigate();
-
   // Table data exactly matching the image
   // const tableData = [
   //   {
@@ -62,6 +60,7 @@ export default function DirectLODSendingIncident() {
   const [tableData, setTableData] = useState([]);
   const [isloading, setIsLoading] = useState(true);
   const [filteredData, setFilteredData] = useState(tableData);
+  const navigate = useNavigate();
 
   const rowsPerPage = 7; // Number of rows per page
 
@@ -102,6 +101,15 @@ export default function DirectLODSendingIncident() {
   }, []);
 
   const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
+    if (filteredData.length === 0) {
+      Swal.fire({
+        title: "Warning",
+        text: "No records to download.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
 
     if(!source_type && !fromDate && !toDate){
       Swal.fire({
@@ -110,8 +118,9 @@ export default function DirectLODSendingIncident() {
         icon: 'warning',
         confirmButtonText: 'OK'
       });
+      return;
     }
-    else if ((fromDate && !toDate) || (!fromDate && toDate)) {
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
       Swal.fire({
         title: "Incomplete Date Range",
         text: "Both From Date and To Date must be selected together.",
@@ -119,7 +128,7 @@ export default function DirectLODSendingIncident() {
         confirmButtonText: "OK",
       });
       return;
-    } else{
+    } 
     try{
       const filteredParams = {
         Source_Type:source_type,
@@ -143,10 +152,10 @@ export default function DirectLODSendingIncident() {
         confirmButtonText: 'OK'
       });
     }
-    }
   };
 
   const handleProceed = async (Incident_Id) => {
+    try {
     if (!selectedRows.includes(Incident_Id)) {
       Swal.fire({
         title: "Warning",
@@ -156,7 +165,17 @@ export default function DirectLODSendingIncident() {
       });
       return;
     }
-    try {
+
+    const result = await Swal.fire({
+      title: "Confirm",
+      text: "Are you sure you need to convert the incident as a Direct LOD case?",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "Proceed",
+      cancelButtonText: "Cancel",
+    });
+    
+    if (result.isConfirmed) {
       const openTaskCount = await Open_Task_Count_Forward_Direct_LOD();
       if (openTaskCount > 0) {
         Swal.fire({
@@ -177,6 +196,7 @@ export default function DirectLODSendingIncident() {
         });
         fetchData();
       }
+    }
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -199,44 +219,56 @@ export default function DirectLODSendingIncident() {
         });
         return;
       }
-      const openTaskCount = await Open_Task_Count_Forward_Direct_LOD();
-      if (openTaskCount > 0) {
-        Swal.fire({
-          title: "Warning",
-          text: "A task is already in progress.",
-          icon: "warning",
-          confirmButtonText: "OK",
-        });
-        return;
-      }
-      if (filteredData.length > 10) {
-        const parameters = {
-          Status: "Direct LOD",
-          Inncident_Ids: selectedRows,
-        };
-  
-        const response = await Create_Task_Forward_Direct_LOD(parameters);
-        if (response.status === 201) {
+      const result = await Swal.fire({
+        title: "Confirm",
+        text: "Are you sure you need to convert all incidents as Direct LOD cases?",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Create Task",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        const openTaskCount = await Open_Task_Count_Forward_Direct_LOD();
+        if (openTaskCount > 0) {
+          Swal.fire({
+            title: "Warning",
+            text: "A task is already in progress.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+        if (filteredData.length > 10) {
+          const parameters = {
+            Status: "Direct LOD",
+            Inncident_Ids: selectedRows,
+          };
+    
+          const response = await Create_Task_Forward_Direct_LOD(parameters);
+          if (response.status === 201) {
+            Swal.fire({
+              title: "Success",
+              text: "Successfully created task to forward the direct LOD incidents",
+              icon: "success",
+              confirmButtonText: "OK",
+            });
+          }
+        } else {
+          for (const row of selectedRows) {
+            await Forward_Direct_LOD(row);
+          }
           Swal.fire({
             title: "Success",
-            text: "Successfully created task to forward the direct LOD incidents",
+            text: "Successfully forwarded the direct LOD incidents",
             icon: "success",
             confirmButtonText: "OK",
           });
+    
+          fetchData();
         }
-      } else {
-        for (const row of selectedRows) {
-          await Forward_Direct_LOD(row);
-        }
-        Swal.fire({
-          title: "Success",
-          text: "Successfully forwarded the direct LOD incidents",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-  
-        fetchData();
       }
+
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -364,6 +396,7 @@ export default function DirectLODSendingIncident() {
         }
       }
       fetchData(); 
+      setSearchQuery("")
     }
   };
   
@@ -570,8 +603,16 @@ export default function DirectLODSendingIncident() {
             </button>
           </div>
         )}
+       <div className="flex justify-start items-center w-full mt-6">
+            <button
+              className={`${GlobalStyle.buttonPrimary} `} 
+              onClick={() => navigate(-1)}
+            >
+              ← Back
+            </button>
+        </div>
 
-        <div className="flex justify-end items-center w-full mt-6">
+        <div className="flex justify-end items-center w-full">
           {/* Select All Data Checkbox */}
           <label className="flex items-center gap-2">
             <input
