@@ -413,8 +413,9 @@ export default function AssignDRCsLOG() {
         cancelButtonColor: "#d33",
       }).then((result) => {
         if (result.isConfirmed) {
-          
+
           endDate = endDate;
+          handleApicall(startDate, endDate);
         } else {
           setEndDate(null);
           console.log("Dates cleared");
@@ -424,6 +425,55 @@ export default function AssignDRCsLOG() {
 
     }
   };
+
+  const handleApicall = async (startDate, endDate) => {
+    const userId =  await getLoggedUserId();
+    const payload = {}
+    payload.drc_id = 7; // Hardcoded DRC ID for testing
+    payload.from_date = startDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    payload.to_date = endDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+
+    if (filterType === "Account No" && filterValue.trim() !== "") {
+      payload.account_no = filterValue.trim();
+    }
+    else if (filterType === "Case ID" && filterValue.trim() !== "") {
+      payload.case_id = filterValue.trim();
+    }
+    payload.Created_By = userId;
+    console.log("Filtered Request Payload:", payload);
+
+    // Call API with payload
+    const createtask = async () => {
+      try {
+        const data = await Create_Task_For_Assigned_drc_case_list_download(payload);
+        console.log("Response",data);
+          Swal.fire({
+                 icon: "success",
+                 title: "Success",
+                 text: "Data sent successfully.",
+                 confirmButtonColor: "#28a745",
+          });
+        
+      } catch (error) {
+        console.error("Error in sending the data:", error);
+  
+        const errorMessage = error?.response?.data?.message || 
+                               error?.message || 
+                               "An error occurred. Please try again.";
+         Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: errorMessage,
+                    confirmButtonColor: "#d33",
+                });
+      }
+    }
+    createtask();
+  };
+  
+
+      
+
 
   // Filter handler
   const handleFilter = () => {
