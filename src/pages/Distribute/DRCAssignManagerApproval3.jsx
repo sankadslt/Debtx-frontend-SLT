@@ -32,7 +32,7 @@ export default function DRCAssignManagerApproval3() {
   const [endDate, setEndDate] = useState(null);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 2;
+  const recordsPerPage = 5;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
@@ -266,6 +266,15 @@ export default function DRCAssignManagerApproval3() {
       });
     }
   };
+
+  const ontableiconclick = () => {
+    Swal.fire({
+      icon: "info",
+      title: "Summary",
+      text: "Summary of the case",
+      confirmButtonColor: "#f1c40f",
+    });
+  };
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
@@ -394,7 +403,7 @@ export default function DRCAssignManagerApproval3() {
                       : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    <button>
+                    <button onClick={ontableiconclick}>
                       <img
                         src={one}
                         width={15}
