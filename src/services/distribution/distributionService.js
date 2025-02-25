@@ -60,8 +60,10 @@ export const List_F1_filtered_incidents = async (filters) => {
 
 export const Forward_Direct_LOD = async (Incident_Id) => {
   try {
+    const user= await getLoggedUserId();
     const response = await axios.post(`${URL}/Forward_Direct_LOD`, {
       Incident_Id,
+      user
     });
     return response;
   } catch (error) {
@@ -126,8 +128,10 @@ export const Forward_F1_Filtered = async (Incident_Id) => {
 
 export const Reject_F1_Filtered = async (Incident_Id) => {
   try {
+    const user= await getLoggedUserId();
     const response = await axios.patch(`${URL}/Reject_F1_filtered_Incident`, {
       Incident_Id,
+      user
     });
     return response;
   } catch (error) {
