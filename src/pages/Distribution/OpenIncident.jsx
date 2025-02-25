@@ -10,16 +10,19 @@ ui number : 1.7.1
 Dependencies: tailwind css
 Related Files: 
 Notes: 
-
 */
+
 import { useState,useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-
+import { useNavigate } from "react-router-dom";
+import { getUserData } from "../../services/auth/authService";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band,Create_Case_for_incident} from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/Open_No_Agent.png"
-import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident } from "../../services/task/taskService";
+import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident , Open_Task_Count_Incident_To_Case} from "../../services/task/taskService";
 import Swal from "sweetalert2";
+ 
+ 
 
 export default function OpenIncident() {
   const [searchQuery, setSearchQuery] = useState(""); 
@@ -31,9 +34,24 @@ export default function OpenIncident() {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
   const [isProcessing,setIsProcessing] = useState(false); 
-const [isLocked, setIsLocked] = useState(false);
+const [user, setUser] = useState(null);
+const navigate = useNavigate();
 
   const rowsPerPage = 7;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await getUserData();
+        setUser(userData);
+      } catch (err) {
+        console.error("Failed to fetch user data", err);
+      }
+    };
+
+    fetchUser();
+    fetchData();
+  }, []);
 
 const fetchData = async () => {
   try {
@@ -54,9 +72,10 @@ const fetchData = async () => {
 };
 
 
-useEffect(() => {
-  fetchData();
-});
+//  useEffect(() => {
+ 
+//     fetchData();
+//   }, []);
 
   const handleCreateTask = async () => {
     try {
@@ -88,65 +107,9 @@ useEffect(() => {
     }
   };
   
-  // const handleCaseforIncident = async () => {
-  //   if (selectedRows.length === 0) {
-  //     Swal.fire({
-  //       title: "Warning",
-  //       text: "Please select at least one incident.",
-  //       icon: "warning",
-  //       confirmButtonText: "OK",
-  //     });
-  //     return;
-  //   }
   
-  //   try {
-  //     if (selectedRows.length > 10) {
-  //       // Create task for selected incidents
-  //       const taskParams = {
-  //         Incident_Status: "Open No Agent",
-        
-  //       };
-  
-  //       console.log("Task Params:", taskParams);
-  
-  //       const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-  
-  //       console.log("Response from Create_Task:", response);
-  
-  //       Swal.fire({
-  //         title: "Task Created Successfully!",
-  //         text: `Task created to handle ${selectedRows.length} incidents.`,
-  //         icon: "success",
-  //         confirmButtonText: "OK",
-  //       });
-  //     } else {
-  //       // Create cases for incidents
-  //       const response = await Create_Case_for_incident({ Incident_Ids: selectedRows });
-  
-  //       console.log("Response from Create_Case:", response); // Debug: Log the backend response
-  
-  //       Swal.fire({
-  //         title: "Cases Created Successfully!",
-  //         text: `Successfully created ${response.cases.length} cases.`,
-  //         icon: "success",
-  //         confirmButtonText: "OK",
-  //       });
-  //     }
-  
-  //     // Clear selected rows after task or case creation
-  //     setSelectedRows([]);
-  //     await fetchData(); // Ensure data is refreshed after actions
-  //   } catch (error) {
-  //     console.error("Error in handleCaseforIncident:", error); // Debug: Log the error
-  //     Swal.fire({
-  //       title: "Error",
-  //       text: error.message || "Failed to perform the action.",
-  //       icon: "error",
-  //       confirmButtonText: "OK",
-  //     });
-  //   }
-  // };
   const handleCaseforIncident = async () => {
+   
     if (selectedRows.length === 0) {
       Swal.fire({
         title: "Warning",
@@ -154,19 +117,45 @@ useEffect(() => {
         icon: "warning",
         confirmButtonText: "OK",
       });
+      return;  
+    }
+  
+    
+    const confirmResult = await Swal.fire({
+      title: "Confirmation",
+      text: "Are you sure you want to proceed with all selected cases?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Proceed",
+      cancelButtonText: "No",
+    });
+  
+    if (!confirmResult.isConfirmed) {
       return;
     }
   
     setIsProcessing(true);
   
     try {
+      const openTaskCount = await Open_Task_Count_Incident_To_Case();
+      if (openTaskCount > 0) {
+        Swal.fire({
+          title: "Action Blocked",
+          text: "There are existing open tasks. Please resolve them before proceeding.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        setIsProcessing(false);
+        return;
+      }
+  
       if (selectedRows.length > 10) {
         const taskParams = {
           Incident_Status: "Open No Agent",
         };
   
         const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-          console.log("Response from Create_Task:", response);
+        console.log("Response from Create_Task:", response);
         Swal.fire({
           title: "Task Created Successfully!",
           text: `Task created to handle ${selectedRows.length} incidents.`,
@@ -174,7 +163,10 @@ useEffect(() => {
           confirmButtonText: "OK",
         });
       } else {
-        const response = await Create_Case_for_incident({ Incident_Ids: selectedRows });
+        const response = await Create_Case_for_incident({
+          Incident_Ids: selectedRows,
+          Proceed_By: user.user_id,
+        });
   
         Swal.fire({
           title: "Cases Created Successfully!",
@@ -184,9 +176,7 @@ useEffect(() => {
         });
       }
   
-      // Clear selected rows after action
       setSelectedRows([]);
-      setIsLocked(true);  // Lock the table until data is refreshed
     } catch (error) {
       console.error("Error in handleCaseforIncident:", error);
       Swal.fire({
@@ -201,7 +191,6 @@ useEffect(() => {
     }
   };
   
-  
  
 
   const filteredData = data.filter((row) =>
@@ -211,10 +200,6 @@ useEffect(() => {
       .includes(searchQuery.toLowerCase())
   );
 
- 
-  // const navi = () => {
-  //   navigate("/lod/ftl-log/preview");
-  // };
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
@@ -234,15 +219,9 @@ useEffect(() => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  // const handleRowCheckboxChange = (Incident_Id) => {
-  //   if (selectedRows.includes(Incident_Id)) {
-  //     setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
-  //   } else {
-  //     setSelectedRows([...selectedRows, Incident_Id]);
-  //   }
-  // };
+ 
   const handleRowCheckboxChange = (Incident_Id) => {
-    if (isLocked) return;  // Prevent any selection if table is locked
+     
     if (selectedRows.includes(Incident_Id)) {
       setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
     } else {
@@ -275,7 +254,7 @@ useEffect(() => {
         </button>
         </div>
 
-        {/* Case Count Bar */}
+    
         <div className={`${GlobalStyle.caseCountBar}`}>
           <div className="flex mb-2">
             {" "}
@@ -320,7 +299,7 @@ useEffect(() => {
       </div>
 
       <div className="flex flex-col">
-        {/* Search Bar Section */}
+        
         <div className="mb-4 flex justify-start">
           <div className={GlobalStyle.searchBarContainer}>
             <input
@@ -385,7 +364,7 @@ useEffect(() => {
             </div>
           </td>
           <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
-          <td className={GlobalStyle.tableData}>{row.Action}</td>
+          <td className={GlobalStyle.tableData}>{row.Actions}</td>
           <td className={GlobalStyle.tableData}>
             {new Intl.NumberFormat("en-US").format(row.Arrears)}
           </td>
@@ -403,7 +382,7 @@ useEffect(() => {
   </table>
 </div>
 
-        {/* Navigation Buttons */}
+       
         {filteredData.length > rowsPerPage && (
           <div className={GlobalStyle.navButtonContainer}>
             <button
@@ -425,9 +404,16 @@ useEffect(() => {
             </button>
           </div>
         )}
-
-        <div className="flex justify-end items-center w-full mt-6">
-          {/* Select All Data Checkbox */}
+  <div className="flex justify-start items-center w-full  ">
+            <button
+              className={`${GlobalStyle.buttonPrimary} `} 
+              onClick={() => navigate(-1)}
+            >
+              ← Back
+            </button>
+          </div>
+        <div className="flex justify-end items-center w-full ">
+          
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -440,16 +426,11 @@ useEffect(() => {
           <button
   className={`${GlobalStyle.buttonPrimary} ml-4`}
   onClick={handleCaseforIncident}
-  disabled={isProcessing || selectedRows.length === 0 || isLocked}
+  disabled={isProcessing || selectedRows.length === 0 }
 >
   Proceed
 </button>
-          {/* <button
-  className={`${GlobalStyle.buttonPrimary} ml-4`}
-  onClick={handleCaseforIncident}
->
-  Proceed
-</button> */}
+
         </div>
       </div>
     </>

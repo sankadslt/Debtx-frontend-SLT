@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getUserData } from "../auth/authService";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
 const INCIDENT_URL = `${BASE_URL}/incident`;
@@ -126,12 +127,28 @@ export const Create_Case_for_incident = async (requestData) => {
   }
 };
 
-export const Forward_CPE_Collect = async (requestData) => {
+
+export const Forward_CPE_Collect = async (Incident_Id) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`, requestData);
-    return response.data; 
+     const user = await getUserData();
+
+    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`,  { 
+      Incident_Id, 
+      Proceed_By : user.user_id,
+    });
+    return response; 
   } catch (error) {
-    console.error("Error in Forward_CPE_Collect service:", error.message);
-    throw error.response?.data || error;
+    console.error("Error forwarding CPE Collect incidents:", error.response?.data || error.message);
+    throw error.response?.data || error; 
+  }
+};
+export const getOpenTaskCountforCPECollect = async () => {
+  try {
+    const response = await axios.get(`${INCIDENT_URL}/Open_Task_Count_for_CPE_Collect`);
+    console.log("Open Task Count Response:", response.data); // Debugging
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching open task count:", error.response?.data || error.message);
+    return { openTaskCount: 0 }; // Prevent breaking the UI
   }
 };

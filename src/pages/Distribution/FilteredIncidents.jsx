@@ -20,6 +20,7 @@ import {
   getDirectLODIncidentsCount,
 } from "../../services/Incidents/incidentService";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import File_Icon from "../../assets/images/fileicon.png";
 
 const FilteredIncident = () => {
   const navigate = useNavigate();
@@ -33,17 +34,13 @@ const FilteredIncident = () => {
   useEffect(() => {
     const fetchIncidentCounts = async () => {
       try {
-        const [
-          openCount,
-          rejectCount,
-          directLODCount,
-          collectCPECount,
-        ] = await Promise.all([
-          getDistributionReadyIncidentsCount(),
-          getF1FilteredIncidentsCount(),
-          getDirectLODIncidentsCount(),
-          getCPECollectIncidentsCount(),
-        ]);
+        const [openCount, rejectCount, directLODCount, collectCPECount] =
+          await Promise.all([
+            getDistributionReadyIncidentsCount(),
+            getF1FilteredIncidentsCount(),
+            getDirectLODIncidentsCount(),
+            getCPECollectIncidentsCount(),
+          ]);
 
         setCases([
           { type: "Open for Distribution", count: openCount || 0 },
@@ -115,25 +112,36 @@ const FilteredIncident = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}>
+                      <td
+                        className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
+                      >
                         {cases.type}
                       </td>
-                      <td className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}>
+                      <td
+                        className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
+                      >
                         {cases.count.toLocaleString()}
                       </td>
 
                       <td className={GlobalStyle.tableData}>
                         <button
-                          onClick={() => handleIconClick(cases.type, cases.count)}
+                          onClick={() =>
+                            handleIconClick(cases.type, cases.count)
+                          }
                           className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                         >
-                          <img
-                            src="../../../src/assets/images/Open.png"
-                            alt="Open Icon"
-                            title="Open"
-                            width={20}
-                            height={15}
-                          />
+                        
+                          
+                           <div
+                                                        title="File_ICon"
+                                                        aria-label="File_ICon"
+                                                      >
+                                                        <img
+                                                          src={File_Icon}
+                                                          alt="File_Icon"
+                                                          className="w-5 h-5"
+                                                        />
+                                                      </div>
                         </button>
                       </td>
                     </tr>

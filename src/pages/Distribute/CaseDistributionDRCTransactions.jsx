@@ -25,7 +25,9 @@ import { Tooltip } from "react-tooltip";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution } from "/src/services/case/CaseServices.js";
+import {getLoggedUserId} from "/src/services/auth/authService.js";
+import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution, Batch_Forward_for_Proceed } from "/src/services/case/CaseServices.js";
+import Swal from "sweetalert2";
 
 
 export default function AssignPendingDRCSummary() {
@@ -36,6 +38,7 @@ const [endDate, setEndDate] = useState(null);
 const [filteredData1, setFilteredData1] = useState([]); // Data fetched from API
 const [searchQuery1, setSearchQuery1] = useState(""); // For searching
 const [currentPage1, setCurrentPage1] = useState(1);
+const [disabledRows, setDisabledRows] = useState({});
 const navigate = useNavigate();
 // Items per page
 const itemsPerPage1 = 4;
@@ -96,7 +99,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
   const [selectedService, setSelectedService] = useState("");
   const [selectedBandKey, setSelectedBandKey] = useState("");
 
-
+console.log("Page Data:", paginatedData1);
 
   useEffect(() => {
     const fetchArrearsBands = async () => {
@@ -143,23 +146,94 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
     console.log("Service type :",e.target.value);
   };
 
+ 
   const handlecreatetaskandletmeknow = async () => {
+    const userId = await getLoggedUserId();
+
     const payload = {
       current_arrears_band : selectedBandKey || "null",
       date_from : startDate || "null",
       date_to : endDate || "null",
       drc_commision_rule: selectedService || "null",
-      Created_By: "Sys",
+      Created_By: userId,
     };
 
     console.log("Create Task Payload:", payload);
    try {
       const response = await Create_Task_For_case_distribution(payload);
       console.log("Create Task Response:", response);
+
+      if (response.status = "success") {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Task created successfully.",
+          confirmButtonColor: "#28a745",
+        });
+      }
+      
     } catch (error) {
       console.error("Error creating task for case distribution:", error);
+
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
+
     }
 
+  };
+  const handleonforwardclick = (batchID) => {
+    Swal.fire({
+    title: "Are you sure you want to forward for Approval?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes",
+    confirmButtonColor: "#28a745",
+    cancelButtonText: "No",
+    cancelButtonColor: "#d33",
+    }).then((result) => {
+    if (result.isConfirmed) {
+     
+    const forwardForProceed = async () => {
+    try {
+      const userId = await getLoggedUserId();
+
+      const data = paginatedData1.find((item) => item.case_distribution_batch_id === batchID);
+      console.log("Selected Batch Data:", data);
+      const batchSeqDetails = data?.batch_seq_details?.[0] || {};
+      const distribution = batchSeqDetails?.array_of_distributions?.[0] || {};
+      const payload = {
+        case_distribution_batch_id: [batchID],
+        Proceed_by: userId,
+        plus_drc : distribution.plus_drc || "null",
+        plus_drc_id : distribution.plus_drc_id || "null",
+        minus_drc : distribution.minus_drc  || "null",
+        minus_drc_id : distribution.minus_drc_id  || "null",
+        
+      };
+      console.log("Forward for Proceed Payload:", payload);
+      const response = await Batch_Forward_for_Proceed(payload);
+      console.log("Forward for Proceed Response:", response);
+      
+    } catch (error){
+      console.error (error)
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
+     
+    }
+  };
+  forwardForProceed();
+  }
+  });
   };
 
   const handleonsummaryclick = (batchID) => {
@@ -184,6 +258,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
     }
   };
 
+  
   const formatDate = (isoString) => {
     return isoString ? new Date(isoString).toISOString().split("T")[0] : null;
   };
@@ -283,25 +358,56 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
         <table className={`${GlobalStyle.table}`}>
           <thead className={`${GlobalStyle.thead}`}>
             <tr className="border border-[#0087FF] border-opacity-15">
+            <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Distributed Status</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "80px", fontSize : "10px" }}>Case Distribution Batch ID</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Created dtm</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "75px", fontSize : "10px" }}>Action Type</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "120px", fontSize : "10px" }}>DRC Commission Rule</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "120px",fontSize : "10px" }}>Arrears Band (Selection Rule)</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Case Count (RuleBase count)</th>
-              <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th>
-              <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Distributed Status</th>
+              {/* <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th> */}
+              
               <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Approval</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "60px",fontSize : "10px" }}></th>
             </tr>
           </thead>
           <tbody>
             {paginatedData1.length > 0 ? (
+              
               paginatedData1.map((item, index) => (
+                
                 <tr key={index} 
                   className={index % 2 === 0 ? 
                   GlobalStyle.tableRowEven : 
                   GlobalStyle.tableRowOdd}>
+                  <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
+                    {item.status?.[0]?.crd_distribution_status === "Open" && (
+                      <>
+                      <img data-tooltip-id={`tooltip-open-${index}`} data-tooltip-content="Open" src="/src/assets/images/open.png" width={20} height={15} alt="Open"  />
+                      <Tooltip id={`tooltip-open-${index}`} place="top"/>
+                      </>
+                    )}
+                    {item.status?.[0]?.crd_distribution_status === "Complete" && (
+                      <>
+                      <img data-tooltip-id={`tooltip-complete-${index}`} data-tooltip-content="Complete" src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />
+                      <Tooltip id={`tooltip-complete-${index}`} place="top"/>
+                      </>
+                    )}
+                    {item.status?.[0]?.crd_distribution_status === "Error" && (
+                      <>
+                      <img data-tooltip-id={`tooltip-error-${index}`} data-tooltip-content="Error" src="/src/assets/images/error.png" width={20} height={15} alt="Error" />
+                      <Tooltip id={`tooltip-error-${index}`} place="top"/>
+                      </>
+                    )}
+                    {item.status?.[0]?.crd_distribution_status === "InProgress" && (
+                      <>
+                      <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content="InProgress" src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />
+                      <Tooltip id={`tooltip-progress-${index}`} place="top"/>
+                      </>
+                    )}
+                    </div>
+                  </td>
                   <td className={GlobalStyle.tableData} style={{ width: "80px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {item.case_distribution_batch_id}
                   </td>
@@ -310,8 +416,19 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "75px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.batch_seq_details?.[0]?.action_type === "distribution" && <img src="/src/assets/images/distributed.png" width={20} height={15} alt="Distributed" />}
-                    {item.batch_seq_details?.[0]?.action_type === "ammend" && <img src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />}
+                    {item.batch_seq_details?.[0]?.action_type === "distribution" && (
+                      <>
+                      <img  data-tooltip-id={`tooltip-distribute-${index}`} data-tooltip-content="Distributed" src="/src/assets/images/distributed.png" width={20} height={15} alt="Distributed" />
+                      <Tooltip id={`tooltip-distribute-${index}`} place="top"/>
+                      </>
+                    )}
+                    {item.batch_seq_details?.[0]?.action_type === "amend" && (
+                      <>
+                      <img  data-tooltip-id={`tooltip-amend-${index}`} data-tooltip-content="Amend" src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />
+                      <Tooltip id={`tooltip-amend-${index}`} place="top"/>
+                      </>
+                     
+                    )}
                     </div>
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "120px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -323,56 +440,68 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   <td className={GlobalStyle.tableData} style={{ width: "90px", textAlign: "center" }}>
                     {item.rulebase_count}
                   </td>
-                  <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
+                  {/* <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                     {item.rulebase_arrears_sum}
-                  </td>
-                  <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.status?.[0]?.crd_distribution_status === "Open" && <img src="/src/assets/images/open.png" width={20} height={15} alt="Open" />}
-                    {item.status?.[0]?.crd_distribution_status === "Complete" && <img src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />}
-                    {item.status?.[0]?.crd_distribution_status === "Error" && <img src="/src/assets/images/error.png" width={20} height={15} alt="Error" />}
-                    {item.status?.[0]?.crd_distribution_status === "InProgress" && <img src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />}
-                    </div>
-                  </td>
+                  </td> */}
+                  
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
                     {item.forward_for_approvals_on && !item.approved_on && !item.proceed_on && (
-                      <img src={forwardtoapproval} width={20} height={15} alt="Forward for Approval" />
+                      <>
+                       <img data-tooltip-id={`tooltip-forward-${index}`} data-tooltip-content={item.forward_for_approvals_on
+                          ? `Forward for Approval on: ${formatDate(item.forward_for_approvals_on)}`
+                          : "Forward for Approval" } 
+                          src={forwardtoapproval} width={20} height={15} alt="Forward for Approval" />
+                        <Tooltip id={`tooltip-forward-${index}`} place="top"/>
+                      </>
+                     
                     )}
-                    {item.forward_for_approvals_on && item.approved_on && !item.proceed_on && (
-                      <img src={managerapproved} width={20} height={15} alt="Approval" />
+                    {item.forward_for_approvals_on && !item.approved_on && item.proceed_on && (
+                      <>
+                      <img data-tooltip-id={`tooltip-proceed-${index}`} data-tooltip-content= {item.proceed_on ? `Proceeded on: ${formatDate(item.proceed_on)}` : "Proceed"}
+                      src={proceed} width={20} height={15} alt="Proceed" />
+                      <Tooltip id={`tooltip-proceed-${index}`} place="top"/>
+                      </>
                     )}
                     {item.forward_for_approvals_on && item.approved_on && item.proceed_on && (
-                      <img src={proceed} width={20} height={15} alt="Proceed" />
+                      <>
+                      <img data-tooltip-id={`tooltip-manager-${index}`} data-tooltip-content={item.approved_on ? `Manager Approved on: ${formatDate(item.approved_on)}` : "Manager Approved" }
+                       src={managerapproved} width={20} height={15} alt="Manager Approved" />
+                      <Tooltip id={`tooltip-manager-${index}`} place="top"/>
+                      </>
                     )}
                     </div>
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "60px", textAlign: "center" }}>
-                    <button onClick={() => handleonsummaryclick(item.case_distribution_batch_id)} >
-                    <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "1px"}} />
+                    <button data-tooltip-id= {`tooltip-summary-${index}`} onClick={() => handleonsummaryclick(item.case_distribution_batch_id)} >
+                    <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "2px"}} />
                     </button>
-                    <button onClick={() => handleonexchangeclick(item.case_distribution_batch_id)}>
+                    <Tooltip id={`tooltip-summary-${index}`} place="top" content="Distribution Summary"/>
+
+
+                    <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_batch_id)} disabled= {!!item.forward_for_approvals_on }>
                     <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} />
                     </button>
-                    <button>
-                    <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "1px" }} />
+                    <Tooltip id={`tooltip-exchange-${index}`} place="top" content="Exchange case count"/>
+
+
+                    <button data-tooltip-id={`tooltip-full-${index}`} >
+                    <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "2px" }} />
                     </button>
-                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`}>
+                    <Tooltip id={`tooltip-full-${index}`} place="top" content="Distributed Full Summary"/>
+
+
+                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_batch_id)} disabled={!!item.forward_for_approvals_on}>
                     <img
                       src={four}
                       width={15}
                       height={15}
                       alt="Forward"
-                      style={{ position: "relative", top: "2px", left: "1px" }}
+                      style={{ position: "relative", top: "2px", left: "3px" }}
                     />
                   </button>
                   <Tooltip id={`tooltip-${item.case_distribution_batch_id}`} place="top">
-                  {item.forward_for_approvals_on && 
-                      <div>Forward for Approval on: {formatDate(item.forward_for_approvals_on)}</div>
-                    }
-                      {item.approved_by && <div>Approved by: {item.approved_by}</div>}
-                      {item.approved_on && <div>Approved on: {formatDate(item.approved_on)}</div>}
-                      {item.proceed_on && <div>Proceeded on: {formatDate(item.proceed_on)}</div>}
+                    Forward for Approval
                   </Tooltip>
                   </td>
                 </tr>
