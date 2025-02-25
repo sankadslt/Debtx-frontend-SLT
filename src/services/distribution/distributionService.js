@@ -128,8 +128,10 @@ export const Forward_F1_Filtered = async (Incident_Id) => {
 
 export const Reject_F1_Filtered = async (Incident_Id) => {
   try {
+    const user= await getLoggedUserId();
     const response = await axios.patch(`${URL}/Reject_F1_filtered_Incident`, {
       Incident_Id,
+      user
     });
     return response;
   } catch (error) {

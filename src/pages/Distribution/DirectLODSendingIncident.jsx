@@ -606,7 +606,7 @@ export default function DirectLODSendingIncident() {
        <div className="flex justify-start items-center w-full mt-6">
             <button
               className={`${GlobalStyle.buttonPrimary} `} 
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/Distribution/filtered-incident")}
             >
               ← Back
             </button>
