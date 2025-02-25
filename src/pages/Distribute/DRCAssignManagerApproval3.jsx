@@ -267,12 +267,14 @@ export default function DRCAssignManagerApproval3() {
     }
   };
 
-  const ontableiconclick = () => {
+  const onTableIconClick = (item) => {
     Swal.fire({
+      title: "Row Parameters",
+      html: `<pre style="text-align: center; white-space: pre-wrap;">${JSON.stringify(item.parameters, null, 2)}</pre>`,
       icon: "info",
-      title: "Summary",
-      text: "Summary of the case",
-      confirmButtonColor: "#f1c40f",
+      confirmButtonText: "Close",
+      confirmButtonColor: "#d33",
+      width: "500px", // Adjust width if needed
     });
   };
   return (
@@ -403,7 +405,7 @@ export default function DRCAssignManagerApproval3() {
                       : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    <button onClick={ontableiconclick}>
+                    <button onClick={() => onTableIconClick(item)}>
                       <img
                         src={one}
                         width={15}
