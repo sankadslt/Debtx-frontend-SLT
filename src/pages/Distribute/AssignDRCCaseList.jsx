@@ -334,11 +334,11 @@ import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { List_CasesOwened_By_DRC } from "../../services/case/CaseServices";
 
+
 export default function AssignDRCsLOG() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState({});
   const [cases, setCases] = useState([]); 
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -349,9 +349,7 @@ export default function AssignDRCsLOG() {
         setCases(data);
       } catch (err) {
         setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
     fetchCases();
   }, []);
@@ -367,51 +365,49 @@ export default function AssignDRCsLOG() {
   const [filterType, setFilterType] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
-  const filteredCases = cases.filter((row) => {
-    const matchesSearch = Object.values(row)
+  const filteredCases = cases.filter((row) => 
+    Object.values(row)
       .join(" ")
       .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-
-      const matchesFilter =
-      (!filterType || !filterValue) ||
-      (filterType === "Account No" && row.account_no.toString().includes(filterValue)) ||
-      (filterType === "Case ID" && row.case_id.toString().includes(filterValue));
-
-    const matchesDate =
-      (!startDate || new Date(row.created_dtm) >= startDate) &&
-      (!endDate || new Date(row.expire_dtm) <= endDate);
-
-    return matchesSearch && matchesFilter && matchesDate;
-  });
+      .includes(searchQuery.toLowerCase())
+      );
 
   const itemsPerPage = 4;
   const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
 
   // Filter handler
   const handleFilter = () => {
-    if (startDate && endDate) {
-      const filtered = tableData.filter((row) => {
-        const assignedDate = new Date(row.assignedDate);
-        const endDate1 = new Date(row.endDate);
-        return assignedDate >= startDate && endDate1 <= endDate;
-      });
-      handleFilterByType;
-      setFilteredData(filtered);
-    } else {
-      setFilteredData(tableData); // Reset if dates are not selected
+    const payload = {}
+    payload.drc_id = 7; // Hardcoded DRC ID for testing
+    if (startDate) {
+      payload.from_date = startDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    }
+    if (endDate) {
+      payload.to_date = endDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    }
+    // Assign either "account_no" or "case_id" based on selected filterType
+
+    if (filterType === "Account No" && filterValue.trim() !== "") {
+      payload.account_no = filterValue.trim();
+    } else if (filterType === "Case ID" && filterValue.trim() !== "") {
+      payload.case_id = filterValue.trim();
     }
 
-    if (filterType && filterValue) {
-      const filtered = tableData.filter((row) => {
-        const valueToCheck =
-          filterType === "Account No" ? row.accountNo : row.caseId;
-        return valueToCheck.toLowerCase().includes(filterValue.toLowerCase());
-      });
-      setFilteredData(filtered);
-    } else {
-      setFilteredData(tableData); // Reset to original data if no filter applied
+
+    console.log("Filtered Request Payload:", payload);
+
+    // Call API with payload
+    const fetchCases = async () => {
+      try {
+        const data = await List_CasesOwened_By_DRC(payload);
+        setCases(data);
+      } catch (err) {
+        setError(err.message);
+        setCases([]);
+      }
     }
+    fetchCases();
+
   };
 
   // Pagination handler
@@ -491,11 +487,6 @@ export default function AssignDRCsLOG() {
       </div>
 
       {/* Table Section */}
-      {loading ? (
-        <p className="text-center text-gray-500">Loading...</p>
-      ) : error ? (
-        <p className="text-center text-red-500">Error: {error}</p>
-      ) : (
         <div className="flex flex-col">
         <div className="flex justify-start mb-4">
           <div className={GlobalStyle.searchBarContainer}>
@@ -537,11 +528,11 @@ export default function AssignDRCsLOG() {
             <tbody>
               {paginatedData.length > 0 ? (
                 paginatedData.map((caseItem) => (
-                  <tr key={caseItem.case_id} className={`${
+                  <tr key={caseItem.case_id} className={
                     caseItem % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
+                      ? GlobalStyle.tableRowEven
+                      : GlobalStyle.tableRowOdd
+                  }
                 >
                     <td className={GlobalStyle.tableData}>{caseItem.case_id}</td>
                     <td className={GlobalStyle.tableData}>{caseItem.case_current_status}</td>
@@ -551,7 +542,9 @@ export default function AssignDRCsLOG() {
                       {new Date(caseItem.created_dtm).toLocaleString()}
                     </td>
                     <td className={GlobalStyle.tableData}>
-                      {new Date(caseItem.expire_dtm).toLocaleDateString()}
+                    {caseItem.end_dtm.trim() && !isNaN(new Date(caseItem.end_dtm.trim()).getTime()) 
+                      ? new Date(caseItem.end_dtm.trim()).toLocaleDateString() 
+                      : ""}
                     </td>
                     <td className={GlobalStyle.tableData}>
                     <button
@@ -574,7 +567,7 @@ export default function AssignDRCsLOG() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="text-center p-4 text-gray-500">
+                  <td colSpan="7" className={GlobalStyle.tableData}>
                     No cases found.
                   </td>
                 </tr>
@@ -584,7 +577,7 @@ export default function AssignDRCsLOG() {
         </div>
         </div>
         
-      )}
+      
 
       {/* Pagination */}
       <div className={GlobalStyle.navButtonContainer}>
