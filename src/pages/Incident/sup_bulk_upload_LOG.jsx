@@ -9,14 +9,12 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-
- 
-
 import { useCallback, useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import Swal from "sweetalert2";
 
 import OpenIcon from "../../assets/images/incidents/Incident_Done.png";
 import InProgressIcon from "../../assets/images/incidents/Incident_InProgress.png";
@@ -45,6 +43,23 @@ const SupBulkUploadLog = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const rowsPerPage = 7;
+
+    const validateAndFetchData = () => {
+        // Check if any filter is applied
+        if (!fromDate && !toDate && !status) {
+            Swal.fire({
+                title: "Action required!",
+                text: "Please complete the necessary steps before proceeding",
+                icon: "warning",
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+        
+        // If validation passes, fetch data
+        fetchData();
+    };
 
     const fetchData = useCallback(async () => {
         try {
@@ -86,6 +101,7 @@ const SupBulkUploadLog = () => {
     }, [fromDate, toDate, status]);
     
     useEffect(() => {
+        // Initial data load - optional, you can remove this if you want to require filters first
         fetchData();
     }, [fetchData]);
 
@@ -96,6 +112,14 @@ const SupBulkUploadLog = () => {
     const pages = Math.ceil(filteredData.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+
+    const clearFilters = () => {
+        setFromDate(null);
+        setToDate(null);
+        setStatus("");
+        // Optionally fetch all data after clearing
+        fetchData();
+    };
 
     return (
         <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
@@ -128,10 +152,10 @@ const SupBulkUploadLog = () => {
                         placeholderText="To"
                         className={GlobalStyle.inputText}
                     />
-                    <button className={GlobalStyle.buttonPrimary} onClick={fetchData}>
+                    <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
                         Filter
                     </button>
-                    <button className={GlobalStyle.buttonPrimary} onClick={() => setStatus("")}>
+                    <button className={GlobalStyle.buttonPrimary} onClick={clearFilters}>
                         Clear Filters
                     </button>
                 </div>
@@ -178,8 +202,16 @@ const SupBulkUploadLog = () => {
                                     <td className={GlobalStyle.tableData}>{row.uploadedBy}</td>
                                     <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
                                         <div className="flex items-center gap-2">
-                                            <img src={getStatusIcon(row.status)} alt={row.status} className="w-6 h-6" />
-                                            
+                                            <div className="relative group">
+                                                <img 
+                                                    src={getStatusIcon(row.status)} 
+                                                    alt={row.status} 
+                                                    className="w-6 h-6 cursor-pointer" 
+                                                />
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                                                    {row.status}
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td className={GlobalStyle.tableData}>{row.fileName}</td>
