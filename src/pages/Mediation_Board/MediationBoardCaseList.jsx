@@ -145,7 +145,6 @@ export default function MediationBoardCaseList() {
         <div className={GlobalStyle.searchBarContainer}>
           <input 
             type="text" 
-            placeholder="Search..." 
             className={GlobalStyle.inputSearch}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
