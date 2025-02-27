@@ -1,26 +1,31 @@
 /* Purpose: This template is used for the 2.17 - Mediation Board case list .
 Created Date: 2025-02-27
 Created By: sakumini (sakuminic@gmail.com)
-Modified By: 
+Modified By: Buthmi mithara (buthmimithara1234@gmail.com)
 Version: node 20
 ui number : 2.17
 Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the Mediation Board case list Screen */
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaInfoCircle } from "react-icons/fa";
+import DatePicker from "react-datepicker";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 
 export default function MediationBoardCaseList() {
   // State management
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
+  const [error, setError] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedDRC, setSelectedDRC] = useState("");
   const [selectedRTOM, setSelectedRTOM] = useState("");
-  const [dateRange, setDateRange] = useState({ from: "", to: "" });
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(3);
+  const [currentPage, setCurrentPage] = useState(0); // Fixed: Starting from 0 to match slice logic
+  const [loading, setLoading] = useState(false); // Added: Missing loading state
+
+  const rowsPerPage = 7;
 
   // Mock data for the table
   const caseData = [
@@ -35,7 +40,7 @@ export default function MediationBoardCaseList() {
       nextCallingDate: "mm/dd/yyyy"
     },
     {
-      caseId: "C001",
+      caseId: "C002", // Fixed: Made unique
       status: "FMB Failed",
       date: "mm/dd/yyyy",
       drc: "ABCD",
@@ -46,23 +51,52 @@ export default function MediationBoardCaseList() {
     }
   ];
 
+  // Date handlers
+  const handleFromDateChange = (date) => {
+    if (toDate && date > toDate) {
+      setError("The 'From' date cannot be later than the 'To' date.");
+    } else {
+      setError("");
+      setFromDate(date);
+    }
+  };
+
+  const handleToDateChange = (date) => {
+    if (fromDate && date < fromDate) {
+      setError("The 'To' date cannot be earlier than the 'From' date.");
+    } else {
+      setError("");
+      setToDate(date);
+    }
+  };
+
   // Handle filter updates
   const handleFilter = () => {
     // Implementation for filtering would go here
-    console.log("Filtering with:", { selectedStatus, selectedDRC, selectedRTOM, dateRange });
+    console.log("Filtering with:", { selectedStatus, selectedDRC, selectedRTOM, fromDate, toDate }); // Fixed: dateRange not defined
   };
 
-  // Handle pagination
+  // Data filtering and pagination
+  const filteredData = caseData.filter((row) => // Fixed: cases -> caseData
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  const pages = Math.ceil(filteredData.length / rowsPerPage);
+  const paginatedData = filteredData.slice(
+    currentPage * rowsPerPage,
+    (currentPage + 1) * rowsPerPage
+  );
+
+  // Pagination handlers
   const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    setCurrentPage((prev) => Math.max(0, prev - 1));
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    setCurrentPage((prev) => Math.min(pages - 1, prev + 1));
   };
 
   return (
@@ -70,11 +104,11 @@ export default function MediationBoardCaseList() {
       <h1 className={GlobalStyle.headingLarge}>Mediation Board Case List</h1>
       
       {/* Filter section */}
-      <div className="flex flex-wrap justify-end gap-4 my-8">
+      <div className="flex flex-wrap md:flex-nowrap items-center justify-end my-6 gap-1 mb-8">
         {/* Status dropdown */}
         <div className="w-40">
           <select 
-            className={GlobalStyle.selectBox}
+            className={`${GlobalStyle.selectBox} w-32 md:w-40`}
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
@@ -88,7 +122,7 @@ export default function MediationBoardCaseList() {
         {/* DRC dropdown */}
         <div className="w-40">
           <select 
-            className={GlobalStyle.selectBox}
+            className={`${GlobalStyle.selectBox} w-32 md:w-40`}
             value={selectedDRC}
             onChange={(e) => setSelectedDRC(e.target.value)}
           >
@@ -101,7 +135,7 @@ export default function MediationBoardCaseList() {
         {/* RTOM dropdown */}
         <div className="w-40">
           <select 
-            className={GlobalStyle.selectBox}
+            className={`${GlobalStyle.selectBox} w-32 md:w-40`}
             value={selectedRTOM}
             onChange={(e) => setSelectedRTOM(e.target.value)}
           >
@@ -111,25 +145,21 @@ export default function MediationBoardCaseList() {
           </select>
         </div>
         
-        {/* Date range */}
-        <div className="flex items-center gap-2">
-          <span className={GlobalStyle.dataPickerDate}>Date - From :</span>
-          <input 
-            type="text" 
-            placeholder="mm/dd/yyyy" 
-            className={GlobalStyle.inputText}
-            value={dateRange.from}
-            onChange={(e) => setDateRange({...dateRange, from: e.target.value})}
-          />
-          <span className={GlobalStyle.dataPickerDate}>To :</span>
-          <input 
-            type="text" 
-            placeholder="mm/dd/yyyy" 
-            className={GlobalStyle.inputText}
-            value={dateRange.to}
-            onChange={(e) => setDateRange({...dateRange, to: e.target.value})}
-          />
-        </div>
+        <label className={GlobalStyle.dataPickerDate}>Date</label>
+        <DatePicker
+          selected={fromDate}
+          onChange={handleFromDateChange}
+          dateFormat="dd/MM/yyyy"
+          placeholderText="dd/MM/yyyy"
+          className={`${GlobalStyle.inputText} w-32 md:w-40`}
+        />
+        <DatePicker
+          selected={toDate}
+          onChange={handleToDateChange}
+          dateFormat="dd/MM/yyyy"
+          placeholderText="dd/MM/yyyy"
+          className={`${GlobalStyle.inputText} w-32 md:w-40`}
+        />
         
         {/* Filter button */}
         <button 
@@ -139,24 +169,26 @@ export default function MediationBoardCaseList() {
           Filter
         </button>
       </div>
+
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       
       {/* Search bar */}
-      <div className="flex mb-4">
-        <div className={GlobalStyle.searchBarContainer}>
-          <input 
-            type="text" 
-            className={GlobalStyle.inputSearch}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
+      <div className="mb-4 flex justify-start">
+          <div className={GlobalStyle.searchBarContainer}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={GlobalStyle.inputSearch}
+            />
+            <FaSearch className={GlobalStyle.searchBarIcon} />
+          </div>
         </div>
-      </div>
       
       {/* Table */}
       <div className={GlobalStyle.tableContainer}>
-        <table className={GlobalStyle.table}>
-          <thead>
+          <table className={GlobalStyle.table}>
+            <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Status</th>
@@ -170,11 +202,15 @@ export default function MediationBoardCaseList() {
             </tr>
           </thead>
           <tbody>
-            {caseData.map((row, index) => (
-              <tr 
-                key={index}
-                className={index % 2 === 0 ? "bg-white bg-opacity-75 border-b" : "bg-gray-50 bg-opacity-50 border-b"}
-              >
+            {paginatedData.map((row, index) => (
+                <tr
+                  key={index} // Fixed: Using row.case_id -> index since caseId might not be unique
+                  className={`${
+                    index % 2 === 0
+                      ? "bg-white bg-opacity-75"
+                      : "bg-gray-50 bg-opacity-50"
+                  } border-b`}
+                >
                 <td className={GlobalStyle.tableData}>
                   <a href="#" className="text-blue-600 hover:underline">{row.caseId}</a>
                 </td>
@@ -186,34 +222,43 @@ export default function MediationBoardCaseList() {
                 <td className={GlobalStyle.tableData}>{row.callingRound}</td>
                 <td className={GlobalStyle.tableData}>{row.nextCallingDate}</td>
                 <td className={GlobalStyle.tableData}>
-                  <FaInfoCircle className="mx-auto text-blue-700 text-xl cursor-pointer" />
+                  <FaInfoCircle className="mx-auto text-black text-xl cursor-pointer" />
                 </td>
               </tr>
             ))}
+            {paginatedData.length === 0 && (
+                <tr>
+                  <td colSpan="9" className="text-center py-4"> {/* Fixed: colSpan="8" -> "9" to match columns */}
+                    {loading ? "Loading..." : "No results found"}
+                  </td>
+                </tr>
+              )}
           </tbody>
         </table>
       </div>
       
       {/* Pagination */}
-      <div className={GlobalStyle.navButtonContainer}>
-        <button 
-          className={GlobalStyle.navButton}
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-        >
-          <FaArrowLeft />
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button 
-          className={GlobalStyle.navButton}
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-        >
-          <FaArrowRight />
-        </button>
-      </div>
+      {filteredData.length > rowsPerPage && (
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handlePrevPage}
+            disabled={currentPage === 0}
+          >
+            <FaArrowLeft />
+          </button>
+          <span>
+            Page {currentPage + 1} of {pages}
+          </span>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handleNextPage}
+            disabled={currentPage === pages - 1}
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
