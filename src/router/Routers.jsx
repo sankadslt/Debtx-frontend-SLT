@@ -49,6 +49,9 @@ import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
  import AmendAssignedDRC from "../pages/Distribute/AmendAssignedDRC";
  import ReAssignDRC from "../pages/Distribute/ReAssignDRC";
  import AssignDRCCaseList from "../pages/Distribute/AssignDRCCaseList";
+ import DRCAssignManagerApproval2 from "../pages/Distribute/DRCAssignManagerApproval2";
+ import DRCAssignManagerApproval3 from "../pages/Distribute/DRCAssignManagerApproval3";
+
 const Routers = () => {
   return (
     <Routes>
@@ -102,9 +105,13 @@ const Routers = () => {
     <Route path="/pages/Distribute/CaseDistributionDRCSummarywithRTOM" element={<ProtectedRoute element={<CaseDistributionDRCSummarywithRTOM />} allowedRoles={['superadmin']} />} />
 
     <Route path="/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)" element={<ProtectedRoute element={<CaseDistributionDRCTransactionsBatch />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Distribute/DRCAssignManagerApproval2" element={<ProtectedRoute element={<DRCAssignManagerApproval2 />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Distribute/DRCAssignManagerApproval3" element={<ProtectedRoute element={<DRCAssignManagerApproval3 />} allowedRoles={['superadmin']} />} />
 
     <Route path="/pages/Distribute/ReAssignDRC" element={<ReAssignDRC />} />
     <Route path="/pages/Distribute/AssignDRCCaseList" element={<AssignDRCCaseList />} />
+
+
     {/* //INCIDENT */}
     <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
 

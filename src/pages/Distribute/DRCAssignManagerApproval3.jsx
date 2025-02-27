@@ -32,7 +32,7 @@ export default function DRCAssignManagerApproval3() {
   const [endDate, setEndDate] = useState(null);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 2;
+  const recordsPerPage = 5;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
@@ -266,6 +266,17 @@ export default function DRCAssignManagerApproval3() {
       });
     }
   };
+
+  const onTableIconClick = (item) => {
+    Swal.fire({
+      title: "Row Parameters",
+      html: `<pre style="text-align: center; white-space: pre-wrap;">${JSON.stringify(item.parameters, null, 2)}</pre>`,
+      icon: "info",
+      confirmButtonText: "Close",
+      confirmButtonColor: "#d33",
+      width: "500px", // Adjust width if needed
+    });
+  };
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
@@ -394,7 +405,7 @@ export default function DRCAssignManagerApproval3() {
                       : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    <button>
+                    <button onClick={() => onTableIconClick(item)}>
                       <img
                         src={one}
                         width={15}
