@@ -83,62 +83,7 @@ export default function CollectOnlyCPECollect() {
     fetchData();
   }, []);
 
-  //   const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
-
-  //      if(!source_type && !fromDate && !toDate){
-  //        Swal.fire({
-  //          title: 'Warning',
-  //          text: 'Missing Parameters',
-  //          icon: 'warning',
-  //          confirmButtonText: 'OK'
-  //        });
-  //      }
-  //      else if ((fromDate && !toDate) || (!fromDate && toDate)) {
-  //        Swal.fire({
-  //          title: "Incomplete Date Range",
-  //          text: "Both From Date and To Date must be selected together.",
-  //          icon: "warning",
-  //          confirmButtonText: "OK",
-  //        });
-  //        return;
-  //       };
-
-  //   const confirmation = await Swal.fire({
-  //     title: "Confirm Task Creation",
-  //     text: "Are you sure you want to create this task?",
-  //     icon: "question",
-  //     showCancelButton: true,
-  //     confirmButtonText: "Yes, create it!",
-  //     cancelButtonText: "Cancel",
-  //   });
-
-  //   if (!confirmation.isConfirmed) return;
-
-  //   try {
-  //     const filteredParams = {
-  //       Source_Type: source_type,
-  //       FromDate: fromDate,
-  //       ToDate: toDate,
-  //     };
-  //     const response = await Create_Task(filteredParams);
-  //     if (response.status === 201) {
-  //       Swal.fire({
-  //         title: "Success",
-  //         text: "Task successfully created",
-  //         icon: "success",
-  //         confirmButtonText: "OK",
-  //       });
-  //     }
-  //   } catch {
-  //     Swal.fire({
-  //       title: "Error",
-  //       text: "Error creating task",
-  //       icon: "error",
-  //       confirmButtonText: "OK",
-  //     });
-  //   }
-  // };
-
+  
   const handleCreateTaskForDownload = async ({
     source_type,
     fromDate,
@@ -254,15 +199,6 @@ export default function CollectOnlyCPECollect() {
       return;
     }
 
-    // const confirmation = await Swal.fire({
-    //   title: "Confirm Task Creation",
-    //   text: "Are you sure you want to proceed with creating tasks for selected rows?",
-    //   icon: "question",
-    //   showCancelButton: true,
-    //   confirmButtonText: "Yes, proceed!",
-    //   cancelButtonText: "Cancel",
-    // });
-    // if (!confirmation.isConfirmed) return;
 
     try {
       if (selectedRows.length === 0) {
@@ -285,7 +221,7 @@ export default function CollectOnlyCPECollect() {
         return;
       }
       if (selectedRows.length > 10) {
-        // Change filteredData.length to selectedRows.length
+      
         const parameters = {
           Status: "Open CPE Collect",
           Incident_Ids: selectedRows, // Fix typo "Inncident_Ids" → "Incident_Ids"
