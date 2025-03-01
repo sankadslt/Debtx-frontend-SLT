@@ -78,7 +78,7 @@ const DistributeDummy = () => {
           },
           {
             to: "/pages/Distribute/ReAssignDRC",
-            label: "1.18 - Assigned DRC Summary (Collect CPE) ",
+            label: "1.18 - Re-Assign DRC",
           },
           {
             to: "/pages/Distribute/DRCAssignManagerApproval2",
