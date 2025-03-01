@@ -462,3 +462,36 @@ export const Create_Task_For_Assigned_drc_case_list_download = async (payload) =
   }
 }
 
+export const AssignDRCToCaseDetails = async (payload) => {
+  try {
+    
+    const response = await axios.post(
+      `${URL}/AssignDRCToCaseDetails`,
+      payload
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching assign DRC to case details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+export const Assign_DRC_To_Case = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Assign_DRC_To_Case`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error assigning DRC to case:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
