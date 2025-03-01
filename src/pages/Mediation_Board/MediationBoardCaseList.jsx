@@ -9,9 +9,62 @@ Related Files: (routes)
 Notes:The following page conatins the code for the Mediation Board case list Screen */
 
 import React, { useState } from "react";
-import { FaArrowLeft, FaArrowRight, FaSearch, FaInfoCircle } from "react-icons/fa";
+import {FaArrowLeft,FaArrowRight,FaSearch,FaInfoCircle,} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+
+// Import status icons with correct file extensions
+import Forward_to_Mediation_Board from "../../assets/images/mediationBoard/Forward_to_Mediation_Board.png";
+import MB_fail_with_pending_non_settlement from "../../assets/images/mediationBoard/MB_fail_with_pending_non_settlement.png";
+import MB_Negotiation from "../../assets/images/mediationBoard/MB_Negotiation.png";
+import MB_Settle_Active from "../../assets/images/mediationBoard/MB_Settle_Active.png";
+import MB_Settle_open_pending from "../../assets/images/mediationBoard/MB_Settle_open_pending.png";
+import MB_Settle_pending from "../../assets/images/mediationBoard/MB_Settle_pending.png";
+
+// Status icon mapping
+const STATUS_ICONS = {
+  Forward_to_Mediation_Board: {
+    icon: Forward_to_Mediation_Board,
+    tooltip: "Forward to Mediation Board",
+  },
+  MB_fail_with_pending_non_settlement: {
+    icon: MB_fail_with_pending_non_settlement,
+    tooltip: "MB fail with pending non settlement",
+  },
+  MB_Negotiation: {
+    icon: MB_Negotiation,
+    tooltip: "MB Negotiation",
+  },
+  MB_Settle_Active: {
+    icon: MB_Settle_Active,
+    tooltip: "MB Settle Active",
+  },
+  MB_Settle_open_pending: {
+    icon: MB_Settle_open_pending,
+    tooltip: "MB Settle open pending",
+  },
+  MB_Settle_pending: {
+    icon: MB_Settle_pending,
+    tooltip: "MB Settle pending",
+  },
+};
+
+// Status Icon component with tooltip
+const StatusIcon = ({ status }) => {
+  const statusInfo = STATUS_ICONS[status];
+
+  if (!statusInfo) return <span>{status}</span>;
+
+  return (
+    <div className="relative group">
+      <img src={statusInfo.icon} alt={status} className="w-6 h-6 cursor-help" />
+      <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-sm rounded px-2 py-1 left-1/2 transform -translate-x-1/2 bottom-full mb-1 whitespace-nowrap z-10">
+        {statusInfo.tooltip}
+        <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-2 h-2 bg-gray-800 rotate-45"></div>
+      </div>
+    </div>
+  );
+};
 
 export default function MediationBoardCaseList() {
   // State management
@@ -31,24 +84,24 @@ export default function MediationBoardCaseList() {
   const caseData = [
     {
       caseId: "C001",
-      status: "MB Negotiation",
+      status: "Forward_to_Mediation_Board",
       date: "mm/dd/yyyy",
       drc: "ABCD",
       roName: "ABCD",
       rtom: "RTOM 01",
       callingRound: 1,
-      nextCallingDate: "mm/dd/yyyy"
+      nextCallingDate: "mm/dd/yyyy",
     },
     {
       caseId: "C002", // Fixed: Made unique
-      status: "FMB Failed",
+      status: "MB_fail_with_pending_non_settlement",
       date: "mm/dd/yyyy",
       drc: "ABCD",
       roName: "ABCD",
       rtom: "RTOM 01",
       callingRound: 3,
-      nextCallingDate: "-"
-    }
+      nextCallingDate: "-",
+    },
   ];
 
   // Date handlers
@@ -73,15 +126,24 @@ export default function MediationBoardCaseList() {
   // Handle filter updates
   const handleFilter = () => {
     // Implementation for filtering would go here
-    console.log("Filtering with:", { selectedStatus, selectedDRC, selectedRTOM, fromDate, toDate }); // Fixed: dateRange not defined
+    console.log("Filtering with:", {
+      selectedStatus,
+      selectedDRC,
+      selectedRTOM,
+      fromDate,
+      toDate,
+    }); // Fixed: dateRange not defined
   };
 
   // Data filtering and pagination
-  const filteredData = caseData.filter((row) => // Fixed: cases -> caseData
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
+  const filteredData = caseData.filter(
+    (
+      row // Fixed: cases -> caseData
+    ) =>
+      Object.values(row)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
   );
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -102,26 +164,36 @@ export default function MediationBoardCaseList() {
   return (
     <div className={GlobalStyle.fontPoppins}>
       <h1 className={GlobalStyle.headingLarge}>Mediation Board Case List</h1>
-      
+
       {/* Filter section */}
       <div className="flex flex-wrap md:flex-nowrap items-center justify-end my-6 gap-1 mb-8">
         {/* Status dropdown */}
         <div className="w-40">
-          <select 
+          <select
             className={`${GlobalStyle.selectBox} w-32 md:w-40`}
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
             <option value="">Status</option>
-            <option value="mb-negotiation">MB Negotiation</option>
-            <option value="fmb-failed">FMB Failed</option>
+            <option value="Forward_to_Mediation_Board">
+              Forward_to_Mediation_Board
+            </option>
+            <option value="MB_fail_with_pending_non_settlement">
+              MB_fail_with_pending_non_settlement
+            </option>
+            <option value="MB_Negotiation">MB_Negotiation</option>
+            <option value="MB_Settle_Active">MB_Settle_Active</option>
+            <option value="MB_Settle_open_pending">
+              MB_Settle_open_pending
+            </option>
+            <option value="MB_Settle_pending">MB_Settle_pending</option>
             {/* Add other status options */}
           </select>
         </div>
-        
+
         {/* DRC dropdown */}
         <div className="w-40">
-          <select 
+          <select
             className={`${GlobalStyle.selectBox} w-32 md:w-40`}
             value={selectedDRC}
             onChange={(e) => setSelectedDRC(e.target.value)}
@@ -131,10 +203,10 @@ export default function MediationBoardCaseList() {
             {/* Add other DRC options */}
           </select>
         </div>
-        
+
         {/* RTOM dropdown */}
         <div className="w-40">
-          <select 
+          <select
             className={`${GlobalStyle.selectBox} w-32 md:w-40`}
             value={selectedRTOM}
             onChange={(e) => setSelectedRTOM(e.target.value)}
@@ -144,7 +216,7 @@ export default function MediationBoardCaseList() {
             {/* Add other RTOM options */}
           </select>
         </div>
-        
+
         <label className={GlobalStyle.dataPickerDate}>Date</label>
         <DatePicker
           selected={fromDate}
@@ -160,35 +232,32 @@ export default function MediationBoardCaseList() {
           placeholderText="dd/MM/yyyy"
           className={`${GlobalStyle.inputText} w-32 md:w-40`}
         />
-        
+
         {/* Filter button */}
-        <button 
-          className={GlobalStyle.buttonPrimary}
-          onClick={handleFilter}
-        >
+        <button className={GlobalStyle.buttonPrimary} onClick={handleFilter}>
           Filter
         </button>
       </div>
 
       {error && <div className="text-red-500 mb-4">{error}</div>}
-      
+
       {/* Search bar */}
       <div className="mb-4 flex justify-start">
-          <div className={GlobalStyle.searchBarContainer}>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={GlobalStyle.inputSearch}
-            />
-            <FaSearch className={GlobalStyle.searchBarIcon} />
-          </div>
+        <div className={GlobalStyle.searchBarContainer}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={GlobalStyle.inputSearch}
+          />
+          <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
-      
+      </div>
+
       {/* Table */}
       <div className={GlobalStyle.tableContainer}>
-          <table className={GlobalStyle.table}>
-            <thead className={GlobalStyle.thead}>
+        <table className={GlobalStyle.table}>
+          <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Status</th>
@@ -203,18 +272,20 @@ export default function MediationBoardCaseList() {
           </thead>
           <tbody>
             {paginatedData.map((row, index) => (
-                <tr
-                  key={index} // Fixed: Using row.case_id -> index since caseId might not be unique
-                  className={`${
-                    index % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
+              <tr
+                key={index} // Fixed: Using row.case_id -> index since caseId might not be unique
+                className={`${
+                  index % 2 === 0
+                    ? "bg-white bg-opacity-75"
+                    : "bg-gray-50 bg-opacity-50"
+                } border-b`}
+              >
+                <td className={GlobalStyle.tableData}>{row.caseId}</td>
+                <td
+                  className={`${GlobalStyle.tableData} flex justify-center items-center`}
                 >
-                <td className={GlobalStyle.tableData}>
-                  <a href="#" className="text-blue-600 hover:underline">{row.caseId}</a>
+                  <StatusIcon status={row.status} />
                 </td>
-                <td className={GlobalStyle.tableData}>{row.status}</td>
                 <td className={GlobalStyle.tableData}>{row.date}</td>
                 <td className={GlobalStyle.tableData}>{row.drc}</td>
                 <td className={GlobalStyle.tableData}>{row.roName}</td>
@@ -227,16 +298,18 @@ export default function MediationBoardCaseList() {
               </tr>
             ))}
             {paginatedData.length === 0 && (
-                <tr>
-                  <td colSpan="9" className="text-center py-4"> {/* Fixed: colSpan="8" -> "9" to match columns */}
-                    {loading ? "Loading..." : "No results found"}
-                  </td>
-                </tr>
-              )}
+              <tr>
+                <td colSpan="9" className="text-center py-4">
+                  {" "}
+                  {/* Fixed: colSpan="8" -> "9" to match columns */}
+                  {loading ? "Loading..." : "No results found"}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-      
+
       {/* Pagination */}
       {filteredData.length > rowsPerPage && (
         <div className={GlobalStyle.navButtonContainer}>
