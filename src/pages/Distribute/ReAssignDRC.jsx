@@ -10,13 +10,39 @@
 // Related Files:  app.js (routes)
 // Notes:.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
+import {AssignDRCToCaseDetails} from "../../services/case/CaseServices.js";
 
 export default function ReAssignDRC() {
+  const [casedetails, setCasedetails] = useState("");
+  const case_id = 214;
+  useEffect(() => {
+      const fetchTransactions = async () => {
+        try {
+          const data = {
+            case_id,
+          };
+          const response = await AssignDRCToCaseDetails(data);
+  
+          if (response.status === "success") {
+            setCasedetails(response.data);
+            console.log("Response", response);
+          } else {
+            setError("No data found.");
+          }
+        } catch (err) {
+          console.error("Error fetching case details:", err);
+          setError("Failed to fetch data.");
+        }
+      };
+  
+      fetchTransactions();
+    }, [case_id]);
+
   const negotiationDetails = [
     {
       date: "2024.11.04",

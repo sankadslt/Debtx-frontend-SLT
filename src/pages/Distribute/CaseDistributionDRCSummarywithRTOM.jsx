@@ -7,36 +7,23 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: The following page conatins the codes */
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import { useLocation, useNavigate } from "react-router-dom";
+import {List_Case_Distribution_Details_With_Rtoms} from "/src/services/case/CaseServices.js";
 
 const CaseDistributionDRCSummarywithRTOM = () => {
-  // Sample data for the table
-  const data = [
-    {
-      rtom: "A",
-      caseAmount: "100",
-      arrearsAmount: "10",
-    },
-    {
-      rtom: "B",
-      caseAmount: "10",
-      arrearsAmount: "10",
-    },
-  ];
 
   // State for filters and table
-
-  const [filteredData, setFilteredData] = useState(data);
+  const location = useLocation();
+  const batchId = location.state?.BatchID;
+  const drcname = location.state?.DRCName;
+  const drcid = location.state?.DRCID;
+  const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 7;
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   // Filtering the data based on search query
   const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
@@ -45,11 +32,26 @@ const CaseDistributionDRCSummarywithRTOM = () => {
       .includes(searchQuery.toLowerCase())
   );
 
-  // Apply pagination to the search-filtered data
-  const currentData = filteredDataBySearch.slice(
-    indexOfFirstRecord,
-    indexOfLastRecord
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const payload = {  
+          case_distribution_batch_id: batchId,
+          drc_id: drcid,
+        };
+        
+        console.log("Fetching data with payload:", payload);
+        
+        const response = await List_Case_Distribution_Details_With_Rtoms(payload);
+        setFilteredData(response);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+  
+    fetchData();
+  }, [batchId, drcid]);
+      
 
   const handleCreateTask = () => {
     alert("Create Task and Let Me Know button clicked!");
@@ -60,8 +62,8 @@ const CaseDistributionDRCSummarywithRTOM = () => {
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary</h1>
       <div className=" py-5 mt-2 ml-10 w-fit ">
-        <h2 className={GlobalStyle.headingMedium}>Batch-B1</h2>
-        <h2 className={GlobalStyle.headingMedium}>TCM(DRC Name)</h2>
+        <h2 className={GlobalStyle.headingMedium}>Batch- {batchId || "undefined"}</h2>
+        <h2 className={GlobalStyle.headingMedium}>{drcname || "undefined"}</h2>
       </div>
 
       {/* Search Section */}
@@ -89,7 +91,8 @@ const CaseDistributionDRCSummarywithRTOM = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item, index) => (
+            {filteredDataBySearch.length > 0 ? (
+              filteredDataBySearch.map((item, index) => (
               <tr
                 key={item.caseId}
                 className={
@@ -99,10 +102,18 @@ const CaseDistributionDRCSummarywithRTOM = () => {
                 }
               >
                 <td className={GlobalStyle.tableData}>{item.rtom}</td>
-                <td className={GlobalStyle.tableData}>{item.caseAmount}</td>
-                <td className={GlobalStyle.tableData}>{item.arrearsAmount}</td>
+                <td className={GlobalStyle.tableData}>{item.case_count}</td>
+                <td className={GlobalStyle.tableData}>{item.tot_arrease}</td>
               </tr>
-            ))}
+            ))
+            ) : (
+              <tr>
+                <td colSpan="3" className={GlobalStyle.tableData}>
+                  No data found
+                </td>
+              </tr>
+            )
+          }
           </tbody>
         </table>
       </div>

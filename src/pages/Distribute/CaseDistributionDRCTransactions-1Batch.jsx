@@ -16,9 +16,8 @@ import {
   List_all_transaction_seq_of_batch_id,
   Create_Task_For_case_distribution_transaction,
 } from "/src/services/case/CaseServices.js";
-import {getLoggedUserId} from "/src/services/auth/authService.js";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
-
 
 export default function CaseDistributionDRCTransactions1Batch() {
   const navigate = useNavigate();
@@ -56,14 +55,16 @@ export default function CaseDistributionDRCTransactions1Batch() {
 
     const payload = {
       case_distribution_batch_id: BatchID || 2,
-      Created_By: userId ,
+      Created_By: userId,
     };
-    
+
     console.log("Payload", payload);
     try {
-      const response = await Create_Task_For_case_distribution_transaction(payload); 
+      const response = await Create_Task_For_case_distribution_transaction(
+        payload
+      );
       console.log("Response", response);
-  
+
       if (response.status === "success") {
         console.log("Task created successfully");
         Swal.fire({
@@ -73,7 +74,10 @@ export default function CaseDistributionDRCTransactions1Batch() {
           confirmButtonColor: "#28a745",
         });
       } else {
-        console.error("Error in API response:", response.message || "Unknown error");
+        console.error(
+          "Error in API response:",
+          response.message || "Unknown error"
+        );
       }
     } catch (error) {
       console.error(
@@ -81,7 +85,10 @@ export default function CaseDistributionDRCTransactions1Batch() {
         error.response?.data || error.message
       );
 
-      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "An error occurred. Please try again.";
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -90,18 +97,16 @@ export default function CaseDistributionDRCTransactions1Batch() {
       });
     }
   };
-  
 
   const handleoniconclick = () => {
     navigate("/pages/Distribute/AssignedDRCSummary");
   };
 
-
   const handletableiconclick = (Batchseq) => {
     navigate("/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)", {
-        state: { BatchID, Batchseq } 
+      state: { BatchID, Batchseq },
     });
-};
+  };
 
   const batchSeqDetails = transaction[0]?.batch_seq_details || [];
 
@@ -196,7 +201,9 @@ export default function CaseDistributionDRCTransactions1Batch() {
                     {item.batch_seq_rulebase_arrears_sum}
                   </td> */}
                   <td className={GlobalStyle.tableData}>
-                    <button  onClick={() => handletableiconclick(item.batch_seq)}>
+                    <button
+                      onClick={() => handletableiconclick(item.batch_seq)}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width={26}
