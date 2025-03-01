@@ -462,3 +462,19 @@ export const Create_Task_For_Assigned_drc_case_list_download = async (payload) =
   }
 }
 
+export const AssignDRCToCaseDetails = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/AssignDRCToCaseDetails`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error Fetching the case details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
