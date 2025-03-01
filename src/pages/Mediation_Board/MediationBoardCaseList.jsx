@@ -9,9 +9,11 @@ Related Files: (routes)
 Notes:The following page conatins the code for the Mediation Board case list Screen */
 
 import React, { useState } from "react";
-import {FaArrowLeft,FaArrowRight,FaSearch,FaInfoCircle,} from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import edit from "../../assets/images/mediationBoard/edit.png";
+import { useNavigate } from "react-router-dom";
 
 // Import status icons with correct file extensions
 import Forward_to_Mediation_Board from "../../assets/images/mediationBoard/Forward_to_Mediation_Board.png";
@@ -77,6 +79,7 @@ export default function MediationBoardCaseList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0); // Fixed: Starting from 0 to match slice logic
   const [loading, setLoading] = useState(false); // Added: Missing loading state
+  const navigate = useNavigate();
 
   const rowsPerPage = 7;
 
@@ -293,7 +296,16 @@ export default function MediationBoardCaseList() {
                 <td className={GlobalStyle.tableData}>{row.callingRound}</td>
                 <td className={GlobalStyle.tableData}>{row.nextCallingDate}</td>
                 <td className={GlobalStyle.tableData}>
-                  <FaInfoCircle className="mx-auto text-black text-xl cursor-pointer" />
+                  <img
+                    src={edit}
+                    alt="Edit Case"
+                    className="w-6 h-6 cursor-pointer"
+                    onClick={() =>
+                      navigate(`/MediationBoard/MediationBoardResponse`, {
+                        state: { caseData: row },
+                      })
+                    }
+                  />
                 </td>
               </tr>
             ))}
