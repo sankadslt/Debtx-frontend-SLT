@@ -54,6 +54,7 @@ import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
 
 //MEDIATION BOARD
 import MediationBoardCaseList from "../pages/Mediation_Board/MediationBoardCaseList";
+import MediationBoardResponse from "../pages/Mediation_Board/MediationBoardResponse";
 
 const Routers = () => {
   return (
@@ -125,7 +126,7 @@ const Routers = () => {
   
       {/* //MEDIATION BOARD */}
       <Route path="/MediationBoard/MediationBoardCaseList" element={<ProtectedRoute element={<MediationBoardCaseList />} allowedRoles={['superadmin']} />} />
-      
+      <Route path="/MediationBoard/MediationBoardResponse" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
     </Routes>
   );
 };
