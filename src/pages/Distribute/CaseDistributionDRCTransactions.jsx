@@ -262,6 +262,13 @@ console.log("Page Data:", paginatedData1);
   const formatDate = (isoString) => {
     return isoString ? new Date(isoString).toISOString().split("T")[0] : null;
   };
+
+  const handleonfullsummaryclick = (batchID) => {
+    navigate("/pages/Distribute/CaseDistributionDRCSummary", {
+      state: { BatchID: batchID },
+    });
+    console.log("Case Distribution batch ID:", batchID);
+  };
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <h1 className={`${GlobalStyle.headingLarge}`}>Case distribution</h1>
@@ -485,7 +492,7 @@ console.log("Page Data:", paginatedData1);
                     <Tooltip id={`tooltip-exchange-${index}`} place="top" content="Exchange case count"/>
 
 
-                    <button data-tooltip-id={`tooltip-full-${index}`} >
+                    <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_batch_id)} >
                     <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-full-${index}`} place="top" content="Distributed Full Summary"/>

@@ -193,11 +193,21 @@ export default function RejectIncident() {
           }
         }
         fetchData(); 
+        setSearchQuery("")
       }
     };
     
 
   const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
+        if (filteredData.length === 0) {
+              Swal.fire({
+                title: "Warning",
+                text: "No records to download.",
+                icon: "warning",
+                confirmButtonText: "OK",
+              });
+              return;
+        }
   
         if(!source_type && !fromDate && !toDate){
           Swal.fire({
@@ -288,49 +298,61 @@ export default function RejectIncident() {
   const handleRejectAll = async()=>{
     
       try{
-        if (selectedRows.length === 0) {
+        if (filteredData.length === 0) {
           Swal.fire({
             title: "Warning",
-            text: "No record selected.",
+            text: "No records to reject.",
             icon: "warning",
             confirmButtonText: "OK",
           });
           return;
         }
-        const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
-        if (openTaskCount > 0) {
-              Swal.fire({
-                  title: "Warning",
-                  text: "A task is already in progress.",
-                  icon: "warning",
-                  confirmButtonText: "OK",
-              });
-          return;
-        }
-        if(filteredData.length>10){
-            const parameters = {
-              Status:"Reject Pending",
+        const result = await Swal.fire({
+          title: "Confirm",
+          text: "Are you sure you want to move reject all the Reject pending cases?",
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "Reject All",
+          cancelButtonText: "Cancel",
+         });
+
+        if (result.isConfirmed) {
+
+            const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
+            if (openTaskCount > 0) {
+                  Swal.fire({
+                      title: "Warning",
+                      text: "A task is already in progress.",
+                      icon: "warning",
+                      confirmButtonText: "OK",
+                  });
+              return;
             }
-            const response = await Create_Task_Reject_F1_Filtered(parameters);
-            if(response.status===201){
+            if(filteredData.length>10){
+                const parameters = {
+                  Status:"Reject Pending",
+                }
+                const response = await Create_Task_Reject_F1_Filtered(parameters);
+                if(response.status===201){
+                  Swal.fire({ 
+                    title: 'Success',
+                    text: 'Successfully created task to reject F1 filtered incidents',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                  });
+                }
+            }else{
+              for (const row of filteredData) {
+                await Reject_F1_Filtered(row.id); 
+              }
               Swal.fire({ 
                 title: 'Success',
-                text: 'Successfully created task to reject F1 filtered incidents',
+                text: "Successfully rejected F1 filtered incidents",
                 icon: 'success',
                 confirmButtonText: 'OK'
               });
+              fetchData();
             }
-        }else{
-          for (const row of selectedRows) {
-            await Reject_F1_Filtered(row); 
-          }
-          Swal.fire({ 
-            title: 'Success',
-            text: "Successfully rejected F1 filtered incidents",
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-          fetchData();
         }
       }catch(error){
         Swal.fire({
@@ -343,57 +365,69 @@ export default function RejectIncident() {
     }
 
     const handleMoveForward = async()=>{
-      try{
-        if (selectedRows.length === 0) {
-          Swal.fire({
-            title: "Warning",
-            text: "No record selected.",
-            icon: "warning",
-            confirmButtonText: "OK",
-          });
-          return;
+       try{
+       if (filteredData.length === 0) {
+             Swal.fire({
+               title: "Warning",
+               text: "No records to move forward.",
+               icon: "warning",
+               confirmButtonText: "OK",
+             });
+             return;
         }
-        const openTaskCount = await Open_Task_Count_Forward_F1_Filtered();
-        if (openTaskCount > 0) {
-              Swal.fire({
-                  title: "Warning",
-                  text: "A task is already in progress.",
-                  icon: "warning",
-                  confirmButtonText: "OK",
-              });
-          return;
-        }
+        const result = await Swal.fire({
+             title: "Confirm",
+             text: ":Are you sure you want to move forward all the Reject pending cases?",
+             icon: "info",
+             showCancelButton: true,
+             confirmButtonText: "Forward",
+             cancelButtonText: "Cancel",
+        });
 
-        if(filteredData.length>10){
-            const parameters = {
-              Status:"Reject Pending",
-            }
-            const response = await Create_Task_Forward_F1_Filtered(parameters);
-            if(response.status===201){
-              Swal.fire({ 
-                title: 'Success',
-                text: 'Successfully created task to forward F1 filtered incidents',
-                icon: 'success',
-                confirmButtonText: 'OK'
-              });
-            }
-         
-        }else{
-          for (const row of selectedRows) {
-            await Forward_F1_Filtered(row); 
+        if (result.isConfirmed) {
+          
+          const openTaskCount = await Open_Task_Count_Forward_F1_Filtered();
+          if (openTaskCount > 0) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "A task is already in progress.",
+                    icon: "warning",
+                    confirmButtonText: "OK",
+                });
+            return;
           }
-          Swal.fire({ 
-            title: 'Success',
-            text: "Successfully forwarded F1 filtered incidents",
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-          fetchData();
+
+          if(filteredData.length>10){
+              const parameters = {
+                Status:"Reject Pending",
+              }
+              const response = await Create_Task_Forward_F1_Filtered(parameters);
+              if(response.status===201){
+                Swal.fire({ 
+                  title: 'Success',
+                  text: 'Successfully created task to forward F1 filtered incidents',
+                  icon: 'success',
+                  confirmButtonText: 'OK'
+                });
+              }
+          
+          }else{
+            for (const row of filteredData) {
+              await Forward_F1_Filtered(row.id); 
+            }
+            Swal.fire({ 
+              title: 'Success',
+              text: "Successfully forwarded F1 filtered incidents",
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
+            fetchData();
+          }
         }
       }catch(error){
         Swal.fire({
           title: 'Error',
-          text: "Internal server error",
+          text: error?.message,
           icon: 'error',
           confirmButtonText: 'OK'
         });
@@ -435,7 +469,7 @@ export default function RejectIncident() {
               onChange={(e) => setSelectedSource(e.target.value)}
             >
               <option value="">Select</option>
-              <option value="Pilot - Suspended">Pilot - Suspended</option>
+              <option value="Pilot Suspended">Pilot Suspended</option>
               <option value="Special">Special</option>
               <option value="Product Terminate">Product Terminate</option>
             </select>
@@ -605,6 +639,15 @@ export default function RejectIncident() {
               </button>
             </div>
           )}
+
+        <div className="flex justify-start items-center w-full mt-6">
+            <button
+              className={`${GlobalStyle.buttonPrimary} `} 
+              onClick={() => navigate("/Distribution/filtered-incident")}
+            >
+              ← Back
+            </button>
+        </div>
 
           <div className="flex justify-end items-center w-full mt-6">
             {/* Select All Data Checkbox */}
