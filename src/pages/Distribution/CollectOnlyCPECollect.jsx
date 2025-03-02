@@ -50,7 +50,7 @@ export default function CollectOnlyCPECollect() {
         FromDate: fromDate,
         ToDate: toDate,
       };
-
+  
       const response = await List_Incidents_CPE_Collect(filters);
       const formattedData = response?.data.map((item) => {
         const createdDateStr =
@@ -58,7 +58,7 @@ export default function CollectOnlyCPECollect() {
             ? item.Created_Dtm.replace(" ", "T")
             : item.Created_Dtm;
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
-
+  
         return {
           id: item.Incident_Id || "N/A",
           status: item.Incident_Status || "N/A",
@@ -70,14 +70,16 @@ export default function CollectOnlyCPECollect() {
             : createdDate.toLocaleString() || "N/A",
         };
       });
+  
       setTableData(formattedData);
+      setFilteredData(formattedData);  // Fix: Ensure filteredData is also updated
       setIsLoading(false);
     } catch (error) {
       console.log(error);
-
       setIsLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchData();

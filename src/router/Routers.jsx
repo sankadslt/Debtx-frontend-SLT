@@ -126,7 +126,7 @@ const Routers = () => {
   
       {/* //MEDIATION BOARD */}
       <Route path="/MediationBoard/MediationBoardCaseList" element={<ProtectedRoute element={<MediationBoardCaseList />} allowedRoles={['superadmin']} />} />
-      <Route path="/MediationBoard/MediationBoardResponse" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
+      <Route path="/MediationBoard/MediationBoardResponse/:caseId" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
     </Routes>
   );
 };
