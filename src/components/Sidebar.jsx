@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { MdSpaceDashboard } from "react-icons/md";
 import { IoIosListBox } from "react-icons/io";
-import {MdSpeakerNotes} from "react-icons/md"
+import { MdSpeakerNotes } from "react-icons/md";
+import { GoDot } from "react-icons/go";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../services/auth/authService";
@@ -43,30 +44,93 @@ const Sidebar = ({ onHoverChange }) => {
 
   // Menu structure with nested subtopics
   const menuItems = [
-    //dashboard
     { icon: MdSpaceDashboard, label: "Dashboard", link: "/dashboard", roles: ["superadmin", "admin", "user"], subItems: [] },
 
-
-    //userList
     {
       icon: IoIosListBox,
       label: "User List",
       roles: ["superadmin", "admin", "user"],
       subItems: [
-       
-        { label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { label: "DRC List", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { label: "RO List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "DRC List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "RO List", link: "/dashboard", roles: ["superadmin", "admin"] },
       ],
     },
 
-    //filterincident
-    { icon: MdSpaceDashboard, label: "Filter Incident", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin", "user"], subItems: [] },
+    { icon: MdSpaceDashboard, 
+      label: "Incident List", 
+      roles: ["superadmin", "admin", "user"], 
+      subItems: [
+        { icon: GoDot, label: "Incident List", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Filtered Incidents", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Bulk Upload Log", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Rejected incident log", link: "/dashboard", roles: ["superadmin", "admin"] },
+      ],
+    },
 
-    //Distribute
-    { icon: MdSpeakerNotes, label: " Distribution", link: "/pages/Distribute/DistributionPreparationBulkUpload", roles: ["superadmin", "admin", "user"], subItems: [] },
+    { icon: MdSpeakerNotes, label: "Distribution", link: "/pages/Distribute/DistributionPreparationBulkUpload", roles: ["superadmin", "admin", "user"], subItems: [] },
 
-    //sample
+    {
+      icon: IoIosListBox,
+      label: "Case Lisr",
+      roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: GoDot, label: "Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, 
+          label: "RO Assigned Case List", 
+          roles: ["superadmin", "admin"], 
+          subItems: [
+            {icon:GoDot, label:"Negotiation Case List", link:"/dashboard", roles:["superadmin", "admin"]},
+            {icon:GoDot, label:"Medeation Board List", link:"/dashboard", roles:["superadmin", "admin"]},
+          ],
+        },
+        { icon: GoDot, label: "FTL LOD Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Digital Signature Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Litigation Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Dispute Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, 
+          label: "Disposed Case List", 
+          roles: ["superadmin", "admin"],
+          subItems: [
+            {icon:GoDot, label:"Write off List", link:"/dashboard", roles:["superadmin", "admin"]},
+            {icon:GoDot, label:"Abandoned List", link:"/dashboard", roles:["superadmin", "admin"]},
+            {icon:GoDot, label:"Withdraw List", link:"/dashboard", roles:["superadmin", "admin"]},
+            {icon:GoDot, label:"Closed List", link:"/dashboard", roles:["superadmin", "admin"]},
+          ],
+        },
+      ],
+    },
+
+    {icon: MdSpaceDashboard, label: "Settlement", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
+    {icon: MdSpaceDashboard, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
+    {
+      icon: MdSpaceDashboard, 
+      label: "Approvals", 
+      roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: GoDot, label: "Distribution Approval", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Other Approval", link: "/dashboard", roles: ["superadmin", "admin"] },
+      ],
+    },
+
+    {
+      icon: MdSpaceDashboard,
+      label: "Configuration", 
+      roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: GoDot, label: "RTOM List", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Filter Option", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Arrears Bands and Respective Initial Amounts", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Settlement Plans", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Commission Plans", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Commission Rates", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Negotiation Field Resons", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "MB Field Reasons", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Reqest Type", link: "/dashboard", roles: ["superadmin"] },
+      ],
+    },
+
     {
       icon: IoIosListBox,
       label: "Dummy",
@@ -75,11 +139,11 @@ const Sidebar = ({ onHoverChange }) => {
         {
           label: "Dummy",
           subItems: [
-            { label: "Distribte Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
-            { label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
+            { icon: GoDot, label: "Distribute Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
           ],
         },
-        { label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
       ],
     },
   ];
@@ -91,13 +155,11 @@ const Sidebar = ({ onHoverChange }) => {
   const handleClick = (level, index, hasSubItems) => {
     const updatedExpandedItems = [...expandedItems];
 
-    // Collapse all submenus if clicking a link
     if (!hasSubItems) {
       setIsHovered(false);
       onHoverChange(false);
       updatedExpandedItems.splice(0);
     } else {
-      // Toggle submenu on click if it has subitems
       if (updatedExpandedItems[level] === index) {
         updatedExpandedItems.splice(level);
       } else {
@@ -121,7 +183,6 @@ const Sidebar = ({ onHoverChange }) => {
     return null;
   };
 
-  // Find the active path to highlight the correct menu item
   const activePath = findActivePath(menuItems, location.pathname);
 
   // Render subitems recursively
@@ -130,19 +191,17 @@ const Sidebar = ({ onHoverChange }) => {
       <ul className={`ml-8 mt-2 space-y-2 ${!isHovered ? "hidden" : ""}`}>
         {subItems.map((subItem, subIndex) => {
           const isExpanded = expandedItems[level] === subIndex;
-
-          // Check if user role allows access to subItem
           const isAccessible = subItem.roles ? subItem.roles.includes(userRole) : true;
 
-          // If subItem is accessible, render it
           if (isAccessible) {
             return (
               <li key={subIndex}>
                 <Link
                   to={subItem.link || "#"}
                   onClick={() => handleClick(level, subIndex, !!subItem.subItems)}
-                  className="block px-3 py-2 rounded-lg text-sm font-medium transition"
+                  className="flex items-center gap-x-2 px-3 py-2 rounded-lg text-sm font-medium transition"
                 >
+                  {subItem.icon ? <subItem.icon className="w-4 h-4 text-white" /> : <GoDot className="w-4 h-4 text-white" />}
                   {subItem.label}
                 </Link>
                 {isExpanded && subItem.subItems && (
@@ -154,7 +213,6 @@ const Sidebar = ({ onHoverChange }) => {
             );
           }
 
-          // If not accessible, do not render
           return null;
         })}
       </ul>
@@ -174,7 +232,6 @@ const Sidebar = ({ onHoverChange }) => {
       }}
       style={{ width: isHovered ? "18rem" : "5rem" }}
     >
-      {/* Menu Items */}
       <ul className="flex flex-col gap-4 px-4">
         {filteredMenuItems.map((item, index) => {
           const isActive = activePath && activePath[0] === index;
@@ -187,11 +244,7 @@ const Sidebar = ({ onHoverChange }) => {
                   isActive ? "bg-blue-400 shadow-lg" : "hover:bg-blue-400"
                 }`}
               >
-                <item.icon
-                  className={`w-6 h-6 ${
-                    isActive ? "text-white" : "text-white"
-                  }`} // Change the icon color for active item
-                />
+                <item.icon className="w-6 h-6 text-white" />
                 {isHovered && <span>{item.label}</span>}
               </Link>
               {expandedItems[0] === index && item.subItems && (
