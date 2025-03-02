@@ -107,9 +107,7 @@ const fetchData = async () => {
     }
   };
   
-  
   const handleCaseforIncident = async () => {
-   
     if (selectedRows.length === 0) {
       Swal.fire({
         title: "Warning",
@@ -117,13 +115,12 @@ const fetchData = async () => {
         icon: "warning",
         confirmButtonText: "OK",
       });
-      return;  
+      return;
     }
   
-    
     const confirmResult = await Swal.fire({
       title: "Confirmation",
-      text: "Are you sure you want to proceed with all selected cases?",
+      text: `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, Proceed",
@@ -152,6 +149,8 @@ const fetchData = async () => {
       if (selectedRows.length > 10) {
         const taskParams = {
           Incident_Status: "Open No Agent",
+          Proceed_By: user.user_id,
+          Proceed_Dtm: new Date().toISOString(),
         };
   
         const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
@@ -166,6 +165,7 @@ const fetchData = async () => {
         const response = await Create_Case_for_incident({
           Incident_Ids: selectedRows,
           Proceed_By: user.user_id,
+          Proceed_Dtm: new Date().toISOString(),
         });
   
         Swal.fire({
@@ -187,7 +187,7 @@ const fetchData = async () => {
       });
     } finally {
       setIsProcessing(false);
-      await fetchData();  
+      await fetchData();
     }
   };
   
