@@ -146,7 +146,7 @@ const fetchData = async () => {
         return;
       }
   
-      if (selectedRows.length > 10) {
+      if (selectedRows.length > 9) {
         const taskParams = {
           Incident_Status: "Open No Agent",
           Proceed_By: user.user_id,
@@ -157,7 +157,7 @@ const fetchData = async () => {
         console.log("Response from Create_Task:", response);
         Swal.fire({
           title: "Task Created Successfully!",
-          text: `Task created to handle ${selectedRows.length} incidents.`,
+          text: `Task created to handle incidents.`,
           icon: "success",
           confirmButtonText: "OK",
         });
@@ -426,7 +426,9 @@ const fetchData = async () => {
           <button
   className={`${GlobalStyle.buttonPrimary} ml-4`}
   onClick={handleCaseforIncident}
-  disabled={isProcessing || selectedRows.length === 0 }
+  disabled={isProcessing}
+  
+
 >
   Proceed
 </button>
