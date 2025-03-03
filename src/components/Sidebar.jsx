@@ -1,8 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { MdSpaceDashboard } from "react-icons/md";
+import { MdSpaceDashboard , MdFormatListBulletedAdd , MdDoneOutline } from "react-icons/md";
 import { IoIosListBox } from "react-icons/io";
 import { MdSpeakerNotes } from "react-icons/md";
-import { GoDot } from "react-icons/go";
+import { GoDot, GoChecklist } from "react-icons/go";
+import { GrConfigure } from "react-icons/gr";
+import { FaListCheck } from "react-icons/fa6";
+import { BiSolidDiamond } from "react-icons/bi";
+import { HiOutlineDocumentCheck } from "react-icons/hi2";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../services/auth/authService";
@@ -57,7 +61,7 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
-    { icon: MdSpaceDashboard, 
+    { icon: GoChecklist, 
       label: "Incident List", 
       roles: ["superadmin", "admin", "user"], 
       subItems: [
@@ -71,8 +75,8 @@ const Sidebar = ({ onHoverChange }) => {
     { icon: MdSpeakerNotes, label: "Distribution", link: "/pages/Distribute/DistributionPreparationBulkUpload", roles: ["superadmin", "admin", "user"], subItems: [] },
 
     {
-      icon: IoIosListBox,
-      label: "Case Lisr",
+      icon: FaListCheck,
+      label: "Case List",
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
@@ -101,10 +105,10 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
-    {icon: MdSpaceDashboard, label: "Settlement", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
-    {icon: MdSpaceDashboard, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
+    {icon: HiOutlineDocumentCheck, label: "Settlement", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
+    {icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
     {
-      icon: MdSpaceDashboard, 
+      icon: MdDoneOutline, 
       label: "Approvals", 
       roles: ["superadmin", "admin", "user"],
       subItems: [
@@ -114,7 +118,7 @@ const Sidebar = ({ onHoverChange }) => {
     },
 
     {
-      icon: MdSpaceDashboard,
+      icon: GrConfigure,
       label: "Configuration", 
       roles: ["superadmin", "admin", "user"],
       subItems: [
@@ -132,7 +136,7 @@ const Sidebar = ({ onHoverChange }) => {
     },
 
     {
-      icon: IoIosListBox,
+      icon: BiSolidDiamond,
       label: "Dummy",
       roles: ["superadmin", "admin", "user"],
       subItems: [
