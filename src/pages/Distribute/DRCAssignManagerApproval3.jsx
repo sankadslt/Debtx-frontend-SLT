@@ -306,7 +306,14 @@ export default function DRCAssignManagerApproval3() {
               <option value="" hidden>
                 Select Approve Type
               </option>
-              <option value="DRC_ReAssign">DRC_ReAssign</option>
+              <option value="DRC Assign Approval">DRC Assign Approval </option>
+              <option value="DRC Re-Assign Approval">DRC Re-Assign Approval</option>
+              <option value="Case Withdrawal Approval">Case Withdrawal Approval</option>
+              <option value="Case Abandoned Approval">Case Abandoned Approval</option>
+              <option value="Case Write-Off Approval">Case Write-Off Approval</option>
+              <option value="Commission Approval">Commission Approval</option>
+              
+
             </select>
           </div>
           <div className="flex flex-col items-center mb-4">
