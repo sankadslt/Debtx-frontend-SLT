@@ -510,6 +510,10 @@ export default function AssignDRCsLOG() {
 
   };
 
+  const handlewithdrawbutton = () => {
+    alert ("Withdraw button clicked");
+  }
+
   // Pagination handler
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
@@ -659,7 +663,7 @@ export default function AssignDRCsLOG() {
                     <FaUserEdit /> {/* Icon for Re-Assign */}
                     </button>
 
-                    <button className={GlobalStyle.buttonPrimary} title="Withdraw">
+                    <button className={GlobalStyle.buttonPrimary} title="Withdraw" onClick={handlewithdrawbutton}>
                     <FaUndo /> {/* Icon for Withdraw */}
                     </button>
                     </td>
