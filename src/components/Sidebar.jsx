@@ -61,10 +61,10 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Incident List", 
       roles: ["superadmin", "admin", "user"], 
       subItems: [
-        { icon: GoDot, label: "Incident List", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Filtered Incidents", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Bulk Upload Log", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Rejected incident log", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: " Incident List", link: "/Incident/Incident_List", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Filtered Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Bulk Upload Log", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Rejected incident log", link: "/Distribution/reject-incident-log", roles: ["superadmin", "admin"] },
       ],
     },
 
@@ -81,7 +81,7 @@ const Sidebar = ({ onHoverChange }) => {
           roles: ["superadmin", "admin"], 
           subItems: [
             {icon:GoDot, label:"Negotiation Case List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:GoDot, label:"Medeation Board List", link:"/dashboard", roles:["superadmin", "admin"]},
+            {icon:GoDot, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
           ],
         },
         { icon: GoDot, label: "FTL LOD Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
@@ -108,8 +108,8 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Approvals", 
       roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: GoDot, label: "Distribution Approval", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Other Approval", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Distribution Approval", link: "/pages/Distribute/DRCAssignManagerApproval2", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Other Approval", link: "/pages/Distribute/DRCAssignManagerApproval3", roles: ["superadmin", "admin"] },
       ],
     },
 
