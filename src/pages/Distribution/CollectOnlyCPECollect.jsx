@@ -159,6 +159,19 @@ export default function CollectOnlyCPECollect() {
       });
       return;
     }
+
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to proceed with this action?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Proceed",
+      cancelButtonText: "No",
+    });
+  
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
     try {
       const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
       if (openTaskCount > 0) {
@@ -201,7 +214,19 @@ export default function CollectOnlyCPECollect() {
       return;
     }
 
-
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: `Proceed with ${selectedRows.length} selected incidents?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Proceed",
+      cancelButtonText: "No",
+    });
+  
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
+    
     try {
       if (selectedRows.length === 0) {
         Swal.fire({
@@ -222,11 +247,11 @@ export default function CollectOnlyCPECollect() {
         });
         return;
       }
-      if (selectedRows.length > 10) {
+      if (selectedRows.length > 9) {
       
         const parameters = {
           Status: "Open CPE Collect",
-          Incident_Ids: selectedRows, // Fix typo "Inncident_Ids" → "Incident_Ids"
+          Incident_Ids: selectedRows, 
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
         if (response.status === 201) {
