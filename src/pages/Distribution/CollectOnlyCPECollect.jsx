@@ -14,7 +14,7 @@ Notes:
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-
+import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
 import {
@@ -41,6 +41,7 @@ export default function CollectOnlyCPECollect() {
   const [isloading, setIsLoading] = useState(true);
   const [filteredData, setFilteredData] = useState(tableData);
   const rowsPerPage = 7;
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
@@ -49,7 +50,7 @@ export default function CollectOnlyCPECollect() {
         FromDate: fromDate,
         ToDate: toDate,
       };
-
+  
       const response = await List_Incidents_CPE_Collect(filters);
       const formattedData = response?.data.map((item) => {
         const createdDateStr =
@@ -57,7 +58,7 @@ export default function CollectOnlyCPECollect() {
             ? item.Created_Dtm.replace(" ", "T")
             : item.Created_Dtm;
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
-
+  
         return {
           id: item.Incident_Id || "N/A",
           status: item.Incident_Status || "N/A",
@@ -69,166 +70,221 @@ export default function CollectOnlyCPECollect() {
             : createdDate.toLocaleString() || "N/A",
         };
       });
+  
       setTableData(formattedData);
+      setFilteredData(formattedData);  // Fix: Ensure filteredData is also updated
       setIsLoading(false);
     } catch (error) {
       console.log(error);
-
       setIsLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
- 
-     if(!source_type && !fromDate && !toDate){
-       Swal.fire({
-         title: 'Warning',
-         text: 'Missing Parameters',
-         icon: 'warning',
-         confirmButtonText: 'OK'
-       });
-     }
-     else if ((fromDate && !toDate) || (!fromDate && toDate)) {
-       Swal.fire({
-         title: "Incomplete Date Range",
-         text: "Both From Date and To Date must be selected together.",
-         icon: "warning",
-         confirmButtonText: "OK",
-       });
-       return;
-     } else{
-     try{
-       const filteredParams = {
-         Source_Type:source_type,
-         FromDate:fromDate,
-         ToDate:toDate
-       }
-       const response = await Create_Task(filteredParams);
-       if(response.status===201){
-         Swal.fire({ 
-           title: 'Success',
-           text: 'Task successfully created',
-           icon: 'success',
-           confirmButtonText: 'OK'
-         });
-       }
-     }catch{
-       Swal.fire({
-         title: 'Error',
-         text: 'Error creating task',
-         icon: 'error',
-         confirmButtonText: 'OK'
-       });
-     }
-     }
-   };
- 
-    const handleProceed = async (Incident_Id) => {
-       if (!selectedRows.includes(Incident_Id)) {
-         Swal.fire({
-           title: "Warning",
-           text: "Row not selected",
-           icon: "warning",
-           confirmButtonText: "OK",
-         });
-         return;
-       }
-       try {
-         const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
-         if (openTaskCount > 0) {
-           Swal.fire({
-             title: "Warning",
-             text: "A task is already in progress.",
-             icon: "warning",
-             confirmButtonText: "OK",
-           });
-           return;
-         }
-         const response = await Forward_CPE_Collect(Incident_Id);
-         if (response.status === 201) {
-           Swal.fire({
-             title: "Success",
-             text: response.data.message,
-             icon: "success",
-             confirmButtonText: "OK",
-           });
-           fetchData();
-         }
-       } catch (error) {
-         Swal.fire({
-           title: "Error",
-           text: error.message,
-           icon: "error",
-           confirmButtonText: "OK",
-         });
-       }
-     };
-     
-   
-     const handleCreate = async () => {
-       try {
-         if (filteredData.length === 0) {
-           Swal.fire({
-             title: "Warning",
-             text: "No data.",
-             icon: "warning",
-             confirmButtonText: "OK",
-           });
-           return;
-         }
-         const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
-         if (openTaskCount > 0) {
-           Swal.fire({
-             title: "Warning",
-             text: "A task is already in progress.",
-             icon: "warning",
-             confirmButtonText: "OK",
-           });
-           return;
-         }
-         if (filteredData.length > 10) {
-           const parameters = {
-             Status: "Direct LOD",
-             Inncident_Ids: selectedRows,
-           };
-     
-           const response = await Create_Task_for_Forward_CPECollect(parameters);
-           if (response.status === 201) {
-             Swal.fire({
-               title: "Success",
-               text: "Successfully created task to forward collect CPE Only incidents",
-               icon: "success",
-               confirmButtonText: "OK",
-             });
-           }
-         } else {
-           for (const row of selectedRows) {
-             await Forward_CPE_Collect(row);
-           }
-           Swal.fire({
-             title: "Success",
-             text: "Successfully forwarded the Collect CPE Only incidents",
-             icon: "success",
-             confirmButtonText: "OK",
-           });
-     
-           fetchData();
-         }
-       } catch {
-         Swal.fire({
-           title: "Error",
-           text: "Internal server error",
-           icon: "error",
-           confirmButtonText: "OK",
-         });
-       }
-     };
   
-     
+  const handleCreateTaskForDownload = async ({
+    source_type,
+    fromDate,
+    toDate,
+  }) => {
+    if (!source_type && !fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select a Source Type or provide a date range before creating a task.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return; // Stop function execution
+    }
+
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Incomplete Date Range",
+        text: "Both From Date and To Date must be selected together.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    const confirmation = await Swal.fire({
+      title: "Confirm Task Creation",
+      text: "Are you sure you want to create this task?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, create it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!confirmation.isConfirmed) return;
+
+    try {
+      const filteredParams = {
+        Source_Type: source_type,
+        FromDate: fromDate,
+        ToDate: toDate,
+      };
+
+      const response = await Create_Task(filteredParams);
+
+      if (response.status === 201) {
+        Swal.fire({
+          title: "Success",
+          text: "Task successfully created",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch {
+      Swal.fire({
+        title: "Error",
+        text: "Error creating task",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const handleProceed = async (Incident_Id) => {
+    if (!selectedRows.includes(Incident_Id)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Row not selected",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to proceed with this action?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Proceed",
+      cancelButtonText: "No",
+    });
+  
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
+    try {
+      const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
+      if (openTaskCount > 0) {
+        Swal.fire({
+          title: "Warning",
+          text: "A task is already in progress.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      const response = await Forward_CPE_Collect(Incident_Id);
+      if (response.status === 201) {
+        Swal.fire({
+          title: "Success",
+          text: response.data.message,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+        fetchData();
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const handleCreate = async () => {
+    if (selectedRows.length === 0) {
+      Swal.fire({
+        title: "Warning",
+        text: "Row not selected",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: `Proceed with ${selectedRows.length} selected incidents?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Proceed",
+      cancelButtonText: "No",
+    });
+  
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
+    
+    try {
+      if (selectedRows.length === 0) {
+        Swal.fire({
+          title: "Warning",
+          text: "No data.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
+      if (openTaskCount > 0) {
+        Swal.fire({
+          title: "Warning",
+          text: "A task is already in progress.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      if (selectedRows.length > 9) {
+      
+        const parameters = {
+          Status: "Open CPE Collect",
+          Incident_Ids: selectedRows, 
+        };
+        const response = await Create_Task_for_Forward_CPECollect(parameters);
+        if (response.status === 201) {
+          Swal.fire({
+            title: "Success",
+            text: "Successfully created task to forward collect CPE Only incidents",
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+        }
+      } else {
+        for (const row of selectedRows) {
+          await Forward_CPE_Collect(row);
+        }
+        Swal.fire({
+          title: "Success",
+          text: "Successfully forwarded the Collect CPE Only incidents",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+
+        fetchData();
+      }
+    } catch {
+      Swal.fire({
+        title: "Error",
+        text: "Internal server error",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       setError("The 'From' date cannot be later than the 'To' date.");
@@ -346,6 +402,8 @@ export default function CollectOnlyCPECollect() {
           return;
         }
       }
+
+      setSearchQuery("");
       fetchData();
     }
   };
@@ -550,7 +608,15 @@ export default function CollectOnlyCPECollect() {
             </div>
           )}
 
-          <div className="flex justify-end items-center w-full mt-6">
+          <div className="flex justify-start items-center w-full  ">
+            <button
+              className={`${GlobalStyle.buttonPrimary} `} 
+              onClick={() => navigate(-1)}
+            >
+              ← Back
+            </button>
+          </div>
+          <div className="flex justify-end items-center w-full">
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
