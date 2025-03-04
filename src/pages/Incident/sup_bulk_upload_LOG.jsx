@@ -9,22 +9,13 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-<<<<<<< Updated upstream
-=======
 
-
-
->>>>>>> Stashed changes
 import { useCallback, useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-<<<<<<< Updated upstream
 import Swal from "sweetalert2";
-
-=======
->>>>>>> Stashed changes
 import OpenIcon from "../../assets/images/incidents/Incident_Done.png";
 import InProgressIcon from "../../assets/images/incidents/Incident_InProgress.png";
 import RejectIcon from "../../assets/images/incidents/Incident_Reject.png";
@@ -119,10 +110,7 @@ const SupBulkUploadLog = () => {
         }
     }, [fromDate, toDate, status]);
 
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
     useEffect(() => {
         fetchData();
     }, [fetchData, fromDate, toDate, status]);
@@ -136,19 +124,19 @@ const SupBulkUploadLog = () => {
     const startIndex = currentPage * rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
-<<<<<<< Updated upstream
+
     const clearFilters = () => {
         setFromDate(null);
         setToDate(null);
         setStatus("");
 
         fetchData();
-=======
+    }
     const navigate = useNavigate();
 
     const handleUploadClick = () => {
         navigate('/incident/register-bulk'); // Navigate to the Bulk Upload page
->>>>>>> Stashed changes
+
     };
 
     return (
@@ -233,16 +221,9 @@ const SupBulkUploadLog = () => {
                     <table className={GlobalStyle.table}>
                         <thead className={GlobalStyle.thead}>
                             <tr>
-<<<<<<< Updated upstream
-                                <th className={GlobalStyle.tableHeader}>Date & Time</th>
-                                <th className={GlobalStyle.tableHeader}>Created Time</th>
-                                <th className={GlobalStyle.tableHeader}>Uploaded By</th>
-                                <th className={GlobalStyle.tableHeader}>Status</th>
-=======
                                 <th className={GlobalStyle.tableHeader}>Status</th>
                                 <th className={GlobalStyle.tableHeader}>Date & Time</th>
                                 <th className={GlobalStyle.tableHeader}>Uploaded By</th>
->>>>>>> Stashed changes
                                 <th className={GlobalStyle.tableHeader}>File Name</th>
                                 <th className={GlobalStyle.tableHeader}>Type</th>
                             </tr>
@@ -251,25 +232,7 @@ const SupBulkUploadLog = () => {
                             {paginatedData.length > 0 ? (
                                 paginatedData.map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd}>
-<<<<<<< Updated upstream
-                                        <td className={GlobalStyle.tableData}>{row.dateTime}</td>
-                                        <td className={GlobalStyle.tableData}>{row.createdTime}</td>
-                                        <td className={GlobalStyle.tableData}>{row.uploadedBy}</td>
-                                        <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
-                                            <div className="flex items-center gap-2">
-                                                <div className="relative group">
-                                                    <img
-                                                        src={getStatusIcon(row.status)}
-                                                        alt={row.status}
-                                                        className="w-6 h-6 cursor-pointer"
-                                                    />
-                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-                                                        {row.status}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-=======
+
                                         <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
                                             <div className="flex items-center gap-2">
                                                 <img src={getStatusIcon(row.status)} alt={row.status} className="w-6 h-6" />
@@ -278,7 +241,6 @@ const SupBulkUploadLog = () => {
                                         </td>
                                         <td className={GlobalStyle.tableData}>{row.dateTime},{row.createdTime}</td>
                                         <td className={GlobalStyle.tableData}>{row.uploadedBy}</td>
->>>>>>> Stashed changes
                                         <td className={GlobalStyle.tableData}>{row.fileName}</td>
                                         <td className={GlobalStyle.tableData}>{row.type}</td>
                                     </tr>
