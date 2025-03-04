@@ -298,6 +298,15 @@ export default function RejectIncident() {
   const handleRejectAll = async()=>{
     
       try{
+        if (filteredData.length === 0) {
+          Swal.fire({
+            title: "Warning",
+            text: "No records to reject.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
         const result = await Swal.fire({
           title: "Confirm",
           text: "Are you sure you want to move reject all the Reject pending cases?",
@@ -356,7 +365,16 @@ export default function RejectIncident() {
     }
 
     const handleMoveForward = async()=>{
-      try{
+       try{
+       if (filteredData.length === 0) {
+             Swal.fire({
+               title: "Warning",
+               text: "No records to move forward.",
+               icon: "warning",
+               confirmButtonText: "OK",
+             });
+             return;
+        }
         const result = await Swal.fire({
              title: "Confirm",
              text: ":Are you sure you want to move forward all the Reject pending cases?",

@@ -52,6 +52,10 @@ import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
  import DRCAssignManagerApproval2 from "../pages/Distribute/DRCAssignManagerApproval2";
  import DRCAssignManagerApproval3 from "../pages/Distribute/DRCAssignManagerApproval3";
 
+//MEDIATION BOARD
+import MediationBoardCaseList from "../pages/Mediation_Board/MediationBoardCaseList";
+import MediationBoardResponse from "../pages/Mediation_Board/MediationBoardResponse";
+
 const Routers = () => {
   return (
     <Routes>
@@ -119,10 +123,10 @@ const Routers = () => {
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/upload-log" element={<ProtectedRoute element={<SupBulkUploadLog />} allowedRoles={['superadmin']} />} />
       
-        
-
-
-    
+  
+      {/* //MEDIATION BOARD */}
+      <Route path="/MediationBoard/MediationBoardCaseList" element={<ProtectedRoute element={<MediationBoardCaseList />} allowedRoles={['superadmin']} />} />
+      <Route path="/MediationBoard/MediationBoardResponse/:caseId" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
     </Routes>
   );
 };

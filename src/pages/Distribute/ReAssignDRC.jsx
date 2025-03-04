@@ -10,6 +10,7 @@
 // Related Files:  app.js (routes)
 // Notes:.
 
+
 import { useState , useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
@@ -18,7 +19,6 @@ import { AssignDRCToCaseDetails , Assign_DRC_To_Case} from "/src/services/case/C
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Swal from "sweetalert2";
-
 
 export default function ReAssignDRC() {
   const [currentPage, setCurrentPage] = useState(1);
