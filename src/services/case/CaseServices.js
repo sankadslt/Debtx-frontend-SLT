@@ -495,3 +495,19 @@ export const Assign_DRC_To_Case = async (payload) => {
     throw error;
   }
 }
+
+export const Withdraw_CasesOwened_By_DRC = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Withdraw_CasesOwened_By_DRC`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error withdrawing cases owned by DRC:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
