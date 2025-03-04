@@ -332,7 +332,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch, FaCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { List_CasesOwened_By_DRC , Create_Task_For_Assigned_drc_case_list_download } from "../../services/case/CaseServices";
+import { List_CasesOwened_By_DRC , Create_Task_For_Assigned_drc_case_list_download , Withdraw_CasesOwened_By_DRC } from "../../services/case/CaseServices";
 import { FaUserEdit, FaUndo } from "react-icons/fa"; 
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
@@ -418,7 +418,7 @@ export default function AssignDRCsLOG() {
           handleApicall(startDate, endDate);
         } else {
           setEndDate(null);
-          console.log("Dates cleared");
+          console.log("EndDate cleared");
         }
       }
       );
@@ -434,7 +434,7 @@ export default function AssignDRCsLOG() {
     payload.to_date = endDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
 
     if (filterType === "Account No" && filterValue.trim() !== "") {
-      payload.account_no = filterValue.trim();
+      payload.account_no = String(filterValue.trim());
     }
     else if (filterType === "Case ID" && filterValue.trim() !== "") {
       payload.case_id = filterValue.trim();
@@ -453,6 +453,8 @@ export default function AssignDRCsLOG() {
                  text: "Data sent successfully.",
                  confirmButtonColor: "#28a745",
           });
+          setEndDate(null);
+          setStartDate(null);
         
       } catch (error) {
         console.error("Error in sending the data:", error);
@@ -488,7 +490,7 @@ export default function AssignDRCsLOG() {
     // Assign either "account_no" or "case_id" based on selected filterType
 
     if (filterType === "Account No" && filterValue.trim() !== "") {
-      payload.account_no = filterValue.trim();
+      payload.account_no = String(filterValue.trim());
     } else if (filterType === "Case ID" && filterValue.trim() !== "") {
       payload.case_id = filterValue.trim();
     }
@@ -509,6 +511,64 @@ export default function AssignDRCsLOG() {
     fetchCases();
 
   };
+
+  const handlewithdrawbutton = async (caseID) => {
+    const userId =  await getLoggedUserId();
+    Swal.fire({
+      title: "Enter your remark",
+      input: "text",
+      inputPlaceholder: "Enter remark",
+      showCancelButton: true,
+      cancelButtonText: "Close",
+      confirmButtonText: "Withdraw",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
+      preConfirm: (remark) => {
+        if (!remark) {
+          Swal.showValidationMessage("Please enter a remark before withdrawing!");
+        }
+        return remark;
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const payload = {
+          approver_reference: caseID,
+          remark: result.value,
+          remark_edit_by: userId,
+          created_by: userId,
+        };
+        console.log("Withdraw Payload:", payload);
+
+        // Call API with payload
+        const withdrawCase = async () => {
+          try {
+            const data = await Withdraw_CasesOwened_By_DRC(payload);
+            console.log("Response", data);
+            Swal.fire({
+              icon: "success",
+              title: "Success",
+              text: "Case withdrawn successfully.",
+              confirmButtonColor: "#28a745",
+            });
+          } catch (error) {
+            console.error("Error in withdrawing the case:", error);
+
+            const errorMessage = error?.response?.data?.message ||
+              error?.message ||
+              "An error occurred. Please try again.";
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: errorMessage,
+              confirmButtonColor: "#d33",
+            });
+          }
+        };
+        withdrawCase();
+      }
+    });
+    
+  }
 
   // Pagination handler
   const handlePrevNext = (direction) => {
@@ -639,11 +699,11 @@ export default function AssignDRCsLOG() {
                     <td className={GlobalStyle.tableData}>{caseItem.account_no}</td>
                     <td className={GlobalStyle.tableData}>{caseItem.current_arrears_amount}</td>
                     <td className={GlobalStyle.tableData}>
-                      {new Date(caseItem.created_dtm).toLocaleString()}
+                    {new Date(caseItem.created_dtm).toLocaleDateString('en-GB')} 
                     </td>
                     <td className={GlobalStyle.tableData}>
                     {caseItem.end_dtm.trim() && !isNaN(new Date(caseItem.end_dtm.trim()).getTime()) 
-                      ? new Date(caseItem.end_dtm.trim()).toLocaleDateString() 
+                      ? new Date(caseItem.end_dtm.trim()).toLocaleDateString("en-GB") 
                       : ""}
                     </td>
                     <td className={GlobalStyle.tableData}>
@@ -659,7 +719,7 @@ export default function AssignDRCsLOG() {
                     <FaUserEdit /> {/* Icon for Re-Assign */}
                     </button>
 
-                    <button className={GlobalStyle.buttonPrimary} title="Withdraw">
+                    <button className={GlobalStyle.buttonPrimary} title="Withdraw"  onClick={() => handlewithdrawbutton(caseItem.case_id)}>
                     <FaUndo /> {/* Icon for Withdraw */}
                     </button>
                     </td>

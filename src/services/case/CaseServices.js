@@ -464,19 +464,22 @@ export const Create_Task_For_Assigned_drc_case_list_download = async (payload) =
 
 export const AssignDRCToCaseDetails = async (payload) => {
   try {
+    
     const response = await axios.post(
       `${URL}/AssignDRCToCaseDetails`,
       payload
     );
+
     return response.data;
   } catch (error) {
     console.error(
-      "Error Fetching the case details:",
+      "Error fetching assign DRC to case details:",
       error.response?.data || error.message
     );
     throw error;
   }
 }
+
 
 export const List_All_DRCs_Mediation_Board_Cases = async (filters) => {
   try {
@@ -507,3 +510,37 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
     throw error.response?.data || error;
   }
 };
+
+export const Assign_DRC_To_Case = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Assign_DRC_To_Case`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error assigning DRC to case:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+export const Withdraw_CasesOwened_By_DRC = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Withdraw_CasesOwened_By_DRC`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error withdrawing cases owned by DRC:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+
