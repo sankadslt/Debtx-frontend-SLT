@@ -30,6 +30,7 @@ import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distri
 import Swal from "sweetalert2";
 
 
+
 export default function AssignPendingDRCSummary() {
   
 
@@ -42,6 +43,101 @@ const [disabledRows, setDisabledRows] = useState({});
 const navigate = useNavigate();
 // Items per page
 const itemsPerPage1 = 4;
+
+// Handle start date change
+const handlestartdatechange = (date) => {
+  setStartDate(date);
+  if (endDate) checkdatediffrence(date, endDate);
+};
+
+const handleenddatechange = (date) => {
+  if (startDate) {
+    checkdatediffrence(startDate, date);
+  }
+  setEndDate(date);
+
+};
+
+// Check the date diffrence
+const checkdatediffrence = (startDate, endDate) => {
+  const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    const diffInMs = end - start;
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+    const diffInMonths = diffInDays / 30;
+  if ( diffInMonths > 1) {
+    Swal.fire({
+            title: "Date Range Exceeded",
+            text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            confirmButtonColor: "#28a745",
+            cancelButtonText: "No",
+            cancelButtonColor: "#d33",
+          }).then((result) => {
+            if (result.isConfirmed) {
+    
+              endDate = endDate;
+              handleApicall(startDate, endDate);
+            } else {
+              setEndDate(null);
+              console.log("EndDate cleared");
+            }
+          }
+          );
+    
+        }
+      };
+
+// Handle API call
+const handleApicall = async (startDate, endDate) => {
+  const userId = await getLoggedUserId();
+
+    const payload = {
+      current_arrears_band : selectedBandKey || "null",
+      date_from : startDate || "null",
+      date_to : endDate || "null",
+      drc_commision_rule: selectedService || "null",
+      Created_By: userId,
+    };
+
+    console.log("Create Task Payload:", payload);
+   try {
+      const response = await Create_Task_For_case_distribution(payload);
+      console.log("Create Task Response:", response);
+
+      if (response.status = "success") {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Task created successfully.",
+          confirmButtonColor: "#28a745",
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error creating task for case distribution:", error);
+
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
+
+    }
+
+  };
+
+
+  
+
+      
+
+
+
 
 // Fetch the data and set it to filteredData1 state
 const applyFilters = async () => {
@@ -320,7 +416,7 @@ console.log("Page Data:", paginatedData1);
 
               <DatePicker
                 selected={startDate}
-                onChange={(date) => setStartDate(date)}
+                onChange={handlestartdatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="dd/mm/yyyy"
                 className={GlobalStyle.inputText}
@@ -328,7 +424,7 @@ console.log("Page Data:", paginatedData1);
 
               <DatePicker
                 selected={endDate}
-                onChange={(date) => setEndDate(date)}
+                onChange={handleenddatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="dd/mm/yyyy"
                 className={GlobalStyle.inputText}
