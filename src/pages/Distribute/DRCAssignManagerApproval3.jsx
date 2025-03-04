@@ -23,6 +23,8 @@ import { getLoggedUserId } from "/src/services/auth/authService.js";
 import one from "/src/assets/images/imagefor1.a.13(one).png";
 import Swal from "sweetalert2";
 
+
+
 export default function DRCAssignManagerApproval3() {
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
@@ -37,6 +39,96 @@ export default function DRCAssignManagerApproval3() {
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+
+  // Handle date change
+  const handlestartdatechange = (date) => {
+    setStartDate(date);
+    if (endDate) checkdatediffrence(date, endDate);
+  };
+
+  const handleenddatechange = (date) => {
+    if (startDate) {
+      checkdatediffrence(startDate, date);
+    }
+    setEndDate(date);
+
+  }
+
+  
+    const checkdatediffrence = (startDate, endDate) => {
+      const start = new Date(startDate).getTime();
+      const end = new Date(endDate).getTime();
+      const diffInMs = end - start;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      const diffInMonths = diffInDays / 30;
+    
+      if (diffInMonths > 1) {
+        Swal.fire({
+          title: "Date Range Exceeded",
+          text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes",
+          confirmButtonColor: "#28a745",
+          cancelButtonText: "No",
+          cancelButtonColor: "#d33",
+        }).then((result) => {
+          if (result.isConfirmed) {
+  
+            endDate = endDate;
+            handleApicall(startDate, endDate);
+          } else {
+            setEndDate(null);
+            console.log("EndDate cleared");
+          }
+        }
+        );
+  
+      }
+    };
+
+    const handleApicall = async (startDate, endDate) => {
+      try {
+        const userId = await getLoggedUserId();
+        const payload = {
+          date_from: startDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
+          date_to: endDate.toISOString().split("T")[0],     // Format: YYYY-MM-DD
+          Created_By: userId,
+        };
+    
+        console.log("Filtered Request Payload:", payload);
+    
+        const data = await Create_task_for_DRC_Assign_Manager_Approval(payload);
+        console.log("Response:", data);
+    
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Data sent successfully.",
+          confirmButtonColor: "#28a745",
+        });
+
+      } catch (error) {
+        console.error("Error in sending the data:", error);
+    
+        const errorMessage = error?.response?.data?.message || 
+                             error?.message || 
+                             "An error occurred. Please try again.";
+    
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+        });
+      }
+    };
+    
+      
+
+
+
+
   // Filter data based on selected filters
   const applyFilters = async () => {
     const payload = {};
@@ -54,6 +146,7 @@ export default function DRCAssignManagerApproval3() {
 
     try {
       const response = await List_DRC_Assign_Manager_Approval(payload);
+      console.log("Filtered Response Data:", response);
       setFilteredData(response);
     } catch (error) {
       console.error("Error fetching DRC assign manager approval:", error);
@@ -77,22 +170,22 @@ export default function DRCAssignManagerApproval3() {
           .includes(searchQuery.toLowerCase())
       )
     : currentData;
-
-  const [selectAll, setSelectAll] = useState(false);
+console.log("Filtered Data:", filteredDataBySearch);
+  //const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
 
-  const handleSelectAll = () => {
-    setSelectAll(!selectAll);
-    if (!selectAll) {
-      // Select all rows in the filtered data
-      setSelectedRows(
-        new Set(filteredDataBySearch.map((row) => row.approver_reference))
-      );
-    } else {
-      // Deselect all rows
-      setSelectedRows(new Set());
-    }
-  };
+  // const handleSelectAll = () => {
+  //   setSelectAll(!selectAll);
+  //   if (!selectAll) {
+  //     // Select all rows in the filtered data
+  //     setSelectedRows(
+  //       new Set(filteredDataBySearch.map((row) => row.approver_reference))
+  //     );
+  //   } else {
+  //     // Deselect all rows
+  //     setSelectedRows(new Set());
+  //   }
+  // };
 
   const handleRowSelect = (caseid) => {
     const newSelectedRows = new Set(selectedRows);
@@ -100,11 +193,11 @@ export default function DRCAssignManagerApproval3() {
     if (newSelectedRows.has(caseid)) {
       newSelectedRows.delete(caseid);
     } else {
-      if (newSelectedRows.size >= 5) {
+      if (newSelectedRows.size >= 1) {
         Swal.fire({
           icon: "warning",
           title: "Warning",
-          text: "You can only select 5 records at a time.",
+          text: "You can only select 1 record at a time.",
           confirmButtonColor: "#f1c40f",
         });
         return;
@@ -115,18 +208,18 @@ export default function DRCAssignManagerApproval3() {
     setSelectedRows(newSelectedRows);
 
     // Automatically deselect the "Select All" checkbox if any row is deselected
-    if (newSelectedRows.size !== filteredData.length) {
-      setSelectAll(false);
-    } else {
-      setSelectAll(true);
-    }
+    // if (newSelectedRows.size !== filteredData.length) {
+    //   setSelectAll(false);
+    // } else {
+    //   setSelectAll(true);
+    // }
   };
 
   const handleOnApproveTypeChange = (e) => {
     setDrcFilter(e.target.value);
   };
 
-  const onApproveButtonClick = async () => {
+  const onApproveButtonClick = async ( ) => {
     const userId = await getLoggedUserId();
     const batchIds = Array.from(selectedRows);
     console.log("Selected batch IDs:", batchIds);
@@ -139,8 +232,26 @@ export default function DRCAssignManagerApproval3() {
       });
       return;
     }
+
+    const alreadyApproved = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+      return record?.approved_by !== null;
+  });
+
+    if (alreadyApproved) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been approved.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+    
+
+
     const payload = {
-      approver_references: batchIds,
+      approver_reference: batchIds,
       approved_by: userId,
     };
     console.log("Approve payload:", payload);
@@ -153,7 +264,7 @@ export default function DRCAssignManagerApproval3() {
         text: "Selected records have been approved successfully.",
         confirmButtonColor: "#28a745",
       });
-      setSelectAll(false);
+      //setSelectAll(false);
       setSelectedRows(new Set());
       applyFilters();
     } catch (error) {
@@ -199,7 +310,7 @@ export default function DRCAssignManagerApproval3() {
         text: "Selected records have been rejected.",
         confirmButtonColor: "#28a745",
       });
-      setSelectAll(false);
+      //setSelectAll(false);
       setSelectedRows(new Set());
       applyFilters();
     } catch (error) {
@@ -247,7 +358,7 @@ export default function DRCAssignManagerApproval3() {
         text: "Data sent successfully.",
         confirmButtonColor: "#28a745",
       });
-      setSelectAll(false);
+      //setSelectAll(false);
       setSelectedRows(new Set());
       applyFilters();
     } catch (error) {
@@ -322,7 +433,7 @@ export default function DRCAssignManagerApproval3() {
 
               <DatePicker
                 selected={startDate}
-                onChange={(date) => setStartDate(date)}
+                onChange={handlestartdatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="dd/mm/yyyy"
                 className={GlobalStyle.inputText}
@@ -330,7 +441,7 @@ export default function DRCAssignManagerApproval3() {
 
               <DatePicker
                 selected={endDate}
-                onChange={(date) => setEndDate(date)}
+                onChange={handleenddatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="dd/mm/yyyy"
                 className={GlobalStyle.inputText}
@@ -394,16 +505,14 @@ export default function DRCAssignManagerApproval3() {
                     {item.approver_reference}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {new Date(item.created_on).toLocaleDateString()}
+                    {new Date(item.created_on).toLocaleDateString("en-GB")}
                   </td>
                   <td className={GlobalStyle.tableData}>{item.created_by}</td>
                   <td className={GlobalStyle.tableData}>
                     {item.approver_type}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {item.approver_status
-                      ? item.approver_status
-                      : "Pending Approval"}
+                  {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>{item.approved_by}</td>
                   <td className={GlobalStyle.tableData}>
@@ -467,7 +576,7 @@ export default function DRCAssignManagerApproval3() {
       {/* Select All Data Checkbox and Approve Button */}
       <div className="flex justify-end gap-4 mt-4">
         {/* Select All Data Checkbox */}
-        <label className="flex items-center gap-2">
+        {/* <label className="flex items-center gap-2">
           <input
             type="checkbox"
             className="rounded-lg"
@@ -475,7 +584,7 @@ export default function DRCAssignManagerApproval3() {
             onChange={handleSelectAll}
           />
           Select All Data
-        </label>
+        </label> */}
 
         {/* Approve Button */}
         <button
