@@ -504,7 +504,7 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
       throw new Error("case_id is required");
     }
 
-   
+  
     const user_id = await getLoggedUserId();
     const recieved_by = user_id || "Unknown User"; 
 
