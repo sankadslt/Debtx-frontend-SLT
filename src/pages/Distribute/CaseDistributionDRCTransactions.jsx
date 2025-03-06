@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
-import { fetchAllArrearsBands ,get_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution, Batch_Forward_for_Proceed } from "/src/services/case/CaseServices.js";
+import { fetchAllArrearsBands ,List_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution, Batch_Forward_for_Proceed } from "/src/services/case/CaseServices.js";
 import Swal from "sweetalert2";
 
 
@@ -213,7 +213,7 @@ console.log("Page Data:", paginatedData1);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await get_count_by_drc_commision_rule();
+        const response = await List_count_by_drc_commision_rule(); 
         
         const data = response.data || []; // Extract the "data" array from the response
         setServices(data); 
