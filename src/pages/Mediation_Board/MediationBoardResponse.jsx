@@ -11,7 +11,6 @@ Notes:The following page conatins the code for the Mediation Board Response Scre
 import { useState,useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useNavigate ,useParams} from "react-router-dom";
-import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
 import { List_All_DRCs_Mediation_Board_Cases, Accept_Non_Settlement_Request_from_Mediation_Board } from "../../services/case/CaseServices";
@@ -19,7 +18,6 @@ import { List_All_DRCs_Mediation_Board_Cases, Accept_Non_Settlement_Request_from
 const MediationBoardResponse = () => {
   const { caseId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [nonSettlementAccept, setNonSettlementAccept] = useState(false);
   const [caseData, setCaseData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,7 +55,7 @@ const MediationBoardResponse = () => {
   if (!caseData) return <p>No case details found.</p>;
 
   console.log("Case Data:", caseData);
- 
+ console.log("case_current_status",caseData.case_current_status);
   const isNonSettlementCase = caseData.case_current_status === "MB Fail with Pending Non-Settlement";
 
 
@@ -72,7 +70,7 @@ console.log("caseId",caseId);
 
       Swal.fire("Success", "Non-Settlement request accepted successfully!", "success");
       navigate("/MediationBoard/MediationBoardCaseList");
-    } catch (error) {
+    } catch  {
       Swal.fire("Error", "Failed to submit Non-Settlement acceptance.", "error");
     }
   };
@@ -111,7 +109,12 @@ console.log("caseId",caseId);
             <tr className="flex items-start py-1">
               <td className="font-bold w-48">Last Payment Date</td>
               <td className="px-2 font-bold">:</td>
-              <td className="text-gray-700">{caseData.latest_next_calling_dtm}</td>
+              <td className="text-gray-700">
+  {caseData.latest_next_calling_dtm 
+    ? new Date(caseData.latest_next_calling_dtm).toLocaleDateString("en-GB") 
+    : "N/A"}
+</td>
+
             </tr>
           </tbody>
         </table>

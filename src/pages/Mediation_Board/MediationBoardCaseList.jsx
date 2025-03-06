@@ -51,7 +51,7 @@ const STATUS_ICONS = {
   },
 };
 
-// Status Icon component with tooltip
+
 const StatusIcon = ({ status }) => {
   const statusInfo = STATUS_ICONS[status];
 
@@ -261,7 +261,7 @@ export default function MediationBoardCaseList() {
             value={selectedDRC}
             onChange={(e) => setSelectedDRC(e.target.value)}
           >
-            <option value="">DRC</option>
+            <option value="drc">DRC</option>
             <option value="abcd">ABCD</option>
             {/* Add other DRC options */}
           </select>
@@ -353,7 +353,7 @@ export default function MediationBoardCaseList() {
                   <StatusIcon status={row.case_status} />
                 </td>
                 <td className={GlobalStyle.tableData}>{row.date}</td>
-                <td className={GlobalStyle.tableData}>{row.drc_name}</td>
+                <td className={GlobalStyle.tableData}>{row.drc}</td>
                 <td className={GlobalStyle.tableData}>{row.ro}</td>
                 <td className={GlobalStyle.tableData}>{row.rtom}</td>
                 <td className={GlobalStyle.tableData}>{row.calling_round}</td>
