@@ -3,6 +3,7 @@ import axios from "axios";
 //Base URL for for case-related API
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/case`;
+import { getLoggedUserId } from "../auth/authService";
 
 // get_count_by_drc_commision_rule
 export const get_count_by_drc_commision_rule = async () => {
@@ -500,7 +501,15 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
       throw new Error("case_id is required");
     }
 
-    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {  case_id });
+   
+    const user = await getLoggedUserId();
+    const recieved_by = user?.user_id || "Unknown User"; 
+
+    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {  
+      case_id, 
+      recieved_by 
+    });
+
     return response.data;
   } catch (error) {
     console.error("Error updating case status:", error.response?.data || error.message);

@@ -67,7 +67,7 @@ const MediationBoardResponse = () => {
         Swal.fire("Error", "You must accept Non-Settlement before submitting.", "error");
         return;
       }
-
+console.log("caseId",caseId);
       await Accept_Non_Settlement_Request_from_Mediation_Board(caseId);
 
       Swal.fire("Success", "Non-Settlement request accepted successfully!", "success");
