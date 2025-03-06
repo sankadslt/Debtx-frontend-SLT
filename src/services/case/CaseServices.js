@@ -502,8 +502,8 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
     }
 
    
-    const user = await getLoggedUserId();
-    const recieved_by = user?.user_id || "Unknown User"; 
+    const user_id = await getLoggedUserId();
+    const recieved_by = user_id || "Unknown User"; 
 
     const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {  
       case_id, 
