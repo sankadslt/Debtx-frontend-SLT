@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getUserData } from "../auth/authService";
+import { getLoggedUserId } from "../auth/authService";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
 const INCIDENT_URL = `${BASE_URL}/incident`;
@@ -130,7 +130,7 @@ export const Create_Case_for_incident = async (requestData) => {
 
 export const Forward_CPE_Collect = async (Incident_Id) => {
   try {
-     const user = await getUserData();
+     const user = await getLoggedUserId();
 
     const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`,  { 
       Incident_Id, 
