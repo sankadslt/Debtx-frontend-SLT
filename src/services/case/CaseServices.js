@@ -21,7 +21,7 @@ export const List_count_by_drc_commision_rule = async () => {
 // Fetch all arrears bands
 export const fetchAllArrearsBands = async () => {
   try {
-    const response = await axios.get(`${URL}/getAllArrearsBands`);
+    const response = await axios.get(`${URL}/ListAllArrearsBands`);
     const data = response.data.data;
 
     // Exclude the _id key and return both the key-value pairs
@@ -179,10 +179,10 @@ export const Create_Task_For_case_distribution_transaction = async (
   }
 };
 
-export const get_distribution_array_of_a_transaction = async (data) => {
+export const list_distribution_array_of_a_transaction = async (data) => {
   try {
     const response = await axios.post(
-      `${URL}/get_distribution_array_of_a_transaction`,
+      `${URL}/list_distribution_array_of_a_transaction`,
       data
     );
     return response.data;
