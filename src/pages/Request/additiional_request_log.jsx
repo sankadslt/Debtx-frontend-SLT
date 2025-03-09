@@ -8,12 +8,13 @@
 // Dependencies: tailwind css
 // Notes :
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import { ListRequestLogFromRecoveryOfficers } from "../../services/request/request.js";
 
 const RecoveryOfficerRequests = () => {
   const [fromDate, setFromDate] = useState(null);
@@ -23,9 +24,25 @@ const RecoveryOfficerRequests = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [approved, setApproved] = useState("");
-
+  const [requestsData, setRequestsData] = useState([]);
   const navigate = useNavigate();
   const rowsPerPage = 7;
+
+  useEffect(() => {
+    const payload = {
+      delegate_user_id: 5,
+    };
+    const fetchcases = async () => {
+      try {
+        const response = await ListRequestLogFromRecoveryOfficers(payload);
+        console.log(response);
+        setRequestsData(response);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchcases();
+  }, []);
 
   // validation for date
   const handleFromDateChange = (date) => {
@@ -46,56 +63,6 @@ const RecoveryOfficerRequests = () => {
       setToDate(date);
     }
   };
-
-  const requestsData = [
-    {
-      caseId: "C001",
-      status: "Pending FMB",
-      requestStatus: "Pending",
-      amount: "10,000",
-      validityPeriod: "mm/dd/yyyy - mm/dd/yyyy",
-      drc: "ABCD",
-      requestType: "FMB",
-      requestedDate: "mm/dd/yyyy",
-      approval: "Approved",
-    },
-    {
-      caseId: "C002",
-      status: "RO nego",
-      requestStatus: "Pending",
-      amount: "30,000",
-      validityPeriod: "mm/dd/yyyy - mm/dd/yyyy",
-      drc: "ABCD",
-      requestType: "Period extension",
-      requestedDate: "mm/dd/yyyy",
-
-      approval: "-",
-    },
-    {
-      caseId: "C002",
-      status: "RO nego",
-      requestStatus: "Pending",
-      amount: "30,000",
-      validityPeriod: "mm/dd/yyyy - mm/dd/yyyy",
-      drc: "ABCD",
-      requestType: "Period extension",
-      requestedDate: "mm/dd/yyyy",
-
-      approval: "-",
-    },
-    {
-      caseId: "C002",
-      status: "RO nego",
-      requestStatus: "Pending",
-      amount: "30,000",
-      validityPeriod: "mm/dd/yyyy - mm/dd/yyyy",
-      drc: "ABCD",
-      requestType: "Period extension",
-      requestedDate: "mm/dd/yyyy",
-
-      approval: "-",
-    },
-  ];
 
   // Filter data based on search query
   const filteredData = requestsData.filter((row) => {
@@ -252,9 +219,7 @@ const RecoveryOfficerRequests = () => {
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Approved
                 </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Action
-                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}></th>
               </tr>
             </thead>
             <tbody>
@@ -269,19 +234,33 @@ const RecoveryOfficerRequests = () => {
                 >
                   <td className={GlobalStyle.tableData}>
                     <a href={`#${row.caseId}`} className="hover:underline">
-                      {row.caseId}
+                      {row.Interaction_Log_ID}
                     </a>
                   </td>
-                  <td className={GlobalStyle.tableData}>{row.status}</td>
-                  <td className={GlobalStyle.tableData}>{row.requestStatus}</td>
-                  <td className={GlobalStyle.tableData}>{row.amount}</td>
+                  <td className={GlobalStyle.tableData}>{row.Request_Mode}</td>
                   <td className={GlobalStyle.tableData}>
-                    {row.validityPeriod}
+                    {row.User_Interaction_Status}
                   </td>
-                  <td className={GlobalStyle.tableData}>{row.drc}</td>
-                  <td className={GlobalStyle.tableData}>{row.requestType}</td>
-                  <td className={GlobalStyle.tableData}>{row.requestedDate}</td>
-                  <td className={GlobalStyle.tableData}>{row.approval}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.case_details?.current_arrears_amount ?? ""}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.case_details?.Validity_Period
+                      ? row.case_details.Validity_Period.split(" - ")
+                          .map((date) => date.split("T")[0])
+                          .join(" - ")
+                      : "N/A"}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.case_details?.drc?.drc_id ?? ""}
+                  </td>
+                  <td className={GlobalStyle.tableData}>{row.Request_Mode}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {new Date(row.CreateDTM).toLocaleDateString()}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.Approve_Status}
+                  </td>
                   <td
                     className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                   >
