@@ -126,8 +126,32 @@ const RecoveryOfficerRequests = () => {
             className={GlobalStyle.selectBox}
           >
             <option value="">Select</option>
-            <option value="fmb">FMB</option>
-            <option value="period extension">Period extension</option>
+            <option value="fMediation board forward request lettermb">
+              Mediation board forward request letter
+            </option>
+            <option value="Request period extend for Negotiation">
+              Request period extend for Negotiation
+            </option>
+            <option value="Ledger Details">Ledger Details</option>
+            <option value="Nego 1">Nego 1</option>
+            <option value="Pending Approval RO Extend Period">
+              Pending Approval RO Extend Period
+            </option>
+            <option value="Request Settlement plan">
+              Request Settlement plan
+            </option>
+            <option value="Request period extend for Midiation Board">
+              Request period extend for Midiation Board
+            </option>
+            <option value="Request customer further information - Negotiation">
+              Request customer further information - Negotiation
+            </option>
+            <option value="Customer request service">
+              Customer request service
+            </option>
+            <option value="Request customer further information - Midiation Board">
+              Request customer further information - Midiation Board
+            </option>
           </select>
         </div>
 
@@ -139,9 +163,8 @@ const RecoveryOfficerRequests = () => {
             className={GlobalStyle.selectBox}
           >
             <option value="">Select</option>
-            <option value="yes">YES</option>
-            <option value="no">no</option>
-            <option value="-">-</option>
+            <option value="approve">Approve</option>
+            <option value="reject">Reject</option>
           </select>
         </div>
 
@@ -233,11 +256,16 @@ const RecoveryOfficerRequests = () => {
                   } border-b`}
                 >
                   <td className={GlobalStyle.tableData}>
-                    <a href={`#${row.caseId}`} className="hover:underline">
-                      {row.Interaction_Log_ID}
+                    <a
+                      href={`#${row.case_details?.case_id}`}
+                      className="hover:underline"
+                    >
+                      {row.case_details?.case_id}
                     </a>
                   </td>
-                  <td className={GlobalStyle.tableData}>{row.Request_Mode}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.case_details?.case_current_status}
+                  </td>
                   <td className={GlobalStyle.tableData}>
                     {row.User_Interaction_Status}
                   </td>
@@ -254,7 +282,9 @@ const RecoveryOfficerRequests = () => {
                   <td className={GlobalStyle.tableData}>
                     {row.case_details?.drc?.drc_id ?? ""}
                   </td>
-                  <td className={GlobalStyle.tableData}>{row.Request_Mode}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.User_Interaction_Type}
+                  </td>
                   <td className={GlobalStyle.tableData}>
                     {new Date(row.CreateDTM).toLocaleDateString()}
                   </td>
