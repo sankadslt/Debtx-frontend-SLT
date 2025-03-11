@@ -165,20 +165,20 @@ console.log("caseId",caseId);
                 Agree to Settle
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Field Reason
+                Customer Response
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Remark
+                Comment
               </th>
             </tr>
           </thead>
           <tbody>
             <tr className="bg-white bg-opacity-75 border-b">
-              <td className={GlobalStyle.tableData}>2024.11.04</td>
-              <td className={GlobalStyle.tableData}>Yes/No</td>
-              <td className={GlobalStyle.tableData}>Yes/No</td>
-              <td className={GlobalStyle.tableData}></td>
-              <td className={GlobalStyle.tableData}>............</td>
+              <td className={GlobalStyle.tableData}> {new Date(caseData.latest_next_calling_dtm).toLocaleDateString()}</td>
+              <td className={GlobalStyle.tableData}>{caseData. customer_available}</td>
+              <td className={GlobalStyle.tableData}>{caseData.agree_to_settle}</td>
+              <td className={GlobalStyle.tableData}>{caseData.customer_response}</td>
+              <td className={GlobalStyle.tableData}>{caseData.comment}</td>
             </tr>
           </tbody>
         </table>
@@ -230,9 +230,9 @@ console.log("caseId",caseId);
           </thead>
           <tbody>
             <tr className="bg-white bg-opacity-75 border-b">
-              <td className={GlobalStyle.tableData}>2024.11.04</td>
-              <td className={GlobalStyle.tableData}>...................</td>
-              <td className={GlobalStyle.tableData}>............</td>
+              <td className={GlobalStyle.tableData}> {new Date(caseData.created_dtm).toLocaleDateString()}</td>
+              <td className={GlobalStyle.tableData}>{caseData.ro_request}</td>
+              <td className={GlobalStyle.tableData}>{caseData.request_remark}</td>
             </tr>
           </tbody>
         </table>
