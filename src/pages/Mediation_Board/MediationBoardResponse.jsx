@@ -79,10 +79,10 @@ console.log("caseId",caseId);
 
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-      {/* Header */}
+      
       <h1 className="text-4xl font-bold mb-8">Mediation Board Response</h1>
 
-      {/* Case Info Card with Table Structure */}
+     
       <div className="p-4 rounded-lg shadow-xl mb-6 bg-white bg-opacity-15 border-2 border-zinc-300 max-w-4xl">
         <table className="w-full">
           <tbody>
@@ -120,7 +120,7 @@ console.log("caseId",caseId);
         </table>
       </div>
 
-      {/* Non-Settlement Accept Section - Only shown for relevant status */}
+      
       {isNonSettlementCase && (
           <div className="flex items-center gap-2 mb-4">
             <span className="font-semibold text-lg">Non-Settlement Accept:</span>
@@ -149,8 +149,8 @@ console.log("caseId",caseId);
         </div>
       )}
 
-      {/* Negotiation History Section */}
-      <h2 className="text-xl font-semibold mb-4">Negotiation History</h2>
+    
+      <h2 className="text-xl font-semibold mb-4">Mediation board History</h2>
       <div className={GlobalStyle.tableContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
@@ -165,20 +165,20 @@ console.log("caseId",caseId);
                 Agree to Settle
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Field Reason
+                Customer Response
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Remark
+                Comment
               </th>
             </tr>
           </thead>
           <tbody>
             <tr className="bg-white bg-opacity-75 border-b">
-              <td className={GlobalStyle.tableData}>2024.11.04</td>
-              <td className={GlobalStyle.tableData}>Yes/No</td>
-              <td className={GlobalStyle.tableData}>Yes/No</td>
-              <td className={GlobalStyle.tableData}></td>
-              <td className={GlobalStyle.tableData}>............</td>
+              <td className={GlobalStyle.tableData}> {new Date(caseData.latest_next_calling_dtm).toLocaleDateString()}</td>
+              <td className={GlobalStyle.tableData}>{caseData. customer_available}</td>
+              <td className={GlobalStyle.tableData}>{caseData.agree_to_settle}</td>
+              <td className={GlobalStyle.tableData}>{caseData.customer_response}</td>
+              <td className={GlobalStyle.tableData}>{caseData.comment}</td>
             </tr>
           </tbody>
         </table>
@@ -230,9 +230,9 @@ console.log("caseId",caseId);
           </thead>
           <tbody>
             <tr className="bg-white bg-opacity-75 border-b">
-              <td className={GlobalStyle.tableData}>2024.11.04</td>
-              <td className={GlobalStyle.tableData}>...................</td>
-              <td className={GlobalStyle.tableData}>............</td>
+              <td className={GlobalStyle.tableData}> {new Date(caseData.created_dtm).toLocaleDateString()}</td>
+              <td className={GlobalStyle.tableData}>{caseData.ro_request}</td>
+              <td className={GlobalStyle.tableData}>{caseData.request_remark}</td>
             </tr>
           </tbody>
         </table>
