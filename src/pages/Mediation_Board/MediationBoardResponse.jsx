@@ -79,10 +79,10 @@ console.log("caseId",caseId);
 
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-      {/* Header */}
+      
       <h1 className="text-4xl font-bold mb-8">Mediation Board Response</h1>
 
-      {/* Case Info Card with Table Structure */}
+     
       <div className="p-4 rounded-lg shadow-xl mb-6 bg-white bg-opacity-15 border-2 border-zinc-300 max-w-4xl">
         <table className="w-full">
           <tbody>
@@ -120,7 +120,7 @@ console.log("caseId",caseId);
         </table>
       </div>
 
-      {/* Non-Settlement Accept Section - Only shown for relevant status */}
+      
       {isNonSettlementCase && (
           <div className="flex items-center gap-2 mb-4">
             <span className="font-semibold text-lg">Non-Settlement Accept:</span>
@@ -149,8 +149,8 @@ console.log("caseId",caseId);
         </div>
       )}
 
-      {/* Negotiation History Section */}
-      <h2 className="text-xl font-semibold mb-4">Negotiation History</h2>
+    
+      <h2 className="text-xl font-semibold mb-4">Mediation board History</h2>
       <div className={GlobalStyle.tableContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
