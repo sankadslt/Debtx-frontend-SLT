@@ -8,13 +8,13 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the Mediation Board case list Screen */
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/mediationBoard/edit.png";
 import { useNavigate } from "react-router-dom";
-
+import { List_All_DRCs_Mediation_Board_Cases } from "../../services/case/CaseServices";
 // Import status icons with correct file extensions
 import Forward_to_Mediation_Board from "../../assets/images/mediationBoard/Forward_to_Mediation_Board.png";
 import MB_fail_with_pending_non_settlement from "../../assets/images/mediationBoard/MB_fail_with_pending_non_settlement.png";
@@ -22,7 +22,7 @@ import MB_Negotiation from "../../assets/images/mediationBoard/MB_Negotiation.pn
 import MB_Settle_Active from "../../assets/images/mediationBoard/MB_Settle_Active.png";
 import MB_Settle_open_pending from "../../assets/images/mediationBoard/MB_Settle_open_pending.png";
 import MB_Settle_pending from "../../assets/images/mediationBoard/MB_Settle_pending.png";
-
+import Swal from "sweetalert2";
 // Status icon mapping
 const STATUS_ICONS = {
   Forward_to_Mediation_Board: {
@@ -51,7 +51,7 @@ const STATUS_ICONS = {
   },
 };
 
-// Status Icon component with tooltip
+
 const StatusIcon = ({ status }) => {
   const statusInfo = STATUS_ICONS[status];
 
@@ -69,7 +69,7 @@ const StatusIcon = ({ status }) => {
 };
 
 export default function MediationBoardCaseList() {
-  // State management
+
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [error, setError] = useState("");
@@ -77,37 +77,72 @@ export default function MediationBoardCaseList() {
   const [selectedDRC, setSelectedDRC] = useState("");
   const [selectedRTOM, setSelectedRTOM] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0); // Fixed: Starting from 0 to match slice logic
-  const [loading, setLoading] = useState(false); // Added: Missing loading state
+  const [currentPage, setCurrentPage] = useState(0);
+  const [tableData, setTableData] = useState([]);
+  const [isloading, setIsLoading] = useState(true);
+  const [filteredData, setFilteredData] = useState(tableData);
   const navigate = useNavigate();
 
   const rowsPerPage = 7;
 
-  // Mock data for the table
-  const caseData = [
-    {
-      caseId: "C001",
-      status: "Forward_to_Mediation_Board",
-      date: "mm/dd/yyyy",
-      drc: "ABCD",
-      roName: "ABCD",
-      rtom: "RTOM 01",
-      callingRound: 1,
-      nextCallingDate: "mm/dd/yyyy",
-    },
-    {
-      caseId: "C002", // Fixed: Made unique
-      status: "MB_fail_with_pending_non_settlement",
-      date: "mm/dd/yyyy",
-      drc: "ABCD",
-      roName: "ABCD",
-      rtom: "RTOM 01",
-      callingRound: 3,
-      nextCallingDate: "-",
-    },
-  ];
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+  
+      const filters = {
+        case_current_status: selectedStatus,
+        rtom: selectedRTOM,
+        drc_name: selectedDRC,
+        From_DAT: fromDate ? fromDate.toISOString().split("T")[0] : null,
+        To_DAT: toDate ? toDate.toISOString().split("T")[0] : null,
+      };
+  
+      const response = await List_All_DRCs_Mediation_Board_Cases(filters);
+      console.log("Response:", response);
+  
+      if (!response?.data) {
+        setTableData([]);
+        setFilteredData([]);
+        return;
+      }
+  
+      const formattedData = response.data.map((item) => ({
+        id: item.case_id || "N/A",
+        case_status: item.case_current_status || "N/A",
+        date: item.created_dtm ? new Date(item.created_dtm).toLocaleDateString("en-GB") : "N/A",
+        drc: item.drc_name || "N/A",
+        rtom: item.rtom || "N/A",
+        calling_round: item.mediation_board_call_count || "N/A",
+        next_calling_date: item.latest_next_calling_dtm ? new Date(item.latest_next_calling_dtm).toLocaleDateString("en-GB") : "N/A",
+        created_dtm: item.created_dtm ? new Date(item.created_dtm).toISOString().split("T")[0] : "N/A",
+      }));
+  
+      
+      const filteredResults = formattedData.filter((row) => {
+        const matchesStatus = !selectedStatus || row.case_status === selectedStatus;
+        const matchesDRC = !selectedDRC || row.drc === selectedDRC;
+        const matchesRTOM = !selectedRTOM || row.rtom === selectedRTOM;
+        const matchesDate =
+          (!fromDate || new Date(row.created_dtm) >= fromDate) &&
+          (!toDate || new Date(row.created_dtm) <= toDate);
+  
+        return matchesStatus && matchesDRC && matchesRTOM && matchesDate;
+      });
+  
+      setTableData(formattedData);
+      setFilteredData(filteredResults);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  // Date handlers
+  
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       setError("The 'From' date cannot be later than the 'To' date.");
@@ -126,43 +161,62 @@ export default function MediationBoardCaseList() {
     }
   };
 
-  // Handle filter updates
-  const handleFilter = () => {
-    // Implementation for filtering would go here
-    console.log("Filtering with:", {
-      selectedStatus,
-      selectedDRC,
-      selectedRTOM,
-      fromDate,
-      toDate,
-    }); // Fixed: dateRange not defined
-  };
+  useEffect(() => {
+    setFilteredData(
+      tableData.filter((row) =>
+        Object.values(row)
+          .join(" ")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [searchQuery]); 
 
-  // Data filtering and pagination
-  const filteredData = caseData.filter(
-    (
-      row // Fixed: cases -> caseData
-    ) =>
-      Object.values(row)
-        .join(" ")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-  );
+  const handleFilterClick = () => {
+    if (!selectedStatus && !selectedDRC && !selectedRTOM && !fromDate && !toDate) {
+      Swal.fire({
+        title: "Missing Filters",
+        text: "Please select a filter criteria.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+  
+    const filtered = tableData.filter((row) => {
+      const matchesStatus = !selectedStatus || row.case_status === selectedStatus;
+      const matchesDRC = !selectedDRC || row.drc === selectedDRC;
+      const matchesRTOM = !selectedRTOM || row.rtom === selectedRTOM;
+      const matchesDate =
+        (!fromDate || new Date(row.created_dtm) >= new Date(fromDate)) &&
+        (!toDate || new Date(row.created_dtm) <= new Date(toDate));
+  
+      return matchesStatus && matchesDRC && matchesRTOM && matchesDate;
+    });
+  
+    setFilteredData(filtered);
+  };
+  
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
-  const paginatedData = filteredData.slice(
-    currentPage * rowsPerPage,
-    (currentPage + 1) * rowsPerPage
-  );
 
-  // Pagination handlers
   const handlePrevPage = () => {
-    setCurrentPage((prev) => Math.max(0, prev - 1));
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
   const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(pages - 1, prev + 1));
+    if (currentPage < pages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
   };
+
+  const startIndex = currentPage * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
+  
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -178,18 +232,24 @@ export default function MediationBoardCaseList() {
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
             <option value="">Status</option>
-            <option value="Forward_to_Mediation_Board">
-              Forward_to_Mediation_Board
+            <option value="Forward to Mediation Board">
+            Forward to Mediation Board
             </option>
-            <option value="MB_fail_with_pending_non_settlement">
-              MB_fail_with_pending_non_settlement
+            <option value="MB Request Customer-Info">
+            MB Request Customer-Info
             </option>
-            <option value="MB_Negotiation">MB_Negotiation</option>
-            <option value="MB_Settle_Active">MB_Settle_Active</option>
-            <option value="MB_Settle_open_pending">
-              MB_Settle_open_pending
+            <option value=" MB Handover Customer-Info">
+            MB Handover Customer-Info
             </option>
-            <option value="MB_Settle_pending">MB_Settle_pending</option>
+            <option value="MB Fail with Pending Non-Settlement">
+            MB Fail with Pending Non-Settlement
+            </option>
+            <option value="MB Negotiation">MB Negotiation</option>
+            <option value="MB Settle Active">MB Settle Active</option>
+            <option value="MB Settle Open-Pending">
+              MB Settle Open-Pending
+            </option>
+            <option value="MB Settle Pending">MB Settle Pending</option>
             {/* Add other status options */}
           </select>
         </div>
@@ -201,7 +261,7 @@ export default function MediationBoardCaseList() {
             value={selectedDRC}
             onChange={(e) => setSelectedDRC(e.target.value)}
           >
-            <option value="">DRC</option>
+            <option value="drc">DRC</option>
             <option value="abcd">ABCD</option>
             {/* Add other DRC options */}
           </select>
@@ -215,7 +275,7 @@ export default function MediationBoardCaseList() {
             onChange={(e) => setSelectedRTOM(e.target.value)}
           >
             <option value="">RTOM</option>
-            <option value="rtom-01">RTOM 01</option>
+            <option value="Standard">Standard</option>
             {/* Add other RTOM options */}
           </select>
         </div>
@@ -237,7 +297,10 @@ export default function MediationBoardCaseList() {
         />
 
         {/* Filter button */}
-        <button className={GlobalStyle.buttonPrimary} onClick={handleFilter}>
+        <button
+          className={GlobalStyle.buttonPrimary}
+          onClick={handleFilterClick}
+        >
           Filter
         </button>
       </div>
@@ -276,34 +339,37 @@ export default function MediationBoardCaseList() {
           <tbody>
             {paginatedData.map((row, index) => (
               <tr
-                key={index} // Fixed: Using row.case_id -> index since caseId might not be unique
+                key={index} // Ensure uniqueness
                 className={`${
                   index % 2 === 0
                     ? "bg-white bg-opacity-75"
                     : "bg-gray-50 bg-opacity-50"
                 } border-b`}
               >
-                <td className={GlobalStyle.tableData}>{row.caseId}</td>
+                <td className={GlobalStyle.tableData}>{row.id}</td>
                 <td
                   className={`${GlobalStyle.tableData} flex justify-center items-center`}
                 >
-                  <StatusIcon status={row.status} />
+                  <StatusIcon status={row.case_status} />
                 </td>
                 <td className={GlobalStyle.tableData}>{row.date}</td>
                 <td className={GlobalStyle.tableData}>{row.drc}</td>
-                <td className={GlobalStyle.tableData}>{row.roName}</td>
+                <td className={GlobalStyle.tableData}>{row.ro}</td>
                 <td className={GlobalStyle.tableData}>{row.rtom}</td>
-                <td className={GlobalStyle.tableData}>{row.callingRound}</td>
-                <td className={GlobalStyle.tableData}>{row.nextCallingDate}</td>
+                <td className={GlobalStyle.tableData}>{row.calling_round}</td>
+                <td className={GlobalStyle.tableData}>
+                  {row.next_calling_date}
+                </td>
                 <td className={GlobalStyle.tableData}>
                   <img
                     src={edit}
                     alt="Edit Case"
                     className="w-6 h-6 cursor-pointer"
                     onClick={() =>
-                      navigate(`/MediationBoard/MediationBoardResponse`, {
+                      navigate(`/MediationBoard/MediationBoardResponse/${row.id}`, {
                         state: { caseData: row },
                       })
+                      
                     }
                   />
                 </td>
@@ -311,10 +377,8 @@ export default function MediationBoardCaseList() {
             ))}
             {paginatedData.length === 0 && (
               <tr>
-                <td colSpan="9" className="text-center py-4">
-                  {" "}
-                  {/* Fixed: colSpan="8" -> "9" to match columns */}
-                  {loading ? "Loading..." : "No results found"}
+                <td colSpan="8" className="text-center py-4">
+                  {isloading ? "Loading..." : "No results found"}
                 </td>
               </tr>
             )}

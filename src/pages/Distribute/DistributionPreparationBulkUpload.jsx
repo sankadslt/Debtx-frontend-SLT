@@ -12,7 +12,7 @@ Notes:  This page includes Total and Reject count and a table*/
 import { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { get_count_by_drc_commision_rule } from '/src/services/case/CaseServices.js';
+import { List_count_by_drc_commision_rule } from '/src/services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 
 const DistributionPreparationBulkUpload = () => {
@@ -28,7 +28,7 @@ const DistributionPreparationBulkUpload = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await get_count_by_drc_commision_rule();
+        const response = await List_count_by_drc_commision_rule();
         
         const data = response.data || []; // Extract the "data" array from the response
         setServices(data); 

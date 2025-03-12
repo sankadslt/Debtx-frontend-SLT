@@ -8,7 +8,7 @@ ui number : 1.A.12
 Dependencies: tailwind css
 Related Files: (routes)
 Notes: This page includes a case count bar, filter , table and a pie chart  */
-
+ 
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
