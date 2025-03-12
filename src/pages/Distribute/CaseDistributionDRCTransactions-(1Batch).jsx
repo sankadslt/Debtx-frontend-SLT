@@ -13,7 +13,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import {
-  get_distribution_array_of_a_transaction,
+  list_distribution_array_of_a_transaction,
   Create_Task_For_case_distribution_transaction_array,
 } from "/src/services/case/CaseServices.js";
 import {getLoggedUserId} from "/src/services/auth/authService.js";

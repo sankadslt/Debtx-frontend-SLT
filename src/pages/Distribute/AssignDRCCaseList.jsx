@@ -332,13 +332,17 @@ import { FaArrowLeft, FaArrowRight, FaSearch, FaCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { List_CasesOwened_By_DRC } from "../../services/case/CaseServices";
+import { List_CasesOwened_By_DRC , Create_Task_For_Assigned_drc_case_list_download , Withdraw_CasesOwened_By_DRC } from "../../services/case/CaseServices";
+import { FaUserEdit, FaUndo } from "react-icons/fa"; 
+import {getLoggedUserId} from "/src/services/auth/authService.js";
+import Swal from "sweetalert2";
+
+
 
 export default function AssignDRCsLOG() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState({});
   const [cases, setCases] = useState([]); 
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -349,9 +353,7 @@ export default function AssignDRCsLOG() {
         setCases(data);
       } catch (err) {
         setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
     fetchCases();
   }, []);
@@ -367,52 +369,206 @@ export default function AssignDRCsLOG() {
   const [filterType, setFilterType] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
-  const filteredCases = cases.filter((row) => {
-    const matchesSearch = Object.values(row)
+
+
+  const filteredCases = cases.filter((row) => 
+    Object.values(row)
       .join(" ")
       .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-
-      const matchesFilter =
-      (!filterType || !filterValue) ||
-      (filterType === "Account No" && row.account_no.toString().includes(filterValue)) ||
-      (filterType === "Case ID" && row.case_id.toString().includes(filterValue));
-
-    const matchesDate =
-      (!startDate || new Date(row.created_dtm) >= startDate) &&
-      (!endDate || new Date(row.expire_dtm) <= endDate);
-
-    return matchesSearch && matchesFilter && matchesDate;
-  });
+      .includes(searchQuery.toLowerCase())
+      );
 
   const itemsPerPage = 4;
   const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
 
-  // Filter handler
-  const handleFilter = () => {
-    if (startDate && endDate) {
-      const filtered = tableData.filter((row) => {
-        const assignedDate = new Date(row.assignedDate);
-        const endDate1 = new Date(row.endDate);
-        return assignedDate >= startDate && endDate1 <= endDate;
-      });
-      handleFilterByType;
-      setFilteredData(filtered);
-    } else {
-      setFilteredData(tableData); // Reset if dates are not selected
-    }
+  const handlestartdatechange = (date) => {
+    setStartDate(date);
+    if (endDate) checkdatediffrence(date, endDate);
+  };
 
-    if (filterType && filterValue) {
-      const filtered = tableData.filter((row) => {
-        const valueToCheck =
-          filterType === "Account No" ? row.accountNo : row.caseId;
-        return valueToCheck.toLowerCase().includes(filterValue.toLowerCase());
-      });
-      setFilteredData(filtered);
-    } else {
-      setFilteredData(tableData); // Reset to original data if no filter applied
+  const handleenddatechange = (date) => {
+    if (startDate) {
+      checkdatediffrence(startDate, date);
+    }
+    setEndDate(date);
+
+  }
+
+  const checkdatediffrence = (startDate, endDate) => {
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    const diffInMs = end - start;
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+    const diffInMonths = diffInDays / 30;
+  
+    if (diffInMonths > 1) {
+      Swal.fire({
+        title: "Date Range Exceeded",
+        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        confirmButtonColor: "#28a745",
+        cancelButtonText: "No",
+        cancelButtonColor: "#d33",
+      }).then((result) => {
+        if (result.isConfirmed) {
+
+          endDate = endDate;
+          handleApicall(startDate, endDate);
+        } else {
+          setEndDate(null);
+          console.log("EndDate cleared");
+        }
+      }
+      );
+
     }
   };
+
+  const handleApicall = async (startDate, endDate) => {
+    const userId =  await getLoggedUserId();
+    const payload = {}
+    payload.drc_id = 7; // Hardcoded DRC ID for testing
+    payload.from_date = startDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    payload.to_date = endDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+
+    if (filterType === "Account No" && filterValue.trim() !== "") {
+      payload.account_no = String(filterValue.trim());
+    }
+    else if (filterType === "Case ID" && filterValue.trim() !== "") {
+      payload.case_id = filterValue.trim();
+    }
+    payload.Created_By = userId;
+    console.log("Filtered Request Payload:", payload);
+
+    // Call API with payload
+    const createtask = async () => {
+      try {
+        const data = await Create_Task_For_Assigned_drc_case_list_download(payload);
+        console.log("Response",data);
+          Swal.fire({
+                 icon: "success",
+                 title: "Success",
+                 text: "Data sent successfully.",
+                 confirmButtonColor: "#28a745",
+          });
+          setEndDate(null);
+          setStartDate(null);
+        
+      } catch (error) {
+        console.error("Error in sending the data:", error);
+  
+        const errorMessage = error?.response?.data?.message || 
+                               error?.message || 
+                               "An error occurred. Please try again.";
+         Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: errorMessage,
+                    confirmButtonColor: "#d33",
+                });
+      }
+    }
+    createtask();
+  };
+  
+
+      
+
+
+  // Filter handler
+  const handleFilter = () => {
+    const payload = {}
+    payload.drc_id = 7; // Hardcoded DRC ID for testing
+    if (startDate) {
+      payload.from_date = startDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    }
+    if (endDate) {
+      payload.to_date = endDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    }
+    // Assign either "account_no" or "case_id" based on selected filterType
+
+    if (filterType === "Account No" && filterValue.trim() !== "") {
+      payload.account_no = String(filterValue.trim());
+    } else if (filterType === "Case ID" && filterValue.trim() !== "") {
+      payload.case_id = filterValue.trim();
+    }
+
+
+    console.log("Filtered Request Payload:", payload);
+
+    // Call API with payload
+    const fetchCases = async () => {
+      try {
+        const data = await List_CasesOwened_By_DRC(payload);
+        setCases(data);
+      } catch (err) {
+        setError(err.message);
+        setCases([]);
+      }
+    }
+    fetchCases();
+
+  };
+
+  const handlewithdrawbutton = async (caseID) => {
+    const userId =  await getLoggedUserId();
+    Swal.fire({
+      title: "Enter your remark",
+      input: "text",
+      inputPlaceholder: "Enter remark",
+      showCancelButton: true,
+      cancelButtonText: "Close",
+      confirmButtonText: "Withdraw",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
+      preConfirm: (remark) => {
+        if (!remark) {
+          Swal.showValidationMessage("Please enter a remark before withdrawing!");
+        }
+        return remark;
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const payload = {
+          approver_reference: caseID,
+          remark: result.value,
+          remark_edit_by: userId,
+          created_by: userId,
+        };
+        console.log("Withdraw Payload:", payload);
+
+        // Call API with payload
+        const withdrawCase = async () => {
+          try {
+            const data = await Withdraw_CasesOwened_By_DRC(payload);
+            console.log("Response", data);
+            Swal.fire({
+              icon: "success",
+              title: "Success",
+              text: "Case withdrawn successfully.",
+              confirmButtonColor: "#28a745",
+            });
+          } catch (error) {
+            console.error("Error in withdrawing the case:", error);
+
+            const errorMessage = error?.response?.data?.message ||
+              error?.message ||
+              "An error occurred. Please try again.";
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: errorMessage,
+              confirmButtonColor: "#d33",
+            });
+          }
+        };
+        withdrawCase();
+      }
+    });
+    
+  }
 
   // Pagination handler
   const handlePrevNext = (direction) => {
@@ -444,7 +600,7 @@ export default function AssignDRCsLOG() {
               onChange={(e) => setFilterType(e.target.value)}
               className={`${GlobalStyle.selectBox} h-[36px]`}
             >
-              <option value="">Select</option>
+              <option value="" hidden>Select</option>
               <option value="Account No">Account No</option>
               <option value="Case ID">Case ID</option>
             </select>
@@ -466,14 +622,14 @@ export default function AssignDRCsLOG() {
               <label className={GlobalStyle.dataPickerDate}>Date </label>
               <DatePicker
                 selected={startDate}
-                onChange={(date) => setStartDate(date)}
+                onChange={handlestartdatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="dd/MM/yyyy"
                 className={GlobalStyle.inputText}
               />
               <DatePicker
                 selected={endDate}
-                onChange={(date) => setEndDate(date)}
+                onChange={handleenddatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="dd/MM/yyyy"
                 className={GlobalStyle.inputText}
@@ -491,11 +647,6 @@ export default function AssignDRCsLOG() {
       </div>
 
       {/* Table Section */}
-      {loading ? (
-        <p className="text-center text-gray-500">Loading...</p>
-      ) : error ? (
-        <p className="text-center text-red-500">Error: {error}</p>
-      ) : (
         <div className="flex flex-col">
         <div className="flex justify-start mb-4">
           <div className={GlobalStyle.searchBarContainer}>
@@ -537,44 +688,46 @@ export default function AssignDRCsLOG() {
             <tbody>
               {paginatedData.length > 0 ? (
                 paginatedData.map((caseItem) => (
-                  <tr key={caseItem.case_id} className={`${
+                  <tr key={caseItem.case_id} className={
                     caseItem % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
+                      ? GlobalStyle.tableRowEven
+                      : GlobalStyle.tableRowOdd
+                  }
                 >
                     <td className={GlobalStyle.tableData}>{caseItem.case_id}</td>
                     <td className={GlobalStyle.tableData}>{caseItem.case_current_status}</td>
                     <td className={GlobalStyle.tableData}>{caseItem.account_no}</td>
                     <td className={GlobalStyle.tableData}>{caseItem.current_arrears_amount}</td>
                     <td className={GlobalStyle.tableData}>
-                      {new Date(caseItem.created_dtm).toLocaleString()}
+                    {new Date(caseItem.created_dtm).toLocaleDateString('en-GB')} 
                     </td>
                     <td className={GlobalStyle.tableData}>
-                      {new Date(caseItem.expire_dtm).toLocaleDateString()}
+                    {caseItem.end_dtm.trim() && !isNaN(new Date(caseItem.end_dtm.trim()).getTime()) 
+                      ? new Date(caseItem.end_dtm.trim()).toLocaleDateString("en-GB") 
+                      : ""}
                     </td>
                     <td className={GlobalStyle.tableData}>
                     <button
-                        className={GlobalStyle.buttonPrimary} // Prevents text from wrapping
-                        onClick={() =>
-                          navigate(
-                           `/pages/Distribute/ReAssignDRC?caseId=${caseItem.case_id}&accountNo=${caseItem.account_no}`
-                          )
-                        }
-                      >
-                        Re-Assign
-                      </button>
-                      <button className={GlobalStyle.buttonPrimary}>
-                        {" "}
-                        {/* Increased width */}
-                        Withdraw
-                      </button>
+                    className={GlobalStyle.buttonPrimary}
+                    onClick={() =>
+                    navigate(
+                    `/pages/Distribute/ReAssignDRC?caseId=${caseItem.case_id}&accountNo=${caseItem.account_no}`
+                     )
+                    }
+                     title="Re-Assign" // Shows tooltip on hover
+                    >
+                    <FaUserEdit /> {/* Icon for Re-Assign */}
+                    </button>
+
+                    <button className={GlobalStyle.buttonPrimary} title="Withdraw"  onClick={() => handlewithdrawbutton(caseItem.case_id)}>
+                    <FaUndo /> {/* Icon for Withdraw */}
+                    </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="text-center p-4 text-gray-500">
+                  <td colSpan="7" className={GlobalStyle.tableData}>
                     No cases found.
                   </td>
                 </tr>
@@ -584,7 +737,7 @@ export default function AssignDRCsLOG() {
         </div>
         </div>
         
-      )}
+      
 
       {/* Pagination */}
       <div className={GlobalStyle.navButtonContainer}>

@@ -8,7 +8,7 @@ ui number : 1.A.12
 Dependencies: tailwind css
 Related Files: (routes)
 Notes: This page includes a case count bar, filter , table and a pie chart  */
-
+ 
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
@@ -76,6 +76,7 @@ const AssignDRC = () => {
       try {
         const Names = await Active_DRC_Details();
         setDrcNames(Names);
+        
       } catch (error) {
         console.error("Error fetching drc names:", error);
       }
@@ -178,14 +179,15 @@ const AssignDRC = () => {
       console.log("Selected Band Key:", band.key);
     }
   };
+  
 
   const handleProceed = async () => {
     const userId = await getLoggedUserId();
 
     const drcList = filteredSearchData.map((drc) => ({
-      DRC: drc.name,
-      DRC_ID: drc.drckey,
-      Count: drc.amount,
+      DRC: String(drc.name),
+      DRC_Id: Number(drc.drckey),
+      Count: Number(drc.amount),
     }));
 
     const requestData = {
@@ -232,7 +234,7 @@ const AssignDRC = () => {
   const handlepiechart2 = () => {
     setShowPopup(true); // Open chart popup
   }
-
+  
   return (
     <div className={`${GlobalStyle.fontPoppins} flex flex-col `}>
       {/* Main Content */}

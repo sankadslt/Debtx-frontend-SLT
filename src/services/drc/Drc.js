@@ -12,8 +12,10 @@ export const Active_DRC_Details = async () => {
     // Extract and return the drc_name for all active DRCs
 
     const drcNames = data.map((drc) => ({
-      key: drc._id, // Use _id as key
+      key: drc.drc_id, // Use _id as key
       value: drc.drc_name, // Use drc_name as the display value
+      id: drc.drc_id,
+      
     }));
 
     return drcNames;
