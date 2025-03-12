@@ -3,11 +3,12 @@ import axios from "axios";
 //Base URL for for case-related API
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/case`;
+import { getLoggedUserId } from "../auth/authService";
 
 // get_count_by_drc_commision_rule
-export const get_count_by_drc_commision_rule = async () => {
+export const List_count_by_drc_commision_rule = async () => {
   try {
-    const response = await axios.get(`${URL}/get_count_by_drc_commision_rule`);
+    const response = await axios.get(`${URL}/List_count_by_drc_commision_rule`);
     return response.data;
   } catch (error) {
     console.error(
@@ -21,7 +22,7 @@ export const get_count_by_drc_commision_rule = async () => {
 // Fetch all arrears bands
 export const fetchAllArrearsBands = async () => {
   try {
-    const response = await axios.get(`${URL}/getAllArrearsBands`);
+    const response = await axios.get(`${URL}/ListAllArrearsBands`);
     const data = response.data.data;
 
     // Exclude the _id key and return both the key-value pairs
@@ -179,10 +180,10 @@ export const Create_Task_For_case_distribution_transaction = async (
   }
 };
 
-export const get_distribution_array_of_a_transaction = async (data) => {
+export const list_distribution_array_of_a_transaction = async (data) => {
   try {
     const response = await axios.post(
-      `${URL}/get_distribution_array_of_a_transaction`,
+      `${URL}/list_distribution_array_of_a_transaction`,
       data
     );
     return response.data;
@@ -461,4 +462,94 @@ export const Create_Task_For_Assigned_drc_case_list_download = async (payload) =
     throw error;
   }
 }
+
+export const AssignDRCToCaseDetails = async (payload) => {
+  try {
+    
+    const response = await axios.post(
+      `${URL}/AssignDRCToCaseDetails`,
+      payload
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching assign DRC to case details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+
+export const List_All_DRCs_Mediation_Board_Cases = async (filters) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_All_DRCs_Mediation_Board_Cases`,
+      filters 
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching Case details :",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
+export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id) => {
+  try {
+    if (!case_id) {
+      throw new Error("case_id is required");
+    }
+
+  
+    const user_id = await getLoggedUserId();
+    const recieved_by = user_id || "Unknown User"; 
+
+    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {  
+      case_id, 
+      recieved_by 
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating case status:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const Assign_DRC_To_Case = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Assign_DRC_To_Case`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error assigning DRC to case:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+export const Withdraw_CasesOwened_By_DRC = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Withdraw_CasesOwened_By_DRC`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error withdrawing cases owned by DRC:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
 
