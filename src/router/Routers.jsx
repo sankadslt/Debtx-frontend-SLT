@@ -61,6 +61,10 @@ import MediationBoardResponse from "../pages/Mediation_Board/MediationBoardRespo
 
  import MediationBoardResponse from "../pages/MediationBoard/MediationBoardResponse";
 
+ // Commission
+
+ import Commission_List from "../pages/Commission/Commission_List";
+
 const Routers = () => {
   return (
     <Routes>
@@ -158,6 +162,9 @@ const Routers = () => {
       {/* //MEDIATION BOARD */}
       <Route path="/MediationBoard/MediationBoardCaseList" element={<ProtectedRoute element={<MediationBoardCaseList />} allowedRoles={['superadmin']} />} />
       <Route path="/MediationBoard/MediationBoardResponse/:caseId" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
+
+      {/* Commission */}
+      <Route path="/Commission/Commission_List" element={<ProtectedRoute element={<Commission_List />} allowedRoles={['superadmin']} />} />
 
     </Routes>
   );
