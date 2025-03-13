@@ -12,6 +12,7 @@ import GlobalStyle from '../../assets/prototype/GlobalStyle';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaSearch, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 const Commission_List = () => {
   const [selectValue, setSelectValue] = useState('Account No');
@@ -22,10 +23,49 @@ const Commission_List = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [dateError, setDateError] = useState('');
   const rowsPerPage = 5; // Number of rows per page
 
-  const handleFromDateChange = (date) => setFromDate(date);
-  const handleToDateChange = (date) => setToDate(date);
+  const handleFromDateChange = (date) => {
+    setFromDate(date);
+    validateDates(date, toDate);
+  };
+  
+  const handleToDateChange = (date) => {
+    setToDate(date);
+    validateDates(fromDate, date);
+  };
+
+  const validateDates = (from, to) => {
+    if (from && to) {
+      // Check if from date is before to date
+      if (from >= to) {
+        Swal.fire({
+          title: 'Warning',
+          text: 'From date must be before to date',
+          icon: 'warning',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#3085d6'
+        });
+        return false;
+      }
+      const oneMonthLater = new Date(from);
+    oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+    
+    if (to > oneMonthLater) {
+      Swal.fire({
+        title: 'Warning',
+        text: 'Date range cannot exceed one month',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6'
+      });
+      return false;
+    }
+  }
+  
+  return true;
+};
 
   // Sample data
   const data = [
@@ -46,6 +86,9 @@ const Commission_List = () => {
 
   // Function to filter data based on input criteria
   const handleFilterClick = () => {
+    if (fromDate && toDate && !validateDates(fromDate, toDate)) {
+      return; // Stop filtering if dates are invalid
+    }
     let filtered = data.filter(row => {
       let matchesSearch = true;
       let matchesPhase = true;
@@ -182,6 +225,9 @@ const Commission_List = () => {
         <button className={GlobalStyle.buttonPrimary} onClick={handleFilterClick}>
           Filter
         </button>
+        {dateError && (
+  <div className="text-red-500 text-sm mt-1">{dateError}</div>
+)}
       </div>
 
       {/* Search Bar */}
