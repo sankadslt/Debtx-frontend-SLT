@@ -249,6 +249,24 @@ console.log("Filtered Data:", filteredDataBySearch);
     }
     
 
+      // Show confirmation alert before calling API
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to approve the selected record?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+
+
 
     const payload = {
       approver_reference: batchIds,
@@ -296,6 +314,22 @@ console.log("Filtered Data:", filteredDataBySearch);
       });
       return;
     }
+      // Show confirmation alert before calling API
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to rejected the selected record?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
     const payload = {
       approver_references: batchIds,
       approved_by: userId,
@@ -472,11 +506,11 @@ console.log("Filtered Data:", filteredDataBySearch);
                   className="mx-auto"
                 /> */}
               </th>
+              <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Created on</th>
               <th className={GlobalStyle.tableHeader}>Created by</th>
               <th className={GlobalStyle.tableHeader}>Approve Type</th>
-              <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Approve By</th>
               <th className={GlobalStyle.tableHeader}>Remark</th>
               <th className={GlobalStyle.tableHeader}></th>
@@ -502,6 +536,9 @@ console.log("Filtered Data:", filteredDataBySearch);
                     />
                   </td>
                   <td className={GlobalStyle.tableData}>
+                  {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
                     {item.approver_reference}
                   </td>
                   <td className={GlobalStyle.tableData}>
@@ -511,9 +548,7 @@ console.log("Filtered Data:", filteredDataBySearch);
                   <td className={GlobalStyle.tableData}>
                     {item.approver_type}
                   </td>
-                  <td className={GlobalStyle.tableData}>
-                  {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
-                  </td>
+                  
                   <td className={GlobalStyle.tableData}>{item.approved_by}</td>
                   <td className={GlobalStyle.tableData}>
                     {item.remark.length > 0
