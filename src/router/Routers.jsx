@@ -57,9 +57,9 @@ import MediationBoardCaseList from "../pages/Mediation_Board/MediationBoardCaseL
 import MediationBoardResponse from "../pages/Mediation_Board/MediationBoardResponse";
 
 
- // Mediation
+//  // Mediation
 
- import MediationBoardResponse from "../pages/MediationBoard/MediationBoardResponse";
+//  import MediationBoardResponse from "../pages/MediationBoard/MediationBoardResponse";
 
  // Commission
 
