@@ -39,10 +39,14 @@ const RecoveryOfficerRequests = () => {
         setRequestsData(response);
       } catch (error) {
         console.error(error);
+        setRequestsData([]);
       }
     };
     fetchcases();
   }, []);
+
+  console.log("Selected request type:", requestType);
+  console.log("Selected approved:", approved);
 
   // validation for date
   const handleFromDateChange = (date) => {
@@ -71,24 +75,7 @@ const RecoveryOfficerRequests = () => {
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    const matchesRequestType = requestType
-      ? row.requestType.toLowerCase() === requestType.toLowerCase()
-      : true;
-
-    const matchesApproved = approved
-      ? row.approval.toLowerCase() === approved.toLowerCase()
-      : true;
-
-    const rowDate = new Date(row.requestedDate); // Ensure requestedDate is a valid Date object
-    const matchesDateRange =
-      (!fromDate || rowDate >= fromDate) && (!toDate || rowDate <= toDate);
-
-    return (
-      matchesSearchQuery &&
-      matchesRequestType &&
-      matchesApproved &&
-      matchesDateRange
-    );
+    return matchesSearchQuery;
   });
 
   const navi = () => {
@@ -112,6 +99,29 @@ const RecoveryOfficerRequests = () => {
     }
   };
 
+  const onfilterbuttonclick = () => {
+    const payload = {
+      delegate_user_id: 5,
+      User_Interaction_Type: requestType,
+      "Request Accept": approved,
+      date_from: fromDate,
+      date_to: toDate,
+    };
+
+    console.log("Filter payload:", payload);
+    const fetchcases = async () => {
+      try {
+        const response = await ListRequestLogFromRecoveryOfficers(payload);
+        console.log(response);
+        setRequestsData(response);
+      } catch (error) {
+        console.error(error);
+        setRequestsData([]);
+      }
+    };
+    fetchcases();
+  };
+
   return (
     <div className={GlobalStyle.fontPoppins}>
       <h1 className={GlobalStyle.headingLarge}>
@@ -125,8 +135,10 @@ const RecoveryOfficerRequests = () => {
             onChange={(e) => setRequestType(e.target.value)}
             className={GlobalStyle.selectBox}
           >
-            <option value="">Select</option>
-            <option value="fMediation board forward request lettermb">
+            <option value="" hidden>
+              Select
+            </option>
+            <option value="Mediation board forward request letter">
               Mediation board forward request letter
             </option>
             <option value="Request period extend for Negotiation">
@@ -162,9 +174,11 @@ const RecoveryOfficerRequests = () => {
             onChange={(e) => setApproved(e.target.value)}
             className={GlobalStyle.selectBox}
           >
-            <option value="">Select</option>
-            <option value="approve">Approve</option>
-            <option value="reject">Reject</option>
+            <option value="" hidden>
+              Select
+            </option>
+            <option value="Approve">Approve</option>
+            <option value="Reject">Reject</option>
           </select>
         </div>
 
@@ -188,7 +202,7 @@ const RecoveryOfficerRequests = () => {
         {error && <span className={GlobalStyle.errorText}>{error}</span>}
         <button
           className={GlobalStyle.buttonPrimary}
-          onClick={() => setCurrentPage(0)} // Reset to first page when filter is applied
+          onClick={onfilterbuttonclick} // Reset to first page when filter is applied
         >
           Filter
         </button>
