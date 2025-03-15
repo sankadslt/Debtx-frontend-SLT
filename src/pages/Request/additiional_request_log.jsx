@@ -36,7 +36,9 @@ const RecoveryOfficerRequests = () => {
       try {
         const response = await ListRequestLogFromRecoveryOfficers(payload);
         console.log(response);
-        setRequestsData(response);
+        const lastTwoRecords = response.slice(-10).reverse();
+        console.log("Last two records:", lastTwoRecords);
+        setRequestsData(lastTwoRecords);
       } catch (error) {
         console.error(error);
         setRequestsData([]);
@@ -287,17 +289,20 @@ const RecoveryOfficerRequests = () => {
                     {row.case_details?.current_arrears_amount ?? ""}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                  {row.case_details?.Validity_Period
+                    {row.case_details?.Validity_Period
                       ? row.case_details.Validity_Period.split(" - ")
-                          .map((date) => 
-                            new Date(date.split("T")[0]).toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                            })
+                          .map((date) =>
+                            new Date(date.split("T")[0]).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              }
+                            )
                           )
-                          .join(" - ")  
-                      : "N/A"} 
+                          .join(" - ")
+                      : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
                     {row.case_details?.drc?.drc_id ?? ""}
