@@ -1,12 +1,12 @@
 /* Purpose: This template is used for the 7.7 - Payment Details .
 Created Date: 2025-03-13
 Created By: Buthmi mithara (buthmimithara1234@gmail.com)
+Modified By: K.K C Sakumini (sakuminic@gmail.com)
 Version: node 20
 ui number : 7.7
 Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the Payment Details Screen */
-
 
 import React, { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
@@ -15,6 +15,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import infor from "../../assets/images/moneyTransaction/infor.png";
 import Swal from 'sweetalert2';
+import { List_All_Payment_Cases } from "../../services/case/CaseServices";
 
 const PaymentDetails = () => {
   const [selectValue, setSelectValue] = useState("Account No");
@@ -25,56 +26,53 @@ const PaymentDetails = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const rowsPerPage = 7; // Number of rows per page
 
-  // Sample data
-  const data = [
-    {
-      caseId: "RC001",
-      accountNo: "307200",
-      settlementId: "S1",
-      paiddtm: "2025-02-10",
-      amount: "54000",
-      type: "Payment",
-      phase: "Negotiation",
-      settledbalance: "54000",
-    },
-    {
-      caseId: "RC002",
-      accountNo: "307201",
-      settlementId: "S2",
-      paiddtm: "2025-02-12",
-      amount: "75000",
-      type: "Refund",
-      phase: "Finalization",
-      settledbalance: "75000",
-    },
-    {
-      caseId: "RC003",
-      accountNo: "307202",
-      settlementId: "S3",
-      paiddtm: "2025-02-15",
-      amount: "120000",
-      type: "Payment",
-      phase: "Review",
-      settledbalance: "120000",
-    },
-    {
-      caseId: "RC004",
-      accountNo: "307203",
-      settlementId: "S4",
-      paiddtm: "2025-02-18",
-      amount: "85000",
-      type: "Chargeback",
-      phase: "Negotiation",
-      settledbalance: "85000",
-    },
-  ];
-
-  // Show all data by default
+  // Fetch initial data on component mount
   useEffect(() => {
-    setFilteredData(data);
+    fetchInitialData();
   }, []);
+
+  // Function to fetch initial data
+  const fetchInitialData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await List_All_Payment_Cases({
+        page: 1,
+        limit: rowsPerPage,
+        recent: true
+      });
+      
+      // Transform backend data to match frontend structure
+      const transformedData = transformPaymentData(response.data);
+      setFilteredData(transformedData);
+    } catch (error) {
+      console.error("Failed to fetch payment data:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch payment data",
+        icon: "error"
+      });
+      setFilteredData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to transform backend data to frontend format
+  const transformPaymentData = (paymentData) => {
+    return paymentData.map(payment => ({
+      caseId: payment.Case_ID?.toString() || "-",
+      accountNo: payment.Account_No?.toString() || "-",
+      settlementId: payment.Settlement_ID?.toString() || "-",
+      paiddtm: payment.Money_Transaction_Date ? new Date(payment.Money_Transaction_Date).toISOString().split('T')[0] : "-",
+      amount: payment.Money_Transaction_Amount?.toString() || "0",
+      type: payment.Transaction_Type|| "-",
+      phase: payment.Settlement_Phase || "-",
+      settledbalance: payment. Cummulative_Settled_Balance?.toString() || "0"
+    }));
+  };
 
   // Date handlers with immediate validation
   const handleFromDateChange = (date) => {
@@ -143,7 +141,7 @@ const PaymentDetails = () => {
   };
 
   // Function to filter data based on input criteria
-  const handleFilterClick = () => {
+  const handleFilterClick = async () => {
     // Check if only one date field is filled
     if ((fromDate && !toDate) || (!fromDate && toDate)) {
       Swal.fire({
@@ -185,40 +183,61 @@ const PaymentDetails = () => {
       return;
     }
 
-    // Proceed with filtering if validations pass
-    let filtered = data.filter((row) => {
-      let matchesSearch = true;
-      let matchesPhase = true;
-      let matchesDate = true;
-
-      // Search filter (Case ID or Account No)
+    try {
+      setIsLoading(true);
+      
+      // Prepare query parameters
+      const payload = {
+        page: 1,
+        limit: rowsPerPage,
+      };
+      
+      // Add filters based on selection
       if (inputFilter.trim() !== "") {
         if (selectValue === "Case Id") {
-          matchesSearch = row.caseId
-            .toLowerCase()
-            .includes(inputFilter.toLowerCase());
-        } else {
-          matchesSearch = row.accountNo
-            .toLowerCase()
-            .includes(inputFilter.toLowerCase());
+          payload.case_id = inputFilter.trim();
+        } else if (selectValue === "Account No") {
+          payload.account_num = inputFilter.trim();
         }
       }
-
-      // Phase filter
-      if (phase !== "" && row.phase.toLowerCase() !== phase.toLowerCase()) {
-        matchesPhase = false;
+      
+      // Add phase filter
+      if (phase !== "") {
+        payload.settlement_phase = phase;
       }
-
-      // Date range filter
-      const rowDate = new Date(row.paiddtm);
-      if (fromDate && rowDate < fromDate) matchesDate = false;
-      if (toDate && rowDate > toDate) matchesDate = false;
-
-      return matchesSearch && matchesPhase && matchesDate;
-    });
-
-    setFilteredData(filtered);
-    setCurrentPage(0); // Reset to page 1 when filters are applied
+      
+      // Add date range
+      if (fromDate && toDate) {
+        payload.start_date = fromDate.toISOString().split('T')[0];
+        payload.end_date = toDate.toISOString().split('T')[0];
+      }
+      
+      const response = await List_All_Payment_Cases(payload);
+      
+      // Transform and update the UI
+      const transformedData = transformPaymentData(response.data);
+      setFilteredData(transformedData);
+      setCurrentPage(0); // Reset to page 1 when filters are applied
+      
+      // Show message if no results
+      if (transformedData.length === 0) {
+        Swal.fire({
+          title: "Information",
+          text: "No records found for the selected criteria",
+          icon: "info"
+        });
+      }
+      
+    } catch (error) {
+      console.error("Failed to fetch filtered data:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data",
+        icon: "error"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Dynamic search function across all fields
@@ -281,9 +300,14 @@ const PaymentDetails = () => {
           className={GlobalStyle.selectBox}
         >
           <option value="">Select Phase</option>
+          <option value="Register">Register</option>
+          <option value="Distribution">Distribution</option>
           <option value="Negotiation">Negotiation</option>
-          <option value="Finalization">Finalization</option>
-          <option value="Review">Review</option>
+          <option value="Mediation Board">Mediation Board</option>
+          <option value="Letter Of Demand">Letter Of Demand</option>    
+          <option value="Litigation">Litigation</option>
+          <option value="Dispute">Dispute</option>
+          <option value="WRIT">WRIT</option>
         </select>
 
         <label className={GlobalStyle.dataPickerDate}>Date</label>
@@ -306,8 +330,9 @@ const PaymentDetails = () => {
         <button
           className={GlobalStyle.buttonPrimary}
           onClick={handleFilterClick}
+          disabled={isLoading}
         >
-          Filter
+          {isLoading ? 'Loading...' : 'Filter'}
         </button>
       </div>
 
@@ -341,7 +366,13 @@ const PaymentDetails = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.length > 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan="9" className="text-center py-4">
+                  Loading...
+                </td>
+              </tr>
+            ) : currentData.length > 0 ? (
               currentData.map((row, index) => (
                 <tr
                   key={index}
@@ -356,12 +387,12 @@ const PaymentDetails = () => {
                   <td className={GlobalStyle.tableData}>{row.settlementId}</td>
                   <td className={GlobalStyle.tableData}>{row.paiddtm}</td>
                   <td className={GlobalStyle.tableData}>
-                    {parseInt(row.amount).toLocaleString("en-US")}
+                    {parseInt(row.amount) ? parseInt(row.amount).toLocaleString("en-US") : "-"}
                   </td>
                   <td className={GlobalStyle.tableData}>{row.type}</td>
                   <td className={GlobalStyle.tableData}>{row.phase}</td>
                   <td className={GlobalStyle.tableData}>
-                    {parseInt(row.settledbalance).toLocaleString("en-US")}
+                    {parseInt(row.settledbalance) ? parseInt(row.settledbalance).toLocaleString("en-US") : "-"}
                   </td>
                   <td className={GlobalStyle.tableData}>
                     <img

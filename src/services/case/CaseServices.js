@@ -552,4 +552,18 @@ export const Withdraw_CasesOwened_By_DRC = async (payload) => {
   }
 }
 
-
+export const List_All_Payment_Cases = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_All_Payment_Cases`, 
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching payment cases:", 
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
