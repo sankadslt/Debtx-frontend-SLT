@@ -287,11 +287,17 @@ const RecoveryOfficerRequests = () => {
                     {row.case_details?.current_arrears_amount ?? ""}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {row.case_details?.Validity_Period
+                  {row.case_details?.Validity_Period
                       ? row.case_details.Validity_Period.split(" - ")
-                          .map((date) => date.split("T")[0])
-                          .join(" - ")
-                      : "N/A"}
+                          .map((date) => 
+                            new Date(date.split("T")[0]).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            })
+                          )
+                          .join(" - ")  
+                      : "N/A"} 
                   </td>
                   <td className={GlobalStyle.tableData}>
                     {row.case_details?.drc?.drc_id ?? ""}
@@ -300,7 +306,7 @@ const RecoveryOfficerRequests = () => {
                     {row.User_Interaction_Type}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {new Date(row.CreateDTM).toLocaleDateString()}
+                    {new Date(row.CreateDTM).toLocaleDateString("en-GB")}
                   </td>
                   <td className={GlobalStyle.tableData}>
                     {row.Approve_Status}
