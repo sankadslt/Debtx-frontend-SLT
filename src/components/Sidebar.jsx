@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { MdSpaceDashboard , MdFormatListBulletedAdd , MdDoneOutline } from "react-icons/md";
+import { MdSpaceDashboard, MdFormatListBulletedAdd, MdDoneOutline } from "react-icons/md";
 import { IoIosListBox } from "react-icons/io";
 import { MdSpeakerNotes } from "react-icons/md";
 import { GoDot, GoChecklist } from "react-icons/go";
@@ -61,9 +61,10 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
-    { icon: GoChecklist, 
-      label: "Incident List", 
-      roles: ["superadmin", "admin", "user"], 
+    {
+      icon: GoChecklist,
+      label: "Incident List",
+      roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: " Incident List", link: "/Incident/Incident_List", roles: ["superadmin", "admin"] },
         { icon: GoDot, label: "Filtered Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
@@ -80,36 +81,46 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, 
-          label: "RO Assigned Case List", 
-          roles: ["superadmin", "admin"], 
+        {
+          icon: GoDot,
+          label: "RO Assigned Case List",
+          roles: ["superadmin", "admin"],
           subItems: [
-            {icon:GoDot, label:"Negotiation Case List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:GoDot, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
+            { icon: GoDot, label: "Negotiation Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Medeation Board List", link: "/MediationBoard/MediationBoardCaseList", roles: ["superadmin", "admin"] },
           ],
         },
         { icon: GoDot, label: "FTL LOD Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: GoDot, label: "Digital Signature Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: GoDot, label: "Litigation Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: GoDot, label: "Dispute Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, 
-          label: "Disposed Case List", 
+        {
+          icon: GoDot,
+          label: "Disposed Case List",
           roles: ["superadmin", "admin"],
           subItems: [
-            {icon:GoDot, label:"Write off List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:GoDot, label:"Abandoned List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:GoDot, label:"Withdraw List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:GoDot, label:"Closed List", link:"/dashboard", roles:["superadmin", "admin"]},
+            { icon: GoDot, label: "Write off List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Abandoned List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Withdraw List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Closed List", link: "/dashboard", roles: ["superadmin", "admin"] },
           ],
         },
       ],
     },
 
-    {icon: HiOutlineDocumentCheck, label: "Settlement", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
-    {icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
     {
-      icon: MdDoneOutline, 
-      label: "Approvals", 
+      icon: HiOutlineDocumentCheck, label: "Settlement",  roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: GoDot, label: "Monitor Settlement", link: "/Settlement/MonitorSettlement", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Money Transactions", link: "/Settlement/MoneyTransactions", roles: ["superadmin", "admin"] },
+      ],
+    },
+
+    { icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
+
+    {
+      icon: MdDoneOutline,
+      label: "Approvals",
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "Distribution Approval", link: "/pages/Distribute/DRCAssignManagerApproval2", roles: ["superadmin", "admin"] },
@@ -119,7 +130,7 @@ const Sidebar = ({ onHoverChange }) => {
 
     {
       icon: GrConfigure,
-      label: "Configuration", 
+      label: "Configuration",
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "RTOM List", link: "/dashboard", roles: ["superadmin"] },
@@ -244,9 +255,8 @@ const Sidebar = ({ onHoverChange }) => {
               <Link
                 to={item.link || "#"}
                 onClick={() => handleClick(0, index, !!item.subItems)}
-                className={`flex items-center gap-x-4 px-3 py-2 rounded-lg text-base font-medium transition ${
-                  isActive ? "bg-blue-400 shadow-lg" : "hover:bg-blue-400"
-                }`}
+                className={`flex items-center gap-x-4 px-3 py-2 rounded-lg text-base font-medium transition ${isActive ? "bg-blue-400 shadow-lg" : "hover:bg-blue-400"
+                  }`}
               >
                 <item.icon className="w-6 h-6 text-white" />
                 {isHovered && <span>{item.label}</span>}

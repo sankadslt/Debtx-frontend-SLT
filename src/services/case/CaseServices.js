@@ -553,3 +553,19 @@ export const Withdraw_CasesOwened_By_DRC = async (payload) => {
 }
 
 
+export const list_All_Settlement_Cases = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_All_Settlement_Cases`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error withdrawing Settlement cases :",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+

@@ -3,7 +3,7 @@ Created Date: 2025-12-03
 Created By: Susinidu Sachinthana (susinidusachinthana@gmail.com)
 Last Modified Date: 2025-12-03
 Modified Date: 2025-12-03
-Modified By: Susinidu Sachinthana
+Modified By: Susinidu Sachinthana, Chamath Jayasanka
 Version: node 22
 ui number : 7.5
 Dependencies: tailwind css
@@ -17,6 +17,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import more from "../../assets/images/imagefor1.a.13(one).png";
+import { list_All_Settlement_Cases } from "../../services/case/CaseServices";
 
 const Monitor_settlement = () => {
   // State Variables
@@ -26,16 +27,34 @@ const Monitor_settlement = () => {
   const [caseIdFilter, setCaseIdFilter] = useState("");
   const [status, setStatus] = useState("");
   const [phase, setPhase] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
+
   const [error, setError] = useState("");
-  const [appliedFilters, setAppliedFilters] = useState({
-    searchQuery: "",
-    caseIdFilter: "",
-    status: "",
-    phase: "",
-    fromDate: null,
-    toDate: null,
-  });
+  const [filteredData, setFilteredData] = useState([]);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
+  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+
+  // Handle Pagination
+  const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  /*  const [appliedFilters, setAppliedFilters] = useState({
+     searchQuery: "",
+     caseIdFilter: "",
+     status: "",
+     phase: "",
+     fromDate: null,
+     toDate: null,
+   }); */
 
   const rowsPerPage = 7;
 
@@ -59,7 +78,42 @@ const Monitor_settlement = () => {
     }
   };
 
-  // Sample Data
+  // Search Section
+  const filteredDataBySearch = currentData.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  const handleFilter = async () => {
+    try {
+      const payload = {
+        case_id: caseIdFilter,
+        settlement_phase: phase,
+        settlement_status: status,
+        from_date: fromDate ? fromDate.toISOString().split("T")[0] : null,
+        to_date: toDate ? toDate.toISOString().split("T")[0] : null,
+      };
+
+      console.log("Payload sent to API: ", payload);
+      const response = await list_All_Settlement_Cases(payload);
+
+      if (response && Array.isArray(response.data)) {
+        console.log("Valid data received:", response.data);
+        setFilteredData(response.data); 
+      } else {
+        console.error("No valid Settlement data found in response:", response);
+      }
+    } catch (error) {
+      console.error("Error filtering Settlements:", error);
+    }
+  };
+
+
+
+
+  /* // Sample Data
   const data = [
     {
       caseId: "RC001",
@@ -125,9 +179,11 @@ const Monitor_settlement = () => {
       settlement_phase: "Litigation",
     },
   ];
+ */
+
 
   // Filtering Logic
-  const filterData = () => {
+  /* const filterData = () => {
     return data.filter((row) => {
       const matchesSearch =
         row.caseId
@@ -155,7 +211,7 @@ const Monitor_settlement = () => {
       const matchesPhase =
         !appliedFilters.phase ||
         row.settlement_phase.toLowerCase() ===
-          appliedFilters.phase.toLowerCase();
+        appliedFilters.phase.toLowerCase();
       const matchesFromDate =
         !appliedFilters.fromDate ||
         new Date(row.created_dtm) >= new Date(appliedFilters.fromDate);
@@ -172,10 +228,10 @@ const Monitor_settlement = () => {
         matchesToDate
       );
     });
-  };
+  }; */
 
   // Pagination Logic
-  const pages = Math.ceil(filterData().length / rowsPerPage);
+  /* const pages = Math.ceil(filterData().length / rowsPerPage);
   const startIndex = currentPage * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filterData().slice(startIndex, endIndex);
@@ -187,9 +243,9 @@ const Monitor_settlement = () => {
   const handleNextPage = () => {
     if (currentPage < pages - 1) setCurrentPage(currentPage + 1);
   };
-
+ */
   // Handle Filter Click
-  const handleFilterClick = () => {
+/*   const handleFilterClick = () => {
     setAppliedFilters({
       searchQuery,
       caseIdFilter,
@@ -199,7 +255,7 @@ const Monitor_settlement = () => {
       toDate,
     });
     setCurrentPage(0); // Reset to first page when applying filters
-  };
+  }; */
 
   const navi = () => {
     navigate("/lod/ftl-log/preview");
@@ -244,7 +300,7 @@ const Monitor_settlement = () => {
               >
                 <option value="">All</option>
                 <option value="Pending">Pending</option>
-                <option value="Open-Pending">Open-Pending</option>
+                <option value="Open_Pending">Open-Pending</option>
                 <option value="Active">Active</option>
               </select>
             </div>
@@ -270,7 +326,7 @@ const Monitor_settlement = () => {
             </div>
             <button
               className={GlobalStyle.buttonPrimary}
-              onClick={handleFilterClick}
+              onClick={handleFilter}
             >
               Filter
             </button>
@@ -304,7 +360,7 @@ const Monitor_settlement = () => {
                   <th className={GlobalStyle.tableHeader}></th>
                 </tr>
               </thead>
-              <tbody>
+              {/* <tbody>
                 {paginatedData.map((row, index) => (
                   <tr
                     key={index}
@@ -334,32 +390,75 @@ const Monitor_settlement = () => {
                     </td>
                   </tr>
                 ))}
+              </tbody> */}
+
+              <tbody>
+                {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
+                  filteredDataBySearch.map((item, index) => (
+                    <tr
+                      key={item.case_id || index}
+                      className={
+                        index % 2 === 0
+                          ? GlobalStyle.tableRowEven
+                          : GlobalStyle.tableRowOdd
+                      }
+                    >
+                      <td className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}>{item.case_id || "N/A"}</td>
+                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>{item.settlement_status}</td>
+                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-CA") || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}> {item.settlement_phase || "N/A"} </td>
+                      <td className={GlobalStyle.tableData}>
+                        <img
+                          src={more}
+                          onClick={navi}
+                          title="More"
+                          alt="more icon"
+                          className="w-5 h-5"
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={9} className="text-center">No cases available</td>
+                  </tr>
+                )}
               </tbody>
+
+
+
+
+
+
+
+
             </table>
           </div>
 
-          {/* Navigation Buttons */}
-          {filterData().length > rowsPerPage && (
-            <div className={GlobalStyle.navButtonContainer}>
-              <button
-                className={GlobalStyle.navButton}
-                onClick={handlePrevPage}
-                disabled={currentPage === 0}
-              >
-                <FaArrowLeft />
-              </button>
-              <span>
-                Page {currentPage + 1} of {pages}
-              </span>
-              <button
-                className={GlobalStyle.navButton}
-                onClick={handleNextPage}
-                disabled={currentPage === pages - 1}
-              >
-                <FaArrowRight />
-              </button>
-            </div>
-          )}
+          {/* Pagination Section */}
+          <div className={GlobalStyle.navButtonContainer}>
+            <button
+              onClick={() => handlePrevNext("prev")}
+              disabled={currentPage === 1}
+              className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+                }`}
+            >
+              <FaArrowLeft />
+            </button>
+            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => handlePrevNext("next")}
+              disabled={currentPage === totalPages}
+              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+                }`}
+            >
+              <FaArrowRight />
+            </button>
+          </div>
+
         </main>
       </div>
     </div>
