@@ -17,10 +17,10 @@ const ForwardMediationBoard = () => {
   const [letterSent, setLetterSent] = useState(false); // State for letter sent checkbox
 
   const [calendarMonth, setCalendarMonth] = useState(); // State for calendar month input
-  // const requestType = "forward mediation board";
-  // const requestType = "validity period extension";
-  // const requestType = "Additional Information";
-  const requestType = "Customer Service Activation";
+  const requestType = "Forward mediation board";
+  // const requestType = "Validity period extension";
+  // const requestType = "Additional information";
+  // const requestType = "Customer service activation";
 
   const months = 3;
 
@@ -181,7 +181,7 @@ const ForwardMediationBoard = () => {
       </div>
 
       {/* forward mediation board */}
-      {requestType === "forward mediation board" && (
+      {requestType === "Forward mediation board" && (
         <div>
           <div className="mt-10 mb-6">
             <label className={GlobalStyle.remarkTopic}>Accept Request:</label>
@@ -254,7 +254,7 @@ const ForwardMediationBoard = () => {
       )}
 
       {/* validity period extension */}
-      {requestType === "validity period extension" && (
+      {requestType === "Validity period extension" && (
         <div>
           <div className="mb-6">
             <label className={GlobalStyle.remarkTopic}>
@@ -333,7 +333,7 @@ const ForwardMediationBoard = () => {
       )}
 
       {/* Additional information */}
-      {requestType === "Additional Information" && (
+      {requestType === "Additional information" && (
         <div>
           <div className="mt-10 mb-6">
             <label className={GlobalStyle.remarkTopic}>Request provided:</label>
@@ -386,7 +386,7 @@ const ForwardMediationBoard = () => {
       )}
 
       {/* Customer Service Activation */}
-      {requestType === "Customer Service Activation" && (
+      {requestType === "Customer service activation" && (
         <div>
           <div className="mt-10 mb-6">
             <label className={GlobalStyle.remarkTopic}>Request informed:</label>
