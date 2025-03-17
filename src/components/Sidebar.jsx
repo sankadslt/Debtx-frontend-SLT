@@ -112,8 +112,8 @@ const Sidebar = ({ onHoverChange }) => {
     {
       icon: HiOutlineDocumentCheck, label: "Settlement",  roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: GoDot, label: "Monitor Settlement", link: "/Settlement/MonitorSettlement", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Money Transactions", link: "/Settlement/MoneyTransactions", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Monitor Settlement", link: "pages/Settlement/MonitorSettlement", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Money Transactions", link: "pages/Settlement/MoneyTransactions", roles: ["superadmin", "admin"] },
       ],
     },
 
