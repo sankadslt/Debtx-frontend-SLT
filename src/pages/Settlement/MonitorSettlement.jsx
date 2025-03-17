@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import more from "../../assets/images/imagefor1.a.13(one).png";
 import { list_All_Settlement_Cases } from "../../services/case/CaseServices";
+import Swal from 'sweetalert2';
 
 const Monitor_settlement = () => {
   // State Variables
@@ -60,21 +61,49 @@ const Monitor_settlement = () => {
 
   const navigate = useNavigate();
 
-  const handleFromDateChange = (date) => {
-    if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
-    } else {
-      setError("");
-      setFromDate(date);
-    }
+  const handlestartdatechange = (date) => {
+    setFromDate(date);
+    if (toDate) checkdatediffrence(date, toDate);
   };
 
-  const handleToDateChange = (date) => {
-    if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
-    } else {
-      setError("");
-      setToDate(date);
+  const handleenddatechange = (date) => {
+    if (fromDate) {
+      checkdatediffrence(fromDate, date);
+    }
+    setToDate(date);
+  }
+
+  const checkdatediffrence = (startDate, endDate) => {
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    const diffInMs = end - start;
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+    const diffInMonths = diffInDays / 30;
+
+    if (diffInMonths > 1) {
+      Swal.fire({
+        title: "Date Range Exceeded",
+        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        confirmButtonColor: "#28a745",
+        cancelButtonText: "No",
+        cancelButtonColor: "#d33",
+      }).then((result) => {
+        if (result.isConfirmed) {
+
+          endDate = endDate;
+          handleApicall(startDate, endDate);
+        } else {
+          setToDate(null);
+          console.log("Dates cleared");
+        }
+      }
+      );
+
     }
   };
 
@@ -88,6 +117,73 @@ const Monitor_settlement = () => {
 
   const handleFilter = async () => {
     try {
+
+
+
+      setFilteredData([]); // Clear previous results
+
+      // Format the date to 'YYYY-MM-DD' format
+      const formatDate = (date) => {
+        if (!date) return null;
+        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return offsetDate.toISOString().split('T')[0];
+      };
+
+      if (!caseIdFilter && !phase && !status && !fromDate && !toDate) {
+        Swal.fire({
+          title: "Warning",
+          text: "No filter data is selected. Please, select data.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      };
+
+      if ((fromDate && !toDate) || (!fromDate && toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "Both From Date and To Date must be selected.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
+      if (new Date(fromDate) > new Date(toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "To date should be greater than or equal to From date",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       const payload = {
         case_id: caseIdFilter,
         settlement_phase: phase,
@@ -101,7 +197,7 @@ const Monitor_settlement = () => {
 
       if (response && Array.isArray(response.data)) {
         console.log("Valid data received:", response.data);
-        setFilteredData(response.data); 
+        setFilteredData(response.data);
       } else {
         console.error("No valid Settlement data found in response:", response);
       }
@@ -245,17 +341,17 @@ const Monitor_settlement = () => {
   };
  */
   // Handle Filter Click
-/*   const handleFilterClick = () => {
-    setAppliedFilters({
-      searchQuery,
-      caseIdFilter,
-      status,
-      phase,
-      fromDate,
-      toDate,
-    });
-    setCurrentPage(0); // Reset to first page when applying filters
-  }; */
+  /*   const handleFilterClick = () => {
+      setAppliedFilters({
+        searchQuery,
+        caseIdFilter,
+        status,
+        phase,
+        fromDate,
+        toDate,
+      });
+      setCurrentPage(0); // Reset to first page when applying filters
+    }; */
 
   const navi = () => {
     navigate("/lod/ftl-log/preview");
@@ -308,7 +404,7 @@ const Monitor_settlement = () => {
             <div className="flex items-center">
               <DatePicker
                 selected={fromDate}
-                onChange={handleFromDateChange}
+                onChange={handlestartdatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="From"
                 className={`${GlobalStyle.inputText}`}
@@ -318,7 +414,7 @@ const Monitor_settlement = () => {
             <div className="flex items-center">
               <DatePicker
                 selected={toDate}
-                onChange={handleToDateChange}
+                onChange={handleenddatechange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="To"
                 className={`${GlobalStyle.inputText}`}
