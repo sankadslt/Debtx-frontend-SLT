@@ -10,6 +10,7 @@ import { HiOutlineDocumentCheck } from "react-icons/hi2";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../services/auth/authService";
+import { Subtitles } from "lucide-react";
 
 const Sidebar = ({ onHoverChange }) => {
   const location = useLocation();
@@ -105,7 +106,16 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
-    {icon: HiOutlineDocumentCheck, label: "Settlement", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
+    { 
+      icon: HiOutlineDocumentCheck, 
+      label: "Settlement", 
+      link: "/dashboard",
+      roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: GoDot, label: "Monitor Settlement", link: "/pages/Settlement/MonitorSettlement", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Money Transactions", link: "/pages/Settlement/MoneyTransactions", roles: ["superadmin", "admin"] },
+      ]
+    },
     {icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
     {
       icon: MdDoneOutline, 
