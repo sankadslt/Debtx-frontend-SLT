@@ -19,30 +19,51 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
-import { getUserData } from "../../services/auth/authService.js";
-
+import { getLoggedUserId } from "../../services/auth/authService";
 
 const Incident_Register_Bulk_Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [actionType, setActionType] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // const handleFileChange = (event) => {
+    //     const file = event.target.files[0];
+    //     setSelectedFile(file);
+    // };
     const handleFileChange = (event) => {
         const file = event.target.files[0];
+    
+        if (!file) return;
+    
+        // Allowed file types: CSV and Excel
+        const allowedExtensions = [".csv", ".xls", ".xlsx"];
+        const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+    
+        if (!allowedExtensions.includes(fileExtension)) {
+            Swal.fire({
+                icon: "error",
+                title: "Invalid File Type",
+                text: "Only CSV and Excel files are allowed.",
+            });
+            setSelectedFile(null);
+            return;
+        }
+    
         setSelectedFile(file);
     };
-
+    
     const handleActionTypeChange = (event) => {
         setActionType(event.target.value);
     };
 
     const getCurrentUser = async () => {
         try {
-            const userData = await getUserData();
-            if (!userData?.username) {
+              const user_id = await getLoggedUserId();
+            
+            if (!user_id) {
                 throw new Error("Username not found in user data");
             }
-            return userData.username;
+            return user_id;
         } catch (error) {
             console.error("Error getting user data:", error);
             throw new Error("Failed to get user information");
@@ -64,19 +85,19 @@ const Incident_Register_Bulk_Upload = () => {
         }
     
         try {
-            const username = getCurrentUser();
+            const user_id = await getCurrentUser();
             const reader = new FileReader();
-            
+           
             reader.readAsText(selectedFile);
             reader.onload = async () => {
                 const fileContent = reader.result;
                 setLoading(true);
-        
+                console.log("userb",user_id); 
                 const incidentData = {
                     File_Name: selectedFile.name,
                     File_Type: actionType,
                     File_Content: fileContent,
-                    Created_By: username,
+                    Created_By: user_id,
                     
                 };
         
