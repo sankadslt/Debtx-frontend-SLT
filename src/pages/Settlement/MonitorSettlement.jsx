@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import more from "../../assets/images/imagefor1.a.13(one).png";
 import { list_All_Settlement_Cases } from "../../services/case/CaseServices";
+import Swal from 'sweetalert2';
 
 const Monitor_settlement = () => {
   // State Variables
@@ -88,12 +89,58 @@ const Monitor_settlement = () => {
 
   const handleFilter = async () => {
     try {
+      setFilteredData([]); // Clear previous results
+
+      const formatDate = (date) => {
+        if (!date) return null;
+        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return offsetDate.toISOString().split('T')[0];
+      };
+
+      if (!status && !phase && !fromDate && !toDate) {
+        Swal.fire({
+          title: "Warning",
+          text: "No filter data is selected. Please, select data.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        return;
+      };
+
+
+      if ((fromDate && !toDate) || (!fromDate && toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "Both From Date and To Date must be selected.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
+
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "To date should be greater than or equal to From date",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      };
       const payload = {
         case_id: caseIdFilter,
         settlement_phase: phase,
         settlement_status: status,
-        from_date: fromDate ? fromDate.toISOString().split("T")[0] : null,
-        to_date: toDate ? toDate.toISOString().split("T")[0] : null,
+        from_date: formatDate(fromDate),
+        to_date: formatDate(toDate),
       };
 
       console.log("Payload sent to API: ", payload);
@@ -285,7 +332,7 @@ const Monitor_settlement = () => {
                 onChange={(e) => setPhase(e.target.value)}
                 className={`${GlobalStyle.selectBox}`}
               >
-                <option value="">All</option>
+                <option value="">Settlement Phase</option>
                 <option value="Negotiation">Negotiation</option>
                 <option value="Mediation board">Mediation board</option>
                 <option value="Litigation">Litigation</option>
@@ -298,7 +345,7 @@ const Monitor_settlement = () => {
                 onChange={(e) => setStatus(e.target.value)}
                 className={`${GlobalStyle.selectBox}`}
               >
-                <option value="">All</option>
+                <option value="">Settlement Status</option>
                 <option value="Pending">Pending</option>
                 <option value="Open_Pending">Open-Pending</option>
                 <option value="Active">Active</option>
