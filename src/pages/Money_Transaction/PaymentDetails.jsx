@@ -15,7 +15,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import infor from "../../assets/images/moneyTransaction/infor.png";
 import Swal from 'sweetalert2';
-import { List_All_Payment_Cases } from "../../services/case/CaseServices";
+import { List_All_Payment_Cases } from "../../services/Transaction/Money_TransactionService";
 
 const PaymentDetails = () => {
   const [selectValue, setSelectValue] = useState("Account No");
