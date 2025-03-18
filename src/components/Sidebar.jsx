@@ -56,8 +56,9 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "DRC List", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "RO List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "DRC List", link: "/dashboard", roles: ["superadmin", "admin"], subItems: [
+          {icon:GoDot, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]},
+        ] },
       ],
     },
 
@@ -65,35 +66,40 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Incident List", 
       roles: ["superadmin", "admin", "user"], 
       subItems: [
-        { icon: GoDot, label: " Incident List", link: "/Incident/Incident_List", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Filtered Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Bulk Upload Log", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Rejected incident log", link: "/Distribution/reject-incident-log", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: " Register Accounts", link: "/Incident/Incident_List", roles: ["superadmin", "admin"], subItems: [
+          {icon:GoDot, label:"Bulk", link:"/Incident/Incident_List", roles:["superadmin", "admin"]},
+          {icon:GoDot, label:"Individual", link:"/Incident/Incident_List", roles:["superadmin", "admin"]}, ] },
+        { icon: GoDot, label: "New Reg Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Filtered Incidents", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Bulk Upload History", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Rejected log", link: "/Distribution/reject-incident-log", roles: ["superadmin", "admin"] },
       ],
     },
 
-    { icon: MdSpeakerNotes, label: "Distribution", link: "/pages/Distribute/DistributionPreparationBulkUpload", roles: ["superadmin", "admin", "user"], subItems: [] },
+    { icon: MdSpeakerNotes, label: "Case Distribution", link: "/pages/Distribute/DistributionPreparationBulkUpload", roles: ["superadmin", "admin", "user"], subItems: [
+      {icon:GoDot, label:"Ready For Distribution", link:"/pages/Distribute/DistributionPreparationBulkUpload", roles:["superadmin", "admin"]},
+      {icon:GoDot, label:"Pending Distribution", link:"/pages/Distribute/DistributionPreparationIndividual", roles:["superadmin", "admin"]},
+    ] },
 
     {
       icon: FaListCheck,
-      label: "Case List",
+      label: "Cases",
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: GoDot, 
-          label: "RO Assigned Case List", 
+          label: "DRC Assigned Case List", 
           roles: ["superadmin", "admin"], 
           subItems: [
-            {icon:GoDot, label:"Negotiation Case List", link:"/dashboard", roles:["superadmin", "admin"]},
             {icon:GoDot, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
           ],
         },
-        { icon: GoDot, label: "FTL LOD Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Digital Signature Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Litigation Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Dispute Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Litigation", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Dispute", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: GoDot, 
-          label: "Disposed Case List", 
+          label: "Disposed List", 
           roles: ["superadmin", "admin"],
           subItems: [
             {icon:GoDot, label:"Write off List", link:"/dashboard", roles:["superadmin", "admin"]},
@@ -132,6 +138,7 @@ const Sidebar = ({ onHoverChange }) => {
         { icon: GoDot, label: "Negotiation Field Resons", link: "/dashboard", roles: ["superadmin"] },
         { icon: GoDot, label: "MB Field Reasons", link: "/dashboard", roles: ["superadmin"] },
         { icon: GoDot, label: "Reqest Type", link: "/dashboard", roles: ["superadmin"] },
+        { icon: GoDot, label: "Bonus", link: "/dashboard", roles: ["superadmin"] },
       ],
     },
 

@@ -15,7 +15,7 @@ import { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import { createIncident } from "../../services/Incidents/incidentService.js";
-import { getUserData } from "../../services/auth/authService.js";
+import { getLoggedUserId } from "../../services/auth/authService";
 
 const Incident_Register_Individual = () => {
   const [accountNo, setAccountNo] = useState("");
@@ -49,11 +49,11 @@ const Incident_Register_Individual = () => {
 
   const getCurrentUser = async () => {
     try {
-        const userData = await getUserData();
-        if (!userData?.username) {
+        const user_id = await getLoggedUserId();
+        if (!user_id) {
             throw new Error("Username not found in user data");
         }
-        return userData.username;
+        return user_id;
     } catch (error) {
         console.error("Error getting user data:", error);
         throw new Error("Failed to get user information");
@@ -72,14 +72,14 @@ const handleSubmit = async (e) => {
   }
 
   try {
-    const username = await getCurrentUser();
+    const user_id = await getCurrentUser();
 
     const incidentData = {
       Account_Num: accountNo,
       DRC_Action: actionType,
       Monitor_Months: calendarMonth,
       Source_Type: sourceType,
-      Created_By: username,  // Add this line
+      Created_By: user_id,  
       ...(actionType === "collect CPE" && { Contact_Number: contactNumber }),
     };
 
