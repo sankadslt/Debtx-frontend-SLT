@@ -56,6 +56,8 @@ import DRCAssignManagerApproval3 from "../pages/Distribute/DRCAssignManagerAppro
 import MediationBoardCaseList from "../pages/Mediation_Board/MediationBoardCaseList";
 import MediationBoardResponse from "../pages/Mediation_Board/MediationBoardResponse";
 
+//Commission
+import CommissionCaseList from "../pages/Commission/Commission_List";
 
 const Routers = () => {
   return (
@@ -155,6 +157,8 @@ const Routers = () => {
       <Route path="/MediationBoard/MediationBoardCaseList" element={<ProtectedRoute element={<MediationBoardCaseList />} allowedRoles={['superadmin']} />} />
       <Route path="/MediationBoard/MediationBoardResponse/:caseId" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
 
+{/* //COMMISSION */}
+<Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
     </Routes>
   );
 };
