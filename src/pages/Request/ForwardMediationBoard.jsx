@@ -18,6 +18,7 @@ const ForwardMediationBoard = () => {
   const [remarkText, setRemarkText] = useState(""); // State for remarks input
   const [Data, setData] = useState([]); // State for remarks input
   const [requesthistory, setrequesthistory] = useState([]); // State for remarks input
+  const [negotiationHistory, setNegotiationHistory] = useState([]); // State for remarks input
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,42 +31,6 @@ const ForwardMediationBoard = () => {
   console.log("passed user interaction ", userInteraction);
   console.log("passed delegate id", delegateUserId);
   console.log("passed location id ", locationLogId);
-
-  const negotiationHistory = [
-    {
-      date: "2024.11.04",
-      Negotiation: "------",
-      remark: "------",
-    },
-    {
-      date: "2024.11.05",
-      Negotiation: "------",
-      remark: "------",
-    },
-    {
-      date: "2024.11.06",
-      Negotiation: "------",
-      remark: "------",
-    },
-  ];
-
-  const taskHistory = [
-    {
-      date: "2024.11.05",
-      Negotiation: "----",
-      remark: "------",
-    },
-    {
-      date: "2024.11.07",
-      Negotiation: "----",
-      remark: "----",
-    },
-    {
-      date: "2024.11.09",
-      Negotiation: "----",
-      remark: "----",
-    },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,17 +46,28 @@ const ForwardMediationBoard = () => {
           payload
         );
         console.log("response", response);
-        
+
         setData(response);
-        setrequesthistory(response?.Request_History);
+
+        if (response?.Request_History) {
+          setrequesthistory(response?.Request_History);
+        } else {
+          setrequesthistory([]);
+        }
+
+        if (response?.ro_negotiation) {
+          setNegotiationHistory(response?.ro_negotiation);
+        } else {
+          setNegotiationHistory([]);
+        }
+        console.log("negotiation history", negotiationHistory);
         console.log("request history", requesthistory);
-    
       } catch (error) {
         console.log("error", error);
       }
     };
     fetchData();
-  }, [ caseId, userInteraction, delegateUserId, locationLogId]);
+  }, [caseId, userInteraction, delegateUserId, locationLogId]);
 
   const handleWithdraw = () => {
     alert("Withdrawn");
@@ -122,7 +98,7 @@ const ForwardMediationBoard = () => {
           <strong>Case ID: </strong> {caseId}
         </p>
         <p className="mb-2">
-          <strong>Customer Ref:</strong>  {Data?.customer_ref}
+          <strong>Customer Ref:</strong> {Data?.customer_ref}
         </p>
         <p className="mb-2">
           <strong>Account no:</strong> {Data?.account_no}
@@ -131,7 +107,8 @@ const ForwardMediationBoard = () => {
           <strong>Arrears Amount:</strong> {Data?.current_arrears_amount}
         </p>
         <p className="mb-2">
-          <strong>Last Payment Date:</strong> {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}
+          <strong>Last Payment Date:</strong>{" "}
+          {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}
         </p>
       </div>
       <div className="mt-10 mb-6">
@@ -163,9 +140,11 @@ const ForwardMediationBoard = () => {
                       : GlobalStyle.tableRowOdd
                   }`}
                 >
-                  <td className={GlobalStyle.tableData}>{detail.date}</td>
                   <td className={GlobalStyle.tableData}>
-                    {detail.Negotiation}
+                    {new Date(detail.created_dtm).toLocaleDateString()}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    {detail.field_reason}
                   </td>
                   <td className={GlobalStyle.tableData}>{detail.remark}</td>
                 </tr>
@@ -201,11 +180,15 @@ const ForwardMediationBoard = () => {
                       : GlobalStyle.tableRowOdd
                   }`}
                 >
-                  <td className={GlobalStyle.tableData}>{new Date(detail.CreateDTM).toLocaleDateString()}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {new Date(detail.CreateDTM).toLocaleDateString()}
+                  </td>
                   <td className={GlobalStyle.tableData}>
                     {detail.User_Interaction_Type}
                   </td>
-                  <td className={GlobalStyle.tableData}>{detail.Rejected_Reason || ""}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {detail.Rejected_Reason || ""}
+                  </td>
                 </tr>
               ))}
             </tbody>
