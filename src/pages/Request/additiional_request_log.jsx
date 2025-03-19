@@ -80,15 +80,26 @@ const RecoveryOfficerRequests = () => {
     return matchesSearchQuery;
   });
 
-  const navi = () => {
-    navigate("");
+  const navi = (case_id, User_Interaction_Type, delegate_user_id, Interaction_Log_ID) => {
+    console.log("case_id", case_id);
+    console.log("User_Interaction_Type", User_Interaction_Type);
+    console.log("delegate_user_id", delegate_user_id);
+    console.log("Interaction_Log_ID", Interaction_Log_ID);
+    navigate(`/drc/mediation-board`, {
+      state: {
+        case_Id: case_id,
+        User_Interaction_TYPE: User_Interaction_Type,
+        Delegate_User_id: delegate_user_id,
+        INteraction_Log_ID: Interaction_Log_ID,
+      }
+    });
   };
-
   const pages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = currentPage * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
+  console.log("")
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
@@ -321,7 +332,10 @@ const RecoveryOfficerRequests = () => {
                   >
                     <button
                       className={`${GlobalStyle.buttonPrimary} mx-auto`}
-                      onClick={navi}
+                      onClick= {() => navi( row.case_details?.case_id ,
+                         row.User_Interaction_Type , 
+                         row.delegate_user_id ,
+                          row.Interaction_Log_ID ) }
                     >
                       Open
                     </button>
