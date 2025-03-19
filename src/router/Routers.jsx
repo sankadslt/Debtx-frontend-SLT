@@ -59,6 +59,8 @@ import MediationBoardResponse from "../pages/Mediation_Board/MediationBoardRespo
 //MONEY TRANSACTION
 import PaymentDetails from "../pages/Money_Transaction/PaymentDetails";
 
+//Commission
+import CommissionCaseList from "../pages/Commission/Commission_List";
 
 const Routers = () => {
   return (
@@ -161,6 +163,8 @@ const Routers = () => {
       {/* //MONEY TRANSACTIONS */}
       <Route path="/MoneyTransactions/PaymentDetails" element={<ProtectedRoute element={<PaymentDetails />} allowedRoles={['superadmin']} />} />
 
+{/* //COMMISSION */}
+<Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
     </Routes>
   );
 };
