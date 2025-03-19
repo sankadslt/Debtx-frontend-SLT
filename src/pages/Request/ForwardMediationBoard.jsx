@@ -80,13 +80,14 @@ const ForwardMediationBoard = () => {
           payload
         );
         console.log("response", response);
-        setData(response.data);
+        setData(response);
+       
       } catch (error) {
         console.log("error", error);
       }
     };
     fetchData();
-  }, []);
+  }, [ caseId, userInteraction, delegateUserId, locationLogId]);
 
   const handleWithdraw = () => {
     alert("Withdrawn");
@@ -114,19 +115,19 @@ const ForwardMediationBoard = () => {
       </h1>
       <div className={`${GlobalStyle.cardContainer}`}>
         <p className="mb-2">
-          <strong>Case ID:</strong>
+          <strong>Case ID: </strong> {caseId}
         </p>
         <p className="mb-2">
-          <strong>Customer Ref:</strong>{" "}
+          <strong>Customer Ref:</strong>  {Data?.customer_ref}
         </p>
         <p className="mb-2">
-          <strong>Account no:</strong>{" "}
+          <strong>Account no:</strong> {Data?.account_no}
         </p>
         <p className="mb-2">
-          <strong>Arrears Amount:</strong>{" "}
+          <strong>Arrears Amount:</strong> {Data?.current_arrears_amount}
         </p>
         <p className="mb-2">
-          <strong>Last Payment Date:</strong>{" "}
+          <strong>Last Payment Date:</strong> {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}
         </p>
       </div>
       <div className="mt-10 mb-6">
