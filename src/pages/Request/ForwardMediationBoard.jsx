@@ -17,6 +17,7 @@ const ForwardMediationBoard = () => {
   const [acceptRequest, setAcceptRequest] = useState(""); // State for Yes/No toggle
   const [remarkText, setRemarkText] = useState(""); // State for remarks input
   const [Data, setData] = useState([]); // State for remarks input
+  const [requesthistory, setrequesthistory] = useState([]); // State for remarks input
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -80,8 +81,11 @@ const ForwardMediationBoard = () => {
           payload
         );
         console.log("response", response);
+        
         setData(response);
-       
+        setrequesthistory(response?.Request_History);
+        console.log("request history", requesthistory);
+    
       } catch (error) {
         console.log("error", error);
       }
@@ -171,7 +175,7 @@ const ForwardMediationBoard = () => {
         </div>
       </div>
       <div className="mt-10 mb-6">
-        <label className={GlobalStyle.remarkTopic}>Task History : </label>
+        <label className={GlobalStyle.remarkTopic}>Request History : </label>
         <div className={GlobalStyle.tableContainer}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
@@ -188,7 +192,7 @@ const ForwardMediationBoard = () => {
               </tr>
             </thead>
             <tbody>
-              {taskHistory.map((detail, index) => (
+              {requesthistory.map((detail, index) => (
                 <tr
                   key={index}
                   className={`${
@@ -197,11 +201,11 @@ const ForwardMediationBoard = () => {
                       : GlobalStyle.tableRowOdd
                   }`}
                 >
-                  <td className={GlobalStyle.tableData}>{detail.date}</td>
+                  <td className={GlobalStyle.tableData}>{new Date(detail.CreateDTM).toLocaleDateString()}</td>
                   <td className={GlobalStyle.tableData}>
-                    {detail.Negotiation}
+                    {detail.User_Interaction_Type}
                   </td>
-                  <td className={GlobalStyle.tableData}>{detail.remark}</td>
+                  <td className={GlobalStyle.tableData}>{detail.Rejected_Reason || ""}</td>
                 </tr>
               ))}
             </tbody>
