@@ -10,10 +10,24 @@
 // Notes: This template uses a tailwind css form for the background and section dividing
 import React, { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import { useNavigate  , useLocation} from "react-router-dom";
 
 const ForwardMediationBoard = () => {
   const [acceptRequest, setAcceptRequest] = useState(""); // State for Yes/No toggle
   const [remarkText, setRemarkText] = useState(""); // State for remarks input
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const caseId = location.state?.case_Id;
+  const userInteraction = location.state?.User_Interaction_TYPE;
+  const delegateUserId = location.state?.Delegate_User_id;
+  const locationLogId = location.state?.INteraction_Log_ID;
+
+  console.log("passed case id is ", caseId);
+  console.log("passed user interaction ", userInteraction);
+  console.log("passed delegate id", delegateUserId);
+  console.log("passed location id ", locationLogId);
 
   const negotiationHistory = [
     {
