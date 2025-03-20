@@ -11,7 +11,13 @@
 import React, { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useNavigate, useLocation } from "react-router-dom";
-import { List_Details_Of_Mediation_Board_Acceptance } from "/src/services/case/CaseServices.js";
+import {
+  List_Details_Of_Mediation_Board_Acceptance,
+  Submit_Mediation_Board_Acceptance,
+  Withdraw_Mediation_Board_Acceptance,
+} from "/src/services/case/CaseServices.js";
+import Swal from "sweetalert2";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
 
 const ForwardMediationBoard = () => {
   const [acceptRequest, setAcceptRequest] = useState(""); // State for Yes/No toggle
@@ -82,12 +88,54 @@ const ForwardMediationBoard = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault(); // Prevent page reload
-    alert(`Request Accepted: ${acceptRequest}`);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to rejected the selected record?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const userId = await getLoggedUserId();
+          const payload = {
+            ccreate_by: userId,
+            Interaction_Log_ID: locationLogId,
+            case_id: caseId,
+            User_Interaction_Type: userInteraction,
+            Request_Mode: Data?.Request_Mode || "",
+            Interaction_ID: Data?.Interaction_ID || "",
+            "Request Accept": acceptRequest,
+            Reamrk: remarkText,
+            No_of_Calendar_Month: "1",
+            Letter_Send: letterSend,
+          };
+          console.log("payload", payload);
+          const response = await Submit_Mediation_Board_Acceptance(payload);
+          console.log("response", response);
 
-    // Reset form after submission
-    setAcceptRequest("");
-    setRemarkText("");
+          Swal.fire({
+            title: "Success!",
+            text: "Request has been submitted successfully",
+            icon: "success",
+            confirmButtonColor: "#28a745",
+          }).then(() => {
+            navigate(-1);
+          });
+        } catch (error) {
+          console.log("error", error);
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to submit the request",
+            icon: "error",
+            confirmButtonColor: "#d33",
+          });
+        }
+      }
+    });
   };
 
   return (
@@ -111,6 +159,12 @@ const ForwardMediationBoard = () => {
         <p className="mb-2">
           <strong>Last Payment Date:</strong>{" "}
           {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}
+        </p>
+        <p className="mb-2">
+          <strong>Customer Type name:</strong> {Data?.Customer_Type_Name}
+        </p>
+        <p className="mb-2">
+          <strong>Account Manager Code:</strong> {Data?.ACCOUNT_MANAGER}
         </p>
       </div>
       <div className="mt-10 mb-6">
