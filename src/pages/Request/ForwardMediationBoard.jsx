@@ -1,8 +1,8 @@
 // Purpose: This template is used for Mediation board acceptance
 // Created Date: 2025/01/07
 // Created By:W.R.S.M.Bandara
-// Last Modified Date: 2025/01/08
-// Modified By: savindyabandara413@gmail.com
+// Last Modified Date: 2025/03/14
+// Modified By: savindyabandara413@gmail.com, ytheenura5@gmail.com
 // Version: node 11
 // ui number : v2.11
 // Dependencies: tailwind css
@@ -22,11 +22,17 @@ import { getLoggedUserId } from "/src/services/auth/authService.js";
 const ForwardMediationBoard = () => {
   const [acceptRequest, setAcceptRequest] = useState(""); // State for Yes/No toggle
   const [remarkText, setRemarkText] = useState(""); // State for remarks input
-  const [Data, setData] = useState([]); // State for remarks input
-  const [requesthistory, setrequesthistory] = useState([]); // State for remarks input
-  const [negotiationHistory, setNegotiationHistory] = useState([]); // State for remarks input
+  const [letterSent, setLetterSent] = useState(false); // State for letter sent checkbox
+  const [Data, setData] = useState({});
+  const [requesthistory, setrequesthistory] = useState([]);
+  const [NegotiationHistory, setNegotiationHistory] = useState([]);
 
-  const [letterSend, setLetterSend] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(); // State for calendar month input
+  const requestType = "Forward mediation board";
+  // const requestType = "Validity period extension";
+  // const requestType = "Additional information";
+  // const requestType = "Customer service activation";
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,6 +45,44 @@ const ForwardMediationBoard = () => {
   console.log("passed user interaction ", userInteraction);
   console.log("passed delegate id", delegateUserId);
   console.log("passed location id ", locationLogId);
+
+  const months = 3;
+
+  const negotiationHistory = [
+    {
+      date: "2024.11.04",
+      Negotiation: "------",
+      remark: "------",
+    },
+    {
+      date: "2024.11.05",
+      Negotiation: "------",
+      remark: "------",
+    },
+    {
+      date: "2024.11.06",
+      Negotiation: "------",
+      remark: "------",
+    },
+  ];
+
+  const taskHistory = [
+    {
+      date: "2024.11.05",
+      Negotiation: "----",
+      remark: "------",
+    },
+    {
+      date: "2024.11.07",
+      Negotiation: "----",
+      remark: "----",
+    },
+    {
+      date: "2024.11.09",
+      Negotiation: "----",
+      remark: "----",
+    },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +121,7 @@ const ForwardMediationBoard = () => {
     fetchData();
   }, [caseId, userInteraction, delegateUserId, locationLogId]);
 
-  const handleWithdraw = () => {
+  const handleWithdraw = (e) => {
     alert("Withdrawn");
     e.preventDefault(); // Prevent page reload
     alert(`Request Accepted: ${acceptRequest}`);
@@ -88,70 +132,30 @@ const ForwardMediationBoard = () => {
   };
 
   const handleSubmit = (e) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you really want to rejected the selected record?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
-      confirmButtonColor: "#28a745",
-      cancelButtonColor: "#d33",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const userId = await getLoggedUserId();
-          const payload = {
-            ccreate_by: userId,
-            Interaction_Log_ID: locationLogId,
-            case_id: caseId,
-            User_Interaction_Type: userInteraction,
-            Request_Mode: Data?.Request_Mode || "",
-            Interaction_ID: Data?.Interaction_ID || "",
-            "Request Accept": acceptRequest,
-            Reamrk: remarkText,
-            No_of_Calendar_Month: "1",
-            Letter_Send: letterSend,
-          };
-          console.log("payload", payload);
-          const response = await Submit_Mediation_Board_Acceptance(payload);
-          console.log("response", response);
+    e.preventDefault(); // Prevent page reload
+    alert(`Request Accepted: ${acceptRequest}`);
 
-          Swal.fire({
-            title: "Success!",
-            text: "Request has been submitted successfully",
-            icon: "success",
-            confirmButtonColor: "#28a745",
-          }).then(() => {
-            navigate(-1);
-          });
-        } catch (error) {
-          console.log("error", error);
-          Swal.fire({
-            title: "Error!",
-            text: "Failed to submit the request",
-            icon: "error",
-            confirmButtonColor: "#d33",
-          });
-        }
-      }
-    });
+    // Reset form after submission
+    setAcceptRequest("");
+    setRemarkText("");
+    setLetterSent(false);
+    setCalendarMonth("");
   };
 
   return (
     <div className={GlobalStyle.fontPoppins}>
-      <h1 className={GlobalStyle.headingLarge}>
-        Request Type: Forward Mediation Board
-      </h1>
+      <h1 className={GlobalStyle.headingLarge}>Request Type: {requestType}</h1>
       <div className={`${GlobalStyle.cardContainer}`}>
         <p className="mb-2">
-          <strong>Case ID: </strong> {caseId}
+          <strong>Case ID:</strong>
+          {caseId}
         </p>
         <p className="mb-2">
           <strong>Customer Ref:</strong> {Data?.customer_ref}
         </p>
         <p className="mb-2">
-          <strong>Account no:</strong> {Data?.account_no}
+          <strong>Account no:</strong>
+          {Data?.account_no}
         </p>
         <p className="mb-2">
           <strong>Arrears Amount:</strong> {Data?.current_arrears_amount}
@@ -159,12 +163,6 @@ const ForwardMediationBoard = () => {
         <p className="mb-2">
           <strong>Last Payment Date:</strong>{" "}
           {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}
-        </p>
-        <p className="mb-2">
-          <strong>Customer Type name:</strong> {Data?.Customer_Type_Name}
-        </p>
-        <p className="mb-2">
-          <strong>Account Manager Code:</strong> {Data?.ACCOUNT_MANAGER}
         </p>
       </div>
       <div className="mt-10 mb-6">
@@ -196,11 +194,9 @@ const ForwardMediationBoard = () => {
                       : GlobalStyle.tableRowOdd
                   }`}
                 >
+                  <td className={GlobalStyle.tableData}>{detail.date}</td>
                   <td className={GlobalStyle.tableData}>
-                    {new Date(detail.created_dtm).toLocaleDateString()}
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    {detail.field_reason}
+                    {detail.Negotiation}
                   </td>
                   <td className={GlobalStyle.tableData}>{detail.remark}</td>
                 </tr>
@@ -210,7 +206,7 @@ const ForwardMediationBoard = () => {
         </div>
       </div>
       <div className="mt-10 mb-6">
-        <label className={GlobalStyle.remarkTopic}>Request History : </label>
+        <label className={GlobalStyle.remarkTopic}>Task History : </label>
         <div className={GlobalStyle.tableContainer}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
@@ -227,7 +223,7 @@ const ForwardMediationBoard = () => {
               </tr>
             </thead>
             <tbody>
-              {requesthistory.map((detail, index) => (
+              {taskHistory.map((detail, index) => (
                 <tr
                   key={index}
                   className={`${
@@ -236,87 +232,275 @@ const ForwardMediationBoard = () => {
                       : GlobalStyle.tableRowOdd
                   }`}
                 >
+                  <td className={GlobalStyle.tableData}>{detail.date}</td>
                   <td className={GlobalStyle.tableData}>
-                    {new Date(detail.CreateDTM).toLocaleDateString()}
+                    {detail.Negotiation}
                   </td>
-                  <td className={GlobalStyle.tableData}>
-                    {detail.User_Interaction_Type}
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    {detail.Rejected_Reason || ""}
-                  </td>
+                  <td className={GlobalStyle.tableData}>{detail.remark}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
-      <div className="mt-10 mb-6">
-        <label className={GlobalStyle.remarkTopic}>Accept Request:</label>
-        <div className="flex justify-left gap-8 mt-2">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="Yes"
-              name="acceptRequest"
-              checked={acceptRequest === "Yes"}
-              className="mr-2"
-              onChange={(e) => setAcceptRequest(e.target.value)}
-            />
-            Yes
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="No"
-              name="acceptRequest"
-              checked={acceptRequest === "No"}
-              className="mr-2"
-              onChange={(e) => {
-                setAcceptRequest(e.target.value);
-                setLetterSend(false); // Reset letterSend when selecting "No"
-              }}
-            />
-            No
-          </label>
-        </div>
 
-        <div className="mb-6 mt-4">
-          <label className={GlobalStyle.remarkTopic}>Remark</label>
-          <textarea
-            value={remarkText}
-            onChange={(e) => setRemarkText(e.target.value)}
-            className={`${GlobalStyle.remark}`}
-            rows="5"
-          ></textarea>
-        </div>
-        {acceptRequest === "Yes" && (
-          <div className="mb-5 mt-4 flex items-center gap-2">
-            <span className={GlobalStyle.remarkTopic}>Letter Send:</span>
-            <input
-              type="checkbox"
-              checked={letterSend}
-              className="mt--1"
-              onChange={(e) => setLetterSend(e.target.checked)}
-            />
-            <span className={GlobalStyle.remarkTopic}>Yes</span>
+      {/* forward mediation board */}
+      {requestType === "Forward mediation board" && (
+        <div>
+          <div className="mt-10 mb-6">
+            <label className={GlobalStyle.remarkTopic}>Accept Request:</label>
+            <div className="flex justify-left gap-8 mt-2">
+              <label className="flex items">
+                <input
+                  type="radio"
+                  value="Yes"
+                  name="acceptRequest"
+                  checked={acceptRequest === "Yes"}
+                  className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                Yes
+              </label>
+              <label className="flex items">
+                <input
+                  type="radio"
+                  value="No"
+                  name="acceptRequest"
+                  checked={acceptRequest === "No"}
+                  className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                No
+              </label>
+            </div>
           </div>
-        )}
 
-        <div className="flex gap-4 justify-end">
-          {acceptRequest !== "Yes" && (
+          <div className="mb-6">
+            <label className={GlobalStyle.remarkTopic}>Remark</label>
+            <textarea
+              value={remarkText}
+              onChange={(e) => setRemarkText(e.target.value)}
+              className={`${GlobalStyle.remark}`}
+              rows="5"
+              disabled={acceptRequest === "Yes"}
+            ></textarea>
+          </div>
+
+          {acceptRequest === "Yes" && (
+            <div className="mb-6 flex items-center">
+              <label className={GlobalStyle.remarkTopic}>Letter Sent</label>
+              <input
+                type="checkbox"
+                checked={letterSent}
+                onChange={(e) => setLetterSent(e.target.checked)}
+                className="ml-2 mb-2"
+              />
+            </div>
+          )}
+
+          <div className="flex gap-4">
+            {acceptRequest !== "Yes" && (
+              <button
+                className={GlobalStyle.buttonPrimary}
+                onClick={handleWithdraw}
+              >
+                Withdraw
+              </button>
+            )}
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={handleSubmit}
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* validity period extension */}
+      {requestType === "Validity period extension" && (
+        <div>
+          <div className="mb-6">
+            <label className={GlobalStyle.remarkTopic}>
+              Requested Period: {months} months
+            </label>
+          </div>
+          <div className="mt-10 mb-6">
+            <label className={GlobalStyle.remarkTopic}>Accept Request:</label>
+            <div className="flex justify-left gap-8 mt-2">
+              <label className="flex items">
+                <input
+                  type="radio"
+                  value="Yes"
+                  name="acceptRequest"
+                  checked={acceptRequest === "Yes"}
+                  className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                  disabled={months >= 5}
+                />
+                Yes
+              </label>
+              <label className="flex items">
+                <input
+                  type="radio"
+                  value="No"
+                  name="acceptRequest"
+                  checked={acceptRequest === "No"}
+                  className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                No
+              </label>
+            </div>
+          </div>
+
+          {acceptRequest === "Yes" && (
+            <div className="mb-6 flex items-center gap-3">
+              <label className={GlobalStyle.remarkTopic}>Calender month:</label>
+              <input
+                type="number"
+                className={`${GlobalStyle.inputText}`}
+                min="1"
+                max="12"
+                defaultValue={2}
+                onChange={(e) => setCalendarMonth(e.target.value)}
+                value={calendarMonth}
+              />
+            </div>
+          )}
+
+          <div className="mb-6">
+            <label className={GlobalStyle.remarkTopic}>Remark</label>
+            <textarea
+              value={remarkText}
+              onChange={(e) => setRemarkText(e.target.value)}
+              className={`${GlobalStyle.remark}`}
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div className="flex gap-4">
             <button
               className={GlobalStyle.buttonPrimary}
               onClick={handleWithdraw}
             >
               Withdraw
             </button>
-          )}
-          <button className={GlobalStyle.buttonPrimary} onClick={handleSubmit}>
-            Submit
-          </button>
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={handleSubmit}
+            >
+              Submit
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Additional information */}
+      {requestType === "Additional information" && (
+        <div>
+          <div className="mt-10 mb-6">
+            <label className={GlobalStyle.remarkTopic}>Request provided:</label>
+            <div className="flex justify-left gap-8 mt-2">
+              <label className="flex items">
+                <input
+                  type="radio"
+                  value="Yes"
+                  name="acceptRequest"
+                  checked={acceptRequest === "Yes"}
+                  className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                  disabled={months >= 5}
+                />
+                Yes
+              </label>
+              <label className="flex items">
+                <input
+                  type="radio"
+                  value="No"
+                  name="acceptRequest"
+                  checked={acceptRequest === "No"}
+                  className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                No
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className={GlobalStyle.remarkTopic}>Remark</label>
+            <textarea
+              value={remarkText}
+              onChange={(e) => setRemarkText(e.target.value)}
+              className={`${GlobalStyle.remark}`}
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={handleSubmit}
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Service Activation */}
+      {requestType === "Customer service activation" && (
+        <div>
+          <div className="mt-10 mb-6">
+            <label className={GlobalStyle.remarkTopic}>Request informed:</label>
+            <div className="flex justify-left gap-8 mt-2">
+              <label className="flex items">
+                <input
+                  type="radio"
+                  value="Yes"
+                  name="acceptRequest"
+                  checked={acceptRequest === "Yes"}
+                  className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                  disabled={months >= 5}
+                />
+                Yes
+              </label>
+              <label className="flex items">
+                <input
+                  type="radio"
+                  value="No"
+                  name="acceptRequest"
+                  checked={acceptRequest === "No"}
+                  className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                No
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className={GlobalStyle.remarkTopic}>Remark</label>
+            <textarea
+              value={remarkText}
+              onChange={(e) => setRemarkText(e.target.value)}
+              className={`${GlobalStyle.remark}`}
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={handleSubmit}
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
