@@ -19,6 +19,8 @@ const ForwardMediationBoard = () => {
   const [Data, setData] = useState([]); // State for remarks input
   const [requesthistory, setrequesthistory] = useState([]); // State for remarks input
   const [negotiationHistory, setNegotiationHistory] = useState([]); // State for remarks input
+
+  const [letterSend, setLetterSend] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -198,7 +200,7 @@ const ForwardMediationBoard = () => {
       <div className="mt-10 mb-6">
         <label className={GlobalStyle.remarkTopic}>Accept Request:</label>
         <div className="flex justify-left gap-8 mt-2">
-          <label className="flex items">
+          <label className="flex items-center">
             <input
               type="radio"
               value="Yes"
@@ -209,35 +211,57 @@ const ForwardMediationBoard = () => {
             />
             Yes
           </label>
-          <label className="flex items">
+          <label className="flex items-center">
             <input
               type="radio"
               value="No"
               name="acceptRequest"
               checked={acceptRequest === "No"}
               className="mr-2"
-              onChange={(e) => setAcceptRequest(e.target.value)}
+              onChange={(e) => {
+                setAcceptRequest(e.target.value);
+                setLetterSend(false); // Reset letterSend when selecting "No"
+              }}
             />
             No
           </label>
         </div>
-      </div>
-      <div className="mb-6">
-        <label className={GlobalStyle.remarkTopic}>Remark</label>
-        <textarea
-          value={remarkText}
-          onChange={(e) => setRemarkText(e.target.value)}
-          className={`${GlobalStyle.remark}`}
-          rows="5"
-        ></textarea>
-      </div>
-      <div className="flex gap-4">
-        <button className={GlobalStyle.buttonPrimary} onClick={handleWithdraw}>
-          Withdraw
-        </button>
-        <button className={GlobalStyle.buttonPrimary} onClick={handleSubmit}>
-          Submit
-        </button>
+
+        <div className="mb-6 mt-4">
+          <label className={GlobalStyle.remarkTopic}>Remark</label>
+          <textarea
+            value={remarkText}
+            onChange={(e) => setRemarkText(e.target.value)}
+            className={`${GlobalStyle.remark}`}
+            rows="5"
+          ></textarea>
+        </div>
+        {acceptRequest === "Yes" && (
+          <div className="mb-5 mt-4 flex items-center gap-2">
+            <span className={GlobalStyle.remarkTopic}>Letter Send:</span>
+            <input
+              type="checkbox"
+              checked={letterSend}
+              className="mt--1"
+              onChange={(e) => setLetterSend(e.target.checked)}
+            />
+            <span className={GlobalStyle.remarkTopic}>Yes</span>
+          </div>
+        )}
+
+        <div className="flex gap-4 justify-end">
+          {acceptRequest !== "Yes" && (
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={handleWithdraw}
+            >
+              Withdraw
+            </button>
+          )}
+          <button className={GlobalStyle.buttonPrimary} onClick={handleSubmit}>
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );
