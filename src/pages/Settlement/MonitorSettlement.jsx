@@ -20,6 +20,68 @@ import more from "../../assets/images/imagefor1.a.13(one).png";
 import { list_All_Settlement_Cases } from "../../services/case/CaseServices";
 import Swal from 'sweetalert2';
 
+// // Import status icons with correct file extensions
+// import RO_Negotiation_FMB_pending from "../../assets/images/negotiation/RO_Negotiation_FMB_pending.png";
+// import RO_Negotiation_Extneded from "../../assets/images/negotiation/RO_Negotiation_Extneded.png";
+// import RO_Negotiation_Extension_Pending from "../../assets/images/negotiation/RO_Negotiation_Extension_Pending.png";
+// import Negotiation_Settle_Active from "../../assets/images/negotiation/Negotiation_Settle_Active.png";
+// import Negotiation_Settle_Open_Pending from "../../assets/images/negotiation/Negotiation_Settle_Open_Pending.png";
+// import Negotiation_Settle_Pending from "../../assets/images/negotiation/Negotiation_Settle_Pending.png";
+// import RO_Negotiation from "../../assets/images/negotiation/RO_Negotiation.png";
+
+// // Status icon mapping
+// const STATUS_ICONS = {
+//   "RO Negotiation FMB Pending": {
+//     icon: RO_Negotiation_FMB_pending,
+//     tooltip: "RO Negotiation FMB pending"
+//   },
+//   "RO Negotiation Extended": {
+//     icon: RO_Negotiation_Extneded,
+//     tooltip: "RO Negotiation Extneded"
+//   },
+//   "RO Negotiation Extension Pending": {
+//     icon: RO_Negotiation_Extension_Pending,
+//     tooltip: "RO Negotiation Extension Pending"
+//   },
+//   "Negotiation Settle Active": {
+//     icon: Negotiation_Settle_Active,
+//     tooltip: "Negotiation Settle Active"
+//   },
+//   "Negotiation Settle Open-Pending": {
+//     icon: Negotiation_Settle_Open_Pending,
+//     tooltip: "Negotiation Settle Open-Pending"
+//   },
+//   "Negotiation Settle Pending": {
+//     icon: Negotiation_Settle_Pending,
+//     tooltip: "Negotiation Settle Pending"
+//   },
+//   "RO Negotiation": {
+//     icon: RO_Negotiation,
+//     tooltip: "MB Settle open pending"
+//   },
+// };
+
+// // Status Icon component with tooltip
+// const StatusIcon = ({ status }) => {
+//   const statusInfo = STATUS_ICONS[status];
+  
+//   if (!statusInfo) return <span>{status}</span>;
+
+//   return (
+//     <div className="relative group">
+//       <img 
+//         src={statusInfo.icon} 
+//         alt={status}
+//         className="w-6 h-6 cursor-help"
+//       />
+//       <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-sm rounded px-2 py-1 left-1/2 transform -translate-x-1/2 bottom-full mb-1 whitespace-nowrap z-10">
+//         {statusInfo.tooltip}
+//         <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-2 h-2 bg-gray-800 rotate-45"></div>
+//       </div>
+//     </div>
+//   );
+// };
+
 const Monitor_settlement = () => {
   // State Variables
   const [fromDate, setFromDate] = useState(null);
@@ -117,9 +179,6 @@ const Monitor_settlement = () => {
 
   const handleFilter = async () => {
     try {
-
-
-
       setFilteredData([]); // Clear previous results
 
       // Format the date to 'YYYY-MM-DD' format
@@ -186,7 +245,12 @@ const Monitor_settlement = () => {
         console.error("No valid Settlement data found in response:", response);
       }
     } catch (error) {
-      console.error("Error filtering Settlements:", error);
+      console.error("Error filtering cases:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data. Please try again.",
+        icon: "error"
+      });
     }
   };
 
@@ -412,7 +476,7 @@ const Monitor_settlement = () => {
             </button>
           </div>
 
-          {error && <span className={GlobalStyle.errorText}>{error}</span>}
+          {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
 
           {/* Search Bar */}
           <div className="mb-4 flex justify-start mt-10">
@@ -505,14 +569,6 @@ const Monitor_settlement = () => {
                   </tr>
                 )}
               </tbody>
-
-
-
-
-
-
-
-
             </table>
           </div>
 
@@ -538,7 +594,6 @@ const Monitor_settlement = () => {
               <FaArrowRight />
             </button>
           </div>
-
         </main>
       </div>
     </div>
