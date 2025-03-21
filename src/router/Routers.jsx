@@ -61,6 +61,10 @@ import PaymentDetails from "../pages/Money_Transaction/PaymentDetails";
 
 //Commission
 import CommissionCaseList from "../pages/Commission/Commission_List";
+//Settlement
+import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
+import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
+
 
 const Routers = () => {
   return (
@@ -165,6 +169,10 @@ const Routers = () => {
 
 {/* //COMMISSION */}
 <Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
+
+      {/* //SETTLEMENT */}
+      <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
     </Routes>
   );
 };

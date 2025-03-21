@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { MdSpaceDashboard , MdFormatListBulletedAdd , MdDoneOutline } from "react-icons/md";
+import { MdSpaceDashboard, MdFormatListBulletedAdd, MdDoneOutline } from "react-icons/md";
 import { IoIosListBox } from "react-icons/io";
 import { MdSpeakerNotes } from "react-icons/md";
 import { GoDot, GoChecklist } from "react-icons/go";
@@ -10,6 +10,7 @@ import { HiOutlineDocumentCheck } from "react-icons/hi2";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../services/auth/authService";
+import { Subtitles } from "lucide-react";
 
 const Sidebar = ({ onHoverChange }) => {
   const location = useLocation();
@@ -62,9 +63,10 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
-    { icon: GoChecklist, 
-      label: "Incident List", 
-      roles: ["superadmin", "admin", "user"], 
+    {
+      icon: GoChecklist,
+      label: "Incident List",
+      roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: " Register Accounts", link: "/Incident/Incident_List", roles: ["superadmin", "admin"], subItems: [
           {icon:GoDot, label:"Bulk", link:"/Incident/Incident_List", roles:["superadmin", "admin"]},
@@ -102,20 +104,28 @@ const Sidebar = ({ onHoverChange }) => {
           label: "Disposed List", 
           roles: ["superadmin", "admin"],
           subItems: [
-            {icon:GoDot, label:"Write off List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:GoDot, label:"Abandoned List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:GoDot, label:"Withdraw List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:GoDot, label:"Closed List", link:"/dashboard", roles:["superadmin", "admin"]},
+            { icon: GoDot, label: "Write off List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Abandoned List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Withdraw List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Closed List", link: "/dashboard", roles: ["superadmin", "admin"] },
           ],
         },
       ],
     },
 
-    {icon: HiOutlineDocumentCheck, label: "Settlement", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
-    {icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
     {
-      icon: MdDoneOutline, 
-      label: "Approvals", 
+      icon: HiOutlineDocumentCheck, label: "Settlement",  roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: GoDot, label: "Monitor Settlement", link: "pages/Settlement/MonitorSettlement", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Money Transactions", link: "pages/Settlement/MoneyTransactions", roles: ["superadmin", "admin"] },
+      ],
+    },
+
+    { icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
+
+    {
+      icon: MdDoneOutline,
+      label: "Approvals",
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "Distribution Approval", link: "/pages/Distribute/DRCAssignManagerApproval2", roles: ["superadmin", "admin"] },
@@ -125,7 +135,7 @@ const Sidebar = ({ onHoverChange }) => {
 
     {
       icon: GrConfigure,
-      label: "Configuration", 
+      label: "Configuration",
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "RTOM List", link: "/dashboard", roles: ["superadmin"] },
@@ -251,9 +261,8 @@ const Sidebar = ({ onHoverChange }) => {
               <Link
                 to={item.link || "#"}
                 onClick={() => handleClick(0, index, !!item.subItems)}
-                className={`flex items-center gap-x-4 px-3 py-2 rounded-lg text-base font-medium transition ${
-                  isActive ? "bg-blue-400 shadow-lg" : "hover:bg-blue-400"
-                }`}
+                className={`flex items-center gap-x-4 px-3 py-2 rounded-lg text-base font-medium transition ${isActive ? "bg-blue-400 shadow-lg" : "hover:bg-blue-400"
+                  }`}
               >
                 <item.icon className="w-6 h-6 text-white" />
                 {isHovered && <span>{item.label}</span>}
