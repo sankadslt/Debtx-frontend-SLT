@@ -27,7 +27,7 @@ const PaymentDetails = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const rowsPerPage = 7; // Number of rows per page
+  const rowsPerPage = 10; // Number of rows per page
 
   // Fetch initial data on component mount
   useEffect(() => {
@@ -143,7 +143,7 @@ const PaymentDetails = () => {
   // Function to filter data based on input criteria
   const handleFilterClick = async () => {
     // Check if only one date field is filled
-    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+    if ((!fromDate && !toDate) || (!fromDate && !toDate)) {
       Swal.fire({
         title: "Warning",
         text: "Both From and To dates are required",
