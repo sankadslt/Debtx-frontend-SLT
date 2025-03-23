@@ -17,7 +17,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import more from "../../assets/images/imagefor1.a.13(one).png";
-import { list_All_Settlement_Cases } from "../../services/case/CaseServices";
+import { list_All_Settlement_Cases } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
 
 // // Import status icons with correct file extensions
