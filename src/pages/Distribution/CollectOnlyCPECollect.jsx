@@ -3,7 +3,7 @@ Created Date: 2025.01.22
 Created By: Buthmi Mithara
 Last Modified Date: 2025.01.24
 Modified By:Nadali Linara
-            K.H.Lasandi Randini  
+            Lasandi Randini (randini-im20057@stu.kln.ac.lk)
 Version: node 11
 ui number : 1.7.3
 Dependencies: tailwind css
