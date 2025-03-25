@@ -201,6 +201,17 @@ const Monitor_settlement = () => {
         return;
       };
 
+      if (caseIdFilter && !phase && !status && !fromDate && !toDate) {
+        Swal.fire({
+          title: "Warning",
+          text: "Please select at least one or more filter data",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        return;
+      }
+
       if ((fromDate && !toDate) || (!fromDate && toDate)) {
         Swal.fire({
           title: "Warning",
@@ -236,7 +247,21 @@ const Monitor_settlement = () => {
       };
 
       console.log("Payload sent to API: ", payload);
-      const response = await list_All_Settlement_Cases(payload);
+      const response = await list_All_Settlement_Cases(payload).catch((error) => {
+        if (error.response && error.response.status === 404) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+          setFilteredData([]);
+          return null;
+        } else {
+          throw error;
+        }
+      });
 
       if (response && Array.isArray(response.data)) {
         console.log("Valid data received:", response.data);
@@ -253,153 +278,6 @@ const Monitor_settlement = () => {
       });
     }
   };
-
-
-
-
-  /* // Sample Data
-  const data = [
-    {
-      caseId: "RC001",
-      status: "FTL",
-      created_dtm: "2025-01-01",
-      settlement_id: "S1",
-      settlement_phase: "Negotiation",
-    },
-    {
-      caseId: "RC002",
-      status: "Write off",
-      created_dtm: "2025-02-01",
-      settlement_id: "S2",
-      settlement_phase: "Mediation board",
-    },
-    {
-      caseId: "RC003",
-      status: "Being settle",
-      created_dtm: "2025-03-01",
-      settlement_id: "S3",
-      settlement_phase: "Litigation",
-    },
-    {
-      caseId: "RC001",
-      status: "FTL",
-      created_dtm: "2025-01-01",
-      settlement_id: "S1",
-      settlement_phase: "Negotiation",
-    },
-    {
-      caseId: "RC002",
-      status: "Write off",
-      created_dtm: "2025-02-01",
-      settlement_id: "S2",
-      settlement_phase: "Mediation board",
-    },
-    {
-      caseId: "RC003",
-      status: "Being settle",
-      created_dtm: "2025-03-01",
-      settlement_id: "S3",
-      settlement_phase: "Litigation",
-    },
-    {
-      caseId: "RC001",
-      status: "FTL",
-      created_dtm: "2025-01-01",
-      settlement_id: "S1",
-      settlement_phase: "Negotiation",
-    },
-    {
-      caseId: "RC002",
-      status: "Write off",
-      created_dtm: "2025-02-01",
-      settlement_id: "S2",
-      settlement_phase: "Mediation board",
-    },
-    {
-      caseId: "RC003",
-      status: "Being settle",
-      created_dtm: "2025-03-01",
-      settlement_id: "S3",
-      settlement_phase: "Litigation",
-    },
-  ];
- */
-
-
-  // Filtering Logic
-  /* const filterData = () => {
-    return data.filter((row) => {
-      const matchesSearch =
-        row.caseId
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase()) ||
-        row.status
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase()) ||
-        row.created_dtm
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase()) ||
-        row.settlement_id
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase()) ||
-        row.settlement_phase
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase());
-
-      const matchesCaseId = row.caseId
-        .toLowerCase()
-        .includes(appliedFilters.caseIdFilter.toLowerCase());
-      const matchesStatus =
-        !appliedFilters.status ||
-        row.status.toLowerCase() === appliedFilters.status.toLowerCase();
-      const matchesPhase =
-        !appliedFilters.phase ||
-        row.settlement_phase.toLowerCase() ===
-        appliedFilters.phase.toLowerCase();
-      const matchesFromDate =
-        !appliedFilters.fromDate ||
-        new Date(row.created_dtm) >= new Date(appliedFilters.fromDate);
-      const matchesToDate =
-        !appliedFilters.toDate ||
-        new Date(row.created_dtm) <= new Date(appliedFilters.toDate);
-
-      return (
-        matchesSearch &&
-        matchesCaseId &&
-        matchesStatus &&
-        matchesPhase &&
-        matchesFromDate &&
-        matchesToDate
-      );
-    });
-  }; */
-
-  // Pagination Logic
-  /* const pages = Math.ceil(filterData().length / rowsPerPage);
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filterData().slice(startIndex, endIndex);
-
-  const handlePrevPage = () => {
-    if (currentPage > 0) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < pages - 1) setCurrentPage(currentPage + 1);
-  };
- */
-  // Handle Filter Click
-  /*   const handleFilterClick = () => {
-      setAppliedFilters({
-        searchQuery,
-        caseIdFilter,
-        status,
-        phase,
-        fromDate,
-        toDate,
-      });
-      setCurrentPage(0); // Reset to first page when applying filters
-    }; */
 
   const navi = () => {
     navigate("/lod/ftl-log/preview");
@@ -548,7 +426,7 @@ const Monitor_settlement = () => {
                       }
                     >
                       <td className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}>{item.case_id || "N/A"}</td>
-                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>{item.settlement_status}</td>
+                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>{item.settlement_status || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-CA") || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
                       <td className={GlobalStyle.tableData}> {item.settlement_phase || "N/A"} </td>
