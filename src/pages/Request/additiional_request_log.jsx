@@ -25,6 +25,7 @@ const RecoveryOfficerRequests = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [approved, setApproved] = useState("");
   const [requestsData, setRequestsData] = useState([]);
+  const [firstRequestCount, setFirstRequestCount] = useState(0);
   const navigate = useNavigate();
   const rowsPerPage = 7;
 
@@ -37,8 +38,12 @@ const RecoveryOfficerRequests = () => {
         const response = await ListRequestLogFromRecoveryOfficers(payload);
         console.log(response);
         const lastTwoRecords = response.slice(-10).reverse();
+        const firstRequestCount =
+          response.length > 0 ? response[0].Request_Count : 0;
+        console.log("First request count:", firstRequestCount);
         console.log("Last two records:", lastTwoRecords);
         setRequestsData(lastTwoRecords);
+        setFirstRequestCount(firstRequestCount);
       } catch (error) {
         console.error(error);
         setRequestsData([]);
@@ -80,7 +85,12 @@ const RecoveryOfficerRequests = () => {
     return matchesSearchQuery;
   });
 
-  const navi = (case_id, User_Interaction_Type, delegate_user_id, Interaction_Log_ID) => {
+  const navi = (
+    case_id,
+    User_Interaction_Type,
+    delegate_user_id,
+    Interaction_Log_ID
+  ) => {
     console.log("case_id", case_id);
     console.log("User_Interaction_Type", User_Interaction_Type);
     console.log("delegate_user_id", delegate_user_id);
@@ -91,7 +101,7 @@ const RecoveryOfficerRequests = () => {
         User_Interaction_TYPE: User_Interaction_Type,
         Delegate_User_id: delegate_user_id,
         INteraction_Log_ID: Interaction_Log_ID,
-      }
+      },
     });
   };
   const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -99,7 +109,7 @@ const RecoveryOfficerRequests = () => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  console.log("")
+  console.log("");
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
@@ -125,7 +135,9 @@ const RecoveryOfficerRequests = () => {
     const fetchcases = async () => {
       try {
         const response = await ListRequestLogFromRecoveryOfficers(payload);
+
         console.log(response);
+
         setRequestsData(response);
       } catch (error) {
         console.error(error);
@@ -234,6 +246,19 @@ const RecoveryOfficerRequests = () => {
               className={GlobalStyle.inputSearch}
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
+
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={() => setSearchQuery("")}
+            >
+              show all
+            </button>
+            <div>
+              <span className={GlobalStyle.headingMedium}>
+                {" "}
+                request count : {firstRequestCount}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -332,10 +357,14 @@ const RecoveryOfficerRequests = () => {
                   >
                     <button
                       className={`${GlobalStyle.buttonPrimary} mx-auto`}
-                      onClick= {() => navi( row.case_details?.case_id ,
-                         row.User_Interaction_Type , 
-                         row.delegate_user_id ,
-                          row.Interaction_Log_ID ) }
+                      onClick={() =>
+                        navi(
+                          row.case_details?.case_id,
+                          row.User_Interaction_Type,
+                          row.delegate_user_id,
+                          row.Interaction_Log_ID
+                        )
+                      }
                     >
                       Open
                     </button>
