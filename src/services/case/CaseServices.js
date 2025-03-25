@@ -7,7 +7,7 @@ const URL = `${BASE_URL}/case`;
 // get_count_by_drc_commision_rule
 export const get_count_by_drc_commision_rule = async () => {
   try {
-    const response = await axios.get(`${URL}/get_count_by_drc_commision_rule`);
+    const response = await axios.get(`${URL}/List_count_by_drc_commision_rule`);
     return response.data;
   } catch (error) {
     console.error(
@@ -21,7 +21,7 @@ export const get_count_by_drc_commision_rule = async () => {
 // Fetch all arrears bands
 export const fetchAllArrearsBands = async () => {
   try {
-    const response = await axios.get(`${URL}/getAllArrearsBands`);
+    const response = await axios.get(`${URL}/List_All_Arrears_Bands`);
     const data = response.data.data;
 
     // Exclude the _id key and return both the key-value pairs
