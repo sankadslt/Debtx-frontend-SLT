@@ -87,7 +87,7 @@ const Monitor_settlement = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [caseIdFilter, setCaseIdFilter] = useState("");
+  const [caseId, setCaseId] = useState("");
   const [status, setStatus] = useState("");
   const [phase, setPhase] = useState("");
 
@@ -112,7 +112,7 @@ const Monitor_settlement = () => {
   };
   /*  const [appliedFilters, setAppliedFilters] = useState({
      searchQuery: "",
-     caseIdFilter: "",
+     caseId: "",
      status: "",
      phase: "",
      fromDate: null,
@@ -154,18 +154,10 @@ const Monitor_settlement = () => {
         confirmButtonColor: "#28a745",
         cancelButtonText: "No",
         cancelButtonColor: "#d33",
-      }).then((result) => {
-        if (result.isConfirmed) {
-
-          endDate = endDate;
-          handleApicall(startDate, endDate);
-        } else {
-          setToDate(null);
-          console.log("Dates cleared");
-        }
-      }
-      );
-
+      })
+    } else {
+      setToDate(null);
+      console.log("Dates cleared");
     }
   };
 
@@ -188,7 +180,7 @@ const Monitor_settlement = () => {
         return offsetDate.toISOString().split('T')[0];
       };
 
-      if (!caseIdFilter && !phase && !status && !fromDate && !toDate) {
+      if (!caseId && !phase && !status && !fromDate && !toDate) {
         Swal.fire({
           title: "Warning",
           text: "No filter data is selected. Please, select data.",
@@ -201,7 +193,7 @@ const Monitor_settlement = () => {
         return;
       };
 
-      if (caseIdFilter && !phase && !status && !fromDate && !toDate) {
+      if (caseId && !phase && !status && !fromDate && !toDate) {
         Swal.fire({
           title: "Warning",
           text: "Please select at least one or more filter data",
@@ -239,7 +231,7 @@ const Monitor_settlement = () => {
       };
 
       const payload = {
-        case_id: caseIdFilter,
+        case_id: caseId,
         settlement_phase: phase,
         settlement_status: status,
         from_date: formatDate(fromDate),
@@ -294,8 +286,8 @@ const Monitor_settlement = () => {
             <div className="flex items-center">
               <input
                 type="text"
-                value={caseIdFilter}
-                onChange={(e) => setCaseIdFilter(e.target.value)}
+                value={caseId}
+                onChange={(e) => setCaseId(e.target.value)}
                 className={`${GlobalStyle.inputText}  w-40`}
                 placeholder="Case ID"
               />
