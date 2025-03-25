@@ -96,7 +96,6 @@ const Commission_List = () => {
 
   const validateDates = (from, to) => {
     if (from && to) {
-     
       if (from >= to) {
         Swal.fire({
           title: "Warning",
@@ -139,17 +138,21 @@ const Commission_List = () => {
       let matchesPhase = true;
       let matchesDate = true;
 
-      if (inputFilter.trim() !== "") {
-        if (selectValue === "Case ID") {
-          const caseIdFilter = parseInt(inputFilter, 10);
-          matchesSearch = row.case_id === caseIdFilter;
-        } else if (selectValue === "Account No") {
-          matchesSearch =
-            row.account_no &&
-            row.account_no.toLowerCase().includes(inputFilter.toLowerCase());
-        }
-      }
+      // if (inputFilter.trim() !== "") {
+      //   if (selectValue === "Case ID") {
+      //     const caseIdFilter = parseInt(inputFilter, 10);
+      //     matchesSearch = row.case_id === caseIdFilter;
+      //   } else if (selectValue === "Account No") {
+      //     matchesSearch =
+      //       row.account_no &&
+      //       row.account_no.toLowerCase().includes(inputFilter.toLowerCase());
+      //   }
+      // }
 
+      if (inputFilter.trim() !== "") {
+        const caseIdFilter = parseInt(inputFilter, 10);
+        matchesSearch = row.case_id === caseIdFilter;
+      }
       if (selectedDrcIdMapped !== null) {
         matchesPhase = row.drc_id === selectedDrcIdMapped;
       }
@@ -164,7 +167,6 @@ const Commission_List = () => {
     setFilteredData(filtered);
     setCurrentPage(0);
   };
-
 
   const getSearchedData = () => {
     if (!searchQuery.trim()) return filteredData;
@@ -228,7 +230,7 @@ const Commission_List = () => {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-8">
-        <select
+        {/* <select
           value={selectValue}
           onChange={(e) => setSelectValue(e.target.value)}
           className={GlobalStyle.selectBox}
@@ -236,7 +238,7 @@ const Commission_List = () => {
           <option value="">select</option>
           <option value="Account No">Account No</option>
           <option value="Case ID">Case ID</option>
-        </select>
+        </select>   
 
         <input
           type="text"
@@ -244,8 +246,14 @@ const Commission_List = () => {
           onChange={(e) => setInputFilter(e.target.value)}
           className={GlobalStyle.inputText}
           placeholder="Enter"
+        /> */}
+        <input
+          type="text"
+          value={inputFilter}
+          onChange={(e) => setInputFilter(e.target.value)}
+          className={GlobalStyle.inputText}
+          placeholder="Enter Case ID"
         />
-
         <select
           value={selectedDrcId}
           onChange={(e) => setSelectedDrcId(e.target.value)}
