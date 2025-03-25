@@ -27,7 +27,7 @@ const PaymentDetails = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const rowsPerPage = 7; // Number of rows per page
+  const rowsPerPage = 10; // Number of rows per page
 
   // Fetch initial data on component mount
   useEffect(() => {
@@ -139,8 +139,6 @@ const PaymentDetails = () => {
       });
     }
   };
-
-  // Function to filter data based on input criteria
   const handleFilterClick = async () => {
     // Check if only one date field is filled
     if ((fromDate && !toDate) || (!fromDate && toDate)) {
@@ -153,13 +151,13 @@ const PaymentDetails = () => {
       });
       return;
     }
-
+  
     // Check if any filter is selected
     const hasActiveFilters = 
       inputFilter.trim() !== "" || 
       phase !== "" || 
       (fromDate && toDate);
-
+  
     if (!hasActiveFilters) {
       Swal.fire({
         title: "Warning",
@@ -170,7 +168,7 @@ const PaymentDetails = () => {
       });
       return;
     }
-
+  
     // Check if from date is after to date
     if (fromDate && toDate && fromDate.getTime() > toDate.getTime()) {
       Swal.fire({
@@ -182,7 +180,7 @@ const PaymentDetails = () => {
       });
       return;
     }
-
+  
     try {
       setIsLoading(true);
       
@@ -206,10 +204,10 @@ const PaymentDetails = () => {
         payload.settlement_phase = phase;
       }
       
-      // Add date range
+      // Add date range using the correct parameter names for the controller
       if (fromDate && toDate) {
-        payload.start_date = fromDate.toISOString().split('T')[0];
-        payload.end_date = toDate.toISOString().split('T')[0];
+        payload.from_date = fromDate.toISOString().split('T')[0];
+        payload.to_date = toDate.toISOString().split('T')[0];
       }
       
       const response = await List_All_Payment_Cases(payload);
