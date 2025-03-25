@@ -22,6 +22,7 @@ import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import { fetchIncidents } from "../../services/Incidents/incidentService";
 import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
+import { getLoggedUserId } from "../../services/auth/authService";
 
 const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -115,14 +116,14 @@ const Incident_List = () => {
             const offset = date.getTimezoneOffset() * 60000;
             return new Date(date.getTime() - offset).toISOString();
         };
-        
+          const user_id = await getLoggedUserId();
         const requestData = {
             DRC_Action: status1,
             Incident_Status: status2,
             Source_Type: status3,
             From_Date: adjustToLocalISO(fromDate),
             To_Date: adjustToLocalISO(toDate),
-            Created_By: "Admin"
+            Created_By:user_id
         };
 
         setIsCreatingTask(true);
