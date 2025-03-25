@@ -614,3 +614,21 @@ export const List_Cases_Owned_By_Mediation_Board = async (payload) => {
     throw error;
   }
 };
+
+export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
+  payload
+) => {
+  try {
+    const response = await axios.post(
+      `${URL}/ListAllRequestLogFromRecoveryOfficersWithoutUserID`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching request log from recovery officers without user ID:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
