@@ -598,3 +598,19 @@ export const Withdraw_Mediation_Board_Acceptance = async (payload) => {
     throw error;
   }
 };
+
+export const List_Cases_Owned_By_Mediation_Board = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_Cases_Owned_By_Mediation_Board`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching cases owned by mediation board:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
