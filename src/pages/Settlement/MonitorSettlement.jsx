@@ -10,14 +10,14 @@ Dependencies: tailwind css
 Related Files:
 Notes:  */
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import more from "../../assets/images/imagefor1.a.13(one).png";
-import { list_All_Settlement_Cases } from "../../services/settlement/SettlementServices";
+import { listAllSettlementCases } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
 
 // // Import status icons with correct file extensions
@@ -91,12 +91,12 @@ const Monitor_settlement = () => {
   const [status, setStatus] = useState("");
   const [phase, setPhase] = useState("");
 
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5;
+  const recordsPerPage = 10;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
@@ -119,7 +119,7 @@ const Monitor_settlement = () => {
      toDate: null,
    }); */
 
-  const rowsPerPage = 7;
+  // const rowsPerPage = 7;
 
   const navigate = useNavigate();
 
@@ -129,11 +129,16 @@ const Monitor_settlement = () => {
   };
 
   const handleenddatechange = (date) => {
-    if (fromDate) {
-      checkdatediffrence(fromDate, date);
-    }
     setToDate(date);
-  }
+    if (fromDate) checkdatediffrence(fromDate, date);
+  };
+
+  // const handleenddatechange = (date) => {
+  //   if (fromDate) {
+  //     checkdatediffrence(fromDate, date);
+  //   }
+  //   setToDate(date);
+  // }
 
   const checkdatediffrence = (startDate, endDate) => {
     const start = new Date(startDate).getTime();
@@ -155,9 +160,9 @@ const Monitor_settlement = () => {
         cancelButtonText: "No",
         cancelButtonColor: "#d33",
       })
-    } else {
       setToDate(null);
-      console.log("Dates cleared");
+      setFromDate(null);
+      return;
     }
   };
 
@@ -172,38 +177,27 @@ const Monitor_settlement = () => {
   const handleFilter = async () => {
     try {
       setFilteredData([]); // Clear previous results
-
+  
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
         if (!date) return null;
         const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
         return offsetDate.toISOString().split('T')[0];
       };
-
-      if (!caseId && !phase && !status && !fromDate && !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "No filter data is selected. Please, select data.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      };
-
-      if (caseId && !phase && !status && !fromDate && !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "Please select at least one or more filter data",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        return;
-      }
-
+  
+      // if (!caseId && !phase && !status && !fromDate && !toDate) {
+      //   Swal.fire({
+      //     title: "Warning",
+      //     text: "No filter data is selected. Please, select data.",
+      //     icon: "warning",
+      //     allowOutsideClick: false,
+      //     allowEscapeKey: false
+      //   });
+      //   setToDate(null);
+      //   setFromDate(null);
+      //   return;
+      // }
+  
       if ((fromDate && !toDate) || (!fromDate && toDate)) {
         Swal.fire({
           title: "Warning",
@@ -216,8 +210,8 @@ const Monitor_settlement = () => {
         setFromDate(null);
         return;
       }
-
-      if (new Date(fromDate) > new Date(toDate)) {
+  
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
         Swal.fire({
           title: "Warning",
           text: "To date should be greater than or equal to From date",
@@ -228,8 +222,8 @@ const Monitor_settlement = () => {
         setToDate(null);
         setFromDate(null);
         return;
-      };
-
+      }
+  
       const payload = {
         case_id: caseId,
         settlement_phase: phase,
@@ -237,9 +231,9 @@ const Monitor_settlement = () => {
         from_date: formatDate(fromDate),
         to_date: formatDate(toDate),
       };
-
       console.log("Payload sent to API: ", payload);
-      const response = await list_All_Settlement_Cases(payload).catch((error) => {
+  
+      const response = await listAllSettlementCases(payload).catch((error) => {
         if (error.response && error.response.status === 404) {
           Swal.fire({
             title: "No Results",
@@ -254,12 +248,14 @@ const Monitor_settlement = () => {
           throw error;
         }
       });
-
-      if (response && Array.isArray(response.data)) {
-        console.log("Valid data received:", response.data);
-        setFilteredData(response.data);
+  
+      // Updated response handling
+      if (response && response.data && response.data.data) {
+        console.log("Valid data received:", response.data.data);
+        setFilteredData(response.data.data);
       } else {
         console.error("No valid Settlement data found in response:", response);
+        setFilteredData([]);
       }
     } catch (error) {
       console.error("Error filtering cases:", error);
@@ -270,6 +266,10 @@ const Monitor_settlement = () => {
       });
     }
   };
+
+  useEffect(() => {
+    handleFilter(); // Load initial data
+  }, []);
 
   const navi = () => {
     navigate("/lod/ftl-log/preview");
@@ -301,7 +301,7 @@ const Monitor_settlement = () => {
               >
                 <option value="">Settlement Phase</option>
                 <option value="Negotiation">Negotiation</option>
-                <option value="Mediation board">Mediation board</option>
+                <option value="Mediation Board">Mediation Board</option>
                 <option value="Litigation">Litigation</option>
               </select>
             </div>
@@ -314,7 +314,7 @@ const Monitor_settlement = () => {
               >
                 <option value="">Settlement Status</option>
                 <option value="Pending">Pending</option>
-                <option value="Open_Pending">Open-Pending</option>
+                <option value="Open_Pending">Open Pending</option>
                 <option value="Active">Active</option>
               </select>
             </div>

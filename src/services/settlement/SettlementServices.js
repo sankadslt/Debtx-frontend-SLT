@@ -15,7 +15,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/settlement`;
 
-export const list_All_Settlement_Cases = async (payload) => {
+export const listAllSettlementCases = async (payload) => {
     try {
       const response = await axios.post(
         `${URL}/List_All_Settlement_Cases`,
