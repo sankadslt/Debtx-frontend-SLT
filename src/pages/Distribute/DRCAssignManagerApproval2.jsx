@@ -30,8 +30,15 @@ export default function DRCAssignManagerApproval2() {
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 4;
   const fetchData = async () => {
-    try {
-      const response = await List_All_Batch_Details();
+
+    const userId = await getLoggedUserId();
+    console.log("Logged in user ID:", userId);
+    const payload = {
+      approved_deligated_by : userId,
+    };
+    console.log("Payload:", payload);
+    try {     
+      const response = await List_All_Batch_Details( payload ); 
       setFilteredData(response);
       console.log("All batch details:", response);
     } catch (error) {
