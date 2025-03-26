@@ -293,9 +293,9 @@ export const List_CasesOwened_By_DRC = async (requestData) => {
   }
 };
 
-export const List_All_Batch_Details = async () => {
+export const List_All_Batch_Details = async (payload) => {
   try {
-    const response = await axios.get(`${URL}/List_All_Batch_Details`);
+    const response = await axios.post(`${URL}/List_All_Batch_Details`, payload);
     return response.data;
   } catch (error) {
     console.error(
