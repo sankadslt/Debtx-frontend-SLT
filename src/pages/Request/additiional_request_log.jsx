@@ -14,7 +14,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { ListRequestLogFromRecoveryOfficers } from "../../services/request/request.js";
+import {
+  ListRequestLogFromRecoveryOfficers,
+  ListAllRequestLogFromRecoveryOfficersWithoutUserID,
+} from "../../services/request/request.js";
 
 const RecoveryOfficerRequests = () => {
   const [fromDate, setFromDate] = useState(null);
@@ -25,6 +28,8 @@ const RecoveryOfficerRequests = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [approved, setApproved] = useState("");
   const [requestsData, setRequestsData] = useState([]);
+  const [allRequestsData, setAllRequestsData] = useState([]);
+
   const [firstRequestCount, setFirstRequestCount] = useState(0);
   const navigate = useNavigate();
   const rowsPerPage = 7;
@@ -249,10 +254,26 @@ const RecoveryOfficerRequests = () => {
 
             <button
               className={GlobalStyle.buttonPrimary}
-              onClick={() => setSearchQuery("")}
+              onClick={async () => {
+                setSearchQuery(""); // Optional: clear the search bar
+                const payload = { delegate_user_id: 5 }; // Pass any required parameters
+
+                try {
+                  const response =
+                    await ListAllRequestLogFromRecoveryOfficersWithoutUserID(
+                      payload
+                    );
+                  console.log(response); // Log the response to inspect it
+                  setRequestsData(response); // Update state with new data
+                } catch (error) {
+                  console.error(error);
+                  setRequestsData([]); // In case of error, clear the data
+                }
+              }}
             >
               show all
             </button>
+
             <div>
               <span className={GlobalStyle.headingMedium}>
                 {" "}
