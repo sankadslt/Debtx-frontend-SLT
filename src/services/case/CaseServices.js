@@ -2,7 +2,7 @@ import axios from "axios";
 
 //Base URL for for case-related API
 const BASE_URL = import.meta.env.VITE_BASE_URL;
-const URL = `${BASE_URL}/case`;
+const URL = `${BASE_URL}/settlement`;
 import { getLoggedUserId } from "../auth/authService";
 
 // get_count_by_drc_commision_rule
@@ -555,10 +555,13 @@ export const Withdraw_CasesOwened_By_DRC = async (payload) => {
 
 export const list_All_Settlement_Cases = async (payload) => {
   try {
-    const response = await axios.post(
-      `${URL}/List_All_Settlement_Cases`,
-      payload
-    );
+   
+    const response = await axios.post(`${URL}/List_All_Settlement_Cases`, payload, {
+      headers: {
+          "Content-Type": "application/json",
+      },
+    });
+
     return response.data;
   } catch (error) {
     console.error(
