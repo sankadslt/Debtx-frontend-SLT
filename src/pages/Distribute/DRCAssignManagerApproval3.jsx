@@ -141,6 +141,8 @@ export default function DRCAssignManagerApproval3() {
     if (endDate) {
       payload.date_to = endDate;
     }
+    const userId = await getLoggedUserId();
+    payload.approved_deligated_by = userId;
 
     console.log("Filtered Request Data:", payload);
 
