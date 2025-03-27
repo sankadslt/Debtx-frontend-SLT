@@ -8,7 +8,7 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: The following page conatins the codes */
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import DatePicker from "react-datepicker";
@@ -22,6 +22,7 @@ import {
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import one from "/src/assets/images/imagefor1.a.13(one).png";
 import Swal from "sweetalert2";
+import { use } from "react";
 
 
 
@@ -53,6 +54,26 @@ export default function DRCAssignManagerApproval3() {
     setEndDate(date);
 
   }
+
+  useEffect(() => {
+
+    const fetchDRCData = async () => {
+      const userId = await getLoggedUserId();
+      const payload = {
+        approved_deligated_by: userId,
+      };
+      console.log("Request Payload:", payload);
+      try {
+        const response = await List_DRC_Assign_Manager_Approval(payload);
+        console.log("Response:", response);
+        setFilteredData(response);
+      } catch (error) {
+        console.error("Error fetching DRC assign manager approval:", error);
+      }
+    };
+    fetchDRCData();
+  }, []);
+
 
   
     const checkdatediffrence = (startDate, endDate) => {
