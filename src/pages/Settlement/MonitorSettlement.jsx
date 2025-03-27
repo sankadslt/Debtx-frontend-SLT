@@ -10,14 +10,14 @@ Dependencies: tailwind css
 Related Files:
 Notes:  */
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import more from "../../assets/images/imagefor1.a.13(one).png";
-import { list_All_Settlement_Cases } from "../../services/case/CaseServices";
+import { listAllSettlementCases } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
 
 // // Import status icons with correct file extensions
@@ -87,16 +87,16 @@ const Monitor_settlement = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [caseIdFilter, setCaseIdFilter] = useState("");
+  const [caseId, setCaseId] = useState("");
   const [status, setStatus] = useState("");
   const [phase, setPhase] = useState("");
 
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5;
+  const recordsPerPage = 10;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
@@ -112,14 +112,14 @@ const Monitor_settlement = () => {
   };
   /*  const [appliedFilters, setAppliedFilters] = useState({
      searchQuery: "",
-     caseIdFilter: "",
+     caseId: "",
      status: "",
      phase: "",
      fromDate: null,
      toDate: null,
    }); */
 
-  const rowsPerPage = 7;
+  // const rowsPerPage = 7;
 
   const navigate = useNavigate();
 
@@ -129,11 +129,16 @@ const Monitor_settlement = () => {
   };
 
   const handleenddatechange = (date) => {
-    if (fromDate) {
-      checkdatediffrence(fromDate, date);
-    }
     setToDate(date);
-  }
+    if (fromDate) checkdatediffrence(fromDate, date);
+  };
+
+  // const handleenddatechange = (date) => {
+  //   if (fromDate) {
+  //     checkdatediffrence(fromDate, date);
+  //   }
+  //   setToDate(date);
+  // }
 
   const checkdatediffrence = (startDate, endDate) => {
     const start = new Date(startDate).getTime();
@@ -154,18 +159,10 @@ const Monitor_settlement = () => {
         confirmButtonColor: "#28a745",
         cancelButtonText: "No",
         cancelButtonColor: "#d33",
-      }).then((result) => {
-        if (result.isConfirmed) {
-
-          endDate = endDate;
-          handleApicall(startDate, endDate);
-        } else {
-          setToDate(null);
-          console.log("Dates cleared");
-        }
-      }
-      );
-
+      })
+      setToDate(null);
+      setFromDate(null);
+      return;
     }
   };
 
@@ -180,27 +177,27 @@ const Monitor_settlement = () => {
   const handleFilter = async () => {
     try {
       setFilteredData([]); // Clear previous results
-
+  
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
         if (!date) return null;
         const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
         return offsetDate.toISOString().split('T')[0];
       };
-
-      if (!caseIdFilter && !phase && !status && !fromDate && !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "No filter data is selected. Please, select data.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      };
-
+  
+      // if (!caseId && !phase && !status && !fromDate && !toDate) {
+      //   Swal.fire({
+      //     title: "Warning",
+      //     text: "No filter data is selected. Please, select data.",
+      //     icon: "warning",
+      //     allowOutsideClick: false,
+      //     allowEscapeKey: false
+      //   });
+      //   setToDate(null);
+      //   setFromDate(null);
+      //   return;
+      // }
+  
       if ((fromDate && !toDate) || (!fromDate && toDate)) {
         Swal.fire({
           title: "Warning",
@@ -213,8 +210,8 @@ const Monitor_settlement = () => {
         setFromDate(null);
         return;
       }
-
-      if (new Date(fromDate) > new Date(toDate)) {
+  
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
         Swal.fire({
           title: "Warning",
           text: "To date should be greater than or equal to From date",
@@ -225,24 +222,40 @@ const Monitor_settlement = () => {
         setToDate(null);
         setFromDate(null);
         return;
-      };
-
+      }
+  
       const payload = {
-        case_id: caseIdFilter,
+        case_id: caseId,
         settlement_phase: phase,
         settlement_status: status,
         from_date: formatDate(fromDate),
         to_date: formatDate(toDate),
       };
-
       console.log("Payload sent to API: ", payload);
-      const response = await list_All_Settlement_Cases(payload);
-
-      if (response && Array.isArray(response.data)) {
-        console.log("Valid data received:", response.data);
-        setFilteredData(response.data);
+  
+      const response = await listAllSettlementCases(payload).catch((error) => {
+        if (error.response && error.response.status === 404) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+          setFilteredData([]);
+          return null;
+        } else {
+          throw error;
+        }
+      });
+  
+      // Updated response handling
+      if (response && response.data && response.data.data) {
+        console.log("Valid data received:", response.data.data);
+        setFilteredData(response.data.data);
       } else {
         console.error("No valid Settlement data found in response:", response);
+        setFilteredData([]);
       }
     } catch (error) {
       console.error("Error filtering cases:", error);
@@ -254,152 +267,9 @@ const Monitor_settlement = () => {
     }
   };
 
-
-
-
-  /* // Sample Data
-  const data = [
-    {
-      caseId: "RC001",
-      status: "FTL",
-      created_dtm: "2025-01-01",
-      settlement_id: "S1",
-      settlement_phase: "Negotiation",
-    },
-    {
-      caseId: "RC002",
-      status: "Write off",
-      created_dtm: "2025-02-01",
-      settlement_id: "S2",
-      settlement_phase: "Mediation board",
-    },
-    {
-      caseId: "RC003",
-      status: "Being settle",
-      created_dtm: "2025-03-01",
-      settlement_id: "S3",
-      settlement_phase: "Litigation",
-    },
-    {
-      caseId: "RC001",
-      status: "FTL",
-      created_dtm: "2025-01-01",
-      settlement_id: "S1",
-      settlement_phase: "Negotiation",
-    },
-    {
-      caseId: "RC002",
-      status: "Write off",
-      created_dtm: "2025-02-01",
-      settlement_id: "S2",
-      settlement_phase: "Mediation board",
-    },
-    {
-      caseId: "RC003",
-      status: "Being settle",
-      created_dtm: "2025-03-01",
-      settlement_id: "S3",
-      settlement_phase: "Litigation",
-    },
-    {
-      caseId: "RC001",
-      status: "FTL",
-      created_dtm: "2025-01-01",
-      settlement_id: "S1",
-      settlement_phase: "Negotiation",
-    },
-    {
-      caseId: "RC002",
-      status: "Write off",
-      created_dtm: "2025-02-01",
-      settlement_id: "S2",
-      settlement_phase: "Mediation board",
-    },
-    {
-      caseId: "RC003",
-      status: "Being settle",
-      created_dtm: "2025-03-01",
-      settlement_id: "S3",
-      settlement_phase: "Litigation",
-    },
-  ];
- */
-
-
-  // Filtering Logic
-  /* const filterData = () => {
-    return data.filter((row) => {
-      const matchesSearch =
-        row.caseId
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase()) ||
-        row.status
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase()) ||
-        row.created_dtm
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase()) ||
-        row.settlement_id
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase()) ||
-        row.settlement_phase
-          .toLowerCase()
-          .includes(appliedFilters.searchQuery.toLowerCase());
-
-      const matchesCaseId = row.caseId
-        .toLowerCase()
-        .includes(appliedFilters.caseIdFilter.toLowerCase());
-      const matchesStatus =
-        !appliedFilters.status ||
-        row.status.toLowerCase() === appliedFilters.status.toLowerCase();
-      const matchesPhase =
-        !appliedFilters.phase ||
-        row.settlement_phase.toLowerCase() ===
-        appliedFilters.phase.toLowerCase();
-      const matchesFromDate =
-        !appliedFilters.fromDate ||
-        new Date(row.created_dtm) >= new Date(appliedFilters.fromDate);
-      const matchesToDate =
-        !appliedFilters.toDate ||
-        new Date(row.created_dtm) <= new Date(appliedFilters.toDate);
-
-      return (
-        matchesSearch &&
-        matchesCaseId &&
-        matchesStatus &&
-        matchesPhase &&
-        matchesFromDate &&
-        matchesToDate
-      );
-    });
-  }; */
-
-  // Pagination Logic
-  /* const pages = Math.ceil(filterData().length / rowsPerPage);
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filterData().slice(startIndex, endIndex);
-
-  const handlePrevPage = () => {
-    if (currentPage > 0) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < pages - 1) setCurrentPage(currentPage + 1);
-  };
- */
-  // Handle Filter Click
-  /*   const handleFilterClick = () => {
-      setAppliedFilters({
-        searchQuery,
-        caseIdFilter,
-        status,
-        phase,
-        fromDate,
-        toDate,
-      });
-      setCurrentPage(0); // Reset to first page when applying filters
-    }; */
+  useEffect(() => {
+    handleFilter(); // Load initial data
+  }, []);
 
   const navi = () => {
     navigate("/lod/ftl-log/preview");
@@ -416,8 +286,8 @@ const Monitor_settlement = () => {
             <div className="flex items-center">
               <input
                 type="text"
-                value={caseIdFilter}
-                onChange={(e) => setCaseIdFilter(e.target.value)}
+                value={caseId}
+                onChange={(e) => setCaseId(e.target.value)}
                 className={`${GlobalStyle.inputText}  w-40`}
                 placeholder="Case ID"
               />
@@ -431,7 +301,7 @@ const Monitor_settlement = () => {
               >
                 <option value="">Settlement Phase</option>
                 <option value="Negotiation">Negotiation</option>
-                <option value="Mediation board">Mediation board</option>
+                <option value="Mediation Board">Mediation Board</option>
                 <option value="Litigation">Litigation</option>
               </select>
             </div>
@@ -444,7 +314,7 @@ const Monitor_settlement = () => {
               >
                 <option value="">Settlement Status</option>
                 <option value="Pending">Pending</option>
-                <option value="Open_Pending">Open-Pending</option>
+                <option value="Open_Pending">Open Pending</option>
                 <option value="Active">Active</option>
               </select>
             </div>
@@ -548,7 +418,7 @@ const Monitor_settlement = () => {
                       }
                     >
                       <td className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}>{item.case_id || "N/A"}</td>
-                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>{item.settlement_status}</td>
+                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>{item.settlement_status || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-CA") || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
                       <td className={GlobalStyle.tableData}> {item.settlement_phase || "N/A"} </td>
