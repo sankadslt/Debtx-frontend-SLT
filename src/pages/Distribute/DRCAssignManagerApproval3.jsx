@@ -381,6 +381,27 @@ console.log("Filtered Data:", filteredDataBySearch);
       });
       return;
     }
+
+    const rejected = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Reject";
+
+    });
+    console.log("Rejected:", rejected);
+
+    if (rejected) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been rejected.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+    
       // Show confirmation alert before calling API
       const result = await Swal.fire({
         title: "Are you sure?",
