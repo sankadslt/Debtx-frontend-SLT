@@ -258,9 +258,13 @@ console.log("Filtered Data:", filteredDataBySearch);
 
     const alreadyApproved = batchIds.some((id) => {
       const record = filteredData.find((row) => row.approver_reference === id);
-      return record?.approved_by !== null;
-  });
+      
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
 
+      return status === "Open assign agent" || status === "Case Withdrawed" || status === "Case Abandoned" || status === "Pending Write Off" || status === "Commissioned";
+
+  });
+  console.log("Already Approved:", alreadyApproved);
     if (alreadyApproved) {
       Swal.fire({
         icon: "warning",
@@ -270,7 +274,28 @@ console.log("Filtered Data:", filteredDataBySearch);
       });
       return;
     }
+
+    const rejected = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Reject";
+
+    });
+    console.log("Rejected:", rejected);
+
+    if (rejected) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been rejected.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
     
+   
 
       // Show confirmation alert before calling API
       const result = await Swal.fire({
@@ -333,6 +358,25 @@ console.log("Filtered Data:", filteredDataBySearch);
         icon: "warning",
         title: "Warning",
         text: "Please select at least one record to reject.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    const alreadyApproved = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Open assign agent" || status === "Case Withdrawed" || status === "Case Abandoned" || status === "Pending Write Off" || status === "Commissioned";
+
+  });
+  console.log("Already Approved:", alreadyApproved);
+    if (alreadyApproved) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been approved.",
         confirmButtonColor: "#f1c40f",
       });
       return;
@@ -572,7 +616,7 @@ console.log("Filtered Data:", filteredDataBySearch);
                     {item.approver_type}
                   </td>
                   
-                  <td className={GlobalStyle.tableData}>{item.approved_by}</td>
+                  <td className={GlobalStyle.tableData}>{item.approved_deligated_by}</td>
                   <td className={GlobalStyle.tableData}>
                     {item.remark.length > 0
                       ? item.remark[item.remark.length - 1].remark
