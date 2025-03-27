@@ -84,6 +84,7 @@ const ForwardMediationBoard = () => {
     },
   ];
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -120,6 +121,7 @@ const ForwardMediationBoard = () => {
     };
     fetchData();
   }, [caseId, userInteraction, delegateUserId, locationLogId]);
+
 
   const handleWithdraw = (e) => {
     alert("Withdrawn");

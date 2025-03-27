@@ -4,7 +4,7 @@ Created Date: 2025.01.21
 Created By: K.K.C sakumini
 Last Modified Date: 2025.01.22
 Modified By:K.K.C Sakumini
-            K.H.Lasandi Randini  
+            Lasandi Randini (randini-im20057@stu.kln.ac.lk) 
 Version: node 11
 ui number : 1.7.1
 Dependencies: tailwind css
@@ -72,11 +72,6 @@ const fetchData = async () => {
 };
 
 
-//  useEffect(() => {
- 
-//     fetchData();
-//   }, []);
-
   const handleCreateTask = async () => {
     try {
       const taskParams = {
@@ -107,91 +102,108 @@ const fetchData = async () => {
     }
   };
   
-  const handleCaseforIncident = async () => {
-    if (selectedRows.length === 0) {
+  
+ const handleCaseforIncident = async () => {
+  if (selectedRows.length === 0) {
+    Swal.fire({
+      title: "Warning",
+      text: "Please select at least one incident.",
+      icon: "warning",
+      confirmButtonText: "OK",
+    });
+    return;
+  }
+
+  const confirmResult = await Swal.fire({
+    title: "Confirmation",
+    text: `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, Proceed",
+    cancelButtonText: "No",
+  });
+
+  if (!confirmResult.isConfirmed) {
+    return;
+  }
+
+  setIsProcessing(true);
+
+  try {
+    const openTaskCount = await Open_Task_Count_Incident_To_Case();
+    if (openTaskCount > 0) {
       Swal.fire({
-        title: "Warning",
-        text: "Please select at least one incident.",
+        title: "Action Blocked",
+        text: "There are existing open tasks. Please resolve them before proceeding.",
         icon: "warning",
         confirmButtonText: "OK",
       });
+      setIsProcessing(false);
       return;
     }
-  
-    const confirmResult = await Swal.fire({
-      title: "Confirmation",
-      text: `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, Proceed",
-      cancelButtonText: "No",
-    });
-  
-    if (!confirmResult.isConfirmed) {
-      return;
-    }
-  
-    setIsProcessing(true);
-  
-    try {
-      const openTaskCount = await Open_Task_Count_Incident_To_Case();
-      if (openTaskCount > 0) {
-        Swal.fire({
-          title: "Action Blocked",
-          text: "There are existing open tasks. Please resolve them before proceeding.",
-          icon: "warning",
-          confirmButtonText: "OK",
-        });
+
+    if (selectedRows.length > 9) {
+     
+      const taskConfirmResult = await Swal.fire({
+        title: "Create Task Confirmation",
+        text: `You have selected more than 9 incidents. Do you want to create a task to handle them?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Create Task",
+        cancelButtonText: "No, Cancel",
+      });
+
+      if (!taskConfirmResult.isConfirmed) {
         setIsProcessing(false);
-        return;
+        return;  
       }
-  
-      if (selectedRows.length > 9) {
-        const taskParams = {
-          Incident_Status: "Open No Agent",
-          Proceed_By: user.user_id,
-          Proceed_Dtm: new Date().toISOString(),
-        };
-  
-        const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-        console.log("Response from Create_Task:", response);
-        Swal.fire({
-          title: "Task Created Successfully!",
-          text: `Task created to handle incidents.`,
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-      } else {
-        const response = await Create_Case_for_incident({
-          Incident_Ids: selectedRows,
-          Proceed_By: user.user_id,
-          Proceed_Dtm: new Date().toISOString(),
-        });
-  
-        Swal.fire({
-          title: "Cases Created Successfully!",
-          text: `Successfully created ${response.cases.length} cases.`,
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-      }
-  
-      setSelectedRows([]);
-    } catch (error) {
-      console.error("Error in handleCaseforIncident:", error);
+
+      
+      const taskParams = {
+        Incident_Status: "Open No Agent",
+        Proceed_By: user.user_id,
+        Proceed_Dtm: new Date().toISOString(),
+      };
+
+      const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
+      console.log("Response from Create_Task:", response);
       Swal.fire({
-        title: "Error",
-        text: error.message || "Action failed: Another set in progress.",
-        icon: "error",
+        title: "Task Created Successfully!",
+        text: `Task created to handle incidents.`,
+        icon: "success",
         confirmButtonText: "OK",
       });
-    } finally {
-      setIsProcessing(false);
-      await fetchData();
+    } else {
+      
+      const response = await Create_Case_for_incident({
+        Incident_Ids: selectedRows,
+        Proceed_By: user.user_id,
+        Proceed_Dtm: new Date().toISOString(),
+      });
+
+      Swal.fire({
+        title: "Cases Created Successfully!",
+        text: `Successfully created ${response.cases.length} cases.`,
+        icon: "success",
+        confirmButtonText: "OK",
+      });
     }
-  };
-  
- 
+
+    setSelectedRows([]);
+  } catch (error) {
+    console.error("Error in handleCaseforIncident:", error);
+    Swal.fire({
+      title: "Error",
+      text: error.message || "Action failed: Another set in progress.",
+      icon: "error",
+      confirmButtonText: "OK",
+    });
+  } finally {
+    setIsProcessing(false);
+    await fetchData();
+  }
+};
+
 
   const filteredData = data.filter((row) =>
     Object.values(row)

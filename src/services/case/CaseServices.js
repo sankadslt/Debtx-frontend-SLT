@@ -3,9 +3,10 @@ import axios from "axios";
 //Base URL for for case-related API
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/case`;
+import { getLoggedUserId } from "../auth/authService";
 
 // get_count_by_drc_commision_rule
-export const get_count_by_drc_commision_rule = async () => {
+export const List_count_by_drc_commision_rule = async () => {
   try {
     const response = await axios.get(`${URL}/List_count_by_drc_commision_rule`);
     return response.data;
@@ -21,7 +22,9 @@ export const get_count_by_drc_commision_rule = async () => {
 // Fetch all arrears bands
 export const fetchAllArrearsBands = async () => {
   try {
+
     const response = await axios.get(`${URL}/List_All_Arrears_Bands`);
+
     const data = response.data.data;
 
     // Exclude the _id key and return both the key-value pairs
@@ -179,10 +182,10 @@ export const Create_Task_For_case_distribution_transaction = async (
   }
 };
 
-export const get_distribution_array_of_a_transaction = async (data) => {
+export const list_distribution_array_of_a_transaction = async (data) => {
   try {
     const response = await axios.post(
-      `${URL}/get_distribution_array_of_a_transaction`,
+      `${URL}/list_distribution_array_of_a_transaction`,
       data
     );
     return response.data;
@@ -500,24 +503,24 @@ export const List_All_DRCs_Mediation_Board_Cases = async (filters) => {
   }
 };
 
-export const Accept_Non_Settlement_Request_from_Mediation_Board = async (
-  case_id
-) => {
+export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id) => {
   try {
     if (!case_id) {
       throw new Error("case_id is required");
     }
 
-    const response = await axios.put(
-      `${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`,
-      { case_id }
-    );
+  
+    const user_id = await getLoggedUserId();
+    const recieved_by = user_id || "Unknown User"; 
+
+    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {  
+      case_id, 
+      recieved_by 
+    });
+
     return response.data;
   } catch (error) {
-    console.error(
-      "Error updating case status:",
-      error.response?.data || error.message
-    );
+    console.error("Error updating case status:", error.response?.data || error.message);
     throw error.response?.data || error;
   }
 };
@@ -550,6 +553,7 @@ export const Withdraw_CasesOwened_By_DRC = async (payload) => {
     throw error;
   }
 };
+
 
 export const List_Details_Of_Mediation_Board_Acceptance = async (payload) => {
   try {
@@ -632,3 +636,4 @@ export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
     throw error;
   }
 };
+

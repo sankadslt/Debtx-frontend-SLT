@@ -11,7 +11,6 @@ Notes:The following page conatins the code for the Mediation Board Response Scre
 import { useState,useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useNavigate ,useParams} from "react-router-dom";
-import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
 import { List_All_DRCs_Mediation_Board_Cases, Accept_Non_Settlement_Request_from_Mediation_Board } from "../../services/case/CaseServices";
@@ -19,7 +18,6 @@ import { List_All_DRCs_Mediation_Board_Cases, Accept_Non_Settlement_Request_from
 const MediationBoardResponse = () => {
   const { caseId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [nonSettlementAccept, setNonSettlementAccept] = useState(false);
   const [caseData, setCaseData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,7 +55,7 @@ const MediationBoardResponse = () => {
   if (!caseData) return <p>No case details found.</p>;
 
   console.log("Case Data:", caseData);
- 
+ console.log("case_current_status",caseData.case_current_status);
   const isNonSettlementCase = caseData.case_current_status === "MB Fail with Pending Non-Settlement";
 
 
@@ -67,12 +65,12 @@ const MediationBoardResponse = () => {
         Swal.fire("Error", "You must accept Non-Settlement before submitting.", "error");
         return;
       }
-
+console.log("caseId",caseId);
       await Accept_Non_Settlement_Request_from_Mediation_Board(caseId);
 
       Swal.fire("Success", "Non-Settlement request accepted successfully!", "success");
       navigate("/MediationBoard/MediationBoardCaseList");
-    } catch (error) {
+    } catch  {
       Swal.fire("Error", "Failed to submit Non-Settlement acceptance.", "error");
     }
   };
@@ -81,10 +79,10 @@ const MediationBoardResponse = () => {
 
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-      {/* Header */}
+      
       <h1 className="text-4xl font-bold mb-8">Mediation Board Response</h1>
 
-      {/* Case Info Card with Table Structure */}
+     
       <div className="p-4 rounded-lg shadow-xl mb-6 bg-white bg-opacity-15 border-2 border-zinc-300 max-w-4xl">
         <table className="w-full">
           <tbody>
@@ -111,13 +109,18 @@ const MediationBoardResponse = () => {
             <tr className="flex items-start py-1">
               <td className="font-bold w-48">Last Payment Date</td>
               <td className="px-2 font-bold">:</td>
-              <td className="text-gray-700">{caseData.latest_next_calling_dtm}</td>
+              <td className="text-gray-700">
+  {caseData.latest_next_calling_dtm 
+    ? new Date(caseData.latest_next_calling_dtm).toLocaleDateString("en-GB") 
+    : "N/A"}
+</td>
+
             </tr>
           </tbody>
         </table>
       </div>
 
-      {/* Non-Settlement Accept Section - Only shown for relevant status */}
+      
       {isNonSettlementCase && (
           <div className="flex items-center gap-2 mb-4">
             <span className="font-semibold text-lg">Non-Settlement Accept:</span>
@@ -146,8 +149,8 @@ const MediationBoardResponse = () => {
         </div>
       )}
 
-      {/* Negotiation History Section */}
-      <h2 className="text-xl font-semibold mb-4">Negotiation History</h2>
+    
+      <h2 className="text-xl font-semibold mb-4">Mediation board History</h2>
       <div className={GlobalStyle.tableContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
@@ -162,20 +165,20 @@ const MediationBoardResponse = () => {
                 Agree to Settle
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Field Reason
+                Customer Response
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Remark
+                Comment
               </th>
             </tr>
           </thead>
           <tbody>
             <tr className="bg-white bg-opacity-75 border-b">
-              <td className={GlobalStyle.tableData}>2024.11.04</td>
-              <td className={GlobalStyle.tableData}>Yes/No</td>
-              <td className={GlobalStyle.tableData}>Yes/No</td>
-              <td className={GlobalStyle.tableData}></td>
-              <td className={GlobalStyle.tableData}>............</td>
+              <td className={GlobalStyle.tableData}> {new Date(caseData.latest_next_calling_dtm).toLocaleDateString()}</td>
+              <td className={GlobalStyle.tableData}>{caseData. customer_available}</td>
+              <td className={GlobalStyle.tableData}>{caseData.agree_to_settle}</td>
+              <td className={GlobalStyle.tableData}>{caseData.customer_response}</td>
+              <td className={GlobalStyle.tableData}>{caseData.comment}</td>
             </tr>
           </tbody>
         </table>
@@ -227,9 +230,9 @@ const MediationBoardResponse = () => {
           </thead>
           <tbody>
             <tr className="bg-white bg-opacity-75 border-b">
-              <td className={GlobalStyle.tableData}>2024.11.04</td>
-              <td className={GlobalStyle.tableData}>...................</td>
-              <td className={GlobalStyle.tableData}>............</td>
+              <td className={GlobalStyle.tableData}> {new Date(caseData.created_dtm).toLocaleDateString()}</td>
+              <td className={GlobalStyle.tableData}>{caseData.ro_request}</td>
+              <td className={GlobalStyle.tableData}>{caseData.request_remark}</td>
             </tr>
           </tbody>
         </table>

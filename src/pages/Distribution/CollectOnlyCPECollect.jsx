@@ -3,7 +3,7 @@ Created Date: 2025.01.22
 Created By: Buthmi Mithara
 Last Modified Date: 2025.01.24
 Modified By:Nadali Linara
-            K.H.Lasandi Randini  
+            Lasandi Randini (randini-im20057@stu.kln.ac.lk)
 Version: node 11
 ui number : 1.7.3
 Dependencies: tailwind css
@@ -72,7 +72,7 @@ export default function CollectOnlyCPECollect() {
       });
   
       setTableData(formattedData);
-      setFilteredData(formattedData);  // Fix: Ensure filteredData is also updated
+      setFilteredData(formattedData);  
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -98,7 +98,7 @@ export default function CollectOnlyCPECollect() {
         icon: "warning",
         confirmButtonText: "OK",
       });
-      return; // Stop function execution
+      return;
     }
 
     if ((fromDate && !toDate) || (!fromDate && toDate)) {
@@ -203,88 +203,94 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
+ 
   const handleCreate = async () => {
     if (selectedRows.length === 0) {
       Swal.fire({
         title: "Warning",
-        text: "Row not selected",
+        text: "No rows selected. Please select at least one incident.",
         icon: "warning",
         confirmButtonText: "OK",
       });
       return;
     }
-
-    const confirmResult = await Swal.fire({
-      title: "Are you sure?",
-      text: `Proceed with ${selectedRows.length} selected incidents?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, Proceed",
-      cancelButtonText: "No",
-    });
   
-    if (!confirmResult.isConfirmed) {
-      return;
-    }
-    
     try {
-      if (selectedRows.length === 0) {
-        Swal.fire({
-          title: "Warning",
-          text: "No data.",
-          icon: "warning",
-          confirmButtonText: "OK",
-        });
-        return;
-      }
       const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
       if (openTaskCount > 0) {
         Swal.fire({
           title: "Warning",
-          text: "A task is already in progress.",
+          text: "A task is already in progress. Please complete it first.",
           icon: "warning",
           confirmButtonText: "OK",
         });
         return;
       }
+  
       if (selectedRows.length > 9) {
-      
+       
+        const confirmCreateTask = await Swal.fire({
+          title: "Create Task?",
+          text: "You have selected more than 9 incidents. Do you want to create a task instead?",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Yes, Create Task",
+          cancelButtonText: "Cancel",
+        });
+  
+        if (!confirmCreateTask.isConfirmed) return;
+  
         const parameters = {
           Status: "Open CPE Collect",
-          Incident_Ids: selectedRows, 
+          Incident_Ids: selectedRows,
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
+  
         if (response.status === 201) {
           Swal.fire({
             title: "Success",
-            text: "Successfully created task to forward collect CPE Only incidents",
+            text: "Task successfully created for forwarding Collect CPE Only incidents.",
             icon: "success",
             confirmButtonText: "OK",
           });
         }
       } else {
+        
+        const confirmProceed = await Swal.fire({
+          title: "Proceed?",
+          text: `You have selected ${selectedRows.length} incidents. Do you want to proceed?`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Yes, Proceed",
+          cancelButtonText: "Cancel",
+        });
+  
+        if (!confirmProceed.isConfirmed) return;
+  
         for (const row of selectedRows) {
           await Forward_CPE_Collect(row);
         }
+  
         Swal.fire({
           title: "Success",
-          text: "Successfully forwarded the Collect CPE Only incidents",
+          text: "Successfully forwarded the selected Collect CPE Only incidents.",
           icon: "success",
           confirmButtonText: "OK",
         });
-
+  
         fetchData();
       }
-    } catch {
+    } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "Internal server error",
+        text: "An error occurred while processing your request.",
         icon: "error",
         confirmButtonText: "OK",
       });
+      console.error("Error:", error);
     }
   };
-
+  
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       setError("The 'From' date cannot be later than the 'To' date.");
