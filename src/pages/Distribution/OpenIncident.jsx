@@ -4,7 +4,7 @@ Created Date: 2025.01.21
 Created By: K.K.C sakumini
 Last Modified Date: 2025.01.22
 Modified By:K.K.C Sakumini
-            K.H.Lasandi Randini  
+            Lasandi Randini (randini-im20057@stu.kln.ac.lk) 
 Version: node 11
 ui number : 1.7.1
 Dependencies: tailwind css

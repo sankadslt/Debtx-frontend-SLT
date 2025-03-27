@@ -56,6 +56,15 @@ import DRCAssignManagerApproval3 from "../pages/Distribute/DRCAssignManagerAppro
 import MediationBoardCaseList from "../pages/Mediation_Board/MediationBoardCaseList";
 import MediationBoardResponse from "../pages/Mediation_Board/MediationBoardResponse";
 
+//MONEY TRANSACTION
+import PaymentDetails from "../pages/Money_Transaction/PaymentDetails";
+
+//Commission
+import CommissionCaseList from "../pages/Commission/Commission_List";
+//Settlement
+import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
+import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
+
 
 const Routers = () => {
   return (
@@ -121,10 +130,6 @@ const Routers = () => {
       <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
 
 
-
-
-
-
       {/* Distribute Routes */}
       <Route path="/pages/Distribute/AssignDRC" element={<ProtectedRoute element={<AssignDRC />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Distribute/AssignDRCForCollectCPE" element={<ProtectedRoute element={<AssignDRCForCollectCPE />} allowedRoles={['superadmin']} />} />
@@ -143,6 +148,7 @@ const Routers = () => {
 
       <Route path="/pages/Distribute/ReAssignDRC" element={<ReAssignDRC />} />
       <Route path="/pages/Distribute/AssignDRCCaseList" element={<AssignDRCCaseList />} />
+
       {/* //INCIDENT */}
       <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
@@ -155,6 +161,15 @@ const Routers = () => {
       <Route path="/MediationBoard/MediationBoardCaseList" element={<ProtectedRoute element={<MediationBoardCaseList />} allowedRoles={['superadmin']} />} />
       <Route path="/MediationBoard/MediationBoardResponse/:caseId" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
 
+      {/* //MONEY TRANSACTIONS */}
+      <Route path="pages/Money_Transaction/MoneyTransaction" element={<ProtectedRoute element={<PaymentDetails />} allowedRoles={['superadmin']} />} />
+
+{/* //COMMISSION */}
+<Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
+
+      {/* //SETTLEMENT */}
+      <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
     </Routes>
   );
 };
