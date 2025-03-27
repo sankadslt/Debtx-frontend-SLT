@@ -22,6 +22,7 @@ import Incident_List from "../pages/Incident/Incident_List";
 import Incident_Register_Individual from "../pages/Incident/Incident_Register_Individual";
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
+import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 
 
 
@@ -157,7 +158,7 @@ const Routers = () => {
       <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/upload-log" element={<ProtectedRoute element={<SupBulkUploadLog />} allowedRoles={['superadmin']} />} />
-
+      <Route path="/incident/Incident_File_Download" element={<ProtectedRoute element={<Incident_File_Download/>} allowedRoles={['superadmin']} />} />
 
 
       {/* //MEDIATION BOARD */}
