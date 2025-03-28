@@ -152,11 +152,42 @@ const RecoveryOfficerRequests = () => {
     fetchcases();
   };
 
+  const setshowall = () => {
+    alert("show all clicked");
+    const payload = {
+      delegate_user_id: "",
+    };
+    console.log("Filter payload:", payload);
+    const fetchcases = async () => {
+      try {
+        const response = await ListAllRequestLogFromRecoveryOfficersWithoutUserID(payload);
+        console.log(response);
+        setRequestsData(response);
+      } catch (error) {
+        console.error(error);
+        setRequestsData([]);
+      }
+    };
+    fetchcases();
+  }
   return (
     <div className={GlobalStyle.fontPoppins}>
       <h1 className={GlobalStyle.headingLarge}>
         Requests from Recovery Officer
       </h1>
+      <div className="flex items-center gap-2 justify-end ">
+              <span className={GlobalStyle.headingMedium}>
+                {" "}
+                Request Count : {firstRequestCount}
+              </span>
+
+              <button
+                className={GlobalStyle.buttonPrimary}
+                onClick={setshowall}
+              >
+                Show All
+              </button>
+            </div>
       <div className="flex justify-end gap-6 items-center mb-8">
         <div className="flex items-center gap-2">
           <span className={GlobalStyle.headingMedium}>Request Type:</span>
@@ -242,7 +273,7 @@ const RecoveryOfficerRequests = () => {
       <div className="flex flex-col">
         {/* Search Bar Section */}
         <div className="mb-4 flex justify-start">
-          <div className={GlobalStyle.searchBarContainer}>
+          <div className={`${GlobalStyle.searchBarContainer} `}>
             <input
               type="text"
               placeholder=""
@@ -252,35 +283,8 @@ const RecoveryOfficerRequests = () => {
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
 
-            <button
-              className={GlobalStyle.buttonPrimary}
-              onClick={async () => {
-                setSearchQuery(""); // Optional: clear the search bar
-                const payload = { delegate_user_id: 5 }; // Pass any required parameters
-
-                try {
-                  const response =
-                    await ListAllRequestLogFromRecoveryOfficersWithoutUserID(
-                      payload
-                    );
-                  console.log(response); // Log the response to inspect it
-                  setRequestsData(response); // Update state with new data
-                } catch (error) {
-                  console.error(error);
-                  setRequestsData([]); // In case of error, clear the data
-                }
-              }}
-            >
-              show all
-            </button>
-
-            <div>
-              <span className={GlobalStyle.headingMedium}>
-                {" "}
-                request count : {firstRequestCount}
-              </span>
-            </div>
-          </div>
+            </div> 
+          
         </div>
 
         {/* Table Section */}
