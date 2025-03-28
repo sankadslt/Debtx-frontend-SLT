@@ -22,7 +22,9 @@ export const List_count_by_drc_commision_rule = async () => {
 // Fetch all arrears bands
 export const fetchAllArrearsBands = async () => {
   try {
-    const response = await axios.get(`${URL}/ListAllArrearsBands`);
+
+    const response = await axios.get(`${URL}/List_All_Arrears_Bands`);
+
     const data = response.data.data;
 
     // Exclude the _id key and return both the key-value pairs
@@ -264,19 +266,26 @@ export const Batch_Forward_for_Proceed = async (payload) => {
   }
 };
 
-
 // List Cases Owned By DRC // - nimaaa
 
 export const List_CasesOwened_By_DRC = async (requestData) => {
   try {
-    const response = await axios.post(`${URL}/List_CasesOwened_By_DRC`, requestData);
+    const response = await axios.post(
+      `${URL}/List_CasesOwened_By_DRC`,
+      requestData
+    );
 
     // Validate response structure
     if (response.data && response.data.status === "success") {
       return response.data.Cases; // Return the cases data
     } else {
-      console.error("Error in API response:", response.data?.message || "Unknown error");
-      throw new Error(response.data?.message || "Failed to retrieve case details.");
+      console.error(
+        "Error in API response:",
+        response.data?.message || "Unknown error"
+      );
+      throw new Error(
+        response.data?.message || "Failed to retrieve case details."
+      );
     }
   } catch (error) {
     console.error(
@@ -287,11 +296,9 @@ export const List_CasesOwened_By_DRC = async (requestData) => {
   }
 };
 
-
-
-export const List_All_Batch_Details = async () => {
+export const List_All_Batch_Details = async (payload) => {
   try {
-    const response = await axios.get(`${URL}/List_All_Batch_Details`);
+    const response = await axios.post(`${URL}/List_All_Batch_Details`, payload);
     return response.data;
   } catch (error) {
     console.error(
@@ -412,10 +419,11 @@ export const List_Case_Distribution_Details = async (payload) => {
     );
     throw error;
   }
-}
+};
 
-
-export const Create_Task_For_case_distribution_drc_summery = async (payload) => {
+export const Create_Task_For_case_distribution_drc_summery = async (
+  payload
+) => {
   try {
     const response = await axios.post(
       `${URL}/Create_Task_For_case_distribution_drc_summery`,
@@ -429,7 +437,7 @@ export const Create_Task_For_case_distribution_drc_summery = async (payload) => 
     );
     throw error;
   }
-}
+};
 
 export const List_Case_Distribution_Details_With_Rtoms = async (payload) => {
   try {
@@ -445,9 +453,11 @@ export const List_Case_Distribution_Details_With_Rtoms = async (payload) => {
     );
     throw error;
   }
-}
+};
 
-export const Create_Task_For_Assigned_drc_case_list_download = async (payload) => {
+export const Create_Task_For_Assigned_drc_case_list_download = async (
+  payload
+) => {
   try {
     const response = await axios.post(
       `${URL}/Create_Task_For_Assigned_drc_case_list_download`,
@@ -461,15 +471,11 @@ export const Create_Task_For_Assigned_drc_case_list_download = async (payload) =
     );
     throw error;
   }
-}
+};
 
 export const AssignDRCToCaseDetails = async (payload) => {
   try {
-    
-    const response = await axios.post(
-      `${URL}/AssignDRCToCaseDetails`,
-      payload
-    );
+    const response = await axios.post(`${URL}/AssignDRCToCaseDetails`, payload);
 
     return response.data;
   } catch (error) {
@@ -479,14 +485,13 @@ export const AssignDRCToCaseDetails = async (payload) => {
     );
     throw error;
   }
-}
-
+};
 
 export const List_All_DRCs_Mediation_Board_Cases = async (filters) => {
   try {
     const response = await axios.post(
       `${URL}/List_All_DRCs_Mediation_Board_Cases`,
-      filters 
+      filters
     );
     return response.data;
   } catch (error) {
@@ -522,10 +527,7 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
 
 export const Assign_DRC_To_Case = async (payload) => {
   try {
-    const response = await axios.post(
-      `${URL}/Assign_DRC_To_Case`,
-      payload
-    );
+    const response = await axios.post(`${URL}/Assign_DRC_To_Case`, payload);
     return response.data;
   } catch (error) {
     console.error(
@@ -534,7 +536,7 @@ export const Assign_DRC_To_Case = async (payload) => {
     );
     throw error;
   }
-}
+};
 
 export const Withdraw_CasesOwened_By_DRC = async (payload) => {
   try {
@@ -550,5 +552,88 @@ export const Withdraw_CasesOwened_By_DRC = async (payload) => {
     );
     throw error;
   }
-}
+};
+
+
+export const List_Details_Of_Mediation_Board_Acceptance = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_Details_Of_Mediation_Board_Acceptance`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching mediation board acceptance details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const Submit_Mediation_Board_Acceptance = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Submit_Mediation_Board_Acceptance`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error submitting mediation board acceptance:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const Withdraw_Mediation_Board_Acceptance = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Withdraw_Mediation_Board_Acceptance`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error withdrawing mediation board acceptance:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const List_Cases_Owned_By_Mediation_Board = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_Cases_Owned_By_Mediation_Board`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching cases owned by mediation board:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
+  payload
+) => {
+  try {
+    const response = await axios.post(
+      `${URL}/ListAllRequestLogFromRecoveryOfficersWithoutUserID`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching request log from recovery officers without user ID:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
 

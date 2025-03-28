@@ -53,9 +53,6 @@ const CaseDistributionDRCSummarywithRTOM = () => {
   }, [batchId, drcid]);
       
 
-  const handleCreateTask = () => {
-    alert("Create Task and Let Me Know button clicked!");
-  };
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -120,16 +117,7 @@ const CaseDistributionDRCSummarywithRTOM = () => {
       <br />
 
       {/* Button */}
-      <div className="flex justify-between">
-        <br></br>
-        {/* Right-aligned button */}
-        <button
-          onClick={handleCreateTask}
-          className={GlobalStyle.buttonPrimary} // Same style as Approve button
-        >
-          Create Task and Let Me Know
-        </button>
-      </div>
+    
       <button>
         <svg
           xmlns="http://www.w3.org/2000/svg"
