@@ -22,6 +22,7 @@ import Incident_List from "../pages/Incident/Incident_List";
 import Incident_Register_Individual from "../pages/Incident/Incident_Register_Individual";
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
+import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 
 
 
@@ -130,10 +131,6 @@ const Routers = () => {
       <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
 
 
-
-
-
-
       {/* Distribute Routes */}
       <Route path="/pages/Distribute/AssignDRC" element={<ProtectedRoute element={<AssignDRC />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Distribute/AssignDRCForCollectCPE" element={<ProtectedRoute element={<AssignDRCForCollectCPE />} allowedRoles={['superadmin']} />} />
@@ -152,12 +149,13 @@ const Routers = () => {
 
       <Route path="/pages/Distribute/ReAssignDRC" element={<ReAssignDRC />} />
       <Route path="/pages/Distribute/AssignDRCCaseList" element={<AssignDRCCaseList />} />
+
       {/* //INCIDENT */}
       <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/upload-log" element={<ProtectedRoute element={<SupBulkUploadLog />} allowedRoles={['superadmin']} />} />
-
+      <Route path="/incident/Incident_File_Download" element={<ProtectedRoute element={<Incident_File_Download/>} allowedRoles={['superadmin']} />} />
 
 
       {/* //MEDIATION BOARD */}
@@ -165,7 +163,7 @@ const Routers = () => {
       <Route path="/MediationBoard/MediationBoardResponse/:caseId" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
 
       {/* //MONEY TRANSACTIONS */}
-      <Route path="/MoneyTransactions/PaymentDetails" element={<ProtectedRoute element={<PaymentDetails />} allowedRoles={['superadmin']} />} />
+      <Route path="pages/Money_Transaction/MoneyTransaction" element={<ProtectedRoute element={<PaymentDetails />} allowedRoles={['superadmin']} />} />
 
 {/* //COMMISSION */}
 <Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />

@@ -116,20 +116,12 @@ const Sidebar = ({ onHoverChange }) => {
     {
       icon: HiOutlineDocumentCheck, label: "Settlement",  roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: GoDot, 
-          label: "Disposed List", 
-          roles: ["superadmin", "admin"],
-          subItems: [
-            { icon: GoDot, label: "Write off List", link: "/dashboard", roles: ["superadmin", "admin"] },
-            { icon: GoDot, label: "Abandoned List", link: "/dashboard", roles: ["superadmin", "admin"] },
-            { icon: GoDot, label: "Withdraw List", link: "/dashboard", roles: ["superadmin", "admin"] },
-            { icon: GoDot, label: "Closed List", link: "/dashboard", roles: ["superadmin", "admin"] },
-          ],
-        },
+        { icon: GoDot, label: "Monitor Settlement", link: "pages/Settlement/MonitorSettlement", roles: ["superadmin", "admin"] },
+        { icon: GoDot, label: "Money Transactions", link: "pages/Settlement/MoneyTransactions", roles: ["superadmin", "admin"] },
       ],
     },
 
-    {
+  {
       icon: HiOutlineDocumentCheck, label: "Letter Of Demand",  roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "FTL LOD", link: "", roles: ["superadmin", "admin"],
@@ -145,8 +137,6 @@ const Sidebar = ({ onHoverChange }) => {
         
       ],
     },
-
-
 
 
 

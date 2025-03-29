@@ -28,12 +28,13 @@ const Monitor_settlement = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [caseIdFilter, setCaseIdFilter] = useState("");
+  const [caseId, setCaseId] = useState("");
   const [status, setStatus] = useState("");
   const [phase, setPhase] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [caseIdFilter, setCaseIdFilter] = useState("");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
