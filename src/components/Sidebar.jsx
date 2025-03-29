@@ -116,10 +116,39 @@ const Sidebar = ({ onHoverChange }) => {
     {
       icon: HiOutlineDocumentCheck, label: "Settlement",  roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: GoDot, label: "Monitor Settlement", link: "pages/Settlement/MonitorSettlement", roles: ["superadmin", "admin"] },
-        { icon: GoDot, label: "Money Transactions", link: "pages/Settlement/MoneyTransactions", roles: ["superadmin", "admin"] },
+        { icon: GoDot, 
+          label: "Disposed List", 
+          roles: ["superadmin", "admin"],
+          subItems: [
+            { icon: GoDot, label: "Write off List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Abandoned List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Withdraw List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "Closed List", link: "/dashboard", roles: ["superadmin", "admin"] },
+          ],
+        },
       ],
     },
+
+    {
+      icon: HiOutlineDocumentCheck, label: "Letter Of Demand",  roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: GoDot, label: "FTL LOD", link: "", roles: ["superadmin", "admin"],
+          subItems: [
+            { icon: GoDot, label: "3.1 - FTL LOD Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "3.1.1 sup - FTL LOD creation", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "3.1.2 sup - FTL LOD creation", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "3.1.3 sup - Cus.Response update", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "3.2 - FTL LOD Case details", link: "/dashboard", roles: ["superadmin", "admin"] }
+          ],
+
+         }
+        
+      ],
+    },
+
+
+
+
 
     { icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
 
