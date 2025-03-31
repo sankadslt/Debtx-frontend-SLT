@@ -16,8 +16,13 @@ import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import {
   ListRequestLogFromRecoveryOfficers,
-  ListAllRequestLogFromRecoveryOfficersWithoutUserID,
+  ListAllRequestLogFromRecoveryOfficers,
+  Create_task_for_Request_log_download_when_select_more_than_one_month,
 } from "../../services/request/request.js";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
+import Swal from "sweetalert2";
+
+
 
 const RecoveryOfficerRequests = () => {
   const [fromDate, setFromDate] = useState(null);
@@ -35,11 +40,13 @@ const RecoveryOfficerRequests = () => {
   const rowsPerPage = 7;
 
   useEffect(() => {
-    const payload = {
-      delegate_user_id: 5,
-    };
     const fetchcases = async () => {
       try {
+        const userId = await getLoggedUserId();
+        const payload = {
+          delegate_user_id: userId,
+        };
+        console.log("Payload for fetching cases:", payload);
         const response = await ListRequestLogFromRecoveryOfficers(payload);
         console.log(response);
         const lastTwoRecords = response.slice(-10).reverse();
@@ -63,22 +70,117 @@ const RecoveryOfficerRequests = () => {
   // validation for date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
+      Swal.fire({
+              icon: "warning",
+              title: "Warning",
+              text: "Start date cannot be later than end date.",
+              confirmButtonColor: "#f1c40f",
+            });
     } else {
       setError("");
       setFromDate(date);
+      if (toDate)CheckDateDifference(date, toDate);
     }
   };
 
   // validation for date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
+      Swal.fire({
+              icon: "warning",
+              title: "Warning",
+              text: "End date cannot be earlier than start date.",
+              confirmButtonColor: "#f1c40f",
+            });
     } else {
       setError("");
+      if (fromDate) {
+        CheckDateDifference(fromDate, date);
+      }
       setToDate(date);
+
     }
   };
+
+  const CheckDateDifference = (startDate, endDate) => {
+
+    const start = new Date(startDate).getTime();
+      const end = new Date(endDate).getTime();
+      const diffInMs = end - start;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      const diffInMonths = diffInDays / 30;
+
+    if (diffInMonths > 1) {
+            Swal.fire({
+              title: "Date Range Exceeded",
+              text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonText: "Yes",
+              confirmButtonColor: "#28a745",
+              cancelButtonText: "No",
+              cancelButtonColor: "#d33",
+            })
+            .then((result) => {
+              if (result.isConfirmed) {
+  
+                endDate = endDate;
+                handleApicall(startDate, endDate);
+              } else {
+                setToDate(null); // Clear the end date if the user chooses not to proceed
+                console.log("EndDate cleared");
+              }
+            }
+            );
+      
+          }
+        };
+
+  const handleApicall = async (startDate, endDate) => {
+    const userId = await getLoggedUserId();
+    console.log("User ID:", userId);
+    const payload = {
+      delegate_user_id: userId,
+      User_Interaction_Type: requestType,
+      "Request Accept": approved,
+      date_from: startDate,
+      date_to: endDate,
+      Created_By: userId
+    };
+    console.log("Payload for date download:", payload);
+    try {
+      const response = await Create_task_for_Request_log_download_when_select_more_than_one_month(
+        payload
+      );
+      console.log("Response for date download:", response);
+      
+      Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: "Data sent successfully.",
+                confirmButtonColor: "#28a745",
+              });
+             setFromDate(null);
+             setToDate(null); 
+
+    } catch (error) {
+      console.error("Error in sending the data:", error);
+          
+              const errorMessage = error?.response?.data?.message || 
+                                   error?.message || 
+                                   "An error occurred. Please try again.";
+          
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: errorMessage,
+                confirmButtonColor: "#d33",
+              });
+    }
+  };
+
+
+
 
   // Filter data based on search query
   const filteredData = requestsData.filter((row) => {
@@ -94,18 +196,22 @@ const RecoveryOfficerRequests = () => {
     case_id,
     User_Interaction_Type,
     delegate_user_id,
-    Interaction_Log_ID
+    Interaction_Log_ID,
+    Interaction_ID
+
   ) => {
     console.log("case_id", case_id);
     console.log("User_Interaction_Type", User_Interaction_Type);
     console.log("delegate_user_id", delegate_user_id);
     console.log("Interaction_Log_ID", Interaction_Log_ID);
+    console.log("Interaction_ID", Interaction_ID);
     navigate(`/drc/mediation-board`, {
       state: {
         case_Id: case_id,
         User_Interaction_TYPE: User_Interaction_Type,
         Delegate_User_id: delegate_user_id,
         INteraction_Log_ID: Interaction_Log_ID,
+        INteraction_ID: Interaction_ID,
       },
     });
   };
@@ -128,17 +234,18 @@ const RecoveryOfficerRequests = () => {
   };
 
   const onfilterbuttonclick = () => {
-    const payload = {
-      delegate_user_id: 5,
-      User_Interaction_Type: requestType,
-      "Request Accept": approved,
-      date_from: fromDate,
-      date_to: toDate,
-    };
-
-    console.log("Filter payload:", payload);
     const fetchcases = async () => {
       try {
+        const userId = await getLoggedUserId();
+        console.log("User ID:", userId);
+        const payload = {
+          delegate_user_id: userId,
+          User_Interaction_Type: requestType,
+          "Request Accept": approved,
+          date_from: fromDate,
+          date_to: toDate,
+        };
+        console.log("Filter payload:", payload);
         const response = await ListRequestLogFromRecoveryOfficers(payload);
 
         console.log(response);
@@ -154,13 +261,22 @@ const RecoveryOfficerRequests = () => {
 
   const setshowall = () => {
     alert("show all clicked");
-    const payload = {
-      delegate_user_id: "",
-    };
-    console.log("Filter payload:", payload);
+    
+    
     const fetchcases = async () => {
+      
       try {
-        const response = await ListAllRequestLogFromRecoveryOfficersWithoutUserID(payload);
+        const userId = await getLoggedUserId();
+        console.log("User ID:", userId);
+        const payload = {
+          delegate_user_id: userId,
+          User_Interaction_Type: requestType,
+          "Request Accept": approved,
+          date_from: fromDate,
+          date_to: toDate,
+        };
+        console.log("Payload for fetching all cases:", payload);
+        const response = await ListAllRequestLogFromRecoveryOfficers(payload);
         console.log(response);
         setRequestsData(response);
       } catch (error) {
@@ -202,28 +318,25 @@ const RecoveryOfficerRequests = () => {
             <option value="Mediation board forward request letter">
               Mediation board forward request letter
             </option>
-            <option value="Request period extend for Negotiation">
-              Request period extend for Negotiation
+            <option value="Negotiation Settlement plan Request">
+            Negotiation Settlement plan Request
             </option>
-            <option value="Ledger Details">Ledger Details</option>
-            <option value="Nego 1">Nego 1</option>
-            <option value="Pending Approval RO Extend Period">
-              Pending Approval RO Extend Period
+            <option value="Negotiation period extend Request">Negotiation period extend Request</option>
+            <option value="Negotiation customer further information Request">Negotiation customer further information Request</option>
+            <option value="Negotiation Customer request service">
+            Negotiation Customer request service
             </option>
-            <option value="Request Settlement plan">
-              Request Settlement plan
+            <option value="Mediation Board Settlement plan Request">
+            Mediation Board Settlement plan Request
             </option>
-            <option value="Request period extend for Midiation Board">
-              Request period extend for Midiation Board
+            <option value="Mediation Board period extend Request">
+            Mediation Board period extend Request
             </option>
-            <option value="Request customer further information - Negotiation">
-              Request customer further information - Negotiation
+            <option value="Mediation Board customer further information request">
+            Mediation Board customer further information request
             </option>
-            <option value="Customer request service">
-              Customer request service
-            </option>
-            <option value="Request customer further information - Midiation Board">
-              Request customer further information - Midiation Board
+            <option value="Mediation Board Customer request service">
+            Mediation Board Customer request service
             </option>
           </select>
         </div>
@@ -387,7 +500,9 @@ const RecoveryOfficerRequests = () => {
                           row.case_details?.case_id,
                           row.User_Interaction_Type,
                           row.delegate_user_id,
-                          row.Interaction_Log_ID
+                          row.Interaction_Log_ID,
+                          row.Interaction_ID
+                    
                         )
                       }
                     >
