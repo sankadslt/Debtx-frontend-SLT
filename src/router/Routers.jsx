@@ -65,6 +65,8 @@ import CommissionCaseList from "../pages/Commission/Commission_List";
 //Settlement
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
 import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
+import { Litigation_List } from "../pages/Litigation/Litigation_List";
+import { Litigation_Documentation } from "../pages/Litigation/Litigation_Documentation";
 
 
 const Routers = () => {
@@ -165,12 +167,17 @@ const Routers = () => {
       {/* //MONEY TRANSACTIONS */}
       <Route path="pages/Money_Transaction/MoneyTransaction" element={<ProtectedRoute element={<PaymentDetails />} allowedRoles={['superadmin']} />} />
 
-{/* //COMMISSION */}
-<Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
+      {/* //COMMISSION */}
+      <Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
 
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
+
+      {/* Litigation */}
+      <Route path="/pages/Litigation/Litigation_List" element={<ProtectedRoute element={<Litigation_List />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Litigation/Litigation_Documentation" element={<ProtectedRoute element={<Litigation_Documentation />} allowedRoles={['superadmin']} />} />
+
     </Routes>
   );
 };
