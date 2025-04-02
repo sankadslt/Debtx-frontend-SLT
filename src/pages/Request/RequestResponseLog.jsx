@@ -17,6 +17,7 @@ import {
   List_Request_Response_log,
   Create_Task_For_Request_Responce_Log_Download,
 } from "../../services/request/request";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
 
 const RequestResponseLog = () => {
   const [status, setStatus] = useState("");
@@ -72,11 +73,10 @@ const RequestResponseLog = () => {
     );
     const date_from = fromDate;
     const date_to = toDate;
-    const Created_By = filteredData.map((row) => row.Created_By);
+    const Created_By = getLoggedUserId();
     const payload = {
       case_current_status,
       date_from,
-
       date_to,
       Created_By,
     };
