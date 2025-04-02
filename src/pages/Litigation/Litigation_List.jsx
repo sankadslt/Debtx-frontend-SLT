@@ -11,9 +11,10 @@ Notes: This template uses Tailwind CSS */
 
 import DatePicker from "react-datepicker"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { FaArrowLeft, FaArrowRight, FaEye, FaSearch } from "react-icons/fa";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Litigation_Fail_Update } from "./Litigation_Fail_Update";
 
 export const Litigation_List = () => {
   const navigate =useNavigate();
@@ -22,6 +23,7 @@ export const Litigation_List = () => {
   const [searchQuery, setSearchQuery] =useState("");
   const [currentPage, setCurrentPage] =useState(0);
   const [isloading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] =useState(false);
   const rowsPerPage =5;
 
   const sampleData = [
@@ -115,7 +117,6 @@ export const Litigation_List = () => {
   const handleFilter = () => {
     alert("Filter clicked");
   }
-
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -230,17 +231,23 @@ export const Litigation_List = () => {
                         )}
                         {item.status === "Pending_FTL" && (
                             <div className="flex gap-2">
-                                <button className="px-4 py-2 bg-[#50B748] rounded-full border border-[#001120]">
+                                <button 
+                                    className="px-4 py-2 bg-[#50B748] rounded-full border border-[#001120]"
+                                    onClick={() => navigate("/pages/Litigation/Litigation_Submission_Document_Summary")}
+                                >
                                     Documents
                                 </button>
-                                <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
+                                <button 
+                                    className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                                    onClick={() => navigate("/pages/Litigation/Litigation_Submission")}    
+                                >
                                     Legal Submission
                                 </button>
                             </div>
                         )}
                         {item.status === "FTL_Settle_Pending" && (
                             <div className="flex justify-center gap-2">   
-                                <button>
+                                <button  onClick={() => navigate("/pages/Litigation/Litigation_Case_Details")}>
                                     <FaEye className="w-6 h-6"/>
                                 </button>
                             </div>
@@ -250,14 +257,21 @@ export const Litigation_List = () => {
                                 <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
                                     Create Settlement
                                 </button>
-                                <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
+                                <button 
+                                    className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                                    onClick={() => setIsModalOpen(true)}
+                                >
                                     Legal Fail
                                 </button>
+                                <Litigation_Fail_Update isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
                             </div>
                         )}
                         {item.status === "FTL" && (
                             <div className="flex gap-2">   
-                                <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
+                                <button 
+                                    className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                                    onClick={() => navigate("/pages/Litigation/Litigation_Court_Details_Update")}    
+                                >
                                     Legal Details
                                 </button>
                                 <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">

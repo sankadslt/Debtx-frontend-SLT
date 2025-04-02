@@ -9,7 +9,6 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { FaGlobeAsia } from "react-icons/fa"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
 
 export const Litigation_Documentation = () => {
