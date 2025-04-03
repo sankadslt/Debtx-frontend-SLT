@@ -39,7 +39,7 @@ export const fetchF2SelectionCases = async (current_document_type, pages = 1) =>
             Amount: LOD.current_arrears_amount,
             CustomerTypeName: LOD.CustomerTypeName || null,
             AccountManagerCode: LOD.AccountManagerCode || null,
-            SourceType: LOD.drc && LOD.drc.length > 0 ? "DRC Fail" : "Direct LOD",
+            SourceType: LOD.lod_final_reminder.source_type || null,
           }));
         } else {
           throw new Error("Failed to fetch incidents");
@@ -48,4 +48,67 @@ export const fetchF2SelectionCases = async (current_document_type, pages = 1) =>
         console.error("Error fetching F2 selection cases:", error);
         throw error.response?.data?.message || "Failed to fetch cases";
     }
+};
+
+export const Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases = async (createdBy) => {
+  try {
+    const response = await axios.post(`${LOD_URL}/Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases`, {
+      Created_By: createdBy,
+    });
+
+    const data = response.data || {};
+    const taskData = {
+      ResponceStatus: response.status,
+      Template_Task_Id: data.Template_Task_Id || 39,
+      task_type: data.task_type || "Create Task For Download All Digital Signature LOD Cases",
+      case_current_status: data.case_current_status || "LIT Prescribed",
+      task_status: data.task_status || "open",
+      Created_By: data.Created_By || createdBy,
+    };
+
+    return taskData;
+  } catch (error) {
+    console.error("Error creating task:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases = async (createdBy, LODType) => {
+  try {
+    const response = await axios.post(`${LOD_URL}/Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases`, {
+      Created_By: createdBy,
+      current_document_type: LODType,
+    });
+
+    const data = response.data || {};
+    const taskData = {
+      ResponceStatus: response.status,
+      Template_Task_Id: data.Template_Task_Id || 39,
+      task_type: data.task_type || "Create Task For Download All Digital Signature LOD Cases",
+      case_current_status: data.case_current_status || "LIT Prescribed",
+      task_status: data.task_status || "open",
+      Created_By: data.Created_By || createdBy,
+    };
+
+    return taskData;
+  } catch (error) {
+    console.error("Error creating task:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const Change_Document_Type = async (case_id, current_document_type, Created_By, changed_type_remark) => {
+  try {
+    const response = await axios.post(`${LOD_URL}/Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases`, {
+      Created_By: Created_By,
+      current_document_type: current_document_type,
+      case_id: case_id,
+      changed_type_remark: changed_type_remark,
+    });
+
+    return response.status;
+  } catch (error) {
+    console.error("Error creating task:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
 };

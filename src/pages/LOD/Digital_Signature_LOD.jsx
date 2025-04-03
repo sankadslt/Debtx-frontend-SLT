@@ -20,9 +20,13 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 // import { fetchLODs } from "../../services/LODs/LODservice.js";
 // import { Task_for_Download_LODs } from "../../services/task/taskService.js";
-import { getLoggedUserId } from "../../services/auth/authService.js";
+// import { getLoggedUserId } from "../../services/auth/authService.js";
 import { fetchCaseCounts } from "../../services/LOD/LOD.js";
 import { fetchF2SelectionCases } from "../../services/LOD/LOD.js";
+import { getUserData } from "../../services/auth/authService.js";
+import { Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
+import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
+import { Change_Document_Type } from "../../services/LOD/LOD.js";
 
 const Digital_Signature_LOD = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -31,7 +35,7 @@ const Digital_Signature_LOD = () => {
     const [LODType, setLODType] = useState("");
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    // const [isCreatingTask, setIsCreatingTask] = useState(false);
+    const [isCreatingTask, setIsCreatingTask] = useState(false);
     const [isFiltered, setIsFiltered] = useState(false);
     const navigate = useNavigate();
     const [activePopupLODID, setActivePopupLODID] = useState(null);
@@ -41,6 +45,19 @@ const Digital_Signature_LOD = () => {
     const [totalCount, setTotalCount] = useState(0);
     const [lodCount, setlodCount] = useState(0);
     const [finalReminderCount, setFinalReminderCount] = useState(0);
+
+    // const displayUserData = async () => {
+    //     try {
+    //         const userData = await getUserData();
+    //         console.log("User Data:", userData.username); // Log the user data to the console
+    //     } catch (error) {
+    //         console.error("Error fetching user data:", error.message || error);
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     displayUserData();
+    // }, [])
 
     const getStatusIcon = (status) => {
         switch (status?.toLowerCase()) {
@@ -152,6 +169,63 @@ const Digital_Signature_LOD = () => {
     //     }
     // };
 
+    const HandleCreateTaskEachLOD = async () => {
+        if (!LODType) {
+            Swal.fire("Error", "Please apply filter 2 befor download.", "error");
+            return;
+        }
+
+        const userData = await getUserData();
+
+        setIsCreatingTask(true);
+        try {
+            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData.username, LODType);
+            console.log("Task created successfully:", response);
+            Swal.fire("Success", `Task created successfully! Template Task ID: ${response.Template_Task_Id}`, "success");
+        } catch (error) {
+            Swal.fire("Error", error.message || "Failed to create task.", "error");
+        } finally {
+            setIsCreatingTask(false);
+        }
+    };
+
+    const HandleCreateTaskAllLOD = async () => {
+        if (LODType) {
+            Swal.fire("Error", "Please do not apply filter 2 for download all the LODs.", "error");
+            return;
+        }
+
+        const userData = await getUserData();
+
+        setIsCreatingTask(true);
+        try {
+            const response = await Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases(userData.username);
+            console.log("Task created successfully:", response);
+            Swal.fire("Success", `Task created successfully! Template Task ID: ${response.Template_Task_Id}`, "success");
+        } catch (error) {
+            Swal.fire("Error", error.message || "Failed to create task.", "error");
+        } finally {
+            setIsCreatingTask(false);
+        }
+    };
+
+    const ChangeDocumentType = async () => {
+        if (!activePopupLODID) {
+            Swal.fire("Error", "Please select a LOD or Final Reminder.", "error");
+            return;
+        }
+
+        const userData = await getUserData();
+
+        try {
+            const response = await Change_Document_Type(userData.username, activePopupLODID, activePopupLODStatus, changeReason);
+            console.log("LOD Type changed successfully:", response);
+            Swal.fire("Success", `LOD Type changed successfully!`, "success");
+        } catch (error) {
+            Swal.fire("Error", error.message || "Failed to changee the LOD Type.", "error");
+        } 
+    };
+
     const HandleAddIncident = () => navigate("/incident/register");
 
     if (isLoading) {
@@ -202,10 +276,7 @@ const Digital_Signature_LOD = () => {
             NewStatus: activePopupLODStatus === "LOD" ? "FinalReminder" : "LOD",
             Reason: changeReason
         });
-
-        // Here, you could call an API function to save the change.
-
-        // Close popup after submission
+        ChangeDocumentType();
         closePopup();
     };
 
@@ -251,8 +322,12 @@ const Digital_Signature_LOD = () => {
 
             {!LODType && (
                 <div className="flex justify-end mt-6">
-                    <button className={GlobalStyle.buttonPrimary}>
-                        Create task and let me know
+                    <button
+                        onClick={HandleCreateTaskAllLOD}
+                        className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                        disabled={isCreatingTask}
+                    >
+                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
                     </button>
                 </div>
             )}
@@ -340,34 +415,39 @@ const Digital_Signature_LOD = () => {
                 </table>
 
                 {activePopupLODID && (
-                    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50">
-                        <button
-                            onClick={closePopup}
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-                        >
-                            ✖
-                        </button>
-                        <div className={"bg-white p-6 rounded-lg shadow-lg w-1/2"}>
+                    <div className={GlobalStyle.popupBoxContainer}>
+                        <div className={GlobalStyle.popupBoxBody}>
+                            <div className={GlobalStyle.popupBox}>
+                                <h2 className={GlobalStyle.popupBoxTitle}>
+                                    {activePopupLODStatus === "LOD" ? "Change to Final Reminder" : "Change to LOD"}
+                                </h2>
 
-                            <h2 className={GlobalStyle.headingLarge}>
-                                {activePopupLODStatus === "LOD" ? "Change to Final Reminder" : "Change to LOD"}
-                            </h2>
-                            <div className="mb-6">
-                                <label className={GlobalStyle.remarkTopic}>Change Reason</label>
-                                <textarea
-                                    value={changeReason}
-                                    onChange={(e) => setChangeReason(e.target.value)}
-                                    className={`${GlobalStyle.remark} w-full`}
-                                    rows="5"
-                                ></textarea>
-                            </div>
-                            <div className="flex justify-end mt-4">
+
                                 <button
-                                    onClick={handleSubmitChange}
-                                    className={`${GlobalStyle.buttonPrimary} mr-4`}
+                                    className={GlobalStyle.popupBoxCloseButton}
+                                    onClick={() => closePopup()}
                                 >
-                                    Change
+                                    ×
                                 </button>
+                            </div>
+                            <div>
+                                <div className="mb-6">
+                                    <label className={GlobalStyle.remarkTopic}>Change Reason</label>
+                                    <textarea
+                                        value={changeReason}
+                                        onChange={(e) => setChangeReason(e.target.value)}
+                                        className={`${GlobalStyle.remark} w-full`}
+                                        rows="5"
+                                    ></textarea>
+                                </div>
+                                <div className="flex justify-end mt-4">
+                                    <button
+                                        onClick={handleSubmitChange}
+                                        className={`${GlobalStyle.buttonPrimary} mr-4`}
+                                    >
+                                        Change
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -389,13 +469,11 @@ const Digital_Signature_LOD = () => {
             {LODType && (
                 <div className="flex justify-between mt-6 space-x-4">
                     <button
-                        // onClick={HandleCreateTask}
-                        // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-                        // disabled={isCreatingTask}
-                        className={GlobalStyle.buttonPrimary}
+                        onClick={HandleCreateTaskEachLOD}
+                        className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                        disabled={isCreatingTask}
                     >
-                        {/* {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
-                        Create task and let me know
+                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
                     </button>
                     <div className="flex justify-end gap-4">
                         <input
