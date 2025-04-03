@@ -1,97 +1,59 @@
 /*Purpose: 
 Created Date: 2025-01-09
 Created By: Vihanga eshan Jayarathna (vihangaeshan2002@gmail.com)
-Last Modified Date: 2025-01-09
-Modified By: Vihanga eshan Jayarathna (vihangaeshan2002@gmail.com)
+Last Modified Date: 2025-03-27
+Modified By: Vihanga eshan Jayarathna (vihangaeshan2002@gmail.com), Naduni Rabel (rabelnaduni2000@gmail.com)
 Version: React v18
 ui number : 1.3
 Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import PropTypes from 'prop-types';
 import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import { List_Download_Files_from_Download_Log } from "../../services/file/fileDownloadService";
 
 
 const Incident_File_Download = () => {
 
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
+    const [tableData, setTableData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
     const rowsPerPage = 7;
 
 
-
-
-    const data = [
-        {
-            TaskID: "Task001",
-            GroupID: "0001",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task002",
-            GroupID: "0002",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task003",
-            GroupID: "0003",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task004",
-            GroupID: "0001",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task005",
-            GroupID: "0002",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task006",
-            GroupID: "0003",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task007",
-            GroupID: "0001",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task008",
-            GroupID: "0002",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task009",
-            GroupID: "0003",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-    ];
-
-
-    const filteredData = data.filter((row) =>
+    const fetchData = async () => {
+      try {      
+        const response = await List_Download_Files_from_Download_Log();
+        const formattedData = response.data.map((item) => { 
+            const createdDateStr = typeof item.Created_On === "string" ? item.Created_On.replace(" ", "T") : item.Created_On;
+            const expireDateStr = typeof item.File_Remove_On === "string" ? item.File_Remove_On.replace(" ", "T") : item.File_Remove_On;
+            const createdDate = createdDateStr ? new Date(createdDateStr) : null;
+            const expireDate = expireDateStr ? new Date(expireDateStr) : null;
+            return {
+              TaskID: item.file_download_seq || "N/A",
+              GroupID: item.file_download_seq || "N/A",
+              CreatedDTM: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A",
+              ExpireDTM: isNaN(expireDate) ? "N/A" : expireDate.toLocaleString() || "N/A",
+              CreatedBy: item.Deligate_By
+            };
+          });
+          setTableData(formattedData);
+          setIsLoading(false);
+      } catch {
+          setError("Failed to fetch DRC details. Please try again later.");
+          setIsLoading(false);
+      }
+    };
+    useEffect(() => {
+        fetchData();
+      }, []);
+   
+    const filteredData = tableData.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -176,7 +138,9 @@ const Incident_File_Download = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedData.map((log, index) => (
+                        {paginatedData.map((log, index) => {
+                            const isExpired = new Date(log.ExpireDTM).toLocaleString() < new Date().toLocaleString();
+                            return(
                             <tr
                                 key={log.TaskID}
                                 className={`${index % 2 === 0
@@ -193,13 +157,15 @@ const Incident_File_Download = () => {
                                     <button
                                         onClick={() => handleDownload(log.TaskID)}
                                         className="text-blue-600 hover:text-blue-800"
-                                        title="Download file"
+                                        title={isExpired ? "Download expired" : "Download file"}
+                                        disabled={isExpired}
                                     >
                                         <FaDownload />
                                     </button>
                                 </td>
                             </tr>
-                        ))}
+                          )
+                        })}
                         {filteredData.length === 0 && (
                             <tr>
                                 <td colSpan="6" className="text-center py-4">

@@ -8,19 +8,43 @@
 // Dependencies: tailwind css
 // Related Files:
 // Notes: This template uses a tailwind css form for the background and section dividing
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  List_Details_Of_Mediation_Board_Acceptance,
+  Submit_Mediation_Board_Acceptance,
+  Withdraw_Mediation_Board_Acceptance,
+} from "/src/services/case/CaseServices.js";
+import Swal from "sweetalert2";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
 
 const ForwardMediationBoard = () => {
   const [acceptRequest, setAcceptRequest] = useState(""); // State for Yes/No toggle
   const [remarkText, setRemarkText] = useState(""); // State for remarks input
   const [letterSent, setLetterSent] = useState(false); // State for letter sent checkbox
+  const [Data, setData] = useState({});
+  const [requesthistory, setrequesthistory] = useState([]);
+  const [NegotiationHistory, setNegotiationHistory] = useState([]);
 
   const [calendarMonth, setCalendarMonth] = useState(); // State for calendar month input
   const requestType = "Forward mediation board";
   // const requestType = "Validity period extension";
   // const requestType = "Additional information";
   // const requestType = "Customer service activation";
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const caseId = location.state?.case_Id;
+  const userInteraction = location.state?.User_Interaction_TYPE;
+  const delegateUserId = location.state?.Delegate_User_id;
+  const locationLogId = location.state?.INteraction_Log_ID;
+
+  console.log("passed case id is ", caseId);
+  console.log("passed user interaction ", userInteraction);
+  console.log("passed delegate id", delegateUserId);
+  console.log("passed location id ", locationLogId);
 
   const months = 3;
 
@@ -60,6 +84,45 @@ const ForwardMediationBoard = () => {
     },
   ];
 
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const payload = {
+          case_id: caseId,
+          User_Intraction_Type: userInteraction,
+          delegate_user_id: delegateUserId,
+          Interaction_Log_ID: locationLogId,
+        };
+
+        const response = await List_Details_Of_Mediation_Board_Acceptance(
+          payload
+        );
+        console.log("response", response);
+
+        setData(response);
+
+        if (response?.Request_History) {
+          setrequesthistory(response?.Request_History);
+        } else {
+          setrequesthistory([]);
+        }
+
+        if (response?.ro_negotiation) {
+          setNegotiationHistory(response?.ro_negotiation);
+        } else {
+          setNegotiationHistory([]);
+        }
+        console.log("negotiation history", negotiationHistory);
+        console.log("request history", requesthistory);
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+    fetchData();
+  }, [caseId, userInteraction, delegateUserId, locationLogId]);
+
+
   const handleWithdraw = (e) => {
     alert("Withdrawn");
     e.preventDefault(); // Prevent page reload
@@ -87,18 +150,21 @@ const ForwardMediationBoard = () => {
       <div className={`${GlobalStyle.cardContainer}`}>
         <p className="mb-2">
           <strong>Case ID:</strong>
+          {caseId}
         </p>
         <p className="mb-2">
-          <strong>Customer Ref:</strong>{" "}
+          <strong>Customer Ref:</strong> {Data?.customer_ref}
         </p>
         <p className="mb-2">
-          <strong>Account no:</strong>{" "}
+          <strong>Account no:</strong>
+          {Data?.account_no}
         </p>
         <p className="mb-2">
-          <strong>Arrears Amount:</strong>{" "}
+          <strong>Arrears Amount:</strong> {Data?.current_arrears_amount}
         </p>
         <p className="mb-2">
           <strong>Last Payment Date:</strong>{" "}
+          {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}
         </p>
       </div>
       <div className="mt-10 mb-6">

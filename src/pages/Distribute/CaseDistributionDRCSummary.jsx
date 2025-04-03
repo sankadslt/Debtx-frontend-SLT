@@ -124,6 +124,7 @@ const CaseDistributionDRCSummary = () => {
     const payload = {
       drc_id: selectedDRCKey,
       Created_By: userId,
+      case_distribution_batch_id : batchId,
     };
     console.log("Create task payload: ", payload);
     if (!selectedDRCKey) {
