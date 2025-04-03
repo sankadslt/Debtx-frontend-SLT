@@ -125,13 +125,7 @@ const Sidebar = ({ onHoverChange }) => {
       icon: HiOutlineDocumentCheck, label: "Letter Of Demand",  roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: GoDot, label: "FTL LOD", link: "", roles: ["superadmin", "admin"],
-          subItems: [
-            { icon: GoDot, label: "3.1 - FTL LOD Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
-            { icon: GoDot, label: "3.1.1 sup - FTL LOD creation", link: "/dashboard", roles: ["superadmin", "admin"] },
-            { icon: GoDot, label: "3.1.2 sup - FTL LOD creation", link: "/dashboard", roles: ["superadmin", "admin"] },
-            { icon: GoDot, label: "3.1.3 sup - Cus.Response update", link: "/dashboard", roles: ["superadmin", "admin"] },
-            { icon: GoDot, label: "3.2 - FTL LOD Case details", link: "/dashboard", roles: ["superadmin", "admin"] }
-          ],
+          
 
          }
         
@@ -170,6 +164,22 @@ const Sidebar = ({ onHoverChange }) => {
         { icon: GoDot, label: "Bonus", link: "/dashboard", roles: ["superadmin"] },
       ],
     },
+
+    {
+      icon: BiSolidDiamond,
+      label: "FTL LOD Dummy",
+      roles: ["superadmin", "admin", "user"],
+     
+          subItems: [
+            { icon: GoDot, label: "3.1 - FTL LOD Case List", link: "/pages/flt-lod/ftl-lod-list", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "3.1.1 sup - FTL LOD creation", link: "/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "3.1.2 sup - FTL LOD creation", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: GoDot, label: "3.2 - FTL LOD Case details", link: "/dashboard", roles: ["superadmin", "admin"] }
+          ],
+
+    },
+
+
 
     {
       icon: BiSolidDiamond,

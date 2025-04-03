@@ -66,6 +66,9 @@ import CommissionCaseList from "../pages/Commission/Commission_List";
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
 import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 
+//FLT LOD
+import FTLLODCaseList from "../pages/FLT_LOD/FTL_LOD_List";
+import FTL_LOD_creation from "../pages/FLT_LOD/FTL_LOD_creation";
 
 const Routers = () => {
   return (
@@ -82,7 +85,7 @@ const Routers = () => {
 
       {/* Prototype Routes */}
       <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} allowedRoles={['superadmin']} />} />
-      <Route path="/prototypeA" element={<ProtectedRoute element={<PrototypeA />} allowedRoles={['superadmin']} />} />
+      <Route path="                                                  " element={<ProtectedRoute element={<PrototypeA />} allowedRoles={['superadmin']} />} />
       <Route path="/prototypeB" element={<ProtectedRoute element={<PrototypeB />} allowedRoles={['superadmin']} />} />
       <Route path="/prototypeC" element={<ProtectedRoute element={<PrototypeC />} allowedRoles={['superadmin']} />} />
 
@@ -155,7 +158,7 @@ const Routers = () => {
       <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
       <Route path="/incident/upload-log" element={<ProtectedRoute element={<SupBulkUploadLog />} allowedRoles={['superadmin']} />} />
-      <Route path="/incident/Incident_File_Download" element={<ProtectedRoute element={<Incident_File_Download/>} allowedRoles={['superadmin']} />} />
+      <Route path="/incident/Incident_File_Download" element={<ProtectedRoute element={<Incident_File_Download />} allowedRoles={['superadmin']} />} />
 
 
       {/* //MEDIATION BOARD */}
@@ -165,12 +168,19 @@ const Routers = () => {
       {/* //MONEY TRANSACTIONS */}
       <Route path="pages/Money_Transaction/MoneyTransaction" element={<ProtectedRoute element={<PaymentDetails />} allowedRoles={['superadmin']} />} />
 
-{/* //COMMISSION */}
-<Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
+      {/* //COMMISSION */}
+      <Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
 
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
+
+
+      {/* FTL LOD Routes */}
+      <Route path="/pages/flt-lod/ftl-lod-list" element={<ProtectedRoute element={<FTLLODCaseList />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)" element={<ProtectedRoute element={<FTL_LOD_creation />} allowedRoles={['superadmin']} />} />
+      
+
     </Routes>
   );
 };
