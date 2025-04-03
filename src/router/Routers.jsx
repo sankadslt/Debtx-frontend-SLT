@@ -66,6 +66,10 @@ import CommissionCaseList from "../pages/Commission/Commission_List";
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
 import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 
+//LOD
+import Digital_Signature_LOD from "../pages/LOD/Digital_Signature_LOD";
+import LOD_Creation from "../pages/LOD/LODCreation";
+
 
 const Routers = () => {
   return (
@@ -171,6 +175,10 @@ const Routers = () => {
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
+
+      {/* LOD */}
+      <Route path="/pages/LOD/DigitalSignatureLOD" element={<ProtectedRoute element={<Digital_Signature_LOD />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/LOD/LODCreation" element={<ProtectedRoute element={<LOD_Creation />} allowedRoles={['superadmin']} />} />
     </Routes>
   );
 };
