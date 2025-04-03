@@ -65,6 +65,12 @@ import CommissionCaseList from "../pages/Commission/Commission_List";
 //Settlement
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
 import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
+import { Litigation_List } from "../pages/Litigation/Litigation_List";
+import { Litigation_Documentation } from "../pages/Litigation/Litigation_Documentation";
+import { Litigation_Submission_Document_Summary } from "../pages/Litigation/Litigation_Submission_Document_Summary";
+import { Litigation_Submission } from "../pages/Litigation/Litigation_Submission";
+import { Litigation_Court_Details_Update } from "../pages/Litigation/Litigation_Court_Details_Update";
+import { Litigation_Case_Details } from "../pages/Litigation/Litigation_Case_Details";
 
 
 const Routers = () => {
@@ -165,12 +171,21 @@ const Routers = () => {
       {/* //MONEY TRANSACTIONS */}
       <Route path="pages/Money_Transaction/MoneyTransaction" element={<ProtectedRoute element={<PaymentDetails />} allowedRoles={['superadmin']} />} />
 
-{/* //COMMISSION */}
-<Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
+      {/* //COMMISSION */}
+      <Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
 
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
+
+      {/* Litigation */}
+      <Route path="/pages/Litigation/Litigation_List" element={<ProtectedRoute element={<Litigation_List />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Litigation/Litigation_Documentation" element={<ProtectedRoute element={<Litigation_Documentation />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Litigation/Litigation_Submission_Document_Summary" element={<ProtectedRoute element={<Litigation_Submission_Document_Summary />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Litigation/Litigation_Submission" element={<ProtectedRoute element={<Litigation_Submission />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Litigation/Litigation_Court_Details_Update" element={<ProtectedRoute element={<Litigation_Court_Details_Update />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Litigation/Litigation_Case_Details" element={<ProtectedRoute element={<Litigation_Case_Details />} allowedRoles={['superadmin']} />} />
+
     </Routes>
   );
 };
