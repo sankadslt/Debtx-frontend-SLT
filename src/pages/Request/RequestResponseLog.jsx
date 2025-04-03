@@ -71,9 +71,11 @@ const RequestResponseLog = () => {
     const case_current_status = filteredData.map(
       (row) => row.case_current_status
     );
+
     const date_from = fromDate;
     const date_to = toDate;
-    const Created_By = getLoggedUserId();
+    const userID = await getLoggedUserId();
+    const Created_By = userID;
     const payload = {
       case_current_status,
       date_from,

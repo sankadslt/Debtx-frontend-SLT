@@ -22,8 +22,6 @@ import {
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 
-
-
 const RecoveryOfficerRequests = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -71,15 +69,15 @@ const RecoveryOfficerRequests = () => {
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       Swal.fire({
-              icon: "warning",
-              title: "Warning",
-              text: "Start date cannot be later than end date.",
-              confirmButtonColor: "#f1c40f",
-            });
+        icon: "warning",
+        title: "Warning",
+        text: "Start date cannot be later than end date.",
+        confirmButtonColor: "#f1c40f",
+      });
     } else {
       setError("");
       setFromDate(date);
-      if (toDate)CheckDateDifference(date, toDate);
+      if (toDate) CheckDateDifference(date, toDate);
     }
   };
 
@@ -87,54 +85,48 @@ const RecoveryOfficerRequests = () => {
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
       Swal.fire({
-              icon: "warning",
-              title: "Warning",
-              text: "End date cannot be earlier than start date.",
-              confirmButtonColor: "#f1c40f",
-            });
+        icon: "warning",
+        title: "Warning",
+        text: "End date cannot be earlier than start date.",
+        confirmButtonColor: "#f1c40f",
+      });
     } else {
       setError("");
       if (fromDate) {
         CheckDateDifference(fromDate, date);
       }
       setToDate(date);
-
     }
   };
 
   const CheckDateDifference = (startDate, endDate) => {
-
     const start = new Date(startDate).getTime();
-      const end = new Date(endDate).getTime();
-      const diffInMs = end - start;
-      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-      const diffInMonths = diffInDays / 30;
+    const end = new Date(endDate).getTime();
+    const diffInMs = end - start;
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+    const diffInMonths = diffInDays / 30;
 
     if (diffInMonths > 1) {
-            Swal.fire({
-              title: "Date Range Exceeded",
-              text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonText: "Yes",
-              confirmButtonColor: "#28a745",
-              cancelButtonText: "No",
-              cancelButtonColor: "#d33",
-            })
-            .then((result) => {
-              if (result.isConfirmed) {
-  
-                endDate = endDate;
-                handleApicall(startDate, endDate);
-              } else {
-                setToDate(null); // Clear the end date if the user chooses not to proceed
-                console.log("EndDate cleared");
-              }
-            }
-            );
-      
-          }
-        };
+      Swal.fire({
+        title: "Date Range Exceeded",
+        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        confirmButtonColor: "#28a745",
+        cancelButtonText: "No",
+        cancelButtonColor: "#d33",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          endDate = endDate;
+          handleApicall(startDate, endDate);
+        } else {
+          setToDate(null); // Clear the end date if the user chooses not to proceed
+          console.log("EndDate cleared");
+        }
+      });
+    }
+  };
 
   const handleApicall = async (startDate, endDate) => {
     const userId = await getLoggedUserId();
@@ -145,42 +137,40 @@ const RecoveryOfficerRequests = () => {
       "Request Accept": approved,
       date_from: startDate,
       date_to: endDate,
-      Created_By: userId
+      Created_By: userId,
     };
     console.log("Payload for date download:", payload);
     try {
-      const response = await Create_task_for_Request_log_download_when_select_more_than_one_month(
-        payload
-      );
+      const response =
+        await Create_task_for_Request_log_download_when_select_more_than_one_month(
+          payload
+        );
       console.log("Response for date download:", response);
-      
-      Swal.fire({
-                icon: "success",
-                title: "Success",
-                text: "Data sent successfully.",
-                confirmButtonColor: "#28a745",
-              });
-             setFromDate(null);
-             setToDate(null); 
 
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data sent successfully.",
+        confirmButtonColor: "#28a745",
+      });
+      setFromDate(null);
+      setToDate(null);
     } catch (error) {
       console.error("Error in sending the data:", error);
-          
-              const errorMessage = error?.response?.data?.message || 
-                                   error?.message || 
-                                   "An error occurred. Please try again.";
-          
-              Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: errorMessage,
-                confirmButtonColor: "#d33",
-              });
+
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "An error occurred. Please try again.";
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
     }
   };
-
-
-
 
   // Filter data based on search query
   const filteredData = requestsData.filter((row) => {
@@ -198,7 +188,6 @@ const RecoveryOfficerRequests = () => {
     delegate_user_id,
     Interaction_Log_ID,
     Interaction_ID
-
   ) => {
     console.log("case_id", case_id);
     console.log("User_Interaction_Type", User_Interaction_Type);
@@ -261,10 +250,8 @@ const RecoveryOfficerRequests = () => {
 
   const setshowall = () => {
     alert("show all clicked");
-    
-    
+
     const fetchcases = async () => {
-      
       try {
         const userId = await getLoggedUserId();
         console.log("User ID:", userId);
@@ -285,25 +272,22 @@ const RecoveryOfficerRequests = () => {
       }
     };
     fetchcases();
-  }
+  };
   return (
     <div className={GlobalStyle.fontPoppins}>
       <h1 className={GlobalStyle.headingLarge}>
         Requests from Recovery Officer
       </h1>
       <div className="flex items-center gap-2 justify-end ">
-              <span className={GlobalStyle.headingMedium}>
-                {" "}
-                Request Count : {firstRequestCount}
-              </span>
+        <span className={GlobalStyle.headingMedium}>
+          {" "}
+          Request Count : {firstRequestCount}
+        </span>
 
-              <button
-                className={GlobalStyle.buttonPrimary}
-                onClick={setshowall}
-              >
-                Show All
-              </button>
-            </div>
+        <button className={GlobalStyle.buttonPrimary} onClick={setshowall}>
+          Show All
+        </button>
+      </div>
       <div className="flex justify-end gap-6 items-center mb-8">
         <div className="flex items-center gap-2">
           <span className={GlobalStyle.headingMedium}>Request Type:</span>
@@ -319,24 +303,28 @@ const RecoveryOfficerRequests = () => {
               Mediation board forward request letter
             </option>
             <option value="Negotiation Settlement plan Request">
-            Negotiation Settlement plan Request
+              Negotiation Settlement plan Request
             </option>
-            <option value="Negotiation period extend Request">Negotiation period extend Request</option>
-            <option value="Negotiation customer further information Request">Negotiation customer further information Request</option>
+            <option value="Negotiation period extend Request">
+              Negotiation period extend Request
+            </option>
+            <option value="Negotiation customer further information Request">
+              Negotiation customer further information Request
+            </option>
             <option value="Negotiation Customer request service">
-            Negotiation Customer request service
+              Negotiation Customer request service
             </option>
             <option value="Mediation Board Settlement plan Request">
-            Mediation Board Settlement plan Request
+              Mediation Board Settlement plan Request
             </option>
             <option value="Mediation Board period extend Request">
-            Mediation Board period extend Request
+              Mediation Board period extend Request
             </option>
             <option value="Mediation Board customer further information request">
-            Mediation Board customer further information request
+              Mediation Board customer further information request
             </option>
             <option value="Mediation Board Customer request service">
-            Mediation Board Customer request service
+              Mediation Board Customer request service
             </option>
           </select>
         </div>
@@ -395,9 +383,7 @@ const RecoveryOfficerRequests = () => {
               className={GlobalStyle.inputSearch}
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
-
-            </div> 
-          
+          </div>
         </div>
 
         {/* Table Section */}
@@ -502,7 +488,6 @@ const RecoveryOfficerRequests = () => {
                           row.delegate_user_id,
                           row.Interaction_Log_ID,
                           row.Interaction_ID
-                    
                         )
                       }
                     >
