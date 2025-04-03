@@ -21,6 +21,8 @@ import Swal from "sweetalert2";
 // import { fetchLODs } from "../../services/LODs/LODservice.js";
 // import { Task_for_Download_LODs } from "../../services/task/taskService.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
+import { fetchCaseCounts } from "../../services/LOD/LOD.js";
+import { fetchF2SelectionCases } from "../../services/LOD/LOD.js";
 
 const Digital_Signature_LOD = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -35,12 +37,16 @@ const Digital_Signature_LOD = () => {
     const [activePopupLODID, setActivePopupLODID] = useState(null);
     const [activePopupLODStatus, setActivePopupLODStatus] = useState("");
     const [changeReason, setChangeReason] = useState("");
+    const [LODCount, setLODCount] = useState(0);
+    const [totalCount, setTotalCount] = useState(0);
+    const [lodCount, setlodCount] = useState(0);
+    const [finalReminderCount, setFinalReminderCount] = useState(0);
 
     const getStatusIcon = (status) => {
         switch (status?.toLowerCase()) {
             case "lod":
                 return "/src/assets/images/Incidents/Incident_Open.png";
-            case "finalreminder":
+            case "final reminder":
                 return "/src/assets/images/Incidents/Incident_Reject.png";
             default:
                 return null;
@@ -64,80 +70,27 @@ const Digital_Signature_LOD = () => {
         );
     };
 
-    const fetchDigitalSignatureLOD = async (filters) => {
+    const fetchLODCounts = async () => {
         try {
-            console.log("Sending filters:", filters);
-
-            // Dummy data
-            const dummyData = [
-                {
-                    LODID: "LOD001",
-                    Status: "LOD",
-                    Amount: "BRN12345",
-                    CustomerTypeName: "Alpha",
-                    SourceType: "Direct LOD",
-                    AccountManagerCode: "1234567890",
-                },
-                {
-                    LODID: "LOD002",
-                    Status: "LOD",
-                    Amount: "BRN12345",
-                    CustomerTypeName: "Beta",
-                    SourceType: "DRC Fail",
-                    AccountManagerCode: "1234567890",
-                },
-                {
-                    LODID: "LOD001",
-                    Status: "FinalReminder",
-                    Amount: "BRN12345",
-                    CustomerTypeName: "Alpha",
-                    SourceType: "Direct LOD",
-                    AccountManagerCode: "1234567890",
-                },
-                {
-                    LODID: "LOD001",
-                    Status: "LOD",
-                    Amount: "BRN12345",
-                    CustomerTypeName: "Delta",
-                    SourceType: "Direct LOD",
-                    AccountManagerCode: "1234567890",
-                },
-                {
-                    LODID: "LOD001",
-                    Status: "FinalReminder",
-                    Amount: "BRN12345",
-                    CustomerTypeName: "Alpha",
-                    SourceType: "DRC Fail",
-                    AccountManagerCode: "1234567890",
-                },
-            ];
-
-            // Simulating API response based on filters
-            const filteredData = dummyData.filter((LOD) =>
-                // filters.Status === "All" || LOD.Status === filters.Status
-                LOD.Status === filters.Status
-            );
-
-            console.log("Response:", { status: "success", LODs: filteredData });
-
-            return filteredData.map((LOD) => ({
-                LODID: LOD.LODID,
-                Status: LOD.Status,
-                Amount: LOD.Amount,
-                CustomerTypeName: LOD.CustomerTypeName,
-                SourceType: LOD.SourceType,
-                AccountManagerCode: LOD.AccountManagerCode,
-            }));
+            const { totalCount, lodCount, finalReminderCount } = await fetchCaseCounts();
+            setTotalCount(totalCount);
+            setlodCount(lodCount);
+            setFinalReminderCount(finalReminderCount);
         } catch (error) {
-            console.error("Detailed error:", { message: error.message });
-            throw "An error occurred while fetching data";
+            console.error("Error fetching LOD counts:", error.message);
+            Swal.fire("Error", "Failed to fetch LOD counts.", "error");
         }
-    };
+    }
 
-    const fetchData = async (filters) => {
+    useEffect(() => {
+        fetchLODCounts();
+    }, []);
+
+
+    const fetchData = async (LODType, currentPage) => {
         setIsLoading(true);
         try {
-            const LODs = await fetchDigitalSignatureLOD(filters);
+            const LODs = await fetchF2SelectionCases(LODType, currentPage + 1);
             setData(LODs);
             setIsFiltered(LODs.length > 0);
         } catch (error) {
@@ -148,33 +101,36 @@ const Digital_Signature_LOD = () => {
         }
     };
 
-    const handleFilter = async () => {
-        try {
-            const filters = {
-                Status: LODType,
-            };
-            await fetchData(filters);
-        } catch (error) {
-            Swal.fire("Error", error.message || "No LOD is matching the criteria", "error");
-        }
-    };
+    // const handleFilter = async () => {
+    //     try {
+    //         await fetchData(LODType);
+    //     } catch (error) {
+    //         Swal.fire("Error", error.message || "No LOD is matching the criteria", "error");
+    //     }
+    // };
 
     useEffect(() => {
-        handleFilter();
-    }, [LODType]);
+        if (LODType.trim()) { // Check if LODType is not empty or just whitespace
+            fetchData(LODType, currentPage);
+        }
+    }, [LODType, currentPage]);
+
+    // useEffect(() => {
+    //     fetchData({});
+    // }, []);
 
 
     // const HandleCreateTask = async () => {
 
-    //     if (!isFiltered) {
-    //         Swal.fire("Error", "Please apply filters that return data before creating a task.", "error");
-    //         return;
-    //     }
+    //     // if (!isFiltered) {
+    //     //     Swal.fire("Error", "Please apply filters that return data before creating a task.", "error");
+    //     //     return;
+    //     // }
 
-    //     const adjustToLocalISO = (date) => {
-    //         const offset = date.getTimezoneOffset() * 60000;
-    //         return new Date(date.getTime() - offset).toISOString();
-    //     };
+    //     // const adjustToLocalISO = (date) => {
+    //     //     const offset = date.getTimezoneOffset() * 60000;
+    //     //     return new Date(date.getTime() - offset).toISOString();
+    //     // };
     //     const user_id = await getLoggedUserId();
     //     const requestData = {
     //         LOD_Action: LODType,
@@ -196,11 +152,7 @@ const Digital_Signature_LOD = () => {
     //     }
     // };
 
-    useEffect(() => {
-        fetchData({});
-    }, []);
-
-    // const HandleAddIncident = () => navigate("/incident/register");
+    const HandleAddIncident = () => navigate("/incident/register");
 
     if (isLoading) {
         return (
@@ -219,11 +171,6 @@ const Digital_Signature_LOD = () => {
         String(row.SourceType).toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const pages = Math.ceil(filteredData.length / rowsPerPage);
-    const startIndex = currentPage * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedData = filteredData.slice(startIndex, endIndex);
-
     const handlePrevPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
@@ -231,9 +178,7 @@ const Digital_Signature_LOD = () => {
     };
 
     const handleNextPage = () => {
-        if (currentPage < pages - 1) {
-            setCurrentPage(currentPage + 1);
-        }
+        setCurrentPage(currentPage + 1);
     };
 
     const handlePopup = (LODID, status) => {
@@ -264,6 +209,13 @@ const Digital_Signature_LOD = () => {
         closePopup();
     };
 
+    const handleInputCount = (value) => {
+        setLODCount(value);
+    }
+
+    const handleCreateLODList = () => {
+
+    }
 
     return (
         <div className={GlobalStyle.fontPoppins}>
@@ -283,15 +235,15 @@ const Digital_Signature_LOD = () => {
                     <div className={GlobalStyle.miniCountBarSubTopicContainer}>
                         <div className={GlobalStyle.miniCountBarMainBox}>
                             <span>Total:</span>
-                            <p className={GlobalStyle.miniCountBarMainTopic}>1259</p>
+                            <p className={GlobalStyle.miniCountBarMainTopic}>{totalCount}</p>
                         </div>
                         <div className={GlobalStyle.miniCountBarMainBox}>
                             <span>LOD:</span>
-                            <p className={GlobalStyle.miniCountBarMainTopic}>100</p>
+                            <p className={GlobalStyle.miniCountBarMainTopic}>{lodCount}</p>
                         </div>
                         <div className={GlobalStyle.miniCountBarMainBox}>
                             <span>Final Reminder:</span>
-                            <p className={GlobalStyle.miniCountBarMainTopic}>250</p>
+                            <p className={GlobalStyle.miniCountBarMainTopic}>{finalReminderCount}</p>
                         </div>
                     </div>
                 </div>
@@ -318,7 +270,7 @@ const Digital_Signature_LOD = () => {
                         <option value="">LOD Type</option>
                         {/* <option value="All">All</option> */}
                         <option value="LOD">LOD</option>
-                        <option value="FinalReminder">Final Reminder</option>
+                        <option value="Final Reminder">Final Reminder</option>
                     </select>
                 </div>
             </div>
@@ -350,8 +302,8 @@ const Digital_Signature_LOD = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedData.length > 0 ? (
-                            paginatedData.map((log, index) => (
+                        {filteredData.length > 0 ? (
+                            filteredData.map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
@@ -389,7 +341,14 @@ const Digital_Signature_LOD = () => {
 
                 {activePopupLODID && (
                     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50">
+                        <button
+                            onClick={closePopup}
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                        >
+                            ✖
+                        </button>
                         <div className={"bg-white p-6 rounded-lg shadow-lg w-1/2"}>
+
                             <h2 className={GlobalStyle.headingLarge}>
                                 {activePopupLODStatus === "LOD" ? "Change to Final Reminder" : "Change to LOD"}
                             </h2>
@@ -420,15 +379,15 @@ const Digital_Signature_LOD = () => {
                     <FaArrowLeft />
                 </button>
                 <span className="text-gray-700">
-                    Page {currentPage + 1} of {pages}
+                    Page {currentPage + 1}
                 </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === pages - 1}>
+                <button className={GlobalStyle.navButton} onClick={handleNextPage}>
                     <FaArrowRight />
                 </button>
             </div>
 
             {LODType && (
-                <div className="flex justify-end mt-6 space-x-4">
+                <div className="flex justify-between mt-6 space-x-4">
                     <button
                         // onClick={HandleCreateTask}
                         // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
@@ -438,9 +397,21 @@ const Digital_Signature_LOD = () => {
                         {/* {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
                         Create task and let me know
                     </button>
-                    <button className={GlobalStyle.buttonPrimary}>
-                        Open
-                    </button>
+                    <div className="flex justify-end gap-4">
+                        <input
+                            type="text"
+                            placeholder="Text here"
+                            className={GlobalStyle.inputText}
+                            value={LODCount}
+                            onChange={(e) => handleInputCount(e.target.value)}
+                        />
+                        <button
+                            className={GlobalStyle.buttonPrimary}
+                            onClick={handleCreateLODList}
+                        >
+                            Create LOD List
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
