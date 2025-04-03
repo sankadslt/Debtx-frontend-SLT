@@ -8,7 +8,7 @@ Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
              Vihanga Jayawardena (vihangaeshan2002@gmail.com)
              Janendra Chamodi ( apjanendra@gmail.com)
 Version: React v18
-ui number : 1.1
+ui number : 1.2.1
 Dependencies: Tailwind CSS, SweetAlert2
 Related Files: 
 Notes: This template uses Tailwind CSS */
@@ -44,6 +44,7 @@ const Incident_Register_Bulk_Upload = () => {
                 icon: "error",
                 title: "Invalid File Type",
                 text: "Only CSV and Excel files are allowed.",
+                confirmButtonColor: "#d33",
             });
             setSelectedFile(null);
             return;
@@ -80,6 +81,7 @@ const Incident_Register_Bulk_Upload = () => {
                 icon: "warning",
                 title: "Missing Information",
                 text: "Please select both an action type and a file.",
+                confirmButtonColor: "#f1c40f",
             });
             return;
         }
@@ -107,14 +109,18 @@ const Incident_Register_Bulk_Upload = () => {
                         icon: "success",
                         title: "Success",
                         text: response.message,
+                        confirmButtonColor: "#28a745",
                     });
+                   
                 } catch (error) {
                     console.error("Error uploading file:", error);
                     Swal.fire({
                         icon: "error",
                         title: "Upload Failed",
                         text: error.message || "File upload failed! Please try again.",
+                        confirmButtonColor: "#d33",
                     });
+                  
                 } finally {
                     setLoading(false);
                 }
@@ -125,14 +131,17 @@ const Incident_Register_Bulk_Upload = () => {
                     icon: "error",
                     title: "File Read Error",
                     text: "Failed to read file content.",
+                    confirmButtonColor: "#d33",
                 });
             };
+
         } catch (error) {
             console.error("Authentication error:", error);
             Swal.fire({
                 icon: "error",
                 title: "Authentication Error",
                 text: error.message || "Please log in again to continue.",
+                confirmButtonColor: "#d33",
             });
         }
     };
@@ -145,14 +154,14 @@ const Incident_Register_Bulk_Upload = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Action Type Dropdown */}
                         <div className="flex gap-4 justify-center">
-                            <select className={GlobalStyle.selectBox} onChange={handleActionTypeChange} value={actionType}>
-                                <option value="">Action Type</option>
-                                <option value="Incident Creation">Incident Creation</option>
-                                <option value="Incident Reject">Incident Reject</option>
-                                <option value="Distribute to DRC">Distribute to DRC</option>
-                                <option value="Validity Period Extend">Validity Period Extend</option>
-                                <option value="Hold">Hold</option>
-                                <option value="Discard">Discard</option>
+                            <select className={GlobalStyle.selectBox} onChange={handleActionTypeChange}  value={actionType} style={{ color: actionType === "" ? "gray" : "black" }}>
+                                <option value="" hidden>Action Type</option>
+                                <option value="Incident Creation" style={{ color: "black" }}>Incident Creation</option>
+                                <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
+                                <option value="Distribute to DRC" style={{ color: "black" }}>Distribute to DRC</option>
+                                <option value="Validity Period Extend" style={{ color: "black" }}>Validity Period Extend</option>
+                                <option value="Hold" style={{ color: "black" }}>Hold</option>
+                                <option value="Discard" style={{ color: "black" }}>Discard</option>
                             </select>
                         </div>
 
