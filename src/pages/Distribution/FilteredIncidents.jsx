@@ -21,6 +21,8 @@ import {
 } from "../../services/Incidents/incidentService";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import File_Icon from "../../assets/images/fileicon.png";
+import Swal from "sweetalert2";
+import  { Tooltip } from "react-tooltip";
 
 const FilteredIncident = () => {
   const navigate = useNavigate();
@@ -123,7 +125,7 @@ const FilteredIncident = () => {
                         {cases.count.toLocaleString()}
                       </td>
 
-                      <td className={GlobalStyle.tableData}>
+                      <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <button
                           onClick={() =>
                             handleIconClick(cases.type, cases.count)
