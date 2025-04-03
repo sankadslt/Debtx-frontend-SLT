@@ -8,7 +8,7 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: The following page conatins the codes */
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import DatePicker from "react-datepicker";
@@ -22,6 +22,7 @@ import {
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import one from "/src/assets/images/imagefor1.a.13(one).png";
 import Swal from "sweetalert2";
+import { use } from "react";
 
 
 
@@ -53,6 +54,26 @@ export default function DRCAssignManagerApproval3() {
     setEndDate(date);
 
   }
+
+  useEffect(() => {
+
+    const fetchDRCData = async () => {
+      const userId = await getLoggedUserId();
+      const payload = {
+        approved_deligated_by: userId,
+      };
+      console.log("Request Payload:", payload);
+      try {
+        const response = await List_DRC_Assign_Manager_Approval(payload);
+        console.log("Response:", response);
+        setFilteredData(response);
+      } catch (error) {
+        console.error("Error fetching DRC assign manager approval:", error);
+      }
+    };
+    fetchDRCData();
+  }, []);
+
 
   
     const checkdatediffrence = (startDate, endDate) => {
@@ -141,6 +162,8 @@ export default function DRCAssignManagerApproval3() {
     if (endDate) {
       payload.date_to = endDate;
     }
+    const userId = await getLoggedUserId();
+    payload.approved_deligated_by = userId;
 
     console.log("Filtered Request Data:", payload);
 
@@ -235,9 +258,13 @@ console.log("Filtered Data:", filteredDataBySearch);
 
     const alreadyApproved = batchIds.some((id) => {
       const record = filteredData.find((row) => row.approver_reference === id);
-      return record?.approved_by !== null;
-  });
+      
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
 
+      return status === "Open assign agent" || status === "Case Withdrawed" || status === "Case Abandoned" || status === "Pending Write Off" || status === "Commissioned";
+
+  });
+  console.log("Already Approved:", alreadyApproved);
     if (alreadyApproved) {
       Swal.fire({
         icon: "warning",
@@ -247,7 +274,46 @@ console.log("Filtered Data:", filteredDataBySearch);
       });
       return;
     }
+
+    const rejected = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Reject";
+
+    });
+    console.log("Rejected:", rejected);
+
+    if (rejected) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been rejected.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
     
+   
+
+      // Show confirmation alert before calling API
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to approve the selected record?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+
 
 
     const payload = {
@@ -296,6 +362,62 @@ console.log("Filtered Data:", filteredDataBySearch);
       });
       return;
     }
+
+    const alreadyApproved = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Open assign agent" || status === "Case Withdrawed" || status === "Case Abandoned" || status === "Pending Write Off" || status === "Commissioned";
+
+  });
+  console.log("Already Approved:", alreadyApproved);
+    if (alreadyApproved) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been approved.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    const rejected = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Reject";
+
+    });
+    console.log("Rejected:", rejected);
+
+    if (rejected) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been rejected.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+    
+      // Show confirmation alert before calling API
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to rejected the selected record?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
     const payload = {
       approver_references: batchIds,
       approved_by: userId,
@@ -472,11 +594,11 @@ console.log("Filtered Data:", filteredDataBySearch);
                   className="mx-auto"
                 /> */}
               </th>
+              <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Created on</th>
               <th className={GlobalStyle.tableHeader}>Created by</th>
               <th className={GlobalStyle.tableHeader}>Approve Type</th>
-              <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Approve By</th>
               <th className={GlobalStyle.tableHeader}>Remark</th>
               <th className={GlobalStyle.tableHeader}></th>
@@ -502,6 +624,9 @@ console.log("Filtered Data:", filteredDataBySearch);
                     />
                   </td>
                   <td className={GlobalStyle.tableData}>
+                  {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
                     {item.approver_reference}
                   </td>
                   <td className={GlobalStyle.tableData}>
@@ -511,10 +636,8 @@ console.log("Filtered Data:", filteredDataBySearch);
                   <td className={GlobalStyle.tableData}>
                     {item.approver_type}
                   </td>
-                  <td className={GlobalStyle.tableData}>
-                  {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{item.approved_by}</td>
+                  
+                  <td className={GlobalStyle.tableData}>{item.approved_deligated_by}</td>
                   <td className={GlobalStyle.tableData}>
                     {item.remark.length > 0
                       ? item.remark[item.remark.length - 1].remark

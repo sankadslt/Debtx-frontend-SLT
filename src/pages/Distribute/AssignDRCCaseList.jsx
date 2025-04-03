@@ -715,6 +715,7 @@ export default function AssignDRCsLOG() {
                      )
                     }
                      title="Re-Assign" // Shows tooltip on hover
+                     style={{ marginBottom: "10px" }}
                     >
                     <FaUserEdit /> {/* Icon for Re-Assign */}
                     </button>
