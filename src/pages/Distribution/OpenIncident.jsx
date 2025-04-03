@@ -16,11 +16,12 @@ import { useState,useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useNavigate } from "react-router-dom";
 import { getUserData } from "../../services/auth/authService";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight , FaDownload } from "react-icons/fa";
 import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band,Create_Case_for_incident} from "../../services/Incidents/incidentService";
-import Open_No_Agent from "../../assets/images/Open_No_Agent.png"
+import Open_No_Agent from "../../assets/images/distribution/Open_Assign_Agent.png";
 import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident , Open_Task_Count_Incident_To_Case} from "../../services/task/taskService";
 import Swal from "sweetalert2";
+import  { Tooltip } from "react-tooltip";
  
  
 
@@ -86,6 +87,7 @@ const fetchData = async () => {
         text: `Task ID: ${response.Task_Id}`,
         icon: "success",
         confirmButtonText: "OK",
+        confirmButtonColor: "#28a745"
       });
   
      
@@ -98,6 +100,7 @@ const fetchData = async () => {
         text: `Failed to create task. Error: ${err.message || "Unknown error"}`,
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -110,6 +113,7 @@ const fetchData = async () => {
       text: "Please select at least one incident.",
       icon: "warning",
       confirmButtonText: "OK",
+       confirmButtonColor: "#f1c40f"
     });
     return;
   }
@@ -120,6 +124,8 @@ const fetchData = async () => {
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Yes, Proceed",
+    confirmButtonColor: "#28a745",
+    cancelButtonColor: "#d33",
     cancelButtonText: "No",
   });
 
@@ -137,6 +143,7 @@ const fetchData = async () => {
         text: "There are existing open tasks. Please resolve them before proceeding.",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
       });
       setIsProcessing(false);
       return;
@@ -151,6 +158,8 @@ const fetchData = async () => {
         showCancelButton: true,
         confirmButtonText: "Yes, Create Task",
         cancelButtonText: "No, Cancel",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
       });
 
       if (!taskConfirmResult.isConfirmed) {
@@ -172,6 +181,7 @@ const fetchData = async () => {
         text: `Task created to handle incidents.`,
         icon: "success",
         confirmButtonText: "OK",
+        confirmButtonColor: "#28a745",
       });
     } else {
       
@@ -186,6 +196,7 @@ const fetchData = async () => {
         text: `Successfully created ${response.cases.length} cases.`,
         icon: "success",
         confirmButtonText: "OK",
+        confirmButtonColor: "#28a745",
       });
     }
 
@@ -197,6 +208,7 @@ const fetchData = async () => {
       text: error.message || "Action failed: Another set in progress.",
       icon: "error",
       confirmButtonText: "OK",
+      confirmButtonColor: "#d33",
     });
   } finally {
     setIsProcessing(false);
@@ -250,6 +262,9 @@ const fetchData = async () => {
     setSelectAllData(!selectAllData);
   };
 
+  const handlebacknavigate = () => {
+    navigate(-1); // Go back to the previous page
+  }
   return (
     <>
       <div className={GlobalStyle.fontPoppins}>
@@ -257,11 +272,16 @@ const fetchData = async () => {
           <h1 className={`${GlobalStyle.headingLarge} m-0 mb-4`}>
             Incidents Open for Distribution
           </h1>
-          <button
-          className={`${GlobalStyle.buttonPrimary} pr-4`}
+          
+        </div>
+
+        <div className="flex justify-end items-center mb-4">
+        <button
+          className={`${GlobalStyle.buttonPrimary}   pr-4 flex items-center mb-4`}
          onClick={handleCreateTask}
        
         >
+        <FaDownload className="mr-1" />
           Create task and let me know
         </button>
         </div>
@@ -349,7 +369,7 @@ const fetchData = async () => {
               : "bg-gray-50 bg-opacity-50"
           } border-b`}
         >
-          <td className={GlobalStyle.tableData}>
+          <td className={GlobalStyle.tableData}  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <input
               type="checkbox"
               className="rounded-lg"
@@ -365,19 +385,22 @@ const fetchData = async () => {
           <td className={GlobalStyle.tableData}>
             <div className="flex justify-center items-center h-full">
               {row.Incident_Status === "Open No Agent" && (
-                <div title="open no agent" aria-label="open no agent">
+                <div data-tooltip-id="incident-tooltip">
                   <img
                     src={Open_No_Agent}
                     alt="open no agent"
+                    
                     className="w-5 h-5"
                   />
                 </div>
+
               )}
             </div>
+            <Tooltip id="incident-tooltip" place="bottom" content="Open No Agent" />
           </td>
           <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
           <td className={GlobalStyle.tableData}>{row.Actions}</td>
-          <td className={GlobalStyle.tableData}>
+          <td className={`${GlobalStyle.tableCurrency}`}>
             {new Intl.NumberFormat("en-US").format(row.Arrears)}
           </td>
           <td className={GlobalStyle.tableData}>{row.Source_Type}</td>
@@ -419,9 +442,10 @@ const fetchData = async () => {
   <div className="flex justify-start items-center w-full  ">
             <button
               className={`${GlobalStyle.buttonPrimary} `} 
-              onClick={() => navigate(-1)}
+              onClick={ handlebacknavigate}
             >
-              ← Back
+              <FaArrowLeft className="mr-1" />
+            
             </button>
           </div>
         <div className="flex justify-end items-center w-full ">
