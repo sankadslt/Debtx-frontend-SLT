@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -9,6 +9,7 @@ const WriteOffCaseList = () => {
   const [toDate, setToDate] = useState(null);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   
 
   // Sample data for the table
@@ -37,8 +38,13 @@ const WriteOffCaseList = () => {
 
   const rowsPerPage = 7;
 
-  // Filter function
-  const handleFilter = () => {
+  // Apply filtering whenever search query or dates change
+  useEffect(() => {
+    filterData();
+  }, [searchQuery]);
+
+  // Separate filter function that can be called from button click or search input
+  const filterData = () => {
     setIsLoading(true);
 
     let filtered = caseData;
@@ -53,7 +59,7 @@ const WriteOffCaseList = () => {
     // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter((item) =>
-        Object.values(item).some((value) =>
+        Object.values(item).some((value) => 
           value.toString().toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
@@ -62,6 +68,11 @@ const WriteOffCaseList = () => {
     setFilteredData(filtered);
     setCurrentPage(0); // Reset to first page after filtering
     setIsLoading(false);
+  };
+
+  // Existing filter button handler
+  const handleFilter = () => {
+    filterData();
   };
 
   const handleFromDateChange = (date) => {
@@ -149,8 +160,9 @@ const WriteOffCaseList = () => {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               className={GlobalStyle.inputSearch}
+              placeholder=""
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
@@ -158,46 +170,50 @@ const WriteOffCaseList = () => {
 
         {/* Table */}
         <div className={GlobalStyle.tableContainer}>
-          <table className={GlobalStyle.table}>
-            <thead className={GlobalStyle.thead}>
-              <tr>
-                <th className={GlobalStyle.tableHeader}>Case ID</th>
-                <th className={GlobalStyle.tableHeader}>Status</th>
-                <th className={GlobalStyle.tableHeader}>Account No</th>
-                <th className={GlobalStyle.tableHeader}>Customer ref</th>
-                <th className={GlobalStyle.tableHeader}>Amount</th>
-                <th className={GlobalStyle.tableHeader}>Phase</th>
-                <th className={GlobalStyle.tableHeader}>Write Off On</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.map((row, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
-                >
-                  <td className={GlobalStyle.tableData}>{row.caseId}</td>
-                  <td className={GlobalStyle.tableData}>{row.status}</td>
-                  <td className={GlobalStyle.tableData}>{row.accountNo}</td>
-                  <td className={GlobalStyle.tableData}>{row.customerRef}</td>
-                  <td className={GlobalStyle.tableData}>{row.amount}</td>
-                  <td className={GlobalStyle.tableData}>{row.phase}</td>
-                  <td className={GlobalStyle.tableData}>{row.writeOffOn}</td>
-                </tr>
-              ))}
-              {paginatedData.length === 0 && (
+          {isLoading ? (
+            <div className="text-center py-4">Loading...</div>
+          ) : (
+            <table className={GlobalStyle.table}>
+              <thead className={GlobalStyle.thead}>
                 <tr>
-                  <td colSpan="6" className="text-center py-4">
-                    No results found
-                  </td>
+                  <th className={GlobalStyle.tableHeader}>Case ID</th>
+                  <th className={GlobalStyle.tableHeader}>Status</th>
+                  <th className={GlobalStyle.tableHeader}>Account No</th>
+                  <th className={GlobalStyle.tableHeader}>Customer ref</th>
+                  <th className={GlobalStyle.tableHeader}>Amount</th>
+                  <th className={GlobalStyle.tableHeader}>Phase</th>
+                  <th className={GlobalStyle.tableHeader}>Write Off On</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paginatedData.map((row, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0
+                        ? "bg-white bg-opacity-75"
+                        : "bg-gray-50 bg-opacity-50"
+                    } border-b`}
+                  >
+                    <td className={GlobalStyle.tableData}>{row.caseId}</td>
+                    <td className={GlobalStyle.tableData}>{row.status}</td>
+                    <td className={GlobalStyle.tableData}>{row.accountNo}</td>
+                    <td className={GlobalStyle.tableData}>{row.customerRef}</td>
+                    <td className={GlobalStyle.tableData}>{row.amount}</td>
+                    <td className={GlobalStyle.tableData}>{row.phase}</td>
+                    <td className={GlobalStyle.tableData}>{row.writeOffOn}</td>
+                  </tr>
+                ))}
+                {paginatedData.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="text-center py-4">
+                      No results found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
