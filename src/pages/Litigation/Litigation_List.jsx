@@ -218,6 +218,7 @@ export const Litigation_List = () => {
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/yyyy"
                         className={`${GlobalStyle.inputText} w-32 md:w-40`}
+                        disabled={!dateType}
                     />
 
                     <DatePicker
@@ -226,6 +227,7 @@ export const Litigation_List = () => {
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/yyyy"
                         className={`${GlobalStyle.inputText} w-32 md:w-40`}
+                        disabled={!dateType}
                     />
                 </div>
 
