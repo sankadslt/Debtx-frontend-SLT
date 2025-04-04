@@ -1,8 +1,8 @@
 /*Purpose: 
 Created Date: 2025-04-01
 Created By: Nimesh Perera (nimeshmathew999@gmail.com)
-Last Modified Date: 2025-04-01
-Modified By: Nimesh Perera (nimeshmathew999@gmail.com)
+Last Modified Date: 2025-04-04
+Modified By: Nimesh Perera (nimeshmathew999@gmail.com), Sasindu Srinayaka (sasindusrinayaka@gmail.com)
 Version: React v18
 ui number : 4.1
 Dependencies: Tailwind CSS
@@ -11,112 +11,174 @@ Notes: This template uses Tailwind CSS */
 
 import DatePicker from "react-datepicker"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { FaArrowLeft, FaArrowRight, FaEye, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Litigation_Fail_Update } from "./Litigation_Fail_Update";
+import { listAllLitigationCases } from "../../services/litigation/litigationService";
+import Swal from 'sweetalert2';
 
 export const Litigation_List = () => {
-  const navigate =useNavigate();
-  const [fromDate, setFromDate] =useState(null);
-  const [toDate, setToDate] =useState(null);
-  const [searchQuery, setSearchQuery] =useState("");
-  const [currentPage, setCurrentPage] =useState(0);
-  const [isloading, setIsLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] =useState(false);
-  const rowsPerPage =5;
+  const navigate = useNavigate();
+  const [status, setStatus] = useState("");
+  const [dateType, setDateType] = useState("");
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1); // Changed to start from 1 to match backend
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filteredData, setFilteredData] = useState([]);
+  const [totalCases, setTotalCases] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const sampleData = [
-    {
-        id: "001",
-        status: "Initial_Litigation",
-        account_no: "123456",
-        amount: "5000",
-        legal_accepted_date: "01/04/2024",
-        settlement_created_date: "15/04/2024",
-    },
+  // Status mapping between frontend display values and backend expected values
+  const statusMapping = {
+    "Initial_Litigation": "Initial Litigation",
+    "Pending_FTL": "Pending FTL",
+    "FTL_Settle_Pending": "Litigation Settle Pending",
+    "FTL": "Forward To Litigation",
+    "FLU": "Fail from Legal Unit",
+    "SLA": "Success Legal Action",
+    "FLA": "Fail Legal Action",
+    "Litigation": "Litigation"
+  };
 
-    {
-        id: "002",
-        status: "Pending_FTL",
-        account_no: "123456",
-        amount: "5000",
-        legal_accepted_date: "01/04/2024",
-        settlement_created_date: "15/04/2024",
-    },
-    {
-        id: "003",
-        status: "FTL_Settle_Pending",
-        account_no: "123456",
-        amount: "5000",
-        legal_accepted_date: "01/04/2024",
-        settlement_created_date: "15/04/2024",
-    },
-    {
-        id: "004",
-        status: "FTL",
-        account_no: "123456",
-        amount: "5000",
-        legal_accepted_date: "01/04/2024",
-        settlement_created_date: "15/04/2024",
-    },
-    {
-        id: "005",
-        status: "FLU",
-        account_no: "123456",
-        amount: "5000",
-        legal_accepted_date: "01/04/2024",
-        settlement_created_date: "15/04/2024",
-    },
-    {
-        id: "006",
-        status: "SLA",
-        account_no: "123456",
-        amount: "5000",
-        legal_accepted_date: "01/04/2024",
-        settlement_created_date: "15/04/2024",
-    },
-    {
-        id: "007",
-        status: "FLA",
-        account_no: "123456",
-        amount: "5000",
-        legal_accepted_date: "01/04/2024",
-        settlement_created_date: "15/04/2024",
-    },
-    {
-        id: "008",
-        status: "Litigation",
-        account_no: "123456",
-        amount: "5000",
-        legal_accepted_date: "01/04/2024",
-        settlement_created_date: "15/04/2024",
-    },
-  ];
-
-  const filteredData = sampleData.filter(
-    (item) =>
-      item.id.includes(searchQuery) ||
-      item.status.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
-  const paginatedData = filteredData.slice(
-    currentPage * rowsPerPage,
-    (currentPage + 1) * rowsPerPage
-  );
+  // Date type mapping between frontend display values and backend expected values
+  const dateTypeMapping = {
+    "accepted": "legal accepted date",
+    "created": "Settlement created dtm"
+  };
 
   const handleNextPage = () => {
-    if (currentPage < pages - 1) setCurrentPage(currentPage + 1);
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      fetchData(currentPage + 1);
+    }
   };
 
   const handlePrevPage = () => {
-    if (currentPage > 0) setCurrentPage(currentPage - 1);
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      fetchData(currentPage - 1);
+    }
+  };
+
+  const fetchData = async (page = 1) => {
+    try {
+      setIsLoading(true);
+      
+      // Format the date to 'YYYY-MM-DD' format
+      const formatDate = (date) => {
+        if (!date) return null;
+        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return offsetDate.toISOString().split('T')[0];
+      };
+      
+      // Create the payload with mapped values where needed
+      const payload = {
+        pages: page,
+        case_current_status: status ? statusMapping[status] : "",
+        date_type: dateType ? dateTypeMapping[dateType] : "",
+        from_date: formatDate(fromDate),
+        to_date: formatDate(toDate)
+      };
+      
+      console.log("Payload sent to API: ", payload);
+      
+      const response = await listAllLitigationCases(payload);
+      
+      if (response && response.status === "success") {
+        setFilteredData(response.data);
+        setTotalCases(response.total_cases);
+        setTotalPages(Math.ceil(response.total_cases / (page === 1 ? 10 : 30)));
+      } else {
+        setFilteredData([]);
+        setTotalCases(0);
+        setTotalPages(1);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        Swal.fire({
+          title: "No Results",
+          text: "No matching data found for the selected filters.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setFilteredData([]);
+      } else {
+        console.error("Error fetching litigation cases:", error);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to fetch data. Please try again.",
+          icon: "error"
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFilter = () => {
-    alert("Filter clicked");
-  }
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Both From Date and To Date must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      setToDate(null);
+      setFromDate(null);
+      return;
+    }
+
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "To date should be greater than or equal to From date",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      setToDate(null);
+      setFromDate(null);
+      return;
+    }
+    
+    setCurrentPage(1); // Reset to first page when filtering
+    fetchData(1);
+  };
+
+  // Function to handle searching through current results
+  const getFilteredResults = () => {
+    if (!searchQuery) return filteredData;
+    
+    return filteredData.filter(item => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        (item.id && item.id.toString().toLowerCase().includes(searchLower)) ||
+        (item.status && item.status.toLowerCase().includes(searchLower)) ||
+        (item.account_no && item.account_no.toString().toLowerCase().includes(searchLower))
+      );
+    });
+  };
+
+  const displayData = getFilteredResults();
+
+  // Load initial data on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Map backend status values to frontend display values (reverse of statusMapping)
+  const getDisplayStatus = (backendStatus) => {
+    for (const [key, value] of Object.entries(statusMapping)) {
+      if (value === backendStatus) return key;
+    }
+    return backendStatus; // Fallback to original value if no mapping found
+  };
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -126,7 +188,11 @@ export const Litigation_List = () => {
         <div className="flex flex-wrap md:flex-nowrap items-center justify-end my-6 gap-1 mb-8">
             <div className="flex items-center justify-end gap-[20px] w-full">
                 {/* Status */}
-                <select className={GlobalStyle.selectBox}>
+                <select 
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className={GlobalStyle.selectBox}
+                >
                     <option value="">Status</option>
                     <option value="Initial_Litigation">Initial Litigation</option>
                     <option value="Pending_FTL">Pending FTL</option>
@@ -139,7 +205,10 @@ export const Litigation_List = () => {
                 </select>
 
                 {/* Date Type */}
-                <select className={GlobalStyle.selectBox}>
+                <select 
+                value={dateType}
+                onChange={(e) => setDateType(e.target.value)}
+                className={GlobalStyle.selectBox}>
                     <option value="">Date Type</option>
                     <option value="accepted">Legal Accepted Date</option>
                     <option value="created">Settlement Created DTM</option>
@@ -169,8 +238,9 @@ export const Litigation_List = () => {
                 <button
                     className={GlobalStyle.buttonPrimary}
                     onClick={handleFilter}
+                    disabled={isLoading}
                 >
-                    Filter
+                    {isLoading ? "Loading..." : "Filter"}
                 </button>
             </div>
         </div>
@@ -183,6 +253,7 @@ export const Litigation_List = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={GlobalStyle.inputSearch}
+                placeholder="Search by ID, Status, or Account No"
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
@@ -191,131 +262,150 @@ export const Litigation_List = () => {
         {/* Table */}
         <div className={GlobalStyle.tableContainer}>
             <table className={GlobalStyle.table}>
-            <thead className={GlobalStyle.thead}>
+              <thead className={GlobalStyle.thead}>
                 <tr>
-                <th className={GlobalStyle.tableHeader}>Case ID</th>
-                <th className={GlobalStyle.tableHeader}>Status</th>
-                <th className={GlobalStyle.tableHeader}>Account No</th>
-                <th className={GlobalStyle.tableHeader}>Amount</th>
-                <th className={GlobalStyle.tableHeader}>Legal Accepeted Date</th>
-                <th className={GlobalStyle.tableHeader}>Settlement Created Date</th>
-                <th className={GlobalStyle.tableHeader}>Actions</th>
+                  <th className={GlobalStyle.tableHeader}>Case ID</th>
+                  <th className={GlobalStyle.tableHeader}>Status</th>
+                  <th className={GlobalStyle.tableHeader}>Account No</th>
+                  <th className={GlobalStyle.tableHeader}>Amount</th>
+                  <th className={GlobalStyle.tableHeader}>Legal Accepted Date</th>
+                  <th className={GlobalStyle.tableHeader}>Settlement Created Date</th>
+                  <th className={GlobalStyle.tableHeader}>Actions</th>
                 </tr>
-            </thead>
-            <tbody>
-                {paginatedData.map((item, index) => (
-                <tr
-                    key={index}
-                    className={`${
-                    index % 2 === 0
-                        ? "bg-white bg-opacity-75"
-                        : "bg-gray-50 bg-opacity-50"
-                    } border-b`}
-                >
-                    <td className={GlobalStyle.tableData}>{item.id}</td>
-                    <td className={GlobalStyle.tableData}>{item.status}</td>
-                    <td className={GlobalStyle.tableData}>{item.account_no}</td>
-                    <td className={GlobalStyle.tableData}>{item.amount}</td>
-                    <td className={GlobalStyle.tableData}>{item.legal_accepted_date}</td>
-                    <td className={GlobalStyle.tableData}>{item.settlement_created_date}</td>
-                    <td className={`${GlobalStyle.tableData} px-4`}>
-                        {item.status === "Initial_Litigation" && (
-                            <div>
-                                <button 
-                                    className="px-4 py-2 bg-white rounded-full border border-[#001120]"
-                                    onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
-                                >
-                                    Documents
-                                </button>
-                            </div>
+              </thead>
+              <tbody>
+                {displayData.map((item, index) => {
+                  // Map the backend status to frontend display status
+                  const displayStatus = getDisplayStatus(item.case_current_status || item.status);
+                  
+                  return (
+                    <tr
+                      key={item._id || item.id || index}
+                      className={`${
+                        index % 2 === 0
+                          ? "bg-white bg-opacity-75"
+                          : "bg-gray-50 bg-opacity-50"
+                      } border-b`}
+                    >
+                      <td className={GlobalStyle.tableData}>{item.case_id || item.id}</td>
+                      <td className={GlobalStyle.tableData}>{displayStatus}</td>
+                      <td className={GlobalStyle.tableData}>{item.account_no || item.account_number}</td>
+                      <td className={GlobalStyle.tableData}>{item.amount || (item.settlement && item.settlement.settlement_amount)}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.legal_accepted_date || 
+                         (item.litigation && item.litigation.legal_submission && 
+                          new Date(item.litigation.legal_submission.submission_on).toLocaleDateString())}
+                      </td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.settlement_created_date || 
+                         (item.settlement && item.settlement.settlement_created_dtm && 
+                          new Date(item.settlement.settlement_created_dtm).toLocaleDateString())}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} px-4`}>
+                        {displayStatus === "Initial_Litigation" && (
+                          <div>
+                            <button 
+                              className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
+                            >
+                              Documents
+                            </button>
+                          </div>
                         )}
-                        {item.status === "Pending_FTL" && (
-                            <div className="flex gap-2">
-                                <button 
-                                    className="px-4 py-2 bg-[#50B748] rounded-full border border-[#001120]"
-                                    onClick={() => navigate("/pages/Litigation/Litigation_Submission_Document_Summary")}
-                                >
-                                    Documents
-                                </button>
-                                <button 
-                                    className="px-4 py-2 bg-white rounded-full border border-[#001120]"
-                                    onClick={() => navigate("/pages/Litigation/Litigation_Submission")}    
-                                >
-                                    Legal Submission
-                                </button>
-                            </div>
+                        {displayStatus === "Pending_FTL" && (
+                          <div className="flex gap-2">
+                            <button 
+                              className="px-4 py-2 bg-[#50B748] rounded-full border border-[#001120]"
+                              onClick={() => navigate("/pages/Litigation/Litigation_Submission_Document_Summary")}
+                            >
+                              Documents
+                            </button>
+                            <button 
+                              className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                              onClick={() => navigate("/pages/Litigation/Litigation_Submission")}    
+                            >
+                              Legal Submission
+                            </button>
+                          </div>
                         )}
-                        {item.status === "FTL_Settle_Pending" && (
-                            <div className="flex justify-center gap-2">   
-                                <button  onClick={() => navigate("/pages/Litigation/Litigation_Case_Details")}>
-                                    <FaEye className="w-6 h-6"/>
-                                </button>
-                            </div>
+                        {displayStatus === "FTL_Settle_Pending" && (
+                          <div className="flex justify-center gap-2">   
+                            <button onClick={() => navigate("/pages/Litigation/Litigation_Case_Details")}>
+                              <FaEye className="w-6 h-6"/>
+                            </button>
+                          </div>
                         )}
-                        {item.status === "Litigation" && (
-                            <div className="flex gap-2">   
-                                <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
-                                    Create Settlement
-                                </button>
-                                <button 
-                                    className="px-4 py-2 bg-white rounded-full border border-[#001120]"
-                                    onClick={() => setIsModalOpen(true)}
-                                >
-                                    Legal Fail
-                                </button>
-                                <Litigation_Fail_Update isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
-                            </div>
+                        {displayStatus === "Litigation" && (
+                          <div className="flex gap-2">   
+                            <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
+                              Create Settlement
+                            </button>
+                            <button 
+                              className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                              onClick={() => setIsModalOpen(true)}
+                            >
+                              Legal Fail
+                            </button>
+                            <Litigation_Fail_Update isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
+                          </div>
                         )}
-                        {item.status === "FTL" && (
-                            <div className="flex gap-2">   
-                                <button 
-                                    className="px-4 py-2 bg-white rounded-full border border-[#001120]"
-                                    onClick={() => navigate("/pages/Litigation/Litigation_Court_Details_Update")}    
-                                >
-                                    Legal Details
-                                </button>
-                                <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
-                                    Create Settlement
-                                </button>
-                            </div>
+                        {displayStatus === "FTL" && (
+                          <div className="flex gap-2">   
+                            <button 
+                              className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                              onClick={() => navigate("/pages/Litigation/Litigation_Court_Details_Update")}    
+                            >
+                              Legal Details
+                            </button>
+                            <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
+                              Create Settlement
+                            </button>
+                          </div>
                         )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {isLoading && (
+                  <tr>
+                    <td colSpan="7" className="text-center py-4">
+                      Loading...
                     </td>
-                </tr>
-                ))}
-                {paginatedData.length === 0 && (
-                <tr>
-                    <td colSpan="8" className="text-center py-4">
-                    {isloading ? "Loading..." : "No results found"}
-                    </td>
-                </tr>
+                  </tr>
                 )}
-            </tbody>
+                {!isLoading && displayData.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="text-center py-4">
+                      No results found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
             </table>
         </div>
 
         {/* Pagination */}
-        {filteredData.length > rowsPerPage && (
-            <div className={GlobalStyle.navButtonContainer}>
+        {totalPages > 1 && (
+          <div className={GlobalStyle.navButtonContainer}>
             <button
-                className={GlobalStyle.navButton}
-                onClick={handlePrevPage}
-                disabled={currentPage === 0}
+              className={GlobalStyle.navButton}
+              onClick={handlePrevPage}
+              disabled={currentPage === 1 || isLoading}
             >
-                <FaArrowLeft />
+              <FaArrowLeft />
             </button>
             <span>
-                Page {currentPage + 1} of {pages}
+              Page {currentPage} of {totalPages}
             </span>
             <button
-                className={GlobalStyle.navButton}
-                onClick={handleNextPage}
-                disabled={currentPage === pages - 1}
+              className={GlobalStyle.navButton}
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages || isLoading}
             >
-                <FaArrowRight />
+              <FaArrowRight />
             </button>
-            </div>
+          </div>
         )}
-
-        </div>
+    </div>
   )
 }
