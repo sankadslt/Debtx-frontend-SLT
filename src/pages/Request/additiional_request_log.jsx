@@ -100,14 +100,25 @@ const RecoveryOfficerRequests = () => {
     console.log("User_Interaction_Type", User_Interaction_Type);
     console.log("delegate_user_id", delegate_user_id);
     console.log("Interaction_Log_ID", Interaction_Log_ID);
-    navigate(`/drc/mediation-board`, {
-      state: {
-        case_Id: case_id,
-        User_Interaction_TYPE: User_Interaction_Type,
-        Delegate_User_id: delegate_user_id,
-        INteraction_Log_ID: Interaction_Log_ID,
-      },
-    });
+    if (User_Interaction_Type === "Request Settlement plan") {
+      navigate("/pages/CreateSettlement/CreateSettlementPlan", {
+        state: {
+          case_Id: case_id,
+          User_Interaction_TYPE: User_Interaction_Type,
+          Delegate_User_id: delegate_user_id,
+          INteraction_Log_ID: Interaction_Log_ID,
+        },
+      });
+    } else {
+      navigate(`/drc/mediation-board`, {
+        state: {
+          case_Id: case_id,
+          User_Interaction_TYPE: User_Interaction_Type,
+          Delegate_User_id: delegate_user_id,
+          INteraction_Log_ID: Interaction_Log_ID,
+        },
+      });
+    }
   };
   const pages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = currentPage * rowsPerPage;
