@@ -24,8 +24,6 @@ import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_B
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 
-
-
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
 import CollectOnlyCPECollect from "../pages/Distribution/CollectOnlyCPECollect";
@@ -34,7 +32,9 @@ import RejectIncident from "../pages/Distribution/RejectIncident";
 import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
 import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
 
-{/* Distribute Imports */ }
+{
+  /* Distribute Imports */
+}
 import AssignDRC from "../pages/Distribute/AssignDRC";
 import AssignDRCForCollectCPE from "../pages/Distribute/AssignDRCForCollectCPE";
 import AssignedDRCSummary from "../pages/Distribute/CaseDistributionDRCTransactions";
@@ -66,11 +66,12 @@ import CommissionCaseList from "../pages/Commission/Commission_List";
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
 import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 
+//SettlementPlan
+import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
 
 const Routers = () => {
   return (
     <Routes>
-
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
@@ -79,98 +80,509 @@ const Routers = () => {
       <Route path="/user-profile" element={<UserProfile />} />
       <Route path="/chart" element={<Chart />} />
 
-
       {/* Prototype Routes */}
-      <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} allowedRoles={['superadmin']} />} />
-      <Route path="/prototypeA" element={<ProtectedRoute element={<PrototypeA />} allowedRoles={['superadmin']} />} />
-      <Route path="/prototypeB" element={<ProtectedRoute element={<PrototypeB />} allowedRoles={['superadmin']} />} />
-      <Route path="/prototypeC" element={<ProtectedRoute element={<PrototypeC />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute
+            element={<Dashboard />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/prototypeA"
+        element={
+          <ProtectedRoute
+            element={<PrototypeA />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/prototypeB"
+        element={
+          <ProtectedRoute
+            element={<PrototypeB />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/prototypeC"
+        element={
+          <ProtectedRoute
+            element={<PrototypeC />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
-      <Route path="/additional_request_log" element={<ProtectedRoute element={<RecoveryOfficerRequests />} allowedRoles={['superadmin']} />} />
-      <Route path="/drc/mediation-board" element={<ProtectedRoute element={<ForwardMediationBoard />} allowedRoles={['superadmin']} />} />
-      <Route path="/drc/period-extension" element={<ProtectedRoute element={<ValidityPeriodExtension />} allowedRoles={['superadmin']} />} />
-      <Route path="/drs/logs/reuest-response-logs" element={<ProtectedRoute element={<RequestResponseLog />} allowedRoles={['superadmin']} />} />
-
-
+      <Route
+        path="/additional_request_log"
+        element={
+          <ProtectedRoute
+            element={<RecoveryOfficerRequests />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/drc/mediation-board"
+        element={
+          <ProtectedRoute
+            element={<ForwardMediationBoard />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/drc/period-extension"
+        element={
+          <ProtectedRoute
+            element={<ValidityPeriodExtension />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/drs/logs/reuest-response-logs"
+        element={
+          <ProtectedRoute
+            element={<RequestResponseLog />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //DISTRIBUTION */}
 
       <Route path="/Distribution/open-incident" element={<OpenIncident />} />
-      <Route path="/Distribution/collect-only-cpe-collect" element={<CollectOnlyCPECollect />} />
-      <Route path="/Distribution/direct-lod-sending-incident" element={<DirectLODSendingIncident />} />
-      <Route path="/Distribution/reject-incident" element={<RejectIncident />} />
-      <Route path="/Distribution/reject-incident-log" element={<RejectIncidentlog />} />
-      <Route path="/Distribution/filtered-incident" element={<ProtectedRoute element={<FilteredIncidents />} allowedRoles={['superadmin']} />} />
-
-
-
-
-
-      {/* Distribute Routes */}
-      <Route path="/pages/Distribute/AssignDRC" element={<ProtectedRoute element={<AssignDRC />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/AssignDRCForCollectCPE" element={<ProtectedRoute element={<AssignDRCForCollectCPE />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/AssignedDRCSummary" element={<ProtectedRoute element={<AssignedDRCSummary />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/AssignedDRCSummaryCollectCPE" element={<ProtectedRoute element={<AssignedDRCSummaryCollectCPE />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DistributionPreparationBulkUpload" element={<ProtectedRoute element={<DistributionPreparationBulkUpload />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DistributionPreparationOnlyCPECollect" element={<ProtectedRoute element={<DistributionPreparationOnlyCPECollect />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DRCAssignManagerApproval" element={<ProtectedRoute element={<DRCAssignManagerApproval />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DistributeDummy" element={<ProtectedRoute element={<DistributeDummy />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/CaseDistributionDRCTransactions-1Batch" element={<ProtectedRoute element={<CaseDistributionDRCTransactions1Batch />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/CaseDistributionDRCSummary" element={<ProtectedRoute element={<CaseDistributionDRCSummary />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/AmendAssignedDRC" element={<ProtectedRoute element={<AmendAssignedDRC />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/CaseDistributionDRCSummarywithRTOM" element={<ProtectedRoute element={<CaseDistributionDRCSummarywithRTOM />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)" element={<ProtectedRoute element={<CaseDistributionDRCTransactionsBatch />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DRCAssignManagerApproval2" element={<ProtectedRoute element={<DRCAssignManagerApproval2 />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DRCAssignManagerApproval3" element={<ProtectedRoute element={<DRCAssignManagerApproval3 />} allowedRoles={['superadmin']} />} />
-
-      <Route path="/pages/Distribute/ReAssignDRC" element={<ReAssignDRC />} />
-      <Route path="/pages/Distribute/AssignDRCCaseList" element={<AssignDRCCaseList />} />
-
-
-      {/* //INCIDENT */}
-      <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
-
+      <Route
+        path="/Distribution/collect-only-cpe-collect"
+        element={<CollectOnlyCPECollect />}
+      />
+      <Route
+        path="/Distribution/direct-lod-sending-incident"
+        element={<DirectLODSendingIncident />}
+      />
+      <Route
+        path="/Distribution/reject-incident"
+        element={<RejectIncident />}
+      />
+      <Route
+        path="/Distribution/reject-incident-log"
+        element={<RejectIncidentlog />}
+      />
+      <Route
+        path="/Distribution/filtered-incident"
+        element={
+          <ProtectedRoute
+            element={<FilteredIncidents />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* Distribute Routes */}
-      <Route path="/pages/Distribute/AssignDRC" element={<ProtectedRoute element={<AssignDRC />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/AssignDRCForCollectCPE" element={<ProtectedRoute element={<AssignDRCForCollectCPE />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/AssignedDRCSummary" element={<ProtectedRoute element={<AssignedDRCSummary />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/AssignedDRCSummaryCollectCPE" element={<ProtectedRoute element={<AssignedDRCSummaryCollectCPE />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DistributionPreparationBulkUpload" element={<ProtectedRoute element={<DistributionPreparationBulkUpload />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DistributionPreparationOnlyCPECollect" element={<ProtectedRoute element={<DistributionPreparationOnlyCPECollect />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DRCAssignManagerApproval" element={<ProtectedRoute element={<DRCAssignManagerApproval />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/DistributeDummy" element={<ProtectedRoute element={<DistributeDummy />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/CaseDistributionDRCTransactions-1Batch" element={<ProtectedRoute element={<CaseDistributionDRCTransactions1Batch />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/CaseDistributionDRCSummary" element={<ProtectedRoute element={<CaseDistributionDRCSummary />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/AmendAssignedDRC" element={<ProtectedRoute element={<AmendAssignedDRC />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Distribute/CaseDistributionDRCSummarywithRTOM" element={<ProtectedRoute element={<CaseDistributionDRCSummarywithRTOM />} allowedRoles={['superadmin']} />} />
-
-      <Route path="/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)" element={<ProtectedRoute element={<CaseDistributionDRCTransactionsBatch />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/pages/Distribute/AssignDRC"
+        element={
+          <ProtectedRoute
+            element={<AssignDRC />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignDRCForCollectCPE"
+        element={
+          <ProtectedRoute
+            element={<AssignDRCForCollectCPE />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignedDRCSummary"
+        element={
+          <ProtectedRoute
+            element={<AssignedDRCSummary />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignedDRCSummaryCollectCPE"
+        element={
+          <ProtectedRoute
+            element={<AssignedDRCSummaryCollectCPE />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DistributionPreparationBulkUpload"
+        element={
+          <ProtectedRoute
+            element={<DistributionPreparationBulkUpload />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DistributionPreparationOnlyCPECollect"
+        element={
+          <ProtectedRoute
+            element={<DistributionPreparationOnlyCPECollect />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DRCAssignManagerApproval"
+        element={
+          <ProtectedRoute
+            element={<DRCAssignManagerApproval />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DistributeDummy"
+        element={
+          <ProtectedRoute
+            element={<DistributeDummy />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/CaseDistributionDRCTransactions-1Batch"
+        element={
+          <ProtectedRoute
+            element={<CaseDistributionDRCTransactions1Batch />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/CaseDistributionDRCSummary"
+        element={
+          <ProtectedRoute
+            element={<CaseDistributionDRCSummary />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AmendAssignedDRC"
+        element={
+          <ProtectedRoute
+            element={<AmendAssignedDRC />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/CaseDistributionDRCSummarywithRTOM"
+        element={
+          <ProtectedRoute
+            element={<CaseDistributionDRCSummarywithRTOM />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)"
+        element={
+          <ProtectedRoute
+            element={<CaseDistributionDRCTransactionsBatch />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DRCAssignManagerApproval2"
+        element={
+          <ProtectedRoute
+            element={<DRCAssignManagerApproval2 />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DRCAssignManagerApproval3"
+        element={
+          <ProtectedRoute
+            element={<DRCAssignManagerApproval3 />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       <Route path="/pages/Distribute/ReAssignDRC" element={<ReAssignDRC />} />
-      <Route path="/pages/Distribute/AssignDRCCaseList" element={<AssignDRCCaseList />} />
+      <Route
+        path="/pages/Distribute/AssignDRCCaseList"
+        element={<AssignDRCCaseList />}
+      />
 
       {/* //INCIDENT */}
-      <Route path="/Incident/Incident_List" element={<ProtectedRoute element={<Incident_List />} allowedRoles={['superadmin']} />} />
-      <Route path="/incident/register" element={<ProtectedRoute element={<Incident_Register_Individual />} allowedRoles={['superadmin']} />} />
-      <Route path="/incident/register-bulk" element={<ProtectedRoute element={<Incident_Register_Bulk_Upload />} allowedRoles={['superadmin']} />} />
-      <Route path="/incident/upload-log" element={<ProtectedRoute element={<SupBulkUploadLog />} allowedRoles={['superadmin']} />} />
-      <Route path="/incident/Incident_File_Download" element={<ProtectedRoute element={<Incident_File_Download/>} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/Incident/Incident_List"
+        element={
+          <ProtectedRoute
+            element={<Incident_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
+      {/* Distribute Routes */}
+      <Route
+        path="/pages/Distribute/AssignDRC"
+        element={
+          <ProtectedRoute
+            element={<AssignDRC />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignDRCForCollectCPE"
+        element={
+          <ProtectedRoute
+            element={<AssignDRCForCollectCPE />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignedDRCSummary"
+        element={
+          <ProtectedRoute
+            element={<AssignedDRCSummary />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignedDRCSummaryCollectCPE"
+        element={
+          <ProtectedRoute
+            element={<AssignedDRCSummaryCollectCPE />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DistributionPreparationBulkUpload"
+        element={
+          <ProtectedRoute
+            element={<DistributionPreparationBulkUpload />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DistributionPreparationOnlyCPECollect"
+        element={
+          <ProtectedRoute
+            element={<DistributionPreparationOnlyCPECollect />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DRCAssignManagerApproval"
+        element={
+          <ProtectedRoute
+            element={<DRCAssignManagerApproval />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/DistributeDummy"
+        element={
+          <ProtectedRoute
+            element={<DistributeDummy />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/CaseDistributionDRCTransactions-1Batch"
+        element={
+          <ProtectedRoute
+            element={<CaseDistributionDRCTransactions1Batch />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/CaseDistributionDRCSummary"
+        element={
+          <ProtectedRoute
+            element={<CaseDistributionDRCSummary />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AmendAssignedDRC"
+        element={
+          <ProtectedRoute
+            element={<AmendAssignedDRC />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/CaseDistributionDRCSummarywithRTOM"
+        element={
+          <ProtectedRoute
+            element={<CaseDistributionDRCSummarywithRTOM />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      <Route
+        path="/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)"
+        element={
+          <ProtectedRoute
+            element={<CaseDistributionDRCTransactionsBatch />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      <Route path="/pages/Distribute/ReAssignDRC" element={<ReAssignDRC />} />
+      <Route
+        path="/pages/Distribute/AssignDRCCaseList"
+        element={<AssignDRCCaseList />}
+      />
+
+      {/* //INCIDENT */}
+      <Route
+        path="/Incident/Incident_List"
+        element={
+          <ProtectedRoute
+            element={<Incident_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/incident/register"
+        element={
+          <ProtectedRoute
+            element={<Incident_Register_Individual />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/incident/register-bulk"
+        element={
+          <ProtectedRoute
+            element={<Incident_Register_Bulk_Upload />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/incident/upload-log"
+        element={
+          <ProtectedRoute
+            element={<SupBulkUploadLog />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/incident/Incident_File_Download"
+        element={
+          <ProtectedRoute
+            element={<Incident_File_Download />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //MEDIATION BOARD */}
-      <Route path="/MediationBoard/MediationBoardCaseList" element={<ProtectedRoute element={<MediationBoardCaseList />} allowedRoles={['superadmin']} />} />
-      <Route path="/MediationBoard/MediationBoardResponse/:caseId" element={<ProtectedRoute element={<MediationBoardResponse />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/MediationBoard/MediationBoardCaseList"
+        element={
+          <ProtectedRoute
+            element={<MediationBoardCaseList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/MediationBoard/MediationBoardResponse/:caseId"
+        element={
+          <ProtectedRoute
+            element={<MediationBoardResponse />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //MONEY TRANSACTIONS */}
-      <Route path="pages/Money_Transaction/MoneyTransaction" element={<ProtectedRoute element={<PaymentDetails />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="pages/Money_Transaction/MoneyTransaction"
+        element={
+          <ProtectedRoute
+            element={<PaymentDetails />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
-{/* //COMMISSION */}
-<Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
+      {/* //COMMISSION */}
+      <Route
+        path="/Commission/CommissionCaseList"
+        element={
+          <ProtectedRoute
+            element={<CommissionCaseList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //SETTLEMENT */}
-      <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/pages/Settlement/MonitorSettlement"
+        element={
+          <ProtectedRoute
+            element={<MonitorSettlement />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Settlement/MoneyTransactions"
+        element={
+          <ProtectedRoute
+            element={<MoneyTransactions />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      {/* //Create SETTLEMENT */}
+      <Route
+        path="/pages/CreateSettlement/CreateSettlementPlan"
+        element={
+          <ProtectedRoute
+            element={<CreateSettlementPlan />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
     </Routes>
   );
 };
