@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
+import { Case_Details_Settlement_Phase } from "../../services/settlement/SettlementServices";
 
 export default function CreateSettlementPlan() {
   const [selectedPlan, setSelectedPlan] = useState("");
@@ -9,6 +10,7 @@ export default function CreateSettlementPlan() {
   const [toDate, setToDate] = useState(null);
   const [error, setError] = useState("");
   const [settlementCount, setSettlementCount] = useState(0);
+  const [caseDetails, setCaseDetails] = useState([]);
 
   const data = [
     {
@@ -18,6 +20,23 @@ export default function CreateSettlementPlan() {
       installmentPaidAmount: "25000",
     },
   ];
+  useEffect(() => {
+    const fetchCaseDetails = async () => {
+      try {
+        const payload = { case_id: 4 };
+        console.log("Sending API request with payload:", payload);
+        const response = await Case_Details_Settlement_Phase(payload);
+        console.log("API Response:", response);
+        console.log("Case details received:", response);
+        setCaseDetails(response);
+        setSettlementCount(response?.settlement_count);
+      } catch (error) {
+        console.error("Error fetching case details:", error);
+        setCaseDetails([]);
+      }
+    };
+    fetchCaseDetails();
+  }, []);
 
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
@@ -45,20 +64,25 @@ export default function CreateSettlementPlan() {
       <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
         {/* Card Box */}
         <div className={`${GlobalStyle.cardContainer}`}>
-          <p className="mb-2">
-            <strong>Case ID:</strong>
+          <p className="flex gap-3 mb-2">
+            <strong>Case ID: </strong>
+            <div> {caseDetails?.case_id}</div>
           </p>
           <p className="mb-2">
-            <strong>Customer Ref:</strong>
+            <strong>Customer Ref: </strong>
+            {caseDetails?.customer_ref}
+          </p>
+          <p className="flex gap-3 mb-2">
+            <strong>Account no: </strong>
+            <div> {caseDetails?.account_no}</div>
           </p>
           <p className="mb-2">
-            <strong>Account no:</strong>
+            <strong>Arrears Amount: </strong>
+            {caseDetails?.current_arrears_amount}
           </p>
           <p className="mb-2">
-            <strong>Arrears Amount:</strong>
-          </p>
-          <p className="mb-2">
-            <strong>Last Payment Date:</strong>
+            <strong>Last Payment Date: </strong>
+            {new Date(caseDetails?.last_payment_date).toLocaleDateString()}
           </p>
         </div>
 
@@ -75,23 +99,13 @@ export default function CreateSettlementPlan() {
 
         <div className="flex gap-4">
           <h1 className={GlobalStyle.remarkTopic}>Case Status:</h1>
-          <input
-            type="text"
-            placeholder="Text here"
-            className={GlobalStyle.inputText}
-          />
+          <div> {caseDetails?.case_current_status}</div>
         </div>
         <br />
 
         <div className="flex gap-4">
           <h1 className={GlobalStyle.remarkTopic}>Settlement Count:</h1>
-          <input
-            type="number"
-            min="1"
-            value={settlementCount}
-            onChange={(e) => setSettlementCount(parseInt(e.target.value) || 0)}
-            className={GlobalStyle.inputText}
-          />
+          <div> {caseDetails?.settlement_count}</div>
         </div>
         <br />
 
@@ -167,10 +181,13 @@ export default function CreateSettlementPlan() {
             <br />
 
             {/* Dynamically Render Tables Based on Settlement Count */}
-            {Array.from({ length: settlementCount }, (_, index) => (
-              <div key={index} className={GlobalStyle.tableContainer}>
+            {caseDetails?.settlement_plans?.map((plan, index) => (
+              <div
+                key={plan.settlement_id}
+                className={GlobalStyle.tableContainer}
+              >
                 <h2 className={GlobalStyle.remarkTopic}>
-                  Settlement {index + 1}
+                  Settlement ID: {plan.settlement_id}
                 </h2>
                 <div>
                   {/* Table */}
@@ -189,24 +206,24 @@ export default function CreateSettlementPlan() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.map((row, rowIndex) => (
+                        {plan.settlement_plan.map((row, rowIndex) => (
                           <tr
-                            key={rowIndex}
+                            key={row._id}
                             className={
                               rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
                             }
                           >
                             <td className={GlobalStyle.tableData}>
-                              {row.seqNo}
+                              {row.installment_seq}
                             </td>
                             <td className={GlobalStyle.tableData}>
-                              {row.installmentSettleAmount}
+                              {row.Installment_Settle_Amount}
                             </td>
                             <td className={GlobalStyle.tableData}>
-                              {row.planDate}
+                              {new Date(row.Plan_Date).toLocaleDateString()}
                             </td>
                             <td className={GlobalStyle.tableData}>
-                              {row.installmentPaidAmount}
+                              {row.Installment_Paid_Amount}
                             </td>
                           </tr>
                         ))}
