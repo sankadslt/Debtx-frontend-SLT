@@ -167,10 +167,10 @@ export const Litigation_List = () => {
 
   const displayData = getFilteredResults();
 
-  // Load initial data on component mount
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // // Load initial data on component mount
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
   // Map backend status values to frontend display values (reverse of statusMapping)
   const getDisplayStatus = (backendStatus) => {
@@ -223,6 +223,7 @@ export const Litigation_List = () => {
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/yyyy"
                         className={`${GlobalStyle.inputText} w-32 md:w-40`}
+                        disabled={!dateType}
                     />
 
                     <DatePicker
@@ -231,6 +232,7 @@ export const Litigation_List = () => {
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/yyyy"
                         className={`${GlobalStyle.inputText} w-32 md:w-40`}
+                        disabled={!dateType}
                     />
                 </div>
 
