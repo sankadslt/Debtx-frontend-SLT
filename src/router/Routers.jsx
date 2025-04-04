@@ -69,6 +69,10 @@ import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 //SettlementPlan
 import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
 
+//LOD
+import Digital_Signature_LOD from "../pages/LOD/Digital_Signature_LOD";
+import LOD_Log from "../pages/LOD/LODLog";
+
 const Routers = () => {
   return (
     <Routes>
@@ -583,7 +587,28 @@ const Routers = () => {
           />
         }
       />
+
+      {/* //LOD */}
+      <Route
+        path="/pages/LOD/DigitalSignatureLOD"
+        element={
+          <ProtectedRoute
+            element={<Digital_Signature_LOD />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/LODLog"
+        element={
+          <ProtectedRoute
+            element={<LOD_Log />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
     </Routes>
+    
   );
 };
 

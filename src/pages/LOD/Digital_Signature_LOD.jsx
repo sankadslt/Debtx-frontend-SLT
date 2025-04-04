@@ -22,7 +22,7 @@ import Swal from "sweetalert2";
 // import { Task_for_Download_LODs } from "../../services/task/taskService.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { F2_selection_cases_count } from "../../services/LOD/LOD.js";
-import { fetchF2SelectionCases } from "../../services/LOD/LOD.js";
+import { List_F2_Selection_Cases } from "../../services/LOD/LOD.js";
 import { getUserData } from "../../services/auth/authService.js";
 import { Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
@@ -108,7 +108,7 @@ const Digital_Signature_LOD = () => {
     const fetchData = async (LODType, currentPage) => {
         setIsLoading(true);
         try {
-            const LODs = await fetchF2SelectionCases(LODType, currentPage + 1);
+            const LODs = await List_F2_Selection_Cases(LODType, currentPage + 1);
             setData(LODs);
             setIsFiltered(LODs.length > 0);
         } catch (error) {
