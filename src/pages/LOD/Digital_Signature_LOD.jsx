@@ -27,7 +27,7 @@ import { getUserData } from "../../services/auth/authService.js";
 import { Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Change_Document_Type } from "../../services/LOD/LOD.js";
-import { Create_LOD_List } from "../../services/LOD/LOD.js";
+import { Create_Task_for_Proceed_LOD_OR_Final_Reminder_List } from "../../services/LOD/LOD.js";
 
 const Digital_Signature_LOD = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -176,7 +176,8 @@ const Digital_Signature_LOD = () => {
         const userData = await getUserData();
 
         try {
-            const response = await Change_Document_Type(userData.username, activePopupLODID, activePopupLODStatus, changeReason);
+            const intLODID = parseInt(activePopupLODID, 10);
+            const response = await Change_Document_Type(intLODID, activePopupLODStatus, userData.username, changeReason);
             console.log("LOD Type changed successfully:", response);
             Swal.fire("Success", `LOD Type changed successfully!`, "success");
         } catch (error) {
@@ -194,7 +195,7 @@ const Digital_Signature_LOD = () => {
 
         setIsCreatingTask(true);
         try {
-            const response = await Create_LOD_List(userData.username, LODCount, LODType);
+            const response = await Create_Task_for_Proceed_LOD_OR_Final_Reminder_List(userData.username, LODCount, LODType);
             console.log("Task created successfully:", response);
             Swal.fire("Success", `Task created successfully! Template Task ID: ${response.Template_Task_Id}`, "success");
         } catch (error) {
@@ -254,6 +255,8 @@ const Digital_Signature_LOD = () => {
         });
         ChangeDocumentType();
         closePopup();
+        window.location.reload();
+
     };
 
     const handleInputCount = (value) => {
@@ -289,8 +292,8 @@ const Digital_Signature_LOD = () => {
                         className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
                         disabled={isCreatingTask}
                     >
-                        {/* {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
-                        Create task and let me know
+                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                        {/* Create task and let me know */}
                     </button>
                 </div>
             )}
@@ -435,8 +438,8 @@ const Digital_Signature_LOD = () => {
                         // className={GlobalStyle.buttonPrimary}
                         disabled={isCreatingTask}
                     >
-                        {/* {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
-                        Create task and let me know
+                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                        {/* Create task and let me know */}
                     </button>
                     <div className="flex justify-end gap-4">
                         <input

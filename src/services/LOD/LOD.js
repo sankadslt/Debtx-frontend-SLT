@@ -37,8 +37,8 @@ export const List_F2_Selection_Cases = async (current_document_type, pages = 1) 
             LODID: LOD.case_id,
             Status: LOD.lod_final_reminder.current_document_type,
             Amount: LOD.current_arrears_amount,
-            CustomerTypeName: LOD.CustomerTypeName || null,
-            AccountManagerCode: LOD.AccountManagerCode || null,
+            CustomerTypeName: LOD.customer_name || null,
+            AccountManagerCode: LOD.rtom || null,
             SourceType: LOD.lod_final_reminder.source_type || null,
           }));
         } else {
@@ -99,21 +99,21 @@ export const Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases = async 
 
 export const Change_Document_Type = async (case_id, current_document_type, Created_By, changed_type_remark) => {
   try {
-    const response = await axios.post(`${LOD_URL}/Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases`, {
+    const response = await axios.post(`${LOD_URL}/Change_Document_Type`, {
       Created_By: Created_By,
       current_document_type: current_document_type,
       case_id: case_id,
       changed_type_remark: changed_type_remark,
     });
 
-    return response.status;
+    return response;
   } catch (error) {
     console.error("Error creating task:", error.response?.data || error.message);
     throw error.response?.data || error;
   }
 };
 
-export const Create_LOD_List = async (Created_By, Case_count, current_document_type) => {
+export const Create_Task_for_Proceed_LOD_OR_Final_Reminder_List = async (Created_By, Case_count, current_document_type) => {
   try {
     const response = await axios.post(`${LOD_URL}/Create_Task_for_Proceed_LOD_OR_Final_Reminder_List`, {
       Created_By: Created_By,
