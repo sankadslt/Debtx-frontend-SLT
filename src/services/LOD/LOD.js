@@ -3,7 +3,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
 const LOD_URL = `${BASE_URL}/lod`;
 
-export const fetchCaseCounts = async () => {
+export const F2_selection_cases_count = async () => {
   try {
     const response = await axios.get(`${LOD_URL}/F2_selection_cases_count`);
     const data = response.data?.data || { total_count: 0, cases: [] };
@@ -24,7 +24,7 @@ export const fetchCaseCounts = async () => {
   }
 };
 
-export const fetchF2SelectionCases = async (current_document_type, pages = 1) => {
+export const List_F2_Selection_Cases = async (current_document_type, pages = 1) => {
     try {
         const response = await axios.post(`${LOD_URL}/List_F2_Selection_Cases`, {
             current_document_type: current_document_type,
@@ -115,7 +115,7 @@ export const Change_Document_Type = async (case_id, current_document_type, Creat
 
 export const Create_LOD_List = async (Created_By, Case_count, current_document_type) => {
   try {
-    const response = await axios.post(`${LOD_URL}/Create_LOD_List`, {
+    const response = await axios.post(`${LOD_URL}/Create_Task_for_Proceed_LOD_OR_Final_Reminder_List`, {
       Created_By: Created_By,
       current_document_type: current_document_type,
       Case_count: Case_count,
