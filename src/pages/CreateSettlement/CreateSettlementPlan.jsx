@@ -12,6 +12,14 @@ export default function CreateSettlementPlan() {
   const [settlementCount, setSettlementCount] = useState(0);
   const [caseDetails, setCaseDetails] = useState([]);
 
+  const data = [
+    {
+      seqNo: "1",
+      installmentSettleAmount: "30,000",
+      planDate: "mm/dd/yyyy",
+      installmentPaidAmount: "25000",
+    },
+  ];
   useEffect(() => {
     const fetchCaseDetails = async () => {
       try {
@@ -29,6 +37,21 @@ export default function CreateSettlementPlan() {
     };
     fetchCaseDetails();
   }, []);
+  useEffect(() => {
+    if (!calendarMonth || calendarMonth < 1) return;
+
+    const today = new Date();
+    const from = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const to = new Date(
+      from.getFullYear(),
+      from.getMonth() + Number(calendarMonth),
+      0
+    );
+
+    setFromDate(from);
+    setToDate(to);
+    setError("");
+  }, [calendarMonth]);
 
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
@@ -47,21 +70,6 @@ export default function CreateSettlementPlan() {
       setToDate(date);
     }
   };
-  useEffect(() => {
-    if (!calendarMonth || calendarMonth < 1) return;
-
-    const today = new Date();
-    const from = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-    const to = new Date(
-      from.getFullYear(),
-      from.getMonth() + Number(calendarMonth),
-      0
-    );
-
-    setFromDate(from);
-    setToDate(to);
-    setError("");
-  }, [calendarMonth]);
 
   return (
     <div className={GlobalStyle.fontPoppins}>
