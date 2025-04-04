@@ -586,6 +586,16 @@ const Routers = () => {
           />
         }
       />
+
+      <Route
+      path="/pages/Write_Off/WriteOffCaseList"
+      element={
+        <ProtectedRoute
+        element={<WriteOffCaseList />}
+        allowedRoles={["superadmin"]}
+        />
+      }
+      />
     </Routes>
   );
 };
