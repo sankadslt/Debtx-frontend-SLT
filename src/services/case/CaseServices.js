@@ -555,54 +555,6 @@ export const Withdraw_CasesOwened_By_DRC = async (payload) => {
 };
 
 
-export const List_Details_Of_Mediation_Board_Acceptance = async (payload) => {
-  try {
-    const response = await axios.post(
-      `${URL}/List_Details_Of_Mediation_Board_Acceptance`,
-      payload
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error fetching mediation board acceptance details:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-};
-
-export const Submit_Mediation_Board_Acceptance = async (payload) => {
-  try {
-    const response = await axios.post(
-      `${URL}/Submit_Mediation_Board_Acceptance`,
-      payload
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error submitting mediation board acceptance:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-};
-
-export const Withdraw_Mediation_Board_Acceptance = async (payload) => {
-  try {
-    const response = await axios.post(
-      `${URL}/Withdraw_Mediation_Board_Acceptance`,
-      payload
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error withdrawing mediation board acceptance:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-};
-
 export const List_Cases_Owned_By_Mediation_Board = async (payload) => {
   try {
     const response = await axios.post(
