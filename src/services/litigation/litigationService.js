@@ -15,18 +15,19 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/litigation`;
 
+
 export const listAllLitigationCases = async (payload) => {
-    try {
-      const response = await axios.post(
-        `${URL}/List_All_Litigation_Cases`,
-        payload
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        "Error withdrawing Litigation cases :",
-        error.response?.data || error.message
-      );
-      throw error;
-    }
+  try {
+    const response = await axios.post(
+      `${URL}/List_All_Litigation_Cases`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error withdrawing Litigation cases :",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
 }

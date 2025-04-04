@@ -167,11 +167,6 @@ export const Litigation_List = () => {
 
   const displayData = getFilteredResults();
 
-  // Load initial data on component mount
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   // Map backend status values to frontend display values (reverse of statusMapping)
   const getDisplayStatus = (backendStatus) => {
     for (const [key, value] of Object.entries(statusMapping)) {
