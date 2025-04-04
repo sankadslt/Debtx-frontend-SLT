@@ -112,3 +112,18 @@ export const Change_Document_Type = async (case_id, current_document_type, Creat
     throw error.response?.data || error;
   }
 };
+
+export const Create_LOD_List = async (Created_By, Case_count, current_document_type) => {
+  try {
+    const response = await axios.post(`${LOD_URL}/Create_LOD_List`, {
+      Created_By: Created_By,
+      current_document_type: current_document_type,
+      Case_count: Case_count,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error creating task:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};

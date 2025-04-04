@@ -27,6 +27,7 @@ import { getUserData } from "../../services/auth/authService.js";
 import { Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Change_Document_Type } from "../../services/LOD/LOD.js";
+import { Create_LOD_List } from "../../services/LOD/LOD.js";
 
 const Digital_Signature_LOD = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -118,56 +119,13 @@ const Digital_Signature_LOD = () => {
         }
     };
 
-    // const handleFilter = async () => {
-    //     try {
-    //         await fetchData(LODType);
-    //     } catch (error) {
-    //         Swal.fire("Error", error.message || "No LOD is matching the criteria", "error");
-    //     }
-    // };
-
     useEffect(() => {
         if (LODType.trim()) { // Check if LODType is not empty or just whitespace
             fetchData(LODType, currentPage);
+        } else {
+            setData([]); // Clear data if LODType is empty
         }
     }, [LODType, currentPage]);
-
-    // useEffect(() => {
-    //     fetchData({});
-    // }, []);
-
-
-    // const HandleCreateTask = async () => {
-
-    //     // if (!isFiltered) {
-    //     //     Swal.fire("Error", "Please apply filters that return data before creating a task.", "error");
-    //     //     return;
-    //     // }
-
-    //     // const adjustToLocalISO = (date) => {
-    //     //     const offset = date.getTimezoneOffset() * 60000;
-    //     //     return new Date(date.getTime() - offset).toISOString();
-    //     // };
-    //     const user_id = await getLoggedUserId();
-    //     const requestData = {
-    //         LOD_Action: LODType,
-    //         Incident_Status: status2,
-    //         Source_Type: status3,
-    //         From_Date: adjustToLocalISO(fromDate),
-    //         To_Date: adjustToLocalISO(toDate),
-    //         Created_By: user_id
-    //     };
-
-    //     setIsCreatingTask(true);
-    //     try {
-    //         const response = await Task_for_Download_LODs(requestData);
-    //         Swal.fire("Success", `Task created successfully! Task ID: ${response.Task_Id}`, "success");
-    //     } catch (error) {
-    //         Swal.fire("Error", error.message || "Failed to create task.", "error");
-    //     } finally {
-    //         setIsCreatingTask(false);
-    //     }
-    // };
 
     const HandleCreateTaskEachLOD = async () => {
         if (!LODType) {
@@ -226,7 +184,25 @@ const Digital_Signature_LOD = () => {
         } 
     };
 
-    const HandleAddIncident = () => navigate("/incident/register");
+    const HandleCreateLODList = async () => {
+        if (LODCount <= 0) {
+            Swal.fire("Error", "Please enter LOD Count", "error");
+            return;
+        }
+
+        const userData = await getUserData();
+
+        setIsCreatingTask(true);
+        try {
+            const response = await Create_LOD_List(userData.username, LODCount, LODType);
+            console.log("Task created successfully:", response);
+            Swal.fire("Success", `Task created successfully! Template Task ID: ${response.Template_Task_Id}`, "success");
+        } catch (error) {
+            Swal.fire("Error", error.message || "Failed to create task.", "error");
+        } finally {
+            setIsCreatingTask(false);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -284,25 +260,11 @@ const Digital_Signature_LOD = () => {
         setLODCount(value);
     }
 
-    const handleCreateLODList = () => {
-
-    }
-
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Pending Digital Signature LOD</h2>
-
-            {/* <div className="flex justify-end mt-6">
-                <button onClick={HandleAddIncident} className={GlobalStyle.buttonPrimary}>
-                    Add Incident
-                </button>
-            </div> */}
-
             <div className="flex justify-center mt-6">
                 <div className={`${GlobalStyle.miniCaseCountBar}`}>
-                    {/* <div className="flex">
-                    <span className={GlobalStyle.miniCountBarTopic}>Mini Case count</span>
-                </div> */}
                     <div className={GlobalStyle.miniCountBarSubTopicContainer}>
                         <div className={GlobalStyle.miniCountBarMainBox}>
                             <span>Total:</span>
@@ -327,7 +289,8 @@ const Digital_Signature_LOD = () => {
                         className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
                         disabled={isCreatingTask}
                     >
-                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                        {/* {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
+                        Create task and let me know
                     </button>
                 </div>
             )}
@@ -421,8 +384,6 @@ const Digital_Signature_LOD = () => {
                                 <h2 className={GlobalStyle.popupBoxTitle}>
                                     {activePopupLODStatus === "LOD" ? "Change to Final Reminder" : "Change to LOD"}
                                 </h2>
-
-
                                 <button
                                     className={GlobalStyle.popupBoxCloseButton}
                                     onClick={() => closePopup()}
@@ -471,9 +432,11 @@ const Digital_Signature_LOD = () => {
                     <button
                         onClick={HandleCreateTaskEachLOD}
                         className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                        // className={GlobalStyle.buttonPrimary}
                         disabled={isCreatingTask}
                     >
-                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                        {/* {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
+                        Create task and let me know
                     </button>
                     <div className="flex justify-end gap-4">
                         <input
@@ -485,7 +448,7 @@ const Digital_Signature_LOD = () => {
                         />
                         <button
                             className={GlobalStyle.buttonPrimary}
-                            onClick={handleCreateLODList}
+                            // onClick={HandleCreateLODList}
                         >
                             Create LOD List
                         </button>
