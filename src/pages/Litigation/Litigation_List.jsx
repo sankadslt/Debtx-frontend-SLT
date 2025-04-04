@@ -31,7 +31,7 @@ export const Litigation_List = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [totalCases, setTotalCases] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-
+ 
   // Status mapping between frontend display values and backend expected values
   const statusMapping = {
     "Initial_Litigation": "Initial Litigation",
@@ -167,11 +167,6 @@ export const Litigation_List = () => {
 
   const displayData = getFilteredResults();
 
-  // // Load initial data on component mount
-  // useEffect(() => {
-  //   fetchData();
-  // }, []);
-
   // Map backend status values to frontend display values (reverse of statusMapping)
   const getDisplayStatus = (backendStatus) => {
     for (const [key, value] of Object.entries(statusMapping)) {
@@ -289,9 +284,9 @@ export const Litigation_List = () => {
                           : "bg-gray-50 bg-opacity-50"
                       } border-b`}
                     >
-                      <td className={GlobalStyle.tableData}>{item.case_id || item.id}</td>
+                      <td className={`${GlobalStyle.tableData} text-center`}>{item.case_id || item.id}</td>
                       <td className={GlobalStyle.tableData}>{displayStatus}</td>
-                      <td className={GlobalStyle.tableData}>{item.account_no || item.account_number}</td>
+                      <td className={`${GlobalStyle.tableData} text-center`}>{item.account_no || item.account_number}</td>
                       <td className={GlobalStyle.tableData}>{item.amount || (item.settlement && item.settlement.settlement_amount)}</td>
                       <td className={GlobalStyle.tableData}>
                         {item.legal_accepted_date || 
@@ -307,7 +302,7 @@ export const Litigation_List = () => {
                         {displayStatus === "Initial_Litigation" && (
                           <div>
                             <button 
-                              className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                              className={GlobalStyle.buttonPrimary}
                               onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
                             >
                               Documents
@@ -323,7 +318,7 @@ export const Litigation_List = () => {
                               Documents
                             </button>
                             <button 
-                              className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                              className={GlobalStyle.buttonPrimary}
                               onClick={() => navigate("/pages/Litigation/Litigation_Submission")}    
                             >
                               Legal Submission
@@ -339,11 +334,11 @@ export const Litigation_List = () => {
                         )}
                         {displayStatus === "Litigation" && (
                           <div className="flex gap-2">   
-                            <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
+                            <button className={GlobalStyle.buttonPrimary}>
                               Create Settlement
                             </button>
                             <button 
-                              className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                              className={GlobalStyle.buttonPrimary}
                               onClick={() => setIsModalOpen(true)}
                             >
                               Legal Fail
@@ -354,12 +349,14 @@ export const Litigation_List = () => {
                         {displayStatus === "FTL" && (
                           <div className="flex gap-2">   
                             <button 
-                              className="px-4 py-2 bg-white rounded-full border border-[#001120]"
+                              className={GlobalStyle.buttonPrimary}
                               onClick={() => navigate("/pages/Litigation/Litigation_Court_Details_Update")}    
                             >
                               Legal Details
                             </button>
-                            <button className="px-4 py-2 bg-white rounded-full border border-[#001120]">
+                            <button 
+                              className={GlobalStyle.buttonPrimary}
+                            >
                               Create Settlement
                             </button>
                           </div>
