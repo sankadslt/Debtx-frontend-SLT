@@ -66,6 +66,10 @@ import CommissionCaseList from "../pages/Commission/Commission_List";
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
 import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 
+//FLT LOD
+import FTLLODCaseList from "../pages/FLT_LOD/FTL_LOD_List";
+import FTL_LOD_creation from "../pages/FLT_LOD/FTL_LOD_creation";
+
 //SettlementPlan
 import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
 
@@ -583,6 +587,12 @@ const Routers = () => {
           />
         }
       />
+
+      {/* FTL LOD Routes */}
+      <Route path="/pages/flt-lod/ftl-lod-list" element={<ProtectedRoute element={<FTLLODCaseList />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)" element={<ProtectedRoute element={<FTL_LOD_creation />} allowedRoles={['superadmin']} />} />
+
+
     </Routes>
   );
 };

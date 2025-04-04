@@ -147,6 +147,15 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         {
+          label: "FTL LOD Dummy",
+          subItems: [
+            { icon: CgEditFade, label: "3.1 - FTL LOD Case List", link: "/pages/flt-lod/ftl-lod-list", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "3.1.1 sup - FTL LOD creation", link: "/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "3.1.2 sup - FTL LOD creation", link: "/dashboard", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "3.2 - FTL LOD Case details", link: "/dashboard", roles: ["superadmin", "admin"] }
+          ],
+        },
+        {
           label: "Dummy",
           subItems: [
             { icon: CgEditFade, label: "Distribute Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
