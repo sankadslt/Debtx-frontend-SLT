@@ -66,6 +66,9 @@ import CommissionCaseList from "../pages/Commission/Commission_List";
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
 import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 
+//Write Off
+import WriteOffCaseList from "../pages/Write_Off/WriteOffCaseList";
+
 
 const Routers = () => {
   return (
@@ -171,6 +174,10 @@ const Routers = () => {
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
+
+      {/* //Write_Off */}
+      <Route path="/pages/Write_Off/WriteOffCaseList" element={<ProtectedRoute element={<WriteOffCaseList />} allowedRoles={['superadmin']} />} />
+
     </Routes>
   );
 };
