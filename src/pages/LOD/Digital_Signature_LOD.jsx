@@ -139,7 +139,7 @@ const Digital_Signature_LOD = () => {
         try {
             const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData.username, LODType);
             console.log("Task created successfully:", response);
-            Swal.fire("Success", `Task created successfully! Template Task ID: ${response.Template_Task_Id}`, "success");
+            Swal.fire("Success", `Task created successfully!`, "success");
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to create task.", "error");
         } finally {
@@ -159,7 +159,7 @@ const Digital_Signature_LOD = () => {
         try {
             const response = await Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases(userData.username);
             console.log("Task created successfully:", response);
-            Swal.fire("Success", `Task created successfully! Template Task ID: ${response.Template_Task_Id}`, "success");
+            Swal.fire("Success", `Task created successfully!`, "success");
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to create task.", "error");
         } finally {
@@ -197,7 +197,7 @@ const Digital_Signature_LOD = () => {
         try {
             const response = await Create_Task_for_Proceed_LOD_OR_Final_Reminder_List(userData.username, LODCount, LODType);
             console.log("Task created successfully:", response);
-            Swal.fire("Success", `Task created successfully! Template Task ID: ${response.Template_Task_Id}`, "success");
+            Swal.fire("Success", `Task created successfully!`, "success");
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to create task.", "error");
         } finally {
