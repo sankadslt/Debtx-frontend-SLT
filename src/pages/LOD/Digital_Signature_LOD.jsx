@@ -20,9 +20,9 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 // import { fetchLODs } from "../../services/LODs/LODservice.js";
 // import { Task_for_Download_LODs } from "../../services/task/taskService.js";
-// import { getLoggedUserId } from "../../services/auth/authService.js";
-import { fetchCaseCounts } from "../../services/LOD/LOD.js";
-import { fetchF2SelectionCases } from "../../services/LOD/LOD.js";
+import { getLoggedUserId } from "../../services/auth/authService.js";
+import { F2_selection_cases_count } from "../../services/LOD/LOD.js";
+import { List_F2_Selection_Cases } from "../../services/LOD/LOD.js";
 import { getUserData } from "../../services/auth/authService.js";
 import { Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
@@ -47,18 +47,18 @@ const Digital_Signature_LOD = () => {
     const [lodCount, setlodCount] = useState(0);
     const [finalReminderCount, setFinalReminderCount] = useState(0);
 
-    // const displayUserData = async () => {
-    //     try {
-    //         const userData = await getUserData();
-    //         console.log("User Data:", userData.username); // Log the user data to the console
-    //     } catch (error) {
-    //         console.error("Error fetching user data:", error.message || error);
-    //     }
-    // };
+    const displayUserData = async () => {
+        try {
+            const userData = await getLoggedUserId();
+            console.log("User Data:", userData); // Log the user data to the console
+        } catch (error) {
+            console.error("Error fetching user data:", error.message || error);
+        }
+    };
 
-    // useEffect(() => {
-    //     displayUserData();
-    // }, [])
+    useEffect(() => {
+        displayUserData();
+    }, [])
 
     const getStatusIcon = (status) => {
         switch (status?.toLowerCase()) {
@@ -90,7 +90,7 @@ const Digital_Signature_LOD = () => {
 
     const fetchLODCounts = async () => {
         try {
-            const { totalCount, lodCount, finalReminderCount } = await fetchCaseCounts();
+            const { totalCount, lodCount, finalReminderCount } = await F2_selection_cases_count();
             setTotalCount(totalCount);
             setlodCount(lodCount);
             setFinalReminderCount(finalReminderCount);
@@ -108,7 +108,7 @@ const Digital_Signature_LOD = () => {
     const fetchData = async (LODType, currentPage) => {
         setIsLoading(true);
         try {
-            const LODs = await fetchF2SelectionCases(LODType, currentPage + 1);
+            const LODs = await List_F2_Selection_Cases(LODType, currentPage + 1);
             setData(LODs);
             setIsFiltered(LODs.length > 0);
         } catch (error) {
@@ -448,7 +448,7 @@ const Digital_Signature_LOD = () => {
                         />
                         <button
                             className={GlobalStyle.buttonPrimary}
-                            // onClick={HandleCreateLODList}
+                            onClick={HandleCreateLODList}
                         >
                             Create LOD List
                         </button>
