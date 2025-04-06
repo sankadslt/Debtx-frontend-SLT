@@ -75,6 +75,7 @@ import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan
 
 //Withdrawal
 import WithdrawalCaseLog from "../pages/Withdrawal/WithdrawalCaseLog";
+import WithdrawCase from "../pages/Withdrawal/WithdrawCase";
 
 //Abondoned Case
 import AbondonedCaseLog from "../pages/Abondoned_Case/AbondonedCaseLog";
@@ -620,6 +621,16 @@ const Routers = () => {
       element={
         <ProtectedRoute
         element={<WithdrawalCaseLog />}
+        allowedRoles={["superadmin"]}
+        />
+      }
+      />
+
+      <Route
+      path="/pages/Withdrawal/WithdrawCase"
+      element={
+        <ProtectedRoute
+        element={<WithdrawCase />}
         allowedRoles={["superadmin"]}
         />
       }
