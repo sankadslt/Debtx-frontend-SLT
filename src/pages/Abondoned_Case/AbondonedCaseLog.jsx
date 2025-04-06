@@ -1,3 +1,12 @@
+/* Purpose: This template is used for the 15.2 - Withdrawal case log .
+Created Date: 2025-04-06
+Created By: Buthmi mithara (buthmimithara1234@gmail.com)
+Version: node 20
+ui number : 15.2
+Dependencies: tailwind css
+Related Files: (routes)
+Notes:The following page conatins the code for the Abondoned case log Screen */
+
 import React, { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
