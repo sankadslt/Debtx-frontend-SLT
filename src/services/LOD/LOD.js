@@ -3,6 +3,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
 const LOD_URL = `${BASE_URL}/lod`;
 
+// Function to fetch the LOD, Final Reminder and total count
 export const F2_selection_cases_count = async () => {
   try {
     const response = await axios.get(`${LOD_URL}/F2_selection_cases_count`);
@@ -24,6 +25,7 @@ export const F2_selection_cases_count = async () => {
   }
 };
 
+// Function to fetch the list of F2 selection cases
 export const List_F2_Selection_Cases = async (current_document_type, pages = 1) => {
     try {
         const response = await axios.post(`${LOD_URL}/List_F2_Selection_Cases`, {
@@ -42,7 +44,7 @@ export const List_F2_Selection_Cases = async (current_document_type, pages = 1) 
             SourceType: LOD.lod_final_reminder.source_type || null,
           }));
         } else {
-          throw new Error("Failed to fetch incidents");
+          throw new Error("Failed to fetch cases");
         }
     } catch (error) {
         console.error("Error fetching F2 selection cases:", error);
@@ -50,6 +52,7 @@ export const List_F2_Selection_Cases = async (current_document_type, pages = 1) 
     }
 };
 
+// Create task for downloading all digital signatures LOD cases
 export const Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases = async (createdBy) => {
   try {
     const response = await axios.post(`${LOD_URL}/Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases`, {
@@ -73,6 +76,7 @@ export const Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases = async (
   }
 };
 
+// Create task for downloading each digital signature LOD cases
 export const Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases = async (createdBy, LODType) => {
   try {
     const response = await axios.post(`${LOD_URL}/Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases`, {
@@ -97,6 +101,7 @@ export const Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases = async 
   }
 };
 
+// Change the document type
 export const Change_Document_Type = async (case_id, current_document_type, Created_By, changed_type_remark) => {
   try {
     const response = await axios.post(`${LOD_URL}/Change_Document_Type`, {
@@ -113,6 +118,7 @@ export const Change_Document_Type = async (case_id, current_document_type, Creat
   }
 };
 
+// Create task for proceeding with LOD or final reminder list
 export const Create_Task_for_Proceed_LOD_OR_Final_Reminder_List = async (Created_By, Case_count, current_document_type) => {
   try {
     const response = await axios.post(`${LOD_URL}/Create_Task_for_Proceed_LOD_OR_Final_Reminder_List`, {
@@ -125,5 +131,36 @@ export const Create_Task_for_Proceed_LOD_OR_Final_Reminder_List = async (Created
   } catch (error) {
     console.error("Error creating task:", error.response?.data || error.message);
     throw error.response?.data || error;
+  }
+};
+
+export const List_Final_Reminder_Lod_Cases = async (case_status, date_type, date_from, date_to, current_document_type, pages = 1) => {
+  try {
+      const response = await axios.post(`${LOD_URL}/List_Final_Reminder_Lod_Cases`, {
+          case_status: case_status,
+          date_type: date_type,
+          date_from: date_from,
+          date_to: date_to,
+          current_document_type: current_document_type,
+          pages: pages,
+      });
+
+      // return response.data.data;
+      if (response.data.status === "success") {
+        return response.data.data.map((LOD) => ({
+          LODID: LOD.case_id,
+          Status: LOD.case_current_status,
+          LODBatchNo: LOD.current_arrears_amount,
+          NotificationCount: LOD.customer_name || null,
+          CreatedDTM: LOD.rtom || null,
+          ExpireDTM: LOD.lod_final_reminder.source_type || null,
+          LastResponse: LOD.lod_final_reminder.current_document_type || null,
+        }));
+      } else {
+        throw new Error("Failed to fetch cases");
+      }
+  } catch (error) {
+      console.error("Error fetching cases:", error);
+      throw error.response?.data?.message || "Failed to fetch cases";
   }
 };

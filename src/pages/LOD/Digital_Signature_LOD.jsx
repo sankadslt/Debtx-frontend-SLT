@@ -15,15 +15,11 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-// import DatePicker from "react-datepicker";
+import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
 import Swal from "sweetalert2";
-// import { fetchLODs } from "../../services/LODs/LODservice.js";
-// import { Task_for_Download_LODs } from "../../services/task/taskService.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { F2_selection_cases_count } from "../../services/LOD/LOD.js";
 import { List_F2_Selection_Cases } from "../../services/LOD/LOD.js";
-import { getUserData } from "../../services/auth/authService.js";
 import { Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Change_Document_Type } from "../../services/LOD/LOD.js";
@@ -46,48 +42,22 @@ const Digital_Signature_LOD = () => {
     const [totalCount, setTotalCount] = useState(0);
     const [lodCount, setlodCount] = useState(0);
     const [finalReminderCount, setFinalReminderCount] = useState(0);
+    const [MaxPage, setMaxPage] = useState(0);
 
-    const displayUserData = async () => {
-        try {
-            const userData = await getLoggedUserId();
-            console.log("User Data:", userData); // Log the user data to the console
-        } catch (error) {
-            console.error("Error fetching user data:", error.message || error);
-        }
-    };
+    // const displayUserData = async () => {
+    //     try {
+    //         const userData = await getLoggedUserId();
+    //         console.log("User Data:", userData); // Log the user data to the console
+    //     } catch (error) {
+    //         console.error("Error fetching user data:", error.message || error);
+    //     }
+    // };
 
-    useEffect(() => {
-        displayUserData();
-    }, [])
+    // useEffect(() => {
+    //     displayUserData();
+    // }, [])
 
-    const getStatusIcon = (status) => {
-        switch (status?.toLowerCase()) {
-            case "lod":
-                return "/src/assets/images/Incidents/Incident_Open.png";
-            case "final reminder":
-                return "/src/assets/images/Incidents/Incident_Reject.png";
-            default:
-                return null;
-        }
-    };
-
-    const renderStatusIcon = (status) => {
-        const iconPath = getStatusIcon(status);
-
-        if (!iconPath) {
-            return <span>{status}</span>;
-        }
-
-        return (
-            <img
-                src={iconPath}
-                alt={status}
-                className="w-6 h-6"
-                title={status}
-            />
-        );
-    };
-
+    // Fetch LOD, Final reminder and total counts
     const fetchLODCounts = async () => {
         try {
             const { totalCount, lodCount, finalReminderCount } = await F2_selection_cases_count();
@@ -104,7 +74,25 @@ const Digital_Signature_LOD = () => {
         fetchLODCounts();
     }, []);
 
+    // Function to calculate the maximum number of pages
+    const calculateMaxPages = (totalCases) => {
+        if (totalCases <= 10) {
+            setMaxPage(1) // All cases fit on the first page
+        } else {
+            setMaxPage(Math.ceil((totalCases - 10) / 30) + 1); // Calculate for additional pages
+        }
+    };
 
+    useEffect(() => {
+        if (LODType === "LOD") {
+            calculateMaxPages(lodCount); // Pass lodCount for "LOD"
+        } else if (LODType === "Final Reminder") {
+            calculateMaxPages(finalReminderCount); // Pass finalReminderCount for "final reminder"
+        }
+    }, [LODType, lodCount, finalReminderCount]);
+
+
+    // Fetch LOD data based on the selected LOD type and current page
     const fetchData = async (LODType, currentPage) => {
         setIsLoading(true);
         try {
@@ -127,17 +115,18 @@ const Digital_Signature_LOD = () => {
         }
     }, [LODType, currentPage]);
 
+    // Function to handle the creation of tasks for downloading each LOD
     const HandleCreateTaskEachLOD = async () => {
         if (!LODType) {
             Swal.fire("Error", "Please apply filter 2 befor download.", "error");
             return;
         }
 
-        const userData = await getUserData();
+        const userData = await getLoggedUserId();
 
         setIsCreatingTask(true);
         try {
-            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData.username, LODType);
+            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData, LODType);
             console.log("Task created successfully:", response);
             Swal.fire("Success", `Task created successfully!`, "success");
         } catch (error) {
@@ -147,17 +136,18 @@ const Digital_Signature_LOD = () => {
         }
     };
 
+    // Function to handle the creation of tasks for downloading all LODs
     const HandleCreateTaskAllLOD = async () => {
         if (LODType) {
             Swal.fire("Error", "Please do not apply filter 2 for download all the LODs.", "error");
             return;
         }
 
-        const userData = await getUserData();
+        const userData = await getLoggedUserId();
 
         setIsCreatingTask(true);
         try {
-            const response = await Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases(userData.username);
+            const response = await Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases(userData);
             console.log("Task created successfully:", response);
             Swal.fire("Success", `Task created successfully!`, "success");
         } catch (error) {
@@ -167,35 +157,39 @@ const Digital_Signature_LOD = () => {
         }
     };
 
+    // Function to handle the change of document type (LOD or Final Reminder)
     const ChangeDocumentType = async () => {
         if (!activePopupLODID) {
             Swal.fire("Error", "Please select a LOD or Final Reminder.", "error");
             return;
         }
 
-        const userData = await getUserData();
+        const userData = await getLoggedUserId();
 
         try {
             const intLODID = parseInt(activePopupLODID, 10);
-            const response = await Change_Document_Type(intLODID, activePopupLODStatus, userData.username, changeReason);
+            const response = await Change_Document_Type(intLODID, activePopupLODStatus, userData, changeReason);
             console.log("LOD Type changed successfully:", response);
             Swal.fire("Success", `LOD Type changed successfully!`, "success");
+            fetchData(LODType, currentPage);
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to changee the LOD Type.", "error");
-        } 
+        }
     };
 
+    // Function to handle the creation of LOD or Final Reminder list
     const HandleCreateLODList = async () => {
         if (LODCount <= 0) {
             Swal.fire("Error", "Please enter LOD Count", "error");
             return;
         }
 
-        const userData = await getUserData();
+        const userData = await getLoggedUserId();
 
         setIsCreatingTask(true);
         try {
-            const response = await Create_Task_for_Proceed_LOD_OR_Final_Reminder_List(userData.username, LODCount, LODType);
+            const intLODCount = parseInt(LODCount, 10);
+            const response = await Create_Task_for_Proceed_LOD_OR_Final_Reminder_List(userData, intLODCount, LODType);
             console.log("Task created successfully:", response);
             Swal.fire("Success", `Task created successfully!`, "success");
         } catch (error) {
@@ -213,6 +207,7 @@ const Digital_Signature_LOD = () => {
         );
     }
 
+    // Handle search bar
     const filteredData = data.filter((row) =>
         String(row.LODID).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -255,12 +250,21 @@ const Digital_Signature_LOD = () => {
         });
         ChangeDocumentType();
         closePopup();
-        window.location.reload();
-
     };
 
     const handleInputCount = (value) => {
-        setLODCount(value);
+        if (value === "" || isNaN(value)) {
+            setLODCount(0);
+            return;
+        }
+    
+        const maxCount = LODType === "LOD" ? lodCount : finalReminderCount;
+
+        if (parseInt(value, 10) <= maxCount) {
+            setLODCount(value);
+        } else {
+            Swal.fire("Invalid Input", `Value cannot exceed ${maxCount}.`, "warning");
+        }
     }
 
     return (
@@ -290,8 +294,10 @@ const Digital_Signature_LOD = () => {
                     <button
                         onClick={HandleCreateTaskAllLOD}
                         className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                        style={{ display: 'flex', alignItems: 'center' }}
                         disabled={isCreatingTask}
                     >
+                        {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
                         {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
                         {/* Create task and let me know */}
                     </button>
@@ -334,8 +340,8 @@ const Digital_Signature_LOD = () => {
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Case ID</th>
-                            <th className={GlobalStyle.tableHeader}>Status</th>
-                            <th className={GlobalStyle.tableHeader}>Amount</th>
+                            {/* <th className={GlobalStyle.tableHeader}>Status</th> */}
+                            <th className={GlobalStyle.tableHeader}>Arrears Amount</th>
                             <th className={GlobalStyle.tableHeader}>Customer Type Name</th>
                             <th className={GlobalStyle.tableHeader}>Account Manager Code</th>
                             <th className={GlobalStyle.tableHeader}>Source Type</th>
@@ -353,9 +359,9 @@ const Digital_Signature_LOD = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.LODID}</td>
-                                    <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
+                                    {/* <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
                                         {renderStatusIcon(log.Status)}
-                                    </td>
+                                    </td> */}
                                     <td className={GlobalStyle.tableData}>{log.Amount}</td>
                                     <td className={GlobalStyle.tableData}>{log.CustomerTypeName}</td>
                                     <td className={GlobalStyle.tableData}>{log.AccountManagerCode}</td>
@@ -418,17 +424,19 @@ const Digital_Signature_LOD = () => {
                 )}
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPage + 1}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {LODType && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPage + 1} of {MaxPage}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === MaxPage - 1}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
 
             {LODType && (
                 <div className="flex justify-between mt-6 space-x-4">
@@ -437,7 +445,9 @@ const Digital_Signature_LOD = () => {
                         className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
                         // className={GlobalStyle.buttonPrimary}
                         disabled={isCreatingTask}
+                        style={{ display: 'flex', alignItems: 'center' }}
                     >
+                        {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
                         {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
                         {/* Create task and let me know */}
                     </button>
@@ -453,7 +463,7 @@ const Digital_Signature_LOD = () => {
                             className={GlobalStyle.buttonPrimary}
                             onClick={HandleCreateLODList}
                         >
-                            Create LOD List
+                            {LODType === "LOD" ? "Create LOD List" : "Create Final Reminder List"}
                         </button>
                     </div>
                 </div>

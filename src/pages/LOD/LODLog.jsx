@@ -15,7 +15,7 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import { fetchIncidents } from "../../services/Incidents/incidentService";
@@ -29,8 +29,8 @@ const LOD_Log = () => {
     const [toDate, setToDate] = useState(null);
     const rowsPerPage = 8;
     const [status1, setStatus1] = useState("");
-    const [status2, setStatus2] = useState("");
-    const [status3, setStatus3] = useState("");
+    const [LODStatus, setLODStatus] = useState("");
+    const [DataType, setDataType] = useState("");
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isCreatingTask, setIsCreatingTask] = useState(false);
@@ -52,7 +52,7 @@ const LOD_Log = () => {
 
     const renderStatusIcon = (status) => {
         const iconPath = getStatusIcon(status);
-        
+
         if (!iconPath) {
             return <span>{status}</span>;
         }
@@ -66,6 +66,25 @@ const LOD_Log = () => {
             />
         );
     };
+
+    // validation for date
+    const handleFromDateChange = (date) => {
+        if (toDate && date > toDate) {
+            Swal.fire("Invalid Input", "From' date cannot be later than the 'To' date.", "warning");
+        } else {
+            setFromDate(date);
+        }
+    };
+
+    // validation for date
+    const handleToDateChange = (date) => {
+        if (fromDate && date < fromDate) {
+            Swal.fire("Invalid Input", "The 'To' date cannot be earlier than the 'From' date.", "warning");
+        } else {
+            setToDate(date);
+        }
+    };
+
 
     const fetchData = async (filters) => {
         setIsLoading(true);
@@ -89,8 +108,8 @@ const LOD_Log = () => {
             }
             const filters = {
                 Actions: status1,
-                Incident_Status: status2,
-                Source_Type: status3,
+                Incident_Status: LODStatus,
+                Source_Type: DataType,
                 From_Date: fromDate.toISOString(),
                 To_Date: toDate.toISOString()
             };
@@ -114,14 +133,14 @@ const LOD_Log = () => {
             const offset = date.getTimezoneOffset() * 60000;
             return new Date(date.getTime() - offset).toISOString();
         };
-          const user_id = await getLoggedUserId();
+        const user_id = await getLoggedUserId();
         const requestData = {
             DRC_Action: status1,
-            Incident_Status: status2,
-            Source_Type: status3,
+            Incident_Status: LODStatus,
+            Source_Type: DataType,
             From_Date: adjustToLocalISO(fromDate),
             To_Date: adjustToLocalISO(toDate),
-            Created_By:user_id
+            Created_By: user_id
         };
 
         setIsCreatingTask(true);
@@ -156,12 +175,12 @@ const LOD_Log = () => {
         String(row.action).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
+
     const pages = Math.ceil(filteredData.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, endIndex);
-    
+
     const handlePrevPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
@@ -186,30 +205,40 @@ const LOD_Log = () => {
 
             <div className="w-full mb-8 mt-8">
                 <div className="flex items-center justify-end w-full space-x-6">
-                    {/* <select value={status1} onChange={(e) => setStatus1(e.target.value)} className={GlobalStyle.selectBox}>
-                        <option value="">Action Type</option>
-                        <option value="collect arrears">collect arrears</option>
-                        <option value="collect arrears and CPE">collect arrears and CPE</option>
-                        <option value="collect CPE">collect CPE</option>
-                    </select> */}
-
-                    <select value={status2} onChange={(e) => setStatus2(e.target.value)} className={GlobalStyle.selectBox}>
+                    <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} className={GlobalStyle.selectBox}>
                         <option value="">Status</option>
-                        <option value="Incident Open">Incident Open</option>
-                        <option value="Incident Reject">Incident Reject</option>
+                        <option value="Initial LOD">Initial LOD</option>
+                        <option value="LOD Settle Pending">LOD Settle Pending</option>
+                        <option value="LOD Settle Open-Pending">LOD Settle Open-Pending</option>
+                        <option value="LOD Settle Active">LOD Settle Active</option>
                     </select>
 
-                    <select value={status3} onChange={(e) => setStatus3(e.target.value)} className={GlobalStyle.selectBox}>
+                    <select value={DataType} onChange={(e) => setDataType(e.target.value)} className={GlobalStyle.selectBox}>
                         <option value="">Date Type</option>
-                        <option value="Pilot Suspended">Pilot Suspended</option>
-                        <option value="Product Terminate">Product Terminate</option>
-                        <option value="Special">Special</option>
+                        <option value="Pilot Suspended">Created Date</option>
+                        <option value="Product Terminate">Expiry Date</option>
+                        <option value="Special">Last Response Date</option>
                     </select>
 
-                    <DatePicker selected={fromDate} onChange={setFromDate} dateFormat="dd/MM/yyyy" placeholderText="From Date" className={GlobalStyle.inputText} />
-                    <DatePicker selected={toDate} onChange={setToDate} dateFormat="dd/MM/yyyy" placeholderText="To Date" className={GlobalStyle.inputText} />
+                    <div className={GlobalStyle.datePickerContainer}>
+                        <DatePicker
+                            selected={fromDate}
+                            onChange={handleFromDateChange}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="dd/MM/yyyy"
+                            className={GlobalStyle.inputText}
+                        />
+                        <DatePicker
+                            selected={toDate}
+                            onChange={handleToDateChange}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="dd/MM/yyyy"
+                            className={GlobalStyle.inputText}
+                        />
+                    </div>
 
                     <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
+                    <button className={GlobalStyle.buttonPrimary}>Clear</button>
                 </div>
             </div>
 
@@ -236,7 +265,8 @@ const LOD_Log = () => {
                             <th className={GlobalStyle.tableHeader}>Notification Count</th>
                             <th className={GlobalStyle.tableHeader}>Created DTM</th>
                             <th className={GlobalStyle.tableHeader}>Expire DTM</th>
-                            <th className={GlobalStyle.tableHeader}>Las</th>
+                            <th className={GlobalStyle.tableHeader}>Last Response</th>
+                            <th className={GlobalStyle.tableHeader}></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -247,7 +277,7 @@ const LOD_Log = () => {
                                     className={`${index % 2 === 0
                                         ? "bg-white bg-opacity-75"
                                         : "bg-gray-50 bg-opacity-50"
-                                    } border-b`}
+                                        } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.incidentID}</td>
                                     <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
@@ -257,6 +287,17 @@ const LOD_Log = () => {
                                     <td className={GlobalStyle.tableData}>{log.action}</td>
                                     <td className={GlobalStyle.tableData}>{log.sourceType}</td>
                                     <td className={GlobalStyle.tableData}>{log.createdDTM}</td>
+                                    <td className={GlobalStyle.tableData}>{log.createdDTM}</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <div className="flex justify-center space-x-2">
+                                            <button className={GlobalStyle.buttonIcon} style={{ fontSize: "24px" }}>
+                                                <FaEdit />
+                                            </button>
+                                            <button className={GlobalStyle.buttonIcon} style={{ fontSize: "24px" }}>
+                                                <FaEye />
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))
                         ) : (
@@ -281,20 +322,10 @@ const LOD_Log = () => {
                     <FaArrowRight />
                 </button>
             </div>
-
-            <div className="flex justify-end mt-6">
-                <button 
-                    onClick={HandleCreateTask} 
-                    className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-                    disabled={isCreatingTask}
-                >
-                    {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-                </button>
-            </div>
         </div>
     );
 
-    
+
 };
 
 
