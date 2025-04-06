@@ -43,16 +43,38 @@ export default function DRCAssignManagerApproval3() {
 
   // Handle date change
   const handlestartdatechange = (date) => {
-    setStartDate(date);
+    if (endDate && date > endDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Start date cannot be later than end date.",
+        confirmButtonColor: "#f1c40f",
+      });
+    
+    }
+    else {
+      setStartDate(date);
     if (endDate) checkdatediffrence(date, endDate);
+    }
+    
   };
 
   const handleenddatechange = (date) => {
-    if (startDate) {
-      checkdatediffrence(startDate, date);
+    if (startDate && date < startDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "End date cannot be earlier than start date.",
+        confirmButtonColor: "#f1c40f",
+      });
+      
     }
-    setEndDate(date);
-
+    else {
+      if (startDate) {
+        checkdatediffrence(startDate, date);
+      }
+      setEndDate(date);
+    }
   }
 
   useEffect(() => {
