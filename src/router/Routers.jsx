@@ -72,6 +72,12 @@ import WriteOffCaseList from "../pages/Write_Off/WriteOffCaseList";
 //SettlementPlan
 import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
 
+//Withdrawal
+import WithdrawalCaseLog from "../pages/Withdrawal/WithdrawalCaseLog";
+
+//Abondoned Case
+import AbondonedCaseLog from "../pages/Abondoned_Case/AbondonedCaseLog";
+
 const Routers = () => {
   return (
     <Routes>
@@ -592,6 +598,26 @@ const Routers = () => {
       element={
         <ProtectedRoute
         element={<WriteOffCaseList />}
+        allowedRoles={["superadmin"]}
+        />
+      }
+      />
+
+      <Route
+      path="/pages/Withdrawal/WithdrawalCaseLog"
+      element={
+        <ProtectedRoute
+        element={<WithdrawalCaseLog />}
+        allowedRoles={["superadmin"]}
+        />
+      }
+      />
+
+      <Route
+      path="/pages/Abondoned/AbondonedCaseLog"
+      element={
+        <ProtectedRoute
+        element={<AbondonedCaseLog />}
         allowedRoles={["superadmin"]}
         />
       }
