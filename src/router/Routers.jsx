@@ -68,6 +68,7 @@ import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 
 //Write Off
 import WriteOffCaseList from "../pages/Write_Off/WriteOffCaseList";
+import WriteOffCase from "../pages/Write_Off/WriteOffCase";
 
 //SettlementPlan
 import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
@@ -599,6 +600,16 @@ const Routers = () => {
       element={
         <ProtectedRoute
         element={<WriteOffCaseList />}
+        allowedRoles={["superadmin"]}
+        />
+      }
+      />
+
+      <Route
+      path="/pages/Write_Off/WriteOffCase"
+      element={
+        <ProtectedRoute
+        element={<WriteOffCase />}
         allowedRoles={["superadmin"]}
         />
       }
