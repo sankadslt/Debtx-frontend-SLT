@@ -30,7 +30,7 @@ const WithdrawCase = () => {
       <div className="flex gap-4 mt-10 justify-center">
         <div className={GlobalStyle.cardContainer}>
           <h1 className={`${GlobalStyle.headingLarge} text-center mb-4`}>
-            Write-Off Case
+            Withdraw Case
           </h1>
 
           <form className="flex flex-col gap-4">
