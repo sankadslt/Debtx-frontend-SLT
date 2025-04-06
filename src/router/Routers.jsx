@@ -79,6 +79,7 @@ import WithdrawCase from "../pages/Withdrawal/WithdrawCase";
 
 //Abondoned Case
 import AbondonedCaseLog from "../pages/Abondoned_Case/AbondonedCaseLog";
+import AbondonedCase from "../pages/Abondoned_Case/AbondonedCase";
 import ClosedCaseLog from "../pages/Abondoned_Case/ClosedCaseLog";
 
 const Routers = () => {
@@ -641,6 +642,16 @@ const Routers = () => {
       element={
         <ProtectedRoute
         element={<AbondonedCaseLog />}
+        allowedRoles={["superadmin"]}
+        />
+      }
+      />
+
+      <Route
+      path="/pages/Abondoned/AbondonedCase"
+      element={
+        <ProtectedRoute
+        element={<AbondonedCase />}
         allowedRoles={["superadmin"]}
         />
       }
