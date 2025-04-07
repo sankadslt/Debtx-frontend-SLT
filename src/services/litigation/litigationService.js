@@ -36,7 +36,7 @@ export const listAllLitigationCases = async (payload) => {
 
 export const createLitigationDocument = async (payload) => {
   try {
-    const response = await axios.post(
+    const response = await axios.patch(
       `${URL}/Create_Litigation_Document`,
       payload
     );

@@ -287,12 +287,12 @@ export const Litigation_List = () => {
                       <td className={`${GlobalStyle.tableData} text-center`}>{item.case_id}</td>
                       <td className={GlobalStyle.tableData}>{displayStatus}</td>
                       <td className={`${GlobalStyle.tableData} text-center`}>{item.account_no}</td>
-                      <td className={GlobalStyle.tableData}>{item.current_arreas_amount}</td>
-                      <td className={GlobalStyle.tableData}>{item.legal_accepted_date
+                      <td className={`${GlobalStyle.tableData} text-right px-2`}>{item.current_arreas_amount}</td>
+                      <td className={`${GlobalStyle.tableData} text-center`}>{item.legal_accepted_date
                         ? new Date(item.legal_accepted_date).toLocaleDateString("en-GB")
                         : "N/A"}
                       </td>
-                      <td className={GlobalStyle.tableData}>{item.settlement_created_date
+                      <td className={`${GlobalStyle.tableData} text-center`}>{item.settlement_created_date
                         ? new Date(item.settlement_created_date).toLocaleDateString("en-GB")
                         : "N/A"}
                       </td>
@@ -301,7 +301,9 @@ export const Litigation_List = () => {
                           <div>
                             <button 
                               className={GlobalStyle.buttonPrimary}
-                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
+                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation", {
+                                state:{case_id : item.case_id}
+                              })}
                             >
                               Documents
                             </button>
@@ -381,28 +383,25 @@ export const Litigation_List = () => {
             </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className={GlobalStyle.navButtonContainer}>
-            <button
-              className={GlobalStyle.navButton}
-              onClick={handlePrevPage}
-              disabled={currentPage === 1 || isLoading}
-            >
-              <FaArrowLeft />
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              className={GlobalStyle.navButton}
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages || isLoading}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
-        )}
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handlePrevPage}
+            disabled={currentPage === 1 || isLoading}
+          >
+            <FaArrowLeft />
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages || isLoading}
+          >
+            <FaArrowRight />
+          </button>
+        </div>
     </div>
   )
 }
