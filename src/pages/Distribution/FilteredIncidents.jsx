@@ -134,10 +134,7 @@ const FilteredIncident = () => {
                         >
                         
                           
-                           <div
-                                                        title="File_ICon"
-                                                        aria-label="File_ICon"
-                                                      >
+                           <div data-tooltip-id="filter-tooltip" >
                                                         <img
                                                           src={File_Icon}
                                                           alt="File_Icon"
@@ -145,6 +142,8 @@ const FilteredIncident = () => {
                                                         />
                                                       </div>
                         </button>
+                        <Tooltip id="filter-tooltip" place="bottom" content="Open" />
+                          
                       </td>
                     </tr>
                   ))}
