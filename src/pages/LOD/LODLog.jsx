@@ -136,44 +136,44 @@ const LOD_Log = () => {
             <h2 className={GlobalStyle.headingLarge}>LOD List</h2>
 
             <div className={`${GlobalStyle.cardContainer} w-full`}>
-                
-                    <div className="flex items-center justify-end w-full space-x-6">
-                        <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
-                            <option value="" hidden>Status</option>
-                            <option value="Initial LOD">Initial LOD</option>
-                            <option value="LOD Settle Pending">LOD Settle Pending</option>
-                            <option value="LOD Settle Open-Pending">LOD Settle Open-Pending</option>
-                            <option value="LOD Settle Active">LOD Settle Active</option>
-                        </select>
 
-                        <select value={DateType} onChange={(e) => setDateType(e.target.value)} style={{ color: DateType === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
-                            <option value="" hidden>Date Type</option>
-                            <option value="created_date">Created Date</option>
-                            <option value="expire_date">Expire Date</option>
-                            <option value="last_response_date">Last Response Date</option>
-                        </select>
+                <div className="flex items-center justify-end w-full space-x-6">
+                    <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
+                        <option value="" hidden>Status</option>
+                        <option value="Initial LOD">Initial LOD</option>
+                        <option value="LOD Settle Pending">LOD Settle Pending</option>
+                        <option value="LOD Settle Open-Pending">LOD Settle Open-Pending</option>
+                        <option value="LOD Settle Active">LOD Settle Active</option>
+                    </select>
 
-                        <div className={GlobalStyle.datePickerContainer}>
-                            <DatePicker
-                                selected={fromDate}
-                                onChange={handleFromDateChange}
-                                dateFormat="dd/MM/yyyy"
-                                placeholderText="From Date"
-                                className={GlobalStyle.inputText}
-                            />
-                            <DatePicker
-                                selected={toDate}
-                                onChange={handleToDateChange}
-                                dateFormat="dd/MM/yyyy"
-                                placeholderText="To Date"
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
+                    <select value={DateType} onChange={(e) => setDateType(e.target.value)} style={{ color: DateType === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
+                        <option value="" hidden>Date Type</option>
+                        <option value="created_date">Created Date</option>
+                        <option value="expire_date">Expire Date</option>
+                        <option value="last_response_date">Last Response Date</option>
+                    </select>
 
-                        <button onClick={fetchData} className={GlobalStyle.buttonPrimary}>Filter</button>
-                        <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
+                    <div className={GlobalStyle.datePickerContainer}>
+                        <DatePicker
+                            selected={fromDate}
+                            onChange={handleFromDateChange}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="From Date"
+                            className={GlobalStyle.inputText}
+                        />
+                        <DatePicker
+                            selected={toDate}
+                            onChange={handleToDateChange}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="To Date"
+                            className={GlobalStyle.inputText}
+                        />
                     </div>
-                
+
+                    <button onClick={fetchData} className={GlobalStyle.buttonPrimary}>Filter</button>
+                    <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
+                </div>
+
             </div>
 
             <div className="mb-4 flex justify-start">
@@ -219,7 +219,7 @@ const LOD_Log = () => {
                                     <td className={GlobalStyle.tableData}>{log.NotificationCount}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log.CreatedDTM
-                                            ? new Date(log.CreatedDTM).toLocaleString("en-US", {
+                                            ? new Date(log.CreatedDTM).toLocaleString("en-GB", {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
@@ -233,7 +233,7 @@ const LOD_Log = () => {
                                     </td>
                                     <td className={GlobalStyle.tableData}>
                                         {log.ExpireDTM
-                                            ? new Date(log.ExpireDTM).toLocaleString("en-US", {
+                                            ? new Date(log.ExpireDTM).toLocaleString("en-GB", {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
@@ -247,7 +247,7 @@ const LOD_Log = () => {
                                     </td>
                                     <td className={GlobalStyle.tableData}>
                                         {log.LastResponse
-                                            ? new Date(log.LastResponse).toLocaleString("en-US", {
+                                            ? new Date(log.LastResponse).toLocaleString("en-GB", {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
@@ -261,7 +261,11 @@ const LOD_Log = () => {
                                     </td>
                                     <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center space-x-2">
-                                            <button className={GlobalStyle.buttonIcon} style={{ fontSize: "24px" }}>
+                                            <button
+                                                className={GlobalStyle.buttonIcon}
+                                                style={{ fontSize: "24px" }}
+                                                onClick={() => navigate(`/pages/LOD/CustomerResponse/${log.LODID}`)}
+                                            >
                                                 <FaEdit />
                                             </button>
                                             <button className={GlobalStyle.buttonIcon} style={{ fontSize: "24px" }}>

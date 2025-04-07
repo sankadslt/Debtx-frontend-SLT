@@ -8,12 +8,12 @@ export const F2_selection_cases_count = async () => {
   try {
     const response = await axios.get(`${LOD_URL}/F2_selection_cases_count`);
     const data = response.data?.data || { total_count: 0, cases: [] };
-    
+
     // Assign the relevant values
     const lodCount = data.cases.find(item => item.document_type === "LOD")?.count || 0;
     const finalReminderCount = data.cases.find(item => item.document_type === "Final Reminder")?.count || 0;
     const totalCount = lodCount + finalReminderCount;
-    
+
     return {
       totalCount,
       lodCount,
@@ -27,29 +27,29 @@ export const F2_selection_cases_count = async () => {
 
 // Function to fetch the list of F2 selection cases
 export const List_F2_Selection_Cases = async (current_document_type, pages = 1) => {
-    try {
-        const response = await axios.post(`${LOD_URL}/List_F2_Selection_Cases`, {
-            current_document_type: current_document_type,
-            pages: pages,
-        });
+  try {
+    const response = await axios.post(`${LOD_URL}/List_F2_Selection_Cases`, {
+      current_document_type: current_document_type,
+      pages: pages,
+    });
 
-        // return response.data.data;
-        if (response.data.status === "success") {
-          return response.data.data.map((LOD) => ({
-            LODID: LOD.case_id,
-            Status: LOD.lod_final_reminder.current_document_type,
-            Amount: LOD.current_arrears_amount,
-            CustomerTypeName: LOD.customer_name || null,
-            AccountManagerCode: LOD.rtom || null,
-            SourceType: LOD.lod_final_reminder.source_type || null,
-          }));
-        } else {
-          throw new Error("Failed to fetch cases");
-        }
-    } catch (error) {
-        console.error("Error fetching F2 selection cases:", error);
-        throw error.response?.data?.message || "Failed to fetch cases";
+    // return response.data.data;
+    if (response.data.status === "success") {
+      return response.data.data.map((LOD) => ({
+        LODID: LOD.case_id,
+        Status: LOD.lod_final_reminder.current_document_type,
+        Amount: LOD.current_arrears_amount,
+        CustomerTypeName: LOD.customer_name || null,
+        AccountManagerCode: LOD.rtom || null,
+        SourceType: LOD.lod_final_reminder.source_type || null,
+      }));
+    } else {
+      throw new Error("Failed to fetch cases");
     }
+  } catch (error) {
+    console.error("Error fetching F2 selection cases:", error);
+    throw error.response?.data?.message || "Failed to fetch cases";
+  }
 };
 
 // Create task for downloading all digital signatures LOD cases
@@ -136,31 +136,34 @@ export const Create_Task_for_Proceed_LOD_OR_Final_Reminder_List = async (Created
 
 export const List_Final_Reminder_Lod_Cases = async (case_status, date_type, date_from, date_to, current_document_type, pages = 1) => {
   try {
-      const response = await axios.post(`${LOD_URL}/List_Final_Reminder_Lod_Cases`, {
-          case_status: case_status,
-          date_type: date_type,
-          date_from: date_from,
-          date_to: date_to,
-          current_document_type: current_document_type,
-          pages: pages,
-      });
+    const response = await axios.post(`${LOD_URL}/List_Final_Reminder_Lod_Cases`, {
+      case_status: case_status,
+      date_type: date_type,
+      date_from: date_from,
+      date_to: date_to,
+      current_document_type: current_document_type,
+      pages: pages,
+    });
 
-      // return response.data.data;
-      if (response.data.status === "success") {
-        return response.data.data.map((LOD) => ({
-          LODID: LOD.case_id,
-          Status: LOD.case_current_status,
-          LODBatchNo: LOD.lod_final_reminder.lod_distribution_id,
-          NotificationCount: LOD.lod_final_reminder.lod_notification.length || null,
-          CreatedDTM: LOD.lod_final_reminder.lod_submission.created_on || null,
-          ExpireDTM: LOD.lod_final_reminder.lod_expire_on || null,
-          LastResponse: LOD.lod_final_reminder.lod_response.created_on || null,
-        }));
-      } else {
-        throw new Error("Failed to fetch cases");
-      }
+    // return response.data.data;
+    if (response.data.status === "success") {
+      return response.data.data.map((LOD) => ({
+        LODID: LOD.case_id,
+        Status: LOD.case_current_status,
+        LODBatchNo: LOD.lod_final_reminder.lod_distribution_id,
+        NotificationCount: LOD.lod_final_reminder.lod_notification.length || null,
+        CreatedDTM: LOD.lod_final_reminder.lod_submission.created_on || null,
+        ExpireDTM: LOD.lod_final_reminder.lod_expire_on || null,
+        // LastResponse: LOD.lod_final_reminder.lod_response.created_on || null,
+        LastResponse: LOD.lod_final_reminder.lod_response?.length > 0
+          ? LOD.lod_final_reminder.lod_response[LOD.lod_final_reminder.lod_response.length - 1]?.created_on
+          : null,
+      }));
+    } else {
+      throw new Error("Failed to fetch cases");
+    }
   } catch (error) {
-      console.error("Error fetching cases:", error);
-      throw error.response?.data?.message || "Failed to fetch cases";
+    console.error("Error fetching cases:", error);
+    throw error.response?.data?.message || "Failed to fetch cases";
   }
 };

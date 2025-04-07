@@ -19,6 +19,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
+import { useParams } from "react-router-dom";
 
 const CustomerResponse = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -30,6 +31,7 @@ const CustomerResponse = () => {
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { caseId } = useParams(); // Get the case_id from the URL parameters
 
     // validation for date
     const handleFromDateChange = (date) => {
@@ -139,7 +141,7 @@ const CustomerResponse = () => {
                 <div className={GlobalStyle.cardContainer}>
 
                     <div className={`${GlobalStyle.cardContainer} w-full`}>
-                        <p className="mb-2">
+                        {/* <p className="mb-2">
                             <strong>Case ID:</strong>
                         </p>
                         <p className="mb-2">
@@ -153,20 +155,42 @@ const CustomerResponse = () => {
                         </p>
                         <p className="mb-2">
                             <strong>Last Payment Date:</strong>{" "}
-                        </p>
+                        </p> */}
+                        <div class="table w-full">
+                            <div class="table-row">
+                                <div class="table-cell px-4 py-2 font-bold">Case ID:</div>
+                                <div class="table-cell px-4 py-2">[Actual Case ID]</div>
+                            </div>
+                            <div class="table-row">
+                                <div class="table-cell px-4 py-2 font-bold">Customer Ref:</div>
+                                <div class="table-cell px-4 py-2">[Actual Customer Ref]</div>
+                            </div>
+                            <div class="table-row">
+                                <div class="table-cell px-4 py-2 font-bold">Account no:</div>
+                                <div class="table-cell px-4 py-2">[Actual Account no]</div>
+                            </div>
+                            <div class="table-row">
+                                <div class="table-cell px-4 py-2 font-bold">Arrears Amount:</div>
+                                <div class="table-cell px-4 py-2">[Actual Arrears Amount]</div>
+                            </div>
+                            <div class="table-row">
+                                <div class="table-cell px-4 py-2 font-bold">Last Payment Date:</div>
+                                <div class="table-cell px-4 py-2">[Actual Last Payment Date]</div>
+                            </div>
+                        </div>
                     </div>
 
 
                     {/* Select Box */}
                     <div className="flex flex-justify-between items-center space-x-6">
                         <label className={`${GlobalStyle.headingSmall} mb-1`}>
-                            Select Option
+                            Customer Response:
                         </label>
                         <select className={GlobalStyle.selectBox}>
-                            <option value="">Select an option</option>
-                            <option value="option1">Option 1</option>
-                            <option value="option2">Option 2</option>
-                            <option value="option3">Option 3</option>
+                            <option value="" hidden>Customer Response</option>
+                            <option value="Agree to Settle">Agree to Settle</option>
+                            <option value="Customer Dispute">Customer Dispute</option>
+                            <option value="Request More Information">Request More Information</option>
                         </select>
                     </div>
 
