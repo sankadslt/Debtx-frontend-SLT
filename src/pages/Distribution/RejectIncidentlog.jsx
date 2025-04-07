@@ -18,7 +18,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import "react-datepicker/dist/react-datepicker.css";
-import Incident_Reject from "../../assets/images/Incident_Reject.png";
+import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
 import { Create_Rejected_List_for_Download, List_Reject_Incident } from "../../services/distribution/distributionService.js";
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
@@ -405,7 +405,7 @@ export default function RejectIncidentlog() {
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
-                <th scope="col" className={GlobalStyle.tableHeader}></th>
+                {/* <th scope="col" className={GlobalStyle.tableHeader}></th> */}
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   ID
                 </th>
@@ -439,14 +439,14 @@ export default function RejectIncidentlog() {
                       : "bg-gray-50 bg-opacity-50"
                   } border-b`}
                 >
-                  <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  {/* <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <input
                       type="checkbox"
                       className={"rounded-lg"}
                       checked={selectedRows.includes(row.id)}
                       onChange={() => handleRowCheckboxChange(row.id)}
                     />
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData}>
                     <a href={`#${row.id}`} className="hover:underline">
                       {row.id}
@@ -456,14 +456,18 @@ export default function RejectIncidentlog() {
                     <div className="flex justify-center items-center h-full">
                       {row.status.toLowerCase() === "incident reject" && (
                         <div
-                          title="Incident Reject"
-                          aria-label="Incident Reject"
+                          data-tooltip-id="tooltip-incident-reject"
                         >
                           <img
                             src={Incident_Reject}
                             alt="Incident Reject"
                             className="w-5 h-5"
                           />
+                          
+                          <Tooltip
+                            id="tooltip-incident-reject"
+                            place="bottom"
+                            content="Incident Reject"></Tooltip>
                         </div>
                       )}
                     </div>
@@ -516,7 +520,7 @@ export default function RejectIncidentlog() {
 
       <div className="flex justify-end items-center w-full mt-6">
         {/* Select All Data Checkbox */}
-        <label className="flex items-center gap-2">
+        {/* <label className="flex items-center gap-2">
           <input
             type="checkbox"
             className="rounded-lg"
@@ -527,7 +531,7 @@ export default function RejectIncidentlog() {
             onChange={handleSelectAllDataChange}
           />
           Select All Data
-        </label>
+        </label> */}
 
         <button
           className={`${GlobalStyle.buttonPrimary} ml-4 flex items-center`}
