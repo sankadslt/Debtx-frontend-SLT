@@ -237,7 +237,50 @@ const CustomerResponseReview = () => {
                 </table>
             </div>
 
-            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Settlement Plan</b></h2>
+            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Payment Details</b></h2>
+
+            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+                <table className={GlobalStyle.table}>
+                    <thead className={GlobalStyle.thead}>
+                        <tr>
+                            <th className={GlobalStyle.tableHeader}>Date</th>
+                            <th className={GlobalStyle.tableHeader}>Paid amount</th>
+                            <th className={GlobalStyle.tableHeader}>Settled Balance</th>
+                            <th className={GlobalStyle.tableHeader}>Installment Sequence</th>
+                            <th className={GlobalStyle.tableHeader}>Transaction Type</th>
+                            <th className={GlobalStyle.tableHeader}>Transaction Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Transaction_DTM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredData.length > 0 ? (
+                            filteredData.map((log, index) => (
+                                <tr
+                                    key={index}
+                                    className={`${index % 2 === 0
+                                        ? "bg-white bg-opacity-75"
+                                        : "bg-gray-50 bg-opacity-50"
+                                        } border-b`}
+                                >
+                                    <td className={GlobalStyle.tableData}>{log.CustomerTypeName}</td>
+                                    <td className={GlobalStyle.tableData}>{log.AccountManagerCode}</td>
+                                    <td className={GlobalStyle.tableData}>{log.SourceType}</td>
+                                    <td className={GlobalStyle.tableData}>{log.SourceType}</td>
+                                    <td className={GlobalStyle.tableData}>{log.SourceType}</td>
+                                    <td className={GlobalStyle.tableData}>{log.SourceType}</td>
+                                    <td className={GlobalStyle.tableData}>{log.SourceType}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="6" className="text-center py-4">
+                                    No data matching the criteria.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 
