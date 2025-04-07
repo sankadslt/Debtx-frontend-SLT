@@ -10,7 +10,7 @@ Notes:The following page conatins the code for the Abondoned case Screen */
 import React, { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 
-const WithdrawCase = () => {
+const AbondonedCase = () => {
   const [caseId, setCaseId] = useState("");
   const [remark, setRemark] = useState("");
 
@@ -77,4 +77,4 @@ const WithdrawCase = () => {
   );
 };
 
-export default WithdrawCase;
+export default AbondonedCase;

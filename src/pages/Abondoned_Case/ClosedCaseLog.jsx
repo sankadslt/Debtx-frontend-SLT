@@ -13,7 +13,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const WriteOffCaseList = () => {
+const ClosedCaseLog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -128,29 +128,35 @@ const WriteOffCaseList = () => {
       <h1 className={GlobalStyle.headingLarge}>Closed Case Log</h1>
 
       {/* Filter Section */}
-      <div className="flex gap-4 justify-end">
-        <div className={GlobalStyle.datePickerContainer}>
-          <DatePicker
-            selected={fromDate}
-            onChange={handleFromDateChange}
-            dateFormat="MM/dd/yyyy"
-            placeholderText="MM/dd/yyyy"
-            className={GlobalStyle.inputText}
-          />
-          <DatePicker
-            selected={toDate}
-            onChange={handleToDateChange}
-            dateFormat="MM/dd/yyyy"
-            placeholderText="MM/dd/yyyy"
-            className={GlobalStyle.inputText}
-          />
+      <div className={`${GlobalStyle.cardContainer} w-full`}>
+        <div className="flex gap-4 justify-end">
+          <div className={GlobalStyle.datePickerContainer}>
+            <DatePicker
+              selected={fromDate}
+              onChange={handleFromDateChange}
+              dateFormat="MM/dd/yyyy"
+              placeholderText="From"
+              className={GlobalStyle.inputText}
+            />
+            <DatePicker
+              selected={toDate}
+              onChange={handleToDateChange}
+              dateFormat="MM/dd/yyyy"
+              placeholderText="To"
+              className={GlobalStyle.inputText}
+            />
 
-          <button
-            className={GlobalStyle.buttonPrimary} 
-            onClick={handleFilter}
-          >
-            Filter
-          </button>
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={handleFilter}
+            >
+              Filter
+            </button>
+
+            <button className={GlobalStyle.buttonRemove} onClick={handleFilter}>
+              Clear
+            </button>
+          </div>
         </div>
       </div>
 
@@ -236,4 +242,4 @@ const WriteOffCaseList = () => {
   );
 };
 
-export default WriteOffCaseList;
+export default ClosedCaseLog;

@@ -65,7 +65,7 @@ const WithdrawCase = () => {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className={GlobalStyle.buttonPrimary}
+                className={GlobalStyle.buttonRemove}
               >
                 Withdraw
               </button>
