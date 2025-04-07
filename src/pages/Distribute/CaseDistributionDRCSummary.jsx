@@ -10,7 +10,7 @@ Notes: The following page conatins the codes */
 import { useState , useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch , FaArrowLeft , FaDownload} from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import {List_Case_Distribution_Details , Create_Task_For_case_distribution_drc_summery} from "/src/services/case/CaseServices.js";
@@ -38,12 +38,13 @@ const CaseDistributionDRCSummary = () => {
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   // Filtering the data based on search query
-  const filteredDataBySearch = filteredData.filter((row) =>
+  const filteredDataBySearch = Array.isArray(filteredData)? filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
-  );
+  )
+  : [];
 
   // Apply pagination to the search-filtered data
   const currentData = filteredDataBySearch.slice(
@@ -118,6 +119,29 @@ const CaseDistributionDRCSummary = () => {
     fetchFilteredData();
   };
 
+  // Handle clear filters action
+  const handleclearfilters = () => {
+    
+    setSelectedDRC("");
+    setSelectedDRCKey("");
+    setSearchQuery("");
+    const payload = {
+      case_distribution_batch_id: batchId || "2",
+    };
+    console.log("Clear filters payload: ", payload);
+    const fetchFilteredData = async () => {
+      try {
+        const filteredData = await List_Case_Distribution_Details(payload);
+        setFilteredData(filteredData);
+      } catch (error) {
+        console.error("Error fetching filtered data:", error);
+        setFilteredData([]);
+      }
+    }
+    fetchFilteredData();
+  };
+
+
   // Handle create task action
   const handleCreateTask = async () => {
     const userId = await getLoggedUserId();
@@ -187,49 +211,57 @@ const CaseDistributionDRCSummary = () => {
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
-      <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary</h1>
+      <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary </h1>
       <h2 className={GlobalStyle.headingMedium}>Batch - {batchId || "Undefined"} </h2>
 
       {/* Filter Section */}
-      <div className="flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4">
-        {/* DRC Select Dropdown */}
-        <select
-          className={GlobalStyle.selectBox}
-          value={selectedDRC} 
-          onChange={handleDRCChange}
-        > 
-           <option value="" hidden>
-                DRC
-              </option>
-              {drcNames.map(({ key, value }) => (
-                <option key={key} value={value}>
-                  {value}
-                </option>
-              ))}
-          
-        </select>
+      <div className="flex justify-end">
+            <div className={`${GlobalStyle.cardContainer}  w-[30vw] flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4 `}>
+              {/* DRC Select Dropdown */}
+              <select
+                className={GlobalStyle.selectBox}
+                value={selectedDRC} 
+                onChange={handleDRCChange}
+                style={{ color: selectedDRC === "" ? "gray" : "black" }}
+              > 
+                <option value="" hidden>
+                      DRC
+                    </option>
+                    {drcNames.map(({ key, value }) => (
+                      <option key={key} value={value} style={{ color: "black" }}>
+                        {value}
+                      </option>
+                    ))}
+                
+              </select>
 
-        {/* Filter Button */}
-        <button
-          onClick={handleFilter}
-          className={`${GlobalStyle.buttonPrimary}`}
-        >
-          Filter
-        </button>
-      </div>
+              {/* Filter Button */}
+              <button
+                onClick={handleFilter}
+                className={`${GlobalStyle.buttonPrimary}`}
+              >
+                Filter
+              </button>
 
-      {/* Search Section */}
-      <div className="flex justify-start mb-4">
-        <div className={GlobalStyle.searchBarContainer}>
-          <input
-            type="text"
-            placeholder=""
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={GlobalStyle.inputSearch}
-          />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
+              {/* Reset Button */}
+              <button className={`${GlobalStyle.buttonRemove} h-[35px] `} onClick={handleclearfilters}  >
+                            Clear 
+              </button>
+            </div>
         </div>
+
+        {/* Search Section */}
+        <div className="flex justify-start mb-4">
+          <div className={GlobalStyle.searchBarContainer}>
+            <input
+              type="text"
+              placeholder=""
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={GlobalStyle.inputSearch}
+            />
+            <FaSearch className={GlobalStyle.searchBarIcon} />
+          </div>
       </div>
 
       {/* Table Section */}
@@ -237,11 +269,13 @@ const CaseDistributionDRCSummary = () => {
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
-              <th className={GlobalStyle.tableHeader}>Created dtm</th>
+              
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>Count</th>
               <th className={GlobalStyle.tableHeader}>Total Arreas</th>
+              <th className={GlobalStyle.tableHeader}>Created dtm</th>
               <th className={GlobalStyle.tableHeader}>Proceed On</th>
+              
               <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
@@ -256,12 +290,23 @@ const CaseDistributionDRCSummary = () => {
                       : GlobalStyle.tableRowOdd
                   }
                 >
-                  <td className={GlobalStyle.tableData}>{new Date (item.created_dtm).toLocaleDateString()}</td>
+                  
                   <td className={GlobalStyle.tableData}>{item.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{item.case_count}</td>
-                  <td className={GlobalStyle.tableData}>{item.tot_arrease}</td>
+                  <td className={GlobalStyle.tableCurrency}>{item.tot_arrease}</td>
+                  <td className={GlobalStyle.tableData}>{new Date (item.created_dtm).toLocaleString('en-GB', 
+                  {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric", // Ensures two-digit year (YY)
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: true, // Keeps AM/PM format
+                      })}
+                  </td>
                   <td className={GlobalStyle.tableData}>
-                    {item.proceed_on ? new Date(item.proceed_on).toLocaleDateString() : ""}
+                    {item.proceed_on ? new Date(item.proceed_on).toLocaleDateString('en-GB') : ""}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)}>
@@ -283,7 +328,7 @@ const CaseDistributionDRCSummary = () => {
                 </tr>
               ))): (
                 <tr>
-                  <td colSpan={6} className={GlobalStyle.tableData}>
+                  <td colSpan={6} style={{ textAlign: 'center', verticalAlign: 'middle' }} className={GlobalStyle.tableData}>
                     No data found
                   </td>
                 </tr>
@@ -301,37 +346,15 @@ const CaseDistributionDRCSummary = () => {
         {/* Right-aligned button */}
         <button
           onClick={handleCreateTask}
-          className={GlobalStyle.buttonPrimary} // Same style as Approve button
+          className={`${GlobalStyle.buttonPrimary} flex items-center `} // Same style as Approve button
         >
+          <FaDownload className="mr-2" />
           Create Task and Let Me Know
         </button>
       </div>
       {/* Button on the left */}
-      <button onClick={handleonbacknuttonclick}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width={65}
-          height={65}
-          fill="none"
-        >
-          <circle
-            cx={32.5}
-            cy={32.5}
-            r={32.45}
-            fill="#B3CCE3"
-            stroke="#58120E"
-            strokeWidth={0.1}
-            transform="rotate(-90 32.5 32.5)"
-          />
-          <path
-            fill="#001120"
-            d="m36.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L43.782 45.5l3.063-3.064L36.46 32.051Z"
-          />
-          <path
-            fill="#001120"
-            d="m23.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L30.782 45.5l3.063-3.064L23.46 32.051Z"
-          />
-        </svg>
+      <button className={GlobalStyle.buttonPrimary} onClick={handleonbacknuttonclick}>
+         <FaArrowLeft className="mr-2" />
       </button>
     </div>
   );

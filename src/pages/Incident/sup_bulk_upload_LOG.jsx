@@ -20,12 +20,16 @@ import OpenIcon from "../../assets/images/incidents/Incident_Done.png";
 import InProgressIcon from "../../assets/images/incidents/Incident_InProgress.png";
 import RejectIcon from "../../assets/images/incidents/Incident_Reject.png";
 import { useNavigate } from 'react-router-dom';
+import { Tooltip } from "react-tooltip";
+
+
 
 
 const getStatusIcon = (status) => {
     switch (status) {
         case "Open":
             return OpenIcon;
+
         case "InProgress":
             return InProgressIcon;
         case "Reject":
@@ -102,8 +106,15 @@ const SupBulkUploadLog = () => {
                 setData([]);
             }
         } catch (error) {
-            console.error("Error fetching data:", error);
-            setError(error.message || "Failed to fetch data");
+            // console.error("Error fetching data:", error);
+            // setError(error.message || "Failed to fetch data");
+            Swal.fire({
+                title: "Error",
+                text: "Failed to fetch data. Please try again later.",
+                icon: "error",
+                confirmButtonColor: "#d33",
+                confirmButtonText: "OK"
+            });
             setData([]);
         } finally {
             setLoading(false);
@@ -129,7 +140,9 @@ const SupBulkUploadLog = () => {
         setFromDate(null);
         setToDate(null);
         setStatus("");
-
+        setSelectedFromDate(null);
+        setSelectedToDate(null);
+        setSelectedStatus("");
         fetchData();
     }
     const navigate = useNavigate();
@@ -148,22 +161,35 @@ const SupBulkUploadLog = () => {
                 </button>
             </div>
             {/* Filters */}
-            <div className="flex flex-col gap-4 mb-8">
-                <div className="flex items-center gap-4">
-                    <span>Status:</span>
-                    <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className={GlobalStyle.selectBox}>
-                        <option value="">All</option>
-                        <option value="Open">Open</option>
-                        <option value="InProgress">In Progress</option>
-                        <option value="Reject">Reject</option>
+            <div className="flex justify-end ">
+            <div className= {`${GlobalStyle.cardContainer}  w-[70vw] mb-8 mt-8  `} > {/* Filter Section Small issue with the viewport width. or 
+                                                                                        else can use  w-3/4  */}
+                <div className="flex items-center gap-4 justify-end">
+                    
+                    <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className={GlobalStyle.selectBox} style={{ color: selectedStatus === "" ? "gray" : "black" }}>
+                        <option value="" hidden>Status</option>
+                        <option value="Open" style={{ color: "black" }}>Open</option>
+                        <option value="InProgress" style={{ color: "black" }}>In Progress</option>
+                        <option value="Reject" style={{ color: "black" }}>Reject</option>
                     </select>
-
                     <label className={GlobalStyle.dataPickerDate}>Date:</label>
-
-                    <span>To:</span>
+                    
                     <DatePicker
                         selected={selectedFromDate}
-                        onChange={(date) => setSelectedFromDate(date)}
+                        onChange={(date) =>{
+                            if (selectedToDate && date > selectedToDate) {
+                                Swal.fire({
+                                    title: "Invalid Date Selection!",
+                                    text: "The 'From' date cannot be later than the 'To' date.",
+                                    icon: "error",
+                                    confirmButtonColor: "#d33",
+                                    confirmButtonText: "OK"
+                                });
+                            } else {
+                                setSelectedFromDate(date);
+                            }
+                        }}
+
                         dateFormat="dd/MM/yyyy"
                         placeholderText="From"
                         className={GlobalStyle.inputText}
@@ -176,14 +202,14 @@ const SupBulkUploadLog = () => {
                                     title: "Invalid Date Selection!",
                                     text: "The 'To' date cannot be earlier than the 'From' date.",
                                     icon: "error",
-                                    confirmButtonColor: "#3085d6",
+                                    confirmButtonColor: "#d33",
                                     confirmButtonText: "OK"
                                 });
                             } else {
                                 setSelectedToDate(date);
                             }
                         }}
-                        minDate={selectedFromDate}
+                        
                         dateFormat="dd/MM/yyyy"
                         placeholderText="To"
                         className={GlobalStyle.inputText}
@@ -191,11 +217,12 @@ const SupBulkUploadLog = () => {
                     <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
                         Filter
                     </button>
-                    <button className={GlobalStyle.buttonPrimary} onClick={clearFilters}>
-                        Clear Filters
+                    <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
+                        Clear
                     </button>
                 </div>
-                {error && <span className={GlobalStyle.errorText}>{error}</span>}
+                {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
+            </div>
             </div>
 
             {/* Search Bar */}
@@ -203,7 +230,7 @@ const SupBulkUploadLog = () => {
                 <div className={GlobalStyle.searchBarContainer}>
                     <input
                         type="text"
-                        placeholder="Search..."
+                        placeholder=""
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className={GlobalStyle.inputSearch}
@@ -222,10 +249,10 @@ const SupBulkUploadLog = () => {
                         <thead className={GlobalStyle.thead}>
                             <tr>
                                 <th className={GlobalStyle.tableHeader}>Status</th>
-                                <th className={GlobalStyle.tableHeader}>Date & Time</th>
                                 <th className={GlobalStyle.tableHeader}>Uploaded By</th>
                                 <th className={GlobalStyle.tableHeader}>File Name</th>
                                 <th className={GlobalStyle.tableHeader}>Type</th>
+                                <th className={GlobalStyle.tableHeader}>Date & Time</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -235,14 +262,23 @@ const SupBulkUploadLog = () => {
 
                                         <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
                                             <div className="flex items-center gap-2">
-                                                <img src={getStatusIcon(row.status)} alt={row.status} className="w-6 h-6" />
-
+                                                <img src={getStatusIcon(row.status)} alt={row.status} data-tooltip-id={`tooltip-${index}`} className="w-6 h-6" />
+                                                <Tooltip id={`tooltip-${index}`} place="bottom" effect="solid">
+                                                    {row.status}
+                                                </Tooltip>
+                            
                                             </div>
                                         </td>
-                                        <td className={GlobalStyle.tableData}>{row.dateTime},{row.createdTime}</td>
+                                       
                                         <td className={GlobalStyle.tableData}>{row.uploadedBy}</td>
                                         <td className={GlobalStyle.tableData}>{row.fileName}</td>
                                         <td className={GlobalStyle.tableData}>{row.type}</td>
+                                        <td className={GlobalStyle.tableData}> {new Date(row.dateTime).toLocaleDateString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                        })} , 
+                                        {row.createdTime}</td>
                                     </tr>
                                 ))
                             ) : (

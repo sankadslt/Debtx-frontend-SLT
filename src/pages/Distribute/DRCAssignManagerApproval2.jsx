@@ -12,7 +12,7 @@ Notes: The following page contains the code
 */
 
 import { useState , useEffect } from "react";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; 
 import "react-datepicker/dist/react-datepicker.css";
 import {List_All_Batch_Details , Approve_Batch_or_Batches , Create_task_for_batch_approval} from "/src/services/case/CaseServices.js";
@@ -357,7 +357,8 @@ export default function DRCAssignManagerApproval2() {
         </button>
       </div>
       <div>
-        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
+        <button onClick={onSubmit} className={`${GlobalStyle.buttonPrimary} flex items-center `} >
+          <FaDownload className="mr-2" />
           Create task and let me know
         </button>
       </div>

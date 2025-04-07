@@ -512,6 +512,26 @@ export default function AssignDRCsLOG() {
 
   };
 
+  const handleclearfilter = () => {
+
+    setStartDate(null);
+    setEndDate(null);
+    setFilterType("");
+    setFilterValue("");
+    
+    const fetchCases = async () => {
+      try {
+        const requestData = { drc_id: 7 };
+        const data = await List_CasesOwened_By_DRC(requestData);
+        setCases(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchCases();
+  };
+
+
   const handlewithdrawbutton = async (caseID) => {
     const userId =  await getLoggedUserId();
     Swal.fire({
@@ -590,60 +610,64 @@ export default function AssignDRCsLOG() {
     <h1 className={`${GlobalStyle.headingMedium} mb-5`}>DRC : TCM</h1>
 
        {/* Filter Section */}
-       <div className="flex justify-end gap-10 my-12">
-        <div className="flex gap-10 mt-2">
+       <div className= {`${GlobalStyle.cardContainer}  w-full mt-6 flex justify-center gap-5 mb-7 `}>
+              <div className="flex gap-2">
+                  
+                {/* Filter Dropdown (Account No or Case ID) */}
+              
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className={`${GlobalStyle.selectBox} h-[36px]`}
+                    style={{ color: filterType === "" ? "gray" : "black" }}
+                  >
+                    <option value="" hidden>Select</option>
+                    <option value="Account No" style={{ color: "black" }}>Account No</option>
+                    <option value="Case ID" style={{ color: "black" }}>Case ID</option>
+                  </select>
+                
+                <div>
+                  <input
+                    type="text"
+                    value={filterValue}
+                    onChange={(e) => setFilterValue(e.target.value)}
+                    placeholder={`Enter ${filterType}`}
+                    className={`${GlobalStyle.inputText} `}
+                  />
+                </div>
+              </div>
+
+                  
+                    <label className={GlobalStyle.dataPickerDate}   style={{ marginTop: '5px', display: 'block' }}>Date: </label>
+                    <DatePicker
+                      selected={startDate}
+                      onChange={handlestartdatechange}
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="From"
+                      className={GlobalStyle.inputText}
+                    />
+                    <DatePicker
+                      selected={endDate}
+                      onChange={handleenddatechange}
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="To"
+                      className={GlobalStyle.inputText}
+                    />
+                  
             
-           {/* Filter Dropdown (Account No or Case ID) */}
-          <div className="flex gap-4">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className={`${GlobalStyle.selectBox} h-[36px]`}
-            >
-              <option value="" hidden>Select</option>
-              <option value="Account No">Account No</option>
-              <option value="Case ID">Case ID</option>
-            </select>
-          </div>
-          <div>
-            <input
-              type="text"
-              value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
-              placeholder={`Enter ${filterType}`}
-              className={`${GlobalStyle.inputText} `}
-            />
-          </div>
-        </div>
 
-        <div className="flex flex-col">
-          <div className="flex flex-col mb-4">
-            <div className={GlobalStyle.datePickerContainer}>
-              <label className={GlobalStyle.dataPickerDate}>Date </label>
-              <DatePicker
-                selected={startDate}
-                onChange={handlestartdatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/MM/yyyy"
-                className={GlobalStyle.inputText}
-              />
-              <DatePicker
-                selected={endDate}
-                onChange={handleenddatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/MM/yyyy"
-                className={GlobalStyle.inputText}
-              />
-            </div>
-          </div>
-        </div>
-
-        <button
-          className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
-          onClick={handleFilter}
-        >
-          Filter
-        </button>
+              <button
+                className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                onClick={handleFilter}
+              >
+                Filter
+              </button>
+              <button
+                className={`${GlobalStyle.buttonRemove} h-[35px]`}
+                onClick={handleclearfilter} // <-- Corrected here
+              >
+                Clear
+              </button>
       </div>
 
       {/* Table Section */}
@@ -697,9 +721,17 @@ export default function AssignDRCsLOG() {
                     <td className={GlobalStyle.tableData}>{caseItem.case_id}</td>
                     <td className={GlobalStyle.tableData}>{caseItem.case_current_status}</td>
                     <td className={GlobalStyle.tableData}>{caseItem.account_no}</td>
-                    <td className={GlobalStyle.tableData}>{caseItem.current_arrears_amount}</td>
+                    <td className={GlobalStyle.tableCurrency}>{caseItem.current_arrears_amount}</td>
                     <td className={GlobalStyle.tableData}>
-                    {new Date(caseItem.created_dtm).toLocaleDateString('en-GB')} 
+                    {new Date(caseItem.created_dtm).toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric", // Ensures two-digit year (YY)
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: true, // Keeps AM/PM format
+                      }) } 
                     </td>
                     <td className={GlobalStyle.tableData}>
                     {caseItem.end_dtm.trim() && !isNaN(new Date(caseItem.end_dtm.trim()).getTime()) 
