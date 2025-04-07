@@ -14,13 +14,14 @@
 import { useState , useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import { useLocation , useNavigate } from "react-router-dom";
 import { AssignDRCToCaseDetails , Assign_DRC_To_Case} from "/src/services/case/CaseServices.js";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Swal from "sweetalert2";
 
 export default function ReAssignDRC() {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [currentPage1, setCurrentPage1] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,6 +78,10 @@ export default function ReAssignDRC() {
     };
     fetchDRCNames();
   });
+
+  const handleonbacknuttonclick = () => {
+    navigate("/pages/Distribute/AssignDRCCaseList" );
+  };
   
   const onSubmit = async () => {
     const userId = await getLoggedUserId();
@@ -171,6 +176,9 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedData = filteredSearchData.slice(startIndex, endIndex);
+
+
+  
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <h1 className={`${GlobalStyle.headingLarge} mb-5`}>Re-Assign DRC</h1>
@@ -414,6 +422,10 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
           Submit
         </button>
       </div>
+
+      <button className={GlobalStyle.buttonPrimary} onClick={handleonbacknuttonclick}>
+         <FaArrowLeft className="mr-2" />
+      </button>
     </div>
   );
 }
