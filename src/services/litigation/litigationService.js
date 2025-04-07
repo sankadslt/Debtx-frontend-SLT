@@ -22,7 +22,9 @@ export const listAllLitigationCases = async (payload) => {
       `${URL}/List_All_Litigation_Cases`,
       payload
     );
+    console.log("Litigation cases fetched successfully:", response.data);
     return response.data;
+
   } catch (error) {
     console.error(
       "Error withdrawing Litigation cases :",
