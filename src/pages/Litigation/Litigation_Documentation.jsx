@@ -12,11 +12,12 @@ Notes: This template uses Tailwind CSS */
 import { useEffect, useState } from "react"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
 import { createLitigationDocument } from "../../services/litigation/litigationService";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getLoggedUserId } from "../../services/auth/authService";
 
 export const Litigation_Documentation = () => {
   const location =useLocation();
+  const navigate =useNavigate();
   const caseId =location.state?.case_id ||"";
   const [userId, setUserId] =useState(null);
   const [error, setError] =useState(null)
@@ -50,7 +51,16 @@ export const Litigation_Documentation = () => {
     try {
         const result =await createLitigationDocument(payload);
         console.log(result);
+
+        //reset states
         setError('');
+        setRtomPages('');
+        setRtomStatus('');
+        setDrcPages('');
+        setDrcStatus('');
+
+        navigate('/pages/Litigation/Litigation_List');
+
     } catch (error) {
         const statusCode = error.response?.status;
         if (statusCode === 400) {
