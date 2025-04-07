@@ -36,7 +36,7 @@ const Incident_Register_Individual = () => {
     if (!accountNo) {
       newErrors.accountNo = "*";
     } else if (accountNo.length > 10) {
-      newErrors1.accountNo = "Account number must be \n 10 characters or fewer.";
+      newErrors1.accountNo = "Account number must be  10 characters or fewer.";
     }
     if (!actionType) newErrors.actionType = "*";
     if (!sourceType) newErrors.sourceType = "*";
@@ -127,7 +127,7 @@ const handleSubmit = async (e) => {
         <div className={`${GlobalStyle.cardContainer} mt-4 `}>
         <h1 className={`${GlobalStyle.headingLarge} mb-4 flex justify-center items-center`}>Incident Register</h1>
           <h2 className={`${GlobalStyle.headingMedium} mb-6 flex justify-center items-center`}>Incident Details</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {/* <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex gap-4 justify-center items-center ">
               <label htmlFor="accountNo" className="w-[150px]">Account No </label>
               {errors.accountNo && <p className="text-red-500">{errors.accountNo}</p>}
@@ -151,7 +151,7 @@ const handleSubmit = async (e) => {
             <div className="flex gap-4 justify-center items-center">
               <label htmlFor="actionType" className="w-[150px]">Action</label>
               {errors.actionType && <p className="text-red-500">{errors.actionType}</p>}
-              <select id="actionType" value={actionType} onChange={(e) => setActionType(e.target.value)} className={`${GlobalStyle.selectBox} w-[160px] text-sm`}>
+              <select id="actionType" value={actionType} onChange={(e) => setActionType(e.target.value)} className={`${GlobalStyle.selectBox}w-[159px] px-2 py-1 text-sm`}>
                 <option value=""  hidden  ></option>
                 <option value="collect arrears">Collect Arrears</option>
                 <option value="collect arrears and CPE">Collect Arrears and CPE</option>
@@ -195,7 +195,174 @@ const handleSubmit = async (e) => {
             <div className="pt-4 flex justify-end">
               <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button>
             </div>
-          </form>
+          </form> */}
+
+          <div className="flex items-center justify-center ">
+            <form onSubmit={handleSubmit} className="space-y-6   ">
+              <table className=" text-sm" >
+                <tbody>
+                  {/* Account No */}
+                  <tr className="align-center">
+                    <td className="w-[180px] py-2">
+                      <label htmlFor="accountNo">Account No</label>
+                    </td>
+                    <td className="py-2">
+                    <div className="flex items-center gap-1">
+                      {/* {errors.accountNo && (
+                          <p className=" text-red-500 text-xs" >{errors.accountNo}</p>
+                        )} */}
+                         <span className={`text-red-500 text-xs w-3 ${errors.accountNo ? "" : "invisible"}`}>
+                          {errors.accountNo}
+                          </span>
+                      <input
+                        id="accountNo"
+                        type="text"
+                        value={accountNo}
+                        onChange={(e) => setAccountNo(e.target.value)}
+                        className={`${GlobalStyle.inputText} w-full px-2 py-1`}
+                      />
+                    </div>
+                      {/* {errors.accountNo && (
+                        <p className=" text-red-500 text-xs" >{errors.accountNo}</p>
+                      )} */}
+                      {/* {errors1.accountNo && (
+                        <p className="text-red-500 text-xs break-words">
+                          {errors1.accountNo.split("\n").map((line, index) => (
+                            <span key={index}>{line}<br /></span>
+                          ))}
+                        </p>
+                      )} */}
+
+                      {errors1.accountNo && (
+                        <p className="text-red-500 text-xs mt-1">{errors1.accountNo}</p>
+                      )}
+                    </td>
+                  </tr>
+
+                  {/* Action Type */}
+                  <tr className="align-center">
+                    <td className="py-2">
+                      <label htmlFor="actionType">Action</label>
+                    </td>
+                    <td className="py-2">
+                    <div className="flex items-center gap-1">
+                    {/* {errors.actionType && (
+                        <p className="text-red-500 text-xs">{errors.actionType}</p>
+                      )} */}
+                      <span className={`text-red-500 text-xs w-3 ${errors.actionType ? "" : "invisible"}`}>
+                          {errors.actionType}
+                          </span>
+                      <select
+                        id="actionType"
+                        value={actionType}
+                        onChange={(e) => setActionType(e.target.value)}
+                        className={`${GlobalStyle.selectBox} w-full px-2 py-1`}
+                      >
+                        <option value="" hidden></option>
+                        <option value="collect arrears">Collect Arrears</option>
+                        <option value="collect arrears and CPE">Collect Arrears and CPE</option>
+                        <option value="collect CPE">Collect CPE</option>
+                      </select>
+
+                      </div>
+                      
+                    </td>
+                  </tr>
+
+                  {/* Contact Number (Conditional) */}
+                  {actionType === "collect CPE" && (
+                    <tr className="align-center">
+                      <td className="py-2">
+                        <label htmlFor="contactNumber">Contact Number</label>
+                      </td>
+                      <td className="py-2">
+                      <div className="flex items-center gap-1">
+                      {/* {errors.contactNumber && (
+                          <p className="text-red-500 text-xs">{errors.contactNumber}</p>
+                        )} */}
+                        <span className={`text-red-500 text-xs w-3 ${errors.contactNumber ? "" : "invisible"}`}>
+                          {errors.contactNumber}
+                          </span>
+                        <input
+                          id="contactNumber"
+                          type="text"
+                          value={contactNumber}
+                          onChange={(e) => setContactNumber(e.target.value)}
+                          className={`${GlobalStyle.inputText} w-full px-2 py-1`}
+                        />
+                        </div>
+                        
+                      </td>
+                    </tr>
+                  )}
+
+                  {/* Source Type */}
+                  <tr className="align-center">
+                    <td className="py-2">
+                      <label htmlFor="sourceType">Source Type</label>
+                    </td>
+                    <td className="py-2">
+                    <div className="flex items-center gap-1">
+                    {/* {errors.sourceType && (
+                        <p className="text-red-500 text-xs">{errors.sourceType}</p>
+                      )} */}
+
+                      <span className={`text-red-500 text-xs w-3 ${errors.sourceType ? "" : "invisible"}`}>
+                          {errors.sourceType}
+                      </span>
+                      <select
+                        id="sourceType"
+                        value={sourceType}
+                        onChange={(e) => setSourceType(e.target.value)}
+                        className={`${GlobalStyle.selectBox} w-full px-2 py-1`}
+                      >
+                        <option value="" hidden></option>
+                        <option value="Pilot Suspended">Pilot Suspended</option>
+                        <option value="Product Terminate">Product Terminate</option>
+                        <option value="Special">Special</option>
+                      </select>
+                      </div>
+                      
+                    </td>
+                  </tr>
+
+                  {/* Calendar Month */}
+                  <tr className="align-center">
+                    <td className="py-2">Calendar Month</td>
+                    <td className="py-2">
+                      <div className="flex items-center gap-2">
+                      <span className="w-3 invisible">*</span>
+                        <button
+                          type="button"
+                          onClick={() => setCalendarMonth((prev) => Math.max(1, prev - 1))}
+                          className={GlobalStyle.buttonPrimary}
+                        >
+                          -
+                        </button>
+                        <span className="w-8 text-center">{calendarMonth}</span>
+                        <button
+                          type="button"
+                          onClick={() => setCalendarMonth((prev) => Math.min(3, prev + 1))}
+                          className={GlobalStyle.buttonPrimary}
+                        >
+                          +
+                        </button>
+                      </div>
+                      {errors1.calendarMonth && (
+                        <p className="text-red-500 text-xs mt-1">{errors1.calendarMonth}</p>
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Submit Button */}
+              <div className="pt-4 flex justify-end">
+                <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button>
+              </div>
+            </form>
+            </div>
+
         </div>
       </div>
 
