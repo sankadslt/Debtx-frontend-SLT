@@ -133,17 +133,17 @@ const LOD_Log = () => {
 
     return (
         <div className={GlobalStyle.fontPoppins}>
-            <h2 className={GlobalStyle.headingLarge}>LOD List</h2>
+            <h2 className={GlobalStyle.headingLarge}>Final Reminder List</h2>
 
             <div className={`${GlobalStyle.cardContainer} w-full`}>
                 
                     <div className="flex items-center justify-end w-full space-x-6">
                         <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                             <option value="" hidden>Status</option>
-                            <option value="Initial LOD">Initial LOD</option>
-                            <option value="LOD Settle Pending">LOD Settle Pending</option>
-                            <option value="LOD Settle Open-Pending">LOD Settle Open-Pending</option>
-                            <option value="LOD Settle Active">LOD Settle Active</option>
+                            <option value="Final Reminder">Final Reminder</option>
+                            <option value="Final Reminder Settle Pending">Final Reminder Settle Pending</option>
+                            <option value="Final Reminder Settle Open-Pending">Final Reminder Settle Open-Pending</option>
+                            <option value="Final Reminder Settle Active">Final Reminder Settle Active</option>
                         </select>
 
                         <select value={DateType} onChange={(e) => setDateType(e.target.value)} style={{ color: DateType === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
@@ -199,7 +199,7 @@ const LOD_Log = () => {
                             <th className={GlobalStyle.tableHeader}>Notification Count</th>
                             <th className={GlobalStyle.tableHeader}>Created DTM</th>
                             <th className={GlobalStyle.tableHeader}>Expire DTM</th>
-                            <th className={GlobalStyle.tableHeader}>Last Response</th>
+                            <th className={GlobalStyle.tableHeader}>Response Updated Date</th>
                             <th className={GlobalStyle.tableHeader}></th>
                         </tr>
                     </thead>

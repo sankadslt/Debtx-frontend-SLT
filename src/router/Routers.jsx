@@ -78,6 +78,9 @@ import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan
 //LOD
 import Digital_Signature_LOD from "../pages/LOD/Digital_Signature_LOD";
 import LOD_Log from "../pages/LOD/LODLog";
+import FinalReminderList from "../pages/LOD/FinalReminderList";
+import CustomerResponse from "../pages/LOD/CustomerResponse";
+import CustomerResponseReview from "../pages/LOD/CustomerResponseReview";
 
 const Routers = () => {
   return (
@@ -596,7 +599,35 @@ const Routers = () => {
           />
         }
       />
+      <Route
+        path="/pages/LOD/FinalReminderList"
+        element={
+          <ProtectedRoute
+            element={<FinalReminderList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/CustomerResponse"
+        element={
+          <ProtectedRoute
+            element={<CustomerResponse />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/CustomerResponseReview"
+        element={
+          <ProtectedRoute
+            element={<CustomerResponseReview />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
     </Routes>
+    
     
   );
 };

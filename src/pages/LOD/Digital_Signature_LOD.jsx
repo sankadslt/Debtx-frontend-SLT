@@ -257,7 +257,7 @@ const Digital_Signature_LOD = () => {
             setLODCount(0);
             return;
         }
-    
+
         const maxCount = LODType === "LOD" ? lodCount : finalReminderCount;
 
         if (parseInt(value, 10) <= maxCount) {
@@ -305,7 +305,7 @@ const Digital_Signature_LOD = () => {
             )}
 
             <div className="w-full mb-8 mt-8">
-                <div className="flex items-center justify-center w-full space-x-6">
+                <div className="flex items-center justify-center w-full space-x-6"> 
                     <h1><b>LOD Type</b></h1>
                     <select
                         value={LODType}
@@ -313,8 +313,9 @@ const Digital_Signature_LOD = () => {
                             setLODType(e.target.value);
                         }}
                         className={GlobalStyle.selectBox}
+                        style={{ color: LODType === "" ? "gray" : "black" }}
                     >
-                        <option value="">LOD Type</option>
+                        <option value="" hidden>LOD Type</option>
                         {/* <option value="All">All</option> */}
                         <option value="LOD">LOD</option>
                         <option value="Final Reminder">Final Reminder</option>
@@ -362,7 +363,13 @@ const Digital_Signature_LOD = () => {
                                     {/* <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
                                         {renderStatusIcon(log.Status)}
                                     </td> */}
-                                    <td className={GlobalStyle.tableData}>{log.Amount}</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        {log.Amount.toLocaleString("en-LK", {
+                                            style: "currency",
+                                            currency: "LKR",
+                                        })}
+
+                                    </td>
                                     <td className={GlobalStyle.tableData}>{log.CustomerTypeName}</td>
                                     <td className={GlobalStyle.tableData}>{log.AccountManagerCode}</td>
                                     <td className={GlobalStyle.tableData}>{log.SourceType}</td>

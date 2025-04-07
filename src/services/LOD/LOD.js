@@ -150,8 +150,8 @@ export const List_Final_Reminder_Lod_Cases = async (case_status, date_type, date
         return response.data.data.map((LOD) => ({
           LODID: LOD.case_id,
           Status: LOD.case_current_status,
-          LODBatchNo: LOD.current_arrears_amount,
-          NotificationCount: LOD.customer_name || null,
+          LODBatchNo: LOD.lod_final_reminder.lod_distribution_id,
+          NotificationCount: LOD.lod_final_reminder.lod_notification.length || null,
           CreatedDTM: LOD.lod_final_reminder.lod_submission.created_on || null,
           ExpireDTM: LOD.lod_final_reminder.lod_expire_on || null,
           LastResponse: LOD.lod_final_reminder.lod_response.created_on || null,
