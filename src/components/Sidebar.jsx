@@ -95,7 +95,7 @@ const Sidebar = ({ onHoverChange }) => {
         },
         { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "Litigation", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Dispute", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, 
           label: "Disposed List", 
