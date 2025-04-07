@@ -577,6 +577,25 @@ const Routers = () => {
       <Route path="/pages/Litigation/Litigation_Court_Details_Update" element={<ProtectedRoute element={<Litigation_Court_Details_Update />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Case_Details" element={<ProtectedRoute element={<Litigation_Case_Details />} allowedRoles={['superadmin']} />} />
 
+      {/* //LOD */}
+      <Route
+        path="/pages/LOD/DigitalSignatureLOD"
+        element={
+          <ProtectedRoute
+            element={<Digital_Signature_LOD />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/LODLog"
+        element={
+          <ProtectedRoute
+            element={<LOD_Log />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
     </Routes>
     
   );
