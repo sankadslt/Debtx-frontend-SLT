@@ -16,6 +16,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import { createIncident } from "../../services/Incidents/incidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
 
 
 const Incident_Register_Individual = () => {
@@ -115,6 +116,10 @@ const handleSubmit = async (e) => {
   }
 };
 
+  const handlebackbuttonClick = () => {
+    window.history.back(); // Go back to the previous page
+  }
+
   return (
     <div className={`p-6 ${GlobalStyle.fontPoppins}`}>
       
@@ -146,7 +151,7 @@ const handleSubmit = async (e) => {
             <div className="flex gap-4 justify-center items-center">
               <label htmlFor="actionType" className="w-[150px]">Action</label>
               {errors.actionType && <p className="text-red-500">{errors.actionType}</p>}
-              <select id="actionType" value={actionType} onChange={(e) => setActionType(e.target.value)} className={`${GlobalStyle.selectBox} w-[159px] text-sm`}>
+              <select id="actionType" value={actionType} onChange={(e) => setActionType(e.target.value)} className={`${GlobalStyle.selectBox} w-[160px] text-sm`}>
                 <option value=""  hidden  ></option>
                 <option value="collect arrears">Collect Arrears</option>
                 <option value="collect arrears and CPE">Collect Arrears and CPE</option>
@@ -159,7 +164,7 @@ const handleSubmit = async (e) => {
               <div className="flex gap-4 justify-center items-center">
                 <label htmlFor="contactNumber" className="w-[150px]">Contact Number</label>
                 {errors.contactNumber && <p className="text-red-500">{errors.contactNumber}</p>}
-                <input id="contactNumber" type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} className={`${GlobalStyle.inputText} w-[159px] px-2 py-1 text-sm`} />
+                <input id="contactNumber" type="text" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} className={`${GlobalStyle.inputText} w-[160px] px-2 py-1 text-sm`} />
               </div>
               
             ) }
@@ -168,7 +173,7 @@ const handleSubmit = async (e) => {
             <div className="flex gap-4 justify-center items-center">
               <label htmlFor="sourceType" className="w-[150px]">Source Type</label>
               {errors.sourceType && <p className="text-red-500">{errors.sourceType}</p>}
-              <select id="sourceType" value={sourceType} onChange={(e) => setSourceType(e.target.value)} className={`${GlobalStyle.selectBox} w-[159px] text-sm`}>
+              <select id="sourceType" value={sourceType} onChange={(e) => setSourceType(e.target.value)} className={`${GlobalStyle.selectBox} w-[160px] text-sm`}>
                 <option value="" hidden></option>
                 <option value="Pilot Suspended">Pilot Suspended</option>
                 <option value="Product Terminate">Product Terminate</option>
@@ -193,6 +198,16 @@ const handleSubmit = async (e) => {
           </form>
         </div>
       </div>
+
+      <div className="flex justify-start items-center w-full  ">
+            <button
+              className={`${GlobalStyle.buttonPrimary} `} 
+             onClick={handlebackbuttonClick}
+            >
+              <FaArrowLeft className="mr-2" />
+              
+            </button>
+          </div>
     </div>
   );
 };
