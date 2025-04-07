@@ -34,9 +34,9 @@ export const Litigation_List = () => {
  
   // Status mapping between frontend display values and backend expected values
   const statusMapping = {
-    "Initial_Litigation": "Initial Litigation",
+    "Initial_Litigation": "Initial_Litigation",
     "Pending_FTL": "Pending FTL",
-    "FTL_Settle_Pending": "Litigation Settle Pending",
+    "FTL_Settle_Pending": "FTL_Settle_Pending",
     "FTL": "Forward To Litigation",
     "FLU": "Fail from Legal Unit",
     "SLA": "Success Legal Action",
@@ -273,7 +273,7 @@ export const Litigation_List = () => {
               <tbody>
                 {displayData.map((item, index) => {
                   // Map the backend status to frontend display status
-                  const displayStatus = getDisplayStatus(item.case_current_status || item.status);
+                  const displayStatus = getDisplayStatus(item.status);
                   
                   return (
                     <tr
@@ -284,19 +284,17 @@ export const Litigation_List = () => {
                           : "bg-gray-50 bg-opacity-50"
                       } border-b`}
                     >
-                      <td className={`${GlobalStyle.tableData} text-center`}>{item.case_id || item.id}</td>
+                      <td className={`${GlobalStyle.tableData} text-center`}>{item.case_id}</td>
                       <td className={GlobalStyle.tableData}>{displayStatus}</td>
-                      <td className={`${GlobalStyle.tableData} text-center`}>{item.account_no || item.account_number}</td>
-                      <td className={GlobalStyle.tableData}>{item.amount || (item.settlement && item.settlement.settlement_amount)}</td>
-                      <td className={GlobalStyle.tableData}>
-                        {item.legal_accepted_date || 
-                         (item.litigation && item.litigation.legal_submission && 
-                          new Date(item.litigation.legal_submission.submission_on).toLocaleDateString())}
+                      <td className={`${GlobalStyle.tableData} text-center`}>{item.account_no}</td>
+                      <td className={GlobalStyle.tableData}>{item.current_arreas_amount}</td>
+                      <td className={GlobalStyle.tableData}>{item.legal_accepted_date
+                        ? new Date(item.legal_accepted_date).toLocaleDateString("en-GB")
+                        : "N/A"}
                       </td>
-                      <td className={GlobalStyle.tableData}>
-                        {item.settlement_created_date || 
-                         (item.settlement && item.settlement.settlement_created_dtm && 
-                          new Date(item.settlement.settlement_created_dtm).toLocaleDateString())}
+                      <td className={GlobalStyle.tableData}>{item.settlement_created_date
+                        ? new Date(item.settlement_created_date).toLocaleDateString("en-GB")
+                        : "N/A"}
                       </td>
                       <td className={`${GlobalStyle.tableData} px-4`}>
                         {displayStatus === "Initial_Litigation" && (
