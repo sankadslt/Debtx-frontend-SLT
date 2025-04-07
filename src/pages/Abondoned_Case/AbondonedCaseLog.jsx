@@ -152,6 +152,7 @@ const WithdrawalCaseLog = () => {
       </div>
 
       {/* Filter Section */}
+      <div className={`${GlobalStyle.cardContainer} w-full`}>
       <div className="flex gap-4 justify-end">
         <div className={GlobalStyle.datePickerContainer}>
           <DatePicker
@@ -172,6 +173,10 @@ const WithdrawalCaseLog = () => {
           <button className={GlobalStyle.buttonPrimary} onClick={handleFilter}>
             Filter
           </button>
+          <button className={GlobalStyle.buttonRemove} onClick={handleFilter}>
+            Clear
+          </button>
+        </div>
         </div>
       </div>
 
