@@ -18,11 +18,11 @@ export const Litigation_Submission = () => {
   return (
     <div className={GlobalStyle.fontPoppins}>
         <h1 className={GlobalStyle.headingLarge}>Legal Submission</h1>
-        <div className="flex items-center justify-center w-full">
-            <div className="flex flex-col w-[800px] bg-[#E1E4F5] py-10 px-20 my-6 rounded-tr-2xl">     
+        <div className="flex gap-4 mt-4 justify-center">
+            <div className={GlobalStyle.cardContainer}>     
                 {/* Card */}
                 <div className="flex flex-col w-full items-center justify-center">
-                    <div className={`${GlobalStyle.cardContainer} bg-opacity-100 w-full`}>
+                    <div className={`${GlobalStyle.cardContainer} w-full`}>
                         {[
                             { label: "Case ID", value: "" },
                             { label: "Customer Red", value: "" },
@@ -40,9 +40,9 @@ export const Litigation_Submission = () => {
                 </div>
 
                 {/* Legal Submission */}
-                <div className="flex gap-4 items-center justify-start mb-4">
+                <div className="flex gap-4 items-center justify-start mb-4 w-full">
                     <label className="w-56">Legal Submission</label>
-                    <select className={GlobalStyle.selectBox}>
+                    <select className={`${GlobalStyle.selectBox}`}>
                         <option value="">Select</option>
                         <option value="Legal_Accepted">Legal Accepted</option>
                         <option value="Legal_Rejected">Legal Rejected</option>

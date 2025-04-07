@@ -16,14 +16,14 @@ export const Litigation_Documentation = () => {
     <div className={GlobalStyle.fontPoppins}>
         <h1 className={GlobalStyle.headingLarge}>Litigation Documentation</h1>
 
-        <div className="flex flex-wrap md:flex-nowrap items-center justify-center my-6 gap-1 mb-8">
-            <div className="flex flex-col w-[800px] gap-6 mx-6 px-20 py-8 bg-[#E1E4F5] rounded-tr-2xl">
-                <h3 className={`${GlobalStyle.headingMedium} font-semibold`}>CaseID : 001</h3>
+        <div className="flex gap-4 mt-4 justify-center">
+            <div className={GlobalStyle.cardContainer}>
+                <h3 className={`${GlobalStyle.headingMedium} font-semibold mb-4`}>CaseID : 001</h3>
                 <div className="flex flex-col gap-4">
                     <div className="flex justify-between">
-                        <span>RTOM Customer File</span>
-                        <div className="flex gap-4">
-                            <select className={`${GlobalStyle.selectBox} w-[270px]`}>
+                        <span className={`${GlobalStyle.headingSmall} mb-1`}>RTOM Customer File</span>
+                        <div className="flex gap-4 w-[270px]">
+                            <select className={`${GlobalStyle.selectBox} w-full`}>
                                 <option value="">Select</option>
                                 <option value="">Requested</option>
                                 <option value="">Collected</option>
@@ -33,9 +33,9 @@ export const Litigation_Documentation = () => {
                         </div>
                     </div>
                     <div className="flex justify-between">
-                        <span>DRC File</span>
-                        <div className="flex gap-4">
-                            <select className={`${GlobalStyle.selectBox} w-[270px]`}>
+                        <span className={`${GlobalStyle.headingSmall} mb-1`}>DRC File</span>
+                        <div className="flex gap-4 w-[270px]">
+                            <select className={`${GlobalStyle.selectBox} w-full`}>
                                 <option value="">Select</option>
                                 <option value="">Requested</option>
                                 <option value="">Collected</option>
@@ -45,7 +45,7 @@ export const Litigation_Documentation = () => {
                     </div>
                 </div>
                 <div className="flex justify-end">
-                    <button className={GlobalStyle.buttonPrimary}>
+                    <button className={`${GlobalStyle.buttonPrimary} mt-4`}>
                         Submit
                     </button>
                 </div>
