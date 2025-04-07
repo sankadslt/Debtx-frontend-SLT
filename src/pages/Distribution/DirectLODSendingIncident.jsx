@@ -18,7 +18,7 @@ import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import Direct_LOD from "../../assets/images/Direct_LOD.png";
+import Direct_LOD from "../../assets/images/incidents/Direct_LOD.png";
 import { List_incidents_Direct_LOD, Create_Task_Download_Direct_LOD_Sending, Forward_Direct_LOD, Create_Task_Forward_Direct_LOD, Open_Task_Count_Forward_Direct_LOD } from "../../services/distribution/distributionService.js";
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
