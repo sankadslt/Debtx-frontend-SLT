@@ -20,6 +20,7 @@ import Swal from "sweetalert2";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
 
 const Incident_Register_Bulk_Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -146,6 +147,10 @@ const Incident_Register_Bulk_Upload = () => {
         }
     };
 
+    const handlebackbuttonClick = () => {
+        window.history.back();
+    }
+
     return (
         <div className={`h-screen ${GlobalStyle.fontPoppins}`}>
             <h1 className={`${GlobalStyle.headingLarge} `}>File Upload</h1>
@@ -189,6 +194,16 @@ const Incident_Register_Bulk_Upload = () => {
                     </form>
                 </div>
             </div>
+
+            <div className="flex justify-start items-center w-full  ">
+            <button
+              className={`${GlobalStyle.buttonPrimary} `} 
+              onClick={handlebackbuttonClick}
+            >
+              <FaArrowLeft className="mr-2" />
+              
+            </button>
+          </div>
         </div>
     );
 };
