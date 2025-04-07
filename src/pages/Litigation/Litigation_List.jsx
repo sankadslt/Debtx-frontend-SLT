@@ -34,9 +34,9 @@ export const Litigation_List = () => {
  
   // Status mapping between frontend display values and backend expected values
   const statusMapping = {
-    "Initial_Litigation": "Initial Litigation",
+    "Initial_Litigation": "Initial_Litigation",
     "Pending_FTL": "Pending FTL",
-    "FTL_Settle_Pending": "Litigation Settle Pending",
+    "FTL_Settle_Pending": "FTL_Settle_Pending",
     "FTL": "Forward To Litigation",
     "FLU": "Fail from Legal Unit",
     "SLA": "Success Legal Action",
@@ -288,11 +288,6 @@ export const Litigation_List = () => {
                       <td className={GlobalStyle.tableData}>{displayStatus}</td>
                       <td className={`${GlobalStyle.tableData} text-center`}>{item.account_no}</td>
                       <td className={GlobalStyle.tableData}>{item.current_arreas_amount}</td>
-                      {/* <td className={GlobalStyle.tableData}>
-                        {item.legal_accepted_date || 
-                         (item.litigation && item.litigation.legal_submission && 
-                          new Date(item.litigation.legal_submission.submission_on).toLocaleDateString())}
-                      </td> */}
                       <td className={GlobalStyle.tableData}>{item.legal_accepted_date
                         ? new Date(item.legal_accepted_date).toLocaleDateString("en-GB")
                         : "N/A"}
@@ -301,11 +296,6 @@ export const Litigation_List = () => {
                         ? new Date(item.settlement_created_date).toLocaleDateString("en-GB")
                         : "N/A"}
                       </td>
-                      {/* <td className={GlobalStyle.tableData}>
-                        {item.settlement_created_date || 
-                         (item.settlement && item.settlement.settlement_created_dtm && 
-                          new Date(item.settlement.settlement_created_dtm).toLocaleDateString())}
-                      </td> */}
                       <td className={`${GlobalStyle.tableData} px-4`}>
                         {displayStatus === "Initial_Litigation" && (
                           <div>

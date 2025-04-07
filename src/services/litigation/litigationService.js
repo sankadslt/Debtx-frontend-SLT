@@ -33,3 +33,21 @@ export const listAllLitigationCases = async (payload) => {
     throw error;
   }
 }
+
+export const createLitigationDocument = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Create_Litigation_Document`,
+      payload
+    );
+    console.log("Litigation document created successfully:", response.data);
+    return response.data;
+
+  } catch (error) {
+    console.error(
+      "Error creating Litigation document:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
