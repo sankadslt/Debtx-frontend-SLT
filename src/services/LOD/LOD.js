@@ -152,9 +152,9 @@ export const List_Final_Reminder_Lod_Cases = async (case_status, date_type, date
           Status: LOD.case_current_status,
           LODBatchNo: LOD.current_arrears_amount,
           NotificationCount: LOD.customer_name || null,
-          CreatedDTM: LOD.rtom || null,
-          ExpireDTM: LOD.lod_final_reminder.source_type || null,
-          LastResponse: LOD.lod_final_reminder.current_document_type || null,
+          CreatedDTM: LOD.lod_final_reminder.lod_submission.created_on || null,
+          ExpireDTM: LOD.lod_final_reminder.lod_expire_on || null,
+          LastResponse: LOD.lod_final_reminder.lod_response.created_on || null,
         }));
       } else {
         throw new Error("Failed to fetch cases");

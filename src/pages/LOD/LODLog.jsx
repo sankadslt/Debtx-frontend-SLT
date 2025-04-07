@@ -18,9 +18,10 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
-import { fetchIncidents } from "../../services/Incidents/incidentService";
-import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
+// import { fetchLOD } from "../../services/LOD/LODervice";
+// import { Task_for_Download_LOD } from "../../services/task/taskService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
+import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
 
 const LOD_Log = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -30,42 +31,12 @@ const LOD_Log = () => {
     const rowsPerPage = 8;
     const [status1, setStatus1] = useState("");
     const [LODStatus, setLODStatus] = useState("");
-    const [DataType, setDataType] = useState("");
+    const [DateType, setDateType] = useState("");
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isCreatingTask, setIsCreatingTask] = useState(false);
     const [isFiltered, setIsFiltered] = useState(false);
     const navigate = useNavigate();
-
-    const getStatusIcon = (status) => {
-        switch (status?.toLowerCase()) {
-            case "incident open":
-                return "/src/assets/images/incidents/Incident_Open.png";
-            case "incident reject":
-                return "/src/assets/images/incidents/Incident_Reject.png";
-            case "incident inprogress":
-                return "/src/assets/images/incidents/Incident_InProgress.png";
-            default:
-                return null;
-        }
-    };
-
-    const renderStatusIcon = (status) => {
-        const iconPath = getStatusIcon(status);
-
-        if (!iconPath) {
-            return <span>{status}</span>;
-        }
-
-        return (
-            <img
-                src={iconPath}
-                alt={status}
-                className="w-6 h-6"
-                title={status}
-            />
-        );
-    };
 
     // validation for date
     const handleFromDateChange = (date) => {
@@ -86,71 +57,17 @@ const LOD_Log = () => {
     };
 
 
-    const fetchData = async (filters) => {
+    const fetchData = async () => {
         setIsLoading(true);
         try {
-            const incidents = await fetchIncidents(filters);
-            setData(incidents);
-            setIsFiltered(incidents.length > 0);
+            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage + 1);
+            setData(LOD);
+            // setIsFiltered(LOD.length > 0);
         } catch (error) {
-            setIsFiltered(false);
-            Swal.fire("Error", error.message || "No incidents matching the criteria.", "error");
+            // setIsFiltered(false);
+            Swal.fire("Error", error.message || "No LOD matching the criteria.", "error");
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const handleFilter = async () => {
-        try {
-            if (!fromDate || !toDate) {
-                Swal.fire("Error", "Both 'From' and 'To' dates are required.", "error");
-                return;
-            }
-            const filters = {
-                Actions: status1,
-                Incident_Status: LODStatus,
-                Source_Type: DataType,
-                From_Date: fromDate.toISOString(),
-                To_Date: toDate.toISOString()
-            };
-            await fetchData(filters);
-        } catch (error) {
-            Swal.fire("Error", error.message || "No incidents matching the criteria", "error");
-        }
-    };
-
-    const HandleCreateTask = async () => {
-        if (!fromDate || !toDate) {
-            Swal.fire("Error", "Both 'From' and 'To' dates are required.", "error");
-            return;
-        }
-        if (!isFiltered) {
-            Swal.fire("Error", "Please apply filters that return data before creating a task.", "error");
-            return;
-        }
-
-        const adjustToLocalISO = (date) => {
-            const offset = date.getTimezoneOffset() * 60000;
-            return new Date(date.getTime() - offset).toISOString();
-        };
-        const user_id = await getLoggedUserId();
-        const requestData = {
-            DRC_Action: status1,
-            Incident_Status: LODStatus,
-            Source_Type: DataType,
-            From_Date: adjustToLocalISO(fromDate),
-            To_Date: adjustToLocalISO(toDate),
-            Created_By: user_id
-        };
-
-        setIsCreatingTask(true);
-        try {
-            const response = await Task_for_Download_Incidents(requestData);
-            Swal.fire("Success", `Task created successfully! Task ID: ${response.Task_Id}`, "success");
-        } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
-        } finally {
-            setIsCreatingTask(false);
         }
     };
 
@@ -158,7 +75,14 @@ const LOD_Log = () => {
         fetchData({});
     }, []);
 
-    const HandleAddIncident = () => navigate("/incident/register");
+    const clearFilter = async  () => {
+        setLODStatus("");
+        setDateType("");
+        setFromDate("");
+        setToDate("");
+    };
+
+    // const HandleAddIncident = () => navigate("/incident/register");
 
     if (isLoading) {
         return (
@@ -169,17 +93,19 @@ const LOD_Log = () => {
     }
 
     const filteredData = data.filter((row) =>
-        String(row.incidentID).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.accountNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.action).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.sourceType).toLowerCase().includes(searchQuery.toLowerCase())
+        String(row.LODID).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.LODBatchNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.NotificationCount).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.CreatedDTM).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.ExpireDTM).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(row.LastResponse).toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
-    const startIndex = currentPage * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedData = filteredData.slice(startIndex, endIndex);
+    // const startIndex = currentPage * rowsPerPage;
+    // const endIndex = startIndex + rowsPerPage;
+    // const paginatedData = filteredData.slice(startIndex, endIndex);
 
     const handlePrevPage = () => {
         if (currentPage > 0) {
@@ -213,10 +139,10 @@ const LOD_Log = () => {
                         <option value="LOD Settle Active">LOD Settle Active</option>
                     </select>
 
-                    <select value={DataType} onChange={(e) => setDataType(e.target.value)} className={GlobalStyle.selectBox}>
+                    <select value={DateType} onChange={(e) => setDateType(e.target.value)} className={GlobalStyle.selectBox}>
                         <option value="">Date Type</option>
                         <option value="Pilot Suspended">Created Date</option>
-                        <option value="Product Terminate">Expiry Date</option>
+                        <option value="Product Terminate">Expire Date</option>
                         <option value="Special">Last Response Date</option>
                     </select>
 
@@ -237,8 +163,8 @@ const LOD_Log = () => {
                         />
                     </div>
 
-                    <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
-                    <button className={GlobalStyle.buttonPrimary}>Clear</button>
+                    <button onClick={fetchData} className={GlobalStyle.buttonPrimary}>Filter</button>
+                    <button onClick={clearFilter} className={GlobalStyle.buttonPrimary}>Clear</button>
                 </div>
             </div>
 
@@ -270,8 +196,8 @@ const LOD_Log = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedData.length > 0 ? (
-                            paginatedData.map((log, index) => (
+                        {filteredData.length > 0 ? (
+                            filteredData.map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
@@ -279,15 +205,13 @@ const LOD_Log = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.incidentID}</td>
-                                    <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
-                                        {renderStatusIcon(log.status)}
-                                    </td>
-                                    <td className={GlobalStyle.tableData}>{log.accountNo}</td>
-                                    <td className={GlobalStyle.tableData}>{log.action}</td>
-                                    <td className={GlobalStyle.tableData}>{log.sourceType}</td>
-                                    <td className={GlobalStyle.tableData}>{log.createdDTM}</td>
-                                    <td className={GlobalStyle.tableData}>{log.createdDTM}</td>
+                                    <td className={GlobalStyle.tableData}>{log.LODID}</td>
+                                    <td className={GlobalStyle.tableData}>{log.Status}</td>
+                                    <td className={GlobalStyle.tableData}>{log.LODBatchNo}</td>
+                                    <td className={GlobalStyle.tableData}>{log.NotificationCount}</td>
+                                    <td className={GlobalStyle.tableData}>{log.CreatedDTM}</td>
+                                    <td className={GlobalStyle.tableData}>{log.ExpireDTM}</td>
+                                    <td className={GlobalStyle.tableData}>{log.LastResponse}</td>
                                     <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center space-x-2">
                                             <button className={GlobalStyle.buttonIcon} style={{ fontSize: "24px" }}>
@@ -316,7 +240,7 @@ const LOD_Log = () => {
                     <FaArrowLeft />
                 </button>
                 <span className="text-gray-700">
-                    Page {currentPage + 1} of {pages}
+                    Page {currentPage + 1}
                 </span>
                 <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === pages - 1}>
                     <FaArrowRight />
