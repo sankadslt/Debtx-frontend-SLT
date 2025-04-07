@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { getUserData } from "../../services/auth/authService";
 import { FaSearch, FaArrowLeft, FaArrowRight , FaDownload } from "react-icons/fa";
 import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band,Create_Case_for_incident} from "../../services/Incidents/incidentService";
-import Open_No_Agent from "../../assets/images/distribution/Open_Assign_Agent.png";
+import Open_No_Agent from "../../assets/images/incidents/Open_No_Agent.png";
 import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident , Open_Task_Count_Incident_To_Case} from "../../services/task/taskService";
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
@@ -153,7 +153,7 @@ const fetchData = async () => {
      
       const taskConfirmResult = await Swal.fire({
         title: "Create Task Confirmation",
-        text: `You have selected more than 9 incidents. Do you want to create a task to handle them?`,
+        text: `You have selected more than 9 incidents. Do you want to create a task to handle all of them?`,
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Yes, Create Task",
@@ -263,7 +263,7 @@ const fetchData = async () => {
   };
 
   const handlebacknavigate = () => {
-    navigate(-1); // Go back to the previous page
+    window.history.back(); // Go back to the previous page
   }
   return (
     <>
