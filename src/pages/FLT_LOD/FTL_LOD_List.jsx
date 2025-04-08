@@ -13,23 +13,22 @@ import { AiFillEye } from "react-icons/ai";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import DatePicker from "react-datepicker";
 //import { fetchAllArrearsBands, listHandlingCasesByDRC } from "../../services/case/CaseService";
- 
+
 import { useNavigate } from "react-router-dom";
 //import { getLoggedUserId } from "../../services/auth/authService.js";
 import Swal from 'sweetalert2';
 import FTL_LOD_Cus_Response_update from "./FTL_LOD_Cus_Response_update.jsx";
-import {getLoggedUserId} from "/src/services/auth/authService.js";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
+import { List_FTL_LOD_Cases } from "../../services/FTL_LOD/FTL_LODServices.js";
+import { fetchAllArrearsBands } from "../../services/case/CaseServices.js";
 
 //Status Icons
-/* import Open_No_Agent from "../../assets/images/status/Open_No_Agent.png";
-import Open_With_Agent from "../../assets/images/status/Open_With_Agent.png";
-import Negotiation_Settle_Pending from "../../assets/images/status/Negotiation_Settle_Pending.png";
-import Negotiation_Settle_Open_Pending from "../../assets/images/status/Negotiation_Settle_Open_Pending.png";
-import Negotiation_Settle_Active from "../../assets/images/status/Negotiation_Settle_Active.png";
-import FMB from "../../assets/images/status/Forward_to_Mediation_Board.png";
-import FMB_Settle_Pending from "../../assets/images/status/MB_Settle_pending.png";
-import FMB_Settle_Open_Pending from "../../assets/images/status/MB_Settle_open_pending.png";
-import FMB_Settle_Active from "../../assets/images/status/MB_Settle_Active.png"; */
+
+import Pending_FTL_LOD from "../../assets/images/FTL_LOD/Pending_FTL_LOD.svg";
+import Initial_FTL_LOD from "../../assets/images/FTL_LOD/Initial_FTL_LOD.svg";
+import FTL_LOD_Settle_Pending from "../../assets/images/FTL_LOD/FTL_LOD_Settle_Pending.svg";
+import FTL_LOD_Settle_Open_Pending from "../../assets/images/FTL_LOD/FTL_LOD_Settle_Open_Pending.svg";
+import FTL_LOD_Settle_Active from "../../assets/images/FTL_LOD/FTL_LOD_Settle_Active.svg";
 
 
 export default function FTLLODCaseList() {
@@ -38,33 +37,36 @@ export default function FTLLODCaseList() {
 
     //const [rtoms, setRtoms] = useState([]);
     //const [selectedRTOM, setSelectedRTOM] = useState("");
-    const [filteredlogData, setFilteredlogData] = useState([]); // State for filtered data
+    //const [filteredlogData, setFilteredlogData] = useState([]); // State for filtered data
     // State for search query and filtered data
     const [searchQuery, setSearchQuery] = useState("");
-    const [filteredData, setFilteredData] = useState([]);
+    const [filteredCases, setFilteredCases] = useState([]);
     const [filterType, setFilterType] = useState("");
     const [filterValue, setFilterValue] = useState("");
     //const [filterAccountNo, setFilterAccountNo] = useState("");
+    const [error, setError] = useState("");
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const recordsPerPage = 5;
-    // const indexOfLastRecord = currentPage * recordsPerPage;
-    // const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    // const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
-    const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+    const recordsPerPage = 10;
+    const indexOfLastRecord = currentPage * recordsPerPage;
+    const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+    const currentData = filteredCases.slice(indexOfFirstRecord, indexOfLastRecord);
+    const totalPages = Math.ceil(filteredCases.length / recordsPerPage);
 
     // Filter state for Amount, Case ID, Status, and Date
     const [arrearsAmounts, setArrearsAmounts] = useState([]);
-    const [selectedStatus, setSelectedStatus] = useState("");
-    const [selectedArrearsBand, setSelectedArrearsBand] = useState("");
     const [filterCaseId, setFilterCaseId] = useState("");
-    const [filterStatus, setFilterStatus] = useState("");
-    const [fromDate, setFromDate] = useState(null);
-    const [toDate, setToDate] = useState(null);
+ 
     const [userData, setUserData] = useState(null);
 
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [filters, setFilters] = useState({
+        arrearsAmount: "",
+        fromDate: "",
+        toDate: "",
+        status: "",
+    });
 
 
     // const loadUser = async () => {
@@ -110,116 +112,232 @@ export default function FTLLODCaseList() {
 
     useEffect(() => {
 
-        console.log("fromDatea:", fromDate);
-        console.log("toDate:", toDate);
-        const fetchRTOMs = async () => {
+        const fetchArrearsBands = async () => {
             try {
-                if (userData?.drc_id) {
+                if (userData) {
                     // Make sure to convert to number if needed
                     const arrearsAmounts = await fetchAllArrearsBands();
                     setArrearsAmounts(arrearsAmounts);
-                    // Fetch RTOMs by DRC ID
-                    const rtomsList = await getActiveRTOMsByDRCID(userData?.drc_id);
-                    console.log("RTOM list retrieved:", rtomsList);
-                    setRtoms(rtomsList);
+                    console.log("Arrears Amounts:", arrearsAmounts);
                 }
             } catch (error) {
-                console.error("Error fetching RTOMs:", error);
+                console.error("Error fetching ArrearsBands:", error);
             }
         };
 
-        fetchRTOMs();
-    }, [userData?.drc_id]); // Only depend on userData
+        fetchArrearsBands();
+    }, [userData]); // Only depend on userData
 
-    const handleonvisiable = (case_id) => {
-        navigate("/drc/ro-monitoring-arrears", { state: { CaseID: case_id } });
-        console.log("Case ID being passed: ", case_id);
-    }
-
-    const handleonreassign = (case_id) => {
-        navigate("/pages/DRC/Re-AssignRo", { state: { CaseID: case_id } });
-        console.log("Case ID being passed: ", case_id);
-    }
+    /*   const handleonvisiable = (case_id) => {
+          navigate("/drc/ro-monitoring-arrears", { state: { CaseID: case_id } });
+          console.log("Case ID being passed: ", case_id);
+      }
+  
+      const handleonreassign = (case_id) => {
+          navigate("/pages/DRC/Re-AssignRo", { state: { CaseID: case_id } });
+          console.log("Case ID being passed: ", case_id);
+      } */
 
 
 
     const handlestartdatechange = (date) => {
-        if (date === null) {
-            setFromDate(null);
+        // Case: User clears the "From Date"
+        if (!date) {
+            setFilters({ ...filters, fromDate: null });
             return;
         }
 
-        if (toDate) {
 
-            if (date > toDate) {
 
-                Swal.fire({
-                    title: "Warning",
-                    text: "The 'From' date cannot be later than the 'To' date.",
-                    icon: "warning",
-                    confirmButtonText: "OK",
-                });
-                return;
-            } else {
-                checkdatediffrence(date, toDate);
-                setFromDate(date);
-            }
 
-        } else {
-
-            setFromDate(date);
-
+        // Case: To Date is set and From Date is after it
+        if (filters.toDate && date > filters.toDate) {
+            Swal.fire({
+                title: "Warning",
+                text: "The 'From' date cannot be later than the 'To' date.",
+                icon: "warning",
+                confirmButtonText: "OK",
+            });
+            setFilters({ ...filters, fromDate: null });
+            return;
         }
 
-
+        // All good: update From Date
+        setFilters({ ...filters, fromDate: date });
     };
+
+
+
     const handleenddatechange = (date) => {
-        if (date === null) {
-            setToDate(null);
+
+        // Helper function to check if the year is valid (4 digits)
+        const isValidYear = (date) => {
+            const year = date.getFullYear();
+            return year >= 1000 && year <= 9999;
+        };
+
+
+        // Case: User clears the "To Date"
+        if (!isValidYear(date)) {
+            setFilters({ ...filters, toDate: null });
             return;
         }
 
-        if (fromDate) {
-            if (date < fromDate) {
+        console.log("From Date:", filters.fromDate);
+
+        console.log("To Date:", date);
+
+
+        // Case: From Date is set and To Date is before it
+        if (filters.fromDate) {
+            if (date < filters.fromDate) {
                 Swal.fire({
                     title: "Warning",
                     text: "The 'To' date cannot be before the 'From' date.",
                     icon: "warning",
                     confirmButtonText: "OK",
                 });
+                setFilters({ ...filters, toDate: null });
                 return;
-            } else {
-                checkdatediffrence(fromDate, date);
-                setToDate(date);
             }
-        } else {
-            setToDate(date);
+        }
+
+        // All good: update To Date
+        setFilters({ ...filters, toDate: date });
+    };
+
+
+    /* 
+        const checkdatediffrence = (startDate, endDate) => {
+            const start = new Date(startDate).getTime();
+            const end = new Date(endDate).getTime();
+            const diffInMs = end - start;
+            const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+            const diffInMonths = diffInDays / 30;
+    
+            if (diffInMonths > 1) {
+                Swal.fire({
+                    title: "Date Range Exceeded",
+                    text: "The selected dates have more than a 1-month gap.",
+                    icon: "warning",
+                    confirmButtonText: "OK",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        setToDate(null);
+                        console.log("Dates cleared");
+                    }
+                }
+                );
+            };
+        }; */
+
+    const handleFilter = async () => {
+        console.log("Filters applied:", filters);
+        console.log("Filters applied:", filters.arrearsAmount, filters.status, filters.fromDate, filters.toDate);
+
+        try {
+            setFilteredCases([]);
+
+            const formatDate = (date) => {
+                if (!date) return null;
+                const d = new Date(date);
+
+                const year = d.getFullYear();
+                const month = (d.getMonth() + 1).toString().padStart(2, '0');
+                const day = d.getDate().toString().padStart(2, '0');
+
+                return `${year}-${month}-${day}`;
+            };
+
+            console.log("Formatted From Date:", formatDate(filters.fromDate));
+            console.log("Formatted To Date:", formatDate(filters.toDate));
+
+            if (!filters.arrearsAmount && !filters.status && !filters.fromDate && !filters.toDate) {
+                Swal.fire({
+                    title: "Missing Filters",
+                    text: "Please select at least one filter.",
+                    icon: "warning",
+                    confirmButtonText: "OK",
+                });
+                return;
+            }
+
+            if ((filters.fromDate && !filters.toDate) || (!filters.fromDate && filters.toDate)) {
+                Swal.fire({
+                    title: "Incomplete Date Range",
+                    text: "Both From Date and To Date must be selected together.",
+                    icon: "warning",
+                    confirmButtonText: "OK",
+                });
+                return;
+            }
+
+            if (filters.fromDate && filters.toDate && filters.fromDate > filters.toDate) {
+                Swal.fire({
+                    title: "Invalid Date Range",
+                    text: "To Date should be greater than or equal to From Date.",
+                    icon: "warning",
+                    confirmButtonText: "OK",
+                });
+                return;
+            }
+
+            const payload = {
+                case_current_status: filters.status || "",
+                current_arrears_band: filters.arrearsAmount || "",
+                date_from: filters.fromDate ? formatDate(filters.fromDate) : null,
+                date_to: filters.toDate ? formatDate(filters.toDate) : null,
+                pages: 1,
+            };
+
+            console.log("Payload sent to API: ", payload);
+
+            const response = await List_FTL_LOD_Cases(payload);
+
+            console.log("Response from API:", response);
+
+            if (Array.isArray(response.data)) {
+                console.log("Filtered Cases:", response.data);
+                setFilteredCases(response.data);
+            } else {
+                console.error("Expected an array but got:", response.data);
+            }
+        } catch (error) {
+            console.error("Error filtering cases:", error);
+            Swal.fire({
+                title: "Error",
+                text: "Failed to fetch filtered data. Please try again.",
+                icon: "error"
+            });
         }
     };
 
+    /*  // Search Section
+     const filteredDataBySearch = currentData.filter((row) =>
+         Object.values(row)
+             .join(" ")
+             .toLowerCase()
+             .includes(searchQuery.toLowerCase())
+     );
+     console.log("Filtered Data by Search:", filteredDataBySearch); */
 
-    const checkdatediffrence = (startDate, endDate) => {
-        const start = new Date(startDate).getTime();
-        const end = new Date(endDate).getTime();
-        const diffInMs = end - start;
-        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-        const diffInMonths = diffInDays / 30;
 
-        if (diffInMonths > 1) {
-            Swal.fire({
-                title: "Date Range Exceeded",
-                text: "The selected dates have more than a 1-month gap.",
-                icon: "warning",
-                confirmButtonText: "OK",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    setToDate(null);
-                    console.log("Dates cleared");
-                }
-            }
-            );
-        };
+
+    const handleFilterClear = () => {
+        setFilters({
+
+
+            arrearsAmount: "",
+            fromDate: "",
+            toDate: "",
+            status: "",
+        });
+
+        setFilteredCases([]); 
     };
+
+
+
 
 
 
@@ -323,67 +441,79 @@ export default function FTLLODCaseList() {
         }
     };
 
-    // Filtering the data based on filter values
-    const filterData = () => {
-        let tempData = data;
-        if (filterType && filterValue) {
-            if (filterType === "Account No") {
-                tempData = tempData.filter((item) =>
-                    item.accountNo.includes(filterValue)
-                );
-            } else if (filterType === "Case ID") {
-                tempData = tempData.filter((item) => item.caseId.includes(filterValue));
-            }
-        }
-
-        if (fromDate) {
-            tempData = tempData.filter((item) => {
-                const itemDate = new Date(item.date);
-                return itemDate >= toDate;
-            });
-        }
-
-        if (toDate) {
-            tempData = tempData.filter((item) => {
-                const itemDate = new Date(item.date);
-                return itemDate <= toDate;
-            });
-        }
-        // Apply filters
-        if (filterAccountNo) {
-            tempData = tempData.filter((item) =>
-                item.accountNo.includes(filterAccountNo)
-            );
-        }
-        if (filterCaseId) {
-            tempData = tempData.filter((item) => item.caseId.includes(filterCaseId));
-        }
-        if (filterStatus) {
-            tempData = tempData.filter((item) => item.status.includes(filterStatus));
-        }
-        if (selectedArrearsBand) {
-            tempData = tempData.filter((item) => {
-                const amount = parseInt(item.amount.replace(/,/g, "")); // Remove commas and parse as integer
-                if (selectedArrearsBand === "5-10") {
-                    return amount >= 5000 && amount <= 10000;
-                } else if (selectedArrearsBand === "10-25") {
-                    return amount >= 10000 && amount <= 25000;
-                } else if (selectedArrearsBand === "25-50") {
-                    return amount >= 25000 && amount <= 50000;
-                } else if (selectedArrearsBand === "50-100") {
-                    return amount >= 50000 && amount <= 100000;
-                } else if (selectedArrearsBand === "100+") {
-                    return amount > 100000;
-                }
-                return true; // Return true if no filter is applied
-            });
-        }
-        setFilteredData(tempData);
-        setCurrentPage(1); // Reset pagination when filter changes
+    // Filter handlers
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+        setError("");
     };
 
+
+    /* 
+        // Filtering the data based on filter values
+        const filterData = () => {
+            let tempData = data;
+            if (filterType && filterValue) {
+                if (filterType === "Account No") {
+                    tempData = tempData.filter((item) =>
+                        item.accountNo.includes(filterValue)
+                    );
+                } else if (filterType === "Case ID") {
+                    tempData = tempData.filter((item) => item.caseId.includes(filterValue));
+                }
+            }
+    
+            if (fromDate) {
+                tempData = tempData.filter((item) => {
+                    const itemDate = new Date(item.date);
+                    return itemDate >= toDate;
+                });
+            }
+    
+            if (toDate) {
+                tempData = tempData.filter((item) => {
+                    const itemDate = new Date(item.date);
+                    return itemDate <= toDate;
+                });
+            }
+            // Apply filters
+            if (filterAccountNo) {
+                tempData = tempData.filter((item) =>
+                    item.accountNo.includes(filterAccountNo)
+                );
+            }
+            if (filterCaseId) {
+                tempData = tempData.filter((item) => item.caseId.includes(filterCaseId));
+            }
+            if (filterStatus) {
+                tempData = tempData.filter((item) => item.status.includes(filterStatus));
+            }
+            if (selectedArrearsAmount) {
+                tempData = tempData.filter((item) => {
+                    const amount = parseInt(item.amount.replace(/,/g, "")); // Remove commas and parse as integer
+                    if (selectedArrearsAmount === "5-10") {
+                        return amount >= 5000 && amount <= 10000;
+                    } else if (selectedArrearsAmount === "10-25") {
+                        return amount >= 10000 && amount <= 25000;
+                    } else if (selectedArrearsAmount === "25-50") {
+                        return amount >= 25000 && amount <= 50000;
+                    } else if (selectedArrearsAmount === "50-100") {
+                        return amount >= 50000 && amount <= 100000;
+                    } else if (selectedArrearsAmount === "100+") {
+                        return amount > 100000;
+                    }
+                    return true; // Return true if no filter is applied
+                });
+            }
+            setFilteredData(tempData);
+            setCurrentPage(1); // Reset pagination when filter changes
+        }; */
+
     // Search Section
-    const filteredDataBySearch = filteredlogData.filter((row) =>
+    const filteredDataBySearch = currentData.filter((row) =>
         Object.values(row)
             .join(" ") // Join all values in a row to form a single string
             .toLowerCase()
@@ -391,91 +521,100 @@ export default function FTLLODCaseList() {
     );
 
     const getStatusIcon = (status) => {
-        switch (status.toLowerCase()) {
-            case "open no agent":
-                return <img src={Open_No_Agent} alt="Open No Agent" title="Open No Agent" className="w-5 h-5" />;
-            case "open with agent":
-                return <img src={Open_With_Agent} alt="Open With Agent" title="Open With Agent" className="w-5 h-5" />;
-            case "negotiation settle pending":
-                return <img src={Negotiation_Settle_Pending} alt="Negotiation Settle Pending" title="Negotiation Settle Pending" className="w-5 h-5" />;
-            case "negotiation settle open pending":
-                return <img src={Negotiation_Settle_Open_Pending} alt="Negotiation Settle Open Pending" title="Negotiation Settle Open Pending" className="w-5 h-5" />;
-            case "negotiation settle active":
-                return <img src={Negotiation_Settle_Active} alt="Negotiation Settle Active" title="Negotiation Settle Active" className="w-5 h-5" />;
-            case "fmb":
-                return <img src={FMB} alt="FMB" title="FMB" className="w-5 h-5" />;
-            case "fmb settle pending":
-                return <img src={FMB_Settle_Pending} alt="FMB Settle Pending" title="FMB Settle Pending" className="w-5 h-5" />;
-            case "fmb settle open pending":
-                return <img src={FMB_Settle_Open_Pending} alt="FMB Settle Open Pending" title="FMB Settle Open Pending" className="w-5 h-5" />;
-            case "fmb settle active":
-                return <img src={FMB_Settle_Active} alt="FMB Settle Active" title="FMB Settle Active" className="w-5 h-5" />;
+        switch (status) {
+            case "Pending FTL LOD":
+                return <img src={Pending_FTL_LOD} alt="Pending FTL LOD" title="Pending FTL LOD" className="w-5 h-5" />;
+            case "Initial FTL LOD":
+                return <img src={Initial_FTL_LOD} alt="Initial FTL LOD" title="Initial FTL LOD" className="w-5 h-5" />;
+            case "FTL LOD Settle Pending":
+                return <img src={FTL_LOD_Settle_Pending} alt="FTL LOD Settle Pending" title="FTL LOD Settle Pending" className="w-5 h-5" />;
+            case "FTL LOD Settle Open-Pending":
+                return <img src={FTL_LOD_Settle_Open_Pending} alt="FTL LOD Settle Open-Pending" title="FTL LOD Settle Open-Pending" className="w-5 h-5" />;
+            case "FTL LOD Settle Active":
+                return <img src={FTL_LOD_Settle_Active} alt="FTL LOD Settle Active" title="FTL LOD Settle Active" className="w-5 h-5" />;
+
             default:
-                return <span className="text-gray-500">N/A</span>;
+                return <span className="text-gray-500">wwwwwwwww</span>;
         }
     };
+
+
+
+
 
     return (
         <div className={GlobalStyle.fontPoppins}>
             {/* Title */}
             <h1 className={GlobalStyle.headingLarge}>FTL LOD List </h1>
 
-            <div className="flex items-center justify-end gap-4 mt-20 mb-4">
+            <div className={`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
+                <div className="flex items-center justify-end w-full space-x-6">
 
-                {/* Status Select Dropdown */}
-                <select
-                    className={GlobalStyle.selectBox}
-                    value={selectedStatus}
-                //onChange={(e) => setSelectedRTOM(e.target.value)}
-                >
-                    <option value="">Status</option>
+                    {/* Status Select Dropdown */}
+                    <select
+                        name="status"
+                        value={filters.status}
+                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                        className={`${GlobalStyle.selectBox} w-32 md:w-40`}
+                    >
+                        <option value="">Status</option>
+                        <option value="Pending FTL LOD">Pending FTL LOD</option>
+                        <option value="Initial FTL LOD">Initial FTL LOD</option>
+                        <option value="FTL LOD Settle Pending">FTL LOD Settle Pending</option>
+                        <option value="FTL LOD Settle Open-Pending">FTL LOD Settle Open-Pending</option>
+                        <option value="FTL LOD Settle Active">FTL LOD Settle Active</option>
+                    </select>
 
-                </select>
-                <select
-                    className={GlobalStyle.selectBox}
-                    value={selectedArrearsBand}
-                //onChange={(e) => setSelectedArrearsBand(e.target.value)} 
-                >
-                    <option value="" >
-                        Arrears band
-                    </option>
-                    {/* {Array.isArray(arrearsAmounts) && arrearsAmounts.length > 0 ? (
-                        arrearsAmounts.map(({ key, value }) => (
-                            <option key={key} value={key}>
-                                {value}
-                            </option>
-                        ))
-                    ) : (
-                        <option disabled>No arrears bands available</option>
-                    )}
- */}
-                </select>
+                    <select
+                        className={GlobalStyle.selectBox}
+                        value={filters.arrearsAmount}
+                        onChange={(e) => setFilters({ ...filters, arrearsAmount: e.target.value })}
+                    >
+                        <option value="" >
+                            Arrears band
+                        </option>
+                        {Array.isArray(arrearsAmounts) && arrearsAmounts.length > 0 ? (
+                            arrearsAmounts.map(({ key, value }) => (
+                                <option key={key} value={key}>
+                                    {value}
+                                </option>
+                            ))
+                        ) : (
+                            <option disabled>No arrears bands available</option>
+                        )}
 
-                <div className={GlobalStyle.datePickerContainer}>
-                    <label className={GlobalStyle.dataPickerDate}>Date</label>
-                    <DatePicker
-                        selected={fromDate}
-                        onChange={handlestartdatechange}
-                        dateFormat="dd/MM/yyyy"
-                        placeholderText="dd/MM/yyyy"
-                        className={GlobalStyle.inputText}
-                    />
-                    <DatePicker
-                        selected={toDate}
-                        onChange={handleenddatechange}
-                        dateFormat="dd/MM/yyyy"
-                        placeholderText="dd/MM/yyyy"
-                        className={GlobalStyle.inputText}
-                    />
+                    </select>
+
+                    <div className={GlobalStyle.datePickerContainer}>
+                        <label className={GlobalStyle.dataPickerDate}>Date</label>
+                        <DatePicker
+                            selected={filters.fromDate}
+                            onChange={handlestartdatechange}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="dd/MM/yyyy"
+                            className={GlobalStyle.inputText}
+                        />
+                        <DatePicker
+                            selected={filters.toDate}
+                            onChange={handleenddatechange}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="dd/MM/yyyy"
+                            className={GlobalStyle.inputText}
+                        />
+                    </div>
+
+                    <button
+                        onClick={handleFilter}
+                        className={`${GlobalStyle.buttonPrimary}`}
+                    >
+                        Filter
+                    </button>
+                    <button onClick={handleFilterClear} className={GlobalStyle.buttonRemove} >
+                        Clear
+                    </button>
+
+
                 </div>
-
-                <button
-                    //onClick={handleFilter}
-                    className={`${GlobalStyle.buttonPrimary}`}
-                >
-                    Filter
-                </button>
-
             </div>
 
             {/* Search Section */}
@@ -518,76 +657,49 @@ export default function FTLLODCaseList() {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredDataBySearch.length > 0 ? (
-                            filteredDataBySearch.map((item, index) => {
-                                // Convert expire_dtm to a JavaScript Date object
-                                const expireDate = new Date(item.expire_dtm);
-                                const today = new Date();
+                        {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
+                            filteredDataBySearch.map((item, index) => (
+                                <tr
+                                    key={item.case_id || index}
+                                    className={
+                                        index % 2 === 0
+                                            ? GlobalStyle.tableRowEven
+                                            : GlobalStyle.tableRowOdd
+                                    }
+                                >
+                                    <td className={`${GlobalStyle.tableData} text-center text-black hover:underline cursor-pointer`}>
+                                        {item.case_id || "N/A"}
+                                    </td>
 
-                                // Check if the expire date is in the past
-                                const isPastDate = expireDate < today;
+                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+                                    {getStatusIcon(item.case_current_status) || "N/A"}
+                                    </td>
 
-                                return (
-                                    <tr
-                                        key={index}
-                                        className={`${index % 2 === 0 ? "bg-white bg-opacity-75" : "bg-gray-50 bg-opacity-50"
-                                            } border-b`}
-                                    >
-                                        <td className={GlobalStyle.tableData}>
-                                            <a href={`#${item.case_id}`} className="hover:underline">
-                                                {item.case_id}
-                                            </a>
-                                        </td>
-                                        <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                                            {getStatusIcon(item.status || "N/A")}
-                                        </td>
-                                        <td className={GlobalStyle.tableData}>{item.current_arrears_amount || "N/A"}</td>
-                                        <td className={GlobalStyle.tableData}>{item.area || "N/A"}</td>
-                                        <td className={GlobalStyle.tableData}>{item.remark || "N/A"}</td>
-                                        <td className={GlobalStyle.tableData}>{item.ro_name || "N/A"}</td>
-                                        <td className={GlobalStyle.tableData}>{item.assigned_date
-                                            ? new Date(item.assigned_date).toLocaleDateString("en-GB")
-                                            : "N/A"}</td>
-                                        <td className={GlobalStyle.tableData}> {item.expire_dtm
-                                            ? new Date(item.expire_dtm).toLocaleDateString("en-GB")
-                                            : "N/A"} </td>
-                                        <td className={GlobalStyle.tableData}>
-                                            <div className="px-8 flex items-center gap-2">
-                                                <AiFillEye
-                                                    onClick={() => handleonvisiable(item.case_id)}
-                                                    style={{ cursor: "pointer", marginRight: "8px" }}
-                                                />
+                                    <td className={`${GlobalStyle.tableData} text-center`}>
+                                        {item.account_no || "N/A"}
+                                    </td>
 
-                                                {/* Show Edit button only if the expire date is in the future */}
-                                                <FaEdit
-                                                    onClick={() => {
-                                                        if (!isPastDate) console.log("Edit clicked");
-                                                    }}
-                                                    style={{
-                                                        cursor: isPastDate ? "not-allowed" : "pointer",
-                                                        color: isPastDate ? "#d3d3d3" : "#000",
-                                                        opacity: isPastDate ? 0.6 : 1,
-                                                    }}
-                                                />
+                                    <td className={`${GlobalStyle.tableData} text-center`}>
+                                        {item.ftl_lod && item.ftl_lod.length > 0 && item.ftl_lod[0].expire_date
+                                            ? new Date(item.ftl_lod[0].expire_date).toLocaleDateString("en-GB")
+                                            : "N/A"}
+                                    </td>
 
-                                                <button
-                                                    className={`${GlobalStyle.buttonPrimary} mx-auto`}
-                                                    style={{ whiteSpace: "nowrap" }}
-                                                    onClick={() => handleonreassign(item.case_id)}
-                                                >
-                                                    Re-Assign
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })
+                                    <td className={`${GlobalStyle.tableData} text-center`}>
+                                        {item.current_arrears_amount || "N/A"}
+                                    </td>
+
+                                    <td className={`${GlobalStyle.tableData} text-center`}></td>
+
+                                </tr>
+                            ))
                         ) : (
                             <tr>
-                                <td colSpan={9} className="text-center">No cases available</td>
+                                <td colSpan={6} className="text-center">No cases available</td>
                             </tr>
                         )}
                     </tbody>
+
                 </table>
             </div>
 
@@ -616,14 +728,14 @@ export default function FTLLODCaseList() {
 
             <button
                 onClick={() => navigate(-1)}
-                className={`${GlobalStyle.navButton} `}
+                className={`${GlobalStyle.buttonPrimary} `}
             >
-                <FaArrowLeft />Go Back
+                <FaArrowLeft />
             </button>
             <FaEdit
                 onClick={() => setIsPopupOpen(true)}
             />
             <FTL_LOD_Cus_Response_update isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
-        </div>
+        </div >
     );
 }
