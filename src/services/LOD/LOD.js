@@ -167,3 +167,81 @@ export const List_Final_Reminder_Lod_Cases = async (case_status, date_type, date
     throw error.response?.data?.message || "Failed to fetch cases";
   }
 };
+
+// Enter a customer response
+export const Creat_Customer_Responce = async (case_id, customer_responce, remark, created_by) => {
+  try {
+    const response = await axios.post(`${LOD_URL}/Creat_Customer_Responce`, {
+      case_id: case_id,
+      customer_responce: customer_responce,
+      remark: remark,
+      created_by: created_by,
+    });
+
+    return response.status;
+  } catch (error) {
+    console.error("Error creating customer response", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+// Getting case details
+export const case_details_for_lod_final_reminder = async (case_id) => {
+  try {
+    const response = await axios.post(`${LOD_URL}/case_details_for_lod_final_reminder`, {
+      case_id: case_id,
+    });
+
+    const Case = response.data.data;
+
+    if (response.data.status === "success") {
+      return {
+        case_id: Case.case_id,
+        customer_ref: Case.customer_ref,
+        account_no: Case.account_no,
+        arrears_amount: Case.current_arrears_amount || null,
+        last_payment_date: Case.last_payment_date || null,
+        lod_response: Case.lod_final_reminder.lod_response || null,
+      };
+    } else {
+      throw new Error("Failed to fetch case details");
+    }
+  } catch (error) {
+    console.error("Error fetching case details:", error);
+    throw error.response?.data?.message || "Failed to fetch case details";
+  }
+};
+
+export const Case_Details_Settlement_LOD_FTL_LOD = async (case_id) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/settlement/Case_Details_Settlement_LOD_FTL_LOD`, {
+      case_id: case_id,
+    });
+    
+    const Case = response.data;
+
+    // Flatten the settlement plans
+    const flattenedSettlementPlans = Case.settlement_plans?.reduce((acc, settlement) => {
+      const flattenedPlans = settlement.settlement_plan.map(plan => ({
+        settlement_id: settlement.settlement_id,
+        last_monitoring_dtm: settlement.last_monitoring_dtm,
+        ...plan
+      }));
+      return acc.concat(flattenedPlans);
+    }, []) || [];
+
+    return {
+      case_id: Case.case_id,
+      customer_ref: Case.customer_ref,
+      account_no: Case.account_no,
+      arrears_amount: Case.current_arrears_amount || null,
+      last_payment_date: Case.last_payment_date || null,
+      lod_response: Case.lod_response.lod_response || null,
+      settlement_plans: flattenedSettlementPlans || null,
+      payment_details: Case.payment_details || null,
+    };
+  } catch (error) {
+    console.error("Error fetching case details:", error);
+    throw error.response?.data?.message || "Failed to fetch case details";
+  }
+};

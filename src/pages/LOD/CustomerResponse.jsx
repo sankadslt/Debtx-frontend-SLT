@@ -15,11 +15,12 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/fa";
-import DatePicker from "react-datepicker";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Swal from "sweetalert2";
-import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
 import { useParams } from "react-router-dom";
+import { getLoggedUserId } from "../../services/auth/authService.js";
+import { Creat_Customer_Responce } from "../../services/LOD/LOD.js";
+import { case_details_for_lod_final_reminder } from "../../services/LOD/LOD.js";
 
 const CustomerResponse = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -30,39 +31,47 @@ const CustomerResponse = () => {
     const [DateType, setDateType] = useState("");
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [ResponseType, setResponseType] = useState("");
+    const [ResponseRemark, setResponseRemark] = useState("");
+    const [isResponseHistory, setIsResponseHistory] = useState(false);
     const navigate = useNavigate();
     const { caseId } = useParams(); // Get the case_id from the URL parameters
+    const rowsPerPage = 10; // Number of rows per page
 
-    // validation for date
-    const handleFromDateChange = (date) => {
-        if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "error");
-        } else if (toDate && date > toDate) {
-            Swal.fire("Invalid Input", "'From' date cannot be later than the 'To' date.", "warning");
-        } else {
-            setFromDate(date);
+    // Handle Submit button
+    const handleSubmit = async () => {
+        if (!ResponseType || !ResponseRemark) {
+            Swal.fire("Error", "Please enter both Customer Response and Remark", "error");
+            return;
         }
 
-    };
+        const userData = await getLoggedUserId();
 
-    // validation for date
-    const handleToDateChange = (date) => {
-        if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "error");
-        } else if (fromDate && date < fromDate) {
-            Swal.fire("Invalid Input", "The 'To' date cannot be earlier than the 'From' date.", "warning");
-        } else {
-            setToDate(date);
+        try {
+            // const intLODCount = parseInt(LODCount, 10);
+            const response = await Creat_Customer_Responce(caseId, ResponseType, ResponseRemark, userData);
+            Swal.fire("Success", `Customer Response created successfully!`, "success");
+            setResponseType("");
+            setResponseRemark("");
+            fetchCaseDetails({});
+        } catch (error) {
+            Swal.fire("Error", error.message || "Failed to create task.", "error");
         }
-    };
+    }
 
-    // Fetch list of LOD cases
-    const fetchData = async () => {
+    // Handle History Response button
+    const handleHistoryResponse = () => {
+        setIsResponseHistory(true);
+    }
+
+    // Fetch details of the case
+    const fetchCaseDetails = async () => {
         setIsLoading(true);
         try {
-            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage + 1);
-            setData(LOD);
-            // setIsFiltered(LOD.length > 0);
+            console.log(caseId);
+            const CaseDetails = await case_details_for_lod_final_reminder(caseId);
+            setData(CaseDetails);
+            console.log(CaseDetails.lod_response);
         } catch (error) {
             setData([]);
         } finally {
@@ -71,18 +80,8 @@ const CustomerResponse = () => {
     };
 
     useEffect(() => {
-        fetchData({});
-    }, [currentPage]);
-
-    // Handle Filter button
-    const clearFilter = async () => {
-        setLODStatus("");
-        setDateType("");
-        setFromDate("");
-        setToDate("");
-    };
-
-    // const HandleAddIncident = () => navigate("/incident/register");
+        fetchCaseDetails();
+    }, []);
 
     if (isLoading) {
         return (
@@ -92,15 +91,11 @@ const CustomerResponse = () => {
         );
     }
 
-    const filteredData = data.filter((row) =>
-        String(row.LODID).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.LODBatchNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.NotificationCount).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.CreatedDTM).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.ExpireDTM).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.LastResponse).toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const lodResponse = data.lod_response || [];
+    const pages = Math.ceil(lodResponse.length / rowsPerPage);
+    const startIndex = currentPage * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = lodResponse.slice(startIndex, endIndex);
 
     const handlePrevPage = () => {
         if (currentPage > 0) {
@@ -108,30 +103,11 @@ const CustomerResponse = () => {
         }
     };
 
-    const handleNextPage = async () => {
-        setIsLoading(true);
-        try {
-            const nextPage = currentPage + 1;
-            const nextData = await List_Final_Reminder_Lod_Cases(
-                LODStatus,
-                DateType,
-                fromDate,
-                toDate,
-                "LOD",
-                nextPage + 1 // backend pages are probably 1-indexed
-            );
-
-            if (nextData.length > 0) {
-                setCurrentPage(nextPage);
-                setData(nextData);
-            }
-        } catch (error) {
-            Swal.fire("Error", "Failed to load next page.", "error");
-        } finally {
-            setIsLoading(false);
+    const handleNextPage = () => {
+        if (currentPage < pages - 1) {
+            setCurrentPage(currentPage + 1);
         }
     };
-
 
     return (
         <div className={GlobalStyle.fontPoppins}>
@@ -141,41 +117,49 @@ const CustomerResponse = () => {
                 <div className={GlobalStyle.cardContainer}>
 
                     <div className={`${GlobalStyle.cardContainer} w-full`}>
-                        {/* <p className="mb-2">
-                            <strong>Case ID:</strong>
-                        </p>
-                        <p className="mb-2">
-                            <strong>Customer Ref:</strong>{" "}
-                        </p>
-                        <p className="mb-2">
-                            <strong>Account no:</strong>{" "}
-                        </p>
-                        <p className="mb-2">
-                            <strong>Arrears Amount:</strong>{" "}
-                        </p>
-                        <p className="mb-2">
-                            <strong>Last Payment Date:</strong>{" "}
-                        </p> */}
-                        <div class="table w-full">
-                            <div class="table-row">
-                                <div class="table-cell px-4 py-2 font-bold">Case ID:</div>
-                                <div class="table-cell px-4 py-2">[Actual Case ID]</div>
+                        <div className="table w-full">
+                            <div className="table-row">
+                                <div className="table-cell px-4 py-2 font-bold">Case ID</div>
+                                <div className="table-cell px-4 py-2 font-bold">:</div>
+                                <div className="table-cell px-4 py-2">{data.case_id}</div>
                             </div>
-                            <div class="table-row">
-                                <div class="table-cell px-4 py-2 font-bold">Customer Ref:</div>
-                                <div class="table-cell px-4 py-2">[Actual Customer Ref]</div>
+                            <div className="table-row">
+                                <div className="table-cell px-4 py-2 font-bold">Customer Ref</div>
+                                <div className="table-cell px-4 py-2 font-bold">:</div>
+                                <div className="table-cell px-4 py-2">{data.customer_ref}</div>
                             </div>
-                            <div class="table-row">
-                                <div class="table-cell px-4 py-2 font-bold">Account no:</div>
-                                <div class="table-cell px-4 py-2">[Actual Account no]</div>
+                            <div className="table-row">
+                                <div className="table-cell px-4 py-2 font-bold">Account no</div>
+                                <div className="table-cell px-4 py-2 font-bold">:</div>
+                                <div className="table-cell px-4 py-2">{data.account_no}</div>
                             </div>
-                            <div class="table-row">
-                                <div class="table-cell px-4 py-2 font-bold">Arrears Amount:</div>
-                                <div class="table-cell px-4 py-2">[Actual Arrears Amount]</div>
+                            <div className="table-row">
+                                <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
+                                <div className="table-cell px-4 py-2 font-bold">:</div>
+                                <div className="table-cell px-4 py-2">
+                                    {data?.arrears_amount &&
+                                        data.arrears_amount.toLocaleString("en-LK", {
+                                            style: "currency",
+                                            currency: "LKR",
+                                        })
+                                    }
+                                </div>
                             </div>
-                            <div class="table-row">
-                                <div class="table-cell px-4 py-2 font-bold">Last Payment Date:</div>
-                                <div class="table-cell px-4 py-2">[Actual Last Payment Date]</div>
+                            <div className="table-row">
+                                <div className="table-cell px-4 py-2 font-bold">Last Payment Date</div>
+                                <div className="table-cell px-4 py-2 font-bold">:</div>
+                                <div className="table-cell px-4 py-2">
+                                    {data?.last_payment_date &&
+                                        new Date(data.last_payment_date).toLocaleString("en-GB", {
+                                            year: "numeric",
+                                            month: "2-digit",
+                                            day: "2-digit",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true,
+                                        })}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -186,7 +170,14 @@ const CustomerResponse = () => {
                         <label className={`${GlobalStyle.headingSmall} mb-1`}>
                             Customer Response:
                         </label>
-                        <select className={GlobalStyle.selectBox}>
+                        <select
+                            value={ResponseType}
+                            className={GlobalStyle.selectBox}
+                            onChange={(e) => {
+                                setResponseType(e.target.value);
+                            }}
+                            style={{ color: ResponseType === "" ? "gray" : "black" }}
+                        >
                             <option value="" hidden>Customer Response</option>
                             <option value="Agree to Settle">Agree to Settle</option>
                             <option value="Customer Dispute">Customer Dispute</option>
@@ -197,7 +188,8 @@ const CustomerResponse = () => {
                     <div className="mb-6">
                         <label className={GlobalStyle.remarkTopic}>Remark</label>
                         <textarea
-                            value=""
+                            value={ResponseRemark}
+                            onChange={(e) => setResponseRemark(e.target.value)}
                             className={`${GlobalStyle.remark} w-full`}
                             rows="5"
                         ></textarea>
@@ -208,6 +200,7 @@ const CustomerResponse = () => {
                         <button
                             className={`${GlobalStyle.buttonPrimary}`}
                             style={{ display: 'flex', alignItems: 'center' }}
+                            onClick={handleSubmit}
                         >
                             Submit
                         </button>
@@ -215,42 +208,79 @@ const CustomerResponse = () => {
                 </div>
             </div>
 
-            <h2 className={`${GlobalStyle.headingMedium}`}><b>Response History</b></h2>
+            {!isResponseHistory && (
+                <button
+                    className={`${GlobalStyle.buttonPrimary}`}
+                    style={{ display: 'flex', alignItems: 'center' }}
+                    onClick={handleHistoryResponse}
+                >
+                    Response History
+                </button>
+            )}
 
-            <div className={`${GlobalStyle.tableContainer} mt-4`}>
-                <table className={GlobalStyle.table}>
-                    <thead className={GlobalStyle.thead}>
-                        <tr>
-                            <th className={GlobalStyle.tableHeader}>DTM</th>
-                            <th className={GlobalStyle.tableHeader}>Response</th>
-                            <th className={GlobalStyle.tableHeader}>Remark</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
-                                <tr
-                                    key={index}
-                                    className={`${index % 2 === 0
-                                        ? "bg-white bg-opacity-75"
-                                        : "bg-gray-50 bg-opacity-50"
-                                        } border-b`}
-                                >
-                                    <td className={GlobalStyle.tableData}>{log.CustomerTypeName}</td>
-                                    <td className={GlobalStyle.tableData}>{log.AccountManagerCode}</td>
-                                    <td className={GlobalStyle.tableData}>{log.SourceType}</td>
+            {isResponseHistory && (
+                <div>
+                    <h2 className={`${GlobalStyle.headingMedium}`}><b>Response History</b></h2>
+
+                    <div className={`${GlobalStyle.tableContainer} mt-4`}>
+                        <table className={GlobalStyle.table}>
+                            <thead className={GlobalStyle.thead}>
+                                <tr>
+                                    <th className={GlobalStyle.tableHeader}>DTM</th>
+                                    <th className={GlobalStyle.tableHeader}>Response</th>
+                                    <th className={GlobalStyle.tableHeader}>Remark</th>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="6" className="text-center py-4">
-                                    No data matching the criteria.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            </thead>
+                            <tbody>
+                                {paginatedData.length > 0 ? (
+                                    paginatedData.map((log, index) => (
+                                        <tr
+                                            key={index}
+                                            className={`${index % 2 === 0
+                                                ? "bg-white bg-opacity-75"
+                                                : "bg-gray-50 bg-opacity-50"
+                                                } border-b`}
+                                        >
+                                            <td className={GlobalStyle.tableData}>
+                                                {/* {log.created_on} */}
+                                                {log?.created_on &&
+                                                    new Date(log.created_on).toLocaleString("en-GB", {
+                                                        year: "numeric",
+                                                        month: "2-digit",
+                                                        day: "2-digit",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                        second: "2-digit",
+                                                        hour12: true,
+                                                    })}
+                                            </td>
+                                            <td className={GlobalStyle.tableData}>{log.response_type}</td>
+                                            <td className={GlobalStyle.tableData}>{log.lod_remark}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-4">
+                                            No data matching the criteria.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className={GlobalStyle.navButtonContainer}>
+                        <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
+                            <FaArrowLeft />
+                        </button>
+                        <span className="text-gray-700">
+                            Page {currentPage + 1} of {pages}
+                        </span>
+                        <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === pages - 1}>
+                            <FaArrowRight />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 

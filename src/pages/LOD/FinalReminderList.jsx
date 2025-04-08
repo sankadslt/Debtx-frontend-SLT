@@ -268,7 +268,11 @@ const LOD_Log = () => {
                                             >
                                                 <FaEdit />
                                             </button>
-                                            <button className={GlobalStyle.buttonIcon} style={{ fontSize: "24px" }}>
+                                            <button
+                                                className={GlobalStyle.buttonIcon}
+                                                style={{ fontSize: "24px" }}
+                                                onClick={() => navigate(`/pages/LOD/CustomerResponseReview/${log.LODID}`)}
+                                            >
                                                 <FaEye />
                                             </button>
                                         </div>

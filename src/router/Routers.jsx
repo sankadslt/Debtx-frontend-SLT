@@ -618,7 +618,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/pages/LOD/CustomerResponseReview"
+        path="/pages/LOD/CustomerResponseReview/:caseId"
         element={
           <ProtectedRoute
             element={<CustomerResponseReview />}
