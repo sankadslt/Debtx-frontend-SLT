@@ -109,6 +109,14 @@ const CustomerResponse = () => {
         }
     };
 
+    const handleBackButton = () => {
+        if (data.current_document_type === "LOD") {
+            navigate("/pages/LOD/LODLog");
+        } else {
+            navigate("/pages/LOD/FinalReminderList");
+        }
+    }
+
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Customer Response</h2>
@@ -210,7 +218,7 @@ const CustomerResponse = () => {
 
             {!isResponseHistory && (
                 <button
-                    className={`${GlobalStyle.buttonPrimary}`}
+                    className={`${GlobalStyle.buttonPrimary} mb-4`}
                     style={{ display: 'flex', alignItems: 'center' }}
                     onClick={handleHistoryResponse}
                 >
@@ -281,6 +289,15 @@ const CustomerResponse = () => {
                     </div>
                 </div>
             )}
+
+            <div>
+                <button
+                    className={GlobalStyle.navButton}
+                    onClick={handleBackButton}
+                >
+                    <FaArrowLeft />
+                </button>
+            </div>
         </div>
     );
 

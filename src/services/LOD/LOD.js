@@ -150,11 +150,10 @@ export const List_Final_Reminder_Lod_Cases = async (case_status, date_type, date
       return response.data.data.map((LOD) => ({
         LODID: LOD.case_id,
         Status: LOD.case_current_status,
-        LODBatchNo: LOD.lod_final_reminder.lod_distribution_id,
-        NotificationCount: LOD.lod_final_reminder.lod_notification.length || null,
-        CreatedDTM: LOD.lod_final_reminder.lod_submission.created_on || null,
-        ExpireDTM: LOD.lod_final_reminder.lod_expire_on || null,
-        // LastResponse: LOD.lod_final_reminder.lod_response.created_on || null,
+        LODBatchNo: LOD.lod_final_reminder?.lod_distribution_id,
+        NotificationCount: LOD.lod_final_reminder?.lod_notification?.length || null,
+        CreatedDTM: LOD.lod_final_reminder?.lod_submission?.created_on || null,
+        ExpireDTM: LOD.lod_final_reminder?.lod_expire_on || null,
         LastResponse: LOD.lod_final_reminder.lod_response?.length > 0
           ? LOD.lod_final_reminder.lod_response[LOD.lod_final_reminder.lod_response.length - 1]?.created_on
           : null,
@@ -201,7 +200,8 @@ export const case_details_for_lod_final_reminder = async (case_id) => {
         account_no: Case.account_no,
         arrears_amount: Case.current_arrears_amount || null,
         last_payment_date: Case.last_payment_date || null,
-        lod_response: Case.lod_final_reminder.lod_response || null,
+        lod_response: Case.lod_final_reminder?.lod_response || null,
+        current_document_type: Case.lod_final_reminder?.current_document_type || null,
       };
     } else {
       throw new Error("Failed to fetch case details");
@@ -236,9 +236,10 @@ export const Case_Details_Settlement_LOD_FTL_LOD = async (case_id) => {
       account_no: Case.account_no,
       arrears_amount: Case.current_arrears_amount || null,
       last_payment_date: Case.last_payment_date || null,
-      lod_response: Case.lod_response.lod_response || null,
+      lod_response: Case.lod_response?.lod_response || null,
       settlement_plans: flattenedSettlementPlans || null,
       payment_details: Case.payment_details || null,
+      current_document_type: Case.lod_response?.current_document_type || null,
     };
   } catch (error) {
     console.error("Error fetching case details:", error);

@@ -117,6 +117,14 @@ const CustomerResponseReview = () => {
         }
     };
 
+    const handleBackButton = () => {
+        if (data.current_document_type === "LOD") {
+            navigate("/pages/LOD/LODLog");
+        } else {
+            navigate("/pages/LOD/FinalReminderList");
+        }
+    }
+
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Customer Response</h2>
@@ -423,6 +431,15 @@ const CustomerResponseReview = () => {
                 </span>
                 <button className={GlobalStyle.navButton} onClick={handleNextPagePaymentDetails} disabled={currentPagePaymentDetails === pagesPaymentDetails - 1}>
                     <FaArrowRight />
+                </button>
+            </div>
+
+            <div>
+                <button 
+                className={GlobalStyle.navButton} 
+                onClick={handleBackButton}
+                >
+                    <FaArrowLeft />
                 </button>
             </div>
         </div>
