@@ -14,13 +14,14 @@ Notes:
 
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import "react-datepicker/dist/react-datepicker.css";
-import Incident_Reject from "../../assets/images/Incident_Reject.png";
+import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
 import { Create_Rejected_List_for_Download, List_Reject_Incident } from "../../services/distribution/distributionService.js";
 import Swal from "sweetalert2";
+import  { Tooltip } from "react-tooltip";
 
 export default function RejectIncidentlog() {
   const navigate = useNavigate();
@@ -88,8 +89,25 @@ export default function RejectIncidentlog() {
               filtered_reason: item.Filtered_Reason || "N/A",
               source_type: item?.Source_Type || "N/A",
               reject_by: item.Rejected_By ||"N/A",
-              reject_dtm: isNaN(rejectedDate) ? "N/A" : rejectedDate.toLocaleString() || "N/A",
-              created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A"
+              reject_dtm: isNaN(rejectedDate) ? "N/A" : rejectedDate.toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric", // Ensures two-digit year (YY)
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true, // Keeps AM/PM format
+
+              }),
+              created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric", // Ensures two-digit year (YY)
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true, // Keeps AM/PM format
+              }),
             };
           });
           setTableData(formattedData);
@@ -114,6 +132,7 @@ export default function RejectIncidentlog() {
             text: "Please select a Source Type or provide both From Date and To Date.",
             icon: "warning",
             confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
           });
           return;
       }
@@ -124,6 +143,7 @@ export default function RejectIncidentlog() {
             text: "Both From Date and To Date must be selected together.",
             icon: "warning",
             confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
           });
           return;
       }
@@ -139,6 +159,8 @@ export default function RejectIncidentlog() {
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: "Create Task",
+                confirmButtonColor: "#28a745",
+                cancelButtonColor: "#d33",
                 cancelButtonText: "Cancel",
               }).then((result) => {
                 if (result.isConfirmed) {
@@ -155,15 +177,32 @@ export default function RejectIncidentlog() {
           fetchData(); 
         }
   };
+
+  const handleclearFilter = () => {
+    setFromDate(null);
+    setToDate(null);
+    setSelectedAction("");
+    setSearchQuery("");
+    setSelectAllData(false); // Reset select all checkbox
+     // Fetch data again to reset the table
+  };
+
+  useEffect(() => {
+    if (fromDate === null && toDate === null && selectedAction === "") {
+        fetchData();
+    }
+}, [fromDate, toDate, selectedAction]);
+
   
   const handleCreateTaskForDownload = async({action_type, fromDate, toDate}) => {
     
       if(!action_type && !fromDate && !toDate){
             Swal.fire({
               title: 'Warning',
-              text: 'Missing Parameters',
+              text: 'Please select a Action Type or provide both From Date and To Date.',
               icon: 'warning',
-              confirmButtonText: 'OK'
+              confirmButtonText: 'OK',
+              confirmButtonColor: "#f1c40f"
             });
           }
           else if ((fromDate && !toDate) || (!fromDate && toDate)) {
@@ -172,6 +211,7 @@ export default function RejectIncidentlog() {
               text: "Both From Date and To Date must be selected together.",
               icon: "warning",
               confirmButtonText: "OK",
+              confirmButtonColor: "#f1c40f"
             });
             return;
           } else{
@@ -187,7 +227,8 @@ export default function RejectIncidentlog() {
                 title: 'Success',
                 text: 'Task successfully created',
                 icon: 'success',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                confirmButtonColor: "#28a745"
               });
             }
           }catch(error){
@@ -195,7 +236,9 @@ export default function RejectIncidentlog() {
               title: 'Error',
               text: 'Error creating task',
               icon: 'error',
-              confirmButtonText: 'OK'
+              confirmButtonText: 'OK',
+              confirmButtonColor: "#d33"
+
             });
           }
           }
@@ -203,7 +246,13 @@ export default function RejectIncidentlog() {
   // validation for date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
+     
+      Swal.fire({
+                                        title: "Error",
+                                        text: "The 'From' date cannot be later than the 'To' date.",
+                                        icon: "error",
+                                        confirmButtonColor: "#d33", 
+                                    });;
     } else {
       setError("");
       setFromDate(date);
@@ -213,7 +262,12 @@ export default function RejectIncidentlog() {
   // validation for date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
+      Swal.fire({
+                                        title: "Error",
+                                        text: "The 'To' date cannot be earlier than the 'From' date.",
+                                        icon: "error",
+                                        confirmButtonColor: "#d33", 
+                                    });
     } else {
       setError("");
       setToDate(date);
@@ -279,48 +333,57 @@ export default function RejectIncidentlog() {
       </div>
 
       {/* Filter Section */}
-      <div className="flex justify-end gap-10 my-12 items-center">
-        {/* Source Dropdown */}
-        <div className="flex items-center gap-4">
-          <select
-            className={GlobalStyle.inputText}
-            value={selectedAction}
-            onChange={(e) => setSelectedAction(e.target.value)}
-          >
-            <option value="">Action Type</option>
-            <option value="collect arrears">Collect Arrears</option>
-            <option value="collect arrears and CPE">Collect Arrears and CPE</option>
-            <option value="collect CPE">Collect CPE</option>
-          </select>
-        </div>
+      <div  className="flex justify-end">
+          <div className={`${GlobalStyle.cardContainer}  items-center w-[70vw] mb-8 mt-8`}>
+            <div className="flex items-center gap-4 justify-end">
+                {/* Source Dropdown */}
+                <div className="flex items-center gap-4">
+                  <select
+                    className={GlobalStyle.inputText}
+                    value={selectedAction}
+                    onChange={(e) => setSelectedAction(e.target.value)}
+                    style={{ color: selectedAction === "" ? "gray" : "black" }}
+                  >
+                    <option value="" hidden>Action Type</option>
+                    <option value="collect arrears" style={{ color: "black" }}>Collect Arrears</option>
+                    <option value="collect arrears and CPE" style={{ color: "black" }}>Collect Arrears and CPE</option>
+                    <option value="collect CPE" style={{ color: "black" }}>Collect CPE</option>
+                  </select>
+                </div>
 
-        {/* Date Picker Section */}
-        <div className="flex items-center gap-4">
-          <label>Date:</label>
-          <DatePicker
-            selected={fromDate}
-            onChange={handleFromDateChange}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="dd/MM/yyyy"
-            className={GlobalStyle.inputText}
-          />
-          <DatePicker
-            selected={toDate}
-            onChange={handleToDateChange}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="dd/MM/yyyy"
-            className={GlobalStyle.inputText}
-          />
-          {error && <span className={GlobalStyle.errorText}>{error}</span>}
-        </div>
+                {/* Date Picker Section */}
+                <div className="flex items-center gap-4">
+                  <label>Date:</label>
+                  <DatePicker
+                    selected={fromDate}
+                    onChange={handleFromDateChange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="From"
+                    className={GlobalStyle.inputText}
+                  />
+                  <DatePicker
+                    selected={toDate}
+                    onChange={handleToDateChange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="To"
+                    className={GlobalStyle.inputText}
+                  />
+                  {error && <span className={GlobalStyle.errorText}>{error}</span>}
+                </div>
 
-        {/* Filter Button */}
-        <button
-          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
-          onClick={handleFilterClick}
-        >
-          Filter
-        </button>
+                {/* Filter Button */}
+                <button
+                  className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                  onClick={handleFilterClick}
+                >
+                  Filter
+                </button>
+                {/* Clear Button */}
+                <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+                                        Clear
+                            </button>
+            </div>
+          </div>
       </div>
 
       {/* Table Section */}
@@ -342,7 +405,7 @@ export default function RejectIncidentlog() {
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
-                <th scope="col" className={GlobalStyle.tableHeader}></th>
+                {/* <th scope="col" className={GlobalStyle.tableHeader}></th> */}
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   ID
                 </th>
@@ -350,7 +413,7 @@ export default function RejectIncidentlog() {
                   Status
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  Account No.
+                  Account No
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Filtered Reason
@@ -376,14 +439,14 @@ export default function RejectIncidentlog() {
                       : "bg-gray-50 bg-opacity-50"
                   } border-b`}
                 >
-                  <td className={GlobalStyle.tableData}>
+                  {/* <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <input
                       type="checkbox"
                       className={"rounded-lg"}
                       checked={selectedRows.includes(row.id)}
                       onChange={() => handleRowCheckboxChange(row.id)}
                     />
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData}>
                     <a href={`#${row.id}`} className="hover:underline">
                       {row.id}
@@ -393,14 +456,18 @@ export default function RejectIncidentlog() {
                     <div className="flex justify-center items-center h-full">
                       {row.status.toLowerCase() === "incident reject" && (
                         <div
-                          title="Incident Reject"
-                          aria-label="Incident Reject"
+                          data-tooltip-id="tooltip-incident-reject"
                         >
                           <img
                             src={Incident_Reject}
                             alt="Incident Reject"
                             className="w-5 h-5"
                           />
+                          
+                          <Tooltip
+                            id="tooltip-incident-reject"
+                            place="bottom"
+                            content="Incident Reject"></Tooltip>
                         </div>
                       )}
                     </div>
@@ -453,7 +520,7 @@ export default function RejectIncidentlog() {
 
       <div className="flex justify-end items-center w-full mt-6">
         {/* Select All Data Checkbox */}
-        <label className="flex items-center gap-2">
+        {/* <label className="flex items-center gap-2">
           <input
             type="checkbox"
             className="rounded-lg"
@@ -464,16 +531,17 @@ export default function RejectIncidentlog() {
             onChange={handleSelectAllDataChange}
           />
           Select All Data
-        </label>
+        </label> */}
 
         <button
-          className={`${GlobalStyle.buttonPrimary} ml-4`}
+          className={`${GlobalStyle.buttonPrimary} ml-4 flex items-center`}
           onClick={()=>{handleCreateTaskForDownload({
             action_type: selectedAction, 
             fromDate: fromDate, 
             toDate: toDate
           })}}
         >
+           <FaDownload className="mr-2" />
           Create Task Let Me Know
         </button>
       </div>

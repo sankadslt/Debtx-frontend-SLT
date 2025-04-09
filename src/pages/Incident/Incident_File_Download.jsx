@@ -14,6 +14,8 @@ import PropTypes from 'prop-types';
 import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { List_Download_Files_from_Download_Log } from "../../services/file/fileDownloadService";
+import  { Tooltip } from "react-tooltip";
+
 
 
 const Incident_File_Download = () => {
@@ -102,7 +104,7 @@ const Incident_File_Download = () => {
                 <div className={GlobalStyle.searchBarContainer}>
                     <input
                         type="text"
-                        placeholder="Search by Task ID, Group ID..."
+                        placeholder=""
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className={GlobalStyle.inputSearch}
@@ -123,14 +125,15 @@ const Incident_File_Download = () => {
                                 Group ID
                             </th>
                             <th scope="col" className={GlobalStyle.tableHeader}>
+                                Created By
+                            </th>
+                            <th scope="col" className={GlobalStyle.tableHeader}>
                                 Created DTM
                             </th>
                             <th scope="col" className={GlobalStyle.tableHeader}>
                                 Expire DTM
                             </th>
-                            <th scope="col" className={GlobalStyle.tableHeader}>
-                                Created By
-                            </th>
+                            
                             <th scope="col" className={GlobalStyle.tableHeader}>
                                 Download
                             </th>
@@ -150,18 +153,37 @@ const Incident_File_Download = () => {
                             >
                                 <td className={GlobalStyle.tableData}>{log.TaskID}</td>
                                 <td className={GlobalStyle.tableData}>{log.GroupID}</td>
-                                <td className={GlobalStyle.tableData}>{log.CreatedDTM}</td>
-                                <td className={GlobalStyle.tableData}>{log.ExpireDTM}</td>
                                 <td className={GlobalStyle.tableData}>{log.CreatedBy}</td>
-                                <td className={GlobalStyle.tableData}>
+                                <td className={GlobalStyle.tableData}>{new Date(log.CreatedDTM).toLocaleString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true,
+                                        })}</td>
+                                <td className={GlobalStyle.tableData}>{new Date(log.ExpireDTM).toLocaleString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true,
+                                        })}</td>
+                                
+                                <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                     <button
                                         onClick={() => handleDownload(log.TaskID)}
-                                        className="text-blue-600 hover:text-blue-800"
-                                        title={isExpired ? "Download expired" : "Download file"}
+                                        className="text-blue-600 hover:text-blue-800 " 
+                                        data-tooltip-id="download-tooltip"
                                         disabled={isExpired}
                                     >
                                         <FaDownload />
+
                                     </button>
+                                    <Tooltip id="download-tooltip" place="bottom" content={isExpired ? "Download expired" : "Download file"} />
                                 </td>
                             </tr>
                           )

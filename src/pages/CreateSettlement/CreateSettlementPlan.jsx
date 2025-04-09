@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import { Case_Details_Settlement_Phase } from "../../services/settlement/SettlementServices";
+import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 export default function CreateSettlementPlan() {
+  const location = useLocation();
   const [selectedPlan, setSelectedPlan] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(2);
   const [fromDate, setFromDate] = useState(null);
@@ -11,7 +14,10 @@ export default function CreateSettlementPlan() {
   const [error, setError] = useState("");
   const [settlementCount, setSettlementCount] = useState(0);
   const [caseDetails, setCaseDetails] = useState([]);
+  //const { caseId } = useParams(); // Get caseId from URL
 
+  const caseId = location.state?.case_Id;
+  console.log("Case ID from URL:", caseId);
   const data = [
     {
       seqNo: "1",
@@ -23,7 +29,7 @@ export default function CreateSettlementPlan() {
   useEffect(() => {
     const fetchCaseDetails = async () => {
       try {
-        const payload = { case_id: 4 };
+        const payload = { case_id: caseId };
         console.log("Sending API request with payload:", payload);
         const response = await Case_Details_Settlement_Phase(payload);
         console.log("API Response:", response);
@@ -37,6 +43,21 @@ export default function CreateSettlementPlan() {
     };
     fetchCaseDetails();
   }, []);
+  useEffect(() => {
+    if (!calendarMonth || calendarMonth < 1) return;
+
+    const today = new Date();
+    const from = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const to = new Date(
+      from.getFullYear(),
+      from.getMonth() + Number(calendarMonth),
+      0
+    );
+
+    setFromDate(from);
+    setToDate(to);
+    setError("");
+  }, [calendarMonth]);
 
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {

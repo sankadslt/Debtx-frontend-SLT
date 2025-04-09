@@ -269,14 +269,14 @@ export default function AmendAssignedDRC() {
             <select
               className={GlobalStyle.selectBox}
               value={newEntry.DRC1}
-              
+              style={{ color: newEntry.DRC1 === "" ? "gray" : "black" }}
               onChange={handleselectchangeDRC1}
             >
               <option value="" hidden>
                 DRC
               </option>
               {[...new Set(drcData.map((item) => item.drc_name))].map((item) => (
-               <option key={item} value={item}>
+               <option key={item} value={item} style={{ color: "black" }}>
                   {`${item}`}
                 </option> 
                ))} 
@@ -288,6 +288,7 @@ export default function AmendAssignedDRC() {
             <select
               className={GlobalStyle.selectBox}
               value={newEntry.RTOM}
+              style={{ color: newEntry.RTOM === "" ? "gray" : "black" }}
               onChange={(e) =>
                 setNewEntry({ ...newEntry, RTOM: e.target.value })
               }
@@ -299,7 +300,7 @@ export default function AmendAssignedDRC() {
               {drcData
                 .filter((item) => item.drc_name == newEntry.DRC1)
                 .map((item) => (
-                  <option key={item.rtom} value={item.rtom}>
+                  <option key={item.rtom} value={item.rtom} style={{ color: "black" }}>
                     {`${item.rtom}`}
                   </option>
                 ))}
@@ -333,12 +334,13 @@ export default function AmendAssignedDRC() {
               className={GlobalStyle.selectBox}
               value={newEntry.DRC2}
               onChange={handleselectchangeDRC2}
+              style={{ color: newEntry.DRC2 === "" ? "gray" : "black" }}
             >
               <option value="" hidden>
                 DRC
               </option>
               {[...new Set(drcData.map((item) => item.drc_name))].map((item) => (
-               <option key={item} value={item}>
+               <option key={item} value={item} style={{ color: "black" }}>
                   {`${item}`}
                 </option> 
                ))}
@@ -428,7 +430,7 @@ export default function AmendAssignedDRC() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className={GlobalStyle.tableData}>
+                  <td colSpan="6" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                     No data available.
                   </td>
                 </tr>
