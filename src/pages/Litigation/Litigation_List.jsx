@@ -1,7 +1,7 @@
 /*Purpose: 
 Created Date: 2025-04-01
 Created By: Nimesh Perera (nimeshmathew999@gmail.com)
-Last Modified Date: 2025-04-04
+Last Modified Date: 2025-04-10
 Modified By: Nimesh Perera (nimeshmathew999@gmail.com), Sasindu Srinayaka (sasindusrinayaka@gmail.com)
 Version: React v18
 ui number : 4.1
@@ -17,6 +17,24 @@ import { useNavigate } from "react-router-dom";
 import { Litigation_Fail_Update } from "./Litigation_Fail_Update";
 import { listAllLitigationCases } from "../../services/litigation/litigationService";
 import Swal from 'sweetalert2';
+
+//Status Icons
+import Initial_Litigation from '../../assets/images/litigation/status/Initial_Litigation.png'
+import FTL_Settle_Pending from '../../assets/images/litigation/status/Litigation_Settle_Pending.png'
+import Pending_FTL from '../../assets/images/litigation/status/Litigation_Settle_Open-Pending.png'
+import FLU from '../../assets/images/litigation/status/FLU.png'
+import FLA from '../../assets/images/litigation/status/FLA.png'
+import SLA from '../../assets/images/litigation/status/Litigation_Settle_Active.png'
+// import FTL from '../../assets/images/litigation/status/FTL.png'
+// import Litigation from '../../assets/images/litigation/status/Litigation.png'
+
+//Button Icons
+import Create_Settlement from '../../assets/images/litigation/buttons/Create_Settlement.png'
+import Documents_Collected from '../../assets/images/litigation/buttons/Documents-Collected.png'
+import Documents from '../../assets/images/litigation/buttons/Documents.png'
+import Legal_Details from '../../assets/images/litigation/buttons/Legal_Details.png'
+import Legal_Submission from '../../assets/images/litigation/buttons/Legal_Submission.png'
+import Preview from '../../assets/images/litigation/buttons/Preview.png'
 
 export const Litigation_List = () => {
   const navigate = useNavigate();
@@ -42,6 +60,42 @@ export const Litigation_List = () => {
     "SLA": "Success Legal Action",
     "FLA": "Fail Legal Action",
     "Litigation": "Litigation"
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+        case "Initial_Litigation":
+          return Initial_Litigation;
+        case "FLU":
+          return FLU;
+        case "FLA":
+          return FLA;
+        case "Pending_FTL":
+          return Pending_FTL;
+        case "FTL_Settle_Pending":
+          return FTL_Settle_Pending;
+        case "SLA":
+          return SLA;
+        default:
+            return null;
+    }
+  };
+
+  const renderStatusIcon = (status) => {
+    const icon = getStatusIcon(status);
+    
+    if (!icon) {
+        return <span>{status}</span>;
+    }
+
+    return (
+        <img
+            src={icon}
+            alt={status}
+            className="w-6 h-6"
+            title={status}
+        />
+    );
   };
 
   // Date type mapping between frontend display values and backend expected values
@@ -285,7 +339,7 @@ export const Litigation_List = () => {
                       } border-b`}
                     >
                       <td className={`${GlobalStyle.tableData} text-center`}>{item.case_id}</td>
-                      <td className={GlobalStyle.tableData}>{displayStatus}</td>
+                      <td className={`${GlobalStyle.tableData} flex justify-center items-center mt-1`}>{renderStatusIcon(item.status)}</td>
                       <td className={`${GlobalStyle.tableData} text-center`}>{item.account_no}</td>
                       <td className={`${GlobalStyle.tableData} text-right px-2`}>{item.current_arreas_amount}</td>
                       <td className={`${GlobalStyle.tableData} text-center`}>{item.legal_accepted_date
@@ -298,45 +352,56 @@ export const Litigation_List = () => {
                       </td>
                       <td className={`${GlobalStyle.tableData} px-4`}>
                         {displayStatus === "Initial_Litigation" && (
-                          <div>
-                            <button 
-                              className={GlobalStyle.buttonPrimary}
+                          <div className="flex gap-4 items-center justify-center">
+                            <img
+                              src={Documents}
+                              alt="Documents"
+                              className="w-6 h-6 cursor-pointer"
+                              title="Documents"
                               onClick={() => navigate("/pages/Litigation/Litigation_Documentation", {
                                 state:{case_id : item.case_id}
                               })}
-                            >
-                              Documents
-                            </button>
+                            />
                           </div>
                         )}
                         {displayStatus === "Pending_FTL" && (
-                          <div className="flex gap-2">
-                            <button 
-                              className="px-4 py-2 bg-[#50B748] rounded-full border border-[#001120]"
+                          <div className="flex gap-4 items-center justify-center">
+                            <img
+                              src={Documents_Collected}
+                              alt="Documents Collected"
+                              className="w-6 h-6 cursor-pointer"
+                              title="Documents Collected"
                               onClick={() => navigate("/pages/Litigation/Litigation_Submission_Document_Summary")}
-                            >
-                              Documents
-                            </button>
-                            <button 
-                              className={GlobalStyle.buttonPrimary}
+                            />
+                            <img
+                              src={Legal_Submission}
+                              alt="Legal Submission"
+                              className="w-6 h-6 cursor-pointer"
+                              title="Legal Submission"
                               onClick={() => navigate("/pages/Litigation/Litigation_Submission")}    
-                            >
-                              Legal Submission
-                            </button>
+                            />
                           </div>
                         )}
                         {displayStatus === "FTL_Settle_Pending" && (
                           <div className="flex justify-center gap-2">   
-                            <button onClick={() => navigate("/pages/Litigation/Litigation_Case_Details")}>
-                              <FaEye className="w-6 h-6"/>
-                            </button>
+                            <img
+                              src={Preview}
+                              alt="Preview"
+                              className="w-6 h-6 cursor-pointer"
+                              title="Preview"
+                              onClick={() => navigate("/pages/Litigation/Litigation_Case_Details")}                      
+                            />
                           </div>
                         )}
                         {displayStatus === "Litigation" && (
-                          <div className="flex gap-2">   
-                            <button className={GlobalStyle.buttonPrimary}>
-                              Create Settlement
-                            </button>
+                          <div className="flex gap-4 items-center justify-center">   
+                            <img
+                              src={Create_Settlement}
+                              alt="Create Settlement"
+                              className="w-6 h-6 cursor-pointer"
+                              title="Create Settlement"
+                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
+                            />
                             <button 
                               className={GlobalStyle.buttonPrimary}
                               onClick={() => setIsModalOpen(true)}
@@ -346,20 +411,23 @@ export const Litigation_List = () => {
                             <Litigation_Fail_Update isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
                           </div>
                         )}
-                        {displayStatus === "FTL" && (
-                          <div className="flex gap-2">   
-                            <button 
-                              className={GlobalStyle.buttonPrimary}
-                              onClick={() => navigate("/pages/Litigation/Litigation_Court_Details_Update")}    
-                            >
-                              Legal Details
-                            </button>
-                            <button 
-                              className={GlobalStyle.buttonPrimary}
-                            >
-                              Create Settlement
-                            </button>
-                          </div>
+                        {displayStatus === "FTL" && ( 
+                          <div className="flex gap-4 items-center justify-center">
+                            <img
+                              src={Legal_Details}
+                              alt="Legal Details"
+                              className="w-6 h-6 cursor-pointer"
+                              title="Create Details"
+                              onClick={() => navigate("/pages/Litigation/Litigation_Court_Details_Update")}
+                            />
+                            <img
+                              src={Create_Settlement}
+                              alt="Create Settlement"
+                              className="w-6 h-6 cursor-pointer"
+                              title="Create Settlement"
+                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
+                            />
+                          </div>          
                         )}
                       </td>
                     </tr>
