@@ -15,7 +15,7 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload, FaRetweet } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { F2_selection_cases_count } from "../../services/LOD/LOD.js";
@@ -25,12 +25,12 @@ import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../.
 import { Change_Document_Type } from "../../services/LOD/LOD.js";
 import { Create_Task_for_Proceed_LOD_OR_Final_Reminder_List } from "../../services/LOD/LOD.js";
 
+
 const Digital_Signature_LOD = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
-    const rowsPerPage = 8;
     const [LODType, setLODType] = useState("");
-    const [data, setData] = useState([]);
+    const [LODData, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isCreatingTask, setIsCreatingTask] = useState(false);
     const [isFiltered, setIsFiltered] = useState(false);
@@ -44,26 +44,15 @@ const Digital_Signature_LOD = () => {
     const [finalReminderCount, setFinalReminderCount] = useState(0);
     const [MaxPage, setMaxPage] = useState(0);
 
-    // const displayUserData = async () => {
-    //     try {
-    //         const userData = await getLoggedUserId();
-    //         console.log("User Data:", userData); // Log the user data to the console
-    //     } catch (error) {
-    //         console.error("Error fetching user data:", error.message || error);
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     displayUserData();
-    // }, [])
-
     // Fetch LOD, Final reminder and total counts
     const fetchLODCounts = async () => {
         try {
-            const { totalCount, lodCount, finalReminderCount } = await F2_selection_cases_count();
-            setTotalCount(totalCount);
-            setlodCount(lodCount);
-            setFinalReminderCount(finalReminderCount);
+            const response = await F2_selection_cases_count();
+
+            // Assign values to parameters from response
+            setTotalCount(response.totalCount);
+            setlodCount(response.lodCount);
+            setFinalReminderCount(response.finalReminderCount);
         } catch (error) {
             console.error("Error fetching LOD counts:", error.message);
             Swal.fire("Error", "Failed to fetch LOD counts.", "error");
@@ -83,6 +72,7 @@ const Digital_Signature_LOD = () => {
         }
     };
 
+    // calculating the maximum number of pages in the table, everytime the LODType, lodcount and finalreminder changes
     useEffect(() => {
         if (LODType === "LOD") {
             calculateMaxPages(lodCount); // Pass lodCount for "LOD"
@@ -97,7 +87,7 @@ const Digital_Signature_LOD = () => {
         setIsLoading(true);
         try {
             const LODs = await List_F2_Selection_Cases(LODType, currentPage + 1);
-            setData(LODs);
+            setLODData(LODs);
             setIsFiltered(LODs.length > 0);
         } catch (error) {
             setIsFiltered(false);
@@ -111,7 +101,7 @@ const Digital_Signature_LOD = () => {
         if (LODType.trim()) { // Check if LODType is not empty or just whitespace
             fetchData(LODType, currentPage);
         } else {
-            setData([]); // Clear data if LODType is empty
+            setLODData([]); // Clear data if LODType is empty
         }
     }, [LODType, currentPage]);
 
@@ -122,13 +112,14 @@ const Digital_Signature_LOD = () => {
             return;
         }
 
-        const userData = await getLoggedUserId();
+        const userData = await getLoggedUserId(); // Assign user ID
 
         setIsCreatingTask(true);
         try {
             const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData, LODType);
-            console.log("Task created successfully:", response);
-            Swal.fire("Success", `Task created successfully!`, "success");
+            if (response === "success") {
+                Swal.fire(response, `Task created successfully!`, "success");
+            }
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to create task.", "error");
         } finally {
@@ -143,13 +134,14 @@ const Digital_Signature_LOD = () => {
             return;
         }
 
-        const userData = await getLoggedUserId();
+        const userData = await getLoggedUserId(); // Assign user ID
 
         setIsCreatingTask(true);
         try {
             const response = await Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases(userData);
-            console.log("Task created successfully:", response);
-            Swal.fire("Success", `Task created successfully!`, "success");
+            if (response === "success") {
+                Swal.fire(response, `Task created successfully!`, "success");
+            }
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to create task.", "error");
         } finally {
@@ -164,14 +156,16 @@ const Digital_Signature_LOD = () => {
             return;
         }
 
-        const userData = await getLoggedUserId();
+        const userData = await getLoggedUserId(); // Assign user ID
 
         try {
-            const intLODID = parseInt(activePopupLODID, 10);
+            const intLODID = parseInt(activePopupLODID, 10); // converti and store string type LOD_ID as a int
             const response = await Change_Document_Type(intLODID, activePopupLODStatus, userData, changeReason);
-            console.log("LOD Type changed successfully:", response);
-            Swal.fire("Success", `LOD Type changed successfully!`, "success");
-            fetchData(LODType, currentPage);
+            if (response === "success") {
+                Swal.fire(response, `LOD Type changed successfully!`, "success");
+                fetchData(LODType, currentPage); // Refresh the case list after changing the document type
+                fetchLODCounts(); // Refresh the counts after changing the document type
+            }
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to changee the LOD Type.", "error");
         }
@@ -184,21 +178,20 @@ const Digital_Signature_LOD = () => {
             return;
         }
 
-        const userData = await getLoggedUserId();
+        const userData = await getLoggedUserId(); // Assign user ID
 
-        setIsCreatingTask(true);
         try {
-            const intLODCount = parseInt(LODCount, 10);
+            const intLODCount = parseInt(LODCount, 10); // convert string variable into int variable
             const response = await Create_Task_for_Proceed_LOD_OR_Final_Reminder_List(userData, intLODCount, LODType);
-            console.log("Task created successfully:", response);
-            Swal.fire("Success", `Task created successfully!`, "success");
+            if (response === "success") {
+                Swal.fire(response, `Task created successfully!`, "success");
+            }
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to create task.", "error");
-        } finally {
-            setIsCreatingTask(false);
         }
     };
 
+    // display loading animation if data is loading
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -208,7 +201,7 @@ const Digital_Signature_LOD = () => {
     }
 
     // Handle search bar
-    const filteredData = data.filter((row) =>
+    const filteredData = LODData.filter((row) =>
         String(row.LODID).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.Amount).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -227,6 +220,7 @@ const Digital_Signature_LOD = () => {
         setCurrentPage(currentPage + 1);
     };
 
+    // handle change document type pop up
     const handlePopup = (LODID, status) => {
         setActivePopupLODID(LODID);
         setActivePopupLODStatus(status);
@@ -237,6 +231,7 @@ const Digital_Signature_LOD = () => {
         setActivePopupLODID(null);
     };
 
+    // handle submit button
     const handleSubmitChange = () => {
         if (!changeReason.trim()) {
             Swal.fire("Error", "Please enter a reason for the change.", "error");
@@ -252,12 +247,14 @@ const Digital_Signature_LOD = () => {
         closePopup();
     };
 
+    // handle user input count for proceed final reminder list or lod list
     const handleInputCount = (value) => {
         if (value === "" || isNaN(value)) {
             setLODCount(0);
             return;
         }
 
+        // assigning maximum possible count based on lod type
         const maxCount = LODType === "LOD" ? lodCount : finalReminderCount;
 
         if (parseInt(value, 10) <= maxCount) {
@@ -299,13 +296,12 @@ const Digital_Signature_LOD = () => {
                     >
                         {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
                         {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-                        {/* Create task and let me know */}
                     </button>
                 </div>
             )}
 
             <div className="w-full mb-8 mt-8">
-                <div className="flex items-center justify-center w-full space-x-6"> 
+                <div className="flex items-center justify-center w-full space-x-6">
                     <h1><b>LOD Type</b></h1>
                     <select
                         value={LODType}
@@ -316,7 +312,6 @@ const Digital_Signature_LOD = () => {
                         style={{ color: LODType === "" ? "gray" : "black" }}
                     >
                         <option value="" hidden>LOD Type</option>
-                        {/* <option value="All">All</option> */}
                         <option value="LOD">LOD</option>
                         <option value="Final Reminder">Final Reminder</option>
                     </select>
@@ -360,25 +355,18 @@ const Digital_Signature_LOD = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.LODID}</td>
-                                    {/* <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
-                                        {renderStatusIcon(log.Status)}
-                                    </td> */}
-                                    <td className={GlobalStyle.tableData}>
+                                    <td className={GlobalStyle.tableCurrency}>
                                         {log.Amount.toLocaleString("en-LK", {
                                             style: "currency",
                                             currency: "LKR",
                                         })}
-
                                     </td>
                                     <td className={GlobalStyle.tableData}>{log.CustomerTypeName}</td>
                                     <td className={GlobalStyle.tableData}>{log.AccountManagerCode}</td>
                                     <td className={GlobalStyle.tableData}>{log.SourceType}</td>
-                                    <td className={GlobalStyle.tableData}>
+                                    <td className={`${GlobalStyle.tableData} flex justify-center`}>
                                         <button onClick={() => handlePopup(log.LODID, log.Status)}>
-                                            <img
-                                                src="/src/assets/images/amend.png"
-                                                className="w-8 h-8"
-                                            />
+                                            <FaRetweet style={{ fontSize: '24px' }} />
                                         </button>
                                     </td>
                                 </tr>

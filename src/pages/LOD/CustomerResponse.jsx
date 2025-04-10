@@ -50,10 +50,13 @@ const CustomerResponse = () => {
         try {
             // const intLODCount = parseInt(LODCount, 10);
             const response = await Creat_Customer_Responce(caseId, ResponseType, ResponseRemark, userData);
-            Swal.fire("Success", `Customer Response created successfully!`, "success");
-            setResponseType("");
-            setResponseRemark("");
-            fetchCaseDetails({});
+            // console.log(response)
+            if (response === "success") {
+                Swal.fire(response, `Customer Response created successfully!`, "success");
+                setResponseType("");
+                setResponseRemark("");
+                fetchCaseDetails({});
+            }
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to create task.", "error");
         }
@@ -83,6 +86,7 @@ const CustomerResponse = () => {
         fetchCaseDetails();
     }, []);
 
+    // display loading animation when data is loading
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -91,6 +95,7 @@ const CustomerResponse = () => {
         );
     }
 
+    // variables need for table
     const lodResponse = data.lod_response || [];
     const pages = Math.ceil(lodResponse.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
@@ -119,60 +124,63 @@ const CustomerResponse = () => {
 
     return (
         <div className={GlobalStyle.fontPoppins}>
+            {/* Title */}
             <h2 className={GlobalStyle.headingLarge}>Customer Response</h2>
 
-            <div className="flex gap-4 mt-4 justify-center">
-                <div className={GlobalStyle.cardContainer}>
-
-                    <div className={`${GlobalStyle.cardContainer} w-full`}>
-                        <div className="table w-full">
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Case ID</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">{data.case_id}</div>
+            {/* Case Details card */}
+            <div className="flex justify-center mb-4">
+                <div className={`${GlobalStyle.cardContainer}`}>
+                    <div className="table w-full">
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Case ID</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">{data.case_id}</div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Customer Ref</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">{data.customer_ref}</div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Account no</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">{data.account_no}</div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">
+                                {data?.arrears_amount &&
+                                    data.arrears_amount.toLocaleString("en-LK", {
+                                        style: "currency",
+                                        currency: "LKR",
+                                    })
+                                }
                             </div>
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Customer Ref</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">{data.customer_ref}</div>
-                            </div>
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Account no</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">{data.account_no}</div>
-                            </div>
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">
-                                    {data?.arrears_amount &&
-                                        data.arrears_amount.toLocaleString("en-LK", {
-                                            style: "currency",
-                                            currency: "LKR",
-                                        })
-                                    }
-                                </div>
-                            </div>
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Last Payment Date</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">
-                                    {data?.last_payment_date &&
-                                        new Date(data.last_payment_date).toLocaleString("en-GB", {
-                                            year: "numeric",
-                                            month: "2-digit",
-                                            day: "2-digit",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            second: "2-digit",
-                                            hour12: true,
-                                        })}
-                                </div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Last Payment Date</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">
+                                {data?.last_payment_date &&
+                                    new Date(data.last_payment_date).toLocaleString("en-GB", {
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                        hour12: true,
+                                    })}
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-
+            {/* create custome response */}
+            <div className="flex gap-4 mt-4 justify-center">
+                <div className={GlobalStyle.cardContainer}>
                     {/* Select Box */}
                     <div className="flex flex-justify-between items-center space-x-6">
                         <label className={`${GlobalStyle.headingSmall} mb-1`}>
@@ -234,9 +242,9 @@ const CustomerResponse = () => {
                         <table className={GlobalStyle.table}>
                             <thead className={GlobalStyle.thead}>
                                 <tr>
-                                    <th className={GlobalStyle.tableHeader}>DTM</th>
                                     <th className={GlobalStyle.tableHeader}>Response</th>
                                     <th className={GlobalStyle.tableHeader}>Remark</th>
+                                    <th className={GlobalStyle.tableHeader}>DTM</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -249,6 +257,8 @@ const CustomerResponse = () => {
                                                 : "bg-gray-50 bg-opacity-50"
                                                 } border-b`}
                                         >
+                                            <td className={GlobalStyle.tableData}>{log.response_type}</td>
+                                            <td className={GlobalStyle.tableData}>{log.lod_remark}</td>
                                             <td className={GlobalStyle.tableData}>
                                                 {/* {log.created_on} */}
                                                 {log?.created_on &&
@@ -262,8 +272,6 @@ const CustomerResponse = () => {
                                                         hour12: true,
                                                     })}
                                             </td>
-                                            <td className={GlobalStyle.tableData}>{log.response_type}</td>
-                                            <td className={GlobalStyle.tableData}>{log.lod_remark}</td>
                                         </tr>
                                     ))
                                 ) : (

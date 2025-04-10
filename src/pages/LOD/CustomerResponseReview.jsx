@@ -15,10 +15,7 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/fa";
-import DatePicker from "react-datepicker";
-import Swal from "sweetalert2";
-// import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
 
@@ -26,17 +23,13 @@ const CustomerResponseReview = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [currentPageSettlementPlans, setCurrentPageSettlementPlans] = useState(0);
     const [currentPagePaymentDetails, setCurrentPagePaymentDetails] = useState(0);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [fromDate, setFromDate] = useState(null);
-    const [toDate, setToDate] = useState(null);
-    const [LODStatus, setLODStatus] = useState("");
-    const [DateType, setDateType] = useState("");
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const { caseId } = useParams(); // Get the case_id from the URL parameters
     const rowsPerPage = 5; // Number of rows per page
     const navigate = useNavigate();
 
+    // fetching case details
     const fetchCaseDetails = async () => {
         setIsLoading(true);
         try {
@@ -53,8 +46,7 @@ const CustomerResponseReview = () => {
         fetchCaseDetails();
     }, []);
 
-    // const HandleAddIncident = () => navigate("/incident/register");
-
+    // display loading animation when data is loading
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -63,6 +55,7 @@ const CustomerResponseReview = () => {
         );
     }
 
+    // variables need for response history table
     const lodResponse = data.lod_response || [];
     const pagesResponseHistory = Math.ceil(lodResponse.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
@@ -81,6 +74,7 @@ const CustomerResponseReview = () => {
         }
     };
 
+    // varibles need for settlement plane table
     const settlementPlans = data.settlement_plans || [];
     const pagesSettlementPlans = Math.ceil(settlementPlans.length / rowsPerPage);
     const startIndexSettlementPlans = currentPageSettlementPlans * rowsPerPage;
@@ -99,6 +93,7 @@ const CustomerResponseReview = () => {
         }
     };
 
+    // variables need for payment  details table
     const paymentDetails = data.payment_details || [];
     const pagesPaymentDetails = Math.ceil(paymentDetails.length / rowsPerPage);
     const startIndexPaymentDetails = currentPagePaymentDetails * rowsPerPage;
@@ -127,69 +122,70 @@ const CustomerResponseReview = () => {
 
     return (
         <div className={GlobalStyle.fontPoppins}>
+            {/* Title */}
             <h2 className={GlobalStyle.headingLarge}>Customer Response</h2>
 
+            {/* Case details card */}
             <div className="flex gap-4 mt-4 justify-center">
-                <div className="w-full">
-                    <div className={`${GlobalStyle.cardContainer} w-full`}>
-                        <div className="table">
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Case ID</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">{data.case_id}</div>
+                <div className={`${GlobalStyle.cardContainer}`}>
+                    <div className="table">
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Case ID</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">{data.case_id}</div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Customer Ref</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">{data.customer_ref}</div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Account no</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">{data.account_no}</div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">
+                                {data?.arrears_amount &&
+                                    data.arrears_amount.toLocaleString("en-LK", {
+                                        style: "currency",
+                                        currency: "LKR",
+                                    })
+                                }
                             </div>
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Customer Ref</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">{data.customer_ref}</div>
-                            </div>
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Account no</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">{data.account_no}</div>
-                            </div>
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">
-                                    {data?.arrears_amount &&
-                                        data.arrears_amount.toLocaleString("en-LK", {
-                                            style: "currency",
-                                            currency: "LKR",
-                                        })
-                                    }
-                                </div>
-                            </div>
-                            <div className="table-row">
-                                <div className="table-cell px-4 py-2 font-bold">Last Payment Date</div>
-                                <div className="table-cell px-4 py-2 font-bold">:</div>
-                                <div className="table-cell px-4 py-2">
-                                    {data?.last_payment_date &&
-                                        new Date(data.last_payment_date).toLocaleString("en-GB", {
-                                            year: "numeric",
-                                            month: "2-digit",
-                                            day: "2-digit",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            second: "2-digit",
-                                            hour12: true,
-                                        })}
-                                </div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Last Payment Date</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">
+                                {data?.last_payment_date &&
+                                    new Date(data.last_payment_date).toLocaleString("en-GB", {
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        // hour: "2-digit",
+                                        // minute: "2-digit",
+                                        // second: "2-digit",
+                                        // hour12: true,
+                                    })}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {/* Response History table */}
             <h2 className={`${GlobalStyle.headingMedium}`}><b>Response History</b></h2>
 
             <div className={`${GlobalStyle.tableContainer} mt-4`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
-                            <th className={GlobalStyle.tableHeader}>DTM</th>
                             <th className={GlobalStyle.tableHeader}>Response</th>
                             <th className={GlobalStyle.tableHeader}>Remark</th>
+                            <th className={GlobalStyle.tableHeader}>DTM</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -202,6 +198,8 @@ const CustomerResponseReview = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
+                                    <td className={GlobalStyle.tableData}>{log.response_type}</td>
+                                    <td className={GlobalStyle.tableData}>{log.lod_remark}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log?.created_on &&
                                             new Date(log.created_on).toLocaleString("en-GB", {
@@ -214,8 +212,6 @@ const CustomerResponseReview = () => {
                                                 hour12: true,
                                             })}
                                     </td>
-                                    <td className={GlobalStyle.tableData}>{log.response_type}</td>
-                                    <td className={GlobalStyle.tableData}>{log.lod_remark}</td>
                                 </tr>
                             ))
                         ) : (
@@ -241,6 +237,7 @@ const CustomerResponseReview = () => {
                 </button>
             </div>
 
+            {/* Settilement Plan table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Settlement Plan</b></h2>
 
             <div className="flex gap-4 mt-4 justify-center">
@@ -280,30 +277,30 @@ const CustomerResponseReview = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
-                                    <td className={GlobalStyle.tableData}>
-                                        {log?.Installment_Settle_Amount &&
-                                            log.Installment_Settle_Amount.toLocaleString("en-LK", {
+                                    <td className={GlobalStyle.tableData}>{log.settlement_plan[0]?.installment_seq}</td>
+                                    <td className={GlobalStyle.tableCurrency}>
+                                        {log?.settlement_plan[0]?.Installment_Settle_Amount &&
+                                            log.settlement_plan[0]?.Installment_Settle_Amount.toLocaleString("en-LK", {
                                                 style: "currency",
                                                 currency: "LKR",
                                             })
                                         }
                                     </td>
                                     <td className={GlobalStyle.tableData}>
-                                        {log?.Plan_Date &&
-                                            new Date(log.Plan_Date).toLocaleString("en-GB", {
+                                        {log?.settlement_plan[0]?.Plan_Date &&
+                                            new Date(log.settlement_plan[0]?.Plan_Date).toLocaleString("en-GB", {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                second: "2-digit",
-                                                hour12: true,
+                                                // hour: "2-digit",
+                                                // minute: "2-digit",
+                                                // second: "2-digit",
+                                                // hour12: true,
                                             })}
                                     </td>
-                                    <td className={GlobalStyle.tableData}>
-                                        {log?.Installment_Paid_Amount &&
-                                            log.Installment_Paid_Amount.toLocaleString("en-LK", {
+                                    <td className={GlobalStyle.tableCurrency}>
+                                        {log?.settlement_plan[0]?.Installment_Paid_Amount &&
+                                            log.settlement_plan[0]?.Installment_Paid_Amount.toLocaleString("en-LK", {
                                                 style: "currency",
                                                 currency: "LKR",
                                             })
@@ -334,6 +331,7 @@ const CustomerResponseReview = () => {
                 </button>
             </div>
 
+            {/* Payment Details Table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Payment Details</b></h2>
 
             <div className={`${GlobalStyle.tableContainer} mt-4`}>
@@ -341,9 +339,9 @@ const CustomerResponseReview = () => {
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Date</th>
+                            <th className={GlobalStyle.tableHeader}>Installment Sequence</th>
                             <th className={GlobalStyle.tableHeader}>Paid amount</th>
                             <th className={GlobalStyle.tableHeader}>Settled Balance</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Sequence</th>
                             <th className={GlobalStyle.tableHeader}>Transaction Type</th>
                             <th className={GlobalStyle.tableHeader}>Transaction Amount</th>
                             <th className={GlobalStyle.tableHeader}>Transaction_DTM</th>
@@ -365,13 +363,14 @@ const CustomerResponseReview = () => {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                second: "2-digit",
-                                                hour12: true,
+                                                // hour: "2-digit",
+                                                // minute: "2-digit",
+                                                // second: "2-digit",
+                                                // hour12: true,
                                             })}
                                     </td>
-                                    <td className={GlobalStyle.tableData}>
+                                    <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
+                                    <td className={GlobalStyle.tableCurrency}>
                                         {log?.payment &&
                                             log.payment.toLocaleString("en-LK", {
                                                 style: "currency",
@@ -379,7 +378,7 @@ const CustomerResponseReview = () => {
                                             })
                                         }
                                     </td>
-                                    <td className={GlobalStyle.tableData}>
+                                    <td className={GlobalStyle.tableCurrency}>
                                         {log?.cummilative_settled_balance &&
                                             log.cummilative_settled_balance.toLocaleString("en-LK", {
                                                 style: "currency",
@@ -387,9 +386,8 @@ const CustomerResponseReview = () => {
                                             })
                                         }
                                     </td>
-                                    <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
                                     <td className={GlobalStyle.tableData}>{log.money_transaction_type}</td>
-                                    <td className={GlobalStyle.tableData}>
+                                    <td className={GlobalStyle.tableCurrency}>
                                         {log?.money_transaction_amount &&
                                             log.money_transaction_amount.toLocaleString("en-LK", {
                                                 style: "currency",
@@ -435,9 +433,9 @@ const CustomerResponseReview = () => {
             </div>
 
             <div>
-                <button 
-                className={GlobalStyle.navButton} 
-                onClick={handleBackButton}
+                <button
+                    className={GlobalStyle.navButton}
+                    onClick={handleBackButton}
                 >
                     <FaArrowLeft />
                 </button>

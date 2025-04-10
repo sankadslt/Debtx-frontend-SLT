@@ -1,5 +1,5 @@
 /*Purpose:
-Created Date: 2025-04-04
+Created Date: 2025-04-09
 Created By: Janani Kumarasiri (jkktg001@gmail.com)
 Last Modified Date: 
 Modified By: 
@@ -14,13 +14,13 @@ Notes: This template uses Tailwind CSS */
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
 
-const LOD_Log = () => {
+const Final_Reminder_LOD_Hold_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [fromDate, setFromDate] = useState(null);
@@ -34,19 +34,18 @@ const LOD_Log = () => {
     // validation for date
     const handleFromDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "error");
+            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "warning");
         } else if (toDate && date > toDate) {
             Swal.fire("Invalid Input", "'From' date cannot be later than the 'To' date.", "warning");
         } else {
             setFromDate(date);
         }
-
     };
 
     // validation for date
     const handleToDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "error");
+            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "warning");
         } else if (fromDate && date < fromDate) {
             Swal.fire("Invalid Input", "The 'To' date cannot be earlier than the 'From' date.", "warning");
         } else {
@@ -58,8 +57,9 @@ const LOD_Log = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "Final Reminder", currentPage + 1);
+            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage + 1);
             setData(LOD);
+            // setIsFiltered(LOD.length > 0);
         } catch (error) {
             setData([]);
         } finally {
@@ -72,7 +72,7 @@ const LOD_Log = () => {
         fetchData({});
     }, [currentPage]);
 
-    // Handle clear Filter button
+    // Handle Filter button
     const clearFilter = async () => {
         setLODStatus("");
         setDateType("");
@@ -116,7 +116,7 @@ const LOD_Log = () => {
                 fromDate,
                 toDate,
                 "LOD",
-                nextPage + 1 
+                nextPage + 1
             );
 
             // Next page will displayed only if fetch data is not empty
@@ -135,25 +135,17 @@ const LOD_Log = () => {
     return (
         <div className={GlobalStyle.fontPoppins}>
             {/* Title */}
-            <h2 className={GlobalStyle.headingLarge}>Final Reminder List</h2>
+            <h2 className={GlobalStyle.headingLarge}>Letter of Demand Hold List</h2>
 
             {/* filters */}
             <div className={`${GlobalStyle.cardContainer} w-full`}>
 
                 <div className="flex items-center justify-end w-full space-x-6">
+                    <label className={GlobalStyle.dataPickerDate}>LOD Type</label>
                     <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
-                        <option value="" hidden>Status</option>
-                        <option value="Final Reminder">Final Reminder</option>
-                        <option value="Final Reminder Settle Pending">Final Reminder Settle Pending</option>
-                        <option value="Final Reminder Settle Open-Pending">Final Reminder Settle Open-Pending</option>
-                        <option value="Final Reminder Settle Active">Final Reminder Settle Active</option>
-                    </select>
-
-                    <select value={DateType} onChange={(e) => setDateType(e.target.value)} style={{ color: DateType === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
-                        <option value="" hidden>Date Type</option>
-                        <option value="created_date">Created Date</option>
-                        <option value="expire_date">Expire Date</option>
-                        <option value="last_response_date">Last Response Date</option>
+                        <option value="" hidden>LOD Type</option>
+                        <option value="Initial LOD">LOD</option>
+                        <option value="LOD Settle Pending">Final Reminder</option>
                     </select>
 
                     <label className={GlobalStyle.dataPickerDate}>Date</label>
@@ -199,13 +191,11 @@ const LOD_Log = () => {
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
-                            <th className={GlobalStyle.tableHeader}>Case ID</th>
+                            <th className={GlobalStyle.tableHeader}>Case No</th>
                             <th className={GlobalStyle.tableHeader}>Status</th>
-                            <th className={GlobalStyle.tableHeader}>LOD Batch No</th>
-                            <th className={GlobalStyle.tableHeader}>Notification Count</th>
-                            <th className={GlobalStyle.tableHeader}>Created DTM</th>
-                            <th className={GlobalStyle.tableHeader}>Expire DTM</th>
-                            <th className={GlobalStyle.tableHeader}>Response Updated Date</th>
+                            <th className={GlobalStyle.tableHeader}>LOD Type</th>
+                            <th className={GlobalStyle.tableHeader}>Hold By</th>
+                            <th className={GlobalStyle.tableHeader}>Hold DTM</th>
                             <th className={GlobalStyle.tableHeader}></th>
                         </tr>
                     </thead>
@@ -238,48 +228,18 @@ const LOD_Log = () => {
 
                                     </td>
                                     <td className={GlobalStyle.tableData}>
-                                        {log.ExpireDTM
-                                            ? new Date(log.ExpireDTM).toLocaleString("en-GB", {
-                                                year: "numeric",
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                second: "2-digit",
-                                                hour12: true,
-                                            })
-                                            : ""}
-
-                                    </td>
-                                    <td className={GlobalStyle.tableData}>
-                                        {log.LastResponse
-                                            ? new Date(log.LastResponse).toLocaleString("en-GB", {
-                                                year: "numeric",
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                second: "2-digit",
-                                                hour12: true,
-                                            })
-                                            : ""}
-
-                                    </td>
-                                    <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center space-x-2">
                                             <button
-                                                className={GlobalStyle.buttonIcon}
-                                                style={{ fontSize: "24px" }}
-                                                onClick={() => navigate(`/pages/LOD/CustomerResponse/${log.LODID}`)}
+                                                // onClick={fetchData}
+                                                className={GlobalStyle.buttonPrimary}
                                             >
-                                                <FaEdit />
+                                                Proceed
                                             </button>
                                             <button
-                                                className={GlobalStyle.buttonIcon}
-                                                style={{ fontSize: "24px" }}
-                                                onClick={() => navigate(`/pages/LOD/CustomerResponseReview/${log.LODID}`)}
+                                                // onClick={fetchData}
+                                                className={GlobalStyle.buttonPrimary}
                                             >
-                                                <FaEye />
+                                                Withdraw
                                             </button>
                                         </div>
                                     </td>
@@ -315,4 +275,4 @@ const LOD_Log = () => {
 };
 
 
-export default LOD_Log;
+export default Final_Reminder_LOD_Hold_List;

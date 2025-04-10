@@ -81,6 +81,7 @@ import LOD_Log from "../pages/LOD/LODLog";
 import FinalReminderList from "../pages/LOD/FinalReminderList";
 import CustomerResponse from "../pages/LOD/CustomerResponse";
 import CustomerResponseReview from "../pages/LOD/CustomerResponseReview";
+import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList";
 
 const Routers = () => {
   return (
@@ -622,6 +623,15 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<CustomerResponseReview />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/FinalReminderLODHoldList"
+        element={
+          <ProtectedRoute
+            element={<Final_Reminder_LOD_Hold_List />}
             allowedRoles={["superadmin"]}
           />
         }

@@ -34,7 +34,7 @@ const LOD_Log = () => {
     // validation for date
     const handleFromDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "error");
+            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "warning");
         } else if (toDate && date > toDate) {
             Swal.fire("Invalid Input", "'From' date cannot be later than the 'To' date.", "warning");
         } else {
@@ -46,7 +46,7 @@ const LOD_Log = () => {
     // validation for date
     const handleToDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "error");
+            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "warning");
         } else if (fromDate && date < fromDate) {
             Swal.fire("Invalid Input", "The 'To' date cannot be earlier than the 'From' date.", "warning");
         } else {
@@ -60,7 +60,6 @@ const LOD_Log = () => {
         try {
             const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage + 1);
             setData(LOD);
-            // setIsFiltered(LOD.length > 0);
         } catch (error) {
             setData([]);
         } finally {
@@ -68,6 +67,7 @@ const LOD_Log = () => {
         }
     };
 
+    // fetching case details everytime currentpage changes
     useEffect(() => {
         fetchData({});
     }, [currentPage]);
@@ -80,8 +80,7 @@ const LOD_Log = () => {
         setToDate("");
     };
 
-    // const HandleAddIncident = () => navigate("/incident/register");
-
+    // display loading animation when data is loading
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -90,6 +89,7 @@ const LOD_Log = () => {
         );
     }
 
+    // handle search
     const filteredData = data.filter((row) =>
         String(row.LODID).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -106,6 +106,7 @@ const LOD_Log = () => {
         }
     };
 
+    // handle next page
     const handleNextPage = async () => {
         setIsLoading(true);
         try {
@@ -116,9 +117,10 @@ const LOD_Log = () => {
                 fromDate,
                 toDate,
                 "LOD",
-                nextPage + 1 // backend pages are probably 1-indexed
+                nextPage + 1
             );
 
+            // Next page will displayed only if fetch data is not empty
             if (nextData.length > 0) {
                 setCurrentPage(nextPage);
                 setData(nextData);
@@ -133,8 +135,10 @@ const LOD_Log = () => {
 
     return (
         <div className={GlobalStyle.fontPoppins}>
+            {/* Title */}
             <h2 className={GlobalStyle.headingLarge}>LOD List</h2>
 
+            {/* filters */}
             <div className={`${GlobalStyle.cardContainer} w-full`}>
 
                 <div className="flex items-center justify-end w-full space-x-6">
@@ -153,6 +157,7 @@ const LOD_Log = () => {
                         <option value="last_response_date">Last Response Date</option>
                     </select>
 
+                    <label className={GlobalStyle.dataPickerDate}>Date</label>
                     <div className={GlobalStyle.datePickerContainer}>
                         <DatePicker
                             selected={fromDate}
@@ -176,6 +181,7 @@ const LOD_Log = () => {
 
             </div>
 
+            {/* Search bar */}
             <div className="mb-4 flex justify-start">
                 <div className={GlobalStyle.searchBarContainer}>
                     <input
@@ -189,6 +195,7 @@ const LOD_Log = () => {
                 </div>
             </div>
 
+            {/* table */}
             <div className={GlobalStyle.tableContainer}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
@@ -290,6 +297,7 @@ const LOD_Log = () => {
                 </table>
             </div>
 
+            {/* Page nevigation buttons */}
             <div className={GlobalStyle.navButtonContainer}>
                 <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
                     <FaArrowLeft />
