@@ -29,7 +29,7 @@ export default function FTL_LOD_Cus_Response_update({ isOpen, onClose }) {
         </div>
         <div >
           <div className="mb-9 ">
-            <label className={GlobalStyle.remarkTopic}>Remark :</label>
+            <label className={GlobalStyle.remarkTopic}>Response :</label>
             <textarea
               value={remark}
               onChange={handleRemarkChange}

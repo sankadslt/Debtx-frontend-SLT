@@ -15,12 +15,13 @@ Notes:
 
 import React, { useState, useEffect} from "react";
 import DatePicker from "react-datepicker";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import Direct_LOD from "../../assets/images/Direct_LOD.png";
+import Direct_LOD from "../../assets/images/incidents/Direct_LOD.png";
 import { List_incidents_Direct_LOD, Create_Task_Download_Direct_LOD_Sending, Forward_Direct_LOD, Create_Task_Forward_Direct_LOD, Open_Task_Count_Forward_Direct_LOD } from "../../services/distribution/distributionService.js";
 import Swal from "sweetalert2";
+import  { Tooltip } from "react-tooltip";
 
 export default function DirectLODSendingIncident() {
   // Table data exactly matching the image
@@ -84,7 +85,15 @@ export default function DirectLODSendingIncident() {
           account_no: item.Account_Num || "N/A",
           amount: item.Arrears || "N/A",
           source_type: item?.Source_Type || "N/A",
-          created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A"
+          created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric", // Ensures two-digit year (YY)
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true, // Keeps AM/PM format
+          }),
         };
       });
       setTableData(formattedData);
@@ -107,6 +116,7 @@ export default function DirectLODSendingIncident() {
         text: "No records to download.",
         icon: "warning",
         confirmButtonText: "OK",
+         confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -116,7 +126,8 @@ export default function DirectLODSendingIncident() {
         title: 'Warning',
         text: 'Missing Parameters',
         icon: 'warning',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
+         confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -126,6 +137,7 @@ export default function DirectLODSendingIncident() {
         text: "Both From Date and To Date must be selected together.",
         icon: "warning",
         confirmButtonText: "OK",
+         confirmButtonColor: "#f1c40f"
       });
       return;
     } 
@@ -141,7 +153,8 @@ export default function DirectLODSendingIncident() {
           title: 'Success',
           text: 'Task successfully created',
           icon: 'success',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          confirmButtonColor: "#28a745"
         });
       }
     }catch(error){
@@ -149,7 +162,9 @@ export default function DirectLODSendingIncident() {
         title: 'Error',
         text: 'Error creating task',
         icon: 'error',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
+        confirmButtonColor: "#d33"
+
       });
     }
   };
@@ -162,6 +177,7 @@ export default function DirectLODSendingIncident() {
         text: "Row not selected",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -172,6 +188,8 @@ export default function DirectLODSendingIncident() {
       icon: "info",
       showCancelButton: true,
       confirmButtonText: "Proceed",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
       cancelButtonText: "Cancel",
     });
     
@@ -183,6 +201,7 @@ export default function DirectLODSendingIncident() {
           text: "A task is already in progress.",
           icon: "warning",
           confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f"
         });
         return;
       }
@@ -193,6 +212,7 @@ export default function DirectLODSendingIncident() {
           text: response.data.message,
           icon: "success",
           confirmButtonText: "OK",
+          confirmButtonColor: "#28a745"
         });
         fetchData();
       }
@@ -203,6 +223,7 @@ export default function DirectLODSendingIncident() {
         text: error.message,
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -216,6 +237,7 @@ export default function DirectLODSendingIncident() {
           text: "No record selected.",
           icon: "warning",
           confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f"
         });
         return;
       }
@@ -225,6 +247,8 @@ export default function DirectLODSendingIncident() {
         icon: "info",
         showCancelButton: true,
         confirmButtonText: "Create Task",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
         cancelButtonText: "Cancel",
       });
 
@@ -236,6 +260,7 @@ export default function DirectLODSendingIncident() {
             text: "A task is already in progress.",
             icon: "warning",
             confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
           });
           return;
         }
@@ -252,6 +277,7 @@ export default function DirectLODSendingIncident() {
               text: "Successfully created task to forward the direct LOD incidents",
               icon: "success",
               confirmButtonText: "OK",
+              confirmButtonColor: "#28a745"
             });
           }
         } else {
@@ -263,6 +289,7 @@ export default function DirectLODSendingIncident() {
             text: "Successfully forwarded the direct LOD incidents",
             icon: "success",
             confirmButtonText: "OK",
+            confirmButtonColor: "#28a745"
           });
     
           fetchData();
@@ -275,6 +302,7 @@ export default function DirectLODSendingIncident() {
         text: "Internal server error",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -282,7 +310,13 @@ export default function DirectLODSendingIncident() {
   // validation for date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
+      
+       Swal.fire({
+                            title: "Error",
+                            text: "The 'From' date cannot be later than the 'To' date.",
+                            icon: "error",
+                            confirmButtonColor: "#d33", 
+                        });;
     } else {
       setError("");
       setFromDate(date);
@@ -292,7 +326,13 @@ export default function DirectLODSendingIncident() {
   // validation for date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
+      
+      Swal.fire({
+                            title: "Error",
+                            text: "The 'To' date cannot be earlier than the 'From' date.",
+                            icon: "error",
+                            confirmButtonColor: "#d33", 
+                        });
     } else {
       setError("");
       setToDate(date);
@@ -357,6 +397,7 @@ export default function DirectLODSendingIncident() {
         text: "Please select a Source Type or provide both From Date and To Date.",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -367,6 +408,7 @@ export default function DirectLODSendingIncident() {
         text: "Both From Date and To Date must be selected together.",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -382,6 +424,8 @@ export default function DirectLODSendingIncident() {
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: "Create Task",
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#d33",
             cancelButtonText: "Cancel",
           }).then((result) => {
             if (result.isConfirmed) {
@@ -400,6 +444,21 @@ export default function DirectLODSendingIncident() {
     }
   };
   
+  const handlefilterclear = async () => {
+    setFromDate(null);
+    setToDate(null);
+    setSelectedRows([]);
+    setSelectAllData(false);
+    setSearchQuery("");
+    setSelectedSource("");
+};
+
+// This useEffect will automatically reload the initial data when filters are cleared
+useEffect(() => {
+    if (fromDate === null && toDate === null && selectedSource === "") {
+        fetchData();
+    }
+}, [fromDate, toDate, selectedSource]);
   
   return (
 
@@ -410,36 +469,44 @@ export default function DirectLODSendingIncident() {
         </div>
       ) : (
       <div className={GlobalStyle.fontPoppins}>
-        <div className="flex justify-between items-center w-full">
-          <h1 className={`${GlobalStyle.headingLarge} m-0`}>
+        <div className="flex justify-between items-center w-full ">
+          <h1 className={`${GlobalStyle.headingLarge} mb-6`}>
             Direct LOD sending Incidents
           </h1>
-          <button
-            className={`${GlobalStyle.buttonPrimary}`}
+          
+        </div>
+          
+        <div className="flex justify-end items-center w-full mb-4"> 
+        <button
+            className={`${GlobalStyle.buttonPrimary} flex items-center`}
             onClick={()=>{handleCreateTaskForDownload({
               source_type: selectedSource, 
               fromDate: fromDate, 
               toDate: toDate
             })}}
           >
+            <FaDownload className="mr-2" />
             Create task and let me know
           </button>
         </div>
 
         {/* Filter Section */}
-        <div className="flex justify-end gap-10 my-12 items-center">
+        <div className="flex justify-end">
+        <div className={`${GlobalStyle.cardContainer}  items-center w-[70vw] mb-8 mt-8`}>
+          <div className="flex items-center gap-4 justify-end">
           {/* Source Dropdown */}
           <div className="flex items-center gap-4">
             <label>Source:</label>
             <select
-              className={GlobalStyle.inputText}
+              className={GlobalStyle.selectBox}
               value={selectedSource}
               onChange={(e) => setSelectedSource(e.target.value)}
+              style={{ color: selectedSource === "" ? "gray" : "black" }}
             >
-              <option value="">Select</option>
-              <option value="Pilot - Suspended">Pilot - Suspended</option>
-              <option value="Special">Special</option>
-              <option value="Product Terminate">Product Terminate</option>
+              <option value="" hidden>Select</option>
+              <option value="Pilot - Suspended" style={{ color: "black" }}>Pilot - Suspended</option>
+              <option value="Special" style={{ color: "black" }}>Special</option>
+              <option value="Product Terminate" style={{ color: "black" }}>Product Terminate</option>
             </select>
           </div>
 
@@ -450,14 +517,14 @@ export default function DirectLODSendingIncident() {
               selected={fromDate}
               onChange={handleFromDateChange}
               dateFormat="dd/MM/yyyy"
-              placeholderText="dd/MM/yyyy"
+              placeholderText="From"
               className={GlobalStyle.inputText}
             />
             <DatePicker
               selected={toDate}
               onChange={handleToDateChange}
               dateFormat="dd/MM/yyyy"
-              placeholderText="dd/MM/yyyy"
+              placeholderText="To"
               className={GlobalStyle.inputText}
             />
             {error && <span className={GlobalStyle.errorText}>{error}</span>}
@@ -470,6 +537,11 @@ export default function DirectLODSendingIncident() {
           >
             Filter
           </button>
+          <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+                        Clear
+            </button>
+          </div>
+        </div>
         </div>
 
         {/* Table Section */}
@@ -551,7 +623,7 @@ export default function DirectLODSendingIncident() {
                     </td>
 
                     <td className={GlobalStyle.tableData}>{row.account_no}</td>
-                    <td className={GlobalStyle.tableData}>
+                    <td className={GlobalStyle.tableCurrency}>
                       {new Intl.NumberFormat("en-US").format(row.amount)}
                     </td>
 
@@ -608,7 +680,7 @@ export default function DirectLODSendingIncident() {
               className={`${GlobalStyle.buttonPrimary} `} 
               onClick={() => navigate("/Distribution/filtered-incident")}
             >
-              ← Back
+              <FaArrowLeft className="mr-2" />
             </button>
         </div>
 

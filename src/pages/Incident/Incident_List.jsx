@@ -17,12 +17,13 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload  } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import { fetchIncidents } from "../../services/Incidents/incidentService";
 import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
+import { Tooltip } from "react-tooltip";
 
 const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -52,21 +53,56 @@ const Incident_List = () => {
         }
     };
 
-    const renderStatusIcon = (status) => {
+    const renderStatusIcon = (status , index) => {
         const iconPath = getStatusIcon(status);
         
         if (!iconPath) {
             return <span>{status}</span>;
         }
+        
+        const tooltipId = `tooltip-${index}`;
 
         return (
+            <div className="flex items-center gap-2">
             <img
                 src={iconPath}
                 alt={status}
                 className="w-6 h-6"
-                title={status}
+                data-tooltip-id={tooltipId} // Add tooltip ID to image
             />
+            {/* Tooltip component */}
+            <Tooltip id={tooltipId} place="bottom" effect="solid">
+                {status} {/* Tooltip text is the status */}
+            </Tooltip>
+        </div>
         );
+    };
+
+    const handleFromDateChange = (date) => {
+        if (toDate && date > toDate) {
+            Swal.fire({
+                title: "Error",
+                text: "From date cannot be after the To date.",
+                icon: "error",
+                confirmButtonColor: "#d33", 
+            });
+        } else {
+            setFromDate(date);
+        }
+        
+    };
+
+    const handleToDateChange = (date) => {
+        if (fromDate && date < fromDate) {
+            Swal.fire({
+                title: "Error",
+                text: "To date cannot be before the From date.",
+                icon: "error",
+                confirmButtonColor: "#d33", 
+            });
+        } else {
+            setToDate(date);
+        }
     };
 
     const fetchData = async (filters) => {
@@ -77,7 +113,13 @@ const Incident_List = () => {
             setIsFiltered(incidents.length > 0);
         } catch (error) {
             setIsFiltered(false);
-            Swal.fire("Error", error.message || "No incidents matching the criteria.", "error");
+           
+            Swal.fire({
+                title: "Error",
+                text: error.message || "No incidents matching the criteria.",
+                icon: "error",
+                confirmButtonColor: "#d33", 
+            });
         } finally {
             setIsLoading(false);
         }
@@ -86,7 +128,13 @@ const Incident_List = () => {
     const handleFilter = async () => {
         try {
             if (!fromDate || !toDate) {
-                Swal.fire("Error", "Both 'From' and 'To' dates are required.", "error");
+                
+                Swal.fire({
+                    title: "Error",
+                    text: "Both 'From' and 'To' dates are required.",
+                    icon: "error",
+                    confirmButtonColor: "#d33", 
+                });
                 return;
             }
             const filters = {
@@ -98,17 +146,44 @@ const Incident_List = () => {
             };
             await fetchData(filters);
         } catch (error) {
-            Swal.fire("Error", error.message || "No incidents matching the criteria", "error");
+           
+            Swal.fire({
+                title: "Error",
+                text: error.message || "No incidents matching the criteria.",
+                icon: "error",
+                confirmButtonColor: "#d33", 
+            });
         }
     };
 
+    const handlefilterclear = () => {
+        setStatus1("");
+        setStatus2("");
+        setStatus3("");
+        setFromDate(null);
+        setToDate(null);
+        fetchData({});
+    };
+
+
     const HandleCreateTask = async () => {
         if (!fromDate || !toDate) {
-            Swal.fire("Error", "Both 'From' and 'To' dates are required.", "error");
+            Swal.fire({
+                title: "Error",
+                text: "Both 'From' and 'To' dates are required.",
+                icon: "error",
+                confirmButtonColor: "#d33", 
+            });
             return;
         }
         if (!isFiltered) {
-            Swal.fire("Error", "Please apply filters that return data before creating a task.", "error");
+            
+            Swal.fire({
+                title: "Error",
+                text: "Please apply filters that return data before creating a task.",
+                icon: "error",
+                confirmButtonColor: "#d33", 
+            });
             return;
         }
 
@@ -129,9 +204,21 @@ const Incident_List = () => {
         setIsCreatingTask(true);
         try {
             const response = await Task_for_Download_Incidents(requestData);
-            Swal.fire("Success", `Task created successfully! Task ID: ${response.Task_Id}`, "success");
+            
+            Swal.fire({
+                title: "Success",
+                text: `Task created successfully! Task ID: ${response.Task_Id}`,
+                icon: "success",
+                confirmButtonColor: "#28a745", 
+            });
         } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
+            
+            Swal.fire({
+                title: "Error",
+                text: error.message || "Failed to create task.",
+                icon: "error",
+                confirmButtonColor: "#d33", 
+            });
         } finally {
             setIsCreatingTask(false);
         }
@@ -178,7 +265,7 @@ const Incident_List = () => {
 
     return (
         <div className={GlobalStyle.fontPoppins}>
-            <h2 className={GlobalStyle.headingLarge}>Incident Log</h2>
+            <h2 className={GlobalStyle.headingLarge}>Incident List</h2>
 
             <div className="flex justify-end mt-6">
                 <button onClick={HandleAddIncident} className={GlobalStyle.buttonPrimary}>
@@ -186,32 +273,37 @@ const Incident_List = () => {
                 </button>
             </div>
 
-            <div className="w-full mb-8 mt-8">
+            <div className= {`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
                 <div className="flex items-center justify-end w-full space-x-6">
-                    <select value={status1} onChange={(e) => setStatus1(e.target.value)} className={GlobalStyle.selectBox}>
-                        <option value="">Action Type</option>
-                        <option value="collect arrears">collect arrears</option>
-                        <option value="collect arrears and CPE">collect arrears and CPE</option>
-                        <option value="collect CPE">collect CPE</option>
+                    <select value={status1} onChange={(e) => setStatus1(e.target.value)} style={{ color: status1 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
+                        <option value="" hidden >Action Type</option>
+                        <option value="collect arrears" style={{ color: "black" }}>collect arrears</option>
+                        <option value="collect arrears and CPE" style={{ color: "black" }}>collect arrears and CPE</option>
+                        <option value="collect CPE" style={{ color: "black" }}>collect CPE</option>
                     </select>
 
-                    <select value={status2} onChange={(e) => setStatus2(e.target.value)} className={GlobalStyle.selectBox}>
-                        <option value="">Status</option>
-                        <option value="Incident Open">Incident Open</option>
-                        <option value="Incident Reject">Incident Reject</option>
+                    <select value={status2} onChange={(e) => setStatus2(e.target.value)} style={{ color: status2 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
+                        <option value="" hidden>Status</option>
+                        <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
+                        <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
                     </select>
 
-                    <select value={status3} onChange={(e) => setStatus3(e.target.value)} className={GlobalStyle.selectBox}>
-                        <option value="">Source Type</option>
-                        <option value="Pilot Suspended">Pilot Suspended</option>
-                        <option value="Product Terminate">Product Terminate</option>
-                        <option value="Special">Special</option>
+                    <select value={status3} onChange={(e) => setStatus3(e.target.value)} style={{ color: status3 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
+                        <option value="" hidden>Source Type</option>
+                        <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>
+                        <option value="Product Terminate"style={{ color: "black" }}>Product Terminate</option>
+                        <option value="Special" style={{ color: "black" }}>Special</option>
                     </select>
-
-                    <DatePicker selected={fromDate} onChange={setFromDate} dateFormat="dd/MM/yyyy" placeholderText="From Date" className={GlobalStyle.inputText} />
-                    <DatePicker selected={toDate} onChange={setToDate} dateFormat="dd/MM/yyyy" placeholderText="To Date" className={GlobalStyle.inputText} />
-
+                    
+                    <label className={GlobalStyle.dataPickerDate}>Date:</label>
+                    <DatePicker selected={fromDate} onChange={handleFromDateChange} dateFormat="dd/MM/yyyy" placeholderText="From " className={GlobalStyle.inputText} />
+                    <DatePicker selected={toDate} onChange={handleToDateChange} dateFormat="dd/MM/yyyy" placeholderText="To " className={GlobalStyle.inputText} />
+                   
                     <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
+                    <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+                        Clear 
+                    </button>
+                    
                 </div>
             </div>
 
@@ -219,7 +311,7 @@ const Incident_List = () => {
                 <div className={GlobalStyle.searchBarContainer}>
                     <input
                         type="text"
-                        placeholder="Search"
+                        placeholder=""
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className={GlobalStyle.inputSearch}
@@ -234,7 +326,7 @@ const Incident_List = () => {
                         <tr>
                             <th className={GlobalStyle.tableHeader}>ID</th>
                             <th className={GlobalStyle.tableHeader}>Status</th>
-                            <th className={GlobalStyle.tableHeader}>Account No.</th>
+                            <th className={GlobalStyle.tableHeader}>Account No</th>
                             <th className={GlobalStyle.tableHeader}>Action</th>
                             <th className={GlobalStyle.tableHeader}>Source Type</th>
                             <th className={GlobalStyle.tableHeader}>Created DTM</th>
@@ -252,12 +344,20 @@ const Incident_List = () => {
                                 >
                                     <td className={GlobalStyle.tableData}>{log.incidentID}</td>
                                     <td className={`${GlobalStyle.tableData} flex justify-center mt-2`}>
-                                        {renderStatusIcon(log.status)}
+                                        {renderStatusIcon(log.status , index)}
                                     </td>
                                     <td className={GlobalStyle.tableData}>{log.accountNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.action}</td>
                                     <td className={GlobalStyle.tableData}>{log.sourceType}</td>
-                                    <td className={GlobalStyle.tableData}>{log.createdDTM}</td>
+                                    <td className={GlobalStyle.tableData}>{new Date(log.createdDTM).toLocaleString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true,
+                                        })}</td>
                                 </tr>
                             ))
                         ) : (
@@ -286,10 +386,11 @@ const Incident_List = () => {
             <div className="flex justify-end mt-6">
                 <button 
                     onClick={HandleCreateTask} 
-                    className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                    className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
                     disabled={isCreatingTask}
-                >
-                    {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                >   
+                    <FaDownload className="mr-2" />
+                    {isCreatingTask ? 'Creating Tasks...' : '  Create task and let me know'}
                 </button>
             </div>
         </div>

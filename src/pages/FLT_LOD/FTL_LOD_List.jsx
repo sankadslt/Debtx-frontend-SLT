@@ -30,6 +30,12 @@ import FTL_LOD_Settle_Pending from "../../assets/images/FTL_LOD/FTL_LOD_Settle_P
 import FTL_LOD_Settle_Open_Pending from "../../assets/images/FTL_LOD/FTL_LOD_Settle_Open_Pending.svg";
 import FTL_LOD_Settle_Active from "../../assets/images/FTL_LOD/FTL_LOD_Settle_Active.svg";
 
+//button icons
+import CreateFtlIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/Create_FTL_LOD.png";
+import CreateSettlementIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/Create_Settlement.png";
+import ViewDetailsIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/View_Details.png";
+import CustomerResponseIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/Customer_Response.png";
+
 
 export default function FTLLODCaseList() {
 
@@ -57,7 +63,7 @@ export default function FTLLODCaseList() {
     // Filter state for Amount, Case ID, Status, and Date
     const [arrearsAmounts, setArrearsAmounts] = useState([]);
     const [filterCaseId, setFilterCaseId] = useState("");
- 
+
     const [userData, setUserData] = useState(null);
 
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -333,7 +339,7 @@ export default function FTLLODCaseList() {
             status: "",
         });
 
-        setFilteredCases([]); 
+        setFilteredCases([]);
     };
 
 
@@ -534,10 +540,65 @@ export default function FTLLODCaseList() {
                 return <img src={FTL_LOD_Settle_Active} alt="FTL LOD Settle Active" title="FTL LOD Settle Active" className="w-5 h-5" />;
 
             default:
-                return <span className="text-gray-500">wwwwwwwww</span>;
+                return <span className="text-gray-500"></span>;
         }
     };
 
+
+    const getActionIcons = (status, item) => {
+        const icons = [];
+
+        const pushIcon = (src, alt, onClickHandler,title) => {
+            icons.push(
+                <img
+                    key={alt}
+                    src={src}
+                    alt={alt}
+                    title={alt}
+                    className="w-6 h-6 mx-1 cursor-pointer"
+                    onClick={() => onClickHandler(item)}
+                />
+            );
+        };
+
+        switch (status) {
+            case "Pending FTL LOD":
+                pushIcon(CreateFtlIcon, "Create FTL", handleCreateFtl);
+                break;
+            case "Initial FTL LOD":
+                pushIcon(CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
+                pushIcon(CustomerResponseIcon, "Customer Response", handleCustomerResponse);
+                pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+                break;
+            case "FTL LOD settle pending":
+            case "FTL LOD settle open pending":
+            case "FTL LOD settle active":
+                pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+                break;
+            default:
+                return null;
+        }
+
+        return icons;
+    };
+
+
+
+    const handleCreateFtl = (item) => {
+        console.log("Create FTL for:", item);
+    };
+
+    const handleCreateSettlement = (item) => {
+        console.log("Create Settlement for:", item);
+    };
+
+    const handleCustomerResponse = (item) => {
+        console.log("Customer Response for:", item);
+    };
+
+    const handleViewDetails = (item) => {
+        console.log("View Details for:", item);
+    };
 
 
 
@@ -645,11 +706,13 @@ export default function FTLLODCaseList() {
                                 Account No
                             </th>
                             <th scope="col" className={GlobalStyle.tableHeader}>
-                                Expire Date
-                            </th>
-                            <th scope="col" className={GlobalStyle.tableHeader}>
                                 Amount
                             </th>
+
+                            <th scope="col" className={GlobalStyle.tableHeader}>
+                                Expire Date
+                            </th>
+
                             <th scope="col" className={GlobalStyle.tableHeader}>
 
                             </th>
@@ -667,30 +730,39 @@ export default function FTLLODCaseList() {
                                             : GlobalStyle.tableRowOdd
                                     }
                                 >
-                                    <td className={`${GlobalStyle.tableData} text-center text-black hover:underline cursor-pointer`}>
+                                    <td className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}>
                                         {item.case_id || "N/A"}
                                     </td>
 
-                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                                    {getStatusIcon(item.case_current_status) || "N/A"}
+                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center pt-8`}>
+                                        {getStatusIcon(item.case_current_status) || "N/A"}
                                     </td>
 
-                                    <td className={`${GlobalStyle.tableData} text-center`}>
+                                    <td className={`${GlobalStyle.tableData} `}>
                                         {item.account_no || "N/A"}
                                     </td>
 
-                                    <td className={`${GlobalStyle.tableData} text-center`}>
+                                    <td className={`${GlobalStyle.tableData} `}>
+                                        {item.current_arrears_amount || "N/A"}
+                                    </td>
+
+
+
+                                    <td className={`${GlobalStyle.tableData} `}>
                                         {item.ftl_lod && item.ftl_lod.length > 0 && item.ftl_lod[0].expire_date
                                             ? new Date(item.ftl_lod[0].expire_date).toLocaleDateString("en-GB")
                                             : "N/A"}
                                     </td>
 
                                     <td className={`${GlobalStyle.tableData} text-center`}>
-                                        {item.current_arrears_amount || "N/A"}
+                                        <div className="px-8 flex items-center gap-2">
+                                            <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+                                                {getActionIcons(item.case_current_status, item)}
+                                            </td>
+
+                                        </div>
+
                                     </td>
-
-                                    <td className={`${GlobalStyle.tableData} text-center`}></td>
-
                                 </tr>
                             ))
                         ) : (

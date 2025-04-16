@@ -13,14 +13,15 @@ Notes:
 */
 
 import DatePicker from "react-datepicker";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Import GlobalStyle
-import Reject_Pending from "../../assets/images/Reject_Pending.png";
+import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
 import { Create_Task_Download_Pending_Reject, Create_Task_Forward_F1_Filtered, Create_Task_Reject_F1_Filtered, Forward_F1_Filtered, List_F1_filtered_incidents, Open_Task_Count_Forward_F1_Filtered, Open_Task_Count_Reject_F1_Filtered, Reject_F1_Filtered } from "../../services/distribution/distributionService.js";
 import Swal from "sweetalert2";
+import  { Tooltip } from "react-tooltip";
 
 export default function RejectIncident() {
   const navigate = useNavigate();
@@ -78,7 +79,12 @@ export default function RejectIncident() {
   // validation for date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
+      Swal.fire({
+                      title: "Error",
+                      text: "The 'From' date cannot be later than the 'To' date.",
+                      icon: "error",
+                      confirmButtonColor: "#d33", 
+                  });;
     } else {
       setError("");
       setFromDate(date);
@@ -88,7 +94,12 @@ export default function RejectIncident() {
   // validation for date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
+      Swal.fire({
+                      title: "Error",
+                      text: "The 'To' date cannot be earlier than the 'From' date.",
+                      icon: "error",
+                      confirmButtonColor: "#d33", 
+                  });
     } else {
       setError("");
       setToDate(date);
@@ -154,6 +165,7 @@ export default function RejectIncident() {
           text: "Please select a Source Type or provide both From Date and To Date.",
           icon: "warning",
           confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f"
         });
         return;
       }
@@ -164,6 +176,7 @@ export default function RejectIncident() {
           text: "Both From Date and To Date must be selected together.",
           icon: "warning",
           confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f"
         });
         return;
       }
@@ -179,6 +192,8 @@ export default function RejectIncident() {
               icon: "warning",
               showCancelButton: true,
               confirmButtonText: "Create Task",
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#d33",
               cancelButtonText: "Cancel",
             }).then((result) => {
               if (result.isConfirmed) {
@@ -196,6 +211,14 @@ export default function RejectIncident() {
         setSearchQuery("")
       }
     };
+
+  const handleclearFilter = () => {
+    setFromDate(null);
+    setToDate(null);
+    setSelectedSource("");
+    fetchData();
+  }
+    
     
 
   const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
@@ -205,6 +228,7 @@ export default function RejectIncident() {
                 text: "No records to download.",
                 icon: "warning",
                 confirmButtonText: "OK",
+                confirmButtonColor: "#f1c40f"
               });
               return;
         }
@@ -214,7 +238,8 @@ export default function RejectIncident() {
             title: 'Warning',
             text: 'Missing Parameters',
             icon: 'warning',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            confirmButtonColor: "#f1c40f"
           });
         }
         else if ((fromDate && !toDate) || (!fromDate && toDate)) {
@@ -223,6 +248,7 @@ export default function RejectIncident() {
             text: "Both From Date and To Date must be selected together.",
             icon: "warning",
             confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
           });
           return;
         } else{
@@ -238,7 +264,8 @@ export default function RejectIncident() {
               title: 'Success',
               text: 'Task successfully created',
               icon: 'success',
-              confirmButtonText: 'OK'
+              confirmButtonText: 'OK',
+              confirmButtonColor: "#28a745"
             });
           }
         }catch(error){
@@ -246,7 +273,8 @@ export default function RejectIncident() {
             title: 'Error',
             text: 'Error creating task',
             icon: 'error',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            confirmButtonColor: "#d33"
           });
         }
         }
@@ -258,7 +286,8 @@ export default function RejectIncident() {
             title: 'Warning',
             text: 'Row not selected',
             icon: 'warning',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            confirmButtonColor: "#f1c40f"
           });
           return;
         }
@@ -271,6 +300,7 @@ export default function RejectIncident() {
                       text: "A task is already in progress.",
                       icon: "warning",
                       confirmButtonText: "OK",
+                      confirmButtonColor : "#f1c40f"
                     });
                     return;
             }
@@ -281,7 +311,8 @@ export default function RejectIncident() {
                 title: 'Success',
                 text: response.data.message,
                 icon: 'success',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                confirmButtonColor: "#28a745"
               });
               fetchData();
             }  
@@ -290,7 +321,8 @@ export default function RejectIncident() {
               title: 'Error',
               text: error.message,
               icon: 'error',
-              confirmButtonText: 'OK'
+              confirmButtonText: 'OK',
+              confirmButtonColor: "#d33"
             });
         } 
   }
@@ -304,6 +336,7 @@ export default function RejectIncident() {
             text: "No records to reject.",
             icon: "warning",
             confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
           });
           return;
         }
@@ -313,6 +346,8 @@ export default function RejectIncident() {
           icon: "info",
           showCancelButton: true,
           confirmButtonText: "Reject All",
+          confirmButtonColor: "#28a745",
+          cancelButtonColor: "#d33",
           cancelButtonText: "Cancel",
          });
 
@@ -325,6 +360,7 @@ export default function RejectIncident() {
                       text: "A task is already in progress.",
                       icon: "warning",
                       confirmButtonText: "OK",
+                      confirmButtonColor: "#f1c40f"
                   });
               return;
             }
@@ -338,7 +374,8 @@ export default function RejectIncident() {
                     title: 'Success',
                     text: 'Successfully created task to reject F1 filtered incidents',
                     icon: 'success',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: "#28a745"
                   });
                 }
             }else{
@@ -349,7 +386,8 @@ export default function RejectIncident() {
                 title: 'Success',
                 text: "Successfully rejected F1 filtered incidents",
                 icon: 'success',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                confirmButtonColor: "#28a745"
               });
               fetchData();
             }
@@ -359,7 +397,8 @@ export default function RejectIncident() {
           title: 'Error',
           text: "Internal server error",
           icon: 'error',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          confirmButtonColor: "#d33"
         });
       }   
     }
@@ -372,6 +411,7 @@ export default function RejectIncident() {
                text: "No records to move forward.",
                icon: "warning",
                confirmButtonText: "OK",
+               confirmButtonColor: "#f1c40f"
              });
              return;
         }
@@ -381,6 +421,8 @@ export default function RejectIncident() {
              icon: "info",
              showCancelButton: true,
              confirmButtonText: "Forward",
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#d33",
              cancelButtonText: "Cancel",
         });
 
@@ -393,6 +435,7 @@ export default function RejectIncident() {
                     text: "A task is already in progress.",
                     icon: "warning",
                     confirmButtonText: "OK",
+                    confirmButtonColor: "#f1c40f"
                 });
             return;
           }
@@ -407,7 +450,8 @@ export default function RejectIncident() {
                   title: 'Success',
                   text: 'Successfully created task to forward F1 filtered incidents',
                   icon: 'success',
-                  confirmButtonText: 'OK'
+                  confirmButtonText: 'OK',
+                  confirmButtonColor: "#28a745"
                 });
               }
           
@@ -419,7 +463,8 @@ export default function RejectIncident() {
               title: 'Success',
               text: "Successfully forwarded F1 filtered incidents",
               icon: 'success',
-              confirmButtonText: 'OK'
+              confirmButtonText: 'OK',
+              confirmButtonColor: "#28a745"
             });
             fetchData();
           }
@@ -429,7 +474,8 @@ export default function RejectIncident() {
           title: 'Error',
           text: error?.message,
           icon: 'error',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          confirmButtonColor: "#d33"
         });
       }   
     }
@@ -443,35 +489,43 @@ export default function RejectIncident() {
       ) : (
       <div className={GlobalStyle.fontPoppins}>
         <div className="flex justify-between items-center w-full">
-          <h1 className={`${GlobalStyle.headingLarge} m-0`}>
+          <h1 className={`${GlobalStyle.headingLarge} mb-4`}>
             Pending Reject Incidents
           </h1>
-          <button
-            className={`${GlobalStyle.buttonPrimary}`}
+          
+        </div>
+
+        <div className="flex justify-end items-center mb-4">
+        <button
+            className={`${GlobalStyle.buttonPrimary} flex items-center`}
             onClick={()=>{handleCreateTaskForDownload({
               source_type: selectedSource, 
               fromDate: fromDate, 
               toDate: toDate
             })}}
           >
+            <FaDownload className="mr-2" />
             Create task and let me know
           </button>
         </div>
 
         {/* Filter Section */}
-        <div className="flex justify-end gap-10 my-12 items-center">
+        <div  className="flex justify-end"> 
+        <div className= {`${GlobalStyle.cardContainer}  items-center w-[70vw] mb-8 mt-8`}>
           {/* Source Selection */}
+          <div className="flex items-center gap-4 justify-end">
           <div className="flex items-center gap-4">
             <label>Source:</label>
             <select
-              className={GlobalStyle.inputText}
-              value={selectedSource}
+              className={GlobalStyle.selectBox}
+              value={selectedSource} 
               onChange={(e) => setSelectedSource(e.target.value)}
+              style={{ color: selectedSource === "" ? "gray" : "black" }}
             >
-              <option value="">Select</option>
-              <option value="Pilot Suspended">Pilot Suspended</option>
-              <option value="Special">Special</option>
-              <option value="Product Terminate">Product Terminate</option>
+              <option value="" hidden>Select</option>
+              <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>
+              <option value="Special" style={{ color: "black" }}>Special</option>
+              <option value="Product Terminate" style={{ color: "black" }}>Product Terminate</option>
             </select>
           </div>
 
@@ -484,14 +538,14 @@ export default function RejectIncident() {
                   selected={fromDate}
                   onChange={handleFromDateChange}
                   dateFormat="dd/MM/yyyy"
-                  placeholderText="dd/MM/yyyy"
+                  placeholderText="From"
                   className={GlobalStyle.inputText}
                 />
                 <DatePicker
                   selected={toDate}
                   onChange={handleToDateChange}
                   dateFormat="dd/MM/yyyy"
-                  placeholderText="dd/MM/yyyy"
+                  placeholderText="To"
                   className={GlobalStyle.inputText}
                 />
               </div>
@@ -506,6 +560,12 @@ export default function RejectIncident() {
           >
             Filter
           </button>
+          <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+                        Clear
+            </button>
+
+          </div>
+        </div>
         </div>
 
         {/* Table Section */}
@@ -561,7 +621,7 @@ export default function RejectIncident() {
                         : "bg-gray-50 bg-opacity-50"
                     } border-b`}
                   >
-                    <td className={GlobalStyle.tableData}>
+                    <td className={GlobalStyle.tableData}  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                       <input
                         type="checkbox"
                         className={"rounded-lg"}
@@ -645,7 +705,7 @@ export default function RejectIncident() {
               className={`${GlobalStyle.buttonPrimary} `} 
               onClick={() => navigate("/Distribution/filtered-incident")}
             >
-              ← Back
+              <FaArrowLeft className="mr-2" />
             </button>
         </div>
 
@@ -668,7 +728,7 @@ export default function RejectIncident() {
               Move Forward
             </button>
             <button
-              className={`${GlobalStyle.buttonPrimary} ml-4`}
+              className={`${GlobalStyle.buttonRemove} ml-4`}
               onClick={handleRejectAll}
             >
               Reject All

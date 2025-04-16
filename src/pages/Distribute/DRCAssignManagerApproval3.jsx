@@ -9,7 +9,7 @@ Related Files: (routes)
 Notes: The following page conatins the codes */
 
 import { useState , useEffect } from "react";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -23,6 +23,7 @@ import { getLoggedUserId } from "/src/services/auth/authService.js";
 import one from "/src/assets/images/imagefor1.a.13(one).png";
 import Swal from "sweetalert2";
 import { use } from "react";
+import { Tooltip } from "react-tooltip";
 
 
 
@@ -43,15 +44,41 @@ export default function DRCAssignManagerApproval3() {
 
   // Handle date change
   const handlestartdatechange = (date) => {
-    setStartDate(date);
+
+
+    if (endDate && date > endDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Start date cannot be later than end date.",
+        confirmButtonColor: "#f1c40f",
+      });
+    
+    }
+    else {
+      setStartDate(date);
     if (endDate) checkdatediffrence(date, endDate);
+    }
+
   };
 
   const handleenddatechange = (date) => {
-    if (startDate) {
-      checkdatediffrence(startDate, date);
+    if (startDate && date < startDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "End date cannot be earlier than start date.",
+        confirmButtonColor: "#f1c40f",
+      });
+      
     }
-    setEndDate(date);
+    else {
+      if (startDate) {
+        checkdatediffrence(startDate, date);
+      }
+      setEndDate(date);
+
+    }
 
   }
 
@@ -174,6 +201,29 @@ export default function DRCAssignManagerApproval3() {
     } catch (error) {
       console.error("Error fetching DRC assign manager approval:", error);
     }
+  };
+
+  // Clear filters and reset state
+  const handlefilterClear = () => {
+    setDrcFilter("");
+    setStartDate(null);
+    setEndDate(null);
+    
+    const filterclear = async () => {
+      const userId = await getLoggedUserId();
+      const payload = {
+        approved_deligated_by: userId,
+      };
+      console.log("Request Payload:", payload);
+      try {
+        const response = await List_DRC_Assign_Manager_Approval(payload);
+        console.log("Response:", response);
+        setFilteredData(response);
+      } catch (error) {
+        console.error("Error fetching DRC assign manager approval:", error);
+      }
+    };
+    filterclear();
   };
   // Handle pagination
   const handlePrevNext = (direction) => {
@@ -514,72 +564,81 @@ console.log("Filtered Data:", filteredDataBySearch);
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Assigned DRC Summary</h1>
-      <div className="flex justify-between mt-16 mb-6">
-        <div className="flex justify-start mb-8">
-          <div className={GlobalStyle.searchBarContainer}>
-            <input
-              type="text"
-              placeholder=""
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={GlobalStyle.inputSearch}
-            />
-            <FaSearch className={GlobalStyle.searchBarIcon} />
-          </div>
-        </div>
+      <div className="flex justify-end ">
 
-        <div className="flex gap-10">
-          {" "}
-          <div className="flex gap-4 h-[35px] mt-2">
-            <select
-              className={GlobalStyle.selectBox}
-              value={drcFilter}
-              onChange={handleOnApproveTypeChange}
-            >
-              <option value="" hidden>
-                Select Approve Type
-              </option>
-              <option value="DRC Assign Approval">DRC Assign Approval </option>
-              <option value="DRC Re-Assign Approval">DRC Re-Assign Approval</option>
-              <option value="Case Withdrawal Approval">Case Withdrawal Approval</option>
-              <option value="Case Abandoned Approval">Case Abandoned Approval</option>
-              <option value="Case Write-Off Approval">Case Write-Off Approval</option>
-              <option value="Commission Approval">Commission Approval</option>
+        <div  className= {`${GlobalStyle.cardContainer}  w-[70vw] mt-6  `}>
+            <div className="flex gap-4">
+              {" "}
+              <div className="flex gap-4 h-[35px] ">
+                <select
+                  className={GlobalStyle.selectBox}
+                  value={drcFilter}
+                  onChange={handleOnApproveTypeChange}
+                  style={{ color: drcFilter === "" ? "gray" : "black" }}
+
+                >
+                  <option value="" hidden>
+                    Select Approve Type
+                  </option>
+                  <option value="DRC Assign Approval" style={{ color: "black" }}>DRC Assign Approval </option>
+                  <option value="DRC Re-Assign Approval" style={{ color: "black" }}>DRC Re-Assign Approval</option>
+                  <option value="Case Withdrawal Approval" style={{ color: "black" }}>Case Withdrawal Approval</option>
+                  <option value="Case Abandoned Approval" style={{ color: "black" }}>Case Abandoned Approval</option>
+                  <option value="Case Write-Off Approval" style={{ color: "black" }}>Case Write-Off Approval</option>
+                  <option value="Commission Approval" style={{ color: "black" }}>Commission Approval</option>
+                  
+
+                </select>
+              </div>
+                  <label className={GlobalStyle.dataPickerDate}  style={{ marginTop: '5px', display: 'block' }}>Date : </label>
+                  <DatePicker
+                    selected={startDate}
+                    onChange={handlestartdatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="From"
+                    className={GlobalStyle.inputText}
+                  />
+
+                  <DatePicker
+                    selected={endDate}
+                    onChange={handleenddatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="To"
+                    className={GlobalStyle.inputText}
+                  />
+                
               
-
-            </select>
-          </div>
-          <div className="flex flex-col items-center mb-4">
-            <div className={GlobalStyle.datePickerContainer}>
-              <label className={GlobalStyle.dataPickerDate}>Date </label>
-
-              <DatePicker
-                selected={startDate}
-                onChange={handlestartdatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/mm/yyyy"
-                className={GlobalStyle.inputText}
-              />
-
-              <DatePicker
-                selected={endDate}
-                onChange={handleenddatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/mm/yyyy"
-                className={GlobalStyle.inputText}
-              />
+              <button
+                onClick={applyFilters}
+                className={`${GlobalStyle.buttonPrimary} h-[35px] `}
+              >
+                Filter
+              </button>
+              <button
+                className={`${GlobalStyle.buttonRemove} h-[35px] `}
+                onClick={handlefilterClear}
+                >
+                  clear
+                </button>
             </div>
-          </div>
-          <button
-            onClick={applyFilters}
-            className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
-          >
-            Filter
-          </button>
         </div>
       </div>
 
       {/* Search Section */}
+
+      <div className="flex py-2 items-center justify-start gap-2 mt-2 mb-4">
+        <div className={GlobalStyle.searchBarContainer}>
+          <input
+            type="text"
+            placeholder=""  
+
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={GlobalStyle.inputSearch}
+          />
+          <FaSearch className={GlobalStyle.searchBarIcon} />
+        </div>
+      </div>
 
       {/* Table Section */}
       <div className={GlobalStyle.tableContainer}>
@@ -645,17 +704,16 @@ console.log("Filtered Data:", filteredDataBySearch);
                   </td>
                   <td className={GlobalStyle.tableData}>
                     <button onClick={() => onTableIconClick(item)}>
+
                       <img
                         src={one}
                         width={15}
                         height={15}
                         alt="Summary"
-                        style={{
-                          position: "relative",
-                          top: "4px",
-                          right: "2px",
-                        }}
+                        data-tooltip-id="my-tooltip"
+                        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                       />
+                      <Tooltip id="my-tooltip" place="bottom" content="View Parameters" />
                     </button>
                   </td>
                 </tr>
@@ -710,21 +768,23 @@ console.log("Filtered Data:", filteredDataBySearch);
         </label> */}
 
         {/* Approve Button */}
-        <button
-          onClick={onRejectButtonClick}
-          className={GlobalStyle.buttonPrimary}
-        >
-          Reject
-        </button>
+        
         <button
           onClick={onApproveButtonClick}
           className={GlobalStyle.buttonPrimary}
         >
           Approve
         </button>
+        <button
+          onClick={onRejectButtonClick}
+          className={GlobalStyle.buttonRemove}
+        >
+          Reject
+        </button>
       </div>
       <div>
-        <button onClick={onCreateTask} className={GlobalStyle.buttonPrimary}>
+        <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
+          <FaDownload className="mr-2" />
           Create Task and Let me know
         </button>
       </div>

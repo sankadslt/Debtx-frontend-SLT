@@ -21,10 +21,19 @@ import one from "/src/assets/images/imagefor1.a.13(one).png";
 import two from "/src/assets/images/imagefor1.a.13(two).png";
 import three from "/src/assets/images/imagefor1.a.13(three).png";
 import four from "/src/assets/images/imagefor1.a.13(four).png";
+import open from "/src/assets/images/distribution/Open.png";
+import Error from "/src/assets/images/distribution/Error.png";
+import Inprogress from "/src/assets/images/distribution/In_progress.png";
+import Complete from "/src/assets/images/distribution/Complete.png";
+import Ammend from "/src/assets/images/distribution/Ammend.png";
+import Distributed from "/src/assets/images/distribution/Distributed.png";
+import Manager from "/src/assets/images/distribution/Manager_Approved.png";
+import Aproval from "/src/assets/images/distribution/Forward_To_Approval.png";
+import Proceed from "/src/assets/images/distribution/Proceed.png";
 import { Tooltip } from "react-tooltip";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { fetchAllArrearsBands ,List_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution, Batch_Forward_for_Proceed } from "/src/services/case/CaseServices.js";
 import Swal from "sweetalert2";
@@ -44,18 +53,39 @@ const navigate = useNavigate();
 // Items per page
 const itemsPerPage1 = 4;
 
+
+
 // Handle start date change
 const handlestartdatechange = (date) => {
+  if(endDate && date > endDate) {
+    Swal.fire({
+      title: "Error",
+      text: "From date cannot be after the To date.",
+      icon: "error",
+      confirmButtonColor: "#d33",
+    });
+  setStartDate(null);
+  } else {
   setStartDate(date);
   if (endDate) checkdatediffrence(date, endDate);
+  }
 };
 
 const handleenddatechange = (date) => {
+  if (startDate && date < startDate) {
+    Swal.fire({
+      title: "Error",
+      text: "To date cannot be before the From date.",
+      icon: "error",
+      confirmButtonColor: "#d33",
+    });
+    setEndDate(null);
+  } else{
   if (startDate) {
     checkdatediffrence(startDate, date);
   }
   setEndDate(date);
-
+  }
 };
 
 // Check the date diffrence
@@ -175,6 +205,30 @@ const applyFilters = async () => {
  
   await fetchData();
 };
+
+// Clear filters and reset state
+const clearfilters = async () => {
+  setStartDate(null);
+  setEndDate(null);
+  setSelectedBand("");
+  setSelectedService("");
+
+  const fetchData = async () => {
+    try {
+      const response = await List_Case_Distribution_DRC_Summary({});
+      if (Array.isArray(response)) {
+        setFilteredData1(response); // Store the fetched data into state
+      }
+    } catch (error) {
+      console.error("API Fetch Error:", error);
+    }
+  };
+  await fetchData();
+  
+};
+
+
+  
 
 // Search Function: Filtering data based on search query
 const filteredSearchData1 = filteredData1.filter((row) =>
@@ -371,73 +425,81 @@ console.log("Page Data:", paginatedData1);
       
 
       {/* Filter Section */}
-      <div className="flex justify-between gap-10 mt-16 mb-5">
-        <div className="flex gap-10">
-          {" "}
-          <div className="flex gap-4 h-[35px] mt-2">
-            <select
-             className={`${GlobalStyle.selectBox}`}
-              value={selectedBand}
-              onChange={handlearrersBandChange}
-            
-            >
-              <option value="" hidden>
-                Arrears Band
-              </option>
-              {arrearsBands.map(({ key, value }) => (
-                <option key={key} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-4 h-[35px] mt-2">
-            <select
-              className={GlobalStyle.selectBox}
-              value={selectedService}
-              onChange={handlesrvicetypeChange}
-            >
-              <option value="" hidden>
-                Service Type
-              </option>
-              {services.map((service) => (  
-                <option key={service.drc_commision_rule} value={service.drc_commision_rule}>
-                  {service.drc_commision_rule}
-                </option>
-              ))}
+      <div className={`${GlobalStyle.cardContainer} w-full mt-6 `}>
+        <div className= "flex justify-between gap-10 ">
+            <div className="flex gap-10">
+              {" "}
+              <div className="flex gap-4 h-[35px] ">
+                <select
+                className={`${GlobalStyle.selectBox}`}
+                  value={selectedBand}
+                  onChange={handlearrersBandChange}
+                  style={{ color: selectedBand === "" ? "gray" : "black" }}
+                >
+                  <option value="" hidden>
+                    Arrears Band
+                  </option>
+                  {arrearsBands.map(({ key, value }) => (
+                    <option key={key} value={value} style={{ color: "black" }}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-4 h-[35px] ">
+                <select
+                  className={GlobalStyle.selectBox}
+                  value={selectedService}
+                  onChange={handlesrvicetypeChange}
+                  style={{ color: selectedService === "" ? "gray" : "black" }}
+                >
+                  <option value="" hidden>
+                    Service Type
+                  </option>
+                  {services.map((service) => (  
+                    <option key={service.drc_commision_rule} value={service.drc_commision_rule} style={{ color: "black" }}>
+                      {service.drc_commision_rule}
+                    </option>
+                  ))}
 
 
+                  
+                </select>
+              </div>
               
-            </select>
-          </div>
-          <div className="flex flex-col items-center mb-4">
-            <div className={GlobalStyle.datePickerContainer}>
-              <label className={GlobalStyle.dataPickerDate}>Date </label>
+                
+                  <label className={GlobalStyle.dataPickerDate} style={{ marginTop: '5px', display: 'block' }} >Date :  </label>
 
-              <DatePicker
-                selected={startDate}
-                onChange={handlestartdatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/mm/yyyy"
-                className={GlobalStyle.inputText}
-              />
+                  <DatePicker
+                    selected={startDate}
+                    onChange={handlestartdatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="From"
+                    className={GlobalStyle.inputText}
+                  />
 
-              <DatePicker
-                selected={endDate}
-                onChange={handleenddatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/mm/yyyy"
-                className={GlobalStyle.inputText}
-              />
+                  <DatePicker
+                    selected={endDate}
+                    onChange={handleenddatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="To"
+                    className={GlobalStyle.inputText}
+                  />
+                
+             
+              
+              <button
+                onClick={applyFilters}
+                className={`${GlobalStyle.buttonPrimary} h-[35px] `}
+              >
+                Filter
+              </button>
+
+              <button className={`${GlobalStyle.buttonRemove} h-[35px] `}  onClick={clearfilters}>
+                            Clear 
+                        </button>
             </div>
           </div>
-          <button
-            onClick={applyFilters}
-            className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
-          >
-            Filter
-          </button>
-        </div>
       </div>
 
       {/* Table*/}
@@ -463,7 +525,7 @@ console.log("Page Data:", paginatedData1);
             <tr className="border border-[#0087FF] border-opacity-15">
             <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Distributed Status</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "80px", fontSize : "10px" }}>Case Distribution Batch ID</th>
-              <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Created dtm</th>
+              
               <th className={GlobalStyle.tableHeader} style={{ width: "75px", fontSize : "10px" }}>Action Type</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "120px", fontSize : "10px" }}>DRC Commission Rule</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "120px",fontSize : "10px" }}>Arrears Band (Selection Rule)</th>
@@ -471,6 +533,7 @@ console.log("Page Data:", paginatedData1);
               {/* <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th> */}
               
               <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Approval</th>
+              <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Created dtm</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "60px",fontSize : "10px" }}></th>
             </tr>
           </thead>
@@ -487,26 +550,26 @@ console.log("Page Data:", paginatedData1);
                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
                     {item.status?.[0]?.crd_distribution_status === "Open" && (
                       <>
-                      <img data-tooltip-id={`tooltip-open-${index}`} data-tooltip-content="Open" src="/src/assets/images/open.png" width={20} height={15} alt="Open"  />
-                      <Tooltip id={`tooltip-open-${index}`} place="top"/>
+                      <img data-tooltip-id={`tooltip-open-${index}`} data-tooltip-content="Open" src= {open} width={20} height={15} alt="Open"  />
+                      <Tooltip id={`tooltip-open-${index}`} place="bottom"/>
                       </>
                     )}
                     {item.status?.[0]?.crd_distribution_status === "Complete" && (
                       <>
-                      <img data-tooltip-id={`tooltip-complete-${index}`} data-tooltip-content="Complete" src="/src/assets/images/complete.png" width={20} height={15} alt="Complete" />
-                      <Tooltip id={`tooltip-complete-${index}`} place="top"/>
+                      <img data-tooltip-id={`tooltip-complete-${index}`} data-tooltip-content="Complete" src={Complete} width={20} height={15} alt="Complete" />
+                      <Tooltip id={`tooltip-complete-${index}`} place="bottom"/>
                       </>
                     )}
                     {item.status?.[0]?.crd_distribution_status === "Error" && (
                       <>
-                      <img data-tooltip-id={`tooltip-error-${index}`} data-tooltip-content="Error" src="/src/assets/images/error.png" width={20} height={15} alt="Error" />
-                      <Tooltip id={`tooltip-error-${index}`} place="top"/>
+                      <img data-tooltip-id={`tooltip-error-${index}`} data-tooltip-content="Error" src={Error} width={20} height={15} alt="Error" />
+                      <Tooltip id={`tooltip-error-${index}`} place="bottom"/>
                       </>
                     )}
-                    {item.status?.[0]?.crd_distribution_status === "InProgress" && (
+                    {item.status?.[0]?.crd_distribution_status === "Inprogress" && (
                       <>
-                      <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content="InProgress" src="/src/assets/images/inprogress.png" width={20} height={15} alt="InProgress" />
-                      <Tooltip id={`tooltip-progress-${index}`} place="top"/>
+                      <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content="InProgress" src={Inprogress} width={20} height={15} alt="InProgress" />
+                      <Tooltip id={`tooltip-progress-${index}`} place="bottom"/>
                       </>
                     )}
                     </div>
@@ -514,21 +577,19 @@ console.log("Page Data:", paginatedData1);
                   <td className={GlobalStyle.tableData} style={{ width: "80px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {item.case_distribution_batch_id}
                   </td>
-                  <td className={GlobalStyle.tableData} style={{ width: "90px", whiteSpace: "nowrap" }}>
-                    {new Date(item.created_dtm).toLocaleDateString()}
-                  </td>
+                  
                   <td className={GlobalStyle.tableData} style={{ width: "75px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
                     {item.batch_seq_details?.[0]?.action_type === "distribution" && (
                       <>
-                      <img  data-tooltip-id={`tooltip-distribute-${index}`} data-tooltip-content="Distributed" src="/src/assets/images/distributed.png" width={20} height={15} alt="Distributed" />
-                      <Tooltip id={`tooltip-distribute-${index}`} place="top"/>
+                      <img  data-tooltip-id={`tooltip-distribute-${index}`} data-tooltip-content="Distributed" src={Distributed} width={20} height={15} alt="Distributed" />
+                      <Tooltip id={`tooltip-distribute-${index}`} place="bottom"/>
                       </>
                     )}
                     {item.batch_seq_details?.[0]?.action_type === "amend" && (
                       <>
-                      <img  data-tooltip-id={`tooltip-amend-${index}`} data-tooltip-content="Amend" src="/src/assets/images/amend.png" width={20} height={15} alt="Amend" />
-                      <Tooltip id={`tooltip-amend-${index}`} place="top"/>
+                      <img  data-tooltip-id={`tooltip-amend-${index}`} data-tooltip-content="Amend" src= {Ammend} width={20} height={15} alt="Amend" />
+                      <Tooltip id={`tooltip-amend-${index}`} place="bottom"/>
                       </>
                      
                     )}
@@ -554,44 +615,58 @@ console.log("Page Data:", paginatedData1);
                        <img data-tooltip-id={`tooltip-forward-${index}`} data-tooltip-content={item.forward_for_approvals_on
                           ? `Forward for Approval on: ${formatDate(item.forward_for_approvals_on)}`
                           : "Forward for Approval" } 
-                          src={forwardtoapproval} width={20} height={15} alt="Forward for Approval" />
-                        <Tooltip id={`tooltip-forward-${index}`} place="top"/>
+                          src={Aproval} width={20} height={15} alt="Forward for Approval" />
+                        <Tooltip id={`tooltip-forward-${index}`} place="bottom"/>
                       </>
                      
                     )}
                     {item.forward_for_approvals_on && !item.approved_on && item.proceed_on && (
                       <>
                       <img data-tooltip-id={`tooltip-proceed-${index}`} data-tooltip-content= {item.proceed_on ? `Proceeded on: ${formatDate(item.proceed_on)}` : "Proceed"}
-                      src={proceed} width={20} height={15} alt="Proceed" />
-                      <Tooltip id={`tooltip-proceed-${index}`} place="top"/>
+                      src={Proceed} width={20} height={15} alt="Proceed" />
+                      <Tooltip id={`tooltip-proceed-${index}`} place="bottom"/>
                       </>
                     )}
                     {item.forward_for_approvals_on && item.approved_on && item.proceed_on && (
                       <>
                       <img data-tooltip-id={`tooltip-manager-${index}`} data-tooltip-content={item.approved_on ? `Manager Approved on: ${formatDate(item.approved_on)}` : "Manager Approved" }
-                       src={managerapproved} width={20} height={15} alt="Manager Approved" />
-                      <Tooltip id={`tooltip-manager-${index}`} place="top"/>
+                       src={Manager} width={20} height={15} alt="Manager Approved" />
+                      <Tooltip id={`tooltip-manager-${index}`} place="bottom"/>
                       </>
                     )}
                     </div>
                   </td>
+                  <td className={GlobalStyle.tableData} style={{ width: "90px", whiteSpace: "nowrap" }}>
+                    {new Date(item.created_dtm).toLocaleString('en-GB', {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric", // Ensures two-digit year (YY)
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: true, // Keeps AM/PM format
+                      })}
+
+    
+                  </td>
+
                   <td className={GlobalStyle.tableData} style={{ width: "60px", textAlign: "center" }}>
                     <button data-tooltip-id= {`tooltip-summary-${index}`} onClick={() => handleonsummaryclick(item.case_distribution_batch_id)} >
                     <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "2px"}} />
                     </button>
-                    <Tooltip id={`tooltip-summary-${index}`} place="top" content="Distribution Summary"/>
+                    <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary"/>
 
 
                     <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_batch_id)} disabled= {!!item.forward_for_approvals_on }>
                     <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} />
                     </button>
-                    <Tooltip id={`tooltip-exchange-${index}`} place="top" content="Exchange case count"/>
+                    <Tooltip id={`tooltip-exchange-${index}`} place="bottom" content="Exchange case count"/>
 
 
                     <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_batch_id)} >
                     <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "2px" }} />
                     </button>
-                    <Tooltip id={`tooltip-full-${index}`} place="top" content="Distributed Full Summary"/>
+                    <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary"/>
 
 
                     <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_batch_id)} disabled={!!item.forward_for_approvals_on}>
@@ -603,7 +678,7 @@ console.log("Page Data:", paginatedData1);
                       style={{ position: "relative", top: "2px", left: "3px" }}
                     />
                   </button>
-                  <Tooltip id={`tooltip-${item.case_distribution_batch_id}`} place="top">
+                  <Tooltip id={`tooltip-${item.case_distribution_batch_id}`} place="bottom">
                     Forward for Approval
                   </Tooltip>
                   </td>
@@ -611,7 +686,7 @@ console.log("Page Data:", paginatedData1);
               ))
             ) : (
               <tr>
-                <td colSpan="10" className= {GlobalStyle.tableData}>No data available</td>
+                <td colSpan={9}  className= {GlobalStyle.tableData}  style={{ textAlign: 'center', verticalAlign: 'middle' }}  >No data available</td>
               </tr>
             )}
           </tbody>
@@ -648,8 +723,9 @@ console.log("Page Data:", paginatedData1);
         {" "}
         <button
           onClick={handlecreatetaskandletmeknow}
-          className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
+          className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2 flex items-center`}
         >
+          <FaDownload className="mr-2" />
           Create task and let me know
         </button>
       </div>

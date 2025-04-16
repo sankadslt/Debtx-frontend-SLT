@@ -65,11 +65,11 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Incident List", 
       roles: ["superadmin", "admin", "user"], 
       subItems: [
-        { icon: CgEditFade, label: " Register Accounts", link: "/Incident/Incident_List", roles: ["superadmin", "admin"], subItems: [
-          {icon:CgEditFade, label:"Bulk", link:"/Incident/Incident_List", roles:["superadmin", "admin"]},
+        { icon: CgEditFade, label: " Register Accounts",  roles: ["superadmin", "admin"], subItems: [
+          {icon:CgEditFade, label:"Bulk", link:"/incident/upload-log", roles:["superadmin", "admin"]},
           {icon:CgEditFade, label:"Individual", link:"/Incident/Incident_List", roles:["superadmin", "admin"]}, ] },
-        { icon: CgEditFade, label: "New Reg Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "Filtered Incidents", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "New Reg Incidents", link: "", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "Filtered Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Bulk Upload History", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Rejected log", link: "/Distribution/reject-incident-log", roles: ["superadmin", "admin"] },
       ],
@@ -95,7 +95,7 @@ const Sidebar = ({ onHoverChange }) => {
         },
         { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "Litigation", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Dispute", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, 
           label: "Disposed List", 
@@ -150,9 +150,9 @@ const Sidebar = ({ onHoverChange }) => {
           label: "FTL LOD Dummy",
           subItems: [
             { icon: CgEditFade, label: "3.1 - FTL LOD Case List", link: "/pages/flt-lod/ftl-lod-list", roles: ["superadmin", "admin"] },
-            { icon: CgEditFade, label: "3.1.1 sup - FTL LOD creation", link: "/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)", roles: ["superadmin", "admin"] },
-            { icon: CgEditFade, label: "3.1.2 sup - FTL LOD creation", link: "/dashboard", roles: ["superadmin", "admin"] },
-            { icon: CgEditFade, label: "3.2 - FTL LOD Case details", link: "/dashboard", roles: ["superadmin", "admin"] }
+            { icon: CgEditFade, label: "3.1.1 sup - (preview-of-ftl-lod)FTL LOD creation", link: "/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "3.1.2 sup - (change details form)FTL LOD creation", link: "/pages/flt-lod/ftl-lod-change-details-form", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "3.2 - FTL LOD case details", link: "/pages/flt-lod/ftl-lod-case-details", roles: ["superadmin", "admin"] }
           ],
         },
         {
