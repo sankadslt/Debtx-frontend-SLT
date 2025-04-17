@@ -5,7 +5,7 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/FTL_LOD/FTL_LODServices";
 
-const CustomerResponseReview = () => {
+const FTL_LOD_Case_Details = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [currentPageSettlementPlans, setCurrentPageSettlementPlans] = useState(0);
     const [currentPagePaymentDetails, setCurrentPagePaymentDetails] = useState(0);
@@ -109,7 +109,7 @@ const CustomerResponseReview = () => {
     return (
         <div className={GlobalStyle.fontPoppins}>
             {/* Title */}
-            <h2 className={GlobalStyle.headingLarge}>Customer Response</h2>
+            <h2 className={GlobalStyle.headingLarge}>Case Details</h2>
 
             {/* Case details card */}
             <div className="flex gap-4 mt-4 justify-center">
@@ -420,8 +420,8 @@ const CustomerResponseReview = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
-                    onClick={handleBackButton}
+                    onClick={() => navigate(-1)}
+                    className={`${GlobalStyle.buttonPrimary} `}
                 >
                     <FaArrowLeft />
                 </button>
@@ -432,4 +432,4 @@ const CustomerResponseReview = () => {
 
 };
 
-export default CustomerResponseReview;
+export default FTL_LOD_Case_Details;

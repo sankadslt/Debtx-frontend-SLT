@@ -152,7 +152,7 @@ const Sidebar = ({ onHoverChange }) => {
             { icon: CgEditFade, label: "3.1 - FTL LOD Case List", link: "/pages/flt-lod/ftl-lod-list", roles: ["superadmin", "admin"] },
             { icon: CgEditFade, label: "3.1.1 sup - (preview-of-ftl-lod)FTL LOD creation", link: "/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)", roles: ["superadmin", "admin"] },
             { icon: CgEditFade, label: "3.1.2 sup - (change details form)FTL LOD creation", link: "/pages/flt-lod/ftl-lod-change-details-form", roles: ["superadmin", "admin"] },
-            { icon: CgEditFade, label: "3.2 - FTL LOD case details", link: "/pages/flt-lod/ftl-lod-case-details", roles: ["superadmin", "admin"] }
+            //{ icon: CgEditFade, label: "3.2 - FTL LOD case details", link: "/pages/flt-lod/ftl-lod-case-details", roles: ["superadmin", "admin"] }
           ],
         },
         {

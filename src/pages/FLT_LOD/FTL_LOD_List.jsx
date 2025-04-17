@@ -13,8 +13,10 @@ import { AiFillEye } from "react-icons/ai";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import DatePicker from "react-datepicker";
 //import { fetchAllArrearsBands, listHandlingCasesByDRC } from "../../services/case/CaseService";
-
 import { useNavigate } from "react-router-dom";
+
+
+
 //import { getLoggedUserId } from "../../services/auth/authService.js";
 import Swal from 'sweetalert2';
 import FTL_LOD_Cus_Response_update from "./FTL_LOD_Cus_Response_update.jsx";
@@ -66,6 +68,7 @@ export default function FTLLODCaseList() {
 
     const [userData, setUserData] = useState(null);
 
+
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [filters, setFilters] = useState({
         arrearsAmount: "",
@@ -74,6 +77,7 @@ export default function FTLLODCaseList() {
         status: "",
     });
 
+    const [selectedItem, setSelectedItem] = useState(null);
 
     // const loadUser = async () => {
     //     let token = localStorage.getItem("accessToken");
@@ -529,15 +533,15 @@ export default function FTLLODCaseList() {
     const getStatusIcon = (status) => {
         switch (status) {
             case "Pending FTL LOD":
-                return <img src={Pending_FTL_LOD} alt="Pending FTL LOD" title="Pending FTL LOD" className="w-5 h-5" />;
-            case "Initial FTL LOD":
-                return <img src={Initial_FTL_LOD} alt="Initial FTL LOD" title="Initial FTL LOD" className="w-5 h-5" />;
+                return <img src={Pending_FTL_LOD} alt="Pending FTL LOD" title="Pending FTL LOD" className="w-6 h-6" />;
+            case "Initial FLT LOD":
+                return <img src={Initial_FTL_LOD} alt="Initial FTL LOD" title="Initial FTL LOD" className="w-6 h-6" />;
             case "FTL LOD Settle Pending":
-                return <img src={FTL_LOD_Settle_Pending} alt="FTL LOD Settle Pending" title="FTL LOD Settle Pending" className="w-5 h-5" />;
+                return <img src={FTL_LOD_Settle_Pending} alt="FTL LOD Settle Pending" title="FTL LOD Settle Pending" className="w-6 h-6" />;
             case "FTL LOD Settle Open-Pending":
-                return <img src={FTL_LOD_Settle_Open_Pending} alt="FTL LOD Settle Open-Pending" title="FTL LOD Settle Open-Pending" className="w-5 h-5" />;
-            case "FTL LOD Settle Active":
-                return <img src={FTL_LOD_Settle_Active} alt="FTL LOD Settle Active" title="FTL LOD Settle Active" className="w-5 h-5" />;
+                return <img src={FTL_LOD_Settle_Open_Pending} alt="FTL LOD Settle Open-Pending" title="FTL LOD Settle Open-Pending" className="w-6 h-6" />;
+            case "FTL LOD Settle Active":
+                return <img src={FTL_LOD_Settle_Active} alt="FTL LOD Settle Active" title="FTL LOD Settle Active" className="w-6 h-6" />;
 
             default:
                 return <span className="text-gray-500"></span>;
@@ -548,14 +552,14 @@ export default function FTLLODCaseList() {
     const getActionIcons = (status, item) => {
         const icons = [];
 
-        const pushIcon = (src, alt, onClickHandler,title) => {
+        const pushIcon = (src, alt, onClickHandler, title) => {
             icons.push(
                 <img
                     key={alt}
                     src={src}
                     alt={alt}
                     title={alt}
-                    className="w-6 h-6 mx-1 cursor-pointer"
+                    className="w-6 h-6  cursor-pointer"
                     onClick={() => onClickHandler(item)}
                 />
             );
@@ -565,14 +569,22 @@ export default function FTLLODCaseList() {
             case "Pending FTL LOD":
                 pushIcon(CreateFtlIcon, "Create FTL", handleCreateFtl);
                 break;
-            case "Initial FTL LOD":
+            case "Initial FLT LOD":
                 pushIcon(CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
                 pushIcon(CustomerResponseIcon, "Customer Response", handleCustomerResponse);
                 pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
                 break;
-            case "FTL LOD settle pending":
-            case "FTL LOD settle open pending":
-            case "FTL LOD settle active":
+            case "FTL LOD Settle Pending":
+                pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+                break;
+            case "FTL LOD Settle Open-Pending":
+                pushIcon(CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
+                pushIcon(CustomerResponseIcon, "Customer Response", handleCustomerResponse);
+                pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+                break;
+            case "FTL LOD Settle Active":
+                pushIcon(CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
+                pushIcon(CustomerResponseIcon, "Customer Response", handleCustomerResponse);
                 pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
                 break;
             default:
@@ -593,10 +605,13 @@ export default function FTLLODCaseList() {
     };
 
     const handleCustomerResponse = (item) => {
+        setSelectedItem(item);
+        setIsPopupOpen(true);
         console.log("Customer Response for:", item);
     };
 
     const handleViewDetails = (item) => {
+        navigate(`/pages/flt-lod/ftl-lod-case-details/${item.case_id}`);
         console.log("View Details for:", item);
     };
 
@@ -604,6 +619,7 @@ export default function FTLLODCaseList() {
 
 
     return (
+
         <div className={GlobalStyle.fontPoppins}>
             {/* Title */}
             <h1 className={GlobalStyle.headingLarge}>FTL LOD List </h1>
@@ -620,10 +636,10 @@ export default function FTLLODCaseList() {
                     >
                         <option value="">Status</option>
                         <option value="Pending FTL LOD">Pending FTL LOD</option>
-                        <option value="Initial FTL LOD">Initial FTL LOD</option>
+                        <option value="Initial FLT LOD">Initial FLT LOD</option>
                         <option value="FTL LOD Settle Pending">FTL LOD Settle Pending</option>
                         <option value="FTL LOD Settle Open-Pending">FTL LOD Settle Open-Pending</option>
-                        <option value="FTL LOD Settle Active">FTL LOD Settle Active</option>
+                        <option value="FTL LOD Settle Active">FTL LOD Settle Active</option>
                     </select>
 
                     <select
@@ -730,11 +746,14 @@ export default function FTLLODCaseList() {
                                             : GlobalStyle.tableRowOdd
                                     }
                                 >
-                                    <td className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}>
+                                    <td
+                                        className={`${GlobalStyle.tableData} text-black hover:underline cursor-pointer`}
+                                        onClick={() => navigate(`/pages/flt-lod/ftl-lod-case-details/${item.case_id}`)}
+                                    >
                                         {item.case_id || "N/A"}
                                     </td>
 
-                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center pt-8`}>
+                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center pt-6`}>
                                         {getStatusIcon(item.case_current_status) || "N/A"}
                                     </td>
 
@@ -742,12 +761,15 @@ export default function FTLLODCaseList() {
                                         {item.account_no || "N/A"}
                                     </td>
 
-                                    <td className={`${GlobalStyle.tableData} `}>
-                                        {item.current_arrears_amount || "N/A"}
+                                    <td className={GlobalStyle.tableCurrency}>
+                                        {item?.current_arrears_amount
+                                            ? item.current_arrears_amount.toLocaleString("en-LK", {
+                                                style: "currency",
+                                                currency: "LKR",
+                                            })
+                                            : "N/A"}
                                     </td>
-
-
-
+ 
                                     <td className={`${GlobalStyle.tableData} `}>
                                         {item.ftl_lod && item.ftl_lod.length > 0 && item.ftl_lod[0].expire_date
                                             ? new Date(item.ftl_lod[0].expire_date).toLocaleDateString("en-GB")
@@ -755,8 +777,8 @@ export default function FTLLODCaseList() {
                                     </td>
 
                                     <td className={`${GlobalStyle.tableData} text-center`}>
-                                        <div className="px-8 flex items-center gap-2">
-                                            <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+                                        <div className=" flex items-center gap-2 justify-center">
+                                            <td className={`${GlobalStyle.tableData} flex justify-center items-center space-x-10`}>
                                                 {getActionIcons(item.case_current_status, item)}
                                             </td>
 
@@ -804,10 +826,16 @@ export default function FTLLODCaseList() {
             >
                 <FaArrowLeft />
             </button>
-            <FaEdit
-                onClick={() => setIsPopupOpen(true)}
-            />
-            <FTL_LOD_Cus_Response_update isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+
+            {/* Render the popup when needed */}
+            {isPopupOpen && selectedItem && (
+                <FTL_LOD_Cus_Response_update
+                    isOpen={isPopupOpen}
+                    onClose={() => setIsPopupOpen(false)}
+                    selectedItem={selectedItem}
+                />
+            )}
+
         </div >
     );
 }
