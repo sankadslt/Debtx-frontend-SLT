@@ -24,12 +24,7 @@ import { case_details_for_lod_final_reminder } from "../../services/LOD/LOD.js";
 
 const CustomerResponse = () => {
     const [currentPage, setCurrentPage] = useState(0);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [fromDate, setFromDate] = useState(null);
-    const [toDate, setToDate] = useState(null);
-    const [LODStatus, setLODStatus] = useState("");
-    const [DateType, setDateType] = useState("");
-    const [data, setData] = useState([]);
+    const [LODdata, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [ResponseType, setResponseType] = useState("");
     const [ResponseRemark, setResponseRemark] = useState("");
@@ -73,10 +68,10 @@ const CustomerResponse = () => {
         try {
             console.log(caseId);
             const CaseDetails = await case_details_for_lod_final_reminder(caseId);
-            setData(CaseDetails);
+            setLODData(CaseDetails);
             console.log(CaseDetails.lod_response);
         } catch (error) {
-            setData([]);
+            setLODData([]);
         } finally {
             setIsLoading(false);
         }
@@ -96,7 +91,7 @@ const CustomerResponse = () => {
     }
 
     // variables need for table
-    const lodResponse = data.lod_response || [];
+    const lodResponse = LODdata.lod_response || [];
     const pages = Math.ceil(lodResponse.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
@@ -115,7 +110,7 @@ const CustomerResponse = () => {
     };
 
     const handleBackButton = () => {
-        if (data.current_document_type === "LOD") {
+        if (LODdata.current_document_type === "LOD") {
             navigate("/pages/LOD/LODLog");
         } else {
             navigate("/pages/LOD/FinalReminderList");
@@ -134,24 +129,24 @@ const CustomerResponse = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Case ID</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{data.case_id}</div>
+                            <div className="table-cell px-4 py-2">{LODdata.case_id}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Customer Ref</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{data.customer_ref}</div>
+                            <div className="table-cell px-4 py-2">{LODdata.customer_ref}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Account no</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{data.account_no}</div>
+                            <div className="table-cell px-4 py-2">{LODdata.account_no}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {data?.arrears_amount &&
-                                    data.arrears_amount.toLocaleString("en-LK", {
+                                {LODdata?.arrears_amount &&
+                                    LODdata.arrears_amount.toLocaleString("en-LK", {
                                         style: "currency",
                                         currency: "LKR",
                                     })
@@ -162,8 +157,8 @@ const CustomerResponse = () => {
                             <div className="table-cell px-4 py-2 font-bold">Last Payment Date</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {data?.last_payment_date &&
-                                    new Date(data.last_payment_date).toLocaleString("en-GB", {
+                                {LODdata?.last_payment_date &&
+                                    new Date(LODdata.last_payment_date).toLocaleString("en-GB", {
                                         year: "numeric",
                                         month: "2-digit",
                                         day: "2-digit",
@@ -276,7 +271,7 @@ const CustomerResponse = () => {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="6" className="text-center py-4">
+                                        <td colSpan="3" className="text-center py-4">
                                             No data matching the criteria.
                                         </td>
                                     </tr>

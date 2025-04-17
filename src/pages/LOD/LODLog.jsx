@@ -27,7 +27,7 @@ const LOD_Log = () => {
     const [toDate, setToDate] = useState(null);
     const [LODStatus, setLODStatus] = useState("");
     const [DateType, setDateType] = useState("");
-    const [data, setData] = useState([]);
+    const [LODdata, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -59,9 +59,9 @@ const LOD_Log = () => {
         setIsLoading(true);
         try {
             const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage + 1);
-            setData(LOD);
+            setLODData(LOD);
         } catch (error) {
-            setData([]);
+            setLODData([]);
         } finally {
             setIsLoading(false);
         }
@@ -90,7 +90,7 @@ const LOD_Log = () => {
     }
 
     // handle search
-    const filteredData = data.filter((row) =>
+    const filteredData = LODdata.filter((row) =>
         String(row.LODID).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.LODBatchNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -123,7 +123,7 @@ const LOD_Log = () => {
             // Next page will displayed only if fetch data is not empty
             if (nextData.length > 0) {
                 setCurrentPage(nextPage);
-                setData(nextData);
+                setLODData(nextData);
             }
         } catch (error) {
             Swal.fire("Error", "Failed to load next page.", "error");
@@ -288,7 +288,7 @@ const LOD_Log = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center py-4">
+                                <td colSpan="8" className="text-center py-4">
                                     No data matching the criteria.
                                 </td>
                             </tr>

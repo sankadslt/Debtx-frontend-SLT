@@ -23,7 +23,7 @@ const CustomerResponseReview = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [currentPageSettlementPlans, setCurrentPageSettlementPlans] = useState(0);
     const [currentPagePaymentDetails, setCurrentPagePaymentDetails] = useState(0);
-    const [data, setData] = useState([]);
+    const [LODdata, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const { caseId } = useParams(); // Get the case_id from the URL parameters
     const rowsPerPage = 5; // Number of rows per page
@@ -34,9 +34,9 @@ const CustomerResponseReview = () => {
         setIsLoading(true);
         try {
             const CaseDetails = await Case_Details_Settlement_LOD_FTL_LOD(caseId);
-            setData(CaseDetails);
+            setLODData(CaseDetails);
         } catch (error) {
-            setData([]);
+            setLODData([]);
         } finally {
             setIsLoading(false);
         }
@@ -56,7 +56,7 @@ const CustomerResponseReview = () => {
     }
 
     // variables need for response history table
-    const lodResponse = data.lod_response || [];
+    const lodResponse = LODdata.lod_response || [];
     const pagesResponseHistory = Math.ceil(lodResponse.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
@@ -75,7 +75,7 @@ const CustomerResponseReview = () => {
     };
 
     // varibles need for settlement plane table
-    const settlementPlans = data.settlement_plans || [];
+    const settlementPlans = LODdata.settlement_plans || [];
     const pagesSettlementPlans = Math.ceil(settlementPlans.length / rowsPerPage);
     const startIndexSettlementPlans = currentPageSettlementPlans * rowsPerPage;
     const endIndexSettlementPlans = startIndexSettlementPlans + rowsPerPage;
@@ -94,7 +94,7 @@ const CustomerResponseReview = () => {
     };
 
     // variables need for payment  details table
-    const paymentDetails = data.payment_details || [];
+    const paymentDetails = LODdata.payment_details || [];
     const pagesPaymentDetails = Math.ceil(paymentDetails.length / rowsPerPage);
     const startIndexPaymentDetails = currentPagePaymentDetails * rowsPerPage;
     const endIndexPaymentDetails = startIndexPaymentDetails + rowsPerPage;
@@ -113,7 +113,7 @@ const CustomerResponseReview = () => {
     };
 
     const handleBackButton = () => {
-        if (data.current_document_type === "LOD") {
+        if (LODdata.current_document_type === "LOD") {
             navigate("/pages/LOD/LODLog");
         } else {
             navigate("/pages/LOD/FinalReminderList");
@@ -132,24 +132,24 @@ const CustomerResponseReview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Case ID</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{data.case_id}</div>
+                            <div className="table-cell px-4 py-2">{LODdata.case_id}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Customer Ref</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{data.customer_ref}</div>
+                            <div className="table-cell px-4 py-2">{LODdata.customer_ref}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Account no</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{data.account_no}</div>
+                            <div className="table-cell px-4 py-2">{LODdata.account_no}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {data?.arrears_amount &&
-                                    data.arrears_amount.toLocaleString("en-LK", {
+                                {LODdata?.arrears_amount &&
+                                    LODdata.arrears_amount.toLocaleString("en-LK", {
                                         style: "currency",
                                         currency: "LKR",
                                     })
@@ -160,8 +160,8 @@ const CustomerResponseReview = () => {
                             <div className="table-cell px-4 py-2 font-bold">Last Payment Date</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {data?.last_payment_date &&
-                                    new Date(data.last_payment_date).toLocaleString("en-GB", {
+                                {LODdata?.last_payment_date &&
+                                    new Date(LODdata.last_payment_date).toLocaleString("en-GB", {
                                         year: "numeric",
                                         month: "2-digit",
                                         day: "2-digit",
