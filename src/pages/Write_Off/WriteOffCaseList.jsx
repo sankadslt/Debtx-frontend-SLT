@@ -140,7 +140,8 @@ const WriteOffCaseList = () => {
       <h1 className={GlobalStyle.headingLarge}>Write-Off Case List</h1>
 
       {/* Filter Section */}
-      <div className={`${GlobalStyle.cardContainer} w-full`}>
+      <div className="flex justify-end ">
+      <div className={`${GlobalStyle.cardContainer}  w-full   `}>
         <div className="flex gap-4 justify-end">
           <div className={GlobalStyle.datePickerContainer}>
             <label className={GlobalStyle.dataPickerDate}>Date : </label>
@@ -172,7 +173,9 @@ const WriteOffCaseList = () => {
         </div>
       </div>
 
+
       {error && <div className="text-red-500 mb-4">{error}</div>}
+      </div>
 
       {/* Search Bar */}
       <div className="mb-4 flex justify-start">
