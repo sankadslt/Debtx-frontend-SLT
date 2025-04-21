@@ -29,7 +29,9 @@ const Final_Reminder_LOD_Hold_List = () => {
     const [DateType, setDateType] = useState("");
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
+    const [activeWithdrawPopupLODID, setActiveWithdrawPopupLODID] = useState(null);
+    const [WithdrawRemark, setWithdrawRemark] = useState("");
+    // const navigate = useNavigate();
 
     // validation for date
     const handleFromDateChange = (date) => {
@@ -131,6 +133,33 @@ const Final_Reminder_LOD_Hold_List = () => {
         }
     };
 
+    const handleWithdrawPopup = (LODID) => {
+        setActiveWithdrawPopupLODID(LODID);
+        setWithdrawRemark("");
+    };
+
+    const closeWithdrawPopup = () => {
+        setActiveWithdrawPopupLODID(null);
+    };
+
+    const handleWithdraw = () => {
+        if (!WithdrawRemark.trim()) {
+            Swal.fire("Error", "Please enter a remark for the withdraw.", "error");
+            return;
+        }
+
+        closeWithdrawPopup();
+    };
+
+    const WithdrawFinalReminderLOD = async () => {
+        if (!activeWithdrawPopupLODID) {
+            Swal.fire("Error", "Please select a LOD or Final Reminder.", "error");
+            return;
+        }
+
+        const userData = await getLoggedUserId(); // Assign user ID
+
+    };
 
     return (
         <div className={GlobalStyle.fontPoppins}>
@@ -141,7 +170,6 @@ const Final_Reminder_LOD_Hold_List = () => {
             <div className={`${GlobalStyle.cardContainer} w-full`}>
 
                 <div className="flex items-center justify-end w-full space-x-6">
-                    <label className={GlobalStyle.dataPickerDate}>LOD Type</label>
                     <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>LOD Type</option>
                         <option value="Initial LOD">LOD</option>
@@ -236,7 +264,7 @@ const Final_Reminder_LOD_Hold_List = () => {
                                                 Proceed
                                             </button>
                                             <button
-                                                // onClick={fetchData}
+                                                onClick={() => handleWithdrawPopup(log.LODID)}
                                                 className={GlobalStyle.buttonPrimary}
                                             >
                                                 Withdraw
@@ -255,6 +283,43 @@ const Final_Reminder_LOD_Hold_List = () => {
                     </tbody>
                 </table>
             </div>
+
+            {activeWithdrawPopupLODID && (
+                <div className={GlobalStyle.popupBoxContainer}>
+                    <div className={GlobalStyle.popupBoxBody}>
+                        <div className={GlobalStyle.popupBox}>
+                            <h2 className={GlobalStyle.popupBoxTitle}>
+                                Withdraw Case
+                            </h2>
+                            <button
+                                className={GlobalStyle.popupBoxCloseButton}
+                                onClick={() => closeWithdrawPopup()}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div>
+                            <div className="mb-6">
+                                <label className={GlobalStyle.remarkTopic}>Remark</label>
+                                <textarea
+                                    value={WithdrawRemark}
+                                    onChange={(e) => setWithdrawRemark(e.target.value)}
+                                    className={`${GlobalStyle.remark} w-full`}
+                                    rows="5"
+                                ></textarea>
+                            </div>
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    onClick={handleWithdraw}
+                                    className={`${GlobalStyle.buttonPrimary} mr-4`}
+                                >
+                                    Withdraw
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Page nevigation buttons */}
             <div className={GlobalStyle.navButtonContainer}>
