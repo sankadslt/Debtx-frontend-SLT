@@ -33,8 +33,6 @@ const Digital_Signature_LOD = () => {
     const [LODData, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isCreatingTask, setIsCreatingTask] = useState(false);
-    const [isFiltered, setIsFiltered] = useState(false);
-    const navigate = useNavigate();
     const [activePopupLODID, setActivePopupLODID] = useState(null);
     const [activePopupLODStatus, setActivePopupLODStatus] = useState("");
     const [changeReason, setChangeReason] = useState("");
@@ -238,11 +236,6 @@ const Digital_Signature_LOD = () => {
             return;
         }
 
-        console.log("Submitting change:", {
-            LODID: activePopupLODID,
-            NewStatus: activePopupLODStatus === "LOD" ? "FinalReminder" : "LOD",
-            Reason: changeReason
-        });
         ChangeDocumentType();
         closePopup();
     };
