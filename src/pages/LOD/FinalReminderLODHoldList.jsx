@@ -6,7 +6,7 @@ Modified By:
 Last Modified Date: 
 Modified By: 
 Version: React v18
-ui number : 1.1
+ui number : 3.8
 Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
