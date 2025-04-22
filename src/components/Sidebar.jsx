@@ -65,11 +65,11 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Incident List", 
       roles: ["superadmin", "admin", "user"], 
       subItems: [
-        { icon: CgEditFade, label: " Register Accounts", link: "/Incident/Incident_List", roles: ["superadmin", "admin"], subItems: [
-          {icon:CgEditFade, label:"Bulk", link:"/Incident/Incident_List", roles:["superadmin", "admin"]},
+        { icon: CgEditFade, label: " Register Accounts",  roles: ["superadmin", "admin"], subItems: [
+          {icon:CgEditFade, label:"Bulk", link:"/incident/upload-log", roles:["superadmin", "admin"]},
           {icon:CgEditFade, label:"Individual", link:"/Incident/Incident_List", roles:["superadmin", "admin"]}, ] },
-        { icon: CgEditFade, label: "New Reg Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "Filtered Incidents", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "New Reg Incidents", link: "", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "Filtered Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Bulk Upload History", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Rejected log", link: "/Distribution/reject-incident-log", roles: ["superadmin", "admin"] },
       ],
