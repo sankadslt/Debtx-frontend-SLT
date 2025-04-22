@@ -86,9 +86,7 @@ const Digital_Signature_LOD = () => {
         try {
             const LODs = await List_F2_Selection_Cases(LODType, currentPage + 1);
             setLODData(LODs);
-            setIsFiltered(LODs.length > 0);
         } catch (error) {
-            setIsFiltered(false);
             Swal.fire("Error", error.message || "No LOD is matching the criteria.", "error");
         } finally {
             setIsLoading(false);

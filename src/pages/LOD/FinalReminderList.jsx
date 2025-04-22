@@ -29,6 +29,7 @@ const LOD_Log = () => {
     const [DateType, setDateType] = useState("");
     const [FinalReminderdata, setFinalReminderData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isFiltered, setIsFiltered] = useState(false);
     const navigate = useNavigate();
 
     // validation for date
@@ -54,6 +55,16 @@ const LOD_Log = () => {
         }
     };
 
+    // Handle filter button
+    const handleFilter = () => {
+        if (!LODStatus && !DateType && !fromDate && !toDate) {
+            Swal.fire("Invalid Input", "Please select at least one filter.", "warning");
+            return;
+        }
+        fetchData();
+        setIsFiltered(true);
+    }
+
     // Fetch list of LOD cases
     const fetchData = async () => {
         setIsLoading(true);
@@ -61,6 +72,7 @@ const LOD_Log = () => {
             const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "Final Reminder", currentPage + 1);
             setFinalReminderData(LOD);
         } catch (error) {
+            Swal.fire("No Results", "Error fetching data.", "error");
             setFinalReminderData([]);
         } finally {
             setIsLoading(false);
@@ -69,7 +81,9 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        fetchData({});
+        if (isFiltered) {
+            fetchData();
+        }
     }, [currentPage]);
 
     // Handle clear Filter button
@@ -78,6 +92,8 @@ const LOD_Log = () => {
         setDateType("");
         setFromDate("");
         setToDate("");
+        setFinalReminderData([]);
+        setIsFiltered(false);
     };
 
     // display loading animation when data is loading
@@ -116,7 +132,7 @@ const LOD_Log = () => {
                 fromDate,
                 toDate,
                 "LOD",
-                nextPage + 1 
+                nextPage + 1
             );
 
             // Next page will displayed only if fetch data is not empty
@@ -174,7 +190,7 @@ const LOD_Log = () => {
                         />
                     </div>
 
-                    <button onClick={fetchData} className={GlobalStyle.buttonPrimary}>Filter</button>
+                    <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
                     <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
                 </div>
 
@@ -304,7 +320,7 @@ const LOD_Log = () => {
                 <span className="text-gray-700">
                     Page {currentPage + 1}
                 </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage}>
+                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={!isFiltered}>
                     <FaArrowRight />
                 </button>
             </div>

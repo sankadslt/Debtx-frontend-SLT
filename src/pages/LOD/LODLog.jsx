@@ -29,6 +29,7 @@ const LOD_Log = () => {
     const [DateType, setDateType] = useState("");
     const [LODdata, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isFiltered, setIsFiltered] = useState(false);
     const navigate = useNavigate();
 
     // validation for date
@@ -54,6 +55,16 @@ const LOD_Log = () => {
         }
     };
 
+    // Handle filter button
+    const handleFilter = () => {
+        if (!LODStatus && !DateType && !fromDate && !toDate) {
+            Swal.fire("Invalid Input", "Please select at least one filter.", "warning");
+            return;
+        }
+        fetchData();
+        setIsFiltered(true);
+    }
+
     // Fetch list of LOD cases
     const fetchData = async () => {
         setIsLoading(true);
@@ -61,6 +72,7 @@ const LOD_Log = () => {
             const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage + 1);
             setLODData(LOD);
         } catch (error) {
+            Swal.fire("No Results", "Error fetching data.", "error");
             setLODData([]);
         } finally {
             setIsLoading(false);
@@ -69,7 +81,9 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        fetchData({});
+        if (isFiltered) {
+            fetchData();
+        }
     }, [currentPage]);
 
     // Handle Filter button
@@ -78,6 +92,8 @@ const LOD_Log = () => {
         setDateType("");
         setFromDate("");
         setToDate("");
+        setLODData([]);
+        setIsFiltered(false);
     };
 
     // display loading animation when data is loading
@@ -175,7 +191,7 @@ const LOD_Log = () => {
                         />
                     </div>
 
-                    <button onClick={fetchData} className={GlobalStyle.buttonPrimary}>Filter</button>
+                    <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
                     <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
                 </div>
 
@@ -305,7 +321,7 @@ const LOD_Log = () => {
                 <span className="text-gray-700">
                     Page {currentPage + 1}
                 </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage}>
+                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={!isFiltered}>
                     <FaArrowRight />
                 </button>
             </div>
