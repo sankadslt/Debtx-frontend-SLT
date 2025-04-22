@@ -7,11 +7,16 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the Write Off case list Screen */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
+import PendingWriteOff from "../../assets/images/Write_Off/Pending Write-Off.png";
+import WriteOff from "../../assets/images/Write_Off/Write-Off.png";
+import { Tooltip } from "react-tooltip";
+import { useNavigate } from "react-router-dom";
 
 const WriteOffCaseList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +25,25 @@ const WriteOffCaseList = () => {
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedFromDate, setSelectedFromDate] = useState(null);
+  const [selectedToDate, setSelectedToDate] = useState(null);
+
+  const getStatusIcon = (status) => {
+    switch (status.toLowerCase()) {
+      case "pending write off":
+        return PendingWriteOff;
+      case "write off":
+        return WriteOff;
+      default:
+        return null;
+    }
+  };
+
+  // Format amount with commas
+  const formatAmount = (amount) => {
+    return Number(amount).toLocaleString("en-US");
+  };
 
   // Sample data for the table with real dates
   const caseData = [
@@ -61,7 +85,7 @@ const WriteOffCaseList = () => {
   }, [searchQuery, fromDate, toDate]);
 
   // Filtering function
-  const filterData = () => {
+  const filterData = useCallback(() => {
     setIsLoading(true);
     let filtered = [...caseData];
 
@@ -72,6 +96,13 @@ const WriteOffCaseList = () => {
         const itemDate = new Date(item.writeOffOn);
         return itemDate >= fromDate && itemDate <= toDate;
       });
+    }
+
+    // Filter by status
+    if (selectedStatus) {
+      filtered = filtered.filter(
+        (item) => item.status.toLowerCase() === selectedStatus.toLowerCase()
+      );
     }
 
     // Filter by search query
@@ -89,28 +120,61 @@ const WriteOffCaseList = () => {
     setFilteredData(filtered);
     setCurrentPage(0);
     setIsLoading(false);
-  };
+  }, [caseData, fromDate, toDate, searchQuery, selectedStatus]);
 
-  const handleFilter = () => {
+  const validateAndFetchData = () => {
+    if (!selectedFromDate && !selectedToDate && !selectedStatus) {
+      Swal.fire({
+        title: "Action required!",
+        text: "Please complete the necessary steps before proceeding",
+        icon: "warning",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    setFromDate(selectedFromDate);
+    setToDate(selectedToDate);
+    setSelectedStatus(selectedStatus);
     filterData();
   };
 
   const handleFromDateChange = (date) => {
-    if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
+    if (selectedToDate && date > selectedToDate) {
+      Swal.fire({
+        title: "Invalid Date Selection!",
+        text: "The 'From' date cannot be later than the 'To' date.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "OK",
+      });
     } else {
-      setError("");
-      setFromDate(date);
+      setSelectedFromDate(date);
     }
   };
 
   const handleToDateChange = (date) => {
-    if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
+    if (selectedFromDate && date < selectedFromDate) {
+      Swal.fire({
+        title: "Invalid Date Selection!",
+        text: "The 'To' date cannot be earlier than the 'From' date.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "OK",
+      });
     } else {
-      setError("");
-      setToDate(date);
+      setSelectedToDate(date);
     }
+  };
+
+  const clearFilters = () => {
+    setFromDate(null);
+    setToDate(null);
+    setSelectedStatus("");
+    setSelectedFromDate(null);
+    setSelectedToDate(null);
+    filterData();
   };
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -141,19 +205,36 @@ const WriteOffCaseList = () => {
 
       {/* Filter Section */}
       <div className="flex justify-end ">
-      <div className={`${GlobalStyle.cardContainer}  w-full   `}>
-        <div className="flex gap-4 justify-end">
-          <div className={GlobalStyle.datePickerContainer}>
-            <label className={GlobalStyle.dataPickerDate}>Date : </label>
+        <div className={`${GlobalStyle.cardContainer} w-[70vw] mb-8 mt-8`}>
+          <div className="flex items-center gap-4 justify-end">
+            {/* Status dropdown */}
+            <select
+              className={GlobalStyle.selectBox}
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              style={{ color: selectedStatus === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>
+                Status
+              </option>
+              <option value="Pending write off" style={{ color: "black" }}>
+                Pending Write-Off
+              </option>
+              <option value="Write off" style={{ color: "black" }}>
+                Write Off
+              </option>
+            </select>
+
+            <label className={GlobalStyle.dataPickerDate}>Date: </label>
             <DatePicker
-              selected={fromDate}
+              selected={selectedFromDate}
               onChange={handleFromDateChange}
               dateFormat="MM/dd/yyyy"
               placeholderText="From"
               className={GlobalStyle.inputText}
             />
             <DatePicker
-              selected={toDate}
+              selected={selectedToDate}
               onChange={handleToDateChange}
               dateFormat="MM/dd/yyyy"
               placeholderText="To"
@@ -161,20 +242,16 @@ const WriteOffCaseList = () => {
             />
             <button
               className={GlobalStyle.buttonPrimary}
-              onClick={handleFilter}
+              onClick={validateAndFetchData}
             >
               Filter
             </button>
 
-            <button className={GlobalStyle.buttonRemove} onClick={handleFilter}>
+            <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
               Clear
             </button>
           </div>
         </div>
-      </div>
-
-
-      {error && <div className="text-red-500 mb-4">{error}</div>}
       </div>
 
       {/* Search Bar */}
@@ -209,28 +286,48 @@ const WriteOffCaseList = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((row, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
-                >
-                  <td className={GlobalStyle.tableData}>{row.caseId}</td>
-                  <td className={GlobalStyle.tableData}>{row.status}</td>
-                  <td className={GlobalStyle.tableData}>{row.accountNo}</td>
-                  <td className={GlobalStyle.tableData}>{row.customerRef}</td>
-                  <td className={GlobalStyle.tableData}>{row.amount}</td>
-                  <td className={GlobalStyle.tableData}>{row.phase}</td>
-                  <td className={GlobalStyle.tableData}>{row.writeOffOn}</td>
-                </tr>
-              ))}
-              {paginatedData.length === 0 && (
+              {paginatedData.length > 0 ? (
+                paginatedData.map((row, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0
+                        ? "bg-white bg-opacity-75"
+                        : "bg-gray-50 bg-opacity-50"
+                    } border-b`}
+                  >
+                    <td className={GlobalStyle.tableData}>{row.caseId}</td>
+                    <td className={GlobalStyle.tableData}>
+                      <div className="flex justify-center">
+                        <img
+                          src={getStatusIcon(row.status)}
+                          alt={row.status}
+                          className="w-6 h-6 cursor-pointer"
+                          data-tooltip-id={`status-tooltip-${index}`}
+                        />
+                        <Tooltip
+                          id={`status-tooltip-${index}`}
+                          place="bottom"
+                          effect="solid"
+                        >
+                          {row.status}
+                        </Tooltip>
+                      </div>
+                    </td>
+                    <td className={GlobalStyle.tableData}>{row.accountNo}</td>
+                    <td className={GlobalStyle.tableData}>{row.customerRef}</td>
+                    <td className={GlobalStyle.tableData}>
+                      {formatAmount(row.amount)}
+                    </td>
+                    <td className={GlobalStyle.tableData}>{row.phase}</td>
+                    <td className={GlobalStyle.tableData}>{row.writeOffOn}</td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td colSpan="7" className="text-center py-4">
-                    No results found
+                    No results found. Try clearing the filters to see all
+                    records.
                   </td>
                 </tr>
               )}
@@ -261,6 +358,7 @@ const WriteOffCaseList = () => {
           </button>
         </div>
       )}
+      
     </div>
   );
 };
