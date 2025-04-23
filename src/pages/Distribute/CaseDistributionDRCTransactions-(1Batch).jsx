@@ -10,7 +10,7 @@ Notes: The following page conatins the codes */
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch , FaDownload , FaArrowLeft } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import {
   list_distribution_array_of_a_transaction,
@@ -37,7 +37,9 @@ export default function CaseDistributionDRCTransactions1Batch() {
           case_distribution_batch_id: BatchID || 1,
           batch_seq: Batchseq || 2,
         };
-        const response = await get_distribution_array_of_a_transaction(data);
+        console.log("This is the payloadData", data);
+        const response = await list_distribution_array_of_a_transaction(data);
+        
 
         if (response.status === "success") {
           setTransactions(response.data);
@@ -103,7 +105,9 @@ export default function CaseDistributionDRCTransactions1Batch() {
   };
 
   const handleoniconclick = () => {
-    navigate("/pages/Distribute/AssignedDRCSummary");
+    navigate("/pages/Distribute/CaseDistributionDRCTransactions-1Batch", {
+      state: { BatchID: BatchID},
+    });
   };
 
   const batchSeqDetails = transactions[0]?.batch_seq_details || [];
@@ -198,81 +202,72 @@ export default function CaseDistributionDRCTransactions1Batch() {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item, index) => (
-                <tr
-                  key={item.date}
-                  className={
-                    index % 2 === 0
-                      ? GlobalStyle.tableRowEven
-                      : GlobalStyle.tableRowOdd
-                  }
-                >
-                  {Batchseq === 1 ? (
-                    <>
-                      <td className={GlobalStyle.tableData}>{item.drc}</td>
-                      <td className={GlobalStyle.tableData}>
-                        {item.rulebase_count}
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className={GlobalStyle.tableData}>{item.rtom}</td>
-                      <td className={GlobalStyle.tableData}>
-                        {item.minus_drc}
-                      </td>
-                      <td className={GlobalStyle.tableData}>
-                        {item.minus_rulebase_count}
-                      </td>
-                      <td className={GlobalStyle.tableData}>{item.plus_drc}</td>
-                      <td className={GlobalStyle.tableData}>
-                        {item.plus_rulebase_count}
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
+            {filteredData.length > 0 ? (
+                  filteredData.map((item, index) => (
+                    <tr
+                      key={item.date}
+                      className={
+                        index % 2 === 0
+                          ? GlobalStyle.tableRowEven
+                          : GlobalStyle.tableRowOdd
+                      }
+                    >
+                      {Batchseq === 1 ? (
+                        <>
+                          <td className={GlobalStyle.tableData}>{item.drc}</td>
+                          <td className={GlobalStyle.tableData}>
+                            {item.rulebase_count}
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className={GlobalStyle.tableData}>{item.rtom}</td>
+                          <td className={GlobalStyle.tableData}>
+                            {item.minus_drc}
+                          </td>
+                          <td className={GlobalStyle.tableData}>
+                            {item.minus_rulebase_count}
+                          </td>
+                          <td className={GlobalStyle.tableData}>{item.plus_drc}</td>
+                          <td className={GlobalStyle.tableData}>
+                            {item.plus_rulebase_count}
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
+                      {/* No data found message */}
+                      No data found
+                    </td>
+                  </tr>
+                )}
+
             </tbody>
           </table>
         </div>
       </div>
       {/* Button */}
-      <div className="flex justify-between">
-        {/* Button on the left */}
-        <button className={` h-[35px] mt-[40px]`} onClick={handleoniconclick}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={65}
-            height={65}
-            fill="none"
-          >
-            <circle
-              cx={32.5}
-              cy={32.5}
-              r={32.45}
-              fill="#B3CCE3"
-              stroke="#58120E"
-              strokeWidth={0.1}
-              transform="rotate(-90 32.5 32.5)"
-            />
-            <path
-              fill="#001120"
-              d="m36.46 32.051 10.386-10.384-3.064-3.064-13.448 13.448L43.782 45.5l3.064-3.064L36.46 32.051Z"
-            />
-            <path
-              fill="#001120"
-              d="m23.46 32.051 10.386-10.384-3.064-3.064-13.448 13.448L30.782 45.5l3.064-3.064L23.46 32.051Z"
-            />
-          </svg>
-        </button>
 
+      <div className="flex justify-end">
         {/* Button on the right */}
         <button
           onClick={handleonclick}
-          className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px]`}
+          className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px] flex items-center `}
         >
+          <FaDownload className="mr-2" />
           Create task and let me know
         </button>
       </div>
+      
+      <div className="flex justify-start mt-">
+      <button className={GlobalStyle.buttonPrimary} onClick={handleoniconclick}>
+        <FaArrowLeft className="mr-2" />
+        </button>
+      </div>
+      
     </div>
   );
 }

@@ -88,6 +88,10 @@ const DistributeDummy = () => {
             to: "/pages/Distribute/DRCAssignManagerApproval3",
             label: "1.15.2 - DRC Assign Manager Approval 3",
           },
+          {
+            to: "/drc/mediation-board",
+            label: "2.11 - Forward Mediation Board",
+          },
         ].map((link, index) => (
           <Link
             key={index}

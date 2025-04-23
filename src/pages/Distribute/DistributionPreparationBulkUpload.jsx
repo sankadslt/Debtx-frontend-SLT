@@ -14,6 +14,7 @@ import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { List_count_by_drc_commision_rule } from '/src/services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import  { Tooltip } from "react-tooltip";
 
 const DistributionPreparationBulkUpload = () => {
   const navigate = useNavigate();
@@ -88,15 +89,15 @@ const DistributionPreparationBulkUpload = () => {
                   {/* Summary Cards Container */}
              <div className={GlobalStyle.miniCountBarSubTopicContainer}>
                   {/* Total Count */}
-                <h2 className={GlobalStyle.headingMedium}>Total Case Count:</h2>
-             <div className={GlobalStyle.miniCountBarMainBox}>
+                <h2 className={GlobalStyle.headingMedium}>Total Case Count :</h2>
+             <div className= {`${GlobalStyle.miniCountBarMainBox} ` } style={{ height: 'fit-content', width: 'fit-content'   }}>
                     <p className={GlobalStyle.miniCountBarMainTopic}>{totalRules}</p>
              </div>
                </div>
               </div>
 
           {/* Search Bar */}
-          <div className="mb-4 flex justify-start">
+          {/* <div className="mb-4 flex justify-start">
           <div className={GlobalStyle.searchBarContainer}>
             <input
               type="text"
@@ -107,10 +108,11 @@ const DistributionPreparationBulkUpload = () => {
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
-        </div>
+        </div> */}
 
           {/* Table Section */}
-          <div className={GlobalStyle.tableContainer}>
+          <div className="flex items-center justify-center min-h-full ">
+          <div className={GlobalStyle.cardContainer}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -143,16 +145,17 @@ const DistributionPreparationBulkUpload = () => {
                     >
                       {service.case_count}
                     </td>
-                    <td className={GlobalStyle.tableData}>
+                    <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                       <button
                         onClick={() => handleIconClick(service)}
                         className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                       >
                         <img src="/src/assets/images/fileicon.png" 
                                 alt="file icon" 
-                                width={34} 
-                                 height={24}  />
+                                data-tooltip-id="filter-tooltip"
+                                className="w-5 h-5"  />
                       </button>
+                      <Tooltip id="filter-tooltip" place="bottom" content="Open" />
                     </td>
                   </tr>
                 ))}
@@ -165,6 +168,7 @@ const DistributionPreparationBulkUpload = () => {
                 )}
               </tbody>
             </table>
+          </div>
           </div>
 
           {/* Pagination */}

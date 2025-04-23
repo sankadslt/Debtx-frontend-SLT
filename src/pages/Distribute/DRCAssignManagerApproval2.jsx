@@ -12,7 +12,7 @@ Notes: The following page contains the code
 */
 
 import { useState , useEffect } from "react";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; 
 import "react-datepicker/dist/react-datepicker.css";
 import {List_All_Batch_Details , Approve_Batch_or_Batches , Create_task_for_batch_approval} from "/src/services/case/CaseServices.js";
@@ -28,10 +28,17 @@ export default function DRCAssignManagerApproval2() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 1;
+  const recordsPerPage = 4;
   const fetchData = async () => {
-    try {
-      const response = await List_All_Batch_Details();
+
+    const userId = await getLoggedUserId();
+    console.log("Logged in user ID:", userId);
+    const payload = {
+      approved_deligated_by : userId,
+    };
+    console.log("Payload:", payload);
+    try {     
+      const response = await List_All_Batch_Details( payload ); 
       setFilteredData(response);
       console.log("All batch details:", response);
     } catch (error) {
@@ -134,6 +141,23 @@ export default function DRCAssignManagerApproval2() {
       });
       return;
     }
+
+      // Show confirmation alert before calling API
+          const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "Do you really want to approve the selected record?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#d33",
+        });
+    
+        if (!result.isConfirmed) {
+          return;
+        }
+
     const payload = {
       approver_references : batchIds,
       approved_by : userId,
@@ -333,7 +357,8 @@ export default function DRCAssignManagerApproval2() {
         </button>
       </div>
       <div>
-        <button onClick={onSubmit} className={GlobalStyle.buttonPrimary}>
+        <button onClick={onSubmit} className={`${GlobalStyle.buttonPrimary} flex items-center `} >
+          <FaDownload className="mr-2" />
           Create task and let me know
         </button>
       </div>
