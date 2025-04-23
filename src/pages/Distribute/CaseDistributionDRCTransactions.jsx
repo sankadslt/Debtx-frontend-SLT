@@ -23,7 +23,7 @@ import three from "/src/assets/images/imagefor1.a.13(three).png";
 import four from "/src/assets/images/imagefor1.a.13(four).png";
 import open from "/src/assets/images/distribution/Open.png";
 import Error from "/src/assets/images/distribution/Error.png";
-import Inprogress from "/src/assets/images/distribution/In_progress.png";
+import Inprogress from "/src/assets/images/distribution/In_Progress.png";
 import Complete from "/src/assets/images/distribution/Complete.png";
 import Ammend from "/src/assets/images/distribution/Ammend.png";
 import Distributed from "/src/assets/images/distribution/Distributed.png";
