@@ -12,7 +12,7 @@ Notes:  */
 
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,17 @@ import more from "../../assets/images/imagefor1.a.13(one).png";
 import { listAllSettlementCases } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
 import { Tooltip } from "react-tooltip";
+import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
+import { getLoggedUserId } from "../../services/auth/authService";
+import RO_Settle_Pending from "/src/assets/images/Settlement/RO_Settle_Pending.png";
+import RO_Settle_Open_Pending from "/src/assets/images/Settlement/RO_Settle_Open_Pending.png";
+import RO_Settle_Active from "/src/assets/images/Settlement/RO_Settle_Active.png";
+import MB_Settle_Pending from "/src/assets/images/Settlement/MB Settle Pending.png";
+import MB_Settle_Open_Pending from "/src/assets/images/Settlement/MB Settle Open Pending.png"
+import MB_Settle_Active from "/src/assets/images/Settlement/MB Settle Active.png";
+import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation Settle Pending.png";
+import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
+import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
 
 // // Import status icons with correct file extensions
 // import RO_Negotiation_FMB_pending from "../../assets/images/negotiation/RO_Negotiation_FMB_pending.png";
@@ -95,6 +106,7 @@ const Monitor_settlement = () => {
   // const [error, setError] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,33 +124,33 @@ const Monitor_settlement = () => {
       case "negotiation":
         switch (status?.toLowerCase()) {
           case "pending":
-            return "/src/assets/images/Settlement/RO_Settle_Pending.png";
+            return RO_Settle_Pending;
           case "open_pending":
-            return "/src/assets/images/Settlement/RO_Settle_Open_Pending.png";
+            return RO_Settle_Open_Pending;
           case "active":
-            return "/src/assets/images/Settlement/RO_Settle_Active.png";
+            return RO_Settle_Active;
           default:
             return null;
         }
       case "mediation board":
         switch (status?.toLowerCase()) {
           case "pending":
-            return "/src/assets/images/Settlement/MB Settle Pending.png";
+            return MB_Settle_Pending;
           case "open_pending":
-            return "/src/assets/images/Settlement/MB Settle Open Pending.png";
+            return MB_Settle_Open_Pending;
           case "active":
-            return "/src/assets/images/Settlement/MB Settle Active.png";
+            return MB_Settle_Active;
           default:
             return null;
         }
       case "litigation":
         switch (status?.toLowerCase()) {
           case "pending":
-            return "/src/assets/images/Settlement/Litigation Settle Pending.png";
+            return Litigation_Settle_Pending;
           case "open_pending":
-            return "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
+            return Litigation_Settle_Open_Pending;
           case "active":
-            return "/src/assets/images/Settlement/Litigation Settle Active.png";
+            return Litigation_Settle_Active;
           default:
             return null;
         }
@@ -167,7 +179,7 @@ const Monitor_settlement = () => {
         />
         {/* Tooltip component */}
         <Tooltip id={tooltipId} place="bottom" effect="solid">
-          {`${phase} settle ${status}`} {/* Tooltip text is the phase and status */}
+          {`${phase} Settle ${status}`} {/* Tooltip text is the phase and status */}
         </Tooltip>
       </div>
     );
@@ -353,8 +365,12 @@ const Monitor_settlement = () => {
     }
   };
 
-  const handleFilterButton = () => {
-    handleFilter();
+  const handleFilterButton = () => { // Reset to the first page
+    if (currentPage === 1) {
+      handleFilter();
+    } else {
+      setCurrentPage(1);
+    }
     setIsFilterApplied(true); // Set filter applied state to true
   }
 
@@ -378,6 +394,36 @@ const Monitor_settlement = () => {
   const navi = () => {
     navigate("/lod/ftl-log/preview");
   };
+
+  // Function to handle the creation of tasks for downloading settlement list
+  const HandleCreateTaskDownloadSettlementList = async () => {
+
+    const userData = await getLoggedUserId(); // Assign user ID
+
+    if (!fromDate || !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select From Date and To Date.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      return;
+    }
+
+    setIsCreatingTask(true);
+    try {
+      const response = await Create_Task_For_Downloard_Settlement_List(userData);
+      if (response === "success") {
+        Swal.fire(response, `Task created successfully!`, "success");
+      }
+    } catch (error) {
+      Swal.fire("Error", error.message || "Failed to create task.", "error");
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
+
 
   // display loading animation when data is loading
   if (isLoading) {
@@ -594,6 +640,16 @@ const Monitor_settlement = () => {
               <FaArrowRight />
             </button>
           </div>
+
+          <button
+            onClick={HandleCreateTaskDownloadSettlementList}
+            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+            disabled={isCreatingTask}
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+          </button>
         </main>
       </div>
     </div>

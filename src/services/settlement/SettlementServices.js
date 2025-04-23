@@ -45,3 +45,18 @@ export const Case_Details_Settlement_Phase = async (payload) => {
     throw error;
   }
 };
+
+// Create task for downloading Settlement list
+export const Create_Task_For_Downloard_Settlement_List = async (createdBy) => {
+  try {
+    const response = await axios.post(`${URL}/Create_Task_For_Downloard_Settlement_List`, {
+      Created_By: createdBy,
+    });
+
+    // return the response status
+    return response.data.status;
+  } catch (error) {
+    console.error("Error creating task:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
