@@ -24,6 +24,9 @@ import { fetchIncidents } from "../../services/Incidents/incidentService";
 import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
+import opeanincident from  "/src/assets/images/incidents/Incident_Open.png"
+import rejectincident from  "/src/assets/images/incidents/Incident_Reject.png"
+import inprogressincident from  "/src/assets/images/incidents/Incident_InProgress.png"
 
 const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -43,11 +46,11 @@ const Incident_List = () => {
     const getStatusIcon = (status) => {
         switch (status?.toLowerCase()) {
             case "incident open":
-                return "/src/assets/images/incidents/Incident_Open.png";
+                return opeanincident;
             case "incident reject":
-                return "/src/assets/images/incidents/Incident_Reject.png";
+                return rejectincident;
             case "incident inprogress":
-                return "/src/assets/images/incidents/Incident_InProgress.png";
+                return inprogressincident;
             default:
                 return null;
         }
