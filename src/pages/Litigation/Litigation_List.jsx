@@ -34,9 +34,9 @@ export const Litigation_List = () => {
  
   // Status mapping between frontend display values and backend expected values
   const statusMapping = {
-    "Initial_Litigation": "Initial Litigation",
+    "Initial_Litigation": "Initial_Litigation",
     "Pending_FTL": "Pending FTL",
-    "FTL_Settle_Pending": "Litigation Settle Pending",
+    "FTL_Settle_Pending": "FTL_Settle_Pending",
     "FTL": "Forward To Litigation",
     "FLU": "Fail from Legal Unit",
     "SLA": "Success Legal Action",
@@ -287,31 +287,23 @@ export const Litigation_List = () => {
                       <td className={`${GlobalStyle.tableData} text-center`}>{item.case_id}</td>
                       <td className={GlobalStyle.tableData}>{displayStatus}</td>
                       <td className={`${GlobalStyle.tableData} text-center`}>{item.account_no}</td>
-                      <td className={GlobalStyle.tableData}>{item.current_arreas_amount}</td>
-                      {/* <td className={GlobalStyle.tableData}>
-                        {item.legal_accepted_date || 
-                         (item.litigation && item.litigation.legal_submission && 
-                          new Date(item.litigation.legal_submission.submission_on).toLocaleDateString())}
-                      </td> */}
-                      <td className={GlobalStyle.tableData}>{item.legal_accepted_date
+                      <td className={`${GlobalStyle.tableData} text-right px-2`}>{item.current_arreas_amount}</td>
+                      <td className={`${GlobalStyle.tableData} text-center`}>{item.legal_accepted_date
                         ? new Date(item.legal_accepted_date).toLocaleDateString("en-GB")
                         : "N/A"}
                       </td>
-                      <td className={GlobalStyle.tableData}>{item.settlement_created_date
+                      <td className={`${GlobalStyle.tableData} text-center`}>{item.settlement_created_date
                         ? new Date(item.settlement_created_date).toLocaleDateString("en-GB")
                         : "N/A"}
                       </td>
-                      {/* <td className={GlobalStyle.tableData}>
-                        {item.settlement_created_date || 
-                         (item.settlement && item.settlement.settlement_created_dtm && 
-                          new Date(item.settlement.settlement_created_dtm).toLocaleDateString())}
-                      </td> */}
                       <td className={`${GlobalStyle.tableData} px-4`}>
                         {displayStatus === "Initial_Litigation" && (
                           <div>
                             <button 
                               className={GlobalStyle.buttonPrimary}
-                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
+                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation", {
+                                state:{case_id : item.case_id}
+                              })}
                             >
                               Documents
                             </button>
@@ -391,28 +383,25 @@ export const Litigation_List = () => {
             </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className={GlobalStyle.navButtonContainer}>
-            <button
-              className={GlobalStyle.navButton}
-              onClick={handlePrevPage}
-              disabled={currentPage === 1 || isLoading}
-            >
-              <FaArrowLeft />
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              className={GlobalStyle.navButton}
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages || isLoading}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
-        )}
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handlePrevPage}
+            disabled={currentPage === 1 || isLoading}
+          >
+            <FaArrowLeft />
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages || isLoading}
+          >
+            <FaArrowRight />
+          </button>
+        </div>
     </div>
   )
 }
