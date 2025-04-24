@@ -82,6 +82,7 @@ import FinalReminderList from "../pages/LOD/FinalReminderList";
 import CustomerResponse from "../pages/LOD/CustomerResponse";
 import CustomerResponseReview from "../pages/LOD/CustomerResponseReview";
 import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList";
+import SettlementPreview from "../pages/Settlement/SettlementPreview";
 
 const Routers = () => {
   return (
@@ -561,6 +562,7 @@ const Routers = () => {
 
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
+      <Route path="/lod/ftl-log/preview" element={<ProtectedRoute element={<SettlementPreview />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
       {/* //Create SETTLEMENT */}
       <Route

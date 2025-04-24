@@ -112,8 +112,18 @@ const Monitor_settlement = () => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalAPIPages, setTotalAPIPages] = useState(1);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
+  const rowsPerPage = 10; // Number of rows per page
+
+  // variables need for table
+  // const maxPages = Math.ceil(filteredDataBySearch.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
   // const recordsPerPage = 10;
   // const indexOfLastRecord = currentPage * recordsPerPage;
   // const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -187,22 +197,38 @@ const Monitor_settlement = () => {
     );
   };
 
+  // Handle api calling only when the currentPage incriment more that before
+  const handlePageChange = (page) => {
+    console.log("Page changed to:", page);
+    if (page > maxCurrentPage && page <= totalAPIPages) {
+      setMaxCurrentPage(page);
+      handleFilter(); // Call the filter function only after the page incrimet 
+    }
+  };
+
+  useEffect(() => {
+    if (isFilterApplied) {
+      handlePageChange(currentPage); // Call the function whenever currentPage changes
+    }
+  }, [currentPage]);
+
   // Handle Pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
       console.log("Current Page:", currentPage);
     } else if (direction === "next" && currentPage < totalPages) {
+      // handlePageChange(currentPage + 1);
       setCurrentPage(currentPage + 1);
       console.log("Current Page:", currentPage);
     }
   };
 
-  useEffect(() => {
-    if (isFilterApplied) {
-      handleFilter(); // Call the filter function only afer the filters are applied
-    }
-  }, [currentPage]);
+  // useEffect(() => {
+  //   if (isFilterApplied) {
+  //     handleFilter(); // Call the filter function only afer the filters are applied
+  //   }
+  // }, [currentPage]);
   /*  const [appliedFilters, setAppliedFilters] = useState({
      searchQuery: "",
      caseId: "",
@@ -260,7 +286,7 @@ const Monitor_settlement = () => {
   };
 
   // Search Section
-  const filteredDataBySearch = filteredData.filter((row) =>
+  const filteredDataBySearch = paginatedData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -269,7 +295,7 @@ const Monitor_settlement = () => {
 
   const handleFilter = async () => {
     try {
-      setFilteredData([]); // Clear previous results
+      // setFilteredData([]); // Clear previous results
 
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
@@ -364,8 +390,13 @@ const Monitor_settlement = () => {
       if (response && response.data && response.data.data) {
         console.log("Valid data received:", response.data.data);
         // console.log(response.data.pagination.pages);
-        setTotalPages(response.data.pagination.pages);
-        setFilteredData(response.data.data);
+        const totalPages = Math.ceil(response.data.pagination.total / rowsPerPage);
+        setTotalPages(totalPages);
+        setTotalAPIPages(response.data.pagination.pages); // Set the total pages from the API response
+        // Append the new data to the existing data
+        setFilteredData((prevData) => [...prevData, ...response.data.data]);
+
+        // setFilteredData(response.data.data);
       } else {
         console.error("No valid Settlement data found in response:", response);
         setFilteredData([]);
@@ -381,6 +412,8 @@ const Monitor_settlement = () => {
   };
 
   const handleFilterButton = () => { // Reset to the first page
+    setFilteredData([]); // Clear previous results
+    setMaxCurrentPage(0); // Reset max current page
     if (currentPage === 1) {
       handleFilter();
     } else {
@@ -405,6 +438,7 @@ const Monitor_settlement = () => {
     setIsFilterApplied(false); // Reset filter applied state
     setTotalPages(1); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    setTotalAPIPages(1); // Reset total API pages
   };
 
   const naviPreview = (caseId) => {
