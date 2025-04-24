@@ -9,12 +9,75 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
 import DatePicker from "react-datepicker";
+import { listLitigationPhaseCaseDetails, updateLegalSubmission } from "../../services/litigation/litigationService";
+import { getLoggedUserId } from "../../services/auth/authService";
 
 export const Litigation_Submission = () => {
+  const [userId, setUserId] =useState(null);
   const [selectedDate, setSelectedDate] =useState(null);
+  const [caseDetails, setCaseDetails] =useState(null);
+  const [loading, setLoading] =useState(false);
+  const [selectedSubmission, setSelectedSubmission] =useState("");
+  const [remark, setRemark] =useState(""); 
+
+  const case_id ="81";
+
+  useEffect(() => {
+    const fetchCaseDetails =async() => {
+        setLoading(true);
+        const response =await listLitigationPhaseCaseDetails(case_id);
+        if (response.success) {
+            setCaseDetails(response.data);
+            console.log(response.data);
+            
+        }else{
+            console.error(response.message);
+        }
+        setLoading(false);
+    }
+
+    fetchCaseDetails();
+  }, [case_id]);
+
+  
+  useEffect(() => {
+    const loadUser =async() => {
+        const user =await getLoggedUserId();
+        setUserId(user);
+        console.log("User: ", user);
+    }
+
+    loadUser();    
+  }, []);
+
+  const handleSubmit =async() => {
+    const payload ={
+        case_id:caseDetails.case_id,
+        submission: selectedSubmission,
+        submission_on: selectedDate,
+        submission_by: userId,
+        submission_remark: remark,
+    }
+
+    try {
+        setLoading(true);
+        const result =await updateLegalSubmission(payload);
+        if (result.status === "success") {
+            console.log("Legal Submission updated successfully");     
+        }else {
+            console.log(result.message);
+        }
+    } catch (error) {
+        console.error(error);
+    } finally{
+        setLoading(false);
+    }
+  }
+  
+
   return (
     <div className={GlobalStyle.fontPoppins}>
         <h1 className={GlobalStyle.headingLarge}>Legal Submission</h1>
@@ -23,29 +86,37 @@ export const Litigation_Submission = () => {
                 {/* Card */}
                 <div className="flex flex-col w-full items-center justify-center">
                     <div className={`${GlobalStyle.cardContainer} w-full`}>
-                        {[
-                            { label: "Case ID", value: "" },
-                            { label: "Customer Red", value: "" },
-                            { label: "Account No", value: "" },
-                            { label: "Arrears Amount", value: "" },
-                            { label: "Last Payment Date", value: "" },
-                        ].map((item, idx) => (
-                            <p key={idx} className="mb-2 flex items-center">
-                                <strong className="w-40 text-left">{item.label}</strong>
-                                <span className="w-6 text-center">:</span>
-                                <span className="flex-1">{item.value || "N/A"}</span>
-                            </p>
-                        ))}
+                    {loading ? (
+                        <p className="text-center">Loading...</p>
+                    ) : (
+                        [
+                        { label: "Case ID", value: caseDetails?.case_id },
+                        { label: "Customer Ref", value: caseDetails?.customer_ref },
+                        { label: "Account No", value: caseDetails?.account_no },
+                        { label: "Arrears Amount", value: caseDetails?.current_arrears_amount },
+                        { label: "Last Payment Date", value: new Date(caseDetails?.last_payment_date).toLocaleDateString("en-GB")},
+                        ].map((item, index) => (
+                        <p key={index} className="mb-2 flex items-center">
+                            <strong className="w-40 text-left">{item.label}</strong>
+                            <span className="w-6 text-center">:</span>
+                            <span className="flex-1">{item.value || "N/A"}</span>
+                        </p>
+                        ))
+                    )}
                     </div>
                 </div>
 
                 {/* Legal Submission */}
                 <div className="flex gap-4 items-center justify-start mb-4 w-full">
                     <label className="w-56">Legal Submission</label>
-                    <select className={`${GlobalStyle.selectBox}`}>
+                    <select 
+                        className={`${GlobalStyle.selectBox}`}
+                        value={selectedSubmission}
+                        onChange={(e) => setSelectedSubmission(e.target.value)}
+                    >
                         <option value="">Select</option>
-                        <option value="Legal_Accepted">Legal Accepted</option>
-                        <option value="Legal_Rejected">Legal Rejected</option>
+                        <option value="Legal Accepted">Legal Accepted</option>
+                        <option value="Legal Rejected">Legal Rejected</option>
                     </select>
                 </div>
 
@@ -64,12 +135,20 @@ export const Litigation_Submission = () => {
                 {/* Remark */}
                 <div className="flex flex-col gap-2 justify-start mb-4">
                     <label>Remark : </label>
-                    <textarea className={`${GlobalStyle.inputText} h-40`}/>
+                    <textarea 
+                        className={`${GlobalStyle.inputText} h-40`}
+                        value={remark}
+                        onChange={(e) => setRemark(e.target.value)}
+                    />
                 </div>
 
                 {/* Submit */}
                 <div className="flex w-full justify-end">
-                        <button className={GlobalStyle.buttonPrimary}>
+                        <button 
+                            className={GlobalStyle.buttonPrimary}
+                            onClick={handleSubmit}
+                            disabled={loading}
+                        >
                             Submit
                         </button>
                 </div>
