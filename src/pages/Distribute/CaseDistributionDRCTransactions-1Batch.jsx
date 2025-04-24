@@ -130,29 +130,41 @@ export default function CaseDistributionDRCTransactions1Batch() {
       {/* Card Section */}
       {transaction.length > 0 && transaction[0] && (
         <div className="flex flex-col items-center justify-center mb-4">
-          <div className={`${GlobalStyle.cardContainer}`}>
-            <p className="mb-2">
-              <strong>Batch ID:</strong>{" "}
-              {transaction[0]?.case_distribution_batch_id || "N/A"}
-            </p>
-            <p className="mb-2">
-              <strong>DRC Commission Rule:</strong>{" "}
-              {transaction[0]?.drc_commision_rule || "N/A"}
-            </p>
-            <p className="mb-2">
-              <strong>Arrears Band:</strong>{" "}
-              {transaction[0]?.current_arrears_band || "N/A"}
-            </p>
-            <p className="mb-2">
-              <strong>Case Count:</strong>{" "}
-              {transaction[0]?.rulebase_count || "N/A"}
-            </p>
-            {/* <p className="mb-2">
-              <strong>Total Arrears Amount:</strong>{" "}
-              {transaction[0]?.rulebase_arrears_sum || "N/A"}
-            </p> */}
-          </div>
+        <div className={`${GlobalStyle.cardContainer}`}>
+          <table >
+          <colgroup>
+            <col  />
+            <col style={{ width: "20px" }} />
+            <col />
+            
+          </colgroup>
+            <tbody>
+              <tr>
+                <td className="py-2"><strong>Batch ID  </strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2">  {transaction[0]?.case_distribution_batch_id || "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>DRC Commission Rule  </strong></td>
+                <td className="py-2"> <strong> : </strong></td>
+                <td className="py-2">  {transaction[0]?.drc_commision_rule || "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Arrears Band  </strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2">  {transaction[0]?.current_arrears_band || "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Case Count </strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2">  {transaction[0]?.rulebase_count || "N/A"}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
+      
+        
       )}
       {/* Table Section */}
       <div className="flex flex-col">
@@ -224,8 +236,9 @@ export default function CaseDistributionDRCTransactions1Batch() {
                       <img
                           src= {open}
                           data-tooltip-id="my-tooltip"
-                          
+          
                         ></img>
+                      <Tooltip id="my-tooltip" place="bottom" content="More Info" />
                       {/* <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width={26}
