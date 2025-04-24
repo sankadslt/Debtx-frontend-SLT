@@ -11,6 +11,13 @@ export default function CreateSettlementPlan2() {
   const [error, setError] = useState("");
   const [settlementCount, setSettlementCount] = useState(0);
   const [caseDetails, setCaseDetails] = useState([]);
+  const [phaseText, setphaseText] = useState("");
+  const [initialAmount, setinitialAmount] = useState("");
+  const [slabCount, setSlabCount] = useState("");
+  const [slab1Amount, setSlab1Amount] = useState("");
+  const [slab2Amount, setSlab2Amount] = useState("");
+  const [slab3Amount, setSlab3Amount] = useState("");
+  const [remarkText, setRemarkText] = useState("");
   //const { caseId } = useParams(); // Get caseId from URL
 
   const caseId = location.state?.case_Id;
@@ -40,6 +47,21 @@ export default function CreateSettlementPlan2() {
     };
     fetchCaseDetails();
   }, []);
+
+  useEffect(() => {
+    const payload = {
+      case_id: caseId,
+      phase: phaseText,
+      settlement_count: settlementCount,
+      initial_amount: initialAmount,
+      slab_count: slabCount,
+      slab1_amount: slab1Amount,
+      slab2_amount: slab2Amount,
+      slab3_amount: slab3Amount,
+      remark: remarkText,
+    };
+    console.log("Sending API request with payload:", payload);
+  });
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -89,6 +111,8 @@ export default function CreateSettlementPlan2() {
                   type="text"
                   placeholder="Text here"
                   className={GlobalStyle.inputText}
+                  value={phaseText}
+                  onChange={(e) => setphaseText(e.target.value)}
                   style={{ width: "50vw" }}
                 />
               </div>
@@ -163,6 +187,8 @@ export default function CreateSettlementPlan2() {
                     type="text"
                     placeholder="Text here"
                     className={GlobalStyle.inputText}
+                    value={initialAmount}
+                    onChange={(e) => setinitialAmount(e.target.value)}
                     style={{ width: "50vw" }}
                   />
                 </div>
@@ -179,6 +205,8 @@ export default function CreateSettlementPlan2() {
                   <input
                     type="number"
                     className={`${GlobalStyle.inputText}`}
+                    value={slabCount}
+                    onChange={(e) => setSlabCount(e.target.value)}
                     style={{ width: "50vw" }}
                     min="0"
                     max="12"
@@ -197,6 +225,8 @@ export default function CreateSettlementPlan2() {
                     type="text"
                     placeholder="Text here"
                     className={GlobalStyle.inputText}
+                    value={slab1Amount}
+                    onChange={(e) => setSlab1Amount(e.target.value)}
                     style={{ width: "50vw" }}
                   />
                 </div>
@@ -213,6 +243,8 @@ export default function CreateSettlementPlan2() {
                     type="text"
                     placeholder="Text here"
                     className={GlobalStyle.inputText}
+                    value={slab2Amount}
+                    onChange={(e) => setSlab2Amount(e.target.value)}
                     style={{ width: "50vw" }}
                   />
                 </div>
@@ -229,6 +261,8 @@ export default function CreateSettlementPlan2() {
                     type="text"
                     placeholder="Text here"
                     className={GlobalStyle.inputText}
+                    value={slab3Amount}
+                    onChange={(e) => setSlab3Amount(e.target.value)}
                     style={{ width: "50vw" }}
                   />
                 </div>
@@ -250,6 +284,8 @@ export default function CreateSettlementPlan2() {
 
                   <textarea
                     className={`${GlobalStyle.remark}`}
+                    value={remarkText}
+                    onChange={(e) => setRemarkText(e.target.value)}
                     rows="5"
                   ></textarea>
                 </div>

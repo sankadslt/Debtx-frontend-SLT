@@ -14,6 +14,9 @@ export default function CreateSettlementPlan() {
   const [error, setError] = useState("");
   const [settlementCount, setSettlementCount] = useState(0);
   const [caseDetails, setCaseDetails] = useState([]);
+  const [remarkText, setRemarkText] = useState("");
+  const [phaseText, setphaseText] = useState("");
+  const [initialAmount, setinitialAmount] = useState("");
   //const { caseId } = useParams(); // Get caseId from URL
 
   const caseId = location.state?.case_Id;
@@ -76,6 +79,18 @@ export default function CreateSettlementPlan() {
       setToDate(date);
     }
   };
+  useEffect(() => {
+    const payload = {
+      case_id: caseId,
+
+      settlement_count: settlementCount,
+      initialAmount: initialAmount,
+      phase: phaseText,
+      calendar_month: calendarMonth,
+      remark: remarkText,
+    };
+    console.log("Payload for API request:", payload);
+  });
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -125,6 +140,8 @@ export default function CreateSettlementPlan() {
                   type="text"
                   placeholder="Text here"
                   className={GlobalStyle.inputText}
+                  value={phaseText}
+                  onChange={(e) => setphaseText(e.target.value)}
                   style={{ width: "50vw" }}
                 />
               </div>
@@ -200,6 +217,8 @@ export default function CreateSettlementPlan() {
                       type="text"
                       placeholder="Text here"
                       className={GlobalStyle.inputText}
+                      value={initialAmount}
+                      onChange={(e) => setinitialAmount(e.target.value)}
                       style={{ width: "50vw" }}
                     />
                   </div>
@@ -294,6 +313,8 @@ export default function CreateSettlementPlan() {
 
                     <textarea
                       className={`${GlobalStyle.remark}`}
+                      value={remarkText}
+                      onChange={(e) => setRemarkText(e.target.value)}
                       rows="5"
                     ></textarea>
                   </div>
