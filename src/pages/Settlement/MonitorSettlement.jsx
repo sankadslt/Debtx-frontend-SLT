@@ -102,6 +102,8 @@ const Monitor_settlement = () => {
   const [caseId, setCaseId] = useState("");
   const [status, setStatus] = useState("");
   const [phase, setPhase] = useState("");
+  const [accountNo, setAccountNo] = useState("");
+  const [searchBy, setSearchBy] = useState("case_id"); // Default search by case ID
 
   // const [error, setError] = useState("");
   const [filteredData, setFilteredData] = useState([]);
@@ -276,7 +278,7 @@ const Monitor_settlement = () => {
         return offsetDate.toISOString().split('T')[0];
       };
 
-      if (!caseId && !phase && !status && !fromDate && !toDate) {
+      if (!caseId && !phase && !status && !fromDate && !toDate && !accountNo) {
         Swal.fire({
           title: "Warning",
           text: "No filter is selected. Please, select a filter.",
@@ -286,6 +288,18 @@ const Monitor_settlement = () => {
         });
         setToDate(null);
         setFromDate(null);
+        return;
+      }
+
+      if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+        Swal.fire({
+          title: "Warning",
+          text: "Invalid input. Only numbers are allowed for Case ID.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        });
+        setCaseId(""); // Clear the invalid input
         return;
       }
 
@@ -319,6 +333,7 @@ const Monitor_settlement = () => {
 
       const payload = {
         case_id: caseId,
+        account_no: accountNo,
         settlement_phase: phase,
         settlement_status: status,
         from_date: formatDate(fromDate),
@@ -380,6 +395,7 @@ const Monitor_settlement = () => {
 
   const handleClear = () => {
     setCaseId("");
+    setAccountNo("");
     setPhase("");
     setStatus("");
     setFromDate(null);
@@ -391,9 +407,13 @@ const Monitor_settlement = () => {
     setFilteredData([]); // Clear filtered data
   };
 
-  const navi = () => {
-    navigate("/lod/ftl-log/preview");
+  const naviPreview = (caseId) => {
+    navigate("/lod/ftl-log/preview", { state: { caseId } });
   };
+
+  const naviCaseID = (caseId) => {
+    navigate("", { state: { caseId } });
+  }
 
   // Function to handle the creation of tasks for downloading settlement list
   const HandleCreateTaskDownloadSettlementList = async () => {
@@ -411,9 +431,21 @@ const Monitor_settlement = () => {
       return;
     }
 
+    if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Invalid input. Only numbers are allowed for Case ID.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
+      setCaseId(""); // Clear the invalid input
+      return;
+    }
+
     setIsCreatingTask(true);
     try {
-      const response = await Create_Task_For_Downloard_Settlement_List(userData);
+      const response = await Create_Task_For_Downloard_Settlement_List(userData, phase, status, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
         Swal.fire(response, `Task created successfully!`, "success");
       }
@@ -423,6 +455,11 @@ const Monitor_settlement = () => {
       setIsCreatingTask(false);
     }
   };
+
+  useEffect(() => {
+    setAccountNo("");
+    setCaseId("");
+  }, [searchBy]);
 
 
   // display loading animation when data is loading
@@ -443,13 +480,31 @@ const Monitor_settlement = () => {
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full`}>
             <div className="flex items-center justify-end w-full space-x-6">
+
+              <div className="flex items-center">
+                <select
+                  value={searchBy}
+                  onChange={(e) => setSearchBy(e.target.value)}
+                  className={`${GlobalStyle.selectBox}`}
+                  style={{ color: searchBy === "" ? "gray" : "black" }}
+                >
+                  <option value="" hidden>Select</option>
+                  <option value="account_no">Account Number</option>
+                  <option value="case_id">Case ID</option>
+                </select>
+              </div>
+
               <div className="flex items-center">
                 <input
                   type="text"
-                  value={caseId}
-                  onChange={(e) => setCaseId(e.target.value)}
+                  value={searchBy === "case_id" ? caseId : accountNo}
+                  onChange={(e) =>
+                    searchBy === "case_id"
+                      ? setCaseId(e.target.value)
+                      : setAccountNo(e.target.value)
+                  }
                   className={`${GlobalStyle.inputText}  w-40`}
-                  placeholder="Case ID"
+                  placeholder={searchBy === "case_id" ? "Case ID" : "Account Number"}
                 />
               </div>
 
@@ -590,7 +645,12 @@ const Monitor_settlement = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}>{item.case_id || "N/A"}</td>
+                      <td
+                        className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                        onClick={() => naviCaseID(item.case_id)}
+                      >
+                        {item.case_id || "N/A"}
+                      </td>
                       <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
                         {/* {item.settlement_status || "N/A"} */}
                         {renderStatusIcon(item.settlement_phase, item.settlement_status, index)}
@@ -601,10 +661,10 @@ const Monitor_settlement = () => {
                       <td className={GlobalStyle.tableData}>
                         <img
                           src={more}
-                          onClick={navi}
+                          onClick={() => naviPreview(item.case_id)}
                           title="More"
                           alt="more icon"
-                          className="w-5 h-5"
+                          className="w-5 h-5 cursor-pointer"
                         />
                       </td>
                     </tr>

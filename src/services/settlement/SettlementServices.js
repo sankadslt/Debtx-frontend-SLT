@@ -47,10 +47,16 @@ export const Case_Details_Settlement_Phase = async (payload) => {
 };
 
 // Create task for downloading Settlement list
-export const Create_Task_For_Downloard_Settlement_List = async (createdBy) => {
+export const Create_Task_For_Downloard_Settlement_List = async (createdBy, Phase, Case_Status, from_date, to_date, Case_ID, Account_Number) => {
   try {
     const response = await axios.post(`${URL}/Create_Task_For_Downloard_Settlement_List`, {
-      Created_By: createdBy,
+      Created_By: createdBy, 
+      Phase: Phase, 
+      Case_Status: Case_Status, 
+      from_date: from_date, 
+      to_date: to_date, 
+      Case_ID: Case_ID, 
+      Account_Number: Account_Number
     });
 
     // return the response status
