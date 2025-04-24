@@ -62,7 +62,7 @@ const handlestartdatechange = (date) => {
       title: "Error",
       text: "From date cannot be after the To date.",
       icon: "error",
-      confirmButtonColor: "#d33",
+      confirmButtonColor: "#f1c40f",
     });
   setStartDate(null);
   } else {
@@ -77,7 +77,7 @@ const handleenddatechange = (date) => {
       title: "Error",
       text: "To date cannot be before the From date.",
       icon: "error",
-      confirmButtonColor: "#d33",
+      confirmButtonColor: "#f1c40f",
     });
     setEndDate(null);
   } else{
@@ -421,7 +421,7 @@ console.log("Page Data:", paginatedData1);
   };
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-      <h1 className={`${GlobalStyle.headingLarge}`}>Case distribution</h1>
+      <h1 className={`${GlobalStyle.headingLarge}`}>Case distribution </h1>
       
 
       {/* Filter Section */}
@@ -534,7 +534,7 @@ console.log("Page Data:", paginatedData1);
               
               <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Approval</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Created dtm</th>
-              <th className={GlobalStyle.tableHeader} style={{ width: "60px",fontSize : "10px" }}></th>
+              <th className={GlobalStyle.tableHeader} style={{ width: "80px",fontSize : "10px" }}> </th>
             </tr>
           </thead>
           <tbody>
@@ -652,7 +652,7 @@ console.log("Page Data:", paginatedData1);
 
                   <td className={GlobalStyle.tableData} style={{ width: "60px", textAlign: "center" }}>
                     <button data-tooltip-id= {`tooltip-summary-${index}`} onClick={() => handleonsummaryclick(item.case_distribution_batch_id)} >
-                    <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "2px"}} />
+                    <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "4px"}} />
                     </button>
                     <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary"/>
 
@@ -664,7 +664,7 @@ console.log("Page Data:", paginatedData1);
 
 
                     <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_batch_id)} >
-                    <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "2px" }} />
+                    <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} />
                     </button>
                     <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary"/>
 
@@ -675,7 +675,7 @@ console.log("Page Data:", paginatedData1);
                       width={15}
                       height={15}
                       alt="Forward"
-                      style={{ position: "relative", top: "2px", left: "3px" }}
+                      style={{ position: "relative", top: "2px", left: "6px" }}
                     />
                   </button>
                   <Tooltip id={`tooltip-${item.case_distribution_batch_id}`} place="bottom">
