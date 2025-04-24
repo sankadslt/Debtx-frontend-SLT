@@ -134,21 +134,39 @@ export default function CaseDistributionDRCTransactions1Batch() {
       {/* Card Section */}
       <div className="flex flex-col items-center justify-center mb-4">
         <div className={`${GlobalStyle.cardContainer}`}>
-          <p className="mb-2">
-          <strong>Batch ID:</strong> {transactions[0]?.case_distribution_batch_id || "N/A"}
-          </p>
+          <table>
+            <colgroup>
+              <col  />
+              <col style={{ width: "20px" }} />
+              <col />
+              
+            </colgroup>
+            <tbody>
+              <tr>
+                  <td className="py-2"><strong>Batch ID  </strong></td>
+                  <td className="py-2"><strong> : </strong> </td>
+                  <td className="py-2"> {transactions[0]?.case_distribution_batch_id || "N/A"}</td>
+              </tr>
+              <tr>
+                  <td className="py-2"><strong>DRC Commission Rule</strong></td>
+                  <td className="py-2"> <strong> : </strong> </td>
+                  <td className="py-2"> {transactions[0]?.drc_commision_rule || "N/A"}</td>
+              </tr>
+              <tr>
+                  <td className="py-2"><strong>Arrears Band</strong></td>
+                  <td className="py-2"> <strong> : </strong> </td>
+                  <td className="py-2"> {transactions[0]?.current_arrears_band || "N/A"}</td>
+              </tr>
+              <tr>
+                  <td className="py-2"><strong>Case Count</strong></td>
+                  <td className="py-2"> <strong> : </strong> </td>
+                  <td className="py-2"> {transactions[0]?.rulebase_count || "N/A"}</td>
+              </tr>
 
-          <p className="mb-2">
-          <strong>DRC Commission Rule:</strong> {transactions[0]?.drc_commision_rule || "N/A"}
-          </p>
-          <p className="mb-2">
-          <strong>Arrears Band:</strong> {transactions[0]?.current_arrears_band || "N/A"}
-          </p>
+            </tbody>  
 
-          <p className="mb-2">
-          <strong>Case Count:</strong> {transactions[0]?.rulebase_count|| "N/A"}
-          </p>
-
+          </table>
+         
           {/* <p className="mb-2">
           <strong>Total Arrears Amount:</strong> {transactions[0]?.rulebase_arrears_sum || "N/A"}
           </p> */}
