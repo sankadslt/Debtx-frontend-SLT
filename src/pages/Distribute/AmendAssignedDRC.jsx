@@ -11,7 +11,7 @@ Notes: The following page conatins the codes */
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch ,FaArrowLeft } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Minorbw from "../../assets/images/minorbw.png";
 import Plusbw from "../../assets/images/plusbw.png";
@@ -217,6 +217,11 @@ export default function AmendAssignedDRC() {
        selectedDRCID2: selectedDRCID2 ? selectedDRCID2.drc_id : null});
   };
 
+
+  const handleoniconclick = () => {
+    navigate("/pages/Distribute/AssignedDRCSummary", );
+  }
+
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Header */}
@@ -229,29 +234,48 @@ export default function AmendAssignedDRC() {
       {/* Card Section */}
       <div className="flex flex-col items-center justify-center mb-4">
         <div className={`${GlobalStyle.cardContainer}`}>
-          <p className="mb-2">
-            <strong>Batch ID: </strong>{" "}
-            {transaction[0]?.case_distribution_batch_id || "N/A"}
-          </p>
-          <p className="mb-2">
-            <strong>Create DTM: </strong>{" "}
-            {transaction[0]?.created_dtm
-              ? new Date(transaction[0].created_dtm).toISOString().split("T")[0]
-              : "N/A"}
-          </p>
-          <p className="mb-2">
-            <strong>DRC Commission Rule: </strong>{" "}
-            {transaction[0]?.drc_commision_rule || "N/A"}
-          </p>
-          <p className="mb-2">
-            <strong>Arrears Band: </strong>{" "}
-            {transaction[0]?.current_arrears_band || "N/A"}
-          </p>
-
-          <p className="mb-2">
-            <strong>Case Count: </strong>{" "}
-            {transaction[0]?.rulebase_count || "N/A"}
-          </p>
+          <table>
+            <tbody>
+              <tr>
+                <td className="py-2"><strong>Batch ID  </strong></td>
+                <td className="py-2"> : </td>
+                <td className="py-2"> {transaction[0]?.case_distribution_batch_id || "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Created DTM  </strong></td>
+                <td className="py-2"> : </td>
+                <td className="py-2"> {transaction[0]?.created_dtm
+                  ? new Date(transaction[0].created_dtm).toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric", 
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                      hour12: true,
+                    })
+                  : "N/A"}
+                  </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>DRC Commission Rule  </strong></td>
+                <td className="py-2"> : </td>
+                <td className="py-2"> {transaction[0]?.drc_commision_rule || "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Arrears Band  </strong></td>
+                <td className="py-2"> : </td>
+                <td className="py-2"> {transaction[0]?.current_arrears_band || "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Case Count  </strong></td>
+                <td className="py-2"> : </td>
+                <td className="py-2"> {transaction[0]?.rulebase_count || "N/A"}</td>
+              </tr>
+                  
+            </tbody>
+          </table>
+         
           {/* <p className="mb-2">
             <strong>Total Arrears Amount: </strong>{" "}
             {transaction[0]?.rulebase_arrears_sum || "N/A"}
@@ -449,6 +473,12 @@ export default function AmendAssignedDRC() {
           Submit
         </button>
       </div>
+
+      <div className="flex justify-start mt-4">
+        <button className= {GlobalStyle.buttonPrimary} onClick={handleoniconclick}>
+        <FaArrowLeft className="mr-2" />
+        </button>
+        </div>
     </div>
   );
 }
