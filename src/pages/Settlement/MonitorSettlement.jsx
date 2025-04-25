@@ -198,17 +198,17 @@ const Monitor_settlement = () => {
   };
 
   // Handle api calling only when the currentPage incriment more that before
-  const handlePageChange = (page) => {
-    console.log("Page changed to:", page);
-    if (page > maxCurrentPage && page <= totalAPIPages) {
-      setMaxCurrentPage(page);
+  const handlePageChange = () => {
+    // console.log("Page changed to:", currentPage);
+    if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
+      setMaxCurrentPage(currentPage);
       handleFilter(); // Call the filter function only after the page incrimet 
     }
   };
 
   useEffect(() => {
     if (isFilterApplied) {
-      handlePageChange(currentPage); // Call the function whenever currentPage changes
+      handlePageChange(); // Call the function whenever currentPage changes
     }
   }, [currentPage]);
 
@@ -216,11 +216,10 @@ const Monitor_settlement = () => {
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      console.log("Current Page:", currentPage);
+      // console.log("Current Page:", currentPage);
     } else if (direction === "next" && currentPage < totalPages) {
-      // handlePageChange(currentPage + 1);
       setCurrentPage(currentPage + 1);
-      console.log("Current Page:", currentPage);
+      // console.log("Current Page:", currentPage);
     }
   };
 
@@ -269,15 +268,15 @@ const Monitor_settlement = () => {
     if (diffInMonths > 1) {
       Swal.fire({
         title: "Date Range Exceeded",
-        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+        text: "The selected dates shouldn't have more than a 1-month gap.",
         icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        confirmButtonColor: "#28a745",
-        cancelButtonText: "No",
-        cancelButtonColor: "#d33",
+        // allowOutsideClick: false,
+        // allowEscapeKey: false,
+        // showCancelButton: true,
+        // confirmButtonText: "Yes",
+        // confirmButtonColor: "#28a745",
+        // cancelButtonText: "No",
+        // cancelButtonColor: "#d33",
       })
       setToDate(null);
       setFromDate(null);
@@ -317,17 +316,17 @@ const Monitor_settlement = () => {
         return;
       }
 
-      if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-        Swal.fire({
-          title: "Warning",
-          text: "Invalid input. Only numbers are allowed for Case ID.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        });
-        setCaseId(""); // Clear the invalid input
-        return;
-      }
+      // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+      //   Swal.fire({
+      //     title: "Warning",
+      //     text: "Invalid input. Only numbers are allowed for Case ID.",
+      //     icon: "warning",
+      //     allowOutsideClick: false,
+      //     allowEscapeKey: false,
+      //   });
+      //   setCaseId(""); // Clear the invalid input
+      //   return;
+      // }
 
       if ((fromDate && !toDate) || (!fromDate && toDate)) {
         Swal.fire({
@@ -411,9 +410,29 @@ const Monitor_settlement = () => {
     }
   };
 
+  // Validate case ID input preventing non-numeric characters
+  const validateCaseId = () => {
+    if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Invalid input. Only numbers are allowed for Case ID.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
+      setCaseId(""); // Clear the invalid input
+      return;
+    }
+  }
+
+  useEffect(() => {
+    validateCaseId(); // Validate case ID input
+  }, [caseId]);
+
   const handleFilterButton = () => { // Reset to the first page
     setFilteredData([]); // Clear previous results
     setMaxCurrentPage(0); // Reset max current page
+    setTotalAPIPages(1); // Reset total API pages
     if (currentPage === 1) {
       handleFilter();
     } else {
@@ -462,6 +481,19 @@ const Monitor_settlement = () => {
         allowOutsideClick: false,
         allowEscapeKey: false
       });
+      return;
+    }
+
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "To date should be greater than or equal to From date",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      setToDate(null);
+      setFromDate(null);
       return;
     }
 

@@ -66,3 +66,28 @@ export const Create_Task_For_Downloard_Settlement_List = async (createdBy, Phase
     throw error.response?.data || error;
   }
 };
+
+// Fetching case details and settlement details for customer responce review page
+export const Case_Details_Settlement_LOD_FTL_LOD_Ext_01 = async (case_id) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/settlement/Case_Details_Settlement_LOD_FTL_LOD_Ext_01`, {
+      case_id: case_id,
+    });
+
+    // return relevant values 
+    return {
+      case_id: response.data.case_id,
+      customer_ref: response.data.customer_ref,
+      account_no: response.data.account_no,
+      arrears_amount: response.data.current_arrears_amount || null,
+      last_payment_date: response.data.last_payment_date || null,
+      lod_response: response.data.lod_response?.lod_response || null,
+      settlement_plans: response.data.settlement_plans || null,
+      payment_details: response.data.payment_details || null,
+      current_document_type: response.data.lod_response?.current_document_type || null,
+    };
+  } catch (error) {
+    console.error("Error fetching case details:", error);
+    throw error.response?.data?.message || "Failed to fetch case details";
+  }
+};
