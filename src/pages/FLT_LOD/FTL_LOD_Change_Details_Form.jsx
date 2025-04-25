@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 
 export default function FTL_LOD_Change_Details_Form() {
@@ -9,133 +9,92 @@ export default function FTL_LOD_Change_Details_Form() {
                 <div className={GlobalStyle.cardContainer}>
                     <h1 className={`${GlobalStyle.headingLarge} text-center mb-4`}>Change Details</h1>
 
-                    <form className="flex flex-col gap-4">
-                        {/* Text Input */}
-                        <div className="flex flex-col">
-                            <label className={`${GlobalStyle.headingSmall} mb-1`}>
-                                Account No :
-                            </label>
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
+                    <form className="w-full max-w-4xl mx-auto">
+                        <table className={GlobalStyle.table}>
 
-                        {/* Select Box */}
-                        <div className="flex flex-col">
-                            <label className={`${GlobalStyle.headingSmall} mb-1`}>
-                                Select Option
-                            </label>
-                            <select className={GlobalStyle.selectBox}>
-                                <option value="">Event Source</option>
-                                <option value="option1">Option 1</option>
-                                <option value="option2">Option 2</option>
-                                <option value="option3">Option 3</option>
-                            </select>
-                        </div>
+                            <tbody>
+                                {/* Field Rows */}
+                                <tr>
+                                    <td className={GlobalStyle.tableData}>Account No :</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <input type="text" className={`${GlobalStyle.inputText} w-full`} />
+                                    </td>
+                                </tr>
 
-                        <div className="flex flex-col">
-                            <label className={`${GlobalStyle.headingSmall} mb-1`}>
-                                Customer Name:
-                            </label>
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
+                                <tr>
+                                    <td className={GlobalStyle.tableData}>Select Option :</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <select className={`${GlobalStyle.selectBox} w-full`}>
+                                            <option value="">Event Source</option>
+                                            <option value="option1">Option 1</option>
+                                            <option value="option2">Option 2</option>
+                                            <option value="option3">Option 3</option>
+                                        </select>
+                                    </td>
+                                </tr>
 
-                        <div className="flex flex-col">
-                            <label className={`${GlobalStyle.headingSmall} mb-1`}>
-                                Address:
-                            </label>
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
+                                <tr>
+                                    <td className={GlobalStyle.tableData}>Customer Name :</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <input type="text" className={`${GlobalStyle.inputText} w-full`} />
+                                    </td>
+                                </tr>
 
-                        <div className="flex flex-col">
+                                <tr>
+                                    <td className={GlobalStyle.tableData}>Address :</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <input type="text" className={`${GlobalStyle.inputText} w-full`} />
+                                    </td>
+                                </tr>
 
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
+                                {/* Dynamic Additional Fields */}
+                                {["", "", "", ""].map((label, index) => (
+                                    <tr key={index}>
+                                        <td className={GlobalStyle.tableData}>{label}</td>
+                                        <td className={GlobalStyle.tableData}>
+                                            <input type="text" className={`${GlobalStyle.inputText} w-full`} />
+                                        </td>
+                                    </tr>
+                                ))}
 
-                        <div className="flex flex-col">
+                                <tr>
+                                    <td className={GlobalStyle.tableData}>Arrears :</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <input type="text" className={`${GlobalStyle.inputText} w-full`} />
+                                    </td>
+                                </tr>
 
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
-                        <div className="flex flex-col">
+                                <tr>
+                                    <td className={GlobalStyle.tableData}>Billing Centre :</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <input type="text" className={`${GlobalStyle.inputText} w-full`} />
+                                    </td>
+                                </tr>
 
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
-                        <div className="flex flex-col">
+                                <tr>
+                                    <td className={GlobalStyle.tableData}>Customer Type :</td>
+                                    <td className={GlobalStyle.tableData}>
+                                        <input type="text" className={`${GlobalStyle.inputText} w-full`} />
+                                    </td>
+                                </tr>
 
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
-
-                        <div className="flex flex-col">
-                            <label className={`${GlobalStyle.headingSmall} mb-1`}>
-                                Arrears:
-                            </label>
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
-
-                        <div className="flex flex-col">
-                            <label className={`${GlobalStyle.headingSmall} mb-1`}>
-                                Billing Centre:
-                            </label>
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
-
-                        <div className="flex flex-col">
-                            <label className={`${GlobalStyle.headingSmall} mb-1`}>
-                                Customer Type:
-                            </label>
-                            <input
-                                type="text"
-                                placeholder=""
-                                className={GlobalStyle.inputText}
-                            />
-                        </div>
-
-
-
-                        {/* Button */}
-                        <button
-                            type="submit"
-                            className={`${GlobalStyle.buttonPrimary} mt-4`}
-                        >
-                            Submit
-                        </button>
+                                {/* Submit Row */}
+                                <tr>
+                                    <td></td>
+                                    <td className={`${GlobalStyle.tableData} text-right`}>
+                                        <button type="submit" className={GlobalStyle.buttonPrimary}>
+                                            Save
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </form>
+
+
+
                 </div>
             </div>
         </>
-    )
+    );
 }

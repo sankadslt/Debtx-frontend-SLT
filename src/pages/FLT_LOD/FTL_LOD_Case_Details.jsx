@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useParams } from "react-router-dom";
@@ -15,11 +15,15 @@ const FTL_LOD_Case_Details = () => {
     const rowsPerPage = 5; // Number of rows per page
     const navigate = useNavigate();
 
+
+    const location = useLocation();
+    const item = location.state?.item;
+
     // fetching case details
     const fetchCaseDetails = async () => {
         setIsLoading(true);
         try {
-            const CaseDetails = await Case_Details_Settlement_LOD_FTL_LOD(caseId);
+            const CaseDetails = await Case_Details_Settlement_LOD_FTL_LOD(item?.case_id);
             setData(CaseDetails);
         } catch (error) {
             setData([]);

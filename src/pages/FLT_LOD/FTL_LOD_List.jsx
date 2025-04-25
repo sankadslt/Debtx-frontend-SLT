@@ -611,7 +611,9 @@ export default function FTLLODCaseList() {
     };
 
     const handleViewDetails = (item) => {
-        navigate(`/pages/flt-lod/ftl-lod-case-details/${item.case_id}`);
+        navigate('/pages/flt-lod/ftl-lod-case-details', {
+            state: { item }, // pass the full object or just case_id
+        });
         console.log("View Details for:", item);
     };
 
@@ -748,7 +750,8 @@ export default function FTLLODCaseList() {
                                 >
                                     <td
                                         className={`${GlobalStyle.tableData} text-black hover:underline cursor-pointer`}
-                                        onClick={() => navigate(`/pages/flt-lod/ftl-lod-case-details/${item.case_id}`)}
+                                        onClick={() => navigate(`/pages/flt-lod/ftl-lod-case-details`, { state: { item } })} // Pass the full object or just case_id
+                                        title="Click to view details"
                                     >
                                         {item.case_id || "N/A"}
                                     </td>

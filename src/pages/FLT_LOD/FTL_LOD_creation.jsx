@@ -41,12 +41,12 @@ export default function FTL_LOD_creation() {
                 </div>
             </div>
             <div className="flex items-center justify-end gap-4 mt-4 mb-4">
-            <button  className={`${GlobalStyle.buttonPrimary}`}>
+                <button className={`${GlobalStyle.buttonPrimary}`}>
                     Change Details
                 </button>
-                
-               
-                <button  className={`${GlobalStyle.buttonPrimary}`}>
+
+
+                <button className={`${GlobalStyle.buttonPrimary}`}>
                     Create PDF
                 </button>
             </div>

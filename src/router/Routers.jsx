@@ -576,7 +576,7 @@ const Routers = () => {
       <Route path="/pages/flt-lod/ftl-lod-list" element={<ProtectedRoute element={<FTLLODCaseList />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)" element={<ProtectedRoute element={<FTL_LOD_creation />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/flt-lod/ftl-lod-change-details-form" element={<ProtectedRoute element={<FTL_LOD_Change_Details_Form />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/flt-lod/ftl-lod-case-details/:caseId" element={<ProtectedRoute element={<FTL_LOD_Case_Details />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/flt-lod/ftl-lod-case-details" element={<ProtectedRoute element={<FTL_LOD_Case_Details />} allowedRoles={['superadmin']} />} />
 
       {/* Litigation */}
       <Route path="/pages/Litigation/Litigation_List" element={<ProtectedRoute element={<Litigation_List />} allowedRoles={['superadmin']} />} />
