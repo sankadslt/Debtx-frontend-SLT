@@ -76,6 +76,15 @@ import { Litigation_Case_Details } from "../pages/Litigation/Litigation_Case_Det
 import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
 import { Change_Litigation_Submission_Document_Summary } from "../pages/Litigation/Change_Litigation_Submission_Document_Summary";
 
+//LOD
+import Digital_Signature_LOD from "../pages/LOD/Digital_Signature_LOD";
+import LOD_Log from "../pages/LOD/LODLog";
+import FinalReminderList from "../pages/LOD/FinalReminderList";
+import CustomerResponse from "../pages/LOD/CustomerResponse";
+import CustomerResponseReview from "../pages/LOD/CustomerResponseReview";
+import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList";
+import SettlementPreview from "../pages/Settlement/SettlementPreview";
+
 const Routers = () => {
   return (
     <Routes>
@@ -554,6 +563,7 @@ const Routers = () => {
 
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
+      <Route path="/lod/ftl-log/preview" element={<ProtectedRoute element={<SettlementPreview />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
       {/* //Create SETTLEMENT */}
       <Route
@@ -575,7 +585,64 @@ const Routers = () => {
       <Route path="/pages/Litigation/Litigation_Court_Details_Update" element={<ProtectedRoute element={<Litigation_Court_Details_Update />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Case_Details" element={<ProtectedRoute element={<Litigation_Case_Details />} allowedRoles={['superadmin']} />} />
 
+      {/* //LOD */}
+      <Route
+        path="/pages/LOD/DigitalSignatureLOD"
+        element={
+          <ProtectedRoute
+            element={<Digital_Signature_LOD />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/LODLog"
+        element={
+          <ProtectedRoute
+            element={<LOD_Log />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/FinalReminderList"
+        element={
+          <ProtectedRoute
+            element={<FinalReminderList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/CustomerResponse/:caseId"
+        element={
+          <ProtectedRoute
+            element={<CustomerResponse />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/CustomerResponseReview/:caseId"
+        element={
+          <ProtectedRoute
+            element={<CustomerResponseReview />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/LOD/FinalReminderLODHoldList"
+        element={
+          <ProtectedRoute
+            element={<Final_Reminder_LOD_Hold_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
     </Routes>
+    
+    
   );
 };
 

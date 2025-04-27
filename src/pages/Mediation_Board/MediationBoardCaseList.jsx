@@ -96,7 +96,7 @@ export default function MediationBoardCaseList() {
         From_DAT: fromDate ? fromDate.toISOString().split("T")[0] : null,
         To_DAT: toDate ? toDate.toISOString().split("T")[0] : null,
       };
-  
+      
       const response = await List_All_DRCs_Mediation_Board_Cases(filters);
       console.log("Response:", response);
   
@@ -145,7 +145,14 @@ export default function MediationBoardCaseList() {
   
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
+      
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "The 'From' date cannot be later than the 'To' date.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f",
+      });
     } else {
       setError("");
       setFromDate(date);
@@ -154,7 +161,14 @@ export default function MediationBoardCaseList() {
 
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
+      
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "The 'To' date cannot be earlier than the 'From' date.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f",
+      });
     } else {
       setError("");
       setToDate(date);
@@ -179,6 +193,7 @@ export default function MediationBoardCaseList() {
         text: "Please select a filter criteria.",
         icon: "warning",
         confirmButtonText: "OK",
+         confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -223,86 +238,96 @@ export default function MediationBoardCaseList() {
       <h1 className={GlobalStyle.headingLarge}>Mediation Board Case List</h1>
 
       {/* Filter section */}
-      <div className="flex flex-wrap md:flex-nowrap items-center justify-end my-6 gap-1 mb-8">
-        {/* Status dropdown */}
-        <div className="w-40">
-          <select
-            className={`${GlobalStyle.selectBox} w-32 md:w-40`}
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-          >
-            <option value="">Status</option>
-            <option value="Forward to Mediation Board">
-            Forward to Mediation Board
-            </option>
-            <option value="MB Request Customer-Info">
-            MB Request Customer-Info
-            </option>
-            <option value=" MB Handover Customer-Info">
-            MB Handover Customer-Info
-            </option>
-            <option value="MB Fail with Pending Non-Settlement">
-            MB Fail with Pending Non-Settlement
-            </option>
-            <option value="MB Negotiation">MB Negotiation</option>
-            <option value="MB Settle Active">MB Settle Active</option>
-            <option value="MB Settle Open-Pending">
-              MB Settle Open-Pending
-            </option>
-            <option value="MB Settle Pending">MB Settle Pending</option>
-            {/* Add other status options */}
-          </select>
-        </div>
+      <div className={`${GlobalStyle.cardContainer} w-full mb-8 mt-8 justify-end `}> 
+          <div className=" flex gap-4 items-center">
+            {/* Status dropdown */}
+            <div className="">
+              <select
+                className={`${GlobalStyle.selectBox}`}
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                style={{ color: selectedStatus === "" ? "gray" : "black" }}
+              >
+                <option value="" hidden>Status</option>
+                <option value="Forward to Mediation Board" style={{ color: "black" }}>
+                Forward to Mediation Board
+                </option>
+                <option value="MB Request Customer-Info" style={{ color: "black" }}>
+                MB Request Customer-Info
+                </option>
+                <option value=" MB Handover Customer-Info" style={{ color: "black" }}>
+                MB Handover Customer-Info
+                </option>
+                <option value="MB Fail with Pending Non-Settlement" style={{ color: "black" }}>
+                MB Fail with Pending Non-Settlement
+                </option>
+                <option value="MB Negotiation" style={{ color: "black" }}>MB Negotiation</option>
+                <option value="MB Settle Active" style={{ color: "black" }}>MB Settle Active</option>
+                <option value="MB Settle Open-Pending" style={{ color: "black" }}>
+                  MB Settle Open-Pending
+                </option>
+                <option value="MB Settle Pending" style={{ color: "black" }}>MB Settle Pending</option>
+                {/* Add other status options */}
+              </select>
+            </div>
 
-        {/* DRC dropdown */}
-        <div className="w-40">
-          <select
-            className={`${GlobalStyle.selectBox} w-32 md:w-40`}
-            value={selectedDRC}
-            onChange={(e) => setSelectedDRC(e.target.value)}
-          >
-            <option value="drc">DRC</option>
-            <option value="abcd">ABCD</option>
-            {/* Add other DRC options */}
-          </select>
-        </div>
+            {/* DRC dropdown */}
+            <div className="">
+              <select
+                className={`${GlobalStyle.selectBox} `}
+                value={selectedDRC}
+                onChange={(e) => setSelectedDRC(e.target.value)}
+                style={{ color: selectedDRC === "" ? "gray" : "black" }}
 
-        {/* RTOM dropdown */}
-        <div className="w-40">
-          <select
-            className={`${GlobalStyle.selectBox} w-32 md:w-40`}
-            value={selectedRTOM}
-            onChange={(e) => setSelectedRTOM(e.target.value)}
-          >
-            <option value="">RTOM</option>
-            <option value="Standard">Standard</option>
-            {/* Add other RTOM options */}
-          </select>
-        </div>
+              >
+                <option value="drc" hidden>DRC</option>
+                <option value="abcd" style={{ color: "black" }}>ABCD</option>
+                {/* Add other DRC options */}
+              </select>
+            </div>
 
-        <label className={GlobalStyle.dataPickerDate}>Date</label>
-        <DatePicker
-          selected={fromDate}
-          onChange={handleFromDateChange}
-          dateFormat="dd/MM/yyyy"
-          placeholderText="dd/MM/yyyy"
-          className={`${GlobalStyle.inputText} w-32 md:w-40`}
-        />
-        <DatePicker
-          selected={toDate}
-          onChange={handleToDateChange}
-          dateFormat="dd/MM/yyyy"
-          placeholderText="dd/MM/yyyy"
-          className={`${GlobalStyle.inputText} w-32 md:w-40`}
-        />
+            {/* RTOM dropdown */}
+            <div className="">
+              <select
+                className={`${GlobalStyle.selectBox}`}
+                value={selectedRTOM}
+                onChange={(e) => setSelectedRTOM(e.target.value)}
+                style={{ color: selectedRTOM === "" ? "gray" : "black" }}
+              >
+                <option value="" hidden>RTOM</option>
+                <option value="Standard" style={{ color: "black" }}>Standard</option>
+                {/* Add other RTOM options */}
+              </select>
+            </div>
 
-        {/* Filter button */}
-        <button
-          className={GlobalStyle.buttonPrimary}
-          onClick={handleFilterClick}
-        >
-          Filter
-        </button>
+            <label className={GlobalStyle.dataPickerDate}>Date</label>
+            <DatePicker
+              selected={fromDate}
+              onChange={handleFromDateChange}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="From"
+              className={`${GlobalStyle.inputText}`}
+            />
+            <DatePicker
+              selected={toDate}
+              onChange={handleToDateChange}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="To"
+              className={`${GlobalStyle.inputText} `}
+            />
+
+            {/* Filter button */}
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={handleFilterClick}
+
+            >
+              Filter
+            </button>
+            <button className={GlobalStyle.buttonRemove}   >
+                        Clear 
+                    </button>
+          </div>
       </div>
 
       {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -377,7 +402,7 @@ export default function MediationBoardCaseList() {
             ))}
             {paginatedData.length === 0 && (
               <tr>
-                <td colSpan="8" className="text-center py-4">
+                <td colSpan="8" className= {GlobalStyle.tableData}  style={{ textAlign: 'center', verticalAlign: 'middle' }} >
                   {isloading ? "Loading..." : "No results found"}
                 </td>
               </tr>
