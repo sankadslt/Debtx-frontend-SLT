@@ -76,15 +76,28 @@ export const Case_Details_Settlement_LOD_FTL_LOD_Ext_01 = async (case_id) => {
 
     // return relevant values 
     return {
+      settlement_id: response.data.settlement_plans?.[0].settlement_id || null,
       case_id: response.data.case_id,
       customer_ref: response.data.customer_ref,
       account_no: response.data.account_no,
       arrears_amount: response.data.current_arrears_amount || null,
+      case_current_status: response.data.case_current_status || null,
       last_payment_date: response.data.last_payment_date || null,
-      lod_response: response.data.lod_response?.lod_response || null,
-      settlement_plans: response.data.settlement_plans || null,
-      payment_details: response.data.payment_details || null,
-      current_document_type: response.data.lod_response?.current_document_type || null,
+      last_monitoring_dtm: response.data.settlement_plans?.[0].last_monitoring_dtm || null,
+      settlement_status: response.data.settlement_plans?.[0].settlement_status || null,
+      status_dtm: response.data.settlement_plans?.[0].status_dtm || null,
+      status_reason: response.data.settlement_plans?.[0].status_reason || null,
+      settlement_phase: response.data.settlement_plans?.[0].settlement_phase || null,
+      settlement_type: response.data.settlement_plans?.[0].settlement_type || null,
+      created_by: response.data.settlement_plans?.[0].created_by || null,
+      created_dtm: response.data.settlement_plans?.[0].created_dtm || null,
+      drc_id: response.data.settlement_plans?.[0].drc_id || null,
+      ro_id: response.data.settlement_plans?.[0].ro_id || null,
+      // lod_response: response.data.lod_response?.lod_response || null,
+      settlement_plans: response.data.settlement_plans?.[0].settlement_plan || null,
+      settlement_plan_received: response.data.settlement_plans?.[0].settlement_plan_received || null,
+      // payment_details: response.data.payment_details || null,
+      // current_document_type: response.data.lod_response?.current_document_type || null,
     };
   } catch (error) {
     console.error("Error fetching case details:", error);
