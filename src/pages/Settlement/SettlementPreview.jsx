@@ -18,6 +18,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
+import { Case_Details_Settlement_LOD_FTL_LOD_Ext_01 } from "../../services/settlement/SettlementServices";
 
 const SettlementPreview = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -34,7 +35,7 @@ const SettlementPreview = () => {
     const fetchCaseDetails = async () => {
         setIsLoading(true);
         try {
-            const CaseDetails = await Case_Details_Settlement_LOD_FTL_LOD(caseId);
+            const CaseDetails = await Case_Details_Settlement_LOD_FTL_LOD_Ext_01(caseId);
             setLODData(CaseDetails);
         } catch (error) {
             setLODData([]);
