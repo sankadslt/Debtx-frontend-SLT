@@ -19,7 +19,7 @@ import { getLoggedUserId } from "../../services/auth/authService";
 export const Litigation_Court_Details_Update = () => {
   const location =useLocation();
   const navigate =useNavigate();
-//   const case_id =location.state?.case_id || "";
+  const case_id =location.state?.case_id || "";
 
   const [userId, setUserId] =useState(null);
   const [caseDetails, setCaseDetails] =useState(null);
@@ -31,7 +31,7 @@ export const Litigation_Court_Details_Update = () => {
   const [loading, setLoading] =useState(false);
   const [error, setError] =useState(null);
 
-  const case_id ="1"; //For testing
+//   const case_id ="1"; //For testing
 
   useEffect(() => {
     const loadUser =async() => {
