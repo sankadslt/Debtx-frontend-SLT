@@ -7,6 +7,9 @@ import { GrConfigure } from "react-icons/gr";
 import { FaListCheck } from "react-icons/fa6";
 import { BiSolidDiamond } from "react-icons/bi";
 import { HiOutlineDocumentCheck } from "react-icons/hi2";
+import { MdDownload } from "react-icons/md";
+
+
 import { useState, useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../services/auth/authService";
@@ -141,6 +144,8 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
+
+    {icon: MdDownload, label: "Download", link: "/incident/Incident_File_Download", roles: ["superadmin", "admin", "user"]},
     {
       icon: BiSolidDiamond,
       label: "Dummy",
