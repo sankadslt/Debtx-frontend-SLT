@@ -1,7 +1,7 @@
 /*Purpose: 
 Created Date: 2025-04-02
 Created By: Nimesh Perera (nimeshmathew999@gmail.com)
-Last Modified Date: 2025-04-02
+Last Modified Date: 2025-04-28
 Modified By: Nimesh Perera (nimeshmathew999@gmail.com)
 Version: React v18
 ui number : 4.6
@@ -14,16 +14,23 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle"
 import DatePicker from "react-datepicker";
 import { listLitigationPhaseCaseDetails, updateLegalSubmission } from "../../services/litigation/litigationService";
 import { getLoggedUserId } from "../../services/auth/authService";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const Litigation_Submission = () => {
+  const location =useLocation();
+  const navigate =useNavigate();
+  const case_id =location.state?.case_id || "";
+     
   const [userId, setUserId] =useState(null);
   const [selectedDate, setSelectedDate] =useState(null);
   const [caseDetails, setCaseDetails] =useState(null);
-  const [loading, setLoading] =useState(false);
   const [selectedSubmission, setSelectedSubmission] =useState("");
-  const [remark, setRemark] =useState(""); 
+  const [remark, setRemark] =useState("");
 
-  const case_id ="81";
+  const [loading, setLoading] =useState(false);
+  const [error, setError] =useState(null);
+
+//   const case_id ="1"; //For testing
 
   useEffect(() => {
     const fetchCaseDetails =async() => {
@@ -53,31 +60,47 @@ export const Litigation_Submission = () => {
     loadUser();    
   }, []);
 
-  const handleSubmit =async() => {
-    const payload ={
-        case_id:caseDetails.case_id,
-        submission: selectedSubmission,
-        submission_on: selectedDate,
-        submission_by: userId,
-        submission_remark: remark,
-    }
-
-    try {
-        setLoading(true);
-        const result =await updateLegalSubmission(payload);
-        if (result.status === "success") {
-            console.log("Legal Submission updated successfully");     
-        }else {
-            console.log(result.message);
-        }
-    } catch (error) {
-        console.error(error);
-    } finally{
-        setLoading(false);
-    }
-  }
+  const handleSubmit = async () => {
+    const payload = {
+      case_id: case_id,
+      submission: selectedSubmission,
+      submission_on: selectedDate,
+      submission_by: userId,
+      submission_remark: remark,
+    };
   
-
+    try {
+      setLoading(true);
+      const result = await updateLegalSubmission(payload);
+  
+      if (result.status === "success") {
+        console.log("Legal Submission updated successfully");
+        setError('');
+        navigate('/pages/Litigation/Litigation_List');
+      } else {
+        console.log("API Error:", result);
+  
+        const errorCode = result.errors?.code;
+        let errorMessage = result.message || "An unexpected error occurred.";
+  
+        if (errorCode === 400) {
+          errorMessage = "Missing required fields.";
+        } else if (errorCode === 404) {
+          errorMessage = "Case not found. Please verify the Case ID.";
+        } else if (errorCode === 500) {
+          errorMessage = "Server error. Please try again later.";
+        }
+  
+        setError(errorMessage);
+      }
+    } catch (error) {
+      console.error("Network or unexpected error:", error);
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   return (
     <div className={GlobalStyle.fontPoppins}>
         <h1 className={GlobalStyle.headingLarge}>Legal Submission</h1>
@@ -152,6 +175,11 @@ export const Litigation_Submission = () => {
                             Submit
                         </button>
                 </div>
+                {error && (
+                    <div className="mt-2 text-end">
+                        <span className="text-red-500 text-sm">{error}</span>
+                    </div>
+                )}
             </div>
         </div>
 

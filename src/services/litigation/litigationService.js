@@ -121,3 +121,33 @@ export const updateLegalSubmission = async (payload) => {
     };
   }
 };
+
+export const createLegalDetails = async (payload) => {
+  try {
+    const response = await axios.patch(
+      `${URL}/Create_Legal_Details_By_Case_ID`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+    
+  } catch (error) {
+    console.error("Error creating legal details:", error);
+
+    const errorMessage = error?.response?.data?.message || "Something went wrong.";
+    const errorDetails = error?.response?.data?.errors || {};
+
+    return {
+      status: "error",
+      message: errorMessage,
+      errors: errorDetails,
+    };
+  }
+};
+
+

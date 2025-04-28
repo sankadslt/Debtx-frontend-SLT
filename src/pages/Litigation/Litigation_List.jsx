@@ -1,7 +1,7 @@
 /*Purpose: 
 Created Date: 2025-04-01
 Created By: Nimesh Perera (nimeshmathew999@gmail.com)
-Last Modified Date: 2025-04-10
+Last Modified Date: 2025-04-28
 Modified By: Nimesh Perera (nimeshmathew999@gmail.com), Sasindu Srinayaka (sasindusrinayaka@gmail.com)
 Version: React v18
 ui number : 4.1
@@ -378,7 +378,9 @@ export const Litigation_List = () => {
                               alt="Legal Submission"
                               className="w-6 h-6 cursor-pointer"
                               title="Legal Submission"
-                              onClick={() => navigate("/pages/Litigation/Litigation_Submission")}    
+                              onClick={() => navigate("/pages/Litigation/Litigation_Submission", {
+                                state:{case_id : item.case_id}
+                              })}    
                             />
                           </div>
                         )}
@@ -418,7 +420,9 @@ export const Litigation_List = () => {
                               alt="Legal Details"
                               className="w-6 h-6 cursor-pointer"
                               title="Create Details"
-                              onClick={() => navigate("/pages/Litigation/Litigation_Court_Details_Update")}
+                              onClick={() => navigate("/pages/Litigation/Litigation_Court_Details_Update", {
+                                state:{case_id : item.case_id}
+                              })} 
                             />
                             <img
                               src={Create_Settlement}
