@@ -25,6 +25,8 @@ import { Task_for_Download_Incidents } from "../../services/task/taskService.js"
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
 import { FaPlus } from 'react-icons/fa';
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 import opeanincident from  "/src/assets/images/incidents/Incident_Open.png"
 import rejectincident from  "/src/assets/images/incidents/Incident_Reject.png"
 import inprogressincident from  "/src/assets/images/incidents/Incident_InProgress.png"
@@ -42,7 +44,33 @@ const Incident_List = () => {
     const [isLoading, setIsLoading] = useState(false); // Loading state for task creation
     const [isCreatingTask, setIsCreatingTask] = useState(false); 
     const [isFiltered, setIsFiltered] = useState(false); // Filtered state for filtering data
+
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
     const navigate = useNavigate();
+
+
+    // Role-Based Button
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
 
 
     // / Function to get the status icon based on the status value
@@ -312,6 +340,8 @@ const Incident_List = () => {
         }
     };
 
+     
+    
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Incident List</h2>
@@ -350,10 +380,23 @@ const Incident_List = () => {
                     <DatePicker selected={fromDate} onChange={handleFromDateChange} dateFormat="dd/MM/yyyy" placeholderText="From " className={GlobalStyle.inputText} />
                     <DatePicker selected={toDate} onChange={handleToDateChange} dateFormat="dd/MM/yyyy" placeholderText="To " className={GlobalStyle.inputText} />
                    
-                    <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
-                    <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+                    {/* <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button> */}
+                    <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                   <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
+                    )}
+                </div>
+
+                <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+                  Clear 
+              </button>
+                    )}
+                </div>
+                    {/* <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
                         Clear 
-                    </button>
+                    </button> */}
                     
                 </div>
             </div>
@@ -439,14 +482,27 @@ const Incident_List = () => {
                         
             {/* Create Task Button */}
             <div className="flex justify-end mt-6">
-                <button 
+
+            <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button 
+                  onClick={HandleCreateTask} 
+                  className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
+                  disabled={isCreatingTask}
+              >   
+                  <FaDownload className="mr-2" />
+                  {isCreatingTask ? 'Creating Tasks...' : '  Create task and let me know'}
+              </button>
+                    )}
+                </div>
+                {/* <button 
                     onClick={HandleCreateTask} 
                     className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
                     disabled={isCreatingTask}
                 >   
                     <FaDownload className="mr-2" />
                     {isCreatingTask ? 'Creating Tasks...' : '  Create task and let me know'}
-                </button>
+                </button> */}
             </div>
         </div>
     );
