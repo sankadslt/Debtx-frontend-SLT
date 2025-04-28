@@ -29,20 +29,22 @@ import rejectincident from  "/src/assets/images/incidents/Incident_Reject.png"
 import inprogressincident from  "/src/assets/images/incidents/Incident_InProgress.png"
 
 const Incident_List = () => {
-    const [currentPage, setCurrentPage] = useState(0);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [fromDate, setFromDate] = useState(null);
-    const [toDate, setToDate] = useState(null);
-    const rowsPerPage = 8;
-    const [status1, setStatus1] = useState("");
-    const [status2, setStatus2] = useState("");
-    const [status3, setStatus3] = useState("");
-    const [data, setData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isCreatingTask, setIsCreatingTask] = useState(false);
-    const [isFiltered, setIsFiltered] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0); // Pagination state
+    const [searchQuery, setSearchQuery] = useState(""); //  Search query state
+    const [fromDate, setFromDate] = useState(null); // Date state for filtering
+    const [toDate, setToDate] = useState(null);// / Date state for filtering
+    const rowsPerPage = 8; // Pagination state
+    const [status1, setStatus1] = useState(""); // Status state for filtering
+    const [status2, setStatus2] = useState(""); // / Status state for filtering
+    const [status3, setStatus3] = useState(""); // Status state for filtering
+    const [data, setData] = useState([]);   // Data state for storing incident data
+    const [isLoading, setIsLoading] = useState(false); // Loading state for task creation
+    const [isCreatingTask, setIsCreatingTask] = useState(false); 
+    const [isFiltered, setIsFiltered] = useState(false); // Filtered state for filtering data
     const navigate = useNavigate();
 
+
+    // / Function to get the status icon based on the status value
     const getStatusIcon = (status) => {
         switch (status?.toLowerCase()) {
             case "incident open":
@@ -55,7 +57,7 @@ const Incident_List = () => {
                 return null;
         }
     };
-
+    // Function to render the status icon with tooltip
     const renderStatusIcon = (status , index) => {
         const iconPath = getStatusIcon(status);
         
@@ -80,34 +82,70 @@ const Incident_List = () => {
         </div>
         );
     };
-
+    
+    // Function to handle date change for "From" date
     const handleFromDateChange = (date) => {
         if (toDate && date > toDate) {
             Swal.fire({
                 title: "Error",
                 text: "From date cannot be after the To date.",
                 icon: "error",
-                confirmButtonColor: "#d33", 
+                confirmButtonColor: "#f1c40f", 
             });
+        } else if (toDate) {
+            // Calculate month gap
+            const diffInMs = toDate - date;
+            const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+            
+            if (diffInDays > 31) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "The selected range is more than 1 month.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                });
+                
+                return;
+            }
+            setFromDate(date);
         } else {
             setFromDate(date);
+            
         }
         
     };
-
+    
+    // Function to handle date change for "To" date
     const handleToDateChange = (date) => {
         if (fromDate && date < fromDate) {
             Swal.fire({
                 title: "Error",
                 text: "To date cannot be before the From date.",
                 icon: "error",
-                confirmButtonColor: "#d33", 
+                confirmButtonColor: "#f1c40f", 
             });
+        } else if (fromDate) {
+            // Calculate month gap
+            const diffInMs = date - fromDate;
+            const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+            
+            if (diffInDays > 31) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "The selected range is more than 1 month.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                });
+                
+                return;
+            }
+            setToDate(date);
         } else {
             setToDate(date);
         }
     };
 
+    // Function to fetch incident data from the API
     const fetchData = async (filters) => {
         setIsLoading(true);
         try {
@@ -128,6 +166,7 @@ const Incident_List = () => {
         }
     };
 
+    // / Function to handle filter button click
     const handleFilter = async () => {
         try {
             if (!fromDate || !toDate) {
@@ -158,7 +197,8 @@ const Incident_List = () => {
             });
         }
     };
-
+    
+    // Function to handle filter clear button click
     const handlefilterclear = () => {
         setStatus1("");
         setStatus2("");
@@ -168,7 +208,7 @@ const Incident_List = () => {
         fetchData({});
     };
 
-
+    // Function to handle the creation of a task for downloading incidents
     const HandleCreateTask = async () => {
         if (!fromDate || !toDate) {
             Swal.fire({
@@ -207,10 +247,11 @@ const Incident_List = () => {
         setIsCreatingTask(true);
         try {
             const response = await Task_for_Download_Incidents(requestData);
+            console.log("Task created successfully:", response);
             
             Swal.fire({
                 title: "Success",
-                text: `Task created successfully! Task ID: ${response.Task_Id}`,
+                text: `Task created successfully! Task ID: ${response.ResponseData.data.Task_Id}`,
                 icon: "success",
                 confirmButtonColor: "#28a745", 
             });
@@ -231,6 +272,7 @@ const Incident_List = () => {
         fetchData({});
     }, []);
 
+    /// Function to handle the addition of a new incident
     const HandleAddIncident = () => navigate("/incident/register");
 
     if (isLoading) {
@@ -241,6 +283,7 @@ const Incident_List = () => {
         );
     }
 
+    // Function to handle search input change
     const filteredData = data.filter((row) =>
         String(row.incidentID).toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -254,12 +297,14 @@ const Incident_List = () => {
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, endIndex);
     
+    // Function to handle previous page button click
     const handlePrevPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
         }
     };
 
+    // Function to handle next page button click
     const handleNextPage = () => {
         if (currentPage < pages - 1) {
             setCurrentPage(currentPage + 1);
@@ -275,7 +320,7 @@ const Incident_List = () => {
                     Add Incident
                 </button>
             </div>
-
+            {/*Filter section */}
             <div className= {`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
                 <div className="flex items-center justify-end w-full space-x-6">
                     <select value={status1} onChange={(e) => setStatus1(e.target.value)} style={{ color: status1 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
@@ -310,6 +355,7 @@ const Incident_List = () => {
                 </div>
             </div>
 
+             {/* Search Section */}
             <div className="mb-4 flex justify-start">
                 <div className={GlobalStyle.searchBarContainer}>
                     <input
@@ -323,6 +369,7 @@ const Incident_List = () => {
                 </div>
             </div>
 
+             {/* Table Section */}
             <div className={GlobalStyle.tableContainer}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
@@ -373,7 +420,8 @@ const Incident_List = () => {
                     </tbody>
                 </table>
             </div>
-
+            
+             {/* Pagnation section */}
             <div className={GlobalStyle.navButtonContainer}>
                 <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
                     <FaArrowLeft />
@@ -385,7 +433,8 @@ const Incident_List = () => {
                     <FaArrowRight />
                 </button>
             </div>
-
+                        
+            {/* Create Task Button */}
             <div className="flex justify-end mt-6">
                 <button 
                     onClick={HandleCreateTask} 
