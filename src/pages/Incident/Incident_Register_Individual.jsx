@@ -11,12 +11,14 @@ Related Files:
 Notes: This template uses Tailwind CSS */
 
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import { createIncident } from "../../services/Incidents/incidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 
 const Incident_Register_Individual = () => {
@@ -28,6 +30,32 @@ const Incident_Register_Individual = () => {
   
   const [errors, setErrors] = useState({}); // Validation errors state
   const [errors1, setErrors1] = useState({}); // Additional validation errors state
+
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+
+  // Role-Based Buttons 
+      useEffect(() => {
+          const token = localStorage.getItem("accessToken");
+          if (!token) return;
+      
+          try {
+            let decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+      
+            if (decoded.exp < currentTime) {
+              refreshAccessToken().then((newToken) => {
+                if (!newToken) return;
+                const newDecoded = jwtDecode(newToken);
+                setUserRole(newDecoded.role);
+              });
+            } else {
+              setUserRole(decoded.role);
+            }
+          } catch (error) {
+            console.error("Invalid token:", error);
+          }
+        }, []);
 
   // Validation function to check if the form is filled correctly
   const validateForm = () => {
@@ -362,7 +390,12 @@ const handleSubmit = async (e) => {
 
               {/* Submit Button */}
               <div className="pt-4 flex justify-end">
-                <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button>
+              <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button>
+                    )}
+                </div>
+                {/* <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button> */}
               </div>
             </form>
             </div>
