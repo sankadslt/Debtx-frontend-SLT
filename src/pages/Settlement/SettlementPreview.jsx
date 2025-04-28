@@ -19,6 +19,9 @@ import { FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
 import { Case_Details_Settlement_LOD_FTL_LOD_Ext_01 } from "../../services/settlement/SettlementServices";
+import { getLoggedUserId } from "../../services/auth/authService";
+import { Create_Task_For_Downloard_Settlement_Details_By_Case_ID } from "../../services/settlement/SettlementServices";
+import Swal from 'sweetalert2';
 
 const SettlementPreview = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -26,6 +29,7 @@ const SettlementPreview = () => {
     const [currentPagesettlementPlanRecievedDetails, setCurrentPagesettlementPlanRecievedDetails] = useState(0);
     const [Settlementdata, setSettlementData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isCreatingTask, setIsCreatingTask] = useState(false);
     const location = useLocation(); // Get the current location
     const { caseId } = location.state || {};// Get the case_id from the URL parameters
     const rowsPerPage = 5; // Number of rows per page
@@ -107,6 +111,23 @@ const SettlementPreview = () => {
         navigate("/pages/Settlement/MonitorSettlement");
     }
 
+    const HandleCreateTaskDownloadSettlementDetailsByCaseID = async () => {
+
+        const userData = await getLoggedUserId(); // Assign user ID
+
+        setIsCreatingTask(true);
+        try {
+            const response = await Create_Task_For_Downloard_Settlement_Details_By_Case_ID(userData, caseId);
+            if (response === "success") {
+                Swal.fire(response, `Task created successfully!`, "success");
+            }
+        } catch (error) {
+            Swal.fire("Error", error.message || "Failed to create task.", "error");
+        } finally {
+            setIsCreatingTask(false);
+        }
+    };
+
     return (
         <div className={GlobalStyle.fontPoppins}>
             <div className="flex justify-between items-center mt-4">
@@ -114,16 +135,16 @@ const SettlementPreview = () => {
                 <h2 className={GlobalStyle.headingLarge}>Settlement Details</h2>
 
                 <button
-                    // onClick={HandleCreateTaskDownloadSettlementList}
-                    // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-                    className={GlobalStyle.buttonPrimary}
-                    // disabled={isCreatingTask}
+                    onClick={HandleCreateTaskDownloadSettlementDetailsByCaseID}
+                    className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                    // className={GlobalStyle.buttonPrimary}
+                    disabled={isCreatingTask}
                     style={{ display: 'flex', alignItems: 'center' }}
                 >
-                    {/* {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-                {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
-                    <FaDownload style={{ marginRight: '8px' }} />
-                    Create task and let me know
+                    {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+                    {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                    {/* <FaDownload style={{ marginRight: '8px' }} />
+                    Create task and let me know */}
                 </button>
             </div>
 
@@ -242,8 +263,8 @@ const SettlementPreview = () => {
                                         }
                                     </td>
                                     <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Installment_Paid_Amount &&
-                                            log.Installment_Paid_Amount.toLocaleString("en-LK", {
+                                        {log?.Cumulative_Settle_Amount &&
+                                            log.Cumulative_Settle_Amount.toLocaleString("en-LK", {
                                                 style: "currency",
                                                 currency: "LKR",
                                             })

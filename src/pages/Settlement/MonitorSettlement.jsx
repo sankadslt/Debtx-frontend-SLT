@@ -497,17 +497,17 @@ const Monitor_settlement = () => {
       return;
     }
 
-    if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-      Swal.fire({
-        title: "Warning",
-        text: "Invalid input. Only numbers are allowed for Case ID.",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
-      setCaseId(""); // Clear the invalid input
-      return;
-    }
+    // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+    //   Swal.fire({
+    //     title: "Warning",
+    //     text: "Invalid input. Only numbers are allowed for Case ID.",
+    //     icon: "warning",
+    //     allowOutsideClick: false,
+    //     allowEscapeKey: false,
+    //   });
+    //   setCaseId(""); // Clear the invalid input
+    //   return;
+    // }
 
     setIsCreatingTask(true);
     try {
@@ -545,7 +545,7 @@ const Monitor_settlement = () => {
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full`}>
-            <div className="flex items-center justify-end w-full space-x-6">
+            <div className="flex items-center justify-end w-full space-x-3">
 
               <div className="flex items-center">
                 <select
@@ -581,7 +581,7 @@ const Monitor_settlement = () => {
                   className={`${GlobalStyle.selectBox}`}
                   style={{ color: phase === "" ? "gray" : "black" }}
                 >
-                  <option value="" hidden>Settlement Phase</option>
+                  <option value="" hidden>Phase</option>
                   <option value="Negotiation">Negotiation</option>
                   <option value="Mediation Board">Mediation Board</option>
                   <option value="Litigation">Litigation</option>
@@ -595,7 +595,7 @@ const Monitor_settlement = () => {
                   className={`${GlobalStyle.selectBox}`}
                   style={{ color: status === "" ? "gray" : "black" }}
                 >
-                  <option value="" hidden>Settlement Status</option>
+                  <option value="" hidden>Status</option>
                   <option value="Pending">Pending</option>
                   <option value="Open_Pending">Open Pending</option>
                   <option value="Active">Active</option>
@@ -603,7 +603,8 @@ const Monitor_settlement = () => {
               </div>
 
               <label className={GlobalStyle.dataPickerDate}>Date</label>
-              <div className={GlobalStyle.datePickerContainer}>
+              {/* <div className={GlobalStyle.datePickerContainer}> */}
+              <div className="flex items-center space-x-2">
                 <div className="flex items-center">
                   <DatePicker
                     selected={fromDate}

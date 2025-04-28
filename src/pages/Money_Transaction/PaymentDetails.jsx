@@ -1,115 +1,266 @@
-/* Purpose: This template is used for the 7.7 - Payment Details .
-Created Date: 2025-03-13
-Created By: Buthmi mithara (buthmimithara1234@gmail.com)
-Modified By: K.K C Sakumini (sakuminic@gmail.com)
-Version: node 20
-ui number : 7.7
+/*Purpose: This template is used for the 7.5 Sup - Monitor Settlemnt page.
+Created Date: 2025-12-03
+Created By: Susinidu Sachinthana (susinidusachinthana@gmail.com)
+Last Modified Date: 2025-12-03
+Modified Date: 2025-12-03
+Modified By: Susinidu Sachinthana, Chamath Jayasanka
+Version: node 22
+ui number : 7.5
 Dependencies: tailwind css
-Related Files: (routes)
-Notes:The following page conatins the code for the Payment Details Screen */
+Related Files:
+Notes:  */
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import infor from "../../assets/images/moneyTransaction/infor.png";
+import { useNavigate } from "react-router-dom";
+import more from "../../assets/images/imagefor1.a.13(one).png";
+import { listAllSettlementCases } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
+import { Tooltip } from "react-tooltip";
+import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
+import { getLoggedUserId } from "../../services/auth/authService";
+import RO_Settle_Pending from "/src/assets/images/Settlement/RO_Settle_Pending.png";
+import RO_Settle_Open_Pending from "/src/assets/images/Settlement/RO_Settle_Open_Pending.png";
+import RO_Settle_Active from "/src/assets/images/Settlement/RO_Settle_Active.png";
+import MB_Settle_Pending from "/src/assets/images/Settlement/MB Settle Pending.png";
+import MB_Settle_Open_Pending from "/src/assets/images/Settlement/MB Settle Open Pending.png"
+import MB_Settle_Active from "/src/assets/images/Settlement/MB Settle Active.png";
+import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation Settle Pending.png";
+import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
+import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
 import { List_All_Payment_Cases } from "../../services/Transaction/Money_TransactionService";
 
+// // Import status icons with correct file extensions
+// import RO_Negotiation_FMB_pending from "../../assets/images/negotiation/RO_Negotiation_FMB_pending.png";
+// import RO_Negotiation_Extneded from "../../assets/images/negotiation/RO_Negotiation_Extneded.png";
+// import RO_Negotiation_Extension_Pending from "../../assets/images/negotiation/RO_Negotiation_Extension_Pending.png";
+// import Negotiation_Settle_Active from "../../assets/images/negotiation/Negotiation_Settle_Active.png";
+// import Negotiation_Settle_Open_Pending from "../../assets/images/negotiation/Negotiation_Settle_Open_Pending.png";
+// import Negotiation_Settle_Pending from "../../assets/images/negotiation/Negotiation_Settle_Pending.png";
+// import RO_Negotiation from "../../assets/images/negotiation/RO_Negotiation.png";
+
+// // Status icon mapping
+// const STATUS_ICONS = {
+//   "RO Negotiation FMB Pending": {
+//     icon: RO_Negotiation_FMB_pending,
+//     tooltip: "RO Negotiation FMB pending"
+//   },
+//   "RO Negotiation Extended": {
+//     icon: RO_Negotiation_Extneded,
+//     tooltip: "RO Negotiation Extneded"
+//   },
+//   "RO Negotiation Extension Pending": {
+//     icon: RO_Negotiation_Extension_Pending,
+//     tooltip: "RO Negotiation Extension Pending"
+//   },
+//   "Negotiation Settle Active": {
+//     icon: Negotiation_Settle_Active,
+//     tooltip: "Negotiation Settle Active"
+//   },
+//   "Negotiation Settle Open-Pending": {
+//     icon: Negotiation_Settle_Open_Pending,
+//     tooltip: "Negotiation Settle Open-Pending"
+//   },
+//   "Negotiation Settle Pending": {
+//     icon: Negotiation_Settle_Pending,
+//     tooltip: "Negotiation Settle Pending"
+//   },
+//   "RO Negotiation": {
+//     icon: RO_Negotiation,
+//     tooltip: "MB Settle open pending"
+//   },
+// };
+
+// // Status Icon component with tooltip
+// const StatusIcon = ({ status }) => {
+//   const statusInfo = STATUS_ICONS[status];
+
+//   if (!statusInfo) return <span>{status}</span>;
+
+//   return (
+//     <div className="relative group">
+//       <img 
+//         src={statusInfo.icon} 
+//         alt={status}
+//         className="w-6 h-6 cursor-help"
+//       />
+//       <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-sm rounded px-2 py-1 left-1/2 transform -translate-x-1/2 bottom-full mb-1 whitespace-nowrap z-10">
+//         {statusInfo.tooltip}
+//         <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-2 h-2 bg-gray-800 rotate-45"></div>
+//       </div>
+//     </div>
+//   );
+// };
+
 const PaymentDetails = () => {
-  const [selectValue, setSelectValue] = useState("Account No");
-  const [inputFilter, setInputFilter] = useState("");
-  const [phase, setPhase] = useState("");
+  // State Variables
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [caseId, setCaseId] = useState("");
+  const [status, setStatus] = useState("");
+  const [phase, setPhase] = useState("");
+  const [accountNo, setAccountNo] = useState("");
+  const [searchBy, setSearchBy] = useState("case_id"); // Default search by case ID
+
+  // const [error, setError] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalAPIPages, setTotalAPIPages] = useState(1);
+  const [isFilterApplied, setIsFilterApplied] = useState(false);
   const rowsPerPage = 10; // Number of rows per page
 
-  // Fetch initial data on component mount
+  // variables need for table
+  // const maxPages = Math.ceil(filteredDataBySearch.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
+  // const recordsPerPage = 10;
+  // const indexOfLastRecord = currentPage * recordsPerPage;
+  // const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  // const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
+  // const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+
+  // return Icon based on settlement status and settlement phase
+  // const getStatusIcon = (phase, status) => {
+  //   switch (phase?.toLowerCase()) {
+  //     case "negotiation":
+  //       switch (status?.toLowerCase()) {
+  //         case "pending":
+  //           return RO_Settle_Pending;
+  //         case "open_pending":
+  //           return RO_Settle_Open_Pending;
+  //         case "active":
+  //           return RO_Settle_Active;
+  //         default:
+  //           return null;
+  //       }
+  //     case "mediation board":
+  //       switch (status?.toLowerCase()) {
+  //         case "pending":
+  //           return MB_Settle_Pending;
+  //         case "open_pending":
+  //           return MB_Settle_Open_Pending;
+  //         case "active":
+  //           return MB_Settle_Active;
+  //         default:
+  //           return null;
+  //       }
+  //     case "litigation":
+  //       switch (status?.toLowerCase()) {
+  //         case "pending":
+  //           return Litigation_Settle_Pending;
+  //         case "open_pending":
+  //           return Litigation_Settle_Open_Pending;
+  //         case "active":
+  //           return Litigation_Settle_Active;
+  //         default:
+  //           return null;
+  //       }
+  //     default:
+  //       return null;
+  //   }
+  // };
+
+  // render status icon with tooltip
+  const renderStatusIcon = (phase, status, index) => {
+    const iconPath = getStatusIcon(phase, status);
+
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+
+    const tooltipId = `tooltip-${index}`;
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={iconPath}
+          alt={status}
+          className="w-6 h-6"
+          data-tooltip-id={tooltipId} // Add tooltip ID to image
+        />
+        {/* Tooltip component */}
+        <Tooltip id={tooltipId} place="bottom" effect="solid">
+          {`${phase} Settle ${status}`} {/* Tooltip text is the phase and status */}
+        </Tooltip>
+      </div>
+    );
+  };
+
+  // Handle api calling only when the currentPage incriment more that before
+  const handlePageChange = () => {
+    // console.log("Page changed to:", currentPage);
+    if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
+      console.log("Page changed to:", currentPage);
+      setMaxCurrentPage(currentPage);
+      handleFilter(); // Call the filter function only after the page incrimet 
+    }
+  };
+
   useEffect(() => {
-    fetchInitialData();
-  }, []);
+    if (isFilterApplied) {
+      handlePageChange(); // Call the function whenever currentPage changes
+    }
+  }, [currentPage]);
 
-  // Function to fetch initial data
-  const fetchInitialData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await List_All_Payment_Cases({
-        page: 1,
-        limit: rowsPerPage,
-        recent: true
-      });
-      
-      // Transform backend data to match frontend structure
-      const transformedData = transformPaymentData(response.data);
-      setFilteredData(transformedData);
-    } catch (error) {
-      console.error("Failed to fetch payment data:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Failed to fetch payment data",
-        icon: "error"
-      });
-      setFilteredData([]);
-    } finally {
-      setIsLoading(false);
+  // Handle Pagination
+  const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      // console.log("Current Page:", currentPage);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      // console.log("Current Page:", currentPage);
     }
   };
 
-  // Function to transform backend data to frontend format
-  const transformPaymentData = (paymentData) => {
-    return paymentData.map(payment => ({
-      caseId: payment.Case_ID?.toString() || "-",
-      accountNo: payment.Account_No?.toString() || "-",
-      settlementId: payment.Settlement_ID?.toString() || "-",
-      paiddtm: payment.Money_Transaction_Date ? new Date(payment.Money_Transaction_Date).toISOString().split('T')[0] : "-",
-      amount: payment.Money_Transaction_Amount?.toString() || "0",
-      type: payment.Transaction_Type|| "-",
-      phase: payment.Settlement_Phase || "-",
-      settledbalance: payment. Cummulative_Settled_Balance?.toString() || "0"
-    }));
-  };
+  // useEffect(() => {
+  //   if (isFilterApplied) {
+  //     handleFilter(); // Call the filter function only afer the filters are applied
+  //   }
+  // }, [currentPage]);
+  /*  const [appliedFilters, setAppliedFilters] = useState({
+     searchQuery: "",
+     caseId: "",
+     status: "",
+     phase: "",
+     fromDate: null,
+     toDate: null,
+   }); */
 
-  // Date handlers with immediate validation
-  const handleFromDateChange = (date) => {
+  // const rowsPerPage = 7;
+
+  const navigate = useNavigate();
+
+  const handlestartdatechange = (date) => {
     setFromDate(date);
-    
-    // Check if dates are invalid immediately after selection
-    if (date && toDate && date.getTime() > toDate.getTime()) {
-      Swal.fire({
-        title: "Warning",
-        text: "From date should be less than or equal to To date",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-    }
-    
-    if (toDate) checkDateDifference(date, toDate);
+    if (toDate) checkdatediffrence(date, toDate);
   };
 
-  const handleToDateChange = (date) => {
+  const handleenddatechange = (date) => {
     setToDate(date);
-    
-    // Check if dates are invalid immediately after selection
-    if (fromDate && date && fromDate.getTime() > date.getTime()) {
-      Swal.fire({
-        title: "Warning",
-        text: "To date should be greater than or equal to From date",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-    }
-    
-    if (fromDate) checkDateDifference(fromDate, date);
+    if (fromDate) checkdatediffrence(fromDate, date);
   };
 
-  const checkDateDifference = (startDate, endDate) => {
+  // const handleenddatechange = (date) => {
+  //   if (fromDate) {
+  //     checkdatediffrence(fromDate, date);
+  //   }
+  //   setToDate(date);
+  // }
+
+  const checkdatediffrence = (startDate, endDate) => {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
     const diffInMs = end - start;
@@ -119,58 +270,224 @@ const PaymentDetails = () => {
     if (diffInMonths > 1) {
       Swal.fire({
         title: "Date Range Exceeded",
-        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+        text: "The selected dates shouldn't have more than a 1-month gap.",
         icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        confirmButtonColor: "#28a745",
-        cancelButtonText: "No",
-        cancelButtonColor: "#d33",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // If user confirms, keep the dates and continue
-          setToDate(endDate);
+        // allowOutsideClick: false,
+        // allowEscapeKey: false,
+        // showCancelButton: true,
+        // confirmButtonText: "Yes",
+        // confirmButtonColor: "#28a745",
+        // cancelButtonText: "No",
+        // cancelButtonColor: "#d33",
+      })
+      setToDate(null);
+      setFromDate(null);
+      return;
+    }
+  };
+
+  // Search Section
+  const filteredDataBySearch = paginatedData.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  const handleFilter = async () => {
+    try {
+      // setFilteredData([]); // Clear previous results
+
+      // Format the date to 'YYYY-MM-DD' format
+      const formatDate = (date) => {
+        if (!date) return null;
+        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return offsetDate.toISOString().split('T')[0];
+      };
+
+      if (!caseId && !phase && !status && !fromDate && !toDate && !accountNo) {
+        Swal.fire({
+          title: "Warning",
+          text: "No filter is selected. Please, select a filter.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
+      // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+      //   Swal.fire({
+      //     title: "Warning",
+      //     text: "Invalid input. Only numbers are allowed for Case ID.",
+      //     icon: "warning",
+      //     allowOutsideClick: false,
+      //     allowEscapeKey: false,
+      //   });
+      //   setCaseId(""); // Clear the invalid input
+      //   return;
+      // }
+
+      if ((fromDate && !toDate) || (!fromDate && toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "Both From Date and To Date must be selected.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "To date should be greater than or equal to From date",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
+      console.log(currentPage);
+
+      const payload = {
+        case_id: caseId,
+        account_no: accountNo,
+        settlement_phase: phase,
+        // settlement_status: status,
+        from_date: formatDate(fromDate),
+        to_date: formatDate(toDate),
+        page: currentPage,
+      };
+      console.log("Payload sent to API: ", payload);
+
+      setIsLoading(true); // Set loading state to true
+      const response = await List_All_Payment_Cases(payload).catch((error) => {
+        if (error.response && error.response.status === 404) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+          setFilteredData([]);
+          return null;
         } else {
-          // If user cancels, reset the to date
-          setToDate(null);
+          throw error;
         }
+      });
+      setIsLoading(false); // Set loading state to false
+
+      // Updated response handling
+      if (response && response.data) {
+        console.log("Valid data received:", response.data);
+        console.log("Total records:", response.pagination.total);
+        console.log("API pages:", response.pagination.pages);
+        const totalPages = Math.ceil(response.pagination.total / rowsPerPage);
+        setTotalPages(totalPages);
+        setTotalAPIPages(response.pagination.pages); // Set the total pages from the API response
+        // Append the new data to the existing data
+        setFilteredData((prevData) => [...prevData, ...response.data]);
+
+        // setFilteredData(response.data.data);
+      } else {
+        console.error("No valid Settlement data found in response:", response);
+        setFilteredData([]);
+      }
+    } catch (error) {
+      console.error("Error filtering cases:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data. Please try again.",
+        icon: "error"
       });
     }
   };
-  const handleFilterClick = async () => {
-    // Check if only one date field is filled
-    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+
+  // Validate case ID input preventing non-numeric characters
+  const validateCaseId = () => {
+    if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
       Swal.fire({
         title: "Warning",
-        text: "Both From and To dates are required",
+        text: "Invalid input. Only numbers are allowed for Case ID.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
+      setCaseId(""); // Clear the invalid input
+      return;
+    }
+  }
+
+  useEffect(() => {
+    validateCaseId(); // Validate case ID input
+  }, [caseId]);
+
+  const handleFilterButton = () => { // Reset to the first page
+    setFilteredData([]); // Clear previous results
+    setMaxCurrentPage(0); // Reset max current page
+    setTotalAPIPages(1); // Reset total API pages
+    if (currentPage === 1) {
+      handleFilter();
+    } else {
+      setCurrentPage(1);
+    }
+    setIsFilterApplied(true); // Set filter applied state to true
+  }
+
+  // useEffect(() => {
+  //   handleFilter(); // Load initial data
+  // }, []);
+
+  const handleClear = () => {
+    setCaseId("");
+    setAccountNo("");
+    setPhase("");
+    setStatus("");
+    setFromDate(null);
+    setToDate(null);
+    setSearchQuery("");
+    setCurrentPage(1); // Reset to the first page
+    setIsFilterApplied(false); // Reset filter applied state
+    setTotalPages(1); // Reset total pages
+    setFilteredData([]); // Clear filtered data
+    setTotalAPIPages(1); // Reset total API pages
+  };
+
+  const naviPreview = (caseId) => {
+    navigate("/lod/ftl-log/preview", { state: { caseId } });
+  };
+
+  const naviCaseID = (caseId) => {
+    navigate("", { state: { caseId } });
+  }
+
+  // Function to handle the creation of tasks for downloading settlement list
+  const HandleCreateTaskDownloadSettlementList = async () => {
+
+    const userData = await getLoggedUserId(); // Assign user ID
+
+    if (!fromDate || !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select From Date and To Date.",
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false
       });
       return;
     }
-  
-    // Check if any filter is selected
-    const hasActiveFilters = 
-      inputFilter.trim() !== "" || 
-      phase !== "" || 
-      (fromDate && toDate);
-  
-    if (!hasActiveFilters) {
-      Swal.fire({
-        title: "Warning",
-        text: "No filter data is selected. Please, select data.",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-      return;
-    }
-  
-    // Check if from date is after to date
-    if (fromDate && toDate && fromDate.getTime() > toDate.getTime()) {
+
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
       Swal.fire({
         title: "Warning",
         text: "To date should be greater than or equal to From date",
@@ -178,263 +495,290 @@ const PaymentDetails = () => {
         allowOutsideClick: false,
         allowEscapeKey: false
       });
+      setToDate(null);
+      setFromDate(null);
       return;
     }
-  
+
+    // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+    //   Swal.fire({
+    //     title: "Warning",
+    //     text: "Invalid input. Only numbers are allowed for Case ID.",
+    //     icon: "warning",
+    //     allowOutsideClick: false,
+    //     allowEscapeKey: false,
+    //   });
+    //   setCaseId(""); // Clear the invalid input
+    //   return;
+    // }
+
+    setIsCreatingTask(true);
     try {
-      setIsLoading(true);
-      
-      // Prepare query parameters
-      const payload = {
-        page: 1,
-        limit: rowsPerPage,
-      };
-      
-      // Add filters based on selection
-      if (inputFilter.trim() !== "") {
-        if (selectValue === "Case Id") {
-          payload.case_id = inputFilter.trim();
-        } else if (selectValue === "Account No") {
-          payload.account_num = inputFilter.trim();
-        }
+      const response = await Create_Task_For_Downloard_Settlement_List(userData, phase, status, fromDate, toDate, caseId, accountNo);
+      if (response === "success") {
+        Swal.fire(response, `Task created successfully!`, "success");
       }
-      
-      // Add phase filter
-      if (phase !== "") {
-        payload.settlement_phase = phase;
-      }
-      
-      // Add date range using the correct parameter names for the controller
-      if (fromDate && toDate) {
-        payload.from_date = fromDate.toISOString().split('T')[0];
-        payload.to_date = toDate.toISOString().split('T')[0];
-      }
-      
-      const response = await List_All_Payment_Cases(payload);
-      
-      // Transform and update the UI
-      const transformedData = transformPaymentData(response.data);
-      setFilteredData(transformedData);
-      setCurrentPage(0); // Reset to page 1 when filters are applied
-      
-      // Show message if no results
-      if (transformedData.length === 0) {
-        Swal.fire({
-          title: "Information",
-          text: "No records found for the selected criteria",
-          icon: "info"
-        });
-      }
-      
     } catch (error) {
-      console.error("Failed to fetch filtered data:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Failed to fetch filtered data",
-        icon: "error"
-      });
+      Swal.fire("Error", error.message || "Failed to create task.", "error");
     } finally {
-      setIsLoading(false);
+      setIsCreatingTask(false);
     }
   };
 
-  // Dynamic search function across all fields
-  const getSearchedData = () => {
-    if (!searchQuery.trim()) return filteredData; // Return filtered data if no search
+  useEffect(() => {
+    setAccountNo("");
+    setCaseId("");
+  }, [searchBy]);
 
-    return filteredData.filter((row) =>
-      Object.values(row).some((value) =>
-        value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-      )
+
+  // display loading animation when data is loading
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
     );
-  };
-
-  // Pagination logic
-  const pages = Math.ceil(getSearchedData().length / rowsPerPage); // Total pages
-  const startIndex = currentPage * rowsPerPage; // Calculate the starting index of current page
-  const currentData = getSearchedData().slice(
-    startIndex,
-    startIndex + rowsPerPage
-  ); // Slice the data to show on current page
-
-  const handleNextPage = () => {
-    if (currentPage < pages - 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  }
 
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-      <h1 className={GlobalStyle.headingLarge}>Payment Details</h1>
+      <div className="flex flex-col flex-1">
+        <main className="p-6">
+          <h1 className={GlobalStyle.headingLarge}>Payment Details</h1>
 
-      {/* Filters - Single Row */}
-      <div className="flex flex-wrap md:flex-nowrap items-center justify-end my-6 gap-1 mb-8">
-        <select
-          value={selectValue}
-          onChange={(e) => setSelectValue(e.target.value)}
-          className={`${GlobalStyle.selectBox} w-32 md:w-40`}
-        >
-          <option value="Account No">Account No</option>
-          <option value="Case Id">Case ID</option>
-        </select>
+          {/* Filters Section */}
+          <div className={`${GlobalStyle.cardContainer} w-full`}>
+            <div className="flex items-center justify-end w-full space-x-3">
 
-        <input
-          type="text"
-          value={inputFilter}
-          onChange={(e) => setInputFilter(e.target.value)}
-          className={`${GlobalStyle.inputText} w-32 md:w-40`}
-          placeholder="Enter"
-        />
-
-        <select
-          value={phase}
-          onChange={(e) => setPhase(e.target.value)}
-          className={GlobalStyle.selectBox}
-        >
-          <option value="">Select Phase</option>
-          <option value="Register">Register</option>
-          <option value="Distribution">Distribution</option>
-          <option value="Negotiation">Negotiation</option>
-          <option value="Mediation Board">Mediation Board</option>
-          <option value="Letter Of Demand">Letter Of Demand</option>    
-          <option value="Litigation">Litigation</option>
-          <option value="Dispute">Dispute</option>
-          <option value="WRIT">WRIT</option>
-        </select>
-
-        <label className={GlobalStyle.dataPickerDate}>Date</label>
-        <DatePicker
-          selected={fromDate}
-          onChange={handleFromDateChange}
-          dateFormat="dd/MM/yyyy"
-          placeholderText="dd/MM/yyyy"
-          className={`${GlobalStyle.inputText} w-32 md:w-40`}
-        />
-
-        <DatePicker
-          selected={toDate}
-          onChange={handleToDateChange}
-          dateFormat="dd/MM/yyyy"
-          placeholderText="dd/MM/yyyy"
-          className={`${GlobalStyle.inputText} w-32 md:w-40`}
-        />
-
-        <button
-          className={GlobalStyle.buttonPrimary}
-          onClick={handleFilterClick}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Loading...' : 'Filter'}
-        </button>
-      </div>
-
-      {/* Search Bar */}
-      <div className="mb-4 flex items-center">
-        <div className={GlobalStyle.searchBarContainer}>
-          <input
-            type="text"
-            className={GlobalStyle.inputSearch}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className={GlobalStyle.tableContainer}>
-        <table className={GlobalStyle.table}>
-          <thead className={GlobalStyle.thead}>
-            <tr>
-              <th className={GlobalStyle.tableHeader}>Case ID</th>
-              <th className={GlobalStyle.tableHeader}>Account No</th>
-              <th className={GlobalStyle.tableHeader}>Settlement ID</th>
-              <th className={GlobalStyle.tableHeader}>Paid DTM</th>
-              <th className={GlobalStyle.tableHeader}>Amount</th>
-              <th className={GlobalStyle.tableHeader}>Type</th>
-              <th className={GlobalStyle.tableHeader}>Phase</th>
-              <th className={GlobalStyle.tableHeader}>Settled Balance</th>
-              <th className={GlobalStyle.tableHeader}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan="9" className="text-center py-4">
-                  Loading...
-                </td>
-              </tr>
-            ) : currentData.length > 0 ? (
-              currentData.map((row, index) => (
-                <tr
-                  key={index}
-                  className={
-                    index % 2 === 0
-                      ? GlobalStyle.tableRowEven
-                      : GlobalStyle.tableRowOdd
-                  }
+              <div className="flex items-center">
+                <select
+                  value={searchBy}
+                  onChange={(e) => setSearchBy(e.target.value)}
+                  className={`${GlobalStyle.selectBox}`}
+                  style={{ color: searchBy === "" ? "gray" : "black" }}
                 >
-                  <td className={GlobalStyle.tableData}>{row.caseId}</td>
-                  <td className={GlobalStyle.tableData}>{row.accountNo}</td>
-                  <td className={GlobalStyle.tableData}>{row.settlementId}</td>
-                  <td className={GlobalStyle.tableData}>{row.paiddtm}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {parseInt(row.amount) ? parseInt(row.amount).toLocaleString("en-US") : "-"}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{row.type}</td>
-                  <td className={GlobalStyle.tableData}>{row.phase}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {parseInt(row.settledbalance) ? parseInt(row.settledbalance).toLocaleString("en-US") : "-"}
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    <img
-                      src={infor}
-                      alt="Info"
-                      className="w-6 h-6 cursor-pointer"
-                      onClick={() => {}} // Add your navigate function here
-                    />
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="9" className="text-center py-2">
-                  No records found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                  <option value="" hidden>Select</option>
+                  <option value="account_no">Account Number</option>
+                  <option value="case_id">Case ID</option>
+                </select>
+              </div>
 
-      {/* Pagination */}
-      {filteredData.length > rowsPerPage && (
-        <div className={GlobalStyle.navButtonContainer}>
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  value={searchBy === "case_id" ? caseId : accountNo}
+                  onChange={(e) =>
+                    searchBy === "case_id"
+                      ? setCaseId(e.target.value)
+                      : setAccountNo(e.target.value)
+                  }
+                  className={`${GlobalStyle.inputText}  w-40`}
+                  placeholder={searchBy === "case_id" ? "Case ID" : "Account Number"}
+                />
+              </div>
+
+              <div className="flex items-center">
+                <select
+                  value={phase}
+                  onChange={(e) => setPhase(e.target.value)}
+                  className={`${GlobalStyle.selectBox}`}
+                  style={{ color: phase === "" ? "gray" : "black" }}
+                >
+                  <option value="" hidden>Select Phase</option>
+                  <option value="Register">Register</option>
+                  <option value="Distribution">Distribution</option>
+                  <option value="Negotiation">Negotiation</option>
+                  <option value="Mediation Board">Mediation Board</option>
+                  <option value="Letter Of Demand">Letter Of Demand</option>
+                  <option value="Litigation">Litigation</option>
+                  <option value="Dispute">Dispute</option>
+                  <option value="WRIT">WRIT</option>
+                </select>
+              </div>
+
+              <label className={GlobalStyle.dataPickerDate}>Paid Date</label>
+              {/* <div className={GlobalStyle.datePickerContainer}> */}
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center">
+                  <DatePicker
+                    selected={fromDate}
+                    onChange={handlestartdatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="From"
+                    className={`${GlobalStyle.inputText}`}
+                  />
+                </div>
+
+                <div className="flex items-center">
+                  <DatePicker
+                    selected={toDate}
+                    onChange={handleenddatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="To"
+                    className={`${GlobalStyle.inputText}`}
+                  />
+                </div>
+              </div>
+
+              <button
+                className={GlobalStyle.buttonPrimary}
+                onClick={handleFilterButton}
+              >
+                Filter
+              </button>
+              <button
+                className={GlobalStyle.buttonRemove}
+                onClick={handleClear}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
+
+          {/* Search Bar */}
+          <div className="mb-4 flex justify-start mt-10">
+            <div className={GlobalStyle.searchBarContainer}>
+              <input
+                type="text"
+                className={GlobalStyle.inputSearch}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <FaSearch className={GlobalStyle.searchBarIcon} />
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className={`${GlobalStyle.tableContainer} mt-10`}>
+            <table className={GlobalStyle.table}>
+              <thead className={GlobalStyle.thead}>
+                <tr>
+                  <th className={GlobalStyle.tableHeader}>Case ID</th>
+                  <th className={GlobalStyle.tableHeader}>Account No.</th>
+                  <th className={GlobalStyle.tableHeader}>Settlement ID</th>
+                  <th className={GlobalStyle.tableHeader}>Paid DTM</th>
+                  <th className={GlobalStyle.tableHeader}>Amount</th>
+                  <th className={GlobalStyle.tableHeader}>Type</th>
+                  <th className={GlobalStyle.tableHeader}>Phase </th>
+                  <th className={GlobalStyle.tableHeader}>Settled Balance</th>
+                  <th className={GlobalStyle.tableHeader}></th>
+                </tr>
+              </thead>
+              {/* <tbody>
+                {paginatedData.map((row, index) => (
+                  <tr
+                    key={index}
+                    className={
+                      index % 2 === 0
+                        ? GlobalStyle.tableRowEven
+                        : GlobalStyle.tableRowOdd
+                    }
+                  >
+                    <td className={GlobalStyle.tableData}>{row.caseId}</td>
+                    <td className={GlobalStyle.tableData}>{row.status}</td>
+                    <td className={GlobalStyle.tableData}>{row.created_dtm}</td>
+                    <td className={GlobalStyle.tableData}>
+                      {row.settlement_id}
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      {row.settlement_phase}
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      <img
+                        src={more}
+                        onClick={navi}
+                        title="More"
+                        alt="more icon"
+                        className="w-5 h-5"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody> */}
+
+              <tbody>
+                {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
+                  filteredDataBySearch.map((item, index) => (
+                    <tr
+                      key={item.settlement_id || index}
+                      className={
+                        index % 2 === 0
+                          ? GlobalStyle.tableRowEven
+                          : GlobalStyle.tableRowOdd
+                      }
+                    >
+                      <td
+                        className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                        onClick={() => naviCaseID(item.Case_ID)}
+                      >
+                        {item.Case_ID || "N/A"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>{item.Account_No || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.Settlement_ID || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.Money_Transaction_Date || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}> {item.Money_Transaction_Amount || "N/A"} </td>
+                      <td className={GlobalStyle.tableData}>{item.Transaction_Type || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.Settlement_Phase || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {parseInt(item.Cummulative_Settled_Balance) ? parseInt(item.Cummulative_Settled_Balance).toLocaleString("en-US") : "-"}
+                      </td>
+                      <td className={GlobalStyle.tableData}>
+                        <img
+                          src={more}
+                          onClick={() => naviPreview(item.case_id)}
+                          title="More"
+                          alt="more icon"
+                          className="w-5 h-5 cursor-pointer"
+                        />
+                      </td>
+
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={9} className="text-center">No cases available</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Section */}
+          <div className={GlobalStyle.navButtonContainer}>
+            <button
+              onClick={() => handlePrevNext("prev")}
+              disabled={currentPage === 1}
+              className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+                }`}
+            >
+              <FaArrowLeft />
+            </button>
+            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => handlePrevNext("next")}
+              disabled={currentPage === totalPages}
+              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+                }`}
+            >
+              <FaArrowRight />
+            </button>
+          </div>
+
           <button
-            className={GlobalStyle.navButton}
-            onClick={handlePrevPage}
-            disabled={currentPage === 0}
+            onClick={HandleCreateTaskDownloadSettlementList}
+            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+            disabled={isCreatingTask}
+            style={{ display: 'flex', alignItems: 'center' }}
           >
-            <FaArrowLeft />
+            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
           </button>
-          <span>
-            Page {currentPage + 1} of {pages}
-          </span>
-          <button
-            className={GlobalStyle.navButton}
-            onClick={handleNextPage}
-            disabled={currentPage >= pages - 1}
-          >
-            <FaArrowRight />
-          </button>
-        </div>
-      )}
+        </main>
+      </div>
     </div>
   );
 };

@@ -104,3 +104,18 @@ export const Case_Details_Settlement_LOD_FTL_LOD_Ext_01 = async (case_id) => {
     throw error.response?.data?.message || "Failed to fetch case details";
   }
 };
+
+export const Create_Task_For_Downloard_Settlement_Details_By_Case_ID = async (createdBy, Case_ID) => {
+  try {
+    const response = await axios.post(`${URL}/Create_Task_For_Downloard_Settlement_Details_By_Case_ID`, {
+      Created_By: createdBy, 
+      Case_ID: Case_ID,
+    });
+    console.log("Response from Create_Task_For_Downloard_Settlement_Details_By_Case_ID:", response);
+    // return the response status
+    return response.data.status;
+  } catch (error) {
+    console.error("Error creating task:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
