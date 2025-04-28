@@ -24,6 +24,7 @@ import { fetchIncidents } from "../../services/Incidents/incidentService";
 import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
+import { FaPlus } from 'react-icons/fa';
 import opeanincident from  "/src/assets/images/incidents/Incident_Open.png"
 import rejectincident from  "/src/assets/images/incidents/Incident_Reject.png"
 import inprogressincident from  "/src/assets/images/incidents/Incident_InProgress.png"
@@ -315,8 +316,10 @@ const Incident_List = () => {
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Incident List</h2>
 
-            <div className="flex justify-end mt-6">
-                <button onClick={HandleAddIncident} className={GlobalStyle.buttonPrimary}>
+
+            <div className="flex  justify-end mt-6">
+                <button onClick={HandleAddIncident}  className={`${GlobalStyle.buttonPrimary} flex items-center`}>
+                    <FaPlus className="mr-2"/>
                     Add Incident
                 </button>
             </div>
