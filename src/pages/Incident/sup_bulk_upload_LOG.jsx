@@ -13,7 +13,8 @@ Notes: This template uses Tailwind CSS */
 import { useCallback, useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight , FaDownload} from "react-icons/fa";
+import { FiUpload } from 'react-icons/fi';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import OpenIcon from "../../assets/images/incidents/Incident_Done.png";
@@ -22,6 +23,11 @@ import RejectIcon from "../../assets/images/incidents/Incident_Reject.png";
 import {List_Transaction_Logs_Upload_Files} from "../../services/Incidents/incidentService.js";
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from "react-tooltip";
+
+import { FaArrowUp } from 'react-icons/fa';
+
+
+
 
 
 
@@ -165,9 +171,13 @@ const SupBulkUploadLog = () => {
 
     return (
         <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className={`${GlobalStyle.headingLarge}`}>Incident Upload Log</h1>
-                <button className={GlobalStyle.buttonPrimary} onClick={handleUploadClick}>
+            <div className="flex items-center justify-between mb-4">
+                <h1 className={`${GlobalStyle.headingLarge} `}>Incident Upload Log</h1>
+                
+            </div>
+            <div className="flex justify-end ">
+            <button  className={`${GlobalStyle.buttonPrimary}  flex items-center`} onClick={handleUploadClick}>
+                    <FaArrowUp  className="mr-2" />
                     Upload a new file
                 </button>
             </div>
