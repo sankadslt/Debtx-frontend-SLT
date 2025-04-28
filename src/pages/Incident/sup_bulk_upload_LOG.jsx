@@ -24,6 +24,9 @@ import {List_Transaction_Logs_Upload_Files} from "../../services/Incidents/incid
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from "react-tooltip";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 import { FaArrowUp } from 'react-icons/fa';
 
 
@@ -61,6 +64,33 @@ const SupBulkUploadLog = () => {
     const [selectedFromDate, setSelectedFromDate] = useState(null);
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState("");
+
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+    
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
 
 
 
@@ -176,10 +206,19 @@ const SupBulkUploadLog = () => {
                 
             </div>
             <div className="flex justify-end ">
-            <button  className={`${GlobalStyle.buttonPrimary}  flex items-center`} onClick={handleUploadClick}>
+
+            <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                   <button  className={`${GlobalStyle.buttonPrimary}  flex items-center`} onClick={handleUploadClick}>
+                   <FaArrowUp  className="mr-2" />
+                   Upload a new file
+               </button>
+                    )}
+                </div>
+            {/* <button  className={`${GlobalStyle.buttonPrimary}  flex items-center`} onClick={handleUploadClick}>
                     <FaArrowUp  className="mr-2" />
                     Upload a new file
-                </button>
+                </button> */}
             </div>
             {/* Filters */}
             <div className="flex justify-end ">
@@ -270,12 +309,26 @@ const SupBulkUploadLog = () => {
                         placeholderText="To"
                         className={GlobalStyle.inputText}
                     />
-                    <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
+                    {/* <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
                         Filter
-                    </button>
-                    <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
+                    </button> */}
+                    <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
+                    Filter
+                </button>
+                    )}
+                </div>
+                    {/* <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
                         Clear
-                    </button>
+                    </button> */}
+                    <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
+                    Clear
+                </button>
+                    )}
+                </div>
                 </div>
                 {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
             </div>
