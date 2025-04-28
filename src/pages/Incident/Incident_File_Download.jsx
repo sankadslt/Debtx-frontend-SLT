@@ -17,6 +17,9 @@ import { List_Download_Files_from_Download_Log } from "../../services/file/fileD
 import  { Tooltip } from "react-tooltip";
 
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 
 const Incident_File_Download = () => {
     // State variables
@@ -24,8 +27,34 @@ const Incident_File_Download = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [tableData, setTableData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
     const [error, setError] = useState("");
     const rowsPerPage = 7;
+
+
+    // Role-Based Buttons
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
+
 
     // Fetch data from the API
     const fetchData = async () => {
@@ -177,7 +206,9 @@ const Incident_File_Download = () => {
                                         })}</td>
                                 
                                 <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <button
+                                <div>
+                                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                                        <button
                                         onClick={() => handleDownload(log.TaskID)}
                                         className="text-blue-600 hover:text-blue-800 " 
                                         data-tooltip-id="download-tooltip"
@@ -186,6 +217,17 @@ const Incident_File_Download = () => {
                                         <FaDownload />
 
                                     </button>
+                                    )}
+                                </div>
+                                    {/* <button
+                                        onClick={() => handleDownload(log.TaskID)}
+                                        className="text-blue-600 hover:text-blue-800 " 
+                                        data-tooltip-id="download-tooltip"
+                                        disabled={isExpired}
+                                    >
+                                        <FaDownload />
+
+                                    </button> */}
                                     <Tooltip id="download-tooltip" place="bottom" content={isExpired ? "Download expired" : "Download file"} />
                                 </td>
                             </tr>
