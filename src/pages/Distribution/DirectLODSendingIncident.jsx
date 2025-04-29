@@ -23,6 +23,9 @@ import { List_incidents_Direct_LOD, Create_Task_Download_Direct_LOD_Sending, For
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 export default function DirectLODSendingIncident() {
   // Table data exactly matching the image
   // const tableData = [
@@ -50,21 +53,48 @@ export default function DirectLODSendingIncident() {
   // ];
 
   // Filter state
-  const [fromDate, setFromDate] = useState(null); //for date
-  const [toDate, setToDate] = useState(null);
-  const [error, setError] = useState("");
-  const [selectAllData, setSelectAllData] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0); // Changed to 0-based indexing
-  const [selectedSource, setSelectedSource] = useState("");
-  const [tableData, setTableData] = useState([]);
-  const [isloading, setIsLoading] = useState(true);
-  const [filteredData, setFilteredData] = useState(tableData);
-  const navigate = useNavigate();
+  const [fromDate, setFromDate] = useState(null); // usestate for date picker
+  const [toDate, setToDate] = useState(null); // usestate for date picker
+  const [error, setError] = useState(""); //usestate for error message
+  const [selectAllData, setSelectAllData] = useState(false); // usestate for select all checkbox
+  const [selectedRows, setSelectedRows] = useState([]); // usestate for selected rows
+  const [searchQuery, setSearchQuery] = useState(""); // usestate for search query
+  const [currentPage, setCurrentPage] = useState(0); // usestate for current page
+  const [selectedSource, setSelectedSource] = useState(""); // usestate for selected source type
+  const [tableData, setTableData] = useState([]); // usestate for table data
+  const [isloading, setIsLoading] = useState(true); // usestate for loading state
+  const [filteredData, setFilteredData] = useState(tableData); // usestate for filtered data
+  const navigate = useNavigate(); // Initialize navigate for routing
+
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   const rowsPerPage = 7; // Number of rows per page
 
+
+    // Role-Based Buttons
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+  
+      try {
+        let decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+  
+        if (decoded.exp < currentTime) {
+          refreshAccessToken().then((newToken) => {
+            if (!newToken) return;
+            const newDecoded = jwtDecode(newToken);
+            setUserRole(newDecoded.role);
+          });
+        } else {
+          setUserRole(decoded.role);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }, []);
+
+  // Function to fetch incident counts
   const fetchData = async () => {
     try {
       const filters= {
@@ -105,10 +135,12 @@ export default function DirectLODSendingIncident() {
     }
   };
 
+  // Fetch data when the component mounts or when filters change
   useEffect(() => {
     fetchData();
   }, []);
 
+  // Function to handle the creation of a task for downloading
   const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
     if (filteredData.length === 0) {
       Swal.fire({
@@ -169,6 +201,7 @@ export default function DirectLODSendingIncident() {
     }
   };
 
+  // Function to handle the "Proceed" button click
   const handleProceed = async (Incident_Id) => {
     try {
     if (!selectedRows.includes(Incident_Id)) {
@@ -228,7 +261,7 @@ export default function DirectLODSendingIncident() {
     }
   };
   
-
+  // Function to handle the creation of a task for forwarding
   const handleCreate = async () => {
     try {
       if (selectedRows.length === 0) {
@@ -315,13 +348,32 @@ export default function DirectLODSendingIncident() {
                             title: "Error",
                             text: "The 'From' date cannot be later than the 'To' date.",
                             icon: "error",
-                            confirmButtonColor: "#d33", 
+                            confirmButtonColor: "#f1c40f",
                         });;
-    } else {
+    } else if (toDate){
+      // Calculate month gap
+      const diffInMs = toDate - date;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      
+      if (diffInDays > 31) {
+          Swal.fire({
+              title: "Warning",
+              text: "The selected range is more than 1 month.",
+              icon: "warning",
+              confirmButtonColor: "#f1c40f",
+          });
+        
+          return;
+      }
+      setFromDate(date);
+    }
+    else {
       setError("");
       setFromDate(date);
     }
   };
+
+
 
   // validation for date
   const handleToDateChange = (date) => {
@@ -331,9 +383,25 @@ export default function DirectLODSendingIncident() {
                             title: "Error",
                             text: "The 'To' date cannot be earlier than the 'From' date.",
                             icon: "error",
-                            confirmButtonColor: "#d33", 
+                            confirmButtonColor: "#f1c40f",
                         });
-    } else {
+    }  else if (fromDate) {
+      // Calculate month gap
+      const diffInMs = date - fromDate;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      
+      if (diffInDays > 31) {
+          Swal.fire({
+              title: "Warning",
+              text: "The selected range is more than 1 month.",
+              icon: "warning",
+              confirmButtonColor: "#f1c40f",
+          });
+          return;
+      }
+      setToDate(date);
+    }
+    else {
       setError("");
       setToDate(date);
     }
@@ -354,6 +422,7 @@ export default function DirectLODSendingIncident() {
   // Calculate total pages
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
+  // Handle pagination
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
@@ -370,6 +439,7 @@ export default function DirectLODSendingIncident() {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
+  // Handle row checkbox change
   const handleRowCheckboxChange = (id) => {
     if (selectedRows.includes(id)) {
       setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
@@ -378,6 +448,7 @@ export default function DirectLODSendingIncident() {
     }
   };
 
+  // Handle select all checkbox change
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
       setSelectedRows([]); // Clear all selections
@@ -387,6 +458,7 @@ export default function DirectLODSendingIncident() {
     setSelectAllData(!selectAllData);
   };
 
+  // Handle filter button click
   const handleFilterClick = () => {
     const from = fromDate ? new Date(fromDate) : null;
     const to = toDate ? new Date(toDate) : null;
@@ -444,6 +516,7 @@ export default function DirectLODSendingIncident() {
     }
   };
   
+  // Function to handle filter clear
   const handlefilterclear = async () => {
     setFromDate(null);
     setToDate(null);
@@ -477,7 +550,7 @@ useEffect(() => {
         </div>
           
         <div className="flex justify-end items-center w-full mb-4"> 
-        <button
+        {/* <button
             className={`${GlobalStyle.buttonPrimary} flex items-center`}
             onClick={()=>{handleCreateTaskForDownload({
               source_type: selectedSource, 
@@ -487,7 +560,22 @@ useEffect(() => {
           >
             <FaDownload className="mr-2" />
             Create task and let me know
-          </button>
+          </button> */}
+          <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+               <button
+               className={`${GlobalStyle.buttonPrimary} flex items-center`}
+               onClick={()=>{handleCreateTaskForDownload({
+                 source_type: selectedSource, 
+                 fromDate: fromDate, 
+                 toDate: toDate
+               })}}
+             >
+               <FaDownload className="mr-2" />
+               Create task and let me know
+             </button>
+            )}
+        </div>
         </div>
 
         {/* Filter Section */}
@@ -531,15 +619,32 @@ useEffect(() => {
           </div>
 
           {/* Filter Button */}
-          <button
+          {/* <button
             className={`${GlobalStyle.buttonPrimary} h-[35px]`}
             onClick={handleFilterClick}
           >
             Filter
-          </button>
-          <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+          </button> */}
+          <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                onClick={handleFilterClick}
+              >
+                Filter
+              </button>
+              )}
+          </div>
+          {/* <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
                         Clear
-            </button>
+            </button> */}
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+                Clear
+                </button>
+              )}
+            </div>
           </div>
         </div>
         </div>
@@ -611,14 +716,21 @@ useEffect(() => {
                     <td className={GlobalStyle.tableData}>
                       <div className="flex justify-center items-center h-full">
                         {row.status.toLowerCase() === "direct lod" && (
-                          <div title="Direct LOD" aria-label="Direct LOD">
+                          <div >
                             <img
                               src={Direct_LOD}
                               alt="Direct LOD"
                               className="w-5 h-5"
+                              data-tooltip-id="direct-lod-tooltip"
                             />
                           </div>
                         )}
+                        <Tooltip
+                          id="direct-lod-tooltip"
+                          place="bottom"
+                          content="Direct LOD"
+                          className="tooltip"
+                        />
                       </div>
                     </td>
 
@@ -632,12 +744,22 @@ useEffect(() => {
                     <td
                       className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                     >
-                      <button
+                      {/* <button
                         className={`${GlobalStyle.buttonPrimary} mx-auto`}
                         onClick={()=>{handleProceed(row.id)}}
                       >
                         Proceed
-                      </button>
+                      </button> */}
+                      <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          className={`${GlobalStyle.buttonPrimary} mx-auto`}
+                          onClick={()=>{handleProceed(row.id)}}
+                        >
+                          Proceed
+                        </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -699,12 +821,22 @@ useEffect(() => {
             Select All Data
           </label>
 
-          <button
+          {/* <button
             className={`${GlobalStyle.buttonPrimary} ml-4`}
             onClick={handleCreate}
           >
             Create
-          </button>
+          </button> */}
+          <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+              <button
+              className={`${GlobalStyle.buttonPrimary} ml-4`}
+              onClick={handleCreate}
+            >
+              Create
+            </button>
+            )}
+          </div>
         </div>
       </div>
       )}
