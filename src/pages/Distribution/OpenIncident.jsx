@@ -12,7 +12,7 @@ Related Files:
 Notes: 
 */
 
-import { useState,useEffect } from "react";
+import { useState,useEffect } from "react"; 
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useNavigate } from "react-router-dom";
 import { getUserData } from "../../services/auth/authService";
@@ -22,24 +22,53 @@ import Open_No_Agent from "../../assets/images/incidents/Open_No_Agent.png";
 import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident , Open_Task_Count_Incident_To_Case} from "../../services/task/taskService";
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
  
  
 
 export default function OpenIncident() {
-  const [searchQuery, setSearchQuery] = useState(""); 
-  const [selectAllData, setSelectAllData] = useState(false);
-  const [data, setData] = useState([]);
-  const [total, setTotal] = useState(0);  
-  const [distributionData, setDistributionData] = useState({});
-  const [ setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [isProcessing,setIsProcessing] = useState(false); 
-const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");  //  usestate for the Search bar
+  const [selectAllData, setSelectAllData] = useState(false); // usestate for the Select all checkbox
+  const [data, setData] = useState([]); // usestate for the data
+  const [total, setTotal] = useState(0);  // usestate for the total number of incidents
+  const [distributionData, setDistributionData] = useState({}); // usestate for the distribution data
+  const [ setError] = useState(null); // usestate for the error message
+  const [currentPage, setCurrentPage] = useState(0); // usestate for the current page
+  const [selectedRows, setSelectedRows] = useState([]); // usestate for the selected rows
+  const [isProcessing,setIsProcessing] = useState(false); // usestate for the processing state
+const [user, setUser] = useState(null); // usestate for the user data
+
+const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 const navigate = useNavigate();
 
   const rowsPerPage = 7;
 
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+  // UseEffect to fetch user data and incident data
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -54,6 +83,7 @@ const navigate = useNavigate();
     fetchData();
   }, []);
 
+  // Function to fetch data
 const fetchData = async () => {
   try {
     const response = await List_Distribution_Ready_Incidents();
@@ -72,7 +102,7 @@ const fetchData = async () => {
   }
 };
 
-
+  // Function to handle task creation
   const handleCreateTask = async () => {
     try {
       const taskParams = {
@@ -105,7 +135,7 @@ const fetchData = async () => {
     }
   };
   
-  
+  // Function to handle case creation for incidents
  const handleCaseforIncident = async () => {
   if (selectedRows.length === 0) {
     Swal.fire({
@@ -227,6 +257,7 @@ const fetchData = async () => {
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
+  // Function to handle previous and next page navigation
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
@@ -243,7 +274,7 @@ const fetchData = async () => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
- 
+  // Function to handle checkbox change for individual rows
   const handleRowCheckboxChange = (Incident_Id) => {
      
     if (selectedRows.includes(Incident_Id)) {
@@ -253,6 +284,7 @@ const fetchData = async () => {
     }
   };
   
+  // Function to handle select all checkbox change
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
       setSelectedRows([]);
@@ -262,6 +294,7 @@ const fetchData = async () => {
     setSelectAllData(!selectAllData);
   };
 
+  // Function to handle back navigation
   const handlebacknavigate = () => {
     window.history.back(); // Go back to the previous page
   }
@@ -276,14 +309,26 @@ const fetchData = async () => {
         </div>
 
         <div className="flex justify-end items-center mb-4">
-        <button
+        {/* <button
           className={`${GlobalStyle.buttonPrimary}   pr-4 flex items-center mb-4`}
          onClick={handleCreateTask}
        
         >
         <FaDownload className="mr-1" />
           Create task and let me know
-        </button>
+        </button> */}
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+               <button
+               className={`${GlobalStyle.buttonPrimary}   pr-4 flex items-center mb-4`}
+              onClick={handleCreateTask}
+            
+             >
+             <FaDownload className="mr-1" />
+               Create task and let me know
+             </button>
+            )}
+        </div>
         </div>
 
     
@@ -345,79 +390,79 @@ const fetchData = async () => {
           </div>
         </div>
 
-       
+       {/* Table Section */}
         <div className={GlobalStyle.tableContainer}>
-  <table className={GlobalStyle.table}>
-    <thead className={GlobalStyle.thead}>
-      <tr>
-        <th className={GlobalStyle.tableHeader}></th>
-        <th className={GlobalStyle.tableHeader}>ID</th>
-        <th className={GlobalStyle.tableHeader}>Status</th>
-        <th className={GlobalStyle.tableHeader}>Account No</th>
-        <th className={GlobalStyle.tableHeader}>Action</th>
-        <th className={GlobalStyle.tableHeader}>Amount</th>
-        <th className={GlobalStyle.tableHeader}>Source Type</th>
-      </tr>
-    </thead>
-    <tbody>
-      {paginatedData.map((row, index) => (
-        <tr
-          key={index}
-          className={`${
-            index % 2 === 0
-              ? "bg-white bg-opacity-75"
-              : "bg-gray-50 bg-opacity-50"
-          } border-b`}
-        >
-          <td className={GlobalStyle.tableData}  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <input
-              type="checkbox"
-              className="rounded-lg"
-              checked={selectedRows.includes(row.Incident_Id)}
-              onChange={() => handleRowCheckboxChange(row.Incident_Id)}
-            />
-          </td>
-          <td className={GlobalStyle.tableData}>
-            <a href={`#${row.Incident_Id}`} className="hover:underline">
-              {row.Incident_Id}
-            </a>
-          </td>
-          <td className={GlobalStyle.tableData}>
-            <div className="flex justify-center items-center h-full">
-              {row.Incident_Status === "Open No Agent" && (
-                <div data-tooltip-id="incident-tooltip">
-                  <img
-                    src={Open_No_Agent}
-                    alt="open no agent"
-                    
-                    className="w-5 h-5"
-                  />
-                </div>
+          <table className={GlobalStyle.table}>
+            <thead className={GlobalStyle.thead}>
+              <tr>
+                <th className={GlobalStyle.tableHeader}></th>
+                <th className={GlobalStyle.tableHeader}>ID</th>
+                <th className={GlobalStyle.tableHeader}>Status</th>
+                <th className={GlobalStyle.tableHeader}>Account No</th>
+                <th className={GlobalStyle.tableHeader}>Action</th>
+                <th className={GlobalStyle.tableHeader}>Amount</th>
+                <th className={GlobalStyle.tableHeader}>Source Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.map((row, index) => (
+                <tr
+                  key={index}
+                  className={`${
+                    index % 2 === 0
+                      ? "bg-white bg-opacity-75"
+                      : "bg-gray-50 bg-opacity-50"
+                  } border-b`}
+                >
+                  <td className={GlobalStyle.tableData}  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      className="rounded-lg"
+                      checked={selectedRows.includes(row.Incident_Id)}
+                      onChange={() => handleRowCheckboxChange(row.Incident_Id)}
+                    />
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    <a href={`#${row.Incident_Id}`} className="hover:underline">
+                      {row.Incident_Id}
+                    </a>
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    <div className="flex justify-center items-center h-full">
+                      {row.Incident_Status === "Open No Agent" && (
+                        <div data-tooltip-id="incident-tooltip">
+                          <img
+                            src={Open_No_Agent}
+                            alt="open no agent"
+                            
+                            className="w-5 h-5"
+                          />
+                        </div>
 
+                      )}
+                    </div>
+                    <Tooltip id="incident-tooltip" place="bottom" content="Open No Agent" />
+                  </td>
+                  <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
+                  <td className={GlobalStyle.tableData}>{row.Actions}</td>
+                  <td className={`${GlobalStyle.tableCurrency}`}>
+                    {new Intl.NumberFormat("en-US").format(row.Arrears)}
+                  </td>
+                  <td className={GlobalStyle.tableData}>{row.Source_Type}</td>
+                </tr>
+              ))}
+              {paginatedData.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="text-center py-4">
+                    No results found
+                  </td>
+                </tr>
               )}
-            </div>
-            <Tooltip id="incident-tooltip" place="bottom" content="Open No Agent" />
-          </td>
-          <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
-          <td className={GlobalStyle.tableData}>{row.Actions}</td>
-          <td className={`${GlobalStyle.tableCurrency}`}>
-            {new Intl.NumberFormat("en-US").format(row.Arrears)}
-          </td>
-          <td className={GlobalStyle.tableData}>{row.Source_Type}</td>
-        </tr>
-      ))}
-      {paginatedData.length === 0 && (
-        <tr>
-          <td colSpan="7" className="text-center py-4">
-            No results found
-          </td>
-        </tr>
-      )}
-    </tbody>
-  </table>
-</div>
+            </tbody>
+          </table>
+        </div>
 
-       
+       {/* Pagnation section */}
         {filteredData.length > rowsPerPage && (
           <div className={GlobalStyle.navButtonContainer}>
             <button
@@ -459,15 +504,28 @@ const fetchData = async () => {
             />
             Select All
           </label>
-          <button
-  className={`${GlobalStyle.buttonPrimary} ml-4`}
-  onClick={handleCaseforIncident}
-  disabled={isProcessing}
-  
+          {/* <button
+                className={`${GlobalStyle.buttonPrimary} ml-4`}
+                onClick={handleCaseforIncident}
+                disabled={isProcessing}
+                
 
->
-  Proceed
-</button>
+              >
+                Proceed
+        </button> */}
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+               <button
+                    className={`${GlobalStyle.buttonPrimary} ml-4`}
+                    onClick={handleCaseforIncident}
+                    disabled={isProcessing}
+                    
+
+                  >
+                    Proceed
+                </button>
+            )}
+        </div>
 
         </div>
       </div>
