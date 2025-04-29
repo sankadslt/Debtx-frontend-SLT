@@ -197,32 +197,6 @@ const Monitor_settlement = () => {
     );
   };
 
-  // Handle api calling only when the currentPage incriment more that before
-  const handlePageChange = () => {
-    // console.log("Page changed to:", currentPage);
-    if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
-      setMaxCurrentPage(currentPage);
-      handleFilter(); // Call the filter function only after the page incrimet 
-    }
-  };
-
-  useEffect(() => {
-    if (isFilterApplied) {
-      handlePageChange(); // Call the function whenever currentPage changes
-    }
-  }, [currentPage]);
-
-  // Handle Pagination
-  const handlePrevNext = (direction) => {
-    if (direction === "prev" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      // console.log("Current Page:", currentPage);
-    } else if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      // console.log("Current Page:", currentPage);
-    }
-  };
-
   // useEffect(() => {
   //   if (isFilterApplied) {
   //     handleFilter(); // Call the filter function only afer the filters are applied
@@ -428,6 +402,32 @@ const Monitor_settlement = () => {
   useEffect(() => {
     validateCaseId(); // Validate case ID input
   }, [caseId]);
+
+  // Handle api calling only when the currentPage incriment more that before
+  const handlePageChange = () => {
+    // console.log("Page changed to:", currentPage);
+    if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
+      setMaxCurrentPage(currentPage);
+      handleFilter(); // Call the filter function only after the page incrimet 
+    }
+  };
+
+  useEffect(() => {
+    if (isFilterApplied) {
+      handlePageChange(); // Call the function whenever currentPage changes
+    }
+  }, [currentPage]);
+
+  // Handle Pagination
+  const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      // console.log("Current Page:", currentPage);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      // console.log("Current Page:", currentPage);
+    }
+  };
 
   const handleFilterButton = () => { // Reset to the first page
     setFilteredData([]); // Clear previous results
@@ -663,9 +663,9 @@ const Monitor_settlement = () => {
                 <tr>
                   <th className={GlobalStyle.tableHeader}>Case ID</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
-                  <th className={GlobalStyle.tableHeader}>Created DTM</th>
                   <th className={GlobalStyle.tableHeader}>Settlement ID</th>
                   <th className={GlobalStyle.tableHeader}>Settlement Phase</th>
+                  <th className={GlobalStyle.tableHeader}>Created DTM</th>
                   <th className={GlobalStyle.tableHeader}></th>
                 </tr>
               </thead>
@@ -722,9 +722,9 @@ const Monitor_settlement = () => {
                         {/* {item.settlement_status || "N/A"} */}
                         {renderStatusIcon(item.settlement_phase, item.settlement_status, index)}
                       </td>
-                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-CA") || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
                       <td className={GlobalStyle.tableData}> {item.settlement_phase || "N/A"} </td>
+                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-CA") || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>
                         <img
                           src={more}
