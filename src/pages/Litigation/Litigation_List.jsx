@@ -391,7 +391,9 @@ export const Litigation_List = () => {
                               alt="Preview"
                               className="w-6 h-6 cursor-pointer"
                               title="Preview"
-                              onClick={() => navigate("/pages/Litigation/Litigation_Case_Details")}                      
+                              onClick={() => navigate("/pages/Litigation/Litigation_Case_Details", {
+                                state:{case_id : item.case_id}
+                              })}                       
                             />
                           </div>
                         )}

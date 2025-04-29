@@ -49,14 +49,12 @@ export const Litigation_Court_Details_Update = () => {
         const response =await listLitigationPhaseCaseDetails(case_id);
         if (response.success) {
             setCaseDetails(response.data);
-            console.log(response.data);
-            
+            console.log("Case Details", response.data);        
         }else{
             console.error(response.message);
         }
         setLoading(false);
     }
-  
     fetchCaseDetails();
   }, [case_id]);
 

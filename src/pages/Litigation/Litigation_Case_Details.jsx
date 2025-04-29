@@ -11,74 +11,139 @@ Notes: This template uses Tailwind CSS */
 
 import DatePicker from "react-datepicker"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getLitigationPhaseCaseDetails, listLitigationPhaseCaseDetails } from "../../services/litigation/litigationService";
+import { useLocation } from "react-router-dom";
 
 export const Litigation_Case_Details = () => {
+  const location =useLocation();
+  const case_id =location.state?.case_id || "";
+
   const [selectedDate, setSelectedDate] =useState(null);
+  const [caseDetails, setCaseDetails] =useState(null);
+  const [settlementAndPaymentDetails, setSettlementAndPaymentDetails] =useState(null);
+
+  const [loading, setLoading] =useState(false);
+
+//   const case_id ="1"; //For testing
+
+  useEffect(() => {
+    const fetchCaseDetails =async() => {
+        setLoading(true);
+        const response =await listLitigationPhaseCaseDetails(case_id);
+        if (response.success) {
+            setCaseDetails(response.data);
+            console.log(response.data);
+            
+        }else{
+            console.error(response.message);
+        }
+        setLoading(false);
+    }
+
+    const fetchSettlementAndPaymentDetails = async () => {
+        setLoading(true);
+        try {
+            const response = await getLitigationPhaseCaseDetails(case_id);
+            
+            if (response && response.status === "success") {
+                setSettlementAndPaymentDetails(response.data);
+                console.log("Settlement:", response.data);
+            } else {
+                console.error("Error retrieving case details:", response.message);
+            }
+        } catch (error) {
+            console.error("Error fetching settlement and payment details:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    fetchCaseDetails();
+    fetchSettlementAndPaymentDetails();
+  }, [case_id]);
+
+  const legalSubmission = caseDetails?.litigation?.[0]?.legal_submission?.at(-1) || {};
+  const courtDetails = caseDetails?.litigation?.[0]?.legal_details?.at(-1) || {};
+
+  const { submission, submission_on, submission_remark } = legalSubmission;
+  const { court_no, court_registered_date, case_handling_officer, remark } = courtDetails;
     
   return (
     <div className={GlobalStyle.fontPoppins}>
         <h1 className={GlobalStyle.headingLarge}>Litigation Case Details</h1>
-        <div className="flex flex-col items-center justify-center w-full">
-            <div className="flex flex-col w-[800px] bg-[#E1E4F5] py-10 px-20 my-6 rounded-tr-2xl">     
+        <div className="flex flex-col gap-4 mt-4 items-center justify-center">
+            <div className={GlobalStyle.cardContainer}>     
                 {/* Card */}
                 <div className="flex flex-col w-full items-center justify-center">
-                    <div className={`${GlobalStyle.cardContainer} bg-opacity-100 w-full`}>
-                        {[
-                            { label: "Case ID", value: "" },
-                            { label: "Customer Red", value: "" },
-                            { label: "Account No", value: "" },
-                            { label: "Arrears Amount", value: "" },
-                            { label: "Last Payment Date", value: "" },
-                        ].map((item, idx) => (
-                            <p key={idx} className="mb-2 flex items-center">
+                    <div className={`${GlobalStyle.cardContainer} w-full`}>
+                        {loading ? (
+                            <p className="text-center">Loading...</p>
+                        ) : (
+                            [
+                            { label: "Case ID", value: caseDetails?.case_id },
+                            { label: "Customer Ref", value: caseDetails?.customer_ref },
+                            { label: "Account No", value: caseDetails?.account_no },
+                            { label: "Arrears Amount", value: caseDetails?.current_arrears_amount },
+                            { label: "Last Payment Date", value: new Date(caseDetails?.last_payment_date).toLocaleDateString("en-GB")},
+                            ].map((item, index) => (
+                            <p key={index} className="mb-2 flex items-center">
                                 <strong className="w-40 text-left">{item.label}</strong>
                                 <span className="w-6 text-center">:</span>
                                 <span className="flex-1">{item.value || "N/A"}</span>
                             </p>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
 
-                {/* Handed Over */}
+                {/* Legal Submission */}
                 <div className="flex gap-2 justify-start mb-4">
-                    <label className="w-56">Handed Over : </label>
-                    <textarea className={`${GlobalStyle.inputText} w-full h-40`}/>
+                    <label className="w-56 mt-4">Legal Submission : </label>
+                    <div className="flex flex-col gap-2 border-2 rounded-xl p-4 w-full">
+                        {loading ? (
+                            <p className="text-center">Loading...</p>
+                        ) : (
+                            [
+                            { label: "Submission", value: submission },
+                            { label: "Submitted Date", value: new Date(submission_on).toLocaleDateString("en-GB")},
+                            { label: "Remark", value: submission_remark},
+                            ].map((item, index) => (
+                            <p key={index} className="flex items-center">
+                                <span className="w-40 text-left">{item.label}</span>
+                                <span className="w-6 text-center">:</span>
+                                <span className="flex-1">{item.value || "N/A"}</span>
+                            </p>
+                            ))
+                        )}
+                    </div>
                 </div>
 
                 {/* Court Details */}
                 <div className="flex gap-2 justify-start mb-4">
-                    <label className="w-56">Court Details : </label>
-                    <textarea className={`${GlobalStyle.inputText} w-full h-40`}/>
-                </div>
-                
-
-               
-            </div>
-            <div className="flex flex-col gap-10 w-full">
-                {/* Response History */}
-                <div className="flex flex-col w-full gap-2">
-                    <h1 className={`${GlobalStyle.headingMedium} font-semibold`}>Response History</h1>
-                    <div className={GlobalStyle.tableContainer}>
-                        <table className={GlobalStyle.table}>
-                            <thead className={GlobalStyle.thead}>
-                                <tr>
-                                    <th className={GlobalStyle.tableHeader}>DTM</th>
-                                    <th className={GlobalStyle.tableHeader}>Response</th>
-                                    <th className={GlobalStyle.tableHeader}>Remark</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className={GlobalStyle.tableData}>2025/04/02</td>
-                                    <td className={GlobalStyle.tableData}>Status</td>
-                                    <td className={GlobalStyle.tableData}>Remark</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <label className="w-56 mt-4">Court Details : </label>
+                    <div className="flex flex-col gap-2 border-2 rounded-xl p-4 w-full">
+                    {loading ? (
+                            <p className="text-center">Loading...</p>
+                        ) : (
+                            [
+                            { label: "Court No", value: court_no },
+                            { label: "Court Registered Date", value: new Date(court_registered_date).toLocaleDateString("en-GB")},
+                            { label: "Case Handling Officer", value: case_handling_officer},
+                            { label: "Remark", value: remark},
+                            ].map((item, index) => (
+                            <p key={index} className="flex items-center">
+                                <span className="min-w-48 text-left">{item.label}</span>
+                                <span className="w-6 text-center">:</span>
+                                <span className="flex-1">{item.value || "N/A"}</span>
+                            </p>
+                            ))
+                        )}
                     </div>
                 </div>
+            </div>
 
+            <div className="flex flex-col gap-10 w-full">
                 {/* Settlement Plan */}
                 <div className="flex flex-col w-full gap-2">
                     <h1 className={`${GlobalStyle.headingMedium} font-semibold`}>Settlement Plan</h1>
@@ -117,7 +182,7 @@ export const Litigation_Case_Details = () => {
 
                 {/* Payment Details */}
                 <div className="flex flex-col w-full gap-2">
-                    <h1 className={`${GlobalStyle.headingMedium} font-semibold`}>Response History</h1>
+                    <h1 className={`${GlobalStyle.headingMedium} font-semibold`}>Payment Details</h1>
                     <div className={GlobalStyle.tableContainer}>
                         <table className={GlobalStyle.table}>
                             <thead className={GlobalStyle.thead}>

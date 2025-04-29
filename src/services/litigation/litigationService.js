@@ -150,4 +150,22 @@ export const createLegalDetails = async (payload) => {
   }
 };
 
+export const getLitigationPhaseCaseDetails = async (case_id) => {
+  try {
+    const response = await axios.post(`${URL}/List_Lit_Phase_Case_settlement_and_payment_Details_By_Case_ID`, {
+      case_id,
+    });
+
+    if (response.status === 200) {
+      console.log('Case details retrieved:', response.data);
+      return response.data;
+    } else {
+      console.error('Failed to retrieve case details:', response.data);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching litigation case details:', error);
+    throw error;
+  }
+};
 
