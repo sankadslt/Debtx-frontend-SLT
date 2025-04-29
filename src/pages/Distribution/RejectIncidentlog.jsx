@@ -23,9 +23,12 @@ import { Create_Rejected_List_for_Download, List_Reject_Incident } from "../../s
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 export default function RejectIncidentlog() {
   const navigate = useNavigate();
-
+ 
   // Table data exactly matching the image
   // const tableData = [
   //   {
@@ -55,19 +58,45 @@ export default function RejectIncidentlog() {
   // ];
 
   // Filter state
-  const [fromDate, setFromDate] = useState(null); //for date
-  const [toDate, setToDate] = useState(null);
-  const [error, setError] = useState("");
-  const [tableData, setTableData] = useState([]);
-  const [selectAllData, setSelectAllData] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [fromDate, setFromDate] = useState(null); // usestate for the date
+  const [toDate, setToDate] = useState(null); // usestate for the to date
+  const [error, setError] = useState(""); // usestate for error message
+  const [tableData, setTableData] = useState([]); // usestate for the table data
+  const [selectAllData, setSelectAllData] = useState(false); // usestate for the selected rows
+  const [selectedRows, setSelectedRows] = useState([]);  // usestate for the selected rows
+  const [searchQuery, setSearchQuery] = useState(""); // useestate for the search query
   const [currentPage, setCurrentPage] = useState(0); // Changed to 0-based indexing
-  const [selectedAction, setSelectedAction] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedAction, setSelectedAction] = useState(""); // usestate for the selected action
+  const [isLoading, setIsLoading] = useState(true); // useestate for loading state
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   const rowsPerPage = 7; // Number of rows per page
 
+
+   // Role-Based Buttons
+   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+   // Function to fetch incident counts 
   const fetchData = async () => {
       try {
           const filters= {
@@ -118,10 +147,12 @@ export default function RejectIncidentlog() {
       }
     };
       
+  // UseEffect to load   
   useEffect(() => {
     fetchData();
   }, []);
 
+  
   const handleFilterClick = () => {
     const from = fromDate ? new Date(fromDate) : null;
     const to = toDate ? new Date(toDate) : null;
@@ -251,9 +282,25 @@ export default function RejectIncidentlog() {
                                         title: "Error",
                                         text: "The 'From' date cannot be later than the 'To' date.",
                                         icon: "error",
-                                        confirmButtonColor: "#d33", 
+                                        confirmButtonColor: "#f1c40f", 
                                     });;
-    } else {
+    }  else if (toDate){
+      // Calculate month gap
+            const diffInMs = toDate - date;
+            const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+            
+            if (diffInDays > 31) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "The selected range is more than 1 month.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                });
+              
+                return;
+          }
+          setFromDate(date);
+        } else {
       setError("");
       setFromDate(date);
     }
@@ -266,9 +313,25 @@ export default function RejectIncidentlog() {
                                         title: "Error",
                                         text: "The 'To' date cannot be earlier than the 'From' date.",
                                         icon: "error",
-                                        confirmButtonColor: "#d33", 
+                                        confirmButtonColor: "#f1c40f",
                                     });
-    } else {
+    } else if (fromDate) {
+      // Calculate month gap
+            const diffInMs = date - fromDate;
+            const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+            
+            if (diffInDays > 31) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "The selected range is more than 1 month.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                });
+              
+                return;
+          }
+          setToDate(date);
+        }else {
       setError("");
       setToDate(date);
     }
@@ -372,16 +435,33 @@ export default function RejectIncidentlog() {
                 </div>
 
                 {/* Filter Button */}
-                <button
+                {/* <button
                   className={`${GlobalStyle.buttonPrimary} h-[35px]`}
                   onClick={handleFilterClick}
                 >
                   Filter
-                </button>
+                </button> */}
+                <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                          onClick={handleFilterClick}
+                        >
+                          Filter
+                        </button>
+                        )}
+                      </div>
                 {/* Clear Button */}
-                <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+                {/* <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
                                         Clear
-                            </button>
+                            </button> */}
+                            <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+                          Clear
+                           </button>
+                        )}
+                      </div>
             </div>
           </div>
       </div>
@@ -533,7 +613,22 @@ export default function RejectIncidentlog() {
           Select All Data
         </label> */}
 
-        <button
+                    <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          className={`${GlobalStyle.buttonPrimary} ml-4 flex items-center`}
+                          onClick={()=>{handleCreateTaskForDownload({
+                            action_type: selectedAction, 
+                            fromDate: fromDate, 
+                            toDate: toDate
+                          })}}
+                        >
+                           <FaDownload className="mr-2" />
+                          Create Task Let Me Know
+                        </button>
+                        )}
+                      </div>
+        {/* <button
           className={`${GlobalStyle.buttonPrimary} ml-4 flex items-center`}
           onClick={()=>{handleCreateTaskForDownload({
             action_type: selectedAction, 
@@ -543,7 +638,7 @@ export default function RejectIncidentlog() {
         >
            <FaDownload className="mr-2" />
           Create Task Let Me Know
-        </button>
+        </button> */}
       </div>
     </div>
       )}
