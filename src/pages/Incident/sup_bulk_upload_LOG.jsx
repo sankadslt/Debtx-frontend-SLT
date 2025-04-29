@@ -19,12 +19,13 @@ import Swal from "sweetalert2";
 import OpenIcon from "../../assets/images/incidents/Incident_Done.png";
 import InProgressIcon from "../../assets/images/incidents/Incident_InProgress.png";
 import RejectIcon from "../../assets/images/incidents/Incident_Reject.png";
+import {List_Transaction_Logs_Upload_Files} from "../../services/Incidents/incidentService.js";
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from "react-tooltip";
 
 
 
-
+// Function to get the status icon based on the status value
 const getStatusIcon = (status) => {
     switch (status) {
         case "Open":
@@ -38,6 +39,7 @@ const getStatusIcon = (status) => {
             return null;
     }
 };
+
 
 const SupBulkUploadLog = () => {
     const [fromDate, setFromDate] = useState(null);
@@ -56,7 +58,7 @@ const SupBulkUploadLog = () => {
 
 
 
-
+    // Function to validate the selected dates and status before fetching data
     const validateAndFetchData = () => {
         if (!selectedFromDate && !selectedToDate && !selectedStatus) {
             Swal.fire({
@@ -74,7 +76,7 @@ const SupBulkUploadLog = () => {
         setStatus(selectedStatus);
     };
 
-
+    // Function to fetch data from the API
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
@@ -84,14 +86,23 @@ const SupBulkUploadLog = () => {
             if (fromDate) requestBody.From_Date = fromDate.toISOString();
             if (toDate) requestBody.To_Date = toDate.toISOString();
             if (status) requestBody.status = status;
+            
 
-            const response = await fetch("http://localhost:5000/api/incident/List_Transaction_Logs_Upload_Files", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestBody),
-            });
+            // const response = await fetch("http://localhost:5000/api/incident/List_Transaction_Logs_Upload_Files", {
+            //     method: "POST",
+            //     headers: { "Content-Type": "application/json" },
+            //     body: JSON.stringify(requestBody),
+            // });
 
-            const result = await response.json();
+             const response = await List_Transaction_Logs_Upload_Files(requestBody);
+        
+             console.log("Request Body:", requestBody);
+
+            //const response = await List_Transaction_Logs_Upload_Files(requestBody);
+
+            
+
+            const result = await response;
             if (result.status === "success") {
                 const transformedData = result.data.map((item) => ({
                     dateTime: new Date(item.Uploaded_Dtm).toLocaleDateString(),
@@ -106,8 +117,8 @@ const SupBulkUploadLog = () => {
                 setData([]);
             }
         } catch (error) {
-            // console.error("Error fetching data:", error);
-            // setError(error.message || "Failed to fetch data");
+             console.error("Error fetching data:", error);
+             setError(error.message || "Failed to fetch data");
             Swal.fire({
                 title: "Error",
                 text: "Failed to fetch data. Please try again later.",
@@ -121,7 +132,7 @@ const SupBulkUploadLog = () => {
         }
     }, [fromDate, toDate, status]);
 
-
+    // Fetch data when the component mounts or when the filters change
     useEffect(() => {
         fetchData();
     }, [fetchData, fromDate, toDate, status]);
@@ -135,7 +146,7 @@ const SupBulkUploadLog = () => {
     const startIndex = currentPage * rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
-
+    // Function to clear filters and reset the state
     const clearFilters = () => {
         setFromDate(null);
         setToDate(null);
@@ -182,18 +193,35 @@ const SupBulkUploadLog = () => {
                                     title: "Invalid Date Selection!",
                                     text: "The 'From' date cannot be later than the 'To' date.",
                                     icon: "error",
-                                    confirmButtonColor: "#d33",
+                                    confirmButtonColor: "#f1c40f",
                                     confirmButtonText: "OK"
                                 });
+                            } else if (selectedToDate) {
+                                // Check month gap
+                                const diffInMs = selectedToDate - date;
+                                const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+                    
+                                if (diffInDays > 31) {
+                                    Swal.fire({
+                                        title: "Invalid Range!",
+                                        text: "The range between From and To dates cannot be more than 1 month.",
+                                        icon: "warning",
+                                        confirmButtonColor: "#f1c40f",
+                                        confirmButtonText: "OK"
+                                    });
+                                    return; // Don't set the date
+                                }
+                    
+                                setSelectedFromDate(date);
                             } else {
                                 setSelectedFromDate(date);
                             }
                         }}
-
                         dateFormat="dd/MM/yyyy"
                         placeholderText="From"
                         className={GlobalStyle.inputText}
                     />
+                    
                     <DatePicker
                         selected={selectedToDate}
                         onChange={(date) => {
@@ -202,12 +230,30 @@ const SupBulkUploadLog = () => {
                                     title: "Invalid Date Selection!",
                                     text: "The 'To' date cannot be earlier than the 'From' date.",
                                     icon: "error",
-                                    confirmButtonColor: "#d33",
+                                    confirmButtonColor: "#f1c40f",
                                     confirmButtonText: "OK"
                                 });
+                            } else if (selectedFromDate) {
+                                // Check month gap
+                                const diffInMs = date - selectedFromDate;
+                                const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+                    
+                                if (diffInDays > 31) {
+                                    Swal.fire({
+                                        title: "Invalid Range!",
+                                        text: "The range between From and To dates cannot be more than 1 month.",
+                                        icon: "warning",
+                                        confirmButtonColor: "#f1c40f",
+                                        confirmButtonText: "OK"
+                                    });
+                                    return; // Don't set the date
+                                }
+                    
+                                setSelectedToDate(date);
                             } else {
                                 setSelectedToDate(date);
                             }
+
                         }}
                         
                         dateFormat="dd/MM/yyyy"
