@@ -156,9 +156,9 @@ export const getLitigationPhaseCaseDetails = async (case_id) => {
       case_id,
     });
 
-    if (response.status === 200) {
-      console.log('Case details retrieved:', response.data);
-      return response.data;
+    if (response.status === 200 && response.data?.status === "success") {
+      const { settlementData, paymentData } = response.data.data;
+      return { settlementData, paymentData };
     } else {
       console.error('Failed to retrieve case details:', response.data);
       return null;
@@ -168,4 +168,5 @@ export const getLitigationPhaseCaseDetails = async (case_id) => {
     throw error;
   }
 };
+
 

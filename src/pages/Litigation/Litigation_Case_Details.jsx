@@ -19,7 +19,6 @@ export const Litigation_Case_Details = () => {
   const location =useLocation();
   const case_id =location.state?.case_id || "";
 
-  const [selectedDate, setSelectedDate] =useState(null);
   const [caseDetails, setCaseDetails] =useState(null);
   const [settlementAndPaymentDetails, setSettlementAndPaymentDetails] =useState(null);
 
@@ -45,12 +44,12 @@ export const Litigation_Case_Details = () => {
         setLoading(true);
         try {
             const response = await getLitigationPhaseCaseDetails(case_id);
-            
-            if (response && response.status === "success") {
-                setSettlementAndPaymentDetails(response.data);
-                console.log("Settlement:", response.data);
+    
+            if (response) {
+                setSettlementAndPaymentDetails(response);
+                console.log("Settlement and Payment:", response);
             } else {
-                console.error("Error retrieving case details:", response.message);
+                console.error("Error retrieving case details: Invalid response");
             }
         } catch (error) {
             console.error("Error fetching settlement and payment details:", error);
@@ -150,13 +149,9 @@ export const Litigation_Case_Details = () => {
                     {/* Court Registered Date*/}
                     <div className="flex gap-4 items-center">
                         <label>Last Monitoring DTM : </label>
-                        <DatePicker
-                            selected={selectedDate}
-                            onChange={(date) => setSelectedDate(date)}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="dd/mm/yyyy"
-                            className={`${GlobalStyle.inputText} w-full`}
-                        />
+                        <span className="flex flex-col gap-2 border-2 rounded-xl py-2 px-8 w-fit">
+                            {new Date(settlementAndPaymentDetails?.settlementData?.last_monitoring_dtm).toLocaleDateString('en-GB')}
+                        </span>
                     </div>
                     <div className={GlobalStyle.tableContainer}>
                         <table className={GlobalStyle.table}>
@@ -169,12 +164,25 @@ export const Litigation_Case_Details = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td className={GlobalStyle.tableData}>001</td>
-                                    <td className={GlobalStyle.tableData}>25000</td>
-                                    <td className={GlobalStyle.tableData}>2025/04/02</td>
-                                    <td className={GlobalStyle.tableData}>15000</td>
-                                </tr>
+                            {settlementAndPaymentDetails?.settlementData?.settlement_plan?.length > 0 ? (
+                                settlementAndPaymentDetails.settlementData.settlement_plan.map((item, index) => (
+                                    <tr key={item._id || index}>
+                                        <td className={GlobalStyle.tableData}>{item.installment_seq}</td>
+                                        <td className={GlobalStyle.tableData}>{item.Installment_Settle_Amount}</td>
+                                        <td className={GlobalStyle.tableData}>
+                                            {item.Plan_Date ? new Date(item.Plan_Date).toLocaleDateString('en-GB') : 'N/A'}
+                                        </td>
+                                        <td className={GlobalStyle.tableData}>{item.Installment_Paid_Amount}</td>
+                                    </tr>
+                                ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-4 text-gray-500">
+                                            No settlement data available
+                                        </td>
+                                    </tr>
+                                )
+                            }
                             </tbody>
                         </table>
                     </div>
@@ -197,15 +205,35 @@ export const Litigation_Case_Details = () => {
                                 </tr>
                             </thead>
                             <tbody>
+                            {settlementAndPaymentDetails?.paymentData ? (
                                 <tr>
-                                    <td className={GlobalStyle.tableData}>2025/04/02</td>
-                                    <td className={GlobalStyle.tableData}>25000</td>
-                                    <td className={GlobalStyle.tableData}>15000</td>
-                                    <td className={GlobalStyle.tableData}>002</td>
-                                    <td className={GlobalStyle.tableData}>Type</td>
-                                    <td className={GlobalStyle.tableData}>10000</td>
-                                    <td className={GlobalStyle.tableData}>2025/04/02</td>
+                                <td className={GlobalStyle.tableData}>
+                                    {new Date(settlementAndPaymentDetails.paymentData.created_dtm).toLocaleDateString('en-GB')}
+                                </td>
+                                <td className={GlobalStyle.tableData}>
+                                    {settlementAndPaymentDetails.paymentData.Installment_Paid_Amount || 'N/A'}
+                                </td>
+                                <td className={GlobalStyle.tableData}>
+                                    {settlementAndPaymentDetails.paymentData.cummilative_settled_balance}
+                                </td>
+                                <td className={GlobalStyle.tableData}>
+                                    {settlementAndPaymentDetails.paymentData.installment_seq}
+                                </td>
+                                <td className={GlobalStyle.tableData}>
+                                    {settlementAndPaymentDetails.paymentData.money_transaction_type}
+                                </td>
+                                <td className={GlobalStyle.tableData}>
+                                    {settlementAndPaymentDetails.paymentData.money_transaction_amount}
+                                </td>
+                                <td className={GlobalStyle.tableData}>
+                                    {new Date(settlementAndPaymentDetails.paymentData.money_transaction_date).toLocaleDateString('en-GB')}
+                                </td>
                                 </tr>
+                            ) : (
+                                <tr>
+                                <td colSpan={7} className="text-center py-4 text-gray-500">No payment data available</td>
+                                </tr>
+                            )}
                             </tbody>
                         </table>
                     </div>
