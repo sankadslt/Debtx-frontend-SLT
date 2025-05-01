@@ -74,9 +74,13 @@ const Incident_Register_Individual = () => {
     
     if (actionType === "collect CPE" && !contactNumber) {
       newErrors.contactNumber = "*";
+    } else if (!/^\d+$/.test(contactNumber)) { // Check if contact number contains only digits
+      newErrors1.contactNumber = "Contact number must contain only digits.";
+    } else if (contactNumber.length !== 10) { // Check if contact number is less than 10 digits
+      newErrors1.contactNumber = "Contact number must be exactly 10 digits.";
     }
 
-    setErrors(newErrors);
+    setErrors(newErrors); 
     setErrors1(newErrors1);
     return Object.keys(newErrors).length === 0 && Object.keys(newErrors1).length === 0;
     
@@ -323,7 +327,9 @@ const handleSubmit = async (e) => {
                           className={`${GlobalStyle.inputText} w-full px-2 py-1`}
                         />
                         </div>
-                        
+                        {errors1.contactNumber && (
+                          <p className="text-red-500 text-xs mt-1">{errors1.contactNumber}</p>
+                        )}
                       </td>
                     </tr>
                   )}
