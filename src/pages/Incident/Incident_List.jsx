@@ -20,8 +20,8 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload  } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
-import { fetchIncidents } from "../../services/Incidents/incidentService";
-import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
+import { fetchIncidents ,Task_for_Download_Incidents } from "../../services/Incidents/incidentService.js";
+//import { Task_for_Download_Incidents } from "../../services/task/taskService.js"; // moved to the incident service 
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
 import { FaPlus } from 'react-icons/fa';
@@ -241,20 +241,22 @@ const Incident_List = () => {
     const HandleCreateTask = async () => {
         if (!fromDate || !toDate) {
             Swal.fire({
-                title: "Error",
+                title: "Warning",
                 text: "Both 'From' and 'To' dates are required.",
-                icon: "error",
-                confirmButtonColor: "#d33", 
+                icon: "warning",
+                confirmButtonColor: "#f1c40f",
+                
             });
             return;
         }
         if (!isFiltered) {
             
             Swal.fire({
-                title: "Error",
+                title: "warning",
                 text: "Please apply filters that return data before creating a task.",
-                icon: "error",
-                confirmButtonColor: "#d33", 
+                icon: "warning",
+                confirmButtonColor: "#f1c40f",
+                
             });
             return;
         }
@@ -468,6 +470,7 @@ const Incident_List = () => {
             </div>
             
              {/* Pagnation section */}
+             { filteredData.length > 0 && ( 
             <div className={GlobalStyle.navButtonContainer}>
                 <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
                     <FaArrowLeft />
@@ -479,11 +482,12 @@ const Incident_List = () => {
                     <FaArrowRight />
                 </button>
             </div>
+            )}
                         
             {/* Create Task Button */}
             <div className="flex justify-end mt-6">
-
-            <div>
+                { paginatedData.length > 0 && (
+                <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button 
                   onClick={HandleCreateTask} 
@@ -495,6 +499,7 @@ const Incident_List = () => {
               </button>
                     )}
                 </div>
+                )}
                 {/* <button 
                     onClick={HandleCreateTask} 
                     className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
