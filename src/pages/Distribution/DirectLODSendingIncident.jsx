@@ -561,21 +561,25 @@ useEffect(() => {
             <FaDownload className="mr-2" />
             Create task and let me know
           </button> */}
-          <div>
-            {["admin", "superadmin", "slt"].includes(userRole) && (
-               <button
-               className={`${GlobalStyle.buttonPrimary} flex items-center`}
-               onClick={()=>{handleCreateTaskForDownload({
-                 source_type: selectedSource, 
-                 fromDate: fromDate, 
-                 toDate: toDate
-               })}}
-             >
-               <FaDownload className="mr-2" />
-               Create task and let me know
-             </button>
-            )}
-        </div>
+          { paginatedData.length > 0 && (
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                
+                <button
+                className={`${GlobalStyle.buttonPrimary} flex items-center`}
+                onClick={()=>{handleCreateTaskForDownload({
+                  source_type: selectedSource, 
+                  fromDate: fromDate, 
+                  toDate: toDate
+                })}}
+              >
+                <FaDownload className="mr-2" />
+                Create task and let me know
+              </button>
+              )}
+              
+          </div>
+          )}
         </div>
 
         {/* Filter Section */}
