@@ -9,13 +9,14 @@ Version: node 11
 ui number : 1.7.1
 Dependencies: tailwind css
 Related Files: 
-Notes: 
+Notes:  
 */
 
 import { useState,useEffect } from "react"; 
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useNavigate } from "react-router-dom";
 import { getUserData } from "../../services/auth/authService";
+import { getLoggedUserId } from "../../services/auth/authService";
 import { FaSearch, FaArrowLeft, FaArrowRight , FaDownload } from "react-icons/fa";
 import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band,Create_Case_for_incident} from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/incidents/Open_No_Agent.png";
@@ -72,8 +73,10 @@ const navigate = useNavigate();
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userData = await getUserData();
-        setUser(userData);
+        const user_id = await getLoggedUserId();
+        setUser(user_id);
+        //console.log("User ID:", user_id);
+        
       } catch (err) {
         console.error("Failed to fetch user data", err);
       }
@@ -200,7 +203,7 @@ const fetchData = async () => {
       
       const taskParams = {
         Incident_Status: "Open No Agent",
-        Proceed_By: user.user_id,
+        Proceed_By: user,
         Proceed_Dtm: new Date().toISOString(),
       };
 
@@ -217,7 +220,7 @@ const fetchData = async () => {
       
       const response = await Create_Case_for_incident({
         Incident_Ids: selectedRows,
-        Proceed_By: user.user_id,
+        Proceed_By: user,
         Proceed_Dtm: new Date().toISOString(),
       });
 
@@ -317,6 +320,7 @@ const fetchData = async () => {
         <FaDownload className="mr-1" />
           Create task and let me know
         </button> */}
+        { paginatedData.length > 0 && (
         <div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
                <button
@@ -329,6 +333,7 @@ const fetchData = async () => {
              </button>
             )}
         </div>
+        )}
         </div>
 
     
@@ -368,9 +373,30 @@ const fetchData = async () => {
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
               {" "}
-              <span>&gt; 100,000</span>
+              <span> 100,000 &lt;</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-100_"] || 0}</p>
             </div>
+            <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
+              {" "}
+              <span> CP_Collect </span>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["CP_Collect"] || 0}</p>
+            </div>
+            <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
+              {" "}
+              <span> &lt; 1000 </span>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-0_1"] || 0}</p>
+            </div>
+            <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
+              {" "}
+              <span> 1000 - 2500 </span>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-1-2.5"] || 0}</p>
+            </div>
+            <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
+              {" "}
+              <span> 2500 - 5000 </span>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-2.5-5"] || 0}</p>
+            </div>
+
           </div>
         </div>
       </div>
@@ -484,7 +510,7 @@ const fetchData = async () => {
             </button>
           </div>
         )}
-  <div className="flex justify-start items-center w-full  ">
+      <div className="flex justify-start items-center w-full  ">
             <button
               className={`${GlobalStyle.buttonPrimary} `} 
               onClick={ handlebacknavigate}
