@@ -612,7 +612,7 @@ export default function RejectIncidentlog() {
           />
           Select All Data
         </label> */}
-
+                  { paginatedData.length > 0 && (
                     <div>
                         {["admin", "superadmin", "slt"].includes(userRole) && (
                           <button
@@ -628,6 +628,7 @@ export default function RejectIncidentlog() {
                         </button>
                         )}
                       </div>
+                  )}
         {/* <button
           className={`${GlobalStyle.buttonPrimary} ml-4 flex items-center`}
           onClick={()=>{handleCreateTaskForDownload({
