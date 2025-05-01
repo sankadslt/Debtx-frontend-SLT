@@ -31,6 +31,8 @@ const Incident_Register_Bulk_Upload = () => {
     //     const file = event.target.files[0];
     //     setSelectedFile(file);
     // };
+
+    // Function to handle file selection and validation
     const handleFileChange = (event) => {
         const file = event.target.files[0];
     
@@ -54,10 +56,12 @@ const Incident_Register_Bulk_Upload = () => {
         setSelectedFile(file);
     };
     
+    // Function to handle action type selection
     const handleActionTypeChange = (event) => {
         setActionType(event.target.value);
     };
 
+    // Function to get the current logged-in user ID
     const getCurrentUser = async () => {
         try {
               const user_id = await getLoggedUserId();
@@ -73,7 +77,8 @@ const Incident_Register_Bulk_Upload = () => {
     };
 
     
-
+    
+    // Function to handle form submission
     const handleSubmit = async (event) => {
         event.preventDefault();
     
@@ -112,6 +117,8 @@ const Incident_Register_Bulk_Upload = () => {
                         text: response.message,
                         confirmButtonColor: "#28a745",
                     });
+                    setSelectedFile(null);  
+                    setActionType(null);
                    
                 } catch (error) {
                     console.error("Error uploading file:", error);
@@ -147,6 +154,7 @@ const Incident_Register_Bulk_Upload = () => {
         }
     };
 
+    // Function to handle back button click
     const handlebackbuttonClick = () => {
         window.history.back();
     }

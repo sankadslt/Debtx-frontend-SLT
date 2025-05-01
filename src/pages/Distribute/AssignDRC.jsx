@@ -30,6 +30,7 @@ import {
 } from "/src/services/case/CaseServices.js";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
+
 import Swal from "sweetalert2";
 import Chart from "/src/pages/Chart.jsx";
 
@@ -408,6 +409,7 @@ const AssignDRC = () => {
                                 width={28}
                                 height={29}
                                 fill="none"
+                             
                               >
                                 <path
                                   fill="#000"

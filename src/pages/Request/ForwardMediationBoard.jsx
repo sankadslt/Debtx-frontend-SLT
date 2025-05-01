@@ -94,7 +94,9 @@ const ForwardMediationBoard = () => {
   const currentData2 = mediationboard.slice(indexOfFirstRecord2, indexOfLastRecord2);
   const TOtalPages = Math.ceil(mediationboard.length / recordsPerPage);
 
-
+  const handlebackbuttonClick = () => {
+    navigate("/additional_request_log");
+  };
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -198,7 +200,7 @@ const ForwardMediationBoard = () => {
         icon: "error",
         title: "Error",
         text: errorMessage,
-        confirmButtonColor: "#f1c40f",
+        confirmButtonColor: "#d33",
       });
     }
   };
@@ -240,7 +242,7 @@ const ForwardMediationBoard = () => {
               icon: "error",
               title: "Error",
               text: errorMessage,
-              confirmButtonColor: "#f1c40f",
+              confirmButtonColor: "#d33",
             });
           }
     }
@@ -248,8 +250,87 @@ const ForwardMediationBoard = () => {
   return (
     <div className={GlobalStyle.fontPoppins}>
       <h1 className={GlobalStyle.headingLarge} style={{ marginBottom: "20px" }}>Request Type: {requestType}</h1>
+
       <div className={`${GlobalStyle.cardContainer}`}>
-        <p className="mb-2">
+
+        <table>
+          <colgroup>
+            <col />
+            <col style={{ width: "20px" }} />
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td className="py-2"><strong>Case ID</strong></td>
+              <td className="py-2"> <strong> : </strong> </td>
+              <td className="py-2"> {caseId}</td>
+            </tr>
+            <tr>
+              <td className="py-2"><strong>Customer Ref</strong></td>
+              <td className="py-2"> <strong> : </strong> </td>
+              <td className="py-2"> {Data?.customer_ref}</td>
+            </tr>
+            <tr>
+              <td className="py-2"><strong>Account no</strong></td>
+              <td className="py-2"> <strong> : </strong> </td>
+              <td className="py-2"> {Data?.account_no}</td>
+            </tr>
+            {requestType === "Mediation board forward request letter" && (
+              <tr>
+                <td className="py-2"><strong>Customer Name</strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2"> {Data?.customer_name}</td>
+              </tr>
+            )}
+            <tr>
+              <td className="py-2"><strong>Arrears Amount</strong></td>
+              <td className="py-2"> <strong> : </strong> </td>
+              <td className="py-2"> {Data?.current_arrears_amount}</td>
+            </tr>
+            {requestType === "Mediation board forward request letter" && (
+              <tr>
+                <td className="py-2"><strong>Validity Expire Date</strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2"> {Data?.validity_expire_date}</td>
+              </tr>
+            )}
+            <tr>
+              <td className="py-2"><strong>Last Payment Date</strong></td>
+              <td className="py-2"> <strong> : </strong> </td>
+              <td className="py-2"> {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}</td>
+            </tr>
+            {requestType === "Mediation board forward request letter" && (
+              <tr>
+                <td className="py-2"><strong>Customer Type Name</strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2"> {Data?.Customer_Type_Name}</td>
+              </tr>
+            )}
+            {requestType === "Mediation board forward request letter" && (
+              <tr>
+                <td className="py-2"><strong>Account Manager Code</strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2"> {Data?.ACCOUNT_MANAGER}</td>
+              </tr>
+            )}
+            {requestType === "Mediation board forward request letter" && (
+              <tr>
+                <td className="py-2"><strong>Credit Class No</strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2"> {Data?.customer_name}</td>
+              </tr>
+            )}
+            {requestType === "Mediation board forward request letter" && (
+              <tr>
+                <td className="py-2"><strong>Credit Class Name</strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2"> {Data?.customer_name}</td>
+              </tr>
+            )}
+          </tbody>
+
+        </table>
+        {/* <p className="mb-2">
           <strong>Case ID: </strong>
           {caseId}
         </p>
@@ -296,7 +377,7 @@ const ForwardMediationBoard = () => {
             <p className="mb-2">
               <strong> Credit Class Name: </strong> {Data?.customer_name}
             </p>
-          )}
+          )} */}
         
 
       </div>
@@ -709,8 +790,22 @@ const ForwardMediationBoard = () => {
           </div>
         </div>
       )}
+
+      {/* Back button */}
+
+      <div className="flex justify-start items-center w-full  mt-8 ">
+            <button
+              className={`${GlobalStyle.buttonPrimary} `} 
+             onClick={handlebackbuttonClick}
+            >
+              <FaArrowLeft className="mr-2" />
+              
+            </button>
+          </div>
     </div>
   );
 };
+
+
 
 export default ForwardMediationBoard;

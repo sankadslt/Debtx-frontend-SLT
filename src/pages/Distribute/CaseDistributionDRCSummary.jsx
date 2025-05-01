@@ -12,10 +12,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch , FaArrowLeft , FaDownload} from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import open from "/src/assets/images/distribution/more_info.png";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import {List_Case_Distribution_Details , Create_Task_For_case_distribution_drc_summery} from "/src/services/case/CaseServices.js";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
+import { Tooltip } from "react-tooltip";
 
 const CaseDistributionDRCSummary = () => {
 
@@ -309,20 +311,13 @@ const CaseDistributionDRCSummary = () => {
                     {item.proceed_on ? new Date(item.proceed_on).toLocaleDateString('en-GB') : ""}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={26}
-                        height={29}
-                        fill="none"
-                      >
-                        <path
-                          fill="#000"
-                          fillRule="evenodd"
-                          d="M13 .32c7.18 0 13 5.821 13 13 0 7.18-5.82 13-13 13s-13-5.82-13-13c0-7.179 5.82-13 13-13Zm5.85 11.05a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                    <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)} >
+                                            <img
+                                                src= {open}
+                                                data-tooltip-id="my-tooltip"
+                                
+                                              ></img>
+                      <Tooltip id="my-tooltip" place="bottom" content="More Info" />
                     </button>
                   </td>
                 </tr>

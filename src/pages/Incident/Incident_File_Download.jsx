@@ -19,7 +19,7 @@ import  { Tooltip } from "react-tooltip";
 
 
 const Incident_File_Download = () => {
-
+    // State variables
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [tableData, setTableData] = useState([]);
@@ -27,7 +27,7 @@ const Incident_File_Download = () => {
     const [error, setError] = useState("");
     const rowsPerPage = 7;
 
-
+    // Fetch data from the API
     const fetchData = async () => {
       try {      
         const response = await List_Download_Files_from_Download_Log();
@@ -51,10 +51,13 @@ const Incident_File_Download = () => {
           setIsLoading(false);
       }
     };
+
+    // Fetch data when the component mounts
     useEffect(() => {
         fetchData();
       }, []);
    
+    // Handle loading state and error
     const filteredData = tableData.filter((row) =>
         Object.values(row)
             .join(" ")
@@ -64,7 +67,7 @@ const Incident_File_Download = () => {
 
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
-
+    // Calculate the number of pages based on the filtered data length
     const handlePrevPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
@@ -81,7 +84,7 @@ const Incident_File_Download = () => {
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, endIndex);
 
-
+    // Handle file download
     const handleDownload = (taskId) => {
         try {
 
@@ -113,7 +116,7 @@ const Incident_File_Download = () => {
                 </div>
             </div>
 
-
+            {/* Table */}
             <div className={GlobalStyle.tableContainer}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
