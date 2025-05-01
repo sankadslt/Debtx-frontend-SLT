@@ -496,6 +496,7 @@ export default function RejectIncident() {
         </div>
 
         <div className="flex justify-end items-center mb-4">
+          {paginatedData.length > 0 && (
         <button
             className={`${GlobalStyle.buttonPrimary} flex items-center`}
             onClick={()=>{handleCreateTaskForDownload({
@@ -507,6 +508,7 @@ export default function RejectIncident() {
             <FaDownload className="mr-2" />
             Create task and let me know
           </button>
+          )}
         </div>
 
         {/* Filter Section */}
