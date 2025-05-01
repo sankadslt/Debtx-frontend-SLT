@@ -588,7 +588,7 @@ export default function CollectOnlyCPECollect() {
             <FaDownload className="mr-2" />
               Create task and let me know
             </button> */}
-
+            { paginatedData.length > 0 && (
             <div>
               {["admin", "superadmin", "slt"].includes(userRole) && (
                 <button
@@ -607,6 +607,8 @@ export default function CollectOnlyCPECollect() {
               </button>
               )}
             </div>
+            )}
+
 
           </div>
           <div className="flex justify-end">
