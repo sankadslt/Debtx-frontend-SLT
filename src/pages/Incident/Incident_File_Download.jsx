@@ -70,9 +70,11 @@ const Incident_File_Download = () => {
               GroupID: item.file_download_seq || "N/A",
               CreatedDTM: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A",
               ExpireDTM: isNaN(expireDate) ? "N/A" : expireDate.toLocaleString() || "N/A",
+              Filepath: item.File_Location || "N/A",
               CreatedBy: item.Deligate_By
             };
           });
+          
           setTableData(formattedData);
           setIsLoading(false);
       } catch {
@@ -114,14 +116,30 @@ const Incident_File_Download = () => {
     const paginatedData = filteredData.slice(startIndex, endIndex);
 
     // Handle file download
-    const handleDownload = (taskId) => {
-        try {
+    const handleDownload = (filepath) => {
+        alert ("Need to configure the download with the server")
 
-            console.log(`Downloading file for task: ${taskId}`);
-        } catch (error) {
-            console.error('Download failed:', error);
+        // try {
+        //     const filename = filepath.split(/[\\/]/).pop();  // Extract the filename from the file path
+        //     const downloadurl = `http://localhost:5000/uploads/${filename}`; // Construct the download URL
 
-        }
+        //     const link = document.createElement("a");
+        //     link.href = downloadurl;
+            
+        //     link.setAttribute("download", filename); // Set the download attribute with the filename
+        //     document.body.appendChild(link);
+        //     link.click(); // Trigger the download
+        //     document.body.removeChild(link); // Clean up the link element
+            
+        //     console.log("Download initiated for:", filename);
+
+
+
+            
+        // } catch (error) {
+        //     console.error('Download failed:', error);
+
+        // }
     };
 
     return (
@@ -174,7 +192,7 @@ const Incident_File_Download = () => {
                     </thead>
                     <tbody>
                         {paginatedData.map((log, index) => {
-                            const isExpired = new Date(log.ExpireDTM).toLocaleString() < new Date().toLocaleString();
+                            // const isExpired = new Date(log.ExpireDTM).toLocaleString() < new Date().toLocaleString();
                             return(
                             <tr
                                 key={log.TaskID}
@@ -209,10 +227,10 @@ const Incident_File_Download = () => {
                                 <div>
                                     {["admin", "superadmin", "slt"].includes(userRole) && (
                                         <button
-                                        onClick={() => handleDownload(log.TaskID)}
+                                        onClick={() => handleDownload(log.File_Location)}
                                         className="text-blue-600 hover:text-blue-800 " 
                                         data-tooltip-id="download-tooltip"
-                                        disabled={isExpired}
+                                        // disabled={isExpired}
                                     >
                                         <FaDownload />
 
@@ -228,7 +246,8 @@ const Incident_File_Download = () => {
                                         <FaDownload />
 
                                     </button> */}
-                                    <Tooltip id="download-tooltip" place="bottom" content={isExpired ? "Download expired" : "Download file"} />
+                                    {/* <Tooltip id="download-tooltip" place="bottom" content={isExpired ? "Download expired" : "Download file"} /> */}
+                                    <Tooltip id="download-tooltip" place="bottom" content="Download file" />
                                 </td>
                             </tr>
                           )
