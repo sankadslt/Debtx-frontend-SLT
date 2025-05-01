@@ -78,9 +78,9 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
-    { icon: MdSpeakerNotes, label: "Case Distribution", link: "/pages/Distribute/DistributionPreparationBulkUpload", roles: ["superadmin", "admin", "user"], subItems: [
+    { icon: MdSpeakerNotes, label: "Case Distribution", link: "", roles: ["superadmin", "admin", "user"], subItems: [
       {icon:CgEditFade, label:"Ready For Distribution", link:"/pages/Distribute/DistributionPreparationBulkUpload", roles:["superadmin", "admin"]},
-      {icon:CgEditFade, label:"Pending Distribution", link:"/pages/Distribute/DistributionPreparationIndividual", roles:["superadmin", "admin"]},
+      {icon:CgEditFade, label:"Pending Distribution", link:"/pages/Distribute/AssignedDRCSummary", roles:["superadmin", "admin"]},
     ] },
 
     {
