@@ -31,6 +31,15 @@ import MB_Settle_Active from "/src/assets/images/Settlement/MB Settle Active.png
 import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation Settle Pending.png";
 import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
 import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
+import LOD_Settle_Active from "/src/assets/images/Settlement/LOD_Settle_Active.png";
+import LOD_Settle_Pending from "/src/assets/images/Settlement/LOD_Settle_Pending.png";
+import LOD_Settle_Open_Pending from "/src/assets/images/Settlement/LOD_Settle_Open_Pending.png";
+import WRIT_Settle_Pending from "/src/assets/images/Settlement/WRIT_Settle_Pending.png";
+import WRIT_Settle_Open_Pending from "/src/assets/images/Settlement/WRIT_Settle_Open-Pending.png";
+import WRIT_Settle_Active from "/src/assets/images/Settlement/WRIT_Settle_Active.png";
+import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle_Pending.png";
+import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
+import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
 
 // // Import status icons with correct file extensions
 // import RO_Negotiation_FMB_pending from "../../assets/images/negotiation/RO_Negotiation_FMB_pending.png";
@@ -163,6 +172,39 @@ const Monitor_settlement = () => {
             return Litigation_Settle_Open_Pending;
           case "active":
             return Litigation_Settle_Active;
+          default:
+            return null;
+        }
+      case "lod":
+        switch (status?.toLowerCase()) {
+          case "pending":
+            return LOD_Settle_Pending;
+          case "open_pending":
+            return LOD_Settle_Open_Pending;
+          case "active":
+            return LOD_Settle_Active;
+          default:
+            return null;
+        }
+      case "writ":
+        switch (status?.toLowerCase()) {
+          case "pending":
+            return WRIT_Settle_Pending;
+          case "open_pending":
+            return WRIT_Settle_Open_Pending;
+          case "active":
+            return WRIT_Settle_Active;
+          default:
+            return null;
+        }
+      case "dispute":
+        switch (status?.toLowerCase()) {
+          case "pending":
+            return Dispute_Settle_Pending;
+          case "open_pending":
+            return Dispute_Settle_Open_Pending;
+          case "active":
+            return Dispute_Settle_Active;
           default:
             return null;
         }
@@ -585,6 +627,9 @@ const Monitor_settlement = () => {
                   <option value="Negotiation">Negotiation</option>
                   <option value="Mediation Board">Mediation Board</option>
                   <option value="Litigation">Litigation</option>
+                  <option value="LOD">LOD</option>
+                  <option value="WRIT">WRIT</option>
+                  <option value="Dispute">Dispute</option>
                 </select>
               </div>
 

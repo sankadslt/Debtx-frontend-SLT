@@ -32,6 +32,7 @@ import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation 
 import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
 import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
 import { List_All_Payment_Cases } from "../../services/Transaction/Money_TransactionService";
+import { Create_task_for_Download_Payment_Case_List } from "../../services/Transaction/Money_TransactionService";
 
 // // Import status icons with correct file extensions
 // import RO_Negotiation_FMB_pending from "../../assets/images/negotiation/RO_Negotiation_FMB_pending.png";
@@ -360,7 +361,7 @@ const PaymentDetails = () => {
 
       const payload = {
         case_id: caseId,
-        account_no: accountNo,
+        account_num: accountNo,
         settlement_phase: phase,
         // settlement_status: status,
         from_date: formatDate(fromDate),
@@ -463,8 +464,10 @@ const PaymentDetails = () => {
     setTotalAPIPages(1); // Reset total API pages
   };
 
-  const naviPreview = (caseId) => {
-    navigate("/lod/ftl-log/preview", { state: { caseId } });
+  const naviPreview = (caseId, moneyTransactionID) => {
+    // console.log("caseId", caseId);
+    // console.log("moneyTransactionID", moneyTransactionID);
+    navigate("/lod/payment/preview", { state: { caseId, moneyTransactionID } });
   };
 
   const naviCaseID = (caseId) => {
@@ -472,7 +475,7 @@ const PaymentDetails = () => {
   }
 
   // Function to handle the creation of tasks for downloading settlement list
-  const HandleCreateTaskDownloadSettlementList = async () => {
+  const HandleCreateTaskDownloadPaymentList = async () => {
 
     const userData = await getLoggedUserId(); // Assign user ID
 
@@ -514,7 +517,7 @@ const PaymentDetails = () => {
 
     setIsCreatingTask(true);
     try {
-      const response = await Create_Task_For_Downloard_Settlement_List(userData, phase, status, fromDate, toDate, caseId, accountNo);
+      const response = await Create_task_for_Download_Payment_Case_List(userData, phase, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
         Swal.fire(response, `Task created successfully!`, "success");
       }
@@ -658,11 +661,11 @@ const PaymentDetails = () => {
                   <th className={GlobalStyle.tableHeader}>Case ID</th>
                   <th className={GlobalStyle.tableHeader}>Account No.</th>
                   <th className={GlobalStyle.tableHeader}>Settlement ID</th>
-                  <th className={GlobalStyle.tableHeader}>Paid DTM</th>
                   <th className={GlobalStyle.tableHeader}>Amount</th>
                   <th className={GlobalStyle.tableHeader}>Type</th>
                   <th className={GlobalStyle.tableHeader}>Phase </th>
                   <th className={GlobalStyle.tableHeader}>Settled Balance</th>
+                  <th className={GlobalStyle.tableHeader}>Paid DTM</th>
                   <th className={GlobalStyle.tableHeader}></th>
                 </tr>
               </thead>
@@ -715,19 +718,39 @@ const PaymentDetails = () => {
                       >
                         {item.Case_ID || "N/A"}
                       </td>
-                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>{item.Account_No || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.Account_No || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.Settlement_ID || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{item.Money_Transaction_Date || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}> {item.Money_Transaction_Amount || "N/A"} </td>
+                      <td className={GlobalStyle.tableCurrency}>
+                        {item.Money_Transaction_Amount?.toLocaleString("en-LK", {
+                          style: "currency",
+                          currency: "LKR",
+                        })}
+                      </td>
                       <td className={GlobalStyle.tableData}>{item.Transaction_Type || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.Settlement_Phase || "N/A"}</td>
+                      <td className={GlobalStyle.tableCurrency}>
+                        {/* {parseInt(item.Cummulative_Settled_Balance) ? parseInt(item.Cummulative_Settled_Balance).toLocaleString("en-US") : "-"} */}
+                        {item.Cummulative_Settled_Balance?.toLocaleString("en-LK", {
+                          style: "currency",
+                          currency: "LKR",
+                        })}
+                      </td>
                       <td className={GlobalStyle.tableData}>
-                        {parseInt(item.Cummulative_Settled_Balance) ? parseInt(item.Cummulative_Settled_Balance).toLocaleString("en-US") : "-"}
+                        {item.Money_Transaction_Date &&
+                          new Date(item.Money_Transaction_Date).toLocaleString("en-GB", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: true,
+                          })}
                       </td>
                       <td className={GlobalStyle.tableData}>
                         <img
                           src={more}
-                          onClick={() => naviPreview(item.case_id)}
+                          onClick={() => naviPreview(item.Case_ID, item.Money_Transaction_ID)}
                           title="More"
                           alt="more icon"
                           className="w-5 h-5 cursor-pointer"
@@ -769,7 +792,7 @@ const PaymentDetails = () => {
           </div>
 
           <button
-            onClick={HandleCreateTaskDownloadSettlementList}
+            onClick={HandleCreateTaskDownloadPaymentList}
             className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
             disabled={isCreatingTask}
             style={{ display: 'flex', alignItems: 'center' }}
