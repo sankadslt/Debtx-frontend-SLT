@@ -9,7 +9,6 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import DatePicker from "react-datepicker"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
 import { useEffect, useState } from "react";
 import { getLitigationPhaseCaseDetails, listLitigationPhaseCaseDetails } from "../../services/litigation/litigationService";
@@ -208,25 +207,26 @@ export const Litigation_Case_Details = () => {
                             {settlementAndPaymentDetails?.paymentData ? (
                                 <tr>
                                 <td className={GlobalStyle.tableData}>
-                                    {new Date(settlementAndPaymentDetails.paymentData.created_dtm).toLocaleDateString('en-GB')}
+                                    {new Date(settlementAndPaymentDetails.paymentData.created_dtm).toLocaleDateString('en-GB') || 'N/A'}
                                 </td>
                                 <td className={GlobalStyle.tableData}>
-                                    {settlementAndPaymentDetails.paymentData.Installment_Paid_Amount || 'N/A'}
+                                    {/* {settlementAndPaymentDetails.paymentData.Installment_Paid_Amount || 'N/A'} */}
+                                    30000
                                 </td>
                                 <td className={GlobalStyle.tableData}>
-                                    {settlementAndPaymentDetails.paymentData.cummilative_settled_balance}
+                                    {settlementAndPaymentDetails.paymentData.cummilative_settled_balance || 'N/A'}
                                 </td>
                                 <td className={GlobalStyle.tableData}>
-                                    {settlementAndPaymentDetails.paymentData.installment_seq}
+                                    {settlementAndPaymentDetails.paymentData.installment_seq || 'N/A'}
                                 </td>
                                 <td className={GlobalStyle.tableData}>
-                                    {settlementAndPaymentDetails.paymentData.money_transaction_type}
+                                    {settlementAndPaymentDetails.paymentData.money_transaction_type || 'N/A'}
                                 </td>
                                 <td className={GlobalStyle.tableData}>
-                                    {settlementAndPaymentDetails.paymentData.money_transaction_amount}
+                                    {settlementAndPaymentDetails.paymentData.money_transaction_amount || 'N/A' }
                                 </td>
                                 <td className={GlobalStyle.tableData}>
-                                    {new Date(settlementAndPaymentDetails.paymentData.money_transaction_date).toLocaleDateString('en-GB')}
+                                    {new Date(settlementAndPaymentDetails.paymentData.money_transaction_date).toLocaleDateString('en-GB') || 'N/A'}
                                 </td>
                                 </tr>
                             ) : (

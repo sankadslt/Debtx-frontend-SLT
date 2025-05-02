@@ -169,4 +169,28 @@ export const getLitigationPhaseCaseDetails = async (case_id) => {
   }
 };
 
+export const createLegalFail = async ({ case_id, remark, created_by }) => {
+  try {
+    const response = await axios.patch(`${URL}/Create_Legal_Fail_By_case_ID`, {
+      case_id,
+      remark,
+      created_by
+    });
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error('createLegalFail error:', error);
+    return {
+      success: false,
+      error: error.response?.data || {
+        message: 'Something went wrong. Please try again.',
+      },
+    };
+  }
+};
+
+
 

@@ -11,8 +11,8 @@ Notes: This template uses Tailwind CSS */
 
 import DatePicker from "react-datepicker"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
-import { useEffect, useState } from "react"
-import { FaArrowLeft, FaArrowRight, FaEye, FaSearch } from "react-icons/fa";
+import { useState } from "react"
+import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Litigation_Fail_Update } from "./Litigation_Fail_Update";
 import { listAllLitigationCases } from "../../services/litigation/litigationService";
@@ -45,10 +45,12 @@ export const Litigation_List = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // Changed to start from 1 to match backend
   const [isLoading, setIsLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [totalCases, setTotalCases] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [showPopup, setShowPopup] = useState(false);
+
  
   // Status mapping between frontend display values and backend expected values
   const statusMapping = {
@@ -408,13 +410,35 @@ export const Litigation_List = () => {
                             />
                             <button 
                               className={GlobalStyle.buttonPrimary}
-                              onClick={() => setIsModalOpen(true)}
+                              onClick={() => setShowPopup(true)}
                             >
                               Legal Fail
                             </button>
-                            <Litigation_Fail_Update isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
                           </div>
                         )}
+                        
+                        {/* Popup */}
+                        {showPopup && (
+                          <div className={GlobalStyle.popupBoxContainer}>
+                            <div className={GlobalStyle.popupBoxBody}>
+                              <div className={GlobalStyle.popupBox}>
+                                <h2 className={GlobalStyle.popupBoxTitle}>Legal Fail Update</h2>
+
+                                <button
+                                  className={GlobalStyle.popupBoxCloseButton}
+                                  onClick={() => setShowPopup(false)}
+                                >
+                                  ×
+                                </button>
+                              </div>
+
+                              <div>
+                                <Litigation_Fail_Update case_id={item.case_id} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {displayStatus === "FTL" && ( 
                           <div className="flex gap-4 items-center justify-center">
                             <img
@@ -476,6 +500,12 @@ export const Litigation_List = () => {
             <FaArrowRight />
           </button>
         </div>
+        {/* Test
+        <div className="flex justify-start gap-4 mt-4">
+          <button className={`${GlobalStyle.buttonPrimary}`} onClick={() => setShowPopup(true)}>
+            Show Litigation Fail
+          </button>
+        </div> */}
     </div>
   )
 }
