@@ -11,7 +11,7 @@ Notes: This template uses Tailwind CSS */
 
 import DatePicker from "react-datepicker"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Litigation_Fail_Update } from "./Litigation_Fail_Update";
@@ -21,7 +21,7 @@ import Swal from 'sweetalert2';
 //Status Icons
 import Initial_Litigation from '../../assets/images/litigation/status/Initial_Litigation.png'
 import FTL_Settle_Pending from '../../assets/images/litigation/status/Litigation_Settle_Pending.png'
-import Pending_FTL from '../../assets/images/litigation/status/Litigation_Settle_Open-Pending.png'
+import Pending_FTL from '../../assets/images/litigation/status/Litigation_Settle_Open_Pending.png'
 import FLU from '../../assets/images/litigation/status/FLU.png'
 import FLA from '../../assets/images/litigation/status/FLA.png'
 import SLA from '../../assets/images/litigation/status/Litigation_Settle_Active.png'
@@ -43,15 +43,25 @@ export const Litigation_List = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // Changed to start from 1 to match backend
   const [isLoading, setIsLoading] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
-  const [totalCases, setTotalCases] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
 
+  //Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalAPIPages, setTotalAPIPages] = useState(1);
+  const [isFilterApplied, setIsFilterApplied] = useState(false);
+  const rowsPerPage = 10; // Number of rows per page 
+
+  //Popup
   const [showPopup, setShowPopup] = useState(false);
 
- 
+  // variables need for table
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
   // Status mapping between frontend display values and backend expected values
   const statusMapping = {
     "Initial_Litigation": "Initial_Litigation",
@@ -72,7 +82,7 @@ export const Litigation_List = () => {
           return FLU;
         case "FLA":
           return FLA;
-        case "Pending_FTL":
+        case "Pending FTL":
           return Pending_FTL;
         case "FTL_Settle_Pending":
           return FTL_Settle_Pending;
@@ -106,52 +116,123 @@ export const Litigation_List = () => {
     "created": "Settlement created dtm"
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      fetchData(currentPage + 1);
+  // Handle api calling only when the currentPage incriment more that before
+  const handlePageChange = () => {
+    if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
+      setMaxCurrentPage(currentPage);
+      handleFilter(); // Call the filter function only after the page incrimet 
     }
   };
+  
+  useEffect(() => {
+    if (isFilterApplied) {
+      handlePageChange(); // Call the function whenever currentPage changes
+    }
+  }, [currentPage]);
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
+  // Handle Pagination
+  const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      fetchData(currentPage - 1);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
-  const fetchData = async (page = 1) => {
-    try {
-      setIsLoading(true);
-      
-      // Format the date to 'YYYY-MM-DD' format
-      const formatDate = (date) => {
-        if (!date) return null;
-        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-        return offsetDate.toISOString().split('T')[0];
-      };
-      
+  const handleFilter = async() => {
+    // Format the date to 'YYYY-MM-DD' format
+    const formatDate = (date) => {
+      if (!date) return null;
+      const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return offsetDate.toISOString().split('T')[0];
+    };
+
+    try{
+      if (!status && !dateType && !fromDate && !toDate) {
+        Swal.fire({
+          title: "Warning",
+          text: "No filter is selected. Please, select a filter.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
+      if ((fromDate && !toDate) || (!fromDate && toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "Both From Date and To Date must be selected.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "To date should be greater than or equal to From date",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
       // Create the payload with mapped values where needed
       const payload = {
-        pages: page,
+        pages: currentPage,
         case_current_status: status ? statusMapping[status] : "",
         date_type: dateType ? dateTypeMapping[dateType] : "",
         from_date: formatDate(fromDate),
         to_date: formatDate(toDate)
       };
-      
       console.log("Payload sent to API: ", payload);
       
-      const response = await listAllLitigationCases(payload);
+      setIsLoading(true);
+      const response = await listAllLitigationCases(payload).catch((error) => {
+        if (error.response && error.response.status === 404) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+          setFilteredData([]);
+          return null;
+        } else {
+          throw error;
+        }
+      });
+      setIsLoading(false);
       
-      if (response && response.status === "success") {
-        setFilteredData(response.data);
-        setTotalCases(response.total_cases);
-        setTotalPages(Math.ceil(response.total_cases / (page === 1 ? 10 : 30)));
+      // Updated response handling
+      if (response && response.data) {
+        console.log("Valid data received:", response.data)
+        // console.log(response.data.pagination.pages);
+        const totalPages = Math.ceil(response.total_cases / rowsPerPage);
+        setTotalPages(totalPages);
+        setTotalAPIPages(totalPages <= 10 ? 1 : Math.ceil((totalPages - 10) / 30) + 1);
+        // Append the new data to the existing data
+        setFilteredData((prevData) => [...prevData, ...response.data]);
+
+        console.log("pages", totalPages);
+        console.log("pagesAPI", totalAPIPages);
+        
+
+        // setFilteredData(response.data.data);
       } else {
+        console.error("No valid Settlement data found in response:", response);
         setFilteredData([]);
-        setTotalCases(0);
-        setTotalPages(1);
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -171,57 +252,36 @@ export const Litigation_List = () => {
           icon: "error"
         });
       }
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
 
-  const handleFilter = () => {
-    if ((fromDate && !toDate) || (!fromDate && toDate)) {
-      Swal.fire({
-        title: "Warning",
-        text: "Both From Date and To Date must be selected.",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-      setToDate(null);
-      setFromDate(null);
-      return;
+  const handleFilterButton = () => { // Reset to the first page
+    setFilteredData([]); // Clear previous results
+    setMaxCurrentPage(0); // Reset max current page
+    setTotalAPIPages(1); // Reset total API pages
+    if (currentPage === 1) {
+      handleFilter();
+    } else {
+      setCurrentPage(1);
     }
-
-    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-      Swal.fire({
-        title: "Warning",
-        text: "To date should be greater than or equal to From date",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-      setToDate(null);
-      setFromDate(null);
-      return;
-    }
-    
-    setCurrentPage(1); // Reset to first page when filtering
-    fetchData(1);
-  };
+    setIsFilterApplied(true); // Set filter applied state to true
+  }
 
   // Function to handle searching through current results
   const getFilteredResults = () => {
-    if (!searchQuery) return filteredData;
+    if (!searchQuery) return paginatedData;
     
-    return filteredData.filter(item => {
+    return paginatedData.filter(item => {
       const searchLower = searchQuery.toLowerCase();
       return (
-        (item.id && item.id.toString().toLowerCase().includes(searchLower)) ||
+        (item.case_id && item.case_id.toString().toLowerCase().includes(searchLower)) ||
         (item.status && item.status.toLowerCase().includes(searchLower)) ||
         (item.account_no && item.account_no.toString().toLowerCase().includes(searchLower))
       );
     });
   };
 
-  const displayData = getFilteredResults();
+  const filteredDataBySearch = getFilteredResults();
 
   // Map backend status values to frontend display values (reverse of statusMapping)
   const getDisplayStatus = (backendStatus) => {
@@ -290,7 +350,7 @@ export const Litigation_List = () => {
                 {/* Filter Button */}
                 <button
                     className={GlobalStyle.buttonPrimary}
-                    onClick={handleFilter}
+                    onClick={handleFilterButton}
                     disabled={isLoading}
                 >
                     {isLoading ? "Loading..." : "Filter"}
@@ -327,7 +387,7 @@ export const Litigation_List = () => {
                 </tr>
               </thead>
               <tbody>
-                {displayData.map((item, index) => {
+                {filteredDataBySearch.map((item, index) => {
                   // Map the backend status to frontend display status
                   const displayStatus = getDisplayStatus(item.status);
                   
@@ -470,7 +530,7 @@ export const Litigation_List = () => {
                     </td>
                   </tr>
                 )}
-                {!isLoading && displayData.length === 0 && (
+                {!isLoading && filteredDataBySearch.length === 0 && (
                   <tr>
                     <td colSpan="7" className="text-center py-4">
                       No results found
@@ -480,26 +540,30 @@ export const Litigation_List = () => {
               </tbody>
             </table>
         </div>
-
+        
+        {/* Pagination Section */}
         <div className={GlobalStyle.navButtonContainer}>
           <button
-            className={GlobalStyle.navButton}
-            onClick={handlePrevPage}
-            disabled={currentPage === 1 || isLoading}
+            onClick={() => handlePrevNext("prev")}
+            disabled={currentPage === 1}
+            className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+              }`}
           >
             <FaArrowLeft />
           </button>
-          <span>
+          <span className={`${GlobalStyle.pageIndicator} mx-4`}>
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className={GlobalStyle.navButton}
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages || isLoading}
+            onClick={() => handlePrevNext("next")}
+            disabled={currentPage === totalPages}
+            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+              }`}
           >
             <FaArrowRight />
           </button>
         </div>
+
         {/* Test
         <div className="flex justify-start gap-4 mt-4">
           <button className={`${GlobalStyle.buttonPrimary}`} onClick={() => setShowPopup(true)}>
