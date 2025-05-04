@@ -185,7 +185,54 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
 
       {/* card box*/}
       <div className={`${GlobalStyle.cardContainer}`}>
-        <p className="flex gap-3 mb-2">
+        <table>
+
+          <colgroup>
+            <col  />
+            <col style={{ width: "20px" }} />
+            <col />
+            
+          </colgroup>
+          <tbody>
+              <tr>
+                <td className="py-2"><strong>Case ID </strong></td>
+               
+                <td className="py-2 "> <strong> : </strong> </td>
+                
+                <td className="py-2 p">  {caseDetails.case_id} </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Customer Ref </strong></td>
+                
+                <td className="py-2"> <strong> : </strong> </td>
+                
+                <td className="py-2"> {caseDetails.customer_ref} </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Account no</strong></td>
+                
+                <td className="py-2"> <strong> : </strong> </td>
+                
+                <td className="py-2"> {caseDetails.account_no} </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Arrears Amount </strong></td>
+               
+                <td className="py-2"> <strong> : </strong> </td>
+              
+                <td className="py-2"> {caseDetails.current_arrears_amount} </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Last Payment Date  </strong></td>
+                
+                <td className="py-2"> <strong> : </strong> </td>
+                
+                <td className="py-2"> {new Date(caseDetails.last_payment_date).toLocaleDateString()} </td>
+              </tr>
+            
+          </tbody>
+        </table>
+        {/* <p className="flex gap-3 mb-2">
           <strong>Case ID: </strong>
           <div> {caseDetails.case_id}</div>
         </p>
@@ -201,7 +248,7 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
         </p>
         <p className="mb-2">
           <strong>Last Payment Date: </strong>{new Date(caseDetails.last_payment_date).toLocaleDateString()}
-        </p>
+        </p> */}
       </div>
 
       <div className=" mb -6">

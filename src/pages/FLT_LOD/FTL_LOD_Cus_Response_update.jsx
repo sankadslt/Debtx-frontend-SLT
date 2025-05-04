@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { Create_Customer_Response } from "../../services/FTL_LOD/FTL_LODServices.js";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
+
 
 export default function FTL_LOD_Cus_Response_update({ isOpen, onClose, selectedItem }) {
+
+const [userData, setUserData] = useState(null);
+
+  const loadUser = async () => {
+          const user = await getLoggedUserId();
+          setUserData(user);
+          console.log("User data:", user);
+      };
+  
+      useEffect(() => {
+          loadUser();
+      }, []);
 
   const [remark, setRemark] = useState("");
   const [successMessage, setSuccessMessage] = useState(""); 
@@ -14,7 +28,7 @@ export default function FTL_LOD_Cus_Response_update({ isOpen, onClose, selectedI
   };
 
   const handleSubmit = async () => {
-    const created_by = "manager1";
+    const created_by = userData || userData?.userName || userData?.email || "Unknown User";
     const payload = {
       case_id: Number(selectedItem?.case_id),
       created_by: created_by,

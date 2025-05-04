@@ -259,6 +259,37 @@ const RecoveryOfficerRequests = () => {
     fetchcases();
   };
 
+  const handleclearbutton = () => {
+    setFromDate(null);
+    setToDate(null);
+    setRequestType("");
+    setApproved("");
+    
+
+     const fetchcases = async () => {
+      try {
+        const userId = await getLoggedUserId();
+        const payload = {
+          delegate_user_id: userId,
+        };
+        console.log("Payload for fetching cases:", payload);
+        const response = await ListRequestLogFromRecoveryOfficers(payload);
+        console.log(response);
+        const lastTwoRecords = response.slice(-10).reverse();
+        const firstRequestCount =
+          response.length > 0 ? response[0].Request_Count : 0;
+        console.log("First request count:", firstRequestCount);
+        console.log("Last two records:", lastTwoRecords);
+        setRequestsData(lastTwoRecords);
+        setFirstRequestCount(firstRequestCount);
+      } catch (error) {
+        console.error(error);
+        setRequestsData([]);
+      }
+    };
+    fetchcases();
+  }
+
   const setshowall = () => {
     alert("show all clicked");
 
@@ -299,86 +330,94 @@ const RecoveryOfficerRequests = () => {
           Show All
         </button>
       </div>
-      <div className="flex justify-end gap-6 items-center mb-8">
-        <div className="flex items-center gap-2">
-          <span className={GlobalStyle.headingMedium}>Request Type:</span>
-          <select
-            value={requestType}
-            onChange={(e) => setRequestType(e.target.value)}
-            className={GlobalStyle.selectBox}
-          >
-            <option value="" hidden>
-              Select
-            </option>
-            <option value="Mediation board forward request letter">
-              Mediation board forward request letter
-            </option>
-            <option value="Negotiation Settlement plan Request">
-              Negotiation Settlement plan Request
-            </option>
-            <option value="Negotiation period extend Request">
-              Negotiation period extend Request
-            </option>
-            <option value="Negotiation customer further information Request">
-              Negotiation customer further information Request
-            </option>
-            <option value="Negotiation Customer request service">
-              Negotiation Customer request service
-            </option>
-            <option value="Mediation Board Settlement plan Request">
-              Mediation Board Settlement plan Request
-            </option>
-            <option value="Mediation Board period extend Request">
-              Mediation Board period extend Request
-            </option>
-            <option value="Mediation Board customer further information request">
-              Mediation Board customer further information request
-            </option>
-            <option value="Mediation Board Customer request service">
-              Mediation Board Customer request service
-            </option>
-          </select>
-        </div>
+      {/* Filter Section */}
+      <div>
+          <div className={`${GlobalStyle.cardContainer} w-full flex justify-end gap-4 items-center mb-8 mt-8`}>
+            <div className="flex items-center gap-2">
+              {/* <span className={GlobalStyle.headingMedium}>Request Type:</span> */}
+              <select
+                value={requestType}
+                onChange={(e) => setRequestType(e.target.value)}
+                className={GlobalStyle.selectBox}
+                style={{ color: requestType === "" ? "gray" : "black" }}
+              >
+                <option value="" hidden>
+                Request Type
+                </option>
+                <option value="Mediation board forward request letter" style={{ color: "black" }}>
+                  Mediation board forward request letter
+                </option>
+                <option value="Negotiation Settlement plan Request" style={{ color: "black" }}>
+                  Negotiation Settlement plan Request
+                </option>
+                <option value="Negotiation period extend Request" style={{ color: "black" }}>
+                  Negotiation period extend Request
+                </option>
+                <option value="Negotiation customer further information Request" style={{ color: "black" }}>
+                  Negotiation customer further information Request
+                </option>
+                <option value="Negotiation Customer request service" style={{ color: "black" }}>
+                  Negotiation Customer request service
+                </option>
+                <option value="Mediation Board Settlement plan Request" style={{ color: "black" }}>
+                  Mediation Board Settlement plan Request
+                </option>
+                <option value="Mediation Board period extend Request" style={{ color: "black" }}>
+                  Mediation Board period extend Request
+                </option>
+                <option value="Mediation Board customer further information request" style={{ color: "black" }}>
+                  Mediation Board customer further information request
+                </option>
+                <option value="Mediation Board Customer request service" style={{ color: "black" }}>
+                  Mediation Board Customer request service
+                </option>
+              </select>
+            </div>
 
-        <div className="flex items-center gap-2">
-          <span className={GlobalStyle.headingMedium}> Approved:</span>
-          <select
-            value={approved}
-            onChange={(e) => setApproved(e.target.value)}
-            className={GlobalStyle.selectBox}
-          >
-            <option value="" hidden>
-              Select
-            </option>
-            <option value="Approve">Approve</option>
-            <option value="Reject">Reject</option>
-          </select>
-        </div>
+            <div className="flex items-center gap-2">
+              <span className={GlobalStyle.headingMedium}> Approved:</span>
+              <select
+                value={approved}
+                onChange={(e) => setApproved(e.target.value)}
+                className={GlobalStyle.selectBox}
+                style={{ color: approved === "" ? "gray" : "black" }}
+              >
+                <option value="" hidden>
+                  Select 
+                </option>
+                <option value="Approve" style={{ color: "black" }}>Approve</option>
+                <option value="Reject" style={{ color: "black" }}>Reject</option>
+              </select>
+            </div>
 
-        <div className={GlobalStyle.datePickerContainer}>
-          <span className={GlobalStyle.dataPickerDate}>Date </span>
-          <DatePicker
-            selected={fromDate}
-            onChange={handleFromDateChange}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="dd/MM/yyyy"
-            className={GlobalStyle.inputText}
-          />
-          <DatePicker
-            selected={toDate}
-            onChange={handleToDateChange}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="dd/MM/yyyy"
-            className={GlobalStyle.inputText}
-          />
-        </div>
-        {error && <span className={GlobalStyle.errorText}>{error}</span>}
-        <button
-          className={GlobalStyle.buttonPrimary}
-          onClick={onfilterbuttonclick} // Reset to first page when filter is applied
-        >
-          Filter
-        </button>
+            <div className={GlobalStyle.datePickerContainer}>
+              <span className={GlobalStyle.dataPickerDate}>Date </span>
+              <DatePicker
+                selected={fromDate}
+                onChange={handleFromDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={GlobalStyle.inputText}
+              />
+              <DatePicker
+                selected={toDate}
+                onChange={handleToDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={GlobalStyle.inputText}
+              />
+            </div>
+            {error && <span className={GlobalStyle.errorText}>{error}</span>}
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={onfilterbuttonclick} // Reset to first page when filter is applied
+            >
+              Filter
+            </button>
+            <button className={GlobalStyle.buttonRemove}  onClick={handleclearbutton} >
+                        Clear 
+                    </button>
+          </div>
       </div>
 
       {/* Table Section */}

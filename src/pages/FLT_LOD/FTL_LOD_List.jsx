@@ -8,21 +8,15 @@ Related Files: (routes)
 Notes: The following page conatins the code for the FTL LOD Case List Screen */
 
 import { useState, useEffect } from "react";
-import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit } from "react-icons/fa";
-import { AiFillEye } from "react-icons/ai";
+import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import DatePicker from "react-datepicker";
-//import { fetchAllArrearsBands, listHandlingCasesByDRC } from "../../services/case/CaseService";
 import { useNavigate } from "react-router-dom";
-
-
-
-//import { getLoggedUserId } from "../../services/auth/authService.js";
 import Swal from 'sweetalert2';
 import FTL_LOD_Cus_Response_update from "./FTL_LOD_Cus_Response_update.jsx";
-import { getLoggedUserId } from "/src/services/auth/authService.js";
 import { List_FTL_LOD_Cases } from "../../services/FTL_LOD/FTL_LODServices.js";
 import { fetchAllArrearsBands } from "../../services/case/CaseServices.js";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
 
 //Status Icons
 
@@ -39,45 +33,64 @@ import ViewDetailsIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/View_Detai
 import CustomerResponseIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/Customer_Response.png";
 
 
+
 export default function FTLLODCaseList() {
 
     const navigate = useNavigate(); // Initialize the navigate function
 
-    //const [rtoms, setRtoms] = useState([]);
-    //const [selectedRTOM, setSelectedRTOM] = useState("");
-    //const [filteredlogData, setFilteredlogData] = useState([]); // State for filtered data
-    // State for search query and filtered data
+    // State Variables
+    const [arrearsBandList, setArrearsBandList] = useState([]);
+
+    const [status, setStatus] = useState("");
+    const [arrearsAmount, setArrearsAmount] = useState("");
+    const [fromDate, setFromDate] = useState(null);
+    const [toDate, setToDate] = useState(null);
+    //const [filterParams, setFilterParams] = useState([]);
+
+    /* useEffect(() => {
+        const updatedParams = [
+            { key: "status", value: status },
+            { key: "arrearsAmount", value: arrearsAmount },
+            { key: "fromDate", value: fromDate },
+            { key: "toDate", value: toDate }
+        ];
+
+        setFilterParams(updatedParams);
+        console.log("Updated filterParams:", updatedParams);
+    }, [status, arrearsAmount, fromDate, toDate]); */
+
+
+    const [filteredData, setFilteredData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [filteredCases, setFilteredCases] = useState([]);
-    const [filterType, setFilterType] = useState("");
-    const [filterValue, setFilterValue] = useState("");
-    //const [filterAccountNo, setFilterAccountNo] = useState("");
-    const [error, setError] = useState("");
+    //const [error, setError] = useState("");
+    //const [caseId, setCaseId] = useState("");
+    //const [searchBy, setSearchBy] = useState("case_id"); // Default search by case ID
+
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const recordsPerPage = 10;
-    const indexOfLastRecord = currentPage * recordsPerPage;
-    const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    const currentData = filteredCases.slice(indexOfFirstRecord, indexOfLastRecord);
-    const totalPages = Math.ceil(filteredCases.length / recordsPerPage);
+    const [maxCurrentPage, setMaxCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalAPIPages, setTotalAPIPages] = useState(1);
+    const [isFilterApplied, setIsFilterApplied] = useState(false);
+    const rowsPerPage = 10; // Number of rows per page
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+
+    //const currentData = filteredCases.slice(indexOfFirstRecord, indexOfLastRecord);
+    //const totalPages = Math.ceil(filteredCases.length / rowsPerPage);
+    //const indexOfLastRecord = currentPage * rowsPerPage;
+    //const indexOfFirstRecord = indexOfLastRecord - rowsPerPage;
+
 
     // Filter state for Amount, Case ID, Status, and Date
-    const [arrearsAmounts, setArrearsAmounts] = useState([]);
-    const [filterCaseId, setFilterCaseId] = useState("");
-
-    const [userData, setUserData] = useState(null);
-
-
+    //const [filterCaseId, setFilterCaseId] = useState("");
+    const [userData, setUserData] = useState(1);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const [filters, setFilters] = useState({
-        arrearsAmount: "",
-        fromDate: "",
-        toDate: "",
-        status: "",
-    });
-
     const [selectedItem, setSelectedItem] = useState(null);
+
 
     // const loadUser = async () => {
     //     let token = localStorage.getItem("accessToken");
@@ -120,15 +133,16 @@ export default function FTLLODCaseList() {
         loadUser();
     }, []);
 
+
     useEffect(() => {
 
         const fetchArrearsBands = async () => {
             try {
                 if (userData) {
                     // Make sure to convert to number if needed
-                    const arrearsAmounts = await fetchAllArrearsBands();
-                    setArrearsAmounts(arrearsAmounts);
-                    console.log("Arrears Amounts:", arrearsAmounts);
+                    const arrearsBandList = await fetchAllArrearsBands();
+                    setArrearsBandList(arrearsBandList);
+                    console.log("Arrears Bands:", arrearsBandList);
                 }
             } catch (error) {
                 console.error("Error fetching ArrearsBands:", error);
@@ -136,29 +150,100 @@ export default function FTLLODCaseList() {
         };
 
         fetchArrearsBands();
-    }, [userData]); // Only depend on userData
 
-    /*   const handleonvisiable = (case_id) => {
-          navigate("/drc/ro-monitoring-arrears", { state: { CaseID: case_id } });
-          console.log("Case ID being passed: ", case_id);
-      }
-  
-      const handleonreassign = (case_id) => {
-          navigate("/pages/DRC/Re-AssignRo", { state: { CaseID: case_id } });
-          console.log("Case ID being passed: ", case_id);
-      } */
+    }, [userData]);
 
 
+    /* const checkdatediffrence = (startDate, endDate) => {
+        const start = new Date(startDate).getTime();
+        const end = new Date(endDate).getTime();
+        const diffInMs = end - start;
+        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+        const diffInMonths = diffInDays / 30;
+
+        if (diffInMonths > 1) {
+            Swal.fire({
+                title: "Date Range Exceeded",
+                text: "The selected dates shouldn't have more than a 1-month gap.",
+                icon: "warning",
+                // allowOutsideClick: false,
+                // allowEscapeKey: false,
+                // showCancelButton: true,
+                // confirmButtonText: "Yes",
+                // confirmButtonColor: "#28a745",
+                // cancelButtonText: "No",
+                // cancelButtonColor: "#d33",
+            })
+            setToDate(null);
+            setFromDate(null);
+            return;
+        }
+    }; */
 
     const handlestartdatechange = (date) => {
+        // Case: User clears the "From Date"
+        if (!date) {
+            setFromDate(null);
+            return;
+        }
+
+        // Case: To Date is set and From Date is after it
+        if (toDate && date > toDate) {
+            Swal.fire({
+                title: "Warning",
+                text: "The 'From' date cannot be later than the 'To' date.",
+                icon: "warning",
+                confirmButtonText: "OK",
+            });
+            setFromDate(null);
+            return;
+        }
+
+        // All good: update From Date
+        setFromDate(date);
+
+        // Optional: if toDate exists, call custom logic
+        /* if (toDate) {
+            checkdatediffrence(date, toDate);
+        } */
+    };
+
+
+    const handleenddatechange = (date) => {
+        // Case: User clears the "To Date"
+        if (!date) {
+            setToDate(null);
+            return;
+        }
+
+        // Case: From Date is set and To Date is before it
+        if (fromDate && date < fromDate) {
+            Swal.fire({
+                title: "Warning",
+                text: "The 'To' date cannot be earlier than the 'From' date.",
+                icon: "warning",
+                confirmButtonText: "OK",
+            });
+            setToDate(null);
+            return;
+        }
+
+        // All good: update To Date
+        setToDate(date);
+
+        // Optional: if fromDate exists, call custom logic
+        /* if (fromDate) {
+            checkdatediffrence(fromDate, date);
+        } */
+    };
+
+
+    /* const handlestartdatechange = (date) => {
         // Case: User clears the "From Date"
         if (!date) {
             setFilters({ ...filters, fromDate: null });
             return;
         }
-
-
-
 
         // Case: To Date is set and From Date is after it
         if (filters.toDate && date > filters.toDate) {
@@ -175,10 +260,25 @@ export default function FTLLODCaseList() {
         // All good: update From Date
         setFilters({ ...filters, fromDate: date });
     };
+ */
+    // Handle api calling only when the currentPage incriment more that before
+    const handlePageChange = () => {
+        // console.log("Page changed to:", currentPage);
+        if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
+            setMaxCurrentPage(currentPage);
+            handleFilter(); // Call the filter function only after the page incrimet 
+        }
+    };
+
+    useEffect(() => {
+        if (isFilterApplied) {
+            handlePageChange(); // Call the function whenever currentPage changes
+        }
+    }, [currentPage]);
 
 
 
-    const handleenddatechange = (date) => {
+    /* const handleenddatechange = (date) => {
 
         // Helper function to check if the year is valid (4 digits)
         const isValidYear = (date) => {
@@ -215,7 +315,7 @@ export default function FTLLODCaseList() {
         // All good: update To Date
         setFilters({ ...filters, toDate: date });
     };
-
+ */
 
     /* 
         const checkdatediffrence = (startDate, endDate) => {
@@ -241,7 +341,154 @@ export default function FTLLODCaseList() {
             };
         }; */
 
+
+    // Search Section
+    const filteredDataBySearch = paginatedData.filter((row) =>
+        Object.values(row)
+            .join(" ")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+    );
+
+
+
     const handleFilter = async () => {
+        try {
+            // setFilteredData([]); // Clear previous results
+
+            // Format the date to 'YYYY-MM-DD' format
+            const formatDate = (date) => {
+                if (!date) return null;
+                const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                return offsetDate.toISOString().split('T')[0];
+            };
+
+            if (!arrearsAmount && !status && !fromDate && !toDate) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "No filter is selected. Please, select a filter.",
+                    icon: "warning",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+                setToDate(null);
+                setFromDate(null);
+                return;
+            }
+
+            // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+            //   Swal.fire({
+            //     title: "Warning",
+            //     text: "Invalid input. Only numbers are allowed for Case ID.",
+            //     icon: "warning",
+            //     allowOutsideClick: false,
+            //     allowEscapeKey: false,
+            //   });
+            //   setCaseId(""); // Clear the invalid input
+            //   return;
+            // }
+
+            if ((fromDate && !toDate) || (!fromDate && toDate)) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "Both From Date and To Date must be selected.",
+                    icon: "warning",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+                setToDate(null);
+                setFromDate(null);
+                return;
+            }
+
+            if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "To date should be greater than or equal to From date",
+                    icon: "warning",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+                setToDate(null);
+                setFromDate(null);
+                return;
+            }
+
+            console.log(currentPage);
+
+            const payload = {
+                case_current_status: status || "",
+                current_arrears_band: arrearsAmount || "",
+                date_from: fromDate ? formatDate(fromDate) : null,
+                date_to: toDate ? formatDate(toDate) : null,
+                pages: currentPage,
+            };
+
+            console.log("Payload sent to API: ", payload);
+
+            setIsLoading(true); // Set loading state to true
+            const response = await List_FTL_LOD_Cases(payload).catch((error) => {
+                if (error.response && error.response.status === 404) {
+                    Swal.fire({
+                        title: "No Results",
+                        text: "No matching data found for the selected filters.",
+                        icon: "warning",
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    });
+                    setFilteredData([]);
+                    return null;
+                } else {
+                    throw error;
+                }
+            });
+            console.log("Response from API:", response);
+            setIsLoading(false); // Set loading state to false
+
+            // Updated response handling
+            if (response && response.data && response.data.cases) {
+                const cases = response.data.cases;
+                console.log("Valid data received:", cases);
+
+                const totalPages = Math.ceil(response.data.pagination.total / rowsPerPage);
+                setTotalPages(totalPages);
+                setTotalAPIPages(response.data.pagination.pages);
+
+                setFilteredData((prevData) => [...prevData, ...cases]);
+            } else {
+                console.error("No valid FTL LOD case data found in response:", response);
+                setFilteredData([]);
+            }
+
+        } catch (error) {
+            console.error("Error filtering cases:", error);
+            Swal.fire({
+                title: "Error",
+                text: "Failed to fetch filtered data. Please try again.",
+                icon: "error"
+            });
+        }
+    };
+    const handleFilterButton = () => { // Reset to the first page
+        setFilteredData([]); // Clear previous results
+        setMaxCurrentPage(0); // Reset max current page
+        setTotalAPIPages(1); // Reset total API pages
+        if (currentPage === 1) {
+            handleFilter();
+        } else {
+            setCurrentPage(1);
+        }
+        setIsFilterApplied(true); // Set filter applied state to true
+    }
+
+
+
+
+
+
+
+
+    /* const handleFilter = async () => {
         console.log("Filters applied:", filters);
         console.log("Filters applied:", filters.arrearsAmount, filters.status, filters.fromDate, filters.toDate);
 
@@ -297,7 +544,7 @@ export default function FTLLODCaseList() {
                 current_arrears_band: filters.arrearsAmount || "",
                 date_from: filters.fromDate ? formatDate(filters.fromDate) : null,
                 date_to: filters.toDate ? formatDate(filters.toDate) : null,
-                pages: 1,
+                pages: currentPage,
             };
 
             console.log("Payload sent to API: ", payload);
@@ -320,7 +567,7 @@ export default function FTLLODCaseList() {
                 icon: "error"
             });
         }
-    };
+    }; */
 
     /*  // Search Section
      const filteredDataBySearch = currentData.filter((row) =>
@@ -331,19 +578,18 @@ export default function FTLLODCaseList() {
      );
      console.log("Filtered Data by Search:", filteredDataBySearch); */
 
+    const handleClear = () => {
 
-
-    const handleFilterClear = () => {
-        setFilters({
-
-
-            arrearsAmount: "",
-            fromDate: "",
-            toDate: "",
-            status: "",
-        });
-
-        setFilteredCases([]);
+        setArrearsAmount('');
+        setStatus("");
+        setFromDate(null);
+        setToDate(null);
+        setSearchQuery("");
+        setCurrentPage(1); // Reset to the first page
+        setIsFilterApplied(false); // Reset filter applied state
+        setTotalPages(1); // Reset total pages
+        setFilteredData([]); // Clear filtered data
+        setTotalAPIPages(1); // Reset total API pages
     };
 
 
@@ -452,14 +698,14 @@ export default function FTLLODCaseList() {
     };
 
     // Filter handlers
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-        setError("");
-    };
+    /*  const handleFilterChange = (e) => {
+         const { name, value } = e.target;
+         setFilters((prev) => ({
+             ...prev,
+             [name]: value,
+         }));
+         setError("");
+     }; */
 
 
     /* 
@@ -522,19 +768,13 @@ export default function FTLLODCaseList() {
             setCurrentPage(1); // Reset pagination when filter changes
         }; */
 
-    // Search Section
-    const filteredDataBySearch = currentData.filter((row) =>
-        Object.values(row)
-            .join(" ") // Join all values in a row to form a single string
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) // Match with the search query
-    );
+
 
     const getStatusIcon = (status) => {
         switch (status) {
             case "Pending FTL LOD":
                 return <img src={Pending_FTL_LOD} alt="Pending FTL LOD" title="Pending FTL LOD" className="w-6 h-6" />;
-            case "Initial FLT LOD":
+            case "Initial FTL LOD":
                 return <img src={Initial_FTL_LOD} alt="Initial FTL LOD" title="Initial FTL LOD" className="w-6 h-6" />;
             case "FTL LOD Settle Pending":
                 return <img src={FTL_LOD_Settle_Pending} alt="FTL LOD Settle Pending" title="FTL LOD Settle Pending" className="w-6 h-6" />;
@@ -569,7 +809,7 @@ export default function FTLLODCaseList() {
             case "Pending FTL LOD":
                 pushIcon(CreateFtlIcon, "Create FTL", handleCreateFtl);
                 break;
-            case "Initial FLT LOD":
+            case "Initial FTL LOD":
                 pushIcon(CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
                 pushIcon(CustomerResponseIcon, "Customer Response", handleCustomerResponse);
                 pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
@@ -617,7 +857,14 @@ export default function FTLLODCaseList() {
         console.log("View Details for:", item);
     };
 
-
+    // display loading animation when data is loading
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
 
 
     return (
@@ -632,13 +879,14 @@ export default function FTLLODCaseList() {
                     {/* Status Select Dropdown */}
                     <select
                         name="status"
-                        value={filters.status}
-                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
                         className={`${GlobalStyle.selectBox} w-32 md:w-40`}
+
                     >
-                        <option value="">Status</option>
+                        <option value="" disabled >Status</option>
                         <option value="Pending FTL LOD">Pending FTL LOD</option>
-                        <option value="Initial FLT LOD">Initial FLT LOD</option>
+                        <option value="Initial FTL LOD">Initial FTL LOD</option>
                         <option value="FTL LOD Settle Pending">FTL LOD Settle Pending</option>
                         <option value="FTL LOD Settle Open-Pending">FTL LOD Settle Open-Pending</option>
                         <option value="FTL LOD Settle Active">FTL LOD Settle Active</option>
@@ -646,14 +894,15 @@ export default function FTLLODCaseList() {
 
                     <select
                         className={GlobalStyle.selectBox}
-                        value={filters.arrearsAmount}
-                        onChange={(e) => setFilters({ ...filters, arrearsAmount: e.target.value })}
+                        value={arrearsAmount}
+                        onChange={(e) => setArrearsAmount(e.target.value)}
+
                     >
-                        <option value="" >
+                        <option value="" disabled >
                             Arrears band
                         </option>
-                        {Array.isArray(arrearsAmounts) && arrearsAmounts.length > 0 ? (
-                            arrearsAmounts.map(({ key, value }) => (
+                        {Array.isArray(arrearsBandList) && arrearsBandList.length > 0 ? (
+                            arrearsBandList.map(({ key, value }) => (
                                 <option key={key} value={key}>
                                     {value}
                                 </option>
@@ -667,28 +916,28 @@ export default function FTLLODCaseList() {
                     <div className={GlobalStyle.datePickerContainer}>
                         <label className={GlobalStyle.dataPickerDate}>Date</label>
                         <DatePicker
-                            selected={filters.fromDate}
+                            selected={fromDate}
                             onChange={handlestartdatechange}
                             dateFormat="dd/MM/yyyy"
-                            placeholderText="dd/MM/yyyy"
+                            placeholderText="From"
                             className={GlobalStyle.inputText}
                         />
                         <DatePicker
-                            selected={filters.toDate}
+                            selected={toDate}
                             onChange={handleenddatechange}
                             dateFormat="dd/MM/yyyy"
-                            placeholderText="dd/MM/yyyy"
+                            placeholderText="To"
                             className={GlobalStyle.inputText}
                         />
                     </div>
 
                     <button
-                        onClick={handleFilter}
+                        onClick={handleFilterButton}
                         className={`${GlobalStyle.buttonPrimary}`}
                     >
                         Filter
                     </button>
-                    <button onClick={handleFilterClear} className={GlobalStyle.buttonRemove} >
+                    <button onClick={handleClear} className={GlobalStyle.buttonRemove} >
                         Clear
                     </button>
 
@@ -772,7 +1021,7 @@ export default function FTLLODCaseList() {
                                             })
                                             : "N/A"}
                                     </td>
- 
+
                                     <td className={`${GlobalStyle.tableData} `}>
                                         {item.ftl_lod && item.ftl_lod.length > 0 && item.ftl_lod[0].expire_date
                                             ? new Date(item.ftl_lod[0].expire_date).toLocaleDateString("en-GB")
@@ -780,14 +1029,11 @@ export default function FTLLODCaseList() {
                                     </td>
 
                                     <td className={`${GlobalStyle.tableData} text-center`}>
-                                        <div className=" flex items-center gap-2 justify-center">
-                                            <td className={`${GlobalStyle.tableData} flex justify-center items-center space-x-10`}>
-                                                {getActionIcons(item.case_current_status, item)}
-                                            </td>
-
+                                        <div className="flex items-center gap-2 justify-center space-x-10">
+                                            {getActionIcons(item.case_current_status, item)}
                                         </div>
-
                                     </td>
+
                                 </tr>
                             ))
                         ) : (
