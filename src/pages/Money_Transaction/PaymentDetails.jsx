@@ -111,11 +111,12 @@ const PaymentDetails = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // State to track if more data is available
 
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [totalAPIPages, setTotalAPIPages] = useState(1);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const rowsPerPage = 10; // Number of rows per page
@@ -174,57 +175,30 @@ const PaymentDetails = () => {
   // };
 
   // render status icon with tooltip
-  const renderStatusIcon = (phase, status, index) => {
-    const iconPath = getStatusIcon(phase, status);
+  // const renderStatusIcon = (phase, status, index) => {
+  //   const iconPath = getStatusIcon(phase, status);
 
-    if (!iconPath) {
-      return <span>{status}</span>;
-    }
+  //   if (!iconPath) {
+  //     return <span>{status}</span>;
+  //   }
 
-    const tooltipId = `tooltip-${index}`;
+  //   const tooltipId = `tooltip-${index}`;
 
-    return (
-      <div className="flex items-center gap-2">
-        <img
-          src={iconPath}
-          alt={status}
-          className="w-6 h-6"
-          data-tooltip-id={tooltipId} // Add tooltip ID to image
-        />
-        {/* Tooltip component */}
-        <Tooltip id={tooltipId} place="bottom" effect="solid">
-          {`${phase} Settle ${status}`} {/* Tooltip text is the phase and status */}
-        </Tooltip>
-      </div>
-    );
-  };
-
-  // Handle api calling only when the currentPage incriment more that before
-  const handlePageChange = () => {
-    // console.log("Page changed to:", currentPage);
-    if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
-      console.log("Page changed to:", currentPage);
-      setMaxCurrentPage(currentPage);
-      handleFilter(); // Call the filter function only after the page incrimet 
-    }
-  };
-
-  useEffect(() => {
-    if (isFilterApplied) {
-      handlePageChange(); // Call the function whenever currentPage changes
-    }
-  }, [currentPage]);
-
-  // Handle Pagination
-  const handlePrevNext = (direction) => {
-    if (direction === "prev" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      // console.log("Current Page:", currentPage);
-    } else if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      // console.log("Current Page:", currentPage);
-    }
-  };
+  //   return (
+  //     <div className="flex items-center gap-2">
+  //       <img
+  //         src={iconPath}
+  //         alt={status}
+  //         className="w-6 h-6"
+  //         data-tooltip-id={tooltipId} // Add tooltip ID to image
+  //       />
+  //       {/* Tooltip component */}
+  //       <Tooltip id={tooltipId} place="bottom" effect="solid">
+  //         {`${phase} Settle ${status}`} {/* Tooltip text is the phase and status */}
+  //       </Tooltip>
+  //     </div>
+  //   );
+  // };
 
   // useEffect(() => {
   //   if (isFilterApplied) {
@@ -366,7 +340,7 @@ const PaymentDetails = () => {
         // settlement_status: status,
         from_date: formatDate(fromDate),
         to_date: formatDate(toDate),
-        page: currentPage,
+        pages: currentPage,
       };
       console.log("Payload sent to API: ", payload);
 
@@ -391,13 +365,28 @@ const PaymentDetails = () => {
       // Updated response handling
       if (response && response.data) {
         console.log("Valid data received:", response.data);
-        console.log("Total records:", response.pagination.total);
-        console.log("API pages:", response.pagination.pages);
-        const totalPages = Math.ceil(response.pagination.total / rowsPerPage);
-        setTotalPages(totalPages);
-        setTotalAPIPages(response.pagination.pages); // Set the total pages from the API response
+        // const totalPages = Math.ceil(response.pagination.total / rowsPerPage);
+        // setTotalPages(totalPages);
+        // setTotalAPIPages(response.pagination.pages); // Set the total pages from the API response
         // Append the new data to the existing data
         setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (response.data.length === 0) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false
+            });
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.data.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
+          }
+        }
 
         // setFilteredData(response.data.data);
       } else {
@@ -433,6 +422,49 @@ const PaymentDetails = () => {
     validateCaseId(); // Validate case ID input
   }, [caseId]);
 
+  // Handle api calling only when the currentPage incriment more that before
+  // const handlePageChange = () => {
+  //   // console.log("Page changed to:", currentPage);
+  //   if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
+  //     console.log("Page changed to:", currentPage);
+  //     setMaxCurrentPage(currentPage);
+  //     handleFilter(); // Call the filter function only after the page incrimet 
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (isFilterApplied) {
+  //     handlePageChange(); // Call the function whenever currentPage changes
+  //   }
+  // }, [currentPage]);
+
+  useEffect(() => {
+    if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      handleFilter(); // Call the function whenever currentPage changes
+    }
+  }, [currentPage]);
+
+  // handle page change and filter data
+  const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      // console.log("Current Page:", currentPage);
+    } else if (direction === "next") {
+      // setCurrentPage(currentPage + 1);
+      if (isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      } else {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        setTotalPages(totalPages);
+        if (currentPage < totalPages) {
+          setCurrentPage(currentPage + 1);
+        }
+      }
+      // console.log("Current Page:", currentPage);
+    }
+  };
+
   const handleFilterButton = () => { // Reset to the first page
     setFilteredData([]); // Clear previous results
     setMaxCurrentPage(0); // Reset max current page
@@ -457,11 +489,11 @@ const PaymentDetails = () => {
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
-    setCurrentPage(1); // Reset to the first page
+    setCurrentPage(0); // Reset to the first page
     setIsFilterApplied(false); // Reset filter applied state
-    setTotalPages(1); // Reset total pages
+    setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
-    setTotalAPIPages(1); // Reset total API pages
+    // setTotalAPIPages(1); // Reset total API pages
   };
 
   const naviPreview = (caseId, moneyTransactionID) => {
@@ -599,7 +631,7 @@ const PaymentDetails = () => {
                 </select>
               </div>
 
-              <label className={GlobalStyle.dataPickerDate}>Paid Date</label>
+              <label className={GlobalStyle.dataPickerDate} style={{ whiteSpace: "nowrap" }}>Paid Date</label>
               {/* <div className={GlobalStyle.datePickerContainer}> */}
               <div className="flex items-center space-x-2">
                 <div className="flex items-center">
@@ -772,14 +804,14 @@ const PaymentDetails = () => {
           <div className={GlobalStyle.navButtonContainer}>
             <button
               onClick={() => handlePrevNext("prev")}
-              disabled={currentPage === 1}
-              className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+              disabled={currentPage <= 1}
+              className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""
                 }`}
             >
               <FaArrowLeft />
             </button>
             <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-              Page {currentPage} of {totalPages}
+              Page {currentPage} 
             </span>
             <button
               onClick={() => handlePrevNext("next")}

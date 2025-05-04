@@ -17,7 +17,7 @@ const URL = `${BASE_URL}/settlement`;
 export const listAllSettlementCases = async (payload) => {
   try {
     const response = await axios.post(
-      `${URL}listAllSettlementCases`,
+      `${URL}/List_All_Settlement_Cases`,
       payload
     );
     return response.data;
