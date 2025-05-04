@@ -160,6 +160,16 @@ const Sidebar = ({ onHoverChange }) => {
             //{ icon: CgEditFade, label: "3.2 - FTL LOD case details", link: "/pages/flt-lod/ftl-lod-case-details", roles: ["superadmin", "admin"] }
           ],
         },
+
+        {
+          label: "Dispute Dummy",
+          subItems: [
+            { icon: CgEditFade, label: "5.2.2 - Dispute Letter preview", link: "/pages/dispute/dispute-letter-preview", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "5.2.3 - Dispute Letter Change Details", link: "/pages/dispute/dispute-letter-change-details", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "5.3.1 - Dispute Settlement Letter Creation", link: "/pages/dispute/dispute-settlement-letter-creation", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "5.3.2 - Dispute Settlement Letter Preview", link: "/pages/dispute/dispute-settlement-letter-preview", roles: ["superadmin", "admin"] },
+          ],
+        },
         {
           label: "Dummy",
           subItems: [

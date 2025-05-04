@@ -77,8 +77,14 @@ import { Litigation_Case_Details } from "../pages/Litigation/Litigation_Case_Det
 //FLT LOD
 import FTLLODCaseList from "../pages/FLT_LOD/FTL_LOD_List";
 import FTL_LOD_creation from "../pages/FLT_LOD/FTL_LOD_creation";
-import FTL_LOD_Change_Details_Form  from "../pages/FLT_LOD/FTL_LOD_Change_Details_Form";
-import FTL_LOD_Case_Details  from "../pages/FLT_LOD/FTL_LOD_Case_Details";
+import FTL_LOD_Change_Details_Form from "../pages/FLT_LOD/FTL_LOD_Change_Details_Form";
+import FTL_LOD_Case_Details from "../pages/FLT_LOD/FTL_LOD_Case_Details";
+
+//Dispute
+import DisputeLetterPreview from "../pages/Dispute/Dispute_Letter_Preview";
+import DisputeLetterChangeDetails from "../pages/Dispute/Dispute_Letter_Change_Details";
+import DisputeSettlementLetterCreation from "../pages/Dispute/Dispute_Settlement_Letter_Creation";
+import DisputeSettlementLetterPreview from "../pages/Dispute/Dispute_Settlement_Letter_Preview";
 
 //SettlementPlan
 import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
@@ -589,6 +595,13 @@ const Routers = () => {
       <Route path="/pages/flt-lod/ftl-lod-change-details-form" element={<ProtectedRoute element={<FTL_LOD_Change_Details_Form />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/flt-lod/ftl-lod-case-details" element={<ProtectedRoute element={<FTL_LOD_Case_Details />} allowedRoles={['superadmin']} />} />
 
+
+      {/* Dispute Routes */}
+      <Route path="/pages/dispute/dispute-letter-preview" element={<ProtectedRoute element={<DisputeLetterPreview />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/dispute/dispute-letter-change-details" element={<ProtectedRoute element={<DisputeLetterChangeDetails />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/dispute/dispute-settlement-letter-creation" element={<ProtectedRoute element={<DisputeSettlementLetterCreation />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/dispute/dispute-settlement-letter-preview" element={<ProtectedRoute element={<DisputeSettlementLetterPreview />} allowedRoles={['superadmin']} />} />
+
       {/* Litigation */}
       <Route path="/pages/Litigation/Litigation_List" element={<ProtectedRoute element={<Litigation_List />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Documentation" element={<ProtectedRoute element={<Litigation_Documentation />} allowedRoles={['superadmin']} />} />
@@ -653,8 +666,8 @@ const Routers = () => {
         }
       />
     </Routes>
-    
-    
+
+
   );
 };
 
