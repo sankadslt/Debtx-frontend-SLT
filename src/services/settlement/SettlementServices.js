@@ -17,7 +17,7 @@ const URL = `${BASE_URL}/settlement`;
 export const listAllSettlementCases = async (payload) => {
   try {
     const response = await axios.post(
-      `${URL}/List_All_Settlement_Cases`,
+      `${URL}listAllSettlementCases`,
       payload
     );
     return response.data;
@@ -45,7 +45,7 @@ export const Case_Details_Settlement_Phase = async (payload) => {
     throw error;
   }
 };
-
+ 
 // Create task for downloading Settlement list
 export const Create_Task_For_Downloard_Settlement_List = async (createdBy, Phase, Case_Status, from_date, to_date, Case_ID, Account_Number) => {
   try {

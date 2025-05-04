@@ -20,15 +20,16 @@ import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa"
 
 
 const Incident_Register_Individual = () => {
-  const [accountNo, setAccountNo] = useState("");
-  const [actionType, setActionType] = useState("");
-  const [sourceType, setSourceType] = useState("");
-  const [calendarMonth, setCalendarMonth] = useState(3);
-  const [contactNumber, setContactNumber] = useState(""); 
+  const [accountNo, setAccountNo] = useState(""); // Account number state
+  const [actionType, setActionType] = useState(""); // Action type state
+  const [sourceType, setSourceType] = useState(""); // Source type state
+  const [calendarMonth, setCalendarMonth] = useState(3); // Calendar month state (default to 3)
+  const [contactNumber, setContactNumber] = useState("");  // Contact number state (only for "collect CPE" action type)
   
-  const [errors, setErrors] = useState({});
-  const [errors1, setErrors1] = useState({});
+  const [errors, setErrors] = useState({}); // Validation errors state
+  const [errors1, setErrors1] = useState({}); // Additional validation errors state
 
+  // Validation function to check if the form is filled correctly
   const validateForm = () => {
     const newErrors = {};
     const newErrors1 = {};
@@ -54,6 +55,7 @@ const Incident_Register_Individual = () => {
 
   };
 
+  // Function to get the current logged-in user ID
   const getCurrentUser = async () => {
     try {
         const user_id = await getLoggedUserId();
@@ -67,6 +69,7 @@ const Incident_Register_Individual = () => {
     }
 };
 
+  // Function to handle form submission
 const handleSubmit = async (e) => {
   e.preventDefault();
   if (!validateForm()) {
@@ -115,7 +118,7 @@ const handleSubmit = async (e) => {
     });
   }
 };
-
+  // Function to handle back button click
   const handlebackbuttonClick = () => {
     window.history.back(); // Go back to the previous page
   }
@@ -197,6 +200,7 @@ const handleSubmit = async (e) => {
             </div>
           </form> */}
 
+          {/* Form for incident registration */}
           <div className="flex items-center justify-center ">
             <form onSubmit={handleSubmit} className="space-y-6   ">
               <table className=" text-sm" >
@@ -365,7 +369,7 @@ const handleSubmit = async (e) => {
 
         </div>
       </div>
-
+      {/* Back Button */}
       <div className="flex justify-start items-center w-full  ">
             <button
               className={`${GlobalStyle.buttonPrimary} `} 
