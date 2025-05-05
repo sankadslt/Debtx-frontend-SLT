@@ -499,7 +499,7 @@ const PaymentDetails = () => {
   const naviPreview = (caseId, moneyTransactionID) => {
     // console.log("caseId", caseId);
     // console.log("moneyTransactionID", moneyTransactionID);
-    navigate("/lod/payment/preview", { state: { caseId, moneyTransactionID } });
+    navigate("/pages/Money_Transaction/payment/preview", { state: { caseId, moneyTransactionID } });
   };
 
   const naviCaseID = (caseId) => {

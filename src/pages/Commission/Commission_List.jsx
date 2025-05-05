@@ -16,7 +16,10 @@ import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa"
 import { List_All_Commission_Cases } from "../../services/commission/commissionService";
 import { commission_type_cases_count } from "../../services/commission/commissionService";
 import { Active_DRC_Details } from "../../services/drc/Drc";
+import { Create_task_for_Download_Commision_Case_List } from "../../services/commission/commissionService";
+import { getLoggedUserId } from "../../services/auth/authService";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const Commission_List = () => {
   const [selectValue, setSelectValue] = useState("Account No");
@@ -206,6 +209,8 @@ const Commission_List = () => {
           confirmButtonText: "OK",
           confirmButtonColor: "#3085d6",
         });
+        setFromDate(null);
+        setToDate(null);
         return false;
       }
       const oneMonthLater = new Date(from);
@@ -219,6 +224,8 @@ const Commission_List = () => {
           confirmButtonText: "OK",
           confirmButtonColor: "#3085d6",
         });
+        setFromDate(null);
+        setToDate(null);
         return false;
       }
     }
@@ -366,13 +373,70 @@ const Commission_List = () => {
     setFilteredData([]); // Clear filtered data
   };
 
+  const HandleCreateTaskDownloadCommissiontList = async () => {
+  
+      const userData = await getLoggedUserId(); // Assign user ID
+  
+      if (!fromDate || !toDate) {
+        Swal.fire({
+          title: "Warning",
+          text: "Please select From Date and To Date.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        return;
+      }
+  
+      // if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      //   Swal.fire({
+      //     title: "Warning",
+      //     text: "To date should be greater than or equal to From date",
+      //     icon: "warning",
+      //     allowOutsideClick: false,
+      //     allowEscapeKey: false
+      //   });
+      //   setToDate(null);
+      //   setFromDate(null);
+      //   return;
+      // }
+  
+      // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+      //   Swal.fire({
+      //     title: "Warning",
+      //     text: "Invalid input. Only numbers are allowed for Case ID.",
+      //     icon: "warning",
+      //     allowOutsideClick: false,
+      //     allowEscapeKey: false,
+      //   });
+      //   setCaseId(""); // Clear the invalid input
+      //   return;
+      // }
+  
+      setIsCreatingTask(true);
+      try {
+        const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
+        if (response === "success") {
+          Swal.fire(response, `Task created successfully!`, "success");
+        }
+      } catch (error) {
+        Swal.fire("Error", error.message || "Failed to create task.", "error");
+      } finally {
+        setIsCreatingTask(false);
+      }
+    };
+
+  const navigate = useNavigate();
+
   const naviCaseID = (caseId) => {
     navigate("", { state: { caseId } });
   }
 
   const naviPreview = (Commission_ID) => {
-    navigate("", { state: { Commission_ID } });
+    navigate("/Commission/preview", { state: { Commission_ID } });
   };
+
+
 
   // display loading animation when data is loading
   if (isLoading) {
@@ -616,10 +680,9 @@ const Commission_List = () => {
         )
       }
       <button
-        // onClick={HandleCreateTaskDownloadSettlementList}
-        // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-        className={GlobalStyle.buttonPrimary}
-        // disabled={isCreatingTask}
+        onClick={HandleCreateTaskDownloadCommissiontList}
+        className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+        disabled={isCreatingTask}
         style={{ display: 'flex', alignItems: 'center', marginTop: '16px' }}
       >
         {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
