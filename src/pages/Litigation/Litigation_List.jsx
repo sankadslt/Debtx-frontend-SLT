@@ -45,12 +45,12 @@ export const Litigation_List = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // State to track if more data is available
 
   //Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalAPIPages, setTotalAPIPages] = useState(1);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const rowsPerPage = 10; // Number of rows per page 
 
@@ -64,29 +64,29 @@ export const Litigation_List = () => {
 
   // Status mapping between frontend display values and backend expected values
   const statusMapping = {
-    "Initial_Litigation": "Initial_Litigation",
+    "Initial_Litigation": "Initial Litigation",
     "Pending_FTL": "Pending FTL",
-    "FTL_Settle_Pending": "FTL_Settle_Pending",
+    "FTL_Settle_Pending": "Litigation Settle Pending",
     "FTL": "Forward To Litigation",
     "FLU": "Fail from Legal Unit",
-    "SLA": "Success Legal Action",
+    "SLA": "Litigation Settle Active",
     "FLA": "Fail Legal Action",
     "Litigation": "Litigation"
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-        case "Initial_Litigation":
+        case "Initial Litigation":
           return Initial_Litigation;
-        case "FLU":
+        case "Fail from Legal Unit":
           return FLU;
-        case "FLA":
+        case "Fail Legal Action":
           return FLA;
         case "Pending FTL":
           return Pending_FTL;
-        case "FTL_Settle_Pending":
+        case "Litigation Settle Pending":
           return FTL_Settle_Pending;
-        case "SLA":
+        case "Litigation Settle Active":
           return SLA;
         default:
             return null;
@@ -116,17 +116,18 @@ export const Litigation_List = () => {
     "created": "Settlement created dtm"
   };
 
-  // Handle api calling only when the currentPage incriment more that before
-  const handlePageChange = () => {
-    if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
-      setMaxCurrentPage(currentPage);
-      handleFilter(); // Call the filter function only after the page incrimet 
-    }
-  };
+  // // Handle api calling only when the currentPage incriment more that before
+  // const handlePageChange = () => {
+  //   if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
+  //     setMaxCurrentPage(currentPage);
+  //     handleFilter(); // Call the filter function only after the page incrimet 
+  //   }
+  // };
   
   useEffect(() => {
-    if (isFilterApplied) {
-      handlePageChange(); // Call the function whenever currentPage changes
+    if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      handleFilter(); // Call the function whenever currentPage changes
     }
   }, [currentPage]);
 
@@ -134,8 +135,19 @@ export const Litigation_List = () => {
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      // console.log("Current Page:", currentPage);
+    } else if (direction === "next") {
+      // setCurrentPage(currentPage + 1);
+      if (isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      } else {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        setTotalPages(totalPages);
+        if (currentPage < totalPages) {
+          setCurrentPage(currentPage + 1);
+        }
+      }
+      // console.log("Current Page:", currentPage);
     }
   };
 
@@ -215,20 +227,22 @@ export const Litigation_List = () => {
       });
       setIsLoading(false);
       
-      // Updated response handling
       if (response && response.data) {
-        console.log("Valid data received:", response.data)
+        console.log("Valid data received:", response.data);
         // console.log(response.data.pagination.pages);
-        const totalPages = Math.ceil(response.total_cases / rowsPerPage);
-        setTotalPages(totalPages);
-        setTotalAPIPages(totalPages <= 10 ? 1 : Math.ceil((totalPages - 10) / 30) + 1);
+        // const totalPages = Math.ceil(response.data.pagination.total / rowsPerPage);
+        // setTotalPages(totalPages);
+        // setTotalAPIPages(response.data.pagination.pages); // Set the total pages from the API response
         // Append the new data to the existing data
         setFilteredData((prevData) => [...prevData, ...response.data]);
-
-        console.log("pages", totalPages);
-        console.log("pagesAPI", totalAPIPages);
-        
-
+        if (response.data.length === 0) {
+          setIsMoreDataAvailable(false); // No more data available
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.data.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
+          }
+        }
         // setFilteredData(response.data.data);
       } else {
         console.error("No valid Settlement data found in response:", response);
@@ -257,8 +271,9 @@ export const Litigation_List = () => {
 
   const handleFilterButton = () => { // Reset to the first page
     setFilteredData([]); // Clear previous results
+    setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
-    setTotalAPIPages(1); // Reset total API pages
+    // setTotalAPIPages(1); // Reset total API pages
     if (currentPage === 1) {
       handleFilter();
     } else {
@@ -266,6 +281,19 @@ export const Litigation_List = () => {
     }
     setIsFilterApplied(true); // Set filter applied state to true
   }
+
+  const handleClear = () => {
+    setStatus("");
+    setDateType("");
+    setFromDate(null);
+    setToDate(null);
+    setSearchQuery("");
+    setCurrentPage(0); // Reset to the first page
+    setIsFilterApplied(false); // Reset filter applied state
+    setTotalPages(0); // Reset total pages
+    setFilteredData([]); // Clear filtered data
+    setIsLoading(false);
+  };
 
   // Function to handle searching through current results
   const getFilteredResults = () => {
@@ -296,8 +324,8 @@ export const Litigation_List = () => {
         <h1 className={GlobalStyle.headingLarge}>Litigation List</h1>
 
         {/* Filtering Section */}
-        <div className="flex flex-wrap md:flex-nowrap items-center justify-end my-6 gap-1 mb-8">
-            <div className="flex items-center justify-end gap-[20px] w-full">
+        <div className={`${GlobalStyle.cardContainer} w-full mt-4`}>
+            <div className="flex items-center justify-end w-full space-x-3">
                 {/* Status */}
                 <select 
                 value={status}
@@ -349,11 +377,18 @@ export const Litigation_List = () => {
 
                 {/* Filter Button */}
                 <button
-                    className={GlobalStyle.buttonPrimary}
-                    onClick={handleFilterButton}
-                    disabled={isLoading}
+                  className={GlobalStyle.buttonPrimary}
+                  onClick={handleFilterButton}
+                  disabled={isLoading}
                 >
-                    {isLoading ? "Loading..." : "Filter"}
+                  {isLoading ? "Loading..." : "Filter"}
+                </button>
+
+                <button
+                  className={GlobalStyle.buttonRemove}
+                  onClick={handleClear}
+                >
+                  Clear
                 </button>
             </div>
         </div>
@@ -466,7 +501,7 @@ export const Litigation_List = () => {
                               alt="Create Settlement"
                               className="w-6 h-6 cursor-pointer"
                               title="Create Settlement"
-                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
+                              onClick={() => navigate("/pages/CreateSettlement/CreateSettlementPlan")}
                             />
                             <button 
                               className={GlobalStyle.buttonPrimary}
@@ -515,7 +550,7 @@ export const Litigation_List = () => {
                               alt="Create Settlement"
                               className="w-6 h-6 cursor-pointer"
                               title="Create Settlement"
-                              onClick={() => navigate("/pages/Litigation/Litigation_Documentation")}
+                              onClick={() => navigate("/pages/CreateSettlement/CreateSettlementPlan")}
                             />
                           </div>          
                         )}
@@ -541,28 +576,27 @@ export const Litigation_List = () => {
             </table>
         </div>
         
-        {/* Pagination Section */}
-        <div className={GlobalStyle.navButtonContainer}>
-          <button
-            onClick={() => handlePrevNext("prev")}
-            disabled={currentPage === 1}
-            className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
-              }`}
-          >
-            <FaArrowLeft />
-          </button>
-          <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => handlePrevNext("next")}
-            disabled={currentPage === totalPages}
-            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
-              }`}
-          >
-            <FaArrowRight />
-          </button>
-        </div>
+         {/* Pagination Section */}
+         <div className={GlobalStyle.navButtonContainer}>
+            <button
+              onClick={() => handlePrevNext("prev")}
+              disabled={currentPage <= 1}
+              className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""
+                }`}
+            >
+              <FaArrowLeft />
+            </button>
+            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+              Page {currentPage}
+            </span>
+            <button
+              onClick={() => handlePrevNext("next")}
+              disabled={currentPage === totalPages}
+              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+            >
+              <FaArrowRight />
+            </button>
+          </div>
 
         {/* Test
         <div className="flex justify-start gap-4 mt-4">

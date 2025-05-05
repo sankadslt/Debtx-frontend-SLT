@@ -59,7 +59,7 @@ export const Litigation_Court_Details_Update = () => {
   }, [case_id]);
 
   const handleSubmit =async() => {
-    if (!courtNo || !caseHandlingOfficer || !remark) {
+    if (!courtNo || !selectedDate || !caseHandlingOfficer || !remark) {
         setError("Missing required fields.");
         return;
     }
@@ -67,6 +67,7 @@ export const Litigation_Court_Details_Update = () => {
     const payload = {
         case_id: case_id,
         court_no: courtNo,
+        court_register_dtm: selectedDate,
         case_handling_officer: caseHandlingOfficer,
         remark: remark,
         created_by: userId,
