@@ -48,9 +48,9 @@ export const Litigation_List = () => {
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // State to track if more data is available
 
   //Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const rowsPerPage = 10; // Number of rows per page 
 
@@ -104,7 +104,7 @@ export const Litigation_List = () => {
         <img
             src={icon}
             alt={status}
-            className="w-6 h-6"
+            className="h-6"
             title={status}
         />
     );
@@ -227,6 +227,7 @@ export const Litigation_List = () => {
       });
       setIsLoading(false);
       
+      // Updated response handling
       if (response && response.data) {
         console.log("Valid data received:", response.data);
         // console.log(response.data.pagination.pages);
@@ -237,35 +238,38 @@ export const Litigation_List = () => {
         setFilteredData((prevData) => [...prevData, ...response.data]);
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false
+            });
+          }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
           if (response.data.length < maxData) {
             setIsMoreDataAvailable(false); // More data available
           }
         }
+
         // setFilteredData(response.data.data);
       } else {
-        console.error("No valid Settlement data found in response:", response);
+        Swal.fire({
+          title: "Error",
+          text: "No valid data found in response.",
+          icon: "error"
+        });
         setFilteredData([]);
       }
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        Swal.fire({
-          title: "No Results",
-          text: "No matching data found for the selected filters.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setFilteredData([]);
-      } else {
-        console.error("Error fetching litigation cases:", error);
-        Swal.fire({
-          title: "Error",
-          text: "Failed to fetch data. Please try again.",
-          icon: "error"
-        });
-      }
+      console.error("Error filtering cases:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data. Please try again.",
+        icon: "error"
+      });
     } 
   };
 
@@ -576,27 +580,28 @@ export const Litigation_List = () => {
             </table>
         </div>
         
-         {/* Pagination Section */}
-         <div className={GlobalStyle.navButtonContainer}>
-            <button
-              onClick={() => handlePrevNext("prev")}
-              disabled={currentPage <= 1}
-              className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""
-                }`}
-            >
-              <FaArrowLeft />
-            </button>
-            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-              Page {currentPage}
-            </span>
-            <button
-              onClick={() => handlePrevNext("next")}
-              disabled={currentPage === totalPages}
-              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
+        {/* Pagination Section */}
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            onClick={() => handlePrevNext("prev")}
+            disabled={currentPage <= 1}
+            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""
+              }`}
+          >
+            <FaArrowLeft />
+          </button>
+          <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+            Page {currentPage}
+          </span>
+          <button
+            onClick={() => handlePrevNext("next")}
+            disabled={currentPage === totalPages}
+            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+
 
         {/* Test
         <div className="flex justify-start gap-4 mt-4">
