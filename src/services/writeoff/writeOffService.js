@@ -1,4 +1,12 @@
-
+/* 
+    Purpose: This template is used for the Write_Off Controllers.
+    Created Date: 2025-04-25
+    Created By: Buthmi Mithara (buthmimithara1234@gmail.com)
+    Version: Node.js v20.11.1
+    Dependencies: axios , mongoose
+    Related Files: WriteOffCaseList.js
+    Notes:  
+*/
 
 import axios from "axios";
 
