@@ -9,9 +9,11 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
+import { useNavigate } from "react-router-dom"
 import GlobalStyle from "../../assets/prototype/GlobalStyle"
 
 export const Litigation_Submission_Document_Summary = () => {
+  const navigate =useNavigate();
   return (
     <div className={GlobalStyle.fontPoppins}>
         <h1 className={GlobalStyle.headingLarge}>Create HS Document</h1>
@@ -22,7 +24,10 @@ export const Litigation_Submission_Document_Summary = () => {
                     <span className={GlobalStyle.headingMedium}>Preview of HS Document</span>
                 </div>
                 <div className="flex w-full justify-end gap-4 mt-4">
-                    <button className={GlobalStyle.buttonPrimary}>
+                    <button 
+                        className={GlobalStyle.buttonPrimary}
+                        onClick={() => navigate('/pages/Litigation/Change_Litigation_Submission_Document_Summary')}
+                    >
                         Change Details
                     </button>
                     <button className={GlobalStyle.buttonPrimary}>

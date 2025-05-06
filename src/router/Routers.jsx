@@ -80,6 +80,7 @@ import WriteOffCase from "../pages/Write_Off/WriteOffCase";
 
 //SettlementPlan
 import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
+import { Change_Litigation_Submission_Document_Summary } from "../pages/Litigation/Change_Litigation_Submission_Document_Summary";
 
 //Withdrawal
 import WithdrawalCaseLog from "../pages/Withdrawal/WithdrawalCaseLog";
@@ -662,6 +663,7 @@ const Routers = () => {
       <Route path="/pages/Litigation/Litigation_List" element={<ProtectedRoute element={<Litigation_List />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Documentation" element={<ProtectedRoute element={<Litigation_Documentation />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Submission_Document_Summary" element={<ProtectedRoute element={<Litigation_Submission_Document_Summary />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Litigation/Change_Litigation_Submission_Document_Summary" element={<ProtectedRoute element={<Change_Litigation_Submission_Document_Summary />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Submission" element={<ProtectedRoute element={<Litigation_Submission />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Court_Details_Update" element={<ProtectedRoute element={<Litigation_Court_Details_Update />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Case_Details" element={<ProtectedRoute element={<Litigation_Case_Details />} allowedRoles={['superadmin']} />} />
