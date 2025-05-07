@@ -535,8 +535,8 @@ const Monitor_settlement = () => {
     setTotalAPIPages(1); // Reset total API pages
   };
 
-  const naviPreview = (caseId) => {
-    navigate("/lod/ftl-log/preview", { state: { caseId } });
+  const naviPreview = (caseId, settlementID) => {
+    navigate("/lod/ftl-log/preview", { state: { caseId, settlementID } });
   };
 
   const naviCaseID = (caseId) => {
@@ -806,7 +806,7 @@ const Monitor_settlement = () => {
                       <td className={GlobalStyle.tableData}>
                         <img
                           src={more}
-                          onClick={() => naviPreview(item.case_id)}
+                          onClick={() => naviPreview(item.case_id, item.settlement_id)}
                           title="More"
                           alt="more icon"
                           className="w-5 h-5 cursor-pointer"

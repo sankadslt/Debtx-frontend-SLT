@@ -18,7 +18,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
-import { Case_Details_Settlement_LOD_FTL_LOD_Ext_01 } from "../../services/settlement/SettlementServices";
+import { Settlement_Details_By_Settlement_ID_Case_ID } from "../../services/settlement/SettlementServices";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Create_Task_For_Downloard_Settlement_Details_By_Case_ID } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
@@ -32,6 +32,7 @@ const SettlementPreview = () => {
     const [isCreatingTask, setIsCreatingTask] = useState(false);
     const location = useLocation(); // Get the current location
     const { caseId } = location.state || {};// Get the case_id from the URL parameters
+    const { settlementID } = location.state || {};// Get the settlementID from the URL parameters
     const rowsPerPage = 5; // Number of rows per page
     const navigate = useNavigate();
 
@@ -39,7 +40,7 @@ const SettlementPreview = () => {
     const fetchCaseDetails = async () => {
         setIsLoading(true);
         try {
-            const CaseDetails = await Case_Details_Settlement_LOD_FTL_LOD_Ext_01(caseId);
+            const CaseDetails = await Settlement_Details_By_Settlement_ID_Case_ID(caseId, settlementID);
             console.log("Case Details:", CaseDetails);
             setSettlementData(CaseDetails);
         } catch (error) {

@@ -18,7 +18,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
-import { Case_Details_Settlement_LOD_FTL_LOD_Ext_01 } from "../../services/settlement/SettlementServices";
+import { Settlement_Details_By_Settlement_ID_Case_ID } from "../../services/settlement/SettlementServices";
 import { Case_Details_Payment_By_Case_ID } from "../../services/Transaction/Money_TransactionService";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Create_Task_For_Downloard_Settlement_Details_By_Case_ID } from "../../services/settlement/SettlementServices";
