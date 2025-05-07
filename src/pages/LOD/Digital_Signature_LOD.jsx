@@ -41,6 +41,10 @@ const Digital_Signature_LOD = () => {
     const [lodCount, setlodCount] = useState(0);
     const [finalReminderCount, setFinalReminderCount] = useState(0);
     const [MaxPage, setMaxPage] = useState(0);
+    const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // Flag to check if more data is available
+    const [maxTablePages, setMaxTablePages] = useState(0); // Maximum number of pages for the table
+    const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Maximum current page for the table
+    const rowsPerPage = 10; // Number of rows per page
 
     // Fetch LOD, Final reminder and total counts
     const fetchLODCounts = async () => {
@@ -65,8 +69,10 @@ const Digital_Signature_LOD = () => {
     const calculateMaxPages = (totalCases) => {
         if (totalCases <= 10) {
             setMaxPage(1) // All cases fit on the first page
+            setMaxTablePages(1); // Set max table pages to 1
         } else {
             setMaxPage(Math.ceil((totalCases - 10) / 30) + 1); // Calculate for additional pages
+            setMaxTablePages(Math.ceil(totalCases / rowsPerPage)); // Set max table pages
         }
     };
 
@@ -77,15 +83,36 @@ const Digital_Signature_LOD = () => {
         } else if (LODType === "Final Reminder") {
             calculateMaxPages(finalReminderCount); // Pass finalReminderCount for "final reminder"
         }
-    }, [LODType, lodCount, finalReminderCount]);
+        console.log("Max Page:", MaxPage);
+    }, [LODType, [lodCount], [finalReminderCount]]);
 
 
     // Fetch LOD data based on the selected LOD type and current page
-    const fetchData = async (LODType, currentPage) => {
+    const fetchData = async () => {
         setIsLoading(true);
         try {
-            const LODs = await List_F2_Selection_Cases(LODType, currentPage + 1);
-            setLODData(LODs);
+            const LODs = await List_F2_Selection_Cases(LODType, currentPage);
+            // setLODData(LODs);
+            setLODData((prevData) => [...prevData, ...LODs]); // Append new data to existing data
+
+            // if (LODs.length === 0) {
+            //     setIsMoreDataAvailable(false); // No more data available
+            //     if (currentPage === 1) {
+            //         Swal.fire({
+            //             title: "No Results",
+            //             text: "No LOD is matching the criteria.",
+            //             icon: "warning",
+            //             allowOutsideClick: false,
+            //             allowEscapeKey: false
+            //         });
+            //     }
+            // } else {
+            //     const maxData = currentPage === 1 ? 10 : 30;
+            //     if (LODs < maxData) {
+            //         setIsMoreDataAvailable(false); // No more data available
+            //     }
+            // }
+
         } catch (error) {
             Swal.fire("Error", error.message || "No LOD is matching the criteria.", "error");
         } finally {
@@ -93,13 +120,31 @@ const Digital_Signature_LOD = () => {
         }
     };
 
+    const handlePageChange = () => {
+        if (currentPage > maxCurrentPage && currentPage <= MaxPage) {
+            setMaxCurrentPage(currentPage);
+            fetchData(); // Fetch next page data
+        }
+    }
+
+    useEffect(() => {
+        handlePageChange(); // Fetch data when currentPage changes
+    }, [currentPage]);
+
     useEffect(() => {
         if (LODType.trim()) { // Check if LODType is not empty or just whitespace
-            fetchData(LODType, currentPage);
+            setLODData([]); // Clear previous data when LODType changes
+            setMaxCurrentPage(0); // Reset the current page
+            // setIsMoreDataAvailable(true); // Reset the flag for new data
+            if (currentPage === 1) {
+                fetchData();
+            } else {
+                setCurrentPage(1); // Reset to the first page if LODType changes
+            }
         } else {
             setLODData([]); // Clear data if LODType is empty
         }
-    }, [LODType, currentPage]);
+    }, [LODType]);
 
     // Function to handle the creation of tasks for downloading each LOD
     const HandleCreateTaskEachLOD = async () => {
@@ -159,7 +204,13 @@ const Digital_Signature_LOD = () => {
             const response = await Change_Document_Type(intLODID, activePopupLODStatus, userData, changeReason);
             if (response === "success") {
                 Swal.fire(response, `LOD Type changed successfully!`, "success");
-                fetchData(LODType, currentPage); // Refresh the case list after changing the document type
+                setLODData([]); // Clear previous data when LODType changes
+                setMaxCurrentPage(0); // Reset the current page
+                if (currentPage === 1) {
+                    fetchData();
+                } else {
+                    setCurrentPage(1); // Reset to the first page if LODType changes
+                }
                 fetchLODCounts(); // Refresh the counts after changing the document type
             }
         } catch (error) {
@@ -196,18 +247,20 @@ const Digital_Signature_LOD = () => {
         );
     }
 
+    // Pagination logic
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const paginatedData = LODData.slice(startIndex, startIndex + rowsPerPage);
+
     // Handle search bar
-    const filteredData = LODData.filter((row) =>
-        String(row.LODID).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.Amount).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.CustomerTypeName).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.AccountManagerCode).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.SourceType).toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredData = paginatedData.filter((row) =>
+        Object.values(row)
+            .join(" ")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
     );
 
     const handlePrevPage = () => {
-        if (currentPage > 0) {
+        if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
         }
     };
@@ -412,13 +465,13 @@ const Digital_Signature_LOD = () => {
 
             {LODType && (
                 <div className={GlobalStyle.navButtonContainer}>
-                    <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 1}>
                         <FaArrowLeft />
                     </button>
                     <span className="text-gray-700">
-                        Page {currentPage + 1} of {MaxPage}
+                        Page {currentPage} of {maxTablePages}
                     </span>
-                    <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === MaxPage - 1}>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === maxTablePages}>
                         <FaArrowRight />
                     </button>
                 </div>
