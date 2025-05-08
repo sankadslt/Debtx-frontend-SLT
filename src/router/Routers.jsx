@@ -620,7 +620,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/pages/LOD/CustomerResponse/:caseId"
+        path="/pages/LOD/CustomerResponse"
         element={
           <ProtectedRoute
             element={<CustomerResponse />}
@@ -629,7 +629,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/pages/LOD/CustomerResponseReview/:caseId"
+        path="/pages/LOD/CustomerResponseReview"
         element={
           <ProtectedRoute
             element={<CustomerResponseReview />}
