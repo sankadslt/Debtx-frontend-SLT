@@ -493,7 +493,9 @@ export const List_All_DRCs_Mediation_Board_Cases = async (filters) => {
       `${URL}/List_All_DRCs_Mediation_Board_Cases`,
       filters
     );
-    return response.data;
+    if (response.data.status === "success") {
+      return response.data;
+    }
   } catch (error) {
     console.error(
       "Error fetching Case details :",
