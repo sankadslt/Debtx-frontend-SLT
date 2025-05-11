@@ -21,6 +21,15 @@ import { getLoggedUserId } from "../../services/auth/authService";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { List_All_DRCs_Mediation_Board_Cases } from "../../services/case/CaseServices";
+import { RTOM_Details } from "../../services/RTOM/rtom";
+import { Tooltip } from "react-tooltip";
+import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
+import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
+import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Request Customer-Info.png";
+import MB_Handover_Customer_Info from "/src/assets/images/Mediation_Board/MB Handover Customer-Info.png";
+import MB_Settle_Pending from "/src/assets/images/Mediation_Board/MB Settle Pending.png";
+import MB_Settle_Open_Pending from "/src/assets/images/Mediation_Board/MB Settle Open Pending.png";
+import MB_Fail_with_Pending_Non_Settlement from "/src/assets/images/Mediation_Board/MB Fail with Pending Non Settlement.png";
 
 const MediationBoardCaseList = () => {
   const [selectValue, setSelectValue] = useState("Account No");
@@ -52,8 +61,57 @@ const MediationBoardCaseList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [caseStatus, setCaseStatus] = useState("");
   const [rtom, setRtom] = useState("");
+  const [rtomList, setRtomList] = useState([]);
 
   const rowsPerPage = 10;
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Forward to Mediation Board":
+        return Forward_To_Mediation_Board;
+      case "MB Negotiation":
+        return MB_Negotiation;
+      case "MB Request Customer-Info":
+        return MB_Request_Customer_Info;
+      case "MB Handover Customer-Info":
+        return MB_Handover_Customer_Info;
+      case "MB Settle Pending":
+        return MB_Settle_Pending;
+      case "MB Settle Open-Pending":
+        return MB_Settle_Open_Pending;
+      case "MB Fail with Pending Non-Settlement":
+        return MB_Fail_with_Pending_Non_Settlement;
+      default:
+        return "";
+    }
+  };
+
+  // render status icon with tooltip
+  const renderStatusIcon = (status, index) => {
+    const iconPath = getStatusIcon(status);
+
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+
+    const tooltipId = `tooltip-${index}`;
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={iconPath}
+          alt={status}
+          className="w-6 h-6"
+          data-tooltip-id={tooltipId} // Add tooltip ID to image
+        />
+        {/* Tooltip component */}
+        <Tooltip id={tooltipId} place="bottom" effect="solid">
+          {status} {/* Tooltip text is the phase and status */}
+        </Tooltip>
+      </div>
+    );
+  };
+
   useEffect(() => {
     const fetchDrcNames = async () => {
       try {
@@ -64,9 +122,20 @@ const MediationBoardCaseList = () => {
         console.error("Error fetching DRC names:", error);
       }
     };
+
+    const fetchRTOM = async () => {
+      try {
+        const rtom = await RTOM_Details();
+
+        setRtomList(rtom);
+      } catch (error) {
+        console.error("Error fetching DRC names:", error);
+      }
+    };
     // fetchData();
     setFilteredData(data);
     fetchDrcNames();
+    fetchRTOM();
     fetchCommissionCounts();
   }, []);
 
@@ -362,9 +431,8 @@ const MediationBoardCaseList = () => {
   };
 
   const handleClear = () => {
-    setCaseId("");
-    setAccountNo("");
-    setCommissionType("");
+    setCaseStatus("");
+    setRtom("");
     setFromDate(null);
     setToDate(null);
     setSelectedDrcId("");
@@ -376,57 +444,57 @@ const MediationBoardCaseList = () => {
   };
 
   const HandleCreateTaskDownloadCommissiontList = async () => {
-  
-      const userData = await getLoggedUserId(); // Assign user ID
-  
-      if (!fromDate || !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "Please select From Date and To Date.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        return;
+
+    const userData = await getLoggedUserId(); // Assign user ID
+
+    if (!fromDate || !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select From Date and To Date.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      return;
+    }
+
+    // if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+    //   Swal.fire({
+    //     title: "Warning",
+    //     text: "To date should be greater than or equal to From date",
+    //     icon: "warning",
+    //     allowOutsideClick: false,
+    //     allowEscapeKey: false
+    //   });
+    //   setToDate(null);
+    //   setFromDate(null);
+    //   return;
+    // }
+
+    // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+    //   Swal.fire({
+    //     title: "Warning",
+    //     text: "Invalid input. Only numbers are allowed for Case ID.",
+    //     icon: "warning",
+    //     allowOutsideClick: false,
+    //     allowEscapeKey: false,
+    //   });
+    //   setCaseId(""); // Clear the invalid input
+    //   return;
+    // }
+
+    setIsCreatingTask(true);
+    try {
+      const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
+      if (response === "success") {
+        Swal.fire(response, `Task created successfully!`, "success");
       }
-  
-      // if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-      //   Swal.fire({
-      //     title: "Warning",
-      //     text: "To date should be greater than or equal to From date",
-      //     icon: "warning",
-      //     allowOutsideClick: false,
-      //     allowEscapeKey: false
-      //   });
-      //   setToDate(null);
-      //   setFromDate(null);
-      //   return;
-      // }
-  
-      // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-      //   Swal.fire({
-      //     title: "Warning",
-      //     text: "Invalid input. Only numbers are allowed for Case ID.",
-      //     icon: "warning",
-      //     allowOutsideClick: false,
-      //     allowEscapeKey: false,
-      //   });
-      //   setCaseId(""); // Clear the invalid input
-      //   return;
-      // }
-  
-      setIsCreatingTask(true);
-      try {
-        const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
-        if (response === "success") {
-          Swal.fire(response, `Task created successfully!`, "success");
-        }
-      } catch (error) {
-        Swal.fire("Error", error.message || "Failed to create task.", "error");
-      } finally {
-        setIsCreatingTask(false);
-      }
-    };
+    } catch (error) {
+      Swal.fire("Error", error.message || "Failed to create task.", "error");
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
 
   const navigate = useNavigate();
 
@@ -434,8 +502,8 @@ const MediationBoardCaseList = () => {
     navigate("", { state: { caseId } });
   }
 
-  const naviPreview = (Commission_ID) => {
-    navigate("/Commission/preview", { state: { Commission_ID } });
+  const naviPreview = (caseID) => {
+    navigate("/MediationBoard/MediationBoardResponse", { state: { caseID } });
   };
 
 
@@ -454,71 +522,80 @@ const MediationBoardCaseList = () => {
       <h1 className={GlobalStyle.headingLarge + " mb-6"}>Mediation Board Case List</h1>
 
       <div className={`${GlobalStyle.cardContainer} w-full`}>
-        <div className="flex flex-wrap items-center justify-end w-full gap-3">
-          <select
-            value={caseStatus}
-            onChange={(e) => setCaseStatus(e.target.value)}
-            className={GlobalStyle.selectBox}
-            style={{ color: caseStatus === "" ? "gray" : "black" }}
-          >
-            <option value="" hidden>Status</option>
-            <option value="Forward to Mediation Board">Forward to Mediation Board</option>
-            <option value="MB Negotiation">MB Negotiation</option>
-            <option value="MB Request Customer-Info">MB Request Customer-Info</option>
-            <option value="MB Handover Customer-Info">MB Handover Customer-Info</option>
-            <option value="MB Settle Pending">MB Settle Pending</option>
-            <option value="MB Settle Open-Pending">MB Settle Open-Pending</option>
-            <option value="MB Fail with Pending Non-Settlement">MB Fail with Pending Non-Settlement</option>
-          </select>
+        <div className="flex items-center justify-end w-full space-x-3">
 
-          <select
-            value={selectedDrcId}
-            onChange={(e) => setSelectedDrcId(e.target.value)}
-            className={GlobalStyle.inputText}
-            style={{ color: selectedDrcId === "" ? "gray" : "black" }}
-          >
-            <option value="" hidden>DRC</option>
-            {drcNames.map((drc) => (
-              <option key={drc.key} value={drc.id.toString()}>
-                {drc.value}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center">
+            <select
+              value={caseStatus}
+              onChange={(e) => setCaseStatus(e.target.value)}
+              className={GlobalStyle.selectBox}
+              style={{ color: caseStatus === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>Status</option>
+              <option value="Forward to Mediation Board">Forward to Mediation Board</option>
+              <option value="MB Negotiation">MB Negotiation</option>
+              <option value="MB Request Customer-Info">MB Request Customer-Info</option>
+              <option value="MB Handover Customer-Info">MB Handover Customer-Info</option>
+              <option value="MB Settle Pending">MB Settle Pending</option>
+              <option value="MB Settle Open-Pending">MB Settle Open-Pending</option>
+              <option value="MB Fail with Pending Non-Settlement">MB Fail with Pending Non-Settlement</option>
+            </select>
+          </div>
 
-          <select
-            value={rtom}
-            onChange={(e) => setRtom(e.target.value)}
-            className={GlobalStyle.inputText}
-            style={{ color: rtom === "" ? "gray" : "black" }}
-          >
-            <option value="" hidden>RTOM</option>
-            {drcNames.map((drc) => (
-              <option key={drc.key} value={drc.id.toString()}>
-                {drc.value}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center">
+            <select
+              value={selectedDrcId}
+              onChange={(e) => setSelectedDrcId(e.target.value)}
+              className={GlobalStyle.inputText}
+              style={{ color: selectedDrcId === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>DRC</option>
+              {drcNames.map((drc) => (
+                <option key={drc.key} value={drc.id.toString()}>
+                  {drc.value}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <label className={GlobalStyle.dataPickerDate}>Date</label>
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <DatePicker
-                selected={fromDate}
-                onChange={handleFromDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="From"
-                className={GlobalStyle.inputText}
-              />
-            </div>
+          <div className="flex items-center">
+            <select
+              value={rtom}
+              onChange={(e) => setRtom(e.target.value)}
+              className={GlobalStyle.inputText}
+              style={{ color: rtom === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>RTOM</option>
+              {Object.values(rtomList).map((rtom) => (
+                <option key={rtom.rtom_id} value={rtom.rtom}>
+                  {rtom.rtom}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div className="flex items-center">
-              <DatePicker
-                selected={toDate}
-                onChange={handleToDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="To"
-                className={GlobalStyle.inputText}
-              />
+          <div className="flex items-center">
+            <label className={GlobalStyle.dataPickerDate}>Date</label>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center">
+                <DatePicker
+                  selected={fromDate}
+                  onChange={handleFromDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="From"
+                  className={GlobalStyle.inputText}
+                />
+              </div>
+
+              <div className="flex items-center">
+                <DatePicker
+                  selected={toDate}
+                  onChange={handleToDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="To"
+                  className={GlobalStyle.inputText}
+                />
+              </div>
             </div>
           </div>
 
@@ -584,7 +661,9 @@ const MediationBoardCaseList = () => {
                   >
                     {row.case_id}
                   </td>
-                  <td className={GlobalStyle.tableData}>{row.status}</td>
+                  <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
+                    {renderStatusIcon(row.status, index)}
+                    </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   {/* <td className={GlobalStyle.tableCurrency}>
                     {row.Commission_Amount?.toLocaleString("en-LK", {
@@ -622,7 +701,7 @@ const MediationBoardCaseList = () => {
                   <td className={GlobalStyle.tableData + " text-center"}>
                     <button
                       className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center"
-                      onClick={() => naviPreview(row.Commission_ID)}
+                      onClick={() => naviPreview(row.case_id)}
                     >
                       !
                     </button>

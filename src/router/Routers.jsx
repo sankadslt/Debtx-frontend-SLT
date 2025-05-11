@@ -542,7 +542,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/MediationBoard/MediationBoardResponse/:caseId"
+        path="/MediationBoard/MediationBoardResponse"
         element={
           <ProtectedRoute
             element={<MediationBoardResponse />}
