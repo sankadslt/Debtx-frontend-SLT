@@ -502,8 +502,8 @@ const MediationBoardCaseList = () => {
     navigate("", { state: { caseId } });
   }
 
-  const naviPreview = (caseID) => {
-    navigate("/MediationBoard/MediationBoardResponse", { state: { caseID } });
+  const naviPreview = (caseID, DRC_ID) => {
+    navigate("/MediationBoard/MediationBoardResponse", { state: { caseID, DRC_ID } });
   };
 
 
@@ -701,7 +701,7 @@ const MediationBoardCaseList = () => {
                   <td className={GlobalStyle.tableData + " text-center"}>
                     <button
                       className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center"
-                      onClick={() => naviPreview(row.case_id)}
+                      onClick={() => naviPreview(row.case_id, row.drc_id)}
                     >
                       !
                     </button>

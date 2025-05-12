@@ -505,6 +505,27 @@ export const List_All_DRCs_Mediation_Board_Cases = async (filters) => {
   }
 };
 
+export const Case_Details_for_DRC = async (case_id, drc_id) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Case_Details_for_DRC_Mediation_Board`,
+      {
+        case_id: case_id,
+        drc_id: drc_id,
+      }
+    );
+    if (response.data.status === "success") {
+      return response.data.data;
+    }
+  } catch (error) {
+    console.error(
+      "Error fetching Case details :",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
 export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id) => {
   try {
     if (!case_id) {

@@ -1,12 +1,12 @@
 /*Purpose:
-Created Date: 2025-04-25
+Created Date: 2025-04-07
 Created By: Janani Kumarasiri (jkktg001@gmail.com)
 Last Modified Date: 
 Modified By: 
 Last Modified Date: 
 Modified By: 
 Version: React v18
-ui number : 7.6
+ui number : 3.7
 Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
@@ -15,24 +15,21 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
-import { Settlement_Details_By_Settlement_ID_Case_ID } from "../../services/settlement/SettlementServices";
-import { getLoggedUserId } from "../../services/auth/authService";
-import { Create_Task_For_Downloard_Settlement_Details_By_Case_ID } from "../../services/settlement/SettlementServices";
-import Swal from 'sweetalert2';
+import { Case_Details_for_DRC } from "../../services/case/CaseServices";
+import Swal from "sweetalert2";
 
 const MediationBoardResponse = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [currentPageSettlementPlans, setCurrentPageSettlementPlans] = useState(0);
-    const [currentPagesettlementPlanRecievedDetails, setCurrentPagesettlementPlanRecievedDetails] = useState(0);
-    const [Settlementdata, setSettlementData] = useState([]);
+    const [currentPagePaymentDetails, setCurrentPagePaymentDetails] = useState(0);
+    const [Casedata, setCaseData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isCreatingTask, setIsCreatingTask] = useState(false);
-    const location = useLocation(); // Get the current location
-    const { caseId } = location.state || {};// Get the case_id from the URL parameters
-    const { settlementID } = location.state || {};// Get the settlementID from the URL parameters
+    const location = useLocation(); // Get the current location object
+    const { caseID } = location.state || {}; // Get the case_id from the state parameters
+    const { DRC_ID } = location.state || {}; // Get the drc_id from the state parameters
     const rowsPerPage = 5; // Number of rows per page
     const navigate = useNavigate();
 
@@ -40,18 +37,30 @@ const MediationBoardResponse = () => {
     const fetchCaseDetails = async () => {
         setIsLoading(true);
         try {
-            const CaseDetails = await Settlement_Details_By_Settlement_ID_Case_ID(caseId, settlementID);
-            console.log("Case Details:", CaseDetails);
-            setSettlementData(CaseDetails);
+            // console.log("caseId", caseID);
+            // console.log("DRC_ID", DRC_ID);
+            const CaseDetails = await Case_Details_for_DRC(caseID, DRC_ID);
+            if (CaseDetails) {
+                setCaseData(CaseDetails);
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: "Error fetching case details",
+                    icon: "error",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+                setCaseData([]);
+            }
         } catch (error) {
             Swal.fire({
                 title: "Error",
-                text: "Error fetching settlement details",
+                text: "Error fetching case details",
                 icon: "error",
                 allowOutsideClick: false,
                 allowEscapeKey: false
             });
-            setSettlementData([]);
+            setCaseData([]);
         } finally {
             setIsLoading(false);
         }
@@ -70,8 +79,46 @@ const MediationBoardResponse = () => {
         );
     }
 
+    // variables need for response history table
+    const MBNegotiationHistory = Casedata.mediation_board || [];
+    const pagesMBNegotiationHistory = Math.ceil(MBNegotiationHistory.length / rowsPerPage);
+    const startIndex = currentPage * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const dataInPageMBNegotiationHistory = MBNegotiationHistory.slice(startIndex, endIndex);
+
+    const handlePrevPageMBNegotiationeHistory = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPageMBNegotiationHistory = () => {
+        if (currentPage < pagesMBNegotiationHistory - 1) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    // variables need for payment  details table
+    const paymentDetails = Casedata.payment_details || [];
+    const pagesPaymentDetails = Math.ceil(paymentDetails.length / rowsPerPage);
+    const startIndexPaymentDetails = currentPagePaymentDetails * rowsPerPage;
+    const endIndexPaymentDetails = startIndexPaymentDetails + rowsPerPage;
+    const dataInPagePaymentDetails = paymentDetails.slice(startIndexPaymentDetails, endIndexPaymentDetails);
+
+    const handlePrevPagePaymentDetails = () => {
+        if (currentPagePaymentDetails > 0) {
+            setCurrentPageSettlementPlans(currentPagePaymentDetails - 1);
+        }
+    };
+
+    const handleNextPagePaymentDetails = () => {
+        if (currentPagePaymentDetails < pagesPaymentDetails - 1) {
+            setCurrentPageSettlementPlans(currentPagePaymentDetails + 1);
+        }
+    };
+
     // varibles need for settlement plane table
-    const settlementPlans = Settlementdata.settlement_plans || [];
+    const settlementPlans = Casedata.settlement_plans || [];
     const pagesSettlementPlans = Math.ceil(settlementPlans.length / rowsPerPage);
     const startIndexSettlementPlans = currentPageSettlementPlans * rowsPerPage;
     const endIndexSettlementPlans = startIndexSettlementPlans + rowsPerPage;
@@ -89,91 +136,36 @@ const MediationBoardResponse = () => {
         }
     };
 
-    // variables need for payment  details table
-    const settlementPlanRecievedDetails = Settlementdata.settlement_plan_received || [];
-    const pagessettlementPlanRecievedDetails = Math.ceil(settlementPlanRecievedDetails.length / rowsPerPage);
-    const startIndexsettlementPlanRecievedDetails = currentPagesettlementPlanRecievedDetails * rowsPerPage;
-    const endIndexsettlementPlanRecievedDetails = startIndexsettlementPlanRecievedDetails + rowsPerPage;
-    const dataInPagesettlementPlanRecievedDetails = settlementPlanRecievedDetails.slice(startIndexsettlementPlanRecievedDetails, endIndexsettlementPlanRecievedDetails);
-
-    const handlePrevPagesettlementPlanRecievedDetails = () => {
-        if (currentPagesettlementPlanRecievedDetails > 0) {
-            setCurrentPagesettlementPlanRecievedDetails(currentPagesettlementPlanRecievedDetails - 1);
-        }
-    };
-
-    const handleNextPagesettlementPlanRecievedDetails = () => {
-        if (currentPagesettlementPlanRecievedDetails < pagessettlementPlanRecievedDetails - 1) {
-            setCurrentPagesettlementPlanRecievedDetails(currentPagesettlementPlanRecievedDetails + 1);
-        }
-    };
-
-    const handleBackButton = () => {
-        navigate("/pages/Settlement/MonitorSettlement");
-    }
-
-    const HandleCreateTaskDownloadSettlementDetailsByCaseID = async () => {
-
-        const userData = await getLoggedUserId(); // Assign user ID
-
-        setIsCreatingTask(true);
-        try {
-            const response = await Create_Task_For_Downloard_Settlement_Details_By_Case_ID(userData, caseId);
-            if (response === "success") {
-                Swal.fire(response, `Task created successfully!`, "success");
-            }
-        } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
-        } finally {
-            setIsCreatingTask(false);
-        }
-    };
-
     return (
         <div className={GlobalStyle.fontPoppins}>
-            <div className="flex justify-between items-center mt-4">
-                {/* Title */}
-                <h2 className={GlobalStyle.headingLarge}>Settlement Details</h2>
-
-                <button
-                    onClick={HandleCreateTaskDownloadSettlementDetailsByCaseID}
-                    className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-                    // className={GlobalStyle.buttonPrimary}
-                    disabled={isCreatingTask}
-                    style={{ display: 'flex', alignItems: 'center' }}
-                >
-                    {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-                    {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-                    {/* <FaDownload style={{ marginRight: '8px' }} />
-                    Create task and let me know */}
-                </button>
-            </div>
+            {/* Title */}
+            <h2 className={GlobalStyle.headingLarge}>Customer Response</h2>
 
             {/* Case details card */}
             <div className="flex gap-4 mt-4 justify-center">
                 <div className={`${GlobalStyle.cardContainer}`}>
                     <div className="table">
                         <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Settlement ID</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.settlement_id}</div>
-                        </div>
-                        <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Case ID</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.case_id}</div>
+                            <div className="table-cell px-4 py-2">{Casedata.case_id}</div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Customer Ref</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">{Casedata.customer_ref}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Account no</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.account_no}</div>
+                            <div className="table-cell px-4 py-2">{Casedata.account_no}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {Settlementdata?.arrears_amount &&
-                                    Settlementdata.arrears_amount.toLocaleString("en-LK", {
+                                {Casedata?.arrears_amount &&
+                                    Casedata.arrears_amount.toLocaleString("en-LK", {
                                         style: "currency",
                                         currency: "LKR",
                                     })
@@ -181,67 +173,175 @@ const MediationBoardResponse = () => {
                             </div>
                         </div>
                         <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Last Monitoring DTM</div>
+                            <div className="table-cell px-4 py-2 font-bold">Last Payment Date</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {Settlementdata?.last_monitoring_dtm &&
-                                    new Date(Settlementdata.last_monitoring_dtm).toLocaleString("en-GB", {
+                                {Casedata?.last_payment_date &&
+                                    new Date(Casedata.last_payment_date).toLocaleString("en-GB", {
                                         year: "numeric",
                                         month: "2-digit",
                                         day: "2-digit",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        second: "2-digit",
-                                        hour12: true,
+                                        // hour: "2-digit",
+                                        // minute: "2-digit",
+                                        // second: "2-digit",
+                                        // hour12: true,
                                     })}
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className={`${GlobalStyle.cardContainer}`}>
-                    <div className="table">
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Settlement Status</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.settlement_status}</div>
-                        </div>
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Status DTM</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">
-                                {Settlementdata?.status_dtm &&
-                                    new Date(Settlementdata.status_dtm).toLocaleString("en-GB", {
-                                        year: "numeric",
-                                        month: "2-digit",
-                                        day: "2-digit",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        second: "2-digit",
-                                        hour12: true,
-                                    })}
-                            </div>
-                        </div>
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Status Reason</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.status_reason}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Settilement Plan table */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Settlement Plan</b></h2>
+            {/* Response History table */}
+            <h2 className={`${GlobalStyle.headingMedium}`}><b>Mediation Board Negotiation History</b></h2>
 
             <div className={`${GlobalStyle.tableContainer} mt-4`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
-                            <th className={GlobalStyle.tableHeader}>Installment Seq.</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount</th>
-                            <th className={GlobalStyle.tableHeader}>Cumulative Settle Amount</th>
-                            <th className={GlobalStyle.tableHeader}>Plan Date</th>
+                            <th className={GlobalStyle.tableHeader}>Calling Date</th>
+                            <th className={GlobalStyle.tableHeader}>Customer Represented</th>
+                            <th className={GlobalStyle.tableHeader}>Agree to Settle</th>
+                            <th className={GlobalStyle.tableHeader}>Customer Response</th>
+                            <th className={GlobalStyle.tableHeader}>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {dataInPageMBNegotiationHistory.length > 0 ? (
+                            dataInPageMBNegotiationHistory.map((log, index) => (
+                                <tr
+                                    key={index}
+                                    className={`${index % 2 === 0
+                                        ? "bg-white bg-opacity-75"
+                                        : "bg-gray-50 bg-opacity-50"
+                                        } border-b`}
+                                >
+                                    <td className={GlobalStyle.tableData}>
+                                        {log?.mediation_board_calling_dtm &&
+                                            new Date(log.mediation_board_calling_dtm).toLocaleString("en-GB", {
+                                                year: "numeric",
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                                // hour: "2-digit",
+                                                // minute: "2-digit",
+                                                // second: "2-digit",
+                                                hour12: true,
+                                            })}
+                                    </td>
+                                    <td className={GlobalStyle.tableData}>{log.customer_available}</td>
+                                    <td className={GlobalStyle.tableData}>{log.agree_to_settle}</td>
+                                    <td className={GlobalStyle.tableData}>{log.customer_response}</td>
+                                    <td className={GlobalStyle.tableData}>{log.comment}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="6" className="text-center py-4">
+                                    No data matching the criteria.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className={GlobalStyle.navButtonContainer}>
+                <button className={GlobalStyle.navButton} onClick={handlePrevPageMBNegotiationeHistory} disabled={currentPage === 0}>
+                    <FaArrowLeft />
+                </button>
+                <span className="text-gray-700">
+                    Page {currentPage + 1} of {pagesMBNegotiationHistory}
+                </span>
+                <button className={GlobalStyle.navButton} onClick={handleNextPageMBNegotiationHistory} disabled={currentPage === pagesMBNegotiationHistory - 1}>
+                    <FaArrowRight />
+                </button>
+            </div>
+
+            {/* Settilement Plan table */}
+            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Payment Details</b></h2>
+
+            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+                <table className={GlobalStyle.table}>
+                    <thead className={GlobalStyle.thead}>
+                        <tr>
+                            <th className={GlobalStyle.tableHeader}>Date</th>
+                            <th className={GlobalStyle.tableHeader}>Paid Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Settled Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {dataInPagePaymentDetails.length > 0 ? (
+                            dataInPagePaymentDetails.map((log, index) => (
+                                <tr
+                                    key={index}
+                                    className={`${index % 2 === 0
+                                        ? "bg-white bg-opacity-75"
+                                        : "bg-gray-50 bg-opacity-50"
+                                        } border-b`}
+                                >
+                                    <td className={GlobalStyle.tableData}>
+                                        {log?.payment_Dtm &&
+                                            new Date(log.payment_Dtm).toLocaleString("en-GB", {
+                                                year: "numeric",
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                                // hour: "2-digit",
+                                                // minute: "2-digit",
+                                                // second: "2-digit",
+                                                // hour12: true,
+                                            })}
+                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>
+                                        {log?.payment &&
+                                            log.payment.toLocaleString("en-LK", {
+                                                style: "currency",
+                                                currency: "LKR",
+                                            })
+                                        }
+                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>
+                                        {log?.settle_balanced &&
+                                            log.settle_balanced.toLocaleString("en-LK", {
+                                                style: "currency",
+                                                currency: "LKR",
+                                            })
+                                        }
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="6" className="text-center py-4">
+                                    No data matching the criteria.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className={GlobalStyle.navButtonContainer}>
+                <button className={GlobalStyle.navButton} onClick={handlePrevPagePaymentDetails} disabled={currentPagePaymentDetails === 0}>
+                    <FaArrowLeft />
+                </button>
+                <span className="text-gray-700">
+                    Page {currentPagePaymentDetails + 1} of {pagesPaymentDetails}
+                </span>
+                <button className={GlobalStyle.navButton} onClick={handleNextPagePaymentDetails} disabled={currentPagePaymentDetails === pagesPaymentDetails - 1}>
+                    <FaArrowRight />
+                </button>
+            </div>
+
+            {/* Payment Details Table */}
+            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Requested Additional Details</b></h2>
+
+            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+                <table className={GlobalStyle.table}>
+                    <thead className={GlobalStyle.thead}>
+                        <tr>
+                            <th className={GlobalStyle.tableHeader}>Date</th>
+                            <th className={GlobalStyle.tableHeader}>Paid Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Settled Balance</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -254,26 +354,18 @@ const MediationBoardResponse = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
+                                    <td className={GlobalStyle.tableData}>{log.settlement_plan[0]?.installment_seq}</td>
                                     <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Installment_Settle_Amount &&
-                                            log.Installment_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Cumulative_Settle_Amount &&
-                                            log.Cumulative_Settle_Amount.toLocaleString("en-LK", {
+                                        {log?.settlement_plan[0]?.Installment_Settle_Amount &&
+                                            log.settlement_plan[0]?.Installment_Settle_Amount.toLocaleString("en-LK", {
                                                 style: "currency",
                                                 currency: "LKR",
                                             })
                                         }
                                     </td>
                                     <td className={GlobalStyle.tableData}>
-                                        {log?.Plan_Date &&
-                                            new Date(log.Plan_Date).toLocaleString("en-GB", {
+                                        {log?.settlement_plan[0]?.Plan_Date &&
+                                            new Date(log.settlement_plan[0]?.Plan_Date).toLocaleString("en-GB", {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
@@ -308,126 +400,10 @@ const MediationBoardResponse = () => {
                 </button>
             </div>
 
-            {/* Payment Details Table */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Received Settlement Plan</b></h2>
-
-            <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
-                    <div className="table">
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Settlement Phase</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.settlement_phase}</div>
-                        </div>
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Settlement Type</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.settlement_type}</div>
-                        </div>
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Settlement Created By</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.created_by}</div>
-                        </div>
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">Settlement Created DTM</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">
-                                {Settlementdata?.created_dtm &&
-                                    new Date(Settlementdata.created_dtm).toLocaleString("en-GB", {
-                                        year: "numeric",
-                                        month: "2-digit",
-                                        day: "2-digit",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        second: "2-digit",
-                                        hour12: true,
-                                    })}
-                            </div>
-                        </div>
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">DRC ID</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.drc_id}</div>
-                        </div>
-                        <div className="table-row">
-                            <div className="table-cell px-4 py-2 font-bold">RO ID</div>
-                            <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.ro_id}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className={`${GlobalStyle.tableContainer} mt-4`}>
-                <table className={GlobalStyle.table}>
-                    <thead className={GlobalStyle.thead}>
-                        <tr>
-                            <th className={GlobalStyle.tableHeader}>Installment Seq.</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount</th>
-                            <th className={GlobalStyle.tableHeader}>Plan Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {dataInPagesettlementPlanRecievedDetails.length > 0 ? (
-                            dataInPagesettlementPlanRecievedDetails.map((log, index) => (
-                                <tr
-                                    key={index}
-                                    className={`${index % 2 === 0
-                                        ? "bg-white bg-opacity-75"
-                                        : "bg-gray-50 bg-opacity-50"
-                                        } border-b`}
-                                >
-                                    <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Installment_Settle_Amount &&
-                                            log.Installment_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
-                                    <td className={GlobalStyle.tableData}>
-                                        {log?.Plan_Date &&
-                                            new Date(log.Plan_Date).toLocaleString("en-GB", {
-                                                year: "numeric",
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                second: "2-digit",
-                                                hour12: true,
-                                            })}
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="6" className="text-center py-4">
-                                    No data matching the criteria.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPagesettlementPlanRecievedDetails} disabled={currentPagesettlementPlanRecievedDetails === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPagesettlementPlanRecievedDetails + 1} of {pagessettlementPlanRecievedDetails}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPagesettlementPlanRecievedDetails} disabled={currentPagesettlementPlanRecievedDetails === pagessettlementPlanRecievedDetails - 1}>
-                    <FaArrowRight />
-                </button>
-            </div>
-
             <div>
                 <button
                     className={GlobalStyle.navButton}
-                    onClick={handleBackButton}
+                    onClick={() => navigate("/MediationBoard/MediationBoardCaseList")}
                 >
                     <FaArrowLeft />
                 </button>
