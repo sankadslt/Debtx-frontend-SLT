@@ -1,16 +1,13 @@
-/*Purpose:
-Created Date: 2025-04-07
-Created By: Janani Kumarasiri (jkktg001@gmail.com)
-Last Modified Date: 
-Modified By: 
-Last Modified Date: 
-Modified By: 
-Version: React v18
-ui number : 3.7
-Dependencies: Tailwind CSS
-Related Files: 
-Notes: This template uses Tailwind CSS */
-
+/* Purpose: This template is used for the 2.17.1 - Mediation Board Reaponse .
+Created Date: 2025-02-28
+Created By: sakumini (sakuminic@gmail.com)
+Modified By: Buthmi Mithara (buthmimithara1234@gmail.com)
+Modified By: Janani Kumarasiri (tgjkk001@gmail.com)
+Version: node 20
+ui number : 2.17.1
+Dependencies: tailwind css
+Related Files: (routes)
+Notes:The following page conatins the code for the Mediation Board Response Screen */
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -20,16 +17,19 @@ import { useParams } from "react-router-dom";
 import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
 import { Case_Details_for_DRC } from "../../services/case/CaseServices";
 import Swal from "sweetalert2";
+import { Accept_Non_Settlement_Request_from_Mediation_Board } from "../../services/case/CaseServices";
+import { getLoggedUserId } from "../../services/auth/authService";
 
 const MediationBoardResponse = () => {
     const [currentPage, setCurrentPage] = useState(0);
-    const [currentPageSettlementPlans, setCurrentPageSettlementPlans] = useState(0);
+    const [currentPageroRequests, setCurrentPageroRequests] = useState(0);
     const [currentPagePaymentDetails, setCurrentPagePaymentDetails] = useState(0);
     const [Casedata, setCaseData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const location = useLocation(); // Get the current location object
     const { caseID } = location.state || {}; // Get the case_id from the state parameters
     const { DRC_ID } = location.state || {}; // Get the drc_id from the state parameters
+    const [nonSettlementAccept, setNonSettlementAccept] = useState(false);
     const rowsPerPage = 5; // Number of rows per page
     const navigate = useNavigate();
 
@@ -79,6 +79,33 @@ const MediationBoardResponse = () => {
         );
     }
 
+    const handleSubmit = async () => {
+        try {
+            if (!nonSettlementAccept) {
+                Swal.fire("Error", "You must accept Non-Settlement before submitting.", "error");
+                return;
+            }
+
+            const received_by = getLoggedUserId();
+
+            setIsLoading(true);
+            const response = await Accept_Non_Settlement_Request_from_Mediation_Board(caseID, received_by);
+
+            if (response === 200) {
+                Swal.fire("Success", "Non-Settlement request accepted successfully!", "success");
+                navigate("/MediationBoard/MediationBoardCaseList");
+            } else {
+                Swal.fire("Error", "Failed to submit Non-Settlement acceptance.", "error");
+                setNonSettlementAccept(false);
+            }
+        } catch {
+            Swal.fire("Error", "Failed to submit Non-Settlement acceptance.", "error");
+            setNonSettlementAccept(false);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // variables need for response history table
     const MBNegotiationHistory = Casedata.mediation_board || [];
     const pagesMBNegotiationHistory = Math.ceil(MBNegotiationHistory.length / rowsPerPage);
@@ -99,7 +126,7 @@ const MediationBoardResponse = () => {
     };
 
     // variables need for payment  details table
-    const paymentDetails = Casedata.payment_details || [];
+    const paymentDetails = Casedata.money_transactions || [];
     const pagesPaymentDetails = Math.ceil(paymentDetails.length / rowsPerPage);
     const startIndexPaymentDetails = currentPagePaymentDetails * rowsPerPage;
     const endIndexPaymentDetails = startIndexPaymentDetails + rowsPerPage;
@@ -107,32 +134,32 @@ const MediationBoardResponse = () => {
 
     const handlePrevPagePaymentDetails = () => {
         if (currentPagePaymentDetails > 0) {
-            setCurrentPageSettlementPlans(currentPagePaymentDetails - 1);
+            setCurrentPagePaymentDetails(currentPagePaymentDetails - 1);
         }
     };
 
     const handleNextPagePaymentDetails = () => {
         if (currentPagePaymentDetails < pagesPaymentDetails - 1) {
-            setCurrentPageSettlementPlans(currentPagePaymentDetails + 1);
+            setCurrentPagePaymentDetails(currentPagePaymentDetails + 1);
         }
     };
 
     // varibles need for settlement plane table
-    const settlementPlans = Casedata.settlement_plans || [];
-    const pagesSettlementPlans = Math.ceil(settlementPlans.length / rowsPerPage);
-    const startIndexSettlementPlans = currentPageSettlementPlans * rowsPerPage;
-    const endIndexSettlementPlans = startIndexSettlementPlans + rowsPerPage;
-    const dataInPageSettlementPlans = settlementPlans.slice(startIndexSettlementPlans, endIndexSettlementPlans);
+    const roRequests = Casedata.ro_requests || [];
+    const pagesroRequests = Math.ceil(roRequests.length / rowsPerPage);
+    const startIndexroRequests = currentPageroRequests * rowsPerPage;
+    const endIndexroRequests = startIndexroRequests + rowsPerPage;
+    const dataInPageroRequests = roRequests.slice(startIndexroRequests, endIndexroRequests);
 
-    const handlePrevPageSettlementPlans = () => {
-        if (currentPageSettlementPlans > 0) {
-            setCurrentPageSettlementPlans(currentPageSettlementPlans - 1);
+    const handlePrevPageroRequests = () => {
+        if (currentPageroRequests > 0) {
+            setCurrentPageroRequests(currentPageroRequests - 1);
         }
     };
 
-    const handleNextPageSettlementPlans = () => {
-        if (currentPageSettlementPlans < pagesSettlementPlans - 1) {
-            setCurrentPageSettlementPlans(currentPageSettlementPlans + 1);
+    const handleNextPageroRequests = () => {
+        if (currentPageroRequests < pagesSettlementPlans - 1) {
+            setCurrentPageroRequests(currentPageroRequests + 1);
         }
     };
 
@@ -191,6 +218,33 @@ const MediationBoardResponse = () => {
                     </div>
                 </div>
             </div>
+
+            {Casedata.case_current_status === "MB Fail with Pending Non-Settlement" && (
+                <div className="flex gap-4 mt-4 mb-4 justify-center">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="font-semibold text-lg">Non-Settlement Accept:</span>
+                        <label className="inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
+                                checked={nonSettlementAccept}
+                                onChange={() => setNonSettlementAccept(!nonSettlementAccept)}
+                            />
+                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            <span className="ms-3 text-sm font-medium">{nonSettlementAccept ? "Yes" : "No"}</span>
+                        </label>
+                    </div>
+
+                    <div className="mt-8 flex justify-end max-w-4xl">
+                        <button
+                            onClick={handleSubmit}
+                            className={`${GlobalStyle.buttonPrimary} px-8`}
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Response History table */}
             <h2 className={`${GlobalStyle.headingMedium}`}><b>Mediation Board Negotiation History</b></h2>
@@ -340,13 +394,13 @@ const MediationBoardResponse = () => {
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Date</th>
-                            <th className={GlobalStyle.tableHeader}>Paid Amount</th>
-                            <th className={GlobalStyle.tableHeader}>Settled Balance</th>
+                            <th className={GlobalStyle.tableHeader}>Request</th>
+                            <th className={GlobalStyle.tableHeader}>Remark</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {dataInPageSettlementPlans.length > 0 ? (
-                            dataInPageSettlementPlans.map((log, index) => (
+                        {dataInPageroRequests.length > 0 ? (
+                            dataInPageroRequests.map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
@@ -354,18 +408,9 @@ const MediationBoardResponse = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.settlement_plan[0]?.installment_seq}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.settlement_plan[0]?.Installment_Settle_Amount &&
-                                            log.settlement_plan[0]?.Installment_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
                                     <td className={GlobalStyle.tableData}>
-                                        {log?.settlement_plan[0]?.Plan_Date &&
-                                            new Date(log.settlement_plan[0]?.Plan_Date).toLocaleString("en-GB", {
+                                        {log?.created_dtm &&
+                                            new Date(log.created_dtm).toLocaleString("en-GB", {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
@@ -375,6 +420,8 @@ const MediationBoardResponse = () => {
                                                 // hour12: true,
                                             })}
                                     </td>
+                                    <td className={GlobalStyle.tableData}>{log.ro_request}</td>
+                                    <td className={GlobalStyle.tableData}>{log.request_remark}</td>
                                 </tr>
                             ))
                         ) : (
@@ -389,13 +436,13 @@ const MediationBoardResponse = () => {
             </div>
 
             <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPageSettlementPlans} disabled={currentPageSettlementPlans === 0}>
+                <button className={GlobalStyle.navButton} onClick={handlePrevPageroRequests} disabled={currentPageroRequests === 0}>
                     <FaArrowLeft />
                 </button>
                 <span className="text-gray-700">
-                    Page {currentPageSettlementPlans + 1} of {pagesSettlementPlans}
+                    Page {currentPageroRequests + 1} of {pagesroRequests}
                 </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPageSettlementPlans} disabled={currentPageSettlementPlans === pagesSettlementPlans - 1}>
+                <button className={GlobalStyle.navButton} onClick={handleNextPageroRequests} disabled={currentPageroRequests === pagesroRequests - 1}>
                     <FaArrowRight />
                 </button>
             </div>

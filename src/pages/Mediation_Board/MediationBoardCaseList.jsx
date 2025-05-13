@@ -1,19 +1,19 @@
-/*Purpose: This template is used for the SLT Commission List1 (8.1).
-Created Date: 2025-03-13
-Created By: U.H.Nandali Linara (nadalilinara5@gmail.com)
-Modified By : Lasandi Randini (randini-im20057@stu.kln.ac.lk)
-Last Modified Date: 2025-03-14
-Version: node 11
-ui number :8.1
+/* Purpose: This template is used for the 2.17 - Mediation Board case list .
+Created Date: 2025-02-27
+Created By: sakumini (sakuminic@gmail.com)
+Modified By: Buthmi mithara (buthmimithara1234@gmail.com)
+Modified By: Janani Kumrasiri (tgjkk001@gmail.com)
+Version: node 20
+ui number : 2.17
 Dependencies: tailwind css
-Related Files:  router.js.js (routes) */
+Related Files: (routes)
+Notes:The following page conatins the code for the Mediation Board case list Screen */
 
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
-import { List_All_Commission_Cases } from "../../services/commission/commissionService";
 import { commission_type_cases_count } from "../../services/commission/commissionService";
 import { Active_DRC_Details } from "../../services/drc/Drc";
 import { Create_task_for_Download_Commision_Case_List } from "../../services/commission/commissionService";
@@ -32,9 +32,9 @@ import MB_Settle_Open_Pending from "/src/assets/images/Mediation_Board/MB Settle
 import MB_Fail_with_Pending_Non_Settlement from "/src/assets/images/Mediation_Board/MB Fail with Pending Non Settlement.png";
 
 const MediationBoardCaseList = () => {
-  const [selectValue, setSelectValue] = useState("Account No");
-  const [inputFilter, setInputFilter] = useState("");
-  const [phase, setPhase] = useState("");
+  // const [selectValue, setSelectValue] = useState("Account No");
+  // const [inputFilter, setInputFilter] = useState("");
+  // const [phase, setPhase] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [data, setData] = useState([]);
@@ -42,18 +42,18 @@ const MediationBoardCaseList = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [drcNames, setDrcNames] = useState([]);
   const [selectedDrcId, setSelectedDrcId] = useState("");
-  const [commissionCounts, setCommissionCounts] = useState({
-    totalCount: 0,
-    pendingCount: 0,
-    unresolvedCount: 0,
-  });
+  // const [commissionCounts, setCommissionCounts] = useState({
+  //   totalCount: 0,
+  //   pendingCount: 0,
+  //   unresolvedCount: 0,
+  // });
   const [currentPage, setCurrentPage] = useState(0);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [dateError, setDateError] = useState("");
-  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  // const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [commissionType, setCommissionType] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [caseId, setCaseId] = useState("");
@@ -443,20 +443,20 @@ const MediationBoardCaseList = () => {
     setFilteredData([]); // Clear filtered data
   };
 
-  const HandleCreateTaskDownloadCommissiontList = async () => {
+  // const HandleCreateTaskDownloadCommissiontList = async () => {
 
-    const userData = await getLoggedUserId(); // Assign user ID
+  //   const userData = await getLoggedUserId(); // Assign user ID
 
-    if (!fromDate || !toDate) {
-      Swal.fire({
-        title: "Warning",
-        text: "Please select From Date and To Date.",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-      return;
-    }
+  //   if (!fromDate || !toDate) {
+  //     Swal.fire({
+  //       title: "Warning",
+  //       text: "Please select From Date and To Date.",
+  //       icon: "warning",
+  //       allowOutsideClick: false,
+  //       allowEscapeKey: false
+  //     });
+  //     return;
+  //   }
 
     // if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
     //   Swal.fire({
@@ -483,18 +483,18 @@ const MediationBoardCaseList = () => {
     //   return;
     // }
 
-    setIsCreatingTask(true);
-    try {
-      const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
-      if (response === "success") {
-        Swal.fire(response, `Task created successfully!`, "success");
-      }
-    } catch (error) {
-      Swal.fire("Error", error.message || "Failed to create task.", "error");
-    } finally {
-      setIsCreatingTask(false);
-    }
-  };
+  //   setIsCreatingTask(true);
+  //   try {
+  //     const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
+  //     if (response === "success") {
+  //       Swal.fire(response, `Task created successfully!`, "success");
+  //     }
+  //   } catch (error) {
+  //     Swal.fire("Error", error.message || "Failed to create task.", "error");
+  //   } finally {
+  //     setIsCreatingTask(false);
+  //   }
+  // };
 
   const navigate = useNavigate();
 
