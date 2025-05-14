@@ -115,8 +115,8 @@ const AssignDRC = () => {
   useEffect(() => {
     const displayData = async () => {
       const effectiveServiceType = serviceType ; // Use "PEO TV" as default
-      console.log("Service Type:", serviceType);
-      console.log("Effective Service Type:", effectiveServiceType);
+    //  console.log("Service Type:", serviceType);
+   //   console.log("Effective Service Type:", effectiveServiceType);
       try {
         const drcDetails = await count_cases_rulebase_and_arrears_band(
           effectiveServiceType
@@ -125,7 +125,7 @@ const AssignDRC = () => {
 
         setTotal(total);
         setBandsAndCounts(bandsAndCounts);
-        console.log("bandsAndCounts:", bandsAndCounts);
+      //  console.log("bandsAndCounts:", bandsAndCounts);
       } catch (error) {
         console.error("Failed to fetch and display data:", error);
       }
@@ -145,7 +145,7 @@ const AssignDRC = () => {
   // Function to handle adding a new entry
   const handleAdd = () => {
     const { drc, drckey, casesAmount } = newEntry;
-    console.log("New Entry:", newEntry);
+   // console.log("New Entry:", newEntry);
     const numericCasesAmount = parseInt(casesAmount, 10);
 
     if (totalDistributedAmount + numericCasesAmount > arrearsbandTotal) {
@@ -194,7 +194,7 @@ const AssignDRC = () => {
   // Function to handle changes in the arrears band dropdown
   const handleArrearsBandChange = (e) => {
     const selectedBand = e.target.value;
-    console.log("Selected Band:", selectedBand);
+   // console.log("Selected Band:", selectedBand);
     setSelectedBand(selectedBand);
 
     const selectedBandCount = bandsAndCounts[selectedBand];
@@ -203,7 +203,7 @@ const AssignDRC = () => {
     const band = arrearsBands.find((band) => band.value === selectedBand);
     if (band) {
       setSelectedBandKey(band.key);
-      console.log("Selected Band Key:", band.key);
+     // console.log("Selected Band Key:", band.key);
     }
   };
   
@@ -225,11 +225,11 @@ const AssignDRC = () => {
       created_by: userId,
     };
 
-    console.log("Request Data:", requestData);
+   // console.log("Request Data:", requestData);
 
     try {
       const response = await Case_Distribution_Among_Agents(requestData); // Use 'await' here
-      console.log("Response:", response);
+     // console.log("Response:", response);
 
       Swal.fire({
         icon: "success",
