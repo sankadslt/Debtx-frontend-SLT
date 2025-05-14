@@ -153,6 +153,8 @@ export default function DirectLODSendingIncident() {
       return;
     }
 
+    
+
     if(!source_type && !fromDate && !toDate){
       Swal.fire({
         title: 'Warning',
@@ -163,6 +165,18 @@ export default function DirectLODSendingIncident() {
       });
       return;
     }
+
+    if (!fromDate && !toDate ) {
+      Swal.fire({
+        title: 'Warning',
+        text: 'Please select a date range',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
+
     if ((fromDate && !toDate) || (!fromDate && toDate)) {
       Swal.fire({
         title: "Incomplete Date Range",
@@ -230,7 +244,7 @@ export default function DirectLODSendingIncident() {
       const openTaskCount = await Open_Task_Count_Forward_Direct_LOD();
       if (openTaskCount > 0) {
         Swal.fire({
-          title: "Warning",
+          title: "Action Blocked",
           text: "A task is already in progress.",
           icon: "warning",
           confirmButtonText: "OK",
@@ -276,7 +290,7 @@ export default function DirectLODSendingIncident() {
       }
       const result = await Swal.fire({
         title: "Confirm",
-        text: "Are you sure you need to convert all incidents as Direct LOD cases?",
+        text: `Are you sure you want to convert ${selectedRows.length} selected incidents as Direct LOD cases?`,
         icon: "info",
         showCancelButton: true,
         confirmButtonText: "Create Task",
@@ -289,7 +303,7 @@ export default function DirectLODSendingIncident() {
         const openTaskCount = await Open_Task_Count_Forward_Direct_LOD();
         if (openTaskCount > 0) {
           Swal.fire({
-            title: "Warning",
+            title: "Action Blocked",
             text: "A task is already in progress.",
             icon: "warning",
             confirmButtonText: "OK",
@@ -297,10 +311,26 @@ export default function DirectLODSendingIncident() {
           });
           return;
         }
-        if (filteredData.length > 10) {
+        if ( selectedRows.length > 5) {
+          const confirmTask = await Swal.fire({
+              title: "Info",
+              text: "More than 5 records selected. Do you want to create a task instead?",
+              icon: "info",
+              showCancelButton: true,
+              confirmButtonText: "Create Task",
+              cancelButtonText: "Cancel",
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#d33"
+            });
+
+        if (!confirmTask.isConfirmed) return;
+          
+
           const parameters = {
             Status: "Direct LOD",
-            Inncident_Ids: selectedRows,
+           // Inncident_Ids: selectedRows,
+           Created_Date : new Date().toISOString().split("T")[0],
+
           };
     
           const response = await Create_Task_Forward_Direct_LOD(parameters);
@@ -314,9 +344,11 @@ export default function DirectLODSendingIncident() {
             });
           }
         } else {
+          
           for (const row of selectedRows) {
-            await Forward_Direct_LOD(row);
+            await Forward_Direct_LOD(row); 
           }
+
           Swal.fire({
             title: "Success",
             text: "Successfully forwarded the direct LOD incidents",
@@ -332,7 +364,7 @@ export default function DirectLODSendingIncident() {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "Internal server error",
+        text: error.message || "Internal server error",
         icon: "error",
         confirmButtonText: "OK",
         confirmButtonColor: "#d33"
