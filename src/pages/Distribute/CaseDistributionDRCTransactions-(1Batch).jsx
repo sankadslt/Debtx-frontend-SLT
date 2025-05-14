@@ -17,33 +17,61 @@ import {
   Create_Task_For_case_distribution_transaction_array,
 } from "/src/services/case/CaseServices.js";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
-import minus from "/src/assets/images/minorbw.png";
-import plus from "/src/assets/images/plusbw.png";
+import minus from "/src/assets/images/distribution/minorbw.png";
+import plus from "/src/assets/images/distribution/plusbw.png";
 import Swal from "sweetalert2";
 
-export default function CaseDistributionDRCTransactions1Batch() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { BatchID, Batchseq } = location.state || {};
-  console.log("BatchID", BatchID);
-  console.log("Batchseq", Batchseq);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [transactions, setTransactions] = useState([]);
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
+export default function CaseDistributionDRCTransactions1Batch() {
+  const navigate = useNavigate(); // usestate for routing
+  const location = useLocation(); // usestate for routing
+  const { BatchID, Batchseq } = location.state || {}; // Get BatchID and Batchseq from location state
+  // console.log("BatchID", BatchID); 
+  // console.log("Batchseq", Batchseq);
+  const [searchQuery, setSearchQuery] = useState(""); // usestate for search query
+  const [transactions, setTransactions] = useState([]); // usestate for transactions
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+    // Role-Based Buttons
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+  
+      try {
+        let decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+  
+        if (decoded.exp < currentTime) {
+          refreshAccessToken().then((newToken) => {
+            if (!newToken) return;
+            const newDecoded = jwtDecode(newToken);
+            setUserRole(newDecoded.role);
+          });
+        } else {
+          setUserRole(decoded.role);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }, []);
+
+  // UseEffect to fetch data from the API
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         const data = {
-          case_distribution_batch_id: BatchID || 1,
-          batch_seq: Batchseq || 2,
+          case_distribution_batch_id: BatchID ,
+          batch_seq: Batchseq ,
         };
-        console.log("This is the payloadData", data);
+       // console.log("This is the payloadData", data);
         const response = await list_distribution_array_of_a_transaction(data);
         
 
         if (response.status === "success") {
           setTransactions(response.data);
-          console.log("Response", response);
+         // console.log("Response", response);
         } else {
           setError("No data found.");
         }
@@ -60,18 +88,18 @@ export default function CaseDistributionDRCTransactions1Batch() {
     const userId = await getLoggedUserId();
 
     const payload = {
-      case_distribution_batch_id: BatchID || 2,
-      batch_seq: Batchseq || 2,
+      case_distribution_batch_id: BatchID ,
+      batch_seq: Batchseq ,
       Created_By: userId,
     };
-    console.log("Payload", payload);
+    //console.log("Payload", payload);
     try {
       const response =
         await Create_Task_For_case_distribution_transaction_array(payload);
-      console.log("Response", response);
+     // console.log("Response", response);
 
       if (response.status === "success") {
-        console.log("Task created successfully");
+       // console.log("Task created successfully");
 
         Swal.fire({
           icon: "success",
@@ -103,7 +131,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
       });
     }
   };
-
+  // Function to handle icon click and navigate to the respective page
   const handleoniconclick = () => {
     navigate("/pages/Distribute/CaseDistributionDRCTransactions-1Batch", {
       state: { BatchID: BatchID},
@@ -115,7 +143,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
     (batch) => batch.array_of_distributions || []
   );
 
-  console.log("allDistributions", allDistributions);
+  //console.log("allDistributions", allDistributions);
   //search function
   const filteredData = allDistributions.filter((row) =>
     Object.values(row)
@@ -189,7 +217,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
         </div>
-        <div className={GlobalStyle.tableContainer}>
+        {/* <div className={GlobalStyle.tableContainer}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
@@ -257,7 +285,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
                 ) : (
                   <tr>
                     <td colSpan="5" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
-                      {/* No data found message */}
+                     
                       No data found
                     </td>
                   </tr>
@@ -265,27 +293,146 @@ export default function CaseDistributionDRCTransactions1Batch() {
 
             </tbody>
           </table>
-        </div>
+        </div> */}
+
+        { Batchseq === 1 ? (
+          <div className="flex items-center justify-center mb-4">
+              <div className={GlobalStyle.cardContainer}>
+                <table className={GlobalStyle.table}>
+                  <thead className={GlobalStyle.thead}>
+                    <tr>
+                      <th scope="col" className={GlobalStyle.tableHeader}>
+                        DRC
+                      </th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>
+                        Distribution Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData.length > 0 ? (
+                      filteredData.map((item, index) => (
+                        <tr
+                          //key={item.date}
+                          key={`${item.date}-${index}`}
+                          className={
+                            index % 2 === 0
+                              ? GlobalStyle.tableRowEven
+                              : GlobalStyle.tableRowOdd
+                          }
+                        >
+                          <td className={GlobalStyle.tableData}>{item.drc}</td>
+                          <td className={GlobalStyle.tableData}>
+                            {item.rulebase_count}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
+                          No data found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div> 
+          </div>
+        ) : (
+          <div className={GlobalStyle.tableContainer}>
+            <table className={GlobalStyle.table}>
+              <thead className={GlobalStyle.thead}>
+                <tr>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    RTOM
+                  </th>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    DRC 1
+                  </th>
+                  <th scope="col" className={`${GlobalStyle.tableHeader} flex justify-center items-center`}>
+                    <img src={minus} width={17} height={17} alt="Min" />
+                  </th>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    DRC 2
+                  </th>
+                  <th scope="col" className={`${GlobalStyle.tableHeader} flex justify-center items-center`}>
+                    <img src={plus} width={17} height={17} alt="Plus" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.length > 0 ? (
+                  filteredData.map((
+                    item,
+                    index
+                  ) => (
+                    <tr
+                      // key={item.date}
+                      key={`${item.date}-${index}`}
+                      className={
+                        index % 2 === 0
+                          ? GlobalStyle.tableRowEven
+                          : GlobalStyle.tableRowOdd
+                      }
+                    >
+                      <td className={GlobalStyle.tableData}>{item.rtom}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.minus_drc}
+                      </td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.minus_rulebase_count}
+                      </td>
+                      <td className={GlobalStyle.tableData}>{item.plus_drc}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {item.plus_rulebase_count}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
+                      No data found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
       {/* Button */}
-
+      { filteredData.length > 0 && (
       <div className="flex justify-end">
         {/* Button on the right */}
-        <button
+
+        <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                onClick={handleonclick}
+                className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px] flex items-center `}
+              >
+                <FaDownload className="mr-2" />
+                Create task and let me know
+              </button>
+              )}
+          </div>
+        {/* <button
           onClick={handleonclick}
           className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px] flex items-center `}
         >
           <FaDownload className="mr-2" />
           Create task and let me know
-        </button>
+        </button> */}
       </div>
+      )}
       
-      <div className="flex justify-start mt-">
+      <div className="flex justify-start mt-2">
       <button className={GlobalStyle.buttonPrimary} onClick={handleoniconclick}>
         <FaArrowLeft className="mr-2" />
         </button>
       </div>
       
     </div>
+          
   );
 }
