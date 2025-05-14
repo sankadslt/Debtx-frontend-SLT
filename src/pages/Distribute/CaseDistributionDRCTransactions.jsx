@@ -221,10 +221,20 @@ const applyFilters = async () => {
       requestdata.drc_commision_rule = selectedService;
     }
 
-  //  console.log("Filtered Request Data:", requestdata);;
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+      Swal.fire({
+        title: "Error",
+        text: "Please select both start and end dates.",
+        icon: "error",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+   //console.log("Filtered Request Data:", requestdata);;
 
     try {
       // Send the filtered data to the backend
+
       const response = await List_Case_Distribution_DRC_Summary(requestdata);
       
       if (Array.isArray(response)) {
@@ -416,7 +426,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
       });
       
       applyFilters(); // Refresh the data after forwarding
-      
+
     } catch (error){
       console.error (error)
       const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
