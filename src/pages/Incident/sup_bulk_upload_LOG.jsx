@@ -20,9 +20,15 @@ import Swal from "sweetalert2";
 import OpenIcon from "../../assets/images/incidents/Incident_Done.png";
 import InProgressIcon from "../../assets/images/incidents/Incident_InProgress.png";
 import RejectIcon from "../../assets/images/incidents/Incident_Reject.png";
+import uploadopen from "../../assets/images/incidents/Upload_Open.png";
+import uploadinprogress from "../../assets/images/incidents/Upload_InProgress.png";
+import uploadcomplete from "../../assets/images/incidents/Upload_Complete.png";
+import uploadfailerd from "../../assets/images/incidents/Upload_Failed.png";
+
 import {List_Transaction_Logs_Upload_Files} from "../../services/Incidents/incidentService.js";
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from "react-tooltip";
+
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
@@ -38,12 +44,15 @@ import { FaArrowUp } from 'react-icons/fa';
 const getStatusIcon = (status) => {
     switch (status) {
         case "Open":
-            return OpenIcon;
+            return uploadopen;
 
         case "InProgress":
-            return InProgressIcon;
+            return uploadinprogress;
         case "Reject":
-            return RejectIcon;
+            return uploadfailerd;
+        case "Complete":
+            return uploadcomplete;
+
         default:
             return null;
     }
