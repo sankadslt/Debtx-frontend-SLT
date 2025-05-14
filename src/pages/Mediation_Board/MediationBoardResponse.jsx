@@ -13,8 +13,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import { useParams } from "react-router-dom";
-import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
 import { Case_Details_for_DRC } from "../../services/case/CaseServices";
 import Swal from "sweetalert2";
 import { Accept_Non_Settlement_Request_from_Mediation_Board } from "../../services/case/CaseServices";
@@ -37,8 +35,6 @@ const MediationBoardResponse = () => {
     const fetchCaseDetails = async () => {
         setIsLoading(true);
         try {
-            // console.log("caseId", caseID);
-            // console.log("DRC_ID", DRC_ID);
             const CaseDetails = await Case_Details_for_DRC(caseID, DRC_ID);
             if (CaseDetails) {
                 setCaseData(CaseDetails);
@@ -79,6 +75,7 @@ const MediationBoardResponse = () => {
         );
     }
 
+    // handle submit button of non-settlement accept
     const handleSubmit = async () => {
         try {
             if (!nonSettlementAccept) {
@@ -219,6 +216,7 @@ const MediationBoardResponse = () => {
                 </div>
             </div>
 
+            {/* Non-settlement accept checkbox */}
             {Casedata.case_current_status === "MB Fail with Pending Non-Settlement" && (
                 <div className="flex gap-4 mt-4 mb-4 justify-center">
                     <div className="flex items-center gap-2 mb-4">
@@ -246,7 +244,7 @@ const MediationBoardResponse = () => {
                 </div>
             )}
 
-            {/* Response History table */}
+            {/* Mediation Board Negotiation History table */}
             <h2 className={`${GlobalStyle.headingMedium}`}><b>Mediation Board Negotiation History</b></h2>
 
             <div className={`${GlobalStyle.tableContainer} mt-4`}>
@@ -311,7 +309,7 @@ const MediationBoardResponse = () => {
                 </button>
             </div>
 
-            {/* Settilement Plan table */}
+            {/* Payment Details table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Payment Details</b></h2>
 
             <div className={`${GlobalStyle.tableContainer} mt-4`}>
@@ -386,7 +384,7 @@ const MediationBoardResponse = () => {
                 </button>
             </div>
 
-            {/* Payment Details Table */}
+            {/* Request Additional Details Table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Requested Additional Details</b></h2>
 
             <div className={`${GlobalStyle.tableContainer} mt-4`}>
