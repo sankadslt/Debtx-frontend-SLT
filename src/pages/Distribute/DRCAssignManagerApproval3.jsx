@@ -24,16 +24,22 @@ import one from "/src/assets/images/imagefor1.a.13(one).png";
 import Swal from "sweetalert2";
 import { use } from "react";
 import { Tooltip } from "react-tooltip";
+import { useNavigate } from "react-router-dom";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 
 export default function DRCAssignManagerApproval3() {
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]); // State for filtered data
   const [drcFilter, setDrcFilter] = useState(""); // DRC filter state
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [ approverstatus , setApproverStatus] = useState(""); // Approver status state]
+  const [startDate, setStartDate] = useState(null); // Start date state
+  const [endDate, setEndDate] = useState(null); // End date state
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const navigate = useNavigate(); // For navigation
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
@@ -42,7 +48,31 @@ export default function DRCAssignManagerApproval3() {
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
 
-  // Handle date change
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+
+  // Handle start date change
   const handlestartdatechange = (date) => {
 
 
@@ -62,6 +92,7 @@ export default function DRCAssignManagerApproval3() {
 
   };
 
+  // Handle end date change
   const handleenddatechange = (date) => {
     if (startDate && date < startDate) {
       Swal.fire({
@@ -82,17 +113,18 @@ export default function DRCAssignManagerApproval3() {
 
   }
 
+  // Fetch data on component mount
   useEffect(() => {
-
+    // Fetch data from the API
     const fetchDRCData = async () => {
       const userId = await getLoggedUserId();
       const payload = {
         approved_deligated_by: userId,
       };
-      console.log("Request Payload:", payload);
+     // console.log("Request Payload:", payload);
       try {
         const response = await List_DRC_Assign_Manager_Approval(payload);
-        console.log("Response:", response);
+      //  console.log("Response:", response);
         setFilteredData(response);
       } catch (error) {
         console.error("Error fetching DRC assign manager approval:", error);
@@ -102,7 +134,7 @@ export default function DRCAssignManagerApproval3() {
   }, []);
 
 
-  
+    // Function to check date difference and show alert if more than 1 month
     const checkdatediffrence = (startDate, endDate) => {
       const start = new Date(startDate).getTime();
       const end = new Date(endDate).getTime();
@@ -127,7 +159,7 @@ export default function DRCAssignManagerApproval3() {
             handleApicall(startDate, endDate);
           } else {
             setEndDate(null);
-            console.log("EndDate cleared");
+           // console.log("EndDate cleared");
           }
         }
         );
@@ -135,6 +167,7 @@ export default function DRCAssignManagerApproval3() {
       }
     };
 
+    // Function to handle API call for creating task when the date range exceeds 1 month
     const handleApicall = async (startDate, endDate) => {
       try {
         const userId = await getLoggedUserId();
@@ -144,10 +177,10 @@ export default function DRCAssignManagerApproval3() {
           Created_By: userId,
         };
     
-        console.log("Filtered Request Payload:", payload);
+       // console.log("Filtered Request Payload:", payload);
     
         const data = await Create_task_for_DRC_Assign_Manager_Approval(payload);
-        console.log("Response:", data);
+       // console.log("Response:", data);
     
         Swal.fire({
           icon: "success",
@@ -183,6 +216,9 @@ export default function DRCAssignManagerApproval3() {
     if (drcFilter) {
       payload.approver_type = drcFilter;
     }
+    if (approverstatus) {
+      payload.approve_status = approverstatus;
+    }
     if (startDate) {
       payload.date_from = startDate;
     }
@@ -192,11 +228,11 @@ export default function DRCAssignManagerApproval3() {
     const userId = await getLoggedUserId();
     payload.approved_deligated_by = userId;
 
-    console.log("Filtered Request Data:", payload);
+    //console.log("Filtered Request Data:", payload);
 
     try {
       const response = await List_DRC_Assign_Manager_Approval(payload);
-      console.log("Filtered Response Data:", response);
+     // console.log("Filtered Response Data:", response);
       setFilteredData(response);
     } catch (error) {
       console.error("Error fetching DRC assign manager approval:", error);
@@ -208,16 +244,17 @@ export default function DRCAssignManagerApproval3() {
     setDrcFilter("");
     setStartDate(null);
     setEndDate(null);
+    setApproverStatus("");
     
     const filterclear = async () => {
       const userId = await getLoggedUserId();
       const payload = {
         approved_deligated_by: userId,
       };
-      console.log("Request Payload:", payload);
+     // console.log("Request Payload:", payload);
       try {
         const response = await List_DRC_Assign_Manager_Approval(payload);
-        console.log("Response:", response);
+      //  console.log("Response:", response);
         setFilteredData(response);
       } catch (error) {
         console.error("Error fetching DRC assign manager approval:", error);
@@ -225,6 +262,7 @@ export default function DRCAssignManagerApproval3() {
     };
     filterclear();
   };
+
   // Handle pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
@@ -243,7 +281,8 @@ export default function DRCAssignManagerApproval3() {
           .includes(searchQuery.toLowerCase())
       )
     : currentData;
-console.log("Filtered Data:", filteredDataBySearch);
+  //console.log("Filtered Data:", filteredDataBySearch);
+
   //const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
 
@@ -260,6 +299,7 @@ console.log("Filtered Data:", filteredDataBySearch);
   //   }
   // };
 
+  // Function to handle row selection
   const handleRowSelect = (caseid) => {
     const newSelectedRows = new Set(selectedRows);
 
@@ -288,14 +328,16 @@ console.log("Filtered Data:", filteredDataBySearch);
     // }
   };
 
+  // Function to handle approve type change
   const handleOnApproveTypeChange = (e) => {
     setDrcFilter(e.target.value);
   };
 
+  // Function to handle approve button click
   const onApproveButtonClick = async ( ) => {
     const userId = await getLoggedUserId();
     const batchIds = Array.from(selectedRows);
-    console.log("Selected batch IDs:", batchIds);
+   // console.log("Selected batch IDs:", batchIds);
     if (batchIds.length === 0) {
       Swal.fire({
         icon: "warning",
@@ -311,10 +353,10 @@ console.log("Filtered Data:", filteredDataBySearch);
       
       const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
 
-      return status === "Open assign agent" || status === "Case Withdrawed" || status === "Case Abandoned" || status === "Pending Write Off" || status === "Commissioned";
+      return status === "Approve" ;
 
   });
-  console.log("Already Approved:", alreadyApproved);
+  //console.log("Already Approved:", alreadyApproved);
     if (alreadyApproved) {
       Swal.fire({
         icon: "warning",
@@ -333,7 +375,7 @@ console.log("Filtered Data:", filteredDataBySearch);
       return status === "Reject";
 
     });
-    console.log("Rejected:", rejected);
+    //console.log("Rejected:", rejected);
 
     if (rejected) {
       Swal.fire({
@@ -370,10 +412,10 @@ console.log("Filtered Data:", filteredDataBySearch);
       approver_reference: batchIds,
       approved_by: userId,
     };
-    console.log("Approve payload:", payload);
+    //console.log("Approve payload:", payload);
     try {
       const response = await Approve_DRC_Assign_Manager_Approval(payload);
-      console.log("Approve response:", response);
+      //console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -399,10 +441,11 @@ console.log("Filtered Data:", filteredDataBySearch);
     }
   };
 
+  // Function to handle reject button click
   const onRejectButtonClick = async () => {
     const userId = await getLoggedUserId();
     const batchIds = Array.from(selectedRows);
-    console.log("Selected batch IDs:", batchIds);
+   // console.log("Selected batch IDs:", batchIds);
     if (batchIds.length === 0) {
       Swal.fire({
         icon: "warning",
@@ -418,10 +461,10 @@ console.log("Filtered Data:", filteredDataBySearch);
 
       const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
 
-      return status === "Open assign agent" || status === "Case Withdrawed" || status === "Case Abandoned" || status === "Pending Write Off" || status === "Commissioned";
+      return status === "Approve";
 
   });
-  console.log("Already Approved:", alreadyApproved);
+  //console.log("Already Approved:", alreadyApproved);
     if (alreadyApproved) {
       Swal.fire({
         icon: "warning",
@@ -440,7 +483,7 @@ console.log("Filtered Data:", filteredDataBySearch);
       return status === "Reject";
 
     });
-    console.log("Rejected:", rejected);
+    //console.log("Rejected:", rejected);
 
     if (rejected) {
       Swal.fire({
@@ -472,10 +515,10 @@ console.log("Filtered Data:", filteredDataBySearch);
       approver_references: batchIds,
       approved_by: userId,
     };
-    console.log("Approve payload:", payload);
+    //console.log("Approve payload:", payload);
     try {
       const response = await Reject_DRC_Assign_Manager_Approval(payload);
-      console.log("Approve response:", response);
+    //  console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -496,34 +539,39 @@ console.log("Filtered Data:", filteredDataBySearch);
         icon: "error",
         title: "Error",
         text: errorMessage,
-        confirmButtonColor: "#f1c40f",
+        confirmButtonColor: "#d33",
       });
     }
   };
 
+  // Function to handle create task button click
   const onCreateTask = async () => {
     const userId = await getLoggedUserId();
-    const batchIds = Array.from(selectedRows);
-    console.log("Selected batch IDs:", batchIds);
-    if (batchIds.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please select at least one record .",
-        confirmButtonColor: "#f1c40f",
-      });
-      return;
-    }
+    //const batchIds = Array.from(selectedRows);
+    //console.log("Selected batch IDs:", batchIds);
+    // if (batchIds.length === 0) {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Warning",
+    //     text: "Please select at least one record .",
+    //     confirmButtonColor: "#f1c40f",
+    //   });
+    //   return;
+    // }
     const payload = {
-      approver_references: batchIds,
+      //approver_references: batchIds, // meka galevva  drop down vala select karana tika yavanna one - check backend
+      approver_type: drcFilter,
+      date_from: startDate,
+      date_to: endDate,
+      approver_status: approverstatus,
       Created_By: userId,
     };
-    console.log("Approve payload:", payload);
+    //console.log("Approve payload:", payload);
     try {
       const response = await Create_task_for_DRC_Assign_Manager_Approval(
         payload
       );
-      console.log("Approve response:", response);
+      //console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -545,31 +593,53 @@ console.log("Filtered Data:", filteredDataBySearch);
         icon: "error",
         title: "Error",
         text: errorMessage,
-        confirmButtonColor: "#f1c40f",
+        confirmButtonColor: "#d33",
       });
     }
   };
 
+  // Function to handle table icon click
   const onTableIconClick = (item) => {
+
+    const formattedParameters = Object.entries(item.parameters)
+    .map(([key, value]) => `  "${key}": ${JSON.stringify(value)}`)
+    .join('\n');
+
     Swal.fire({
+      
       title: "Row Parameters",
-      html: `<pre style="text-align: center; white-space: pre-wrap;">${JSON.stringify(item.parameters, null, 2)}</pre>`,
+      html: `
+      <div style="margin-top: -15px; font-size: 15px; color: #000; margin-bottom: 10px;">
+        <strong>${item.approver_type}</strong>
+      </div>
+      <pre style="text-align: center; white-space: pre-wrap;">${formattedParameters}</pre>
+    `,
       icon: "info",
       confirmButtonText: "Close",
       confirmButtonColor: "#d33",
-      width: "500px", // Adjust width if needed
+      width: "500px",
     });
   };
+
+  // Function to handle hover button click of the table 
+  const onhoverbuttonclick = (caseid) => {
+    navigate("/Incident/Case_Details", {
+      state: { CaseID: caseid }, // Pass the case ID as a parameter
+    });
+   // console.log("Navigating to Case Details with ID:", caseid);
+  }
+
+
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Assigned DRC Summary</h1>
       <div className="flex justify-end ">
-
-        <div  className= {`${GlobalStyle.cardContainer}  w-[70vw] mt-6  `}>
-            <div className="flex gap-4">
+        {/* Filter Section */}
+        <div  className= {`${GlobalStyle.cardContainer}  w-full mt-6  `}>
+            <div className="flex gap-3">
               {" "}
-              <div className="flex gap-4 h-[35px] ">
+              <div className="flex gap-3 h-[35px] ">
                 <select
                   className={GlobalStyle.selectBox}
                   value={drcFilter}
@@ -589,6 +659,26 @@ console.log("Filtered Data:", filteredDataBySearch);
                   
 
                 </select>
+
+                <select 
+                  className={GlobalStyle.selectBox}
+                  value={approverstatus}
+                  onChange={(e) => setApproverStatus(e.target.value)}
+                  style={{ color: approverstatus === "" ? "gray" : "black" }}
+                >
+                  <option value="" hidden>
+                    Select Approve Status
+                  </option>
+                  <option value="Open" style={{ color: "black" }}>Open</option>
+                  <option value="Approve" style={{ color: "black" }}>Approve</option>
+                  <option value="Reject" style={{ color: "black" }}>Reject</option>
+                  
+
+                </select>
+
+
+
+
               </div>
                   <label className={GlobalStyle.dataPickerDate}  style={{ marginTop: '5px', display: 'block' }}>Date : </label>
                   <DatePicker
@@ -606,20 +696,41 @@ console.log("Filtered Data:", filteredDataBySearch);
                     placeholderText="To"
                     className={GlobalStyle.inputText}
                   />
-                
+
+                <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                            onClick={applyFilters}
+                            className={`${GlobalStyle.buttonPrimary} h-[35px] `}
+                          >
+                            Filter
+                      </button>
+                    )}
+                 </div>
               
-              <button
+              {/* <button
                 onClick={applyFilters}
                 className={`${GlobalStyle.buttonPrimary} h-[35px] `}
               >
                 Filter
-              </button>
-              <button
+              </button> */}
+
+              <div>
+                  {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                    className={`${GlobalStyle.buttonRemove} h-[35px] `}
+                    onClick={handlefilterClear}
+                    >
+                      clear
+                    </button>
+                  )}
+              </div>
+              {/* <button
                 className={`${GlobalStyle.buttonRemove} h-[35px] `}
                 onClick={handlefilterClear}
                 >
                   clear
-                </button>
+                </button> */}
             </div>
         </div>
       </div>
@@ -653,13 +764,17 @@ console.log("Filtered Data:", filteredDataBySearch);
                   className="mx-auto"
                 /> */}
               </th>
-              <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
-              <th className={GlobalStyle.tableHeader}>Created on</th>
-              <th className={GlobalStyle.tableHeader}>Created by</th>
+              <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Approve Type</th>
               <th className={GlobalStyle.tableHeader}>Approve By</th>
               <th className={GlobalStyle.tableHeader}>Remark</th>
+              <th className={GlobalStyle.tableHeader}>Created by</th>
+              <th className={GlobalStyle.tableHeader}>Created on</th>
+              
+              
+              
+              
               <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
@@ -683,25 +798,37 @@ console.log("Filtered Data:", filteredDataBySearch);
                     />
                   </td>
                   <td className={GlobalStyle.tableData}>
+                    <button 
+                      onClick={() => onhoverbuttonclick(item.approver_reference)}
+                      onMouseOver={(e) => e.currentTarget.style.textDecoration = "underline"} 
+                      onMouseOut={(e) => e.currentTarget.style.textDecoration = "none"} >
+
+                          {item.approver_reference}
+
+                    </button>
+                  </td>
+                  <td className={GlobalStyle.tableData}>
                   {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {item.approver_reference}
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    {new Date(item.created_on).toLocaleDateString("en-GB")}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{item.created_by}</td>
-                  <td className={GlobalStyle.tableData}>
                     {item.approver_type}
                   </td>
-                  
                   <td className={GlobalStyle.tableData}>{item.approved_deligated_by}</td>
                   <td className={GlobalStyle.tableData}>
                     {item.remark.length > 0
                       ? item.remark[item.remark.length - 1].remark
                       : "N/A"}
                   </td>
+                  
+                  <td className={GlobalStyle.tableData}>{item.created_by}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {new Date(item.created_on).toLocaleDateString("en-GB")}
+                  </td>
+                  
+                  
+                  
+                  
+                  
                   <td className={GlobalStyle.tableData}>
                     <button onClick={() => onTableIconClick(item)}>
 
@@ -720,7 +847,7 @@ console.log("Filtered Data:", filteredDataBySearch);
               ))
             ) : (
               <tr>
-                <td colSpan="9" className={GlobalStyle.tableData}>
+                <td colSpan="9" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                   No data available
                 </td>
               </tr>
@@ -730,6 +857,7 @@ console.log("Filtered Data:", filteredDataBySearch);
       </div>
 
       {/* Pagination Section */}
+      { filteredDataBySearch.length > 0 && (
       <div className={GlobalStyle.navButtonContainer}>
         <button
           onClick={() => handlePrevNext("prev")}
@@ -753,6 +881,7 @@ console.log("Filtered Data:", filteredDataBySearch);
           <FaArrowRight />
         </button>
       </div>
+      )}
 
       {/* Select All Data Checkbox and Approve Button */}
       <div className="flex justify-end gap-4 mt-4">
@@ -767,27 +896,67 @@ console.log("Filtered Data:", filteredDataBySearch);
           Select All Data
         </label> */}
 
+
         {/* Approve Button */}
         
-        <button
+        {/* <button
           onClick={onApproveButtonClick}
           className={GlobalStyle.buttonPrimary}
         >
           Approve
-        </button>
-        <button
+        </button> */}
+
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+              <button
+              onClick={onApproveButtonClick}
+              className={GlobalStyle.buttonPrimary}
+            >
+              Approve
+            </button>
+            )}
+        </div>
+
+        {/* Reject Button */}
+
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              onClick={onRejectButtonClick}
+              className={GlobalStyle.buttonRemove}
+            >
+              Reject
+            </button>
+            )}
+        </div>
+        {/* <button
           onClick={onRejectButtonClick}
           className={GlobalStyle.buttonRemove}
         >
           Reject
-        </button>
+        </button> */}
       </div>
+
+      {/* Create Task Button */}
       <div>
-        <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
+        { filteredDataBySearch.length > 0 && (
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
+            <FaDownload className="mr-2" />
+               Create Task and Let me know
+           </button>
+            )}
+        </div>
+        )}
+
+        {/* <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
           <FaDownload className="mr-2" />
           Create Task and Let me know
-        </button>
+        </button> */}
       </div>
+
+
     </div>
   );
 }
