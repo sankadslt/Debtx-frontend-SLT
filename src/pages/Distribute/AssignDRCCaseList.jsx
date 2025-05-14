@@ -545,10 +545,10 @@ export default function AssignDRCsLOG() {
     const payload = {}
     payload.drc_id = 7; // Hardcoded DRC ID for testing
     if (startDate) {
-      payload.from_date = startDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+      payload.from_date = startDate; // Format: YYYY-MM-DD
     }
     if (endDate) {
-      payload.to_date = endDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+      payload.to_date = endDate; // Format: YYYY-MM-DD
     }
     // Assign either "account_no" or "case_id" based on selected filterType
 
@@ -558,8 +558,17 @@ export default function AssignDRCsLOG() {
       payload.case_id = filterValue.trim();
     }
 
+     if ((startDate && !endDate) || (!startDate && endDate)) {
+       Swal.fire({
+         title: "Error",
+         text: "Please select both start and end dates.",
+         icon: "error",
+         confirmButtonColor: "#f1c40f",
+       });
+       return;
+     }
 
-    //console.log("Filtered Request Payload:", payload);
+    console.log("Filtered Request Payload:", payload);
 
     // Call API with payload
     const fetchCases = async () => {
@@ -837,27 +846,31 @@ export default function AssignDRCsLOG() {
                       }) } 
                     </td>
                     <td className={GlobalStyle.tableData}>
-                    {caseItem.end_dtm.trim() && !isNaN(new Date(caseItem.end_dtm.trim()).getTime()) 
-                      ? new Date(caseItem.end_dtm.trim()).toLocaleDateString("en-GB") 
-                      : ""}
+                      {caseItem.end_dtm && typeof caseItem.end_dtm === 'string' && !isNaN(new Date(caseItem.end_dtm.trim()).getTime())
+                        ? new Date(caseItem.end_dtm.trim()).toLocaleDateString("en-GB")
+                        : ""}
                     </td>
                     <td className={GlobalStyle.tableData} style={ { width: "150px" }}>
                     <button
                     className={GlobalStyle.buttonPrimary}
                     data-tooltip-id="my-tooltip"
                     onClick={() =>
-                    navigate(
-                    `/pages/Distribute/ReAssignDRC?caseId=${caseItem.case_id}&accountNo=${caseItem.account_no}`
-                     )
+                      navigate('/pages/Distribute/ReAssignDRC', {
+                        state: {
+                          caseId: caseItem.case_id,
+                          accountNo: caseItem.account_no,
+                        },
+                      })
                     }
-                     title="Re-Assign" // Shows tooltip on hover
+                    
+                     // Shows tooltip on hover
                      style={{ marginRight: "5px" }} 
                     >
                     <FaUserEdit /> {/* Icon for Re-Assign */}
                     <Tooltip id="my-tooltip" place="bottom" content="Re-Assign" />
                     </button>
 
-                    <button className={GlobalStyle.buttonPrimary} title="Withdraw"  onClick={() => handlewithdrawbutton(caseItem.case_id)} data-tooltip-id="my-tooltip2">
+                    <button className={GlobalStyle.buttonPrimary}   onClick={() => handlewithdrawbutton(caseItem.case_id)} data-tooltip-id="my-tooltip2">
                     <FaUndo /> {/* Icon for Withdraw */}
                     <Tooltip id="my-tooltip2" place="bottom" content="Withdraw" />
                     </button>
