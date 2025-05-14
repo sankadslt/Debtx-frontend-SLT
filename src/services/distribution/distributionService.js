@@ -113,8 +113,10 @@ export const Create_Task_Forward_Direct_LOD = async (parameters) => {
 
 export const Forward_F1_Filtered = async (Incident_Id) => {
   try {
+    //const Incident_Forwarded_By= await getLoggedUserId();
     const response = await axios.post(`${URL}/Forward_F1_filtered_incident`, {
       Incident_Id,
+
     });
     return response;
   } catch (error) {
