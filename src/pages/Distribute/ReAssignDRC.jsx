@@ -40,6 +40,15 @@ export default function ReAssignDRC() {
   });
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  const location = useLocation();
+  const { caseId, accountNo } = location.state || {};
+
+  //console.log("Case ID:", caseId);
+  //console.log("Account No:", accountNo);
+  
+
+
+
   // Role-Based Buttons
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -67,7 +76,7 @@ export default function ReAssignDRC() {
   useEffect(() => {
     const fetchCaseDetails = async () => {
       try {
-        const payload = { case_id: 1 };
+        const payload = { case_id: caseId };
     
        // console.log("Sending API request with payload:", payload);
     
@@ -137,14 +146,14 @@ export default function ReAssignDRC() {
     const userId = await getLoggedUserId();
 
     const payload = {
-      case_id: 1,
+      case_id: caseId,
       drc_id: newEntry.drckey,
       remark: newEntry.remark,
       assigned_by: userId,
       drc_name: newEntry.drc
     };
 
-    //console.log("Sending API request with payload:", payload);
+    console.log("Sending API request with payload:", payload);
 
     try {
       const response = await Assign_DRC_To_Case(payload);
