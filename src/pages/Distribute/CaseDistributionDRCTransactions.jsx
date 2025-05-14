@@ -37,9 +37,16 @@ import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { fetchAllArrearsBands ,List_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution, Batch_Forward_for_Proceed } from "/src/services/case/CaseServices.js";
 import Swal from "sweetalert2";
+import { RiShareForwardFill } from "react-icons/ri";
+import { IoListCircleOutline } from "react-icons/io5";
+import { RiExchangeLine } from "react-icons/ri";
+import { HiDotsCircleHorizontal } from "react-icons/hi";
+
+
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+
 
 
 export default function AssignPendingDRCSummary() {
@@ -138,7 +145,7 @@ const checkdatediffrence = (startDate, endDate) => {
               handleApicall(startDate, endDate);
             } else {
               setEndDate(null);
-              console.log("EndDate cleared");
+             // console.log("EndDate cleared");
             }
           }
           );
@@ -158,10 +165,10 @@ const handleApicall = async (startDate, endDate) => {
       Created_By: userId,
     };
 
-    console.log("Create Task Payload:", payload);
+   // console.log("Create Task Payload:", payload);
    try {
       const response = await Create_Task_For_case_distribution(payload);
-      console.log("Create Task Response:", response);
+     // console.log("Create Task Response:", response);
 
       if (response.status = "success") {
         Swal.fire({
@@ -214,7 +221,7 @@ const applyFilters = async () => {
       requestdata.drc_commision_rule = selectedService;
     }
 
-    console.log("Filtered Request Data:", requestdata);;
+  //  console.log("Filtered Request Data:", requestdata);;
 
     try {
       // Send the filtered data to the backend
@@ -238,18 +245,19 @@ const clearfilters = async () => {
   setEndDate(null);
   setSelectedBand("");
   setSelectedService("");
+  setFilteredData1([]);
 
-  const fetchData = async () => {
-    try {
-      const response = await List_Case_Distribution_DRC_Summary({});
-      if (Array.isArray(response)) {
-        setFilteredData1(response); // Store the fetched data into state
-      }
-    } catch (error) {
-      console.error("API Fetch Error:", error);
-    }
-  };
-  await fetchData();
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await List_Case_Distribution_DRC_Summary({});
+  //     if (Array.isArray(response)) {
+  //       setFilteredData1(response); // Store the fetched data into state
+  //     }
+  //   } catch (error) {
+  //     console.error("API Fetch Error:", error);
+  //   }
+  // };
+  // await fetchData();
   
 };
 
@@ -275,7 +283,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
   const [selectedService, setSelectedService] = useState("");
   const [selectedBandKey, setSelectedBandKey] = useState("");
 
-console.log("Page Data:", paginatedData1);
+//console.log("Page Data:", paginatedData1);
 
   useEffect(() => {
     const fetchArrearsBands = async () => {
@@ -311,18 +319,18 @@ console.log("Page Data:", paginatedData1);
   // Handle Arrears Band Change
   const handlearrersBandChange = (e) => {
     setSelectedBand(e.target.value);
-    console.log ("Arrears band :",e.target.value);
+   // console.log ("Arrears band :",e.target.value);
 
     const selectedkey = arrearsBands.find((band) => band.value === e.target.value);
     setSelectedBandKey(selectedkey.key);
-    console.log("Selected Band Key :",selectedkey.key);
+   // console.log("Selected Band Key :",selectedkey.key);
   };
 
 
   // Handle Service Type Change
   const handlesrvicetypeChange = (e) => {
     setSelectedService(e.target.value);
-    console.log("Service type :",e.target.value);
+  //  console.log("Service type :",e.target.value);
   };
 
   // The function to handle the creation of a task and notify the user
@@ -337,10 +345,10 @@ console.log("Page Data:", paginatedData1);
       Created_By: userId,
     };
 
-    console.log("Create Task Payload:", payload);
+   // console.log("Create Task Payload:", payload);
    try {
       const response = await Create_Task_For_case_distribution(payload);
-      console.log("Create Task Response:", response);
+     // console.log("Create Task Response:", response);
 
       if (response.status = "success") {
         Swal.fire({
@@ -384,21 +392,30 @@ console.log("Page Data:", paginatedData1);
       const userId = await getLoggedUserId();
 
       const data = paginatedData1.find((item) => item.case_distribution_batch_id === batchID);
-      console.log("Selected Batch Data:", data);
+     // console.log("Selected Batch Data:", data);
       const batchSeqDetails = data?.batch_seq_details?.[0] || {};
       const distribution = batchSeqDetails?.array_of_distributions?.[0] || {};
       const payload = {
-        case_distribution_batch_id: [batchID],
+        case_distribution_batch_id: batchID,
         Proceed_by: userId,
-        plus_drc : distribution.plus_drc || "null",
-        plus_drc_id : distribution.plus_drc_id || "null",
-        minus_drc : distribution.minus_drc  || "null",
-        minus_drc_id : distribution.minus_drc_id  || "null",
+        //plus_drc : distribution.plus_drc || "null",
+       // plus_drc_id : distribution.plus_drc_id || "null",
+       // minus_drc : distribution.minus_drc  || "null",
+       // minus_drc_id : distribution.minus_drc_id  || "null",
         
       };
-      console.log("Forward for Proceed Payload:", payload);
+     // console.log("Forward for Proceed Payload:", payload);
       const response = await Batch_Forward_for_Proceed(payload);
-      console.log("Forward for Proceed Response:", response);
+     // console.log("Forward for Proceed Response:", response);
+
+     Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Forwarded for Proceed successfully.",
+        confirmButtonColor: "#28a745",
+      });
+      
+      applyFilters(); // Refresh the data after forwarding
       
     } catch (error){
       console.error (error)
@@ -422,7 +439,7 @@ console.log("Page Data:", paginatedData1);
     navigate("/pages/Distribute/CaseDistributionDRCTransactions-1Batch", {
       state: { BatchID: batchID },
     });
-    console.log("Case Distribution batch ID:", batchID);
+   // console.log("Case Distribution batch ID:", batchID);
 };
 
   // Function to handle exchange click
@@ -430,7 +447,7 @@ console.log("Page Data:", paginatedData1);
     navigate("/pages/Distribute/AmendAssignedDRC", { 
       state: { BatchID: batchID },
     });
-    console.log("Case Distribution batch ID:", batchID);
+    //console.log("Case Distribution batch ID:", batchID);
 };
 
   // Function to handle previous and next page navigation
@@ -453,7 +470,7 @@ console.log("Page Data:", paginatedData1);
     navigate("/pages/Distribute/CaseDistributionDRCSummary", {
       state: { BatchID: batchID },
     });
-    console.log("Case Distribution batch ID:", batchID);
+  //  console.log("Case Distribution batch ID:", batchID);
   };
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
@@ -706,31 +723,35 @@ console.log("Page Data:", paginatedData1);
 
                   <td className={GlobalStyle.tableData} style={{ width: "60px", textAlign: "center" }}>
                     <button data-tooltip-id= {`tooltip-summary-${index}`} onClick={() => handleonsummaryclick(item.case_distribution_batch_id)} >
-                    <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "4px"}} />
+                    {/* <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "4px"}} /> */}
+                    <HiDotsCircleHorizontal size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary"/>
 
 
                     <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_batch_id)} disabled= {!!item.forward_for_approvals_on }>
-                    <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} />
+                    {/* <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} /> */}
+                    <RiExchangeLine size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-exchange-${index}`} place="bottom" content="Exchange case count"/>
 
 
                     <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_batch_id)} >
-                    <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} />
+                    {/* <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} /> */}
+                    <IoListCircleOutline size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary"/>
 
 
                     <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_batch_id)} disabled={!!item.forward_for_approvals_on}>
-                    <img
+                    {/* <img
                       src={four}
                       width={15}
                       height={15}
                       alt="Forward"
                       style={{ position: "relative", top: "2px", left: "6px" }}
-                    />
+                    /> */}
+                    < RiShareForwardFill  size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                   </button>
                   <Tooltip id={`tooltip-${item.case_distribution_batch_id}`} place="bottom">
                     Forward for Approval
