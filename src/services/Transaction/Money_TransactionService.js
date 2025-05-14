@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/money`;
 
 
-
+// Fetching payment cases based on filters
 export const List_All_Payment_Cases = async (payload) => {
   try {
     const response = await axios.post(
@@ -41,6 +41,7 @@ export const Create_task_for_Download_Payment_Case_List = async (createdBy, Phas
   }
 };
 
+// Fetching case payment details by case_id and money_transaction_id
 export const Case_Details_Payment_By_Case_ID = async (case_id, money_transaction_id) => {
   try {
     const response = await axios.post(`${URL}/Case_Details_Payment_By_Case_ID`, {

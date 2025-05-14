@@ -1,9 +1,11 @@
 /*Purpose: This template is used for the 7.5 Sup - Monitor Settlemnt page.
 Created Date: 2025-12-03
 Created By: Susinidu Sachinthana (susinidusachinthana@gmail.com)
-Last Modified Date: 2025-12-03
+Last Modified Date: 2025-14-05
 Modified Date: 2025-12-03
 Modified By: Susinidu Sachinthana, Chamath Jayasanka
+Modified Date: 2025-14-05
+Modified By: Janani Kumarasiri
 Version: node 22
 ui number : 7.5
 Dependencies: tailwind css
@@ -17,84 +19,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import more from "../../assets/images/imagefor1.a.13(one).png";
-import { listAllSettlementCases } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
-import { Tooltip } from "react-tooltip";
-import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
 import { getLoggedUserId } from "../../services/auth/authService";
-import RO_Settle_Pending from "/src/assets/images/Settlement/RO_Settle_Pending.png";
-import RO_Settle_Open_Pending from "/src/assets/images/Settlement/RO_Settle_Open_Pending.png";
-import RO_Settle_Active from "/src/assets/images/Settlement/RO_Settle_Active.png";
-import MB_Settle_Pending from "/src/assets/images/Settlement/MB Settle Pending.png";
-import MB_Settle_Open_Pending from "/src/assets/images/Settlement/MB Settle Open Pending.png"
-import MB_Settle_Active from "/src/assets/images/Settlement/MB Settle Active.png";
-import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation Settle Pending.png";
-import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
-import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
 import { List_All_Payment_Cases } from "../../services/Transaction/Money_TransactionService";
 import { Create_task_for_Download_Payment_Case_List } from "../../services/Transaction/Money_TransactionService";
-
-// // Import status icons with correct file extensions
-// import RO_Negotiation_FMB_pending from "../../assets/images/negotiation/RO_Negotiation_FMB_pending.png";
-// import RO_Negotiation_Extneded from "../../assets/images/negotiation/RO_Negotiation_Extneded.png";
-// import RO_Negotiation_Extension_Pending from "../../assets/images/negotiation/RO_Negotiation_Extension_Pending.png";
-// import Negotiation_Settle_Active from "../../assets/images/negotiation/Negotiation_Settle_Active.png";
-// import Negotiation_Settle_Open_Pending from "../../assets/images/negotiation/Negotiation_Settle_Open_Pending.png";
-// import Negotiation_Settle_Pending from "../../assets/images/negotiation/Negotiation_Settle_Pending.png";
-// import RO_Negotiation from "../../assets/images/negotiation/RO_Negotiation.png";
-
-// // Status icon mapping
-// const STATUS_ICONS = {
-//   "RO Negotiation FMB Pending": {
-//     icon: RO_Negotiation_FMB_pending,
-//     tooltip: "RO Negotiation FMB pending"
-//   },
-//   "RO Negotiation Extended": {
-//     icon: RO_Negotiation_Extneded,
-//     tooltip: "RO Negotiation Extneded"
-//   },
-//   "RO Negotiation Extension Pending": {
-//     icon: RO_Negotiation_Extension_Pending,
-//     tooltip: "RO Negotiation Extension Pending"
-//   },
-//   "Negotiation Settle Active": {
-//     icon: Negotiation_Settle_Active,
-//     tooltip: "Negotiation Settle Active"
-//   },
-//   "Negotiation Settle Open-Pending": {
-//     icon: Negotiation_Settle_Open_Pending,
-//     tooltip: "Negotiation Settle Open-Pending"
-//   },
-//   "Negotiation Settle Pending": {
-//     icon: Negotiation_Settle_Pending,
-//     tooltip: "Negotiation Settle Pending"
-//   },
-//   "RO Negotiation": {
-//     icon: RO_Negotiation,
-//     tooltip: "MB Settle open pending"
-//   },
-// };
-
-// // Status Icon component with tooltip
-// const StatusIcon = ({ status }) => {
-//   const statusInfo = STATUS_ICONS[status];
-
-//   if (!statusInfo) return <span>{status}</span>;
-
-//   return (
-//     <div className="relative group">
-//       <img 
-//         src={statusInfo.icon} 
-//         alt={status}
-//         className="w-6 h-6 cursor-help"
-//       />
-//       <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-sm rounded px-2 py-1 left-1/2 transform -translate-x-1/2 bottom-full mb-1 whitespace-nowrap z-10">
-//         {statusInfo.tooltip}
-//         <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-2 h-2 bg-gray-800 rotate-45"></div>
-//       </div>
-//     </div>
-//   );
-// };
 
 const PaymentDetails = () => {
   // State Variables
@@ -106,8 +34,6 @@ const PaymentDetails = () => {
   const [phase, setPhase] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [searchBy, setSearchBy] = useState("case_id"); // Default search by case ID
-
-  // const [error, setError] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
@@ -117,7 +43,6 @@ const PaymentDetails = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalAPIPages, setTotalAPIPages] = useState(1);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const rowsPerPage = 10; // Number of rows per page
 
@@ -126,95 +51,6 @@ const PaymentDetails = () => {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
-
-  // const recordsPerPage = 10;
-  // const indexOfLastRecord = currentPage * recordsPerPage;
-  // const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  // const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
-  // const totalPages = Math.ceil(filteredData.length / recordsPerPage);
-
-  // return Icon based on settlement status and settlement phase
-  // const getStatusIcon = (phase, status) => {
-  //   switch (phase?.toLowerCase()) {
-  //     case "negotiation":
-  //       switch (status?.toLowerCase()) {
-  //         case "pending":
-  //           return RO_Settle_Pending;
-  //         case "open_pending":
-  //           return RO_Settle_Open_Pending;
-  //         case "active":
-  //           return RO_Settle_Active;
-  //         default:
-  //           return null;
-  //       }
-  //     case "mediation board":
-  //       switch (status?.toLowerCase()) {
-  //         case "pending":
-  //           return MB_Settle_Pending;
-  //         case "open_pending":
-  //           return MB_Settle_Open_Pending;
-  //         case "active":
-  //           return MB_Settle_Active;
-  //         default:
-  //           return null;
-  //       }
-  //     case "litigation":
-  //       switch (status?.toLowerCase()) {
-  //         case "pending":
-  //           return Litigation_Settle_Pending;
-  //         case "open_pending":
-  //           return Litigation_Settle_Open_Pending;
-  //         case "active":
-  //           return Litigation_Settle_Active;
-  //         default:
-  //           return null;
-  //       }
-  //     default:
-  //       return null;
-  //   }
-  // };
-
-  // render status icon with tooltip
-  // const renderStatusIcon = (phase, status, index) => {
-  //   const iconPath = getStatusIcon(phase, status);
-
-  //   if (!iconPath) {
-  //     return <span>{status}</span>;
-  //   }
-
-  //   const tooltipId = `tooltip-${index}`;
-
-  //   return (
-  //     <div className="flex items-center gap-2">
-  //       <img
-  //         src={iconPath}
-  //         alt={status}
-  //         className="w-6 h-6"
-  //         data-tooltip-id={tooltipId} // Add tooltip ID to image
-  //       />
-  //       {/* Tooltip component */}
-  //       <Tooltip id={tooltipId} place="bottom" effect="solid">
-  //         {`${phase} Settle ${status}`} {/* Tooltip text is the phase and status */}
-  //       </Tooltip>
-  //     </div>
-  //   );
-  // };
-
-  // useEffect(() => {
-  //   if (isFilterApplied) {
-  //     handleFilter(); // Call the filter function only afer the filters are applied
-  //   }
-  // }, [currentPage]);
-  /*  const [appliedFilters, setAppliedFilters] = useState({
-     searchQuery: "",
-     caseId: "",
-     status: "",
-     phase: "",
-     fromDate: null,
-     toDate: null,
-   }); */
-
-  // const rowsPerPage = 7;
 
   const navigate = useNavigate();
 
@@ -228,13 +64,7 @@ const PaymentDetails = () => {
     if (fromDate) checkdatediffrence(fromDate, date);
   };
 
-  // const handleenddatechange = (date) => {
-  //   if (fromDate) {
-  //     checkdatediffrence(fromDate, date);
-  //   }
-  //   setToDate(date);
-  // }
-
+  // Function to check the difference between two dates
   const checkdatediffrence = (startDate, endDate) => {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
@@ -261,6 +91,21 @@ const PaymentDetails = () => {
     }
   };
 
+  useEffect(() => {
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "To date should be greater than or equal to From date",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      setToDate(null);
+      setFromDate(null);
+      return;
+    }
+  }, [fromDate, toDate]);
+
   // Search Section
   const filteredDataBySearch = paginatedData.filter((row) =>
     Object.values(row)
@@ -269,10 +114,9 @@ const PaymentDetails = () => {
       .includes(searchQuery.toLowerCase())
   );
 
+  //Fetching data from API
   const handleFilter = async () => {
     try {
-      // setFilteredData([]); // Clear previous results
-
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
         if (!date) return null;
@@ -293,35 +137,10 @@ const PaymentDetails = () => {
         return;
       }
 
-      // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-      //   Swal.fire({
-      //     title: "Warning",
-      //     text: "Invalid input. Only numbers are allowed for Case ID.",
-      //     icon: "warning",
-      //     allowOutsideClick: false,
-      //     allowEscapeKey: false,
-      //   });
-      //   setCaseId(""); // Clear the invalid input
-      //   return;
-      // }
-
       if ((fromDate && !toDate) || (!fromDate && toDate)) {
         Swal.fire({
           title: "Warning",
           text: "Both From Date and To Date must be selected.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "To date should be greater than or equal to From date",
           icon: "warning",
           allowOutsideClick: false,
           allowEscapeKey: false
@@ -337,7 +156,6 @@ const PaymentDetails = () => {
         case_id: caseId,
         account_num: accountNo,
         settlement_phase: phase,
-        // settlement_status: status,
         from_date: formatDate(fromDate),
         to_date: formatDate(toDate),
         pages: currentPage,
@@ -364,12 +182,10 @@ const PaymentDetails = () => {
 
       // Updated response handling
       if (response && response.data) {
-        console.log("Valid data received:", response.data);
-        // const totalPages = Math.ceil(response.pagination.total / rowsPerPage);
-        // setTotalPages(totalPages);
-        // setTotalAPIPages(response.pagination.pages); // Set the total pages from the API response
-        // Append the new data to the existing data
+        // console.log("Valid data received:", response.data);
+        
         setFilteredData((prevData) => [...prevData, ...response.data]);
+
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
@@ -418,26 +234,12 @@ const PaymentDetails = () => {
     }
   }
 
+  // Validate case ID input whenever it changes
   useEffect(() => {
     validateCaseId(); // Validate case ID input
   }, [caseId]);
 
-  // Handle api calling only when the currentPage incriment more that before
-  // const handlePageChange = () => {
-  //   // console.log("Page changed to:", currentPage);
-  //   if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
-  //     console.log("Page changed to:", currentPage);
-  //     setMaxCurrentPage(currentPage);
-  //     handleFilter(); // Call the filter function only after the page incrimet 
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (isFilterApplied) {
-  //     handlePageChange(); // Call the function whenever currentPage changes
-  //   }
-  // }, [currentPage]);
-
+  // Fetch data when the component mounts
   useEffect(() => {
     if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
@@ -465,10 +267,11 @@ const PaymentDetails = () => {
     }
   };
 
+  // handle filter button click
   const handleFilterButton = () => { // Reset to the first page
     setFilteredData([]); // Clear previous results
     setMaxCurrentPage(0); // Reset max current page
-    setTotalAPIPages(1); // Reset total API pages
+    // setTotalAPIPages(1); // Reset total API pages
     if (currentPage === 1) {
       handleFilter();
     } else {
@@ -477,15 +280,10 @@ const PaymentDetails = () => {
     setIsFilterApplied(true); // Set filter applied state to true
   }
 
-  // useEffect(() => {
-  //   handleFilter(); // Load initial data
-  // }, []);
-
   const handleClear = () => {
     setCaseId("");
     setAccountNo("");
     setPhase("");
-    setStatus("");
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
@@ -521,31 +319,6 @@ const PaymentDetails = () => {
       });
       return;
     }
-
-    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-      Swal.fire({
-        title: "Warning",
-        text: "To date should be greater than or equal to From date",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-      setToDate(null);
-      setFromDate(null);
-      return;
-    }
-
-    // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-    //   Swal.fire({
-    //     title: "Warning",
-    //     text: "Invalid input. Only numbers are allowed for Case ID.",
-    //     icon: "warning",
-    //     allowOutsideClick: false,
-    //     allowEscapeKey: false,
-    //   });
-    //   setCaseId(""); // Clear the invalid input
-    //   return;
-    // }
 
     setIsCreatingTask(true);
     try {
@@ -670,8 +443,6 @@ const PaymentDetails = () => {
             </div>
           </div>
 
-          {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
-
           {/* Search Bar */}
           <div className="mb-4 flex justify-start mt-10">
             <div className={GlobalStyle.searchBarContainer}>
@@ -701,37 +472,6 @@ const PaymentDetails = () => {
                   <th className={GlobalStyle.tableHeader}></th>
                 </tr>
               </thead>
-              {/* <tbody>
-                {paginatedData.map((row, index) => (
-                  <tr
-                    key={index}
-                    className={
-                      index % 2 === 0
-                        ? GlobalStyle.tableRowEven
-                        : GlobalStyle.tableRowOdd
-                    }
-                  >
-                    <td className={GlobalStyle.tableData}>{row.caseId}</td>
-                    <td className={GlobalStyle.tableData}>{row.status}</td>
-                    <td className={GlobalStyle.tableData}>{row.created_dtm}</td>
-                    <td className={GlobalStyle.tableData}>
-                      {row.settlement_id}
-                    </td>
-                    <td className={GlobalStyle.tableData}>
-                      {row.settlement_phase}
-                    </td>
-                    <td className={GlobalStyle.tableData}>
-                      <img
-                        src={more}
-                        onClick={navi}
-                        title="More"
-                        alt="more icon"
-                        className="w-5 h-5"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody> */}
 
               <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
@@ -811,7 +551,7 @@ const PaymentDetails = () => {
               <FaArrowLeft />
             </button>
             <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-              Page {currentPage} 
+              Page {currentPage}
             </span>
             <button
               onClick={() => handlePrevNext("next")}

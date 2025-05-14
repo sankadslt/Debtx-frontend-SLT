@@ -4,6 +4,8 @@ Created By: Susinidu Sachinthana (susinidusachinthana@gmail.com)
 Last Modified Date: 2025-12-03
 Modified Date: 2025-12-03
 Modified By: Susinidu Sachinthana, Chamath Jayasanka
+Modified Date: 2025-05-14
+Modified By: Janani Kumarasiri (jkktg001@gmail.com)
 Version: node 22
 ui number : 7.5
 Dependencies: tailwind css
@@ -41,68 +43,6 @@ import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle
 import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
 import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
 
-// // Import status icons with correct file extensions
-// import RO_Negotiation_FMB_pending from "../../assets/images/negotiation/RO_Negotiation_FMB_pending.png";
-// import RO_Negotiation_Extneded from "../../assets/images/negotiation/RO_Negotiation_Extneded.png";
-// import RO_Negotiation_Extension_Pending from "../../assets/images/negotiation/RO_Negotiation_Extension_Pending.png";
-// import Negotiation_Settle_Active from "../../assets/images/negotiation/Negotiation_Settle_Active.png";
-// import Negotiation_Settle_Open_Pending from "../../assets/images/negotiation/Negotiation_Settle_Open_Pending.png";
-// import Negotiation_Settle_Pending from "../../assets/images/negotiation/Negotiation_Settle_Pending.png";
-// import RO_Negotiation from "../../assets/images/negotiation/RO_Negotiation.png";
-
-// // Status icon mapping
-// const STATUS_ICONS = {
-//   "RO Negotiation FMB Pending": {
-//     icon: RO_Negotiation_FMB_pending,
-//     tooltip: "RO Negotiation FMB pending"
-//   },
-//   "RO Negotiation Extended": {
-//     icon: RO_Negotiation_Extneded,
-//     tooltip: "RO Negotiation Extneded"
-//   },
-//   "RO Negotiation Extension Pending": {
-//     icon: RO_Negotiation_Extension_Pending,
-//     tooltip: "RO Negotiation Extension Pending"
-//   },
-//   "Negotiation Settle Active": {
-//     icon: Negotiation_Settle_Active,
-//     tooltip: "Negotiation Settle Active"
-//   },
-//   "Negotiation Settle Open-Pending": {
-//     icon: Negotiation_Settle_Open_Pending,
-//     tooltip: "Negotiation Settle Open-Pending"
-//   },
-//   "Negotiation Settle Pending": {
-//     icon: Negotiation_Settle_Pending,
-//     tooltip: "Negotiation Settle Pending"
-//   },
-//   "RO Negotiation": {
-//     icon: RO_Negotiation,
-//     tooltip: "MB Settle open pending"
-//   },
-// };
-
-// // Status Icon component with tooltip
-// const StatusIcon = ({ status }) => {
-//   const statusInfo = STATUS_ICONS[status];
-
-//   if (!statusInfo) return <span>{status}</span>;
-
-//   return (
-//     <div className="relative group">
-//       <img 
-//         src={statusInfo.icon} 
-//         alt={status}
-//         className="w-6 h-6 cursor-help"
-//       />
-//       <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-sm rounded px-2 py-1 left-1/2 transform -translate-x-1/2 bottom-full mb-1 whitespace-nowrap z-10">
-//         {statusInfo.tooltip}
-//         <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-2 h-2 bg-gray-800 rotate-45"></div>
-//       </div>
-//     </div>
-//   );
-// };
-
 const Monitor_settlement = () => {
   // State Variables
   const [fromDate, setFromDate] = useState(null);
@@ -113,8 +53,6 @@ const Monitor_settlement = () => {
   const [phase, setPhase] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [searchBy, setSearchBy] = useState("case_id"); // Default search by case ID
-
-  // const [error, setError] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
@@ -123,7 +61,7 @@ const Monitor_settlement = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalAPIPages, setTotalAPIPages] = useState(1);
+  // const [totalAPIPages, setTotalAPIPages] = useState(1);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // State to track if more data is available
   const rowsPerPage = 10; // Number of rows per page
@@ -240,22 +178,6 @@ const Monitor_settlement = () => {
     );
   };
 
-  // useEffect(() => {
-  //   if (isFilterApplied) {
-  //     handleFilter(); // Call the filter function only afer the filters are applied
-  //   }
-  // }, [currentPage]);
-  /*  const [appliedFilters, setAppliedFilters] = useState({
-     searchQuery: "",
-     caseId: "",
-     status: "",
-     phase: "",
-     fromDate: null,
-     toDate: null,
-   }); */
-
-  // const rowsPerPage = 7;
-
   const navigate = useNavigate();
 
   const handlestartdatechange = (date) => {
@@ -268,13 +190,8 @@ const Monitor_settlement = () => {
     if (fromDate) checkdatediffrence(fromDate, date);
   };
 
-  // const handleenddatechange = (date) => {
-  //   if (fromDate) {
-  //     checkdatediffrence(fromDate, date);
-  //   }
-  //   setToDate(date);
-  // }
-
+  // Check the difference between two dates
+  // If the difference is more than 1 month, show a warning
   const checkdatediffrence = (startDate, endDate) => {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
@@ -301,6 +218,22 @@ const Monitor_settlement = () => {
     }
   };
 
+  // Check if toDate is greater than fromDate
+  useEffect(() => {
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "To date should be greater than or equal to From date",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      setToDate(null);
+      setFromDate(null);
+      return;
+    }
+  }, [fromDate, toDate]);
+
   // Search Section
   const filteredDataBySearch = paginatedData.filter((row) =>
     Object.values(row)
@@ -309,10 +242,9 @@ const Monitor_settlement = () => {
       .includes(searchQuery.toLowerCase())
   );
 
+  // Fetch data from API
   const handleFilter = async () => {
     try {
-      // setFilteredData([]); // Clear previous results
-
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
         if (!date) return null;
@@ -333,35 +265,10 @@ const Monitor_settlement = () => {
         return;
       }
 
-      // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-      //   Swal.fire({
-      //     title: "Warning",
-      //     text: "Invalid input. Only numbers are allowed for Case ID.",
-      //     icon: "warning",
-      //     allowOutsideClick: false,
-      //     allowEscapeKey: false,
-      //   });
-      //   setCaseId(""); // Clear the invalid input
-      //   return;
-      // }
-
       if ((fromDate && !toDate) || (!fromDate && toDate)) {
         Swal.fire({
           title: "Warning",
           text: "Both From Date and To Date must be selected.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "To date should be greater than or equal to From date",
           icon: "warning",
           allowOutsideClick: false,
           allowEscapeKey: false
@@ -404,13 +311,10 @@ const Monitor_settlement = () => {
 
       // Updated response handling
       if (response && response.data) {
-        console.log("Valid data received:", response.data);
-        // console.log(response.data.pagination.pages);
-        // const totalPages = Math.ceil(response.data.pagination.total / rowsPerPage);
-        // setTotalPages(totalPages);
-        // setTotalAPIPages(response.data.pagination.pages); // Set the total pages from the API response
-        // Append the new data to the existing data
+        // console.log("Valid data received:", response.data);
+
         setFilteredData((prevData) => [...prevData, ...response.data]);
+
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
@@ -429,7 +333,6 @@ const Monitor_settlement = () => {
           }
         }
 
-        // setFilteredData(response.data.data);
       } else {
         Swal.fire({
           title: "Error",
@@ -467,15 +370,6 @@ const Monitor_settlement = () => {
     validateCaseId(); // Validate case ID input
   }, [caseId]);
 
-  // Handle api calling only when the currentPage incriment more that before
-  // const handlePageChange = () => {
-  //   // console.log("Page changed to:", currentPage);
-  //   if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
-  //     setMaxCurrentPage(currentPage);
-  //     handleFilter(); // Call the filter function only after the page incrimet 
-  //   }
-  // };
-
   useEffect(() => {
     if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
@@ -489,7 +383,6 @@ const Monitor_settlement = () => {
       setCurrentPage(currentPage - 1);
       // console.log("Current Page:", currentPage);
     } else if (direction === "next") {
-      // setCurrentPage(currentPage + 1);
       if (isMoreDataAvailable) {
         setCurrentPage(currentPage + 1);
       } else {
@@ -503,11 +396,11 @@ const Monitor_settlement = () => {
     }
   };
 
-  const handleFilterButton = () => { // Reset to the first page
+  // Handle Filter Button click
+  const handleFilterButton = () => {
     setFilteredData([]); // Clear previous results
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
-    // setTotalAPIPages(1); // Reset total API pages
     if (currentPage === 1) {
       handleFilter();
     } else {
@@ -515,10 +408,6 @@ const Monitor_settlement = () => {
     }
     setIsFilterApplied(true); // Set filter applied state to true
   }
-
-  // useEffect(() => {
-  //   handleFilter(); // Load initial data
-  // }, []);
 
   const handleClear = () => {
     setCaseId("");
@@ -532,13 +421,14 @@ const Monitor_settlement = () => {
     setIsFilterApplied(false); // Reset filter applied state
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
-    setTotalAPIPages(1); // Reset total API pages
   };
 
+  // Function to navigate to the settlement details page
   const naviPreview = (caseId, settlementID) => {
     navigate("/lod/ftl-log/preview", { state: { caseId, settlementID } });
   };
 
+  // Function to navigate to the case ID page
   const naviCaseID = (caseId) => {
     navigate("", { state: { caseId } });
   }
@@ -558,31 +448,6 @@ const Monitor_settlement = () => {
       });
       return;
     }
-
-    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-      Swal.fire({
-        title: "Warning",
-        text: "To date should be greater than or equal to From date",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-      setToDate(null);
-      setFromDate(null);
-      return;
-    }
-
-    // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-    //   Swal.fire({
-    //     title: "Warning",
-    //     text: "Invalid input. Only numbers are allowed for Case ID.",
-    //     icon: "warning",
-    //     allowOutsideClick: false,
-    //     allowEscapeKey: false,
-    //   });
-    //   setCaseId(""); // Clear the invalid input
-    //   return;
-    // }
 
     setIsCreatingTask(true);
     try {
@@ -719,8 +584,6 @@ const Monitor_settlement = () => {
             </div>
           </div>
 
-          {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
-
           {/* Search Bar */}
           <div className="mb-4 flex justify-start mt-10">
             <div className={GlobalStyle.searchBarContainer}>
@@ -747,37 +610,6 @@ const Monitor_settlement = () => {
                   <th className={GlobalStyle.tableHeader}></th>
                 </tr>
               </thead>
-              {/* <tbody>
-                {paginatedData.map((row, index) => (
-                  <tr
-                    key={index}
-                    className={
-                      index % 2 === 0
-                        ? GlobalStyle.tableRowEven
-                        : GlobalStyle.tableRowOdd
-                    }
-                  >
-                    <td className={GlobalStyle.tableData}>{row.caseId}</td>
-                    <td className={GlobalStyle.tableData}>{row.status}</td>
-                    <td className={GlobalStyle.tableData}>{row.created_dtm}</td>
-                    <td className={GlobalStyle.tableData}>
-                      {row.settlement_id}
-                    </td>
-                    <td className={GlobalStyle.tableData}>
-                      {row.settlement_phase}
-                    </td>
-                    <td className={GlobalStyle.tableData}>
-                      <img
-                        src={more}
-                        onClick={navi}
-                        title="More"
-                        alt="more icon"
-                        className="w-5 h-5"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody> */}
 
               <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
@@ -797,7 +629,6 @@ const Monitor_settlement = () => {
                         {item.case_id || "N/A"}
                       </td>
                       <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                        {/* {item.settlement_status || "N/A"} */}
                         {renderStatusIcon(item.settlement_phase, item.settlement_status, index)}
                       </td>
                       <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>

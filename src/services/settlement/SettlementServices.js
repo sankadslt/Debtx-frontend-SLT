@@ -14,6 +14,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/settlement`;
 
+// Fetching filtered settlement cases
 export const listAllSettlementCases = async (payload) => {
   try {
     const response = await axios.post(
@@ -88,11 +89,12 @@ export const Settlement_Details_By_Settlement_ID_Case_ID = async (case_id, settl
   }
 };
 
-export const Create_Task_For_Downloard_Settlement_Details_By_Case_ID = async (createdBy, Case_ID) => {
+export const Create_Task_For_Downloard_Settlement_Details_By_Case_ID = async (createdBy, Case_ID, Settlement_ID) => {
   try {
     const response = await axios.post(`${URL}/Create_Task_For_Downloard_Settlement_Details_By_Case_ID`, {
       Created_By: createdBy,
       Case_ID: Case_ID,
+      Settlement_ID: Settlement_ID
     });
     console.log("Response from Create_Task_For_Downloard_Settlement_Details_By_Case_ID:", response);
     // return the response status

@@ -16,15 +16,13 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
-import { useParams } from "react-router-dom";
-import { Case_Details_Settlement_LOD_FTL_LOD } from "../../services/LOD/LOD";
 import { Settlement_Details_By_Settlement_ID_Case_ID } from "../../services/settlement/SettlementServices";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Create_Task_For_Downloard_Settlement_Details_By_Case_ID } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
 
 const SettlementPreview = () => {
-    const [currentPage, setCurrentPage] = useState(0);
+    // const [currentPage, setCurrentPage] = useState(0);
     const [currentPageSettlementPlans, setCurrentPageSettlementPlans] = useState(0);
     const [currentPagesettlementPlanRecievedDetails, setCurrentPagesettlementPlanRecievedDetails] = useState(0);
     const [Settlementdata, setSettlementData] = useState([]);
@@ -112,13 +110,14 @@ const SettlementPreview = () => {
         navigate("/pages/Settlement/MonitorSettlement");
     }
 
+    // Handle create task button click
     const HandleCreateTaskDownloadSettlementDetailsByCaseID = async () => {
 
         const userData = await getLoggedUserId(); // Assign user ID
 
         setIsCreatingTask(true);
         try {
-            const response = await Create_Task_For_Downloard_Settlement_Details_By_Case_ID(userData, caseId);
+            const response = await Create_Task_For_Downloard_Settlement_Details_By_Case_ID(userData, caseId, settlementID);
             if (response === "success") {
                 Swal.fire(response, `Task created successfully!`, "success");
             }
@@ -135,17 +134,15 @@ const SettlementPreview = () => {
                 {/* Title */}
                 <h2 className={GlobalStyle.headingLarge}>Settlement Details</h2>
 
+                {/* Button to create task */}
                 <button
                     onClick={HandleCreateTaskDownloadSettlementDetailsByCaseID}
                     className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-                    // className={GlobalStyle.buttonPrimary}
                     disabled={isCreatingTask}
                     style={{ display: 'flex', alignItems: 'center' }}
                 >
                     {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
                     {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-                    {/* <FaDownload style={{ marginRight: '8px' }} />
-                    Create task and let me know */}
                 </button>
             </div>
 
@@ -308,7 +305,7 @@ const SettlementPreview = () => {
                 </button>
             </div>
 
-            {/* Payment Details Table */}
+            {/* Received Settlement Plan Table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Received Settlement Plan</b></h2>
 
             <div className="flex gap-4 mt-4 justify-center">
