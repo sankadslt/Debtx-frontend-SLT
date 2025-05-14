@@ -9,48 +9,86 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { useRef } from "react";
+import { createLegalFail } from "../../services/litigation/litigationService";
+import { getLoggedUserId } from "../../services/auth/authService";
 
-export const Litigation_Fail_Update = ({isOpen, onClose}) => {
-    const modalRef = useRef(null);
+export const Litigation_Fail_Update = ({case_id}) => {    
+    // const case_id ="1";
 
-    // Close modal when clicking outside
+    const [remark, setRemark] = useState("");
+    const [created_by, setCreatedBy] =useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
+
+    const loadUser =async() => {
+       const user =await getLoggedUserId();
+       setCreatedBy(user);
+       console.log("User: ", user);
+    }
+    
     useEffect(() => {
-        const handleClickOutside = (e) => {
-        if (modalRef.current && !modalRef.current.contains(e.target)) {
-            onClose();
+      loadUser();    
+    }, [])
+
+    const handleSubmit = async () => {
+        if (!remark.trim()) {
+          setError("Remark is required.");
+          return;
         }
-        };
-
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
+    
+        if (!case_id || !remark || !created_by) {
+          setError("Something went wrong. Please try again.");
+          return;
         }
+    
+        setLoading(true);
+        setError(null);
+    
+        const result = await createLegalFail({ 
+            case_id : case_id, 
+            remark : remark, 
+            created_by: created_by, 
+        });
+    
+        setLoading(false);
+    
+        if (result.success) {
+            console.log("Legal fail submitted successfully!");
+            setSuccess('Case Updated Successfully.')
+        } else {
+          setError(result.error?.message || "Something went wrong, Please try again.");
+        }
+    };
 
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isOpen, onClose]);
-
-    if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div ref={modalRef} className="flex flex-col relative w-[800px] h-[400px] p-16 bg-[#E1E4F5] rounded-tr-2xl">
-                <h1 className={GlobalStyle.headingLarge}>Legal Fail Update</h1>
+        <div className="">
+            <div className="flex flex-col">
 
                 {/* Remark */}
                 <div className="flex flex-col gap-2 justify-start mb-4 mt-8">
                     <label className="w-full text-start">Remark : </label>
-                    <textarea className={`${GlobalStyle.inputText} h-40`}/>
+                    <textarea 
+                        className={`${GlobalStyle.inputText} h-40`}
+                        value={remark}
+                        onChange={(e) => setRemark(e.target.value)}
+                    />
                 </div>
 
                 {/* Submit */}
                 <div className="flex w-full justify-end">
-                        <button className={GlobalStyle.buttonPrimary}>
-                            Write Off
-                        </button>
+                    <button
+                        className={GlobalStyle.buttonPrimary}
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? "Submitting..." : "Write Off"}
+                    </button>
                 </div>
+                {error && <p className="flex justify-end text-red-500 text-sm mt-2">{error}</p>}
+                {success && <p className="flex justify-end text-green-500 text-sm mt-2">{success}</p>}
             </div>
         </div>
     )
