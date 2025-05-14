@@ -72,12 +72,15 @@ const Incident_Register_Individual = () => {
     if (calendarMonth < 1 || calendarMonth > 3)
       newErrors1.calendarMonth = "Calendar month must be between 1 and 3.";
     
-    if (actionType === "collect CPE" && !contactNumber) {
-      newErrors.contactNumber = "*";
-    } else if (!/^\d+$/.test(contactNumber)) { // Check if contact number contains only digits
-      newErrors1.contactNumber = "Contact number must contain only digits.";
-    } else if (contactNumber.length !== 10) { // Check if contact number is less than 10 digits
-      newErrors1.contactNumber = "Contact number must be exactly 10 digits.";
+    // if (actionType === "collect CPE" && !contactNumber) {
+    //   newErrors.contactNumber = "*";
+    // } 
+    if (contactNumber) {
+      if (!/^\d+$/.test(contactNumber)) { // Check if contact number contains only digits
+        newErrors1.contactNumber = "Contact number must contain only digits.";
+      } else if (contactNumber.length !== 10) { // Check if contact number is less than 10 digits
+        newErrors1.contactNumber = "Contact number must be exactly 10 digits.";
+      }
     }
 
     setErrors(newErrors); 
