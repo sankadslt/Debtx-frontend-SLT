@@ -230,6 +230,16 @@ export default function DRCAssignManagerApproval3() {
 
     //console.log("Filtered Request Data:", payload);
 
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+          Swal.fire({
+            title: "Error",
+            text: "Please select both start and end dates.",
+            icon: "error",
+            confirmButtonColor: "#f1c40f",
+          });
+          return;
+        }
+
     try {
       const response = await List_DRC_Assign_Manager_Approval(payload);
      // console.log("Filtered Response Data:", response);
