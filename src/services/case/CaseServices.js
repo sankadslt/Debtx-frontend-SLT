@@ -119,8 +119,8 @@ export const List_Case_Distribution_DRC_Summary = async (requestdata) => {
       requestdata
     );
 
-    console.log("Full API Response:", response); // Debugging
-    console.log("Response Data:", response.data); // Debugging
+    //console.log("Full API Response:", response); // Debugging
+    //console.log("Response Data:", response.data); // Debugging
 
     return response.data; // Return response.data directly, since it's already an array
   } catch (error) {
@@ -324,6 +324,23 @@ export const Approve_Batch_or_Batches = async (payload) => {
     throw error;
   }
 };
+
+export const Approve_Batch = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Approve_Batch`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error in approving batch:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
 
 export const Create_task_for_batch_approval = async (payload) => {
   try {
