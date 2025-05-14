@@ -235,6 +235,14 @@ export default function RejectIncidentlog() {
               confirmButtonText: 'OK',
               confirmButtonColor: "#f1c40f"
             });
+          } else if (!fromDate && !toDate) {
+            Swal.fire({
+              title: "warning",
+              text: "Please select both From Date and To Date.",
+              icon: "warning",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#f1c40f"
+            });
           }
           else if ((fromDate && !toDate) || (!fromDate && toDate)) {
             Swal.fire({
