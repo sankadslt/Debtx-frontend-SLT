@@ -132,6 +132,16 @@ export default function CollectOnlyCPECollect() {
       return;
     }
 
+    if (!fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select a date range before creating a task.",
+        icon: "warning",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
     if ((fromDate && !toDate) || (!fromDate && toDate)) {
       Swal.fire({
         title: "Incomplete Date Range",
@@ -216,7 +226,7 @@ export default function CollectOnlyCPECollect() {
       const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
       if (openTaskCount > 0) {
         Swal.fire({
-          title: "Warning",
+          title: "Action Blocked",
           text: "A task is already in progress.",
           icon: "warning",
           confirmButtonText: "OK",
@@ -263,8 +273,8 @@ export default function CollectOnlyCPECollect() {
       const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
       if (openTaskCount > 0) {
         Swal.fire({
-          title: "Warning",
-          text: "A task is already in progress. Please complete it first.",
+          title: "Action Blocked",
+          text: "A task is already in progress.",
           icon: "warning",
           confirmButtonText: "OK",
           confirmButtonColor: "#f1c40f",
@@ -272,11 +282,11 @@ export default function CollectOnlyCPECollect() {
         return;
       }
   
-      if (selectedRows.length > 9) {
+      if (selectedRows.length > 1) {
        
         const confirmCreateTask = await Swal.fire({
           title: "Create Task?",
-          text: "You have selected more than 9 incidents. Do you want to create a task instead?",
+          text: "You have selected more than 5 incidents. Do you want to create a task instead?",
           icon: "question",
           showCancelButton: true,
           confirmButtonText: "Yes, Create Task",
@@ -289,7 +299,8 @@ export default function CollectOnlyCPECollect() {
   
         const parameters = {
           Status: "Open CPE Collect",
-          Incident_Ids: selectedRows,
+          //Incident_Ids: selectedRows,
+          Proceed_Date : new Date(),
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
   
@@ -334,7 +345,7 @@ export default function CollectOnlyCPECollect() {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "An error occurred while processing your request.",
+        text: error.message || "An error occurred while processing your request.",
         icon: "error",
         confirmButtonText: "OK",
         confirmButtonColor: "#d33",
