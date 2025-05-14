@@ -107,6 +107,8 @@ const fetchData = async () => {
 
   // Function to handle task creation
   const handleCreateTask = async () => {
+    
+
     try {
       const taskParams = {
        
@@ -182,11 +184,11 @@ const fetchData = async () => {
       return;
     }
 
-    if (selectedRows.length > 9) {
+    if (selectedRows.length > 5) {
      
       const taskConfirmResult = await Swal.fire({
         title: "Create Task Confirmation",
-        text: `You have selected more than 9 incidents. Do you want to create a task to handle all of them?`,
+        text: `You have selected more than 5 incidents. Do you want to create a task to handle all of them?`,
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Yes, Create Task",
@@ -202,9 +204,9 @@ const fetchData = async () => {
 
       
       const taskParams = {
-        Incident_Status: "Open No Agent",
+        //Incident_Status: "Open No Agent",
         Proceed_By: user,
-        Proceed_Dtm: new Date().toISOString(),
+        Proceed_Dtm: new Date(),
       };
 
       const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
@@ -218,10 +220,12 @@ const fetchData = async () => {
       });
     } else {
       
+      
+
       const response = await Create_Case_for_incident({
         Incident_Ids: selectedRows,
         Proceed_By: user,
-        Proceed_Dtm: new Date().toISOString(),
+       // Proceed_Dtm: new Date().toISOString().split("T")[0],
       });
 
       Swal.fire({
@@ -238,7 +242,7 @@ const fetchData = async () => {
     console.error("Error in handleCaseforIncident:", error);
     Swal.fire({
       title: "Error",
-      text: error.message || "Action failed: Another set in progress.",
+      text:  error.message || "Action failed: Another set in progress.",
       icon: "error",
       confirmButtonText: "OK",
       confirmButtonColor: "#d33",
