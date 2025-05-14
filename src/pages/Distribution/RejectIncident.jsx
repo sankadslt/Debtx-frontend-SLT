@@ -23,22 +23,50 @@ import { Create_Task_Download_Pending_Reject, Create_Task_Forward_F1_Filtered, C
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 export default function RejectIncident() {
   const navigate = useNavigate();
 
   // Filter state
   const [fromDate, setFromDate] = useState(null); //for date
-  const [toDate, setToDate] = useState(null);
-  const [error, setError] = useState("");
-  const [tableData, setTableData] = useState([]);
-  const [filteredData, setFilteredData] = useState(tableData);
-  const [selectAllData, setSelectAllData] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);  
-  const [selectedSource, setSelectedSource] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [toDate, setToDate] = useState(null); //for date
+  const [error, setError] = useState(""); //for date
+  const [tableData, setTableData] = useState([]); //for table data
+  const [filteredData, setFilteredData] = useState(tableData); //for table data
+  const [selectAllData, setSelectAllData] = useState(false); //for select all data
+  const [selectedRows, setSelectedRows] = useState([]); //for selected rows
+  const [searchQuery, setSearchQuery] = useState(""); //for search query
+  const [currentPage, setCurrentPage] = useState(0);   //for pagination
+  const [selectedSource, setSelectedSource] = useState(""); //for source type
+  const [isLoading, setIsLoading] = useState(true); //for loading state
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+  // Fetch data from API
   const fetchData = async () => {
       try {
         const filters= {
@@ -70,7 +98,8 @@ export default function RejectIncident() {
         setIsLoading(false);
       }
     };
-    
+
+   // Fetch data when the component mounts or when filters change 
    useEffect(() => {
         fetchData();
     }, []);
@@ -80,11 +109,27 @@ export default function RejectIncident() {
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       Swal.fire({
-                      title: "Error",
+                      title: "warning",
                       text: "The 'From' date cannot be later than the 'To' date.",
-                      icon: "error",
-                      confirmButtonColor: "#d33", 
+                      icon: "warning",
+                      confirmButtonColor: "#f1c40f"
                   });;
+    } else if (toDate){
+      // Calculate month gap
+      const diffInMs = toDate - date;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+      if (diffInDays > 31) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "The selected range is more than 1 month.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                });
+              
+                return;
+            }
+            setFromDate(date);
     } else {
       setError("");
       setFromDate(date);
@@ -95,11 +140,27 @@ export default function RejectIncident() {
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
       Swal.fire({
-                      title: "Error",
+                      title: "warning",
                       text: "The 'To' date cannot be earlier than the 'From' date.",
-                      icon: "error",
-                      confirmButtonColor: "#d33", 
+                      icon: "warning",
+                      confirmButtonColor: "#f1c40f"
                   });
+    } else if (fromDate) {
+      // Calculate month gap
+      const diffInMs = date - fromDate;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+      if (diffInDays > 31) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "The selected range is more than 1 month.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                });
+              
+                return;
+            }
+            setToDate(date);
     } else {
       setError("");
       setToDate(date);
@@ -117,16 +178,19 @@ export default function RejectIncident() {
       )
     );
   }, [searchQuery, tableData]);
+
   // Pagination state
   const rowsPerPage = 7;
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
+  // Pagination functions
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
 
+  // Pagination functions
   const handleNextPage = () => {
     if (currentPage < pages - 1) {
       setCurrentPage(currentPage + 1);
@@ -138,6 +202,7 @@ export default function RejectIncident() {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
+  // Checkbox functions
   const handleRowCheckboxChange = (id) => {
     if (selectedRows.includes(id)) {
       setSelectedRows(selectedRows.filter((id) => id !== id));
@@ -146,6 +211,7 @@ export default function RejectIncident() {
     }
   };
 
+  // Select All Data Checkbox
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
       setSelectedRows([]);
@@ -155,6 +221,7 @@ export default function RejectIncident() {
     setSelectAllData(!selectAllData);
   };
 
+  // Filter function
   const handleFilterClick = () => {
       const from = fromDate ? new Date(fromDate) : null;
       const to = toDate ? new Date(toDate) : null;
@@ -212,6 +279,7 @@ export default function RejectIncident() {
       }
     };
 
+  // Clear filter function
   const handleclearFilter = () => {
     setFromDate(null);
     setToDate(null);
@@ -220,7 +288,7 @@ export default function RejectIncident() {
   }
     
     
-
+  // Create task for download function
   const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
         if (filteredData.length === 0) {
               Swal.fire({
@@ -241,6 +309,15 @@ export default function RejectIncident() {
             confirmButtonText: 'OK',
             confirmButtonColor: "#f1c40f"
           });
+        } else if (!fromDate && !toDate) {
+          Swal.fire({
+            title: "Warning",
+            text: "Please select a date range.",
+            icon: "warning",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
+          });
+          return;
         }
         else if ((fromDate && !toDate) || (!fromDate && toDate)) {
           Swal.fire({
@@ -280,6 +357,7 @@ export default function RejectIncident() {
         }
     };
 
+  // Handle reject function
   const handleReject= async (Incident_Id)=>{
         if(!selectedRows.includes(Incident_Id)){
           Swal.fire({
@@ -296,7 +374,7 @@ export default function RejectIncident() {
             const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
             if (openTaskCount > 0) {
                     Swal.fire({
-                      title: "Warning",
+                      title: "Action Blocked",
                       text: "A task is already in progress.",
                       icon: "warning",
                       confirmButtonText: "OK",
@@ -327,13 +405,14 @@ export default function RejectIncident() {
         } 
   }
 
+  // Handle reject all function
   const handleRejectAll = async()=>{
     
       try{
-        if (filteredData.length === 0) {
+        if (selectedRows.length === 0) {
           Swal.fire({
             title: "Warning",
-            text: "No records to reject.",
+            text: "No records selected to reject.",
             icon: "warning",
             confirmButtonText: "OK",
             confirmButtonColor: "#f1c40f"
@@ -342,10 +421,10 @@ export default function RejectIncident() {
         }
         const result = await Swal.fire({
           title: "Confirm",
-          text: "Are you sure you want to move reject all the Reject pending cases?",
+          text:  `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
           icon: "info",
           showCancelButton: true,
-          confirmButtonText: "Reject All",
+          confirmButtonText: "Yes",
           confirmButtonColor: "#28a745",
           cancelButtonColor: "#d33",
           cancelButtonText: "Cancel",
@@ -356,7 +435,7 @@ export default function RejectIncident() {
             const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
             if (openTaskCount > 0) {
                   Swal.fire({
-                      title: "Warning",
+                      title: "Action Blocked",
                       text: "A task is already in progress.",
                       icon: "warning",
                       confirmButtonText: "OK",
@@ -364,38 +443,61 @@ export default function RejectIncident() {
                   });
               return;
             }
-            if(filteredData.length>10){
+            if(selectedRows.length>5){ // okkoma silect karala reject all dunnoth hari  // sweet alert add // add the date to the parameaters //condition change
+                const confirmTask = await Swal.fire({
+                  title: "Info",
+                  text: "More than 5 records selected. Do you want to create a task instead?",
+                  icon: "info",
+                  showCancelButton: true,
+                  confirmButtonText: "Create Task",
+                  cancelButtonText: "Cancel",
+                  confirmButtonColor: "#28a745",
+                  cancelButtonColor: "#d33"
+                });
+
+                if (!confirmTask.isConfirmed) return;
+
+               // const today = new Date().toISOString().split("T")[0];
+               // Proceed_Dtm: new Date().toISOString(),
+
                 const parameters = {
                   Status:"Reject Pending",
+                  Reject_Date: new Date(),
+                  
                 }
                 const response = await Create_Task_Reject_F1_Filtered(parameters);
                 if(response.status===201){
-                  Swal.fire({ 
+                   Swal.fire({
                     title: 'Success',
-                    text: 'Successfully created task to reject F1 filtered incidents',
+                    text: 'Successfully created task to reject the records',
                     icon: 'success',
                     confirmButtonText: 'OK',
                     confirmButtonColor: "#28a745"
                   });
                 }
-            }else{
-              for (const row of filteredData) {
-                await Reject_F1_Filtered(row.id); 
+            }else{ 
+              // Loop through selected rows and reject each one api call repeat karanawa 
+              for (const row of selectedRows) {
+                await Reject_F1_Filtered(row); 
               }
-              Swal.fire({ 
+              // if i send it like this the api call will not be repeated.
+              //await Reject_F1_Filtered(selectedRows); // selectedRows = [1, 2, 3, 4]
+              Swal.fire({
                 title: 'Success',
-                text: "Successfully rejected F1 filtered incidents",
+                text: "Successfully rejected selected records",
                 icon: 'success',
                 confirmButtonText: 'OK',
                 confirmButtonColor: "#28a745"
               });
               fetchData();
+              setSelectedRows([]); // Clear selected rows after rejection
+              setSelectAllData(false); // Clear select all checkbox
             }
         }
       }catch(error){
         Swal.fire({
           title: 'Error',
-          text: "Internal server error",
+          text: error.message ||"Internal server error",
           icon: 'error',
           confirmButtonText: 'OK',
           confirmButtonColor: "#d33"
@@ -403,27 +505,29 @@ export default function RejectIncident() {
       }   
     }
 
+  // Handle move forward function
     const handleMoveForward = async()=>{
        try{
-       if (filteredData.length === 0) {
-             Swal.fire({
-               title: "Warning",
-               text: "No records to move forward.",
-               icon: "warning",
-               confirmButtonText: "OK",
-               confirmButtonColor: "#f1c40f"
-             });
+       if  (selectedRows.length === 0) {
+          Swal.fire({
+            title: "Warning",
+            text: "No records selected to forward.",
+            icon: "warning",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
+          });
              return;
         }
         const result = await Swal.fire({
-             title: "Confirm",
-             text: ":Are you sure you want to move forward all the Reject pending cases?",
-             icon: "info",
-             showCancelButton: true,
-             confirmButtonText: "Forward",
-              confirmButtonColor: "#28a745",
-              cancelButtonColor: "#d33",
-             cancelButtonText: "Cancel",
+          title: "Confirm",
+          text: `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "Yes, Forward",
+          confirmButtonColor: "#28a745",
+          cancelButtonColor: "#d33",
+          cancelButtonText: "Cancel",
+
         });
 
         if (result.isConfirmed) {
@@ -431,7 +535,7 @@ export default function RejectIncident() {
           const openTaskCount = await Open_Task_Count_Forward_F1_Filtered();
           if (openTaskCount > 0) {
                 Swal.fire({
-                    title: "Warning",
+                    title: "Action Blocked",
                     text: "A task is already in progress.",
                     icon: "warning",
                     confirmButtonText: "OK",
@@ -440,15 +544,32 @@ export default function RejectIncident() {
             return;
           }
 
-          if(filteredData.length>10){
+          if(selectedRows.length>5){ 
+            const confirmTask = await Swal.fire({
+              title: "Info",
+              text: "More than 5 records selected. Do you want to create a task instead?",
+              icon: "info",
+              showCancelButton: true,
+              confirmButtonText: "Create Task",
+              cancelButtonText: "Cancel",
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#d33"
+            });
+
+            if (!confirmTask.isConfirmed) return;
+
+           // const today1 = new Date().toISOString().split("T")[0];
+            // Proceed_Dtm: new Date().toISOString(),
+
               const parameters = {
                 Status:"Reject Pending",
+                Forward_Date: new Date(), 
               }
               const response = await Create_Task_Forward_F1_Filtered(parameters);
               if(response.status===201){
                 Swal.fire({ 
                   title: 'Success',
-                  text: 'Successfully created task to forward F1 filtered incidents',
+                  text: 'Successfully created task to forward the records',
                   icon: 'success',
                   confirmButtonText: 'OK',
                   confirmButtonColor: "#28a745"
@@ -456,23 +577,27 @@ export default function RejectIncident() {
               }
           
           }else{
-            for (const row of filteredData) {
-              await Forward_F1_Filtered(row.id); 
+
+            for (const row of selectedRows) {
+              await Forward_F1_Filtered(row); 
             }
             Swal.fire({ 
               title: 'Success',
-              text: "Successfully forwarded F1 filtered incidents",
+              text: "Successfully forwarded selected records",
               icon: 'success',
               confirmButtonText: 'OK',
               confirmButtonColor: "#28a745"
             });
             fetchData();
+            setSelectedRows([]); // Clear selected rows after move forward
+            setSelectAllData(false); // Clear select all checkbox
+
           }
         }
       }catch(error){
         Swal.fire({
           title: 'Error',
-          text: error?.message,
+          text: error?.message ||"Internal server error",
           icon: 'error',
           confirmButtonText: 'OK',
           confirmButtonColor: "#d33"
@@ -556,15 +681,33 @@ export default function RejectIncident() {
           </div>
 
           {/* Filter Button */}
-          <button
+          <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+               <button
+               className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+               onClick={handleFilterClick}
+             >
+               Filter
+             </button>
+            )}
+          </div>
+          {/* <button
             className={`${GlobalStyle.buttonPrimary} h-[35px]`}
             onClick={handleFilterClick}
           >
             Filter
-          </button>
-          <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+          </button> */}
+
+          <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+               <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+               Clear
+              </button>
+            )}
+          </div>
+          {/* <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
                         Clear
-            </button>
+            </button> */}
 
           </div>
         </div>
@@ -659,12 +802,22 @@ export default function RejectIncident() {
                     <td
                       className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                     >
-                      <button
+                      <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          className={`${GlobalStyle.buttonPrimary} mx-auto`}
+                          onClick={()=>{handleReject(row.id)}}
+                        >
+                          Reject
+                        </button>
+                        )}
+                      </div>
+                      {/* <button
                         className={`${GlobalStyle.buttonPrimary} mx-auto`}
                         onClick={()=>{handleReject(row.id)}}
                       >
                         Reject
-                      </button>
+                      </button> */}
                     </td>
                   </tr>
                 ))}
@@ -723,18 +876,38 @@ export default function RejectIncident() {
               Select All
             </label>
 
-            <button
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                className={`${GlobalStyle.buttonPrimary} ml-4`}
+                onClick={handleMoveForward}
+              >
+                Move Forward
+              </button>
+              )}
+            </div>
+            {/* <button
               className={`${GlobalStyle.buttonPrimary} ml-4`}
               onClick={handleMoveForward}
             >
               Move Forward
-            </button>
-            <button
+            </button> */}
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                className={`${GlobalStyle.buttonRemove} ml-4`}
+                onClick={handleRejectAll}
+              >
+                Reject All
+              </button>
+              )}
+            </div>
+            {/* <button
               className={`${GlobalStyle.buttonRemove} ml-4`}
               onClick={handleRejectAll}
             >
               Reject All
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
