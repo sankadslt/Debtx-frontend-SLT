@@ -30,6 +30,9 @@ import { refreshAccessToken } from "../../services/auth/authService";
 import opeanincident from  "/src/assets/images/incidents/Incident_Open.png"
 import rejectincident from  "/src/assets/images/incidents/Incident_Reject.png"
 import inprogressincident from  "/src/assets/images/incidents/Incident_InProgress.png"
+import errorincident from "/src/assets/images/incidents/Incident_Error.png"
+import error from "/src/assets/images/incidents/Reject.png"
+
 
 const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0); // Pagination state
@@ -78,10 +81,12 @@ const Incident_List = () => {
         switch (status?.toLowerCase()) {
             case "incident open":
                 return opeanincident;
-            case "incident reject":
-                return rejectincident;
             case "incident inprogress":
                 return inprogressincident;
+            case "incident error":
+                return errorincident;
+            case "reject" || "incident reject":
+                return error;
             default:
                 return null;
         }
