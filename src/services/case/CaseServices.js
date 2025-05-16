@@ -493,7 +493,9 @@ export const List_All_DRCs_Mediation_Board_Cases = async (filters) => {
       `${URL}/List_All_DRCs_Mediation_Board_Cases`,
       filters
     );
-    return response.data;
+    if (response.data.status === "success") {
+      return response.data;
+    }
   } catch (error) {
     console.error(
       "Error fetching Case details :",
@@ -503,7 +505,28 @@ export const List_All_DRCs_Mediation_Board_Cases = async (filters) => {
   }
 };
 
-export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id) => {
+export const Case_Details_for_DRC = async (case_id, drc_id) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Case_Details_for_DRC`,
+      {
+        case_id: case_id,
+        drc_id: drc_id,
+      }
+    );
+    if (response.data.status === "success") {
+      return response.data.data;
+    }
+  } catch (error) {
+    console.error(
+      "Error fetching Case details :",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
+export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id, recieved_by) => {
   try {
     if (!case_id) {
       throw new Error("case_id is required");
@@ -518,7 +541,7 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
       recieved_by 
     });
 
-    return response.data;
+    return response.status;
   } catch (error) {
     console.error("Error updating case status:", error.response?.data || error.message);
     throw error.response?.data || error;
