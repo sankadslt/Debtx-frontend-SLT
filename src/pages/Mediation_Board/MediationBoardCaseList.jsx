@@ -19,7 +19,7 @@ import { Active_DRC_Details } from "../../services/drc/Drc";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { List_All_DRCs_Mediation_Board_Cases } from "../../services/case/CaseServices";
-import { RTOM_Details } from "../../services/RTOM/rtom";
+import { RTOM_Details } from "../../services/RTOM/Rtom";
 import { Tooltip } from "react-tooltip";
 import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
 import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
