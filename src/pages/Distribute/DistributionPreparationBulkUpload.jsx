@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { List_count_by_drc_commision_rule } from '/src/services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import  { Tooltip } from "react-tooltip";
+import File_Icon from "../../assets/images/fileicon.png";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
@@ -192,7 +193,7 @@ const DistributionPreparationBulkUpload = () => {
                           onClick={() => handleIconClick(service)}
                           className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                         >
-                          <img src="/src/assets/images/fileicon.png" 
+                          <img src={File_Icon}
                                   alt="file icon" 
                                   data-tooltip-id="filter-tooltip"
                                   className="w-5 h-5"  />
