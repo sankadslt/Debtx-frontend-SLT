@@ -10,40 +10,72 @@ Notes: The following page conatins the codes */
 import { useState , useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch , FaArrowLeft , FaDownload} from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import open from "/src/assets/images/distribution/more_info.png";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import {List_Case_Distribution_Details , Create_Task_For_case_distribution_drc_summery} from "/src/services/case/CaseServices.js";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
+import { Tooltip } from "react-tooltip";
+import { HiDotsCircleHorizontal } from "react-icons/hi";
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const CaseDistributionDRCSummary = () => {
 
 
   // State for filters and table
-  const [selectedDRC, setSelectedDRC] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDRCKey, setSelectedDRCKey] = useState("");
-  const [drcNames, setDrcNames] = useState([]);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const batchId = location.state?.BatchID;
+  const [selectedDRC, setSelectedDRC] = useState(""); // State for selected DRC
+  const [filteredData, setFilteredData] = useState([]); // State for filtered data
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [selectedDRCKey, setSelectedDRCKey] = useState(""); // State for selected DRC key
+  const [drcNames, setDrcNames] = useState([]); // State for DRC names
+  const location = useLocation(); // Get the current location
+  const navigate = useNavigate(); // Initialize navigate for routing
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+  const batchId = location.state?.BatchID; // Get the batch ID from the location state
 
 
+
+  // Role-Based Buttons
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+  
+      try {
+        let decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+  
+        if (decoded.exp < currentTime) {
+          refreshAccessToken().then((newToken) => {
+            if (!newToken) return;
+            const newDecoded = jwtDecode(newToken);
+            setUserRole(newDecoded.role);
+          });
+        } else {
+          setUserRole(decoded.role);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }, []);
 
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // State for current page
   const recordsPerPage = 7;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   // Filtering the data based on search query
-  const filteredDataBySearch = filteredData.filter((row) =>
+  const filteredDataBySearch = Array.isArray(filteredData)? filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
-  );
+  )
+  : [];
 
   // Apply pagination to the search-filtered data
   const currentData = filteredDataBySearch.slice(
@@ -51,6 +83,7 @@ const CaseDistributionDRCSummary = () => {
     indexOfLastRecord
   );
 
+  // useEffect to fetch DRC names
    useEffect(() => {
       const fetchDRCNames = async () => {
         try {
@@ -78,14 +111,14 @@ const CaseDistributionDRCSummary = () => {
       setSelectedDRC(selectedValue);
       setSelectedDRCKey(selectedKey);
   
-      console.log("Selected DRC: ", selectedValue);
-      console.log("Selected DRC ID: ", selectedKey);
+     // console.log("Selected DRC: ", selectedValue);
+     // console.log("Selected DRC ID: ", selectedKey);
     }
   };
 
   useEffect(() => {
     const payload = {
-      case_distribution_batch_id: batchId || "2",
+      case_distribution_batch_id: batchId ,
     };
     const fetchFilteredData = async () => {
       try {
@@ -102,10 +135,10 @@ const CaseDistributionDRCSummary = () => {
   // Handle filter action - all filtering happens here
   const handleFilter = () => {
     const payload = {
-      case_distribution_batch_id: batchId || "2",
+      case_distribution_batch_id: batchId ,
       drc_id: selectedDRCKey,
     };
-    console.log("Filter payload: ", payload);
+   // console.log("Filter payload: ", payload);
     const fetchFilteredData = async () => {
       try {
         const filteredData = await List_Case_Distribution_Details(payload);
@@ -118,20 +151,44 @@ const CaseDistributionDRCSummary = () => {
     fetchFilteredData();
   };
 
+  // Handle clear filters action
+  const handleclearfilters = () => {
+    
+    setSelectedDRC("");
+    setSelectedDRCKey("");
+    setSearchQuery("");
+    const payload = {
+      case_distribution_batch_id: batchId,
+    };
+   // console.log("Clear filters payload: ", payload);
+    const fetchFilteredData = async () => {
+      try {
+        const filteredData = await List_Case_Distribution_Details(payload);
+        setFilteredData(filteredData);
+      } catch (error) {
+        console.error("Error fetching filtered data:", error);
+        setFilteredData([]);
+      }
+    }
+    fetchFilteredData();
+  };
+
+
   // Handle create task action
   const handleCreateTask = async () => {
     const userId = await getLoggedUserId();
     const payload = {
       drc_id: selectedDRCKey,
       Created_By: userId,
+      case_distribution_batch_id : batchId,
     };
-    console.log("Create task payload: ", payload);
+   // console.log("Create task payload: ", payload);
     if (!selectedDRCKey) {
       Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "Select a DRC to create a task",
-                confirmButtonColor: "#d33",
+        icon: "warning",
+        title: "Warning",
+        text: "Please select a DRC before creating a task.",
+        confirmButtonColor: "#f1c40f",
               });
           return;
 
@@ -139,7 +196,7 @@ const CaseDistributionDRCSummary = () => {
     const createTask = async () => {
       try {
         const response = await Create_Task_For_case_distribution_drc_summery(payload);
-        console.log("Create task response: ", response);
+      //  console.log("Create task response: ", response);
         Swal.fire({
             icon: "success",
             title: "Success",
@@ -164,18 +221,19 @@ const CaseDistributionDRCSummary = () => {
     createTask();
   };
 
+  // Handle button click to navigate to DRC summary page
   const handleonbuttonclicked = ( drc_name , drc_id ) => {
     navigate("/pages/Distribute/CaseDistributionDRCSummarywithRTOM", {
       state:  {BatchID: batchId || "2" , DRCName: drc_name , DRCID: drc_id},
       
   });
-    console.log("Name: ", drc_name);
-    console.log("ID: ", drc_id);
-    console.log("Batch ID: ", batchId);
+   // console.log("Name: ", drc_name);
+   // console.log("ID: ", drc_id);
+   // console.log("Batch ID: ", batchId);
 
   };
 
-
+  // Handle back button click to navigate to the previous page
   const handleonbacknuttonclick = () => {
     navigate("/pages/Distribute/AssignedDRCSummary", {
   });
@@ -186,49 +244,77 @@ const CaseDistributionDRCSummary = () => {
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
-      <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary</h1>
-      <h2 className={GlobalStyle.headingMedium}>Batch - {batchId || "Undefined"} </h2>
+      <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary </h1>
+      <h2 className={GlobalStyle.headingMedium}>Batch - {batchId } </h2>
 
       {/* Filter Section */}
-      <div className="flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4">
-        {/* DRC Select Dropdown */}
-        <select
-          className={GlobalStyle.selectBox}
-          value={selectedDRC} 
-          onChange={handleDRCChange}
-        > 
-           <option value="" hidden>
-                DRC
-              </option>
-              {drcNames.map(({ key, value }) => (
-                <option key={key} value={value}>
-                  {value}
-                </option>
-              ))}
-          
-        </select>
+      <div className="flex justify-end">
+            <div className={`${GlobalStyle.cardContainer}  w-[30vw] flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4 `}>
+              {/* DRC Select Dropdown */}
+              <select
+                className={GlobalStyle.selectBox}
+                value={selectedDRC} 
+                onChange={handleDRCChange}
+                style={{ color: selectedDRC === "" ? "gray" : "black" }}
+              > 
+                <option value="" hidden>
+                      DRC
+                    </option>
+                    {drcNames.map(({ key, value }) => (
+                      <option key={key} value={value} style={{ color: "black" }}>
+                        {value}
+                      </option>
+                    ))}
+                
+              </select>
 
-        {/* Filter Button */}
-        <button
-          onClick={handleFilter}
-          className={`${GlobalStyle.buttonPrimary}`}
-        >
-          Filter
-        </button>
-      </div>
+              {/* Filter Button */}
 
-      {/* Search Section */}
-      <div className="flex justify-start mb-4">
-        <div className={GlobalStyle.searchBarContainer}>
-          <input
-            type="text"
-            placeholder=""
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={GlobalStyle.inputSearch}
-          />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
+              <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                    onClick={handleFilter}
+                    className={`${GlobalStyle.buttonPrimary}`}
+                  >
+                    Filter
+                  </button>  
+                    
+                    )}
+                </div>
+              {/* <button
+                onClick={handleFilter}
+                className={`${GlobalStyle.buttonPrimary}`}
+              >
+                Filter
+              </button> */}
+
+              {/* Reset Button */}
+              <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button className={`${GlobalStyle.buttonRemove} h-[35px] `} onClick={handleclearfilters}  >
+                    Clear 
+                    </button>             
+                    )}
+                </div>
+              
+              {/* <button className={`${GlobalStyle.buttonRemove} h-[35px] `} onClick={handleclearfilters}  >
+                            Clear 
+              </button> */}
+            </div>
         </div>
+
+        {/* Search Section */}
+        <div className="flex justify-start mb-4">
+          <div className={GlobalStyle.searchBarContainer}>
+            <input
+              type="text"
+              placeholder=""
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={GlobalStyle.inputSearch}
+            />
+            <FaSearch className={GlobalStyle.searchBarIcon} />
+          </div>
       </div>
 
       {/* Table Section */}
@@ -236,11 +322,13 @@ const CaseDistributionDRCSummary = () => {
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
-              <th className={GlobalStyle.tableHeader}>Created dtm</th>
+              
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>Count</th>
               <th className={GlobalStyle.tableHeader}>Total Arreas</th>
+              <th className={GlobalStyle.tableHeader}>Created dtm</th>
               <th className={GlobalStyle.tableHeader}>Proceed On</th>
+              
               <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
@@ -248,41 +336,51 @@ const CaseDistributionDRCSummary = () => {
             {currentData.length >0?  (
               currentData.map((item, index) => (
                 <tr
-                  key={item.caseId}
+                key={`${item.caseId}-${index}`}
                   className={
                     index % 2 === 0
                       ? GlobalStyle.tableRowEven
                       : GlobalStyle.tableRowOdd
                   }
                 >
-                  <td className={GlobalStyle.tableData}>{new Date (item.created_dtm).toLocaleDateString()}</td>
+                  
                   <td className={GlobalStyle.tableData}>{item.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{item.case_count}</td>
-                  <td className={GlobalStyle.tableData}>{item.tot_arrease}</td>
+                  <td className={GlobalStyle.tableCurrency}>{item.tot_arrease}</td>
+                  <td className={GlobalStyle.tableData}>{new Date (item.created_dtm).toLocaleString('en-GB', 
+                  {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric", // Ensures two-digit year (YY)
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: true, // Keeps AM/PM format
+                      })}
+                  </td>
                   <td className={GlobalStyle.tableData}>
-                    {item.proceed_on ? new Date(item.proceed_on).toLocaleDateString() : ""}
+                    {item.proceed_on ? new Date(item.proceed_on).toLocaleDateString('en-GB') : ""}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={26}
-                        height={29}
-                        fill="none"
-                      >
-                        <path
-                          fill="#000"
-                          fillRule="evenodd"
-                          d="M13 .32c7.18 0 13 5.821 13 13 0 7.18-5.82 13-13 13s-13-5.82-13-13c0-7.179 5.82-13 13-13Zm5.85 11.05a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                  <div>
+                  {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)} data-tooltip-id="my-tooltip" >
+                                            {/* <img
+                                                src= {open}
+                                                data-tooltip-id="my-tooltip"
+                                
+                                              ></img> */}
+                                     <HiDotsCircleHorizontal size={25} color="#000"  />   
+
+                      <Tooltip id="my-tooltip" place="bottom" content="More Info" />
                     </button>
+                  )}
+                  </div>
                   </td>
                 </tr>
               ))): (
                 <tr>
-                  <td colSpan={6} className={GlobalStyle.tableData}>
+                  <td colSpan={6} style={{ textAlign: 'center', verticalAlign: 'middle' }} className={GlobalStyle.tableData}>
                     No data found
                   </td>
                 </tr>
@@ -295,42 +393,35 @@ const CaseDistributionDRCSummary = () => {
       <br></br>
 
       {/* Button */}
+      { currentData.length > 0 && (
       <div className="flex justify-between">
         <br></br>
         {/* Right-aligned button */}
-        <button
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+            onClick={handleCreateTask}
+            className={`${GlobalStyle.buttonPrimary} flex items-center `} // Same style as Approve button
+          >
+            <FaDownload className="mr-2" />
+            Create Task and Let Me Know
+          </button>
+            
+            )}
+        </div>
+        {/* <button
           onClick={handleCreateTask}
-          className={GlobalStyle.buttonPrimary} // Same style as Approve button
+          className={`${GlobalStyle.buttonPrimary} flex items-center `} // Same style as Approve button
         >
+          <FaDownload className="mr-2" />
           Create Task and Let Me Know
-        </button>
+        </button> */}
       </div>
+      )}
+
       {/* Button on the left */}
-      <button onClick={handleonbacknuttonclick}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width={65}
-          height={65}
-          fill="none"
-        >
-          <circle
-            cx={32.5}
-            cy={32.5}
-            r={32.45}
-            fill="#B3CCE3"
-            stroke="#58120E"
-            strokeWidth={0.1}
-            transform="rotate(-90 32.5 32.5)"
-          />
-          <path
-            fill="#001120"
-            d="m36.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L43.782 45.5l3.063-3.064L36.46 32.051Z"
-          />
-          <path
-            fill="#001120"
-            d="m23.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L30.782 45.5l3.063-3.064L23.46 32.051Z"
-          />
-        </svg>
+      <button className={GlobalStyle.buttonPrimary} onClick={handleonbacknuttonclick}>
+         <FaArrowLeft className="mr-2" />
       </button>
     </div>
   );

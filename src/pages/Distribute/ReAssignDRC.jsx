@@ -14,46 +14,84 @@
 import { useState , useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import { useLocation , useNavigate } from "react-router-dom";
 import { AssignDRCToCaseDetails , Assign_DRC_To_Case} from "/src/services/case/CaseServices.js";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Swal from "sweetalert2";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 export default function ReAssignDRC() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [currentPage1, setCurrentPage1] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchQuery1, setSearchQuery1] = useState("");
-  const [caseDetails, setCaseDetails] = useState([]);
-  const [tabledata, setTabledata] = useState([]);
-  const [table1data, setTable1data] = useState([]);
-  const [drcNames, setDrcNames] = useState([]);
-  const [newEntry, setNewEntry] = useState({
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
+  const [currentPage1, setCurrentPage1] = useState(1); // Current page for pagination
+  const [searchQuery, setSearchQuery] = useState(""); // Search query for filtering data
+  const [searchQuery1, setSearchQuery1] = useState(""); // Search query for filtering data
+  const [caseDetails, setCaseDetails] = useState([]); // Case details from API
+  const [tabledata, setTabledata] = useState([]); // Table data from API
+  const [table1data, setTable1data] = useState([]); // Table data from API
+  const [drcNames, setDrcNames] = useState([]); // DRC names from API
+  const [newEntry, setNewEntry] = useState({  // New entry for DRC assignment
     drckey: "",
     drc: "",
     remark : ""
   });
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  const location = useLocation();
+  const { caseId, accountNo } = location.state || {};
+
+  //console.log("Case ID:", caseId);
+  //console.log("Account No:", accountNo);
+  
+
+
+
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+  // UseEffect to fetch case details from the API
   useEffect(() => {
     const fetchCaseDetails = async () => {
       try {
-        const payload = { case_id: 1 };
+        const payload = { case_id: caseId };
     
-        console.log("Sending API request with payload:", payload);
+       // console.log("Sending API request with payload:", payload);
     
         const response = await AssignDRCToCaseDetails(payload);
     
-        console.log("API Response:", response);
+       // console.log("API Response:", response);
 
-        console.log("Case details received:", response.data);
+       // console.log("Case details received:", response.data);
         setCaseDetails(response.data);
         
         setTabledata(response.data.ro_negotiation)
-        console.log("Table:", response.data.ro_negotiation);
+       // console.log("Table:", response.data.ro_negotiation);
 
         setTable1data(response.data.drc)
-        console.log("Table1:", response.data.drc);
+       // console.log("Table1:", response.data.drc);
           
       } catch (error) {
         console.error("Error fetching case details:", error);
@@ -65,6 +103,7 @@ export default function ReAssignDRC() {
     fetchCaseDetails();
   }, []);
 
+  // UseEffect to fetch DRC names from the API
   useEffect(() => {
     const fetchDRCNames = async () => {
       try {
@@ -77,12 +116,37 @@ export default function ReAssignDRC() {
     };
     fetchDRCNames();
   });
+
+  // UseEffect to fetch data from the API
+  const handleonbacknuttonclick = () => {
+    navigate("/pages/Distribute/AssignDRCCaseList" );
+  };
   
+  // Function to handle the submission of the new entry
   const onSubmit = async () => {
+    if (newEntry.drc === "") {
+      Swal.fire({ 
+        icon: "warning",
+        title: "Warning",
+        text: "Please select a DRC.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    if (newEntry.remark === "") {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please enter a remark.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
     const userId = await getLoggedUserId();
 
     const payload = {
-      case_id: 1,
+      case_id: caseId,
       drc_id: newEntry.drckey,
       remark: newEntry.remark,
       assigned_by: userId,
@@ -94,7 +158,7 @@ export default function ReAssignDRC() {
     try {
       const response = await Assign_DRC_To_Case(payload);
 
-      console.log("API Response:", response);
+     // console.log("API Response:", response);
 
       if (response.status = "success") {
         Swal.fire({
@@ -121,6 +185,7 @@ export default function ReAssignDRC() {
 
   };
 
+  // Function to handle the search functionality
   const filteredSearchData = tabledata.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -128,6 +193,7 @@ export default function ReAssignDRC() {
       .includes(searchQuery.toLowerCase())
   );
 
+  // Function to handle the search functionality for table1data
   const filteredSearchData1 = table1data.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -158,7 +224,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
 
 
 const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
-
+  // Pagination for filteredSearchData (tabledata)
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -171,13 +237,63 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedData = filteredSearchData.slice(startIndex, endIndex);
+
+
+  
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <h1 className={`${GlobalStyle.headingLarge} mb-5`}>Re-Assign DRC</h1>
 
       {/* card box*/}
       <div className={`${GlobalStyle.cardContainer}`}>
-        <p className="flex gap-3 mb-2">
+        <table>
+
+          <colgroup>
+            <col  />
+            <col style={{ width: "20px" }} />
+            <col />
+            
+          </colgroup>
+          <tbody>
+              <tr>
+                <td className="py-2"><strong>Case ID </strong></td>
+               
+                <td className="py-2 "> <strong> : </strong> </td>
+                
+                <td className="py-2 p">  {caseDetails.case_id} </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Customer Ref </strong></td>
+                
+                <td className="py-2"> <strong> : </strong> </td>
+                
+                <td className="py-2"> {caseDetails.customer_ref} </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Account no</strong></td>
+                
+                <td className="py-2"> <strong> : </strong> </td>
+                
+                <td className="py-2"> {caseDetails.account_no} </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Arrears Amount </strong></td>
+               
+                <td className="py-2"> <strong> : </strong> </td>
+              
+                <td className="py-2"> {caseDetails.current_arrears_amount} </td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Last Payment Date  </strong></td>
+                
+                <td className="py-2"> <strong> : </strong> </td>
+                
+                <td className="py-2"> {new Date(caseDetails.last_payment_date).toLocaleDateString()} </td>
+              </tr>
+            
+          </tbody>
+        </table>
+        {/* <p className="flex gap-3 mb-2">
           <strong>Case ID: </strong>
           <div> {caseDetails.case_id}</div>
         </p>
@@ -193,7 +309,7 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
         </p>
         <p className="mb-2">
           <strong>Last Payment Date: </strong>{new Date(caseDetails.last_payment_date).toLocaleDateString()}
-        </p>
+        </p> */}
       </div>
 
       <div className=" mb -6">
@@ -249,7 +365,7 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
                         ))
                       ):(
                         <tr>
-                          <td colSpan="4" className={GlobalStyle.tableData}>
+                          <td colSpan="4" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                             No data found
                           </td>
                         </tr>
@@ -259,29 +375,31 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
                   </table>
                 </div>
              </div>
+             { paginatedData1.length > 0 && (
              <div className={`${GlobalStyle.navButtonContainer} mb-14`}>
-          <button
-            onClick={() => handlePrevNext1("prev")}
-            disabled={currentPage1 === 1}
-            className={`${GlobalStyle.navButton} ${
-              currentPage1 === 1 ? "cursor-not-allowed" : ""
-            }`}
-          >
-            <FaArrowLeft />
-          </button>
-          <span>
-            Page {currentPage1} of {totalpages1}
-          </span>
-          <button
-            onClick={() => handlePrevNext1("next")}
-            disabled={currentPage1 === totalpages1}
-            className={`${GlobalStyle.navButton} ${
-              currentPage1 === totalPages ? "cursor-not-allowed" : ""
-            }`}
-          >
-            <FaArrowRight />
-          </button>
-        </div>
+                <button
+                  onClick={() => handlePrevNext1("prev")}
+                  disabled={currentPage1 === 1}
+                  className={`${GlobalStyle.navButton} ${
+                    currentPage1 === 1 ? "cursor-not-allowed" : ""
+                  }`}
+                >
+                  <FaArrowLeft />
+                </button>
+                <span>
+                  Page {currentPage1} of {totalpages1}
+                </span>
+                <button
+                  onClick={() => handlePrevNext1("next")}
+                  disabled={currentPage1 === totalpages1}
+                  className={`${GlobalStyle.navButton} ${
+                    currentPage1 === totalPages ? "cursor-not-allowed" : ""
+                  }`}
+                >
+                  <FaArrowRight />
+                </button>
+              </div>
+              )}
       </div>
 
       <div className=" mt-6 mb-6">
@@ -338,7 +456,7 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
                   ))
                 ):(
                   <tr>
-                    <td colSpan="4" className={GlobalStyle.tableData}>
+                    <td colSpan="4" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                       No data found
                     </td>
                   </tr>
@@ -348,7 +466,7 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
             </table>
           </div>
         </div>
-
+        { paginatedData.length > 0 && (
         <div className={`${GlobalStyle.navButtonContainer} mb-14`}>
           <button
             onClick={() => handlePrevNext("prev")}
@@ -372,6 +490,7 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
             <FaArrowRight />
           </button>
         </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-4 mt-9">
@@ -385,13 +504,14 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
                   drckey: selectedDRC.key,
                   drc: selectedDRC.value });
               }}
+              style={{ color: newEntry.drc === "" ? "gray" : "black" }}    
         
         >
-        <option value="" hidden>
+        <option value="" hidden style={{ color: "gray" }}>
                 DRC
               </option>
               {drcNames.map(({ key, value }) => (
-                <option key={key} value={value}>
+                <option key={key} value={value} style={{ color: "black" }}>
                   {value}
                 </option>
               ))}
@@ -410,10 +530,22 @@ const totalPages = Math.ceil(filteredSearchData.length / itemsPerPage);
       </div>
 
       <div className="flex items-end justify-end">
-        <button className={`${GlobalStyle.buttonPrimary}`} onClick={onSubmit}>
-          Submit
-        </button>
+      <div>
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+              <button className={`${GlobalStyle.buttonPrimary}`} onClick={onSubmit}>
+              Submit
+            </button>
+          )}
       </div>
+
+        {/* <button className={`${GlobalStyle.buttonPrimary}`} onClick={onSubmit}>
+          Submit
+        </button> */}
+      </div>
+
+      <button className={GlobalStyle.buttonPrimary} onClick={handleonbacknuttonclick}>
+         <FaArrowLeft className="mr-2" />
+      </button>
     </div>
   );
 }

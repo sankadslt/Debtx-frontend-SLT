@@ -1,97 +1,95 @@
 /*Purpose: 
 Created Date: 2025-01-09
 Created By: Vihanga eshan Jayarathna (vihangaeshan2002@gmail.com)
-Last Modified Date: 2025-01-09
-Modified By: Vihanga eshan Jayarathna (vihangaeshan2002@gmail.com)
+Last Modified Date: 2025-03-27
+Modified By: Vihanga eshan Jayarathna (vihangaeshan2002@gmail.com), Naduni Rabel (rabelnaduni2000@gmail.com)
 Version: React v18
 ui number : 1.3
 Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import PropTypes from 'prop-types';
 import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import { List_Download_Files_from_Download_Log } from "../../services/file/fileDownloadService";
+import  { Tooltip } from "react-tooltip";
+
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 
 const Incident_File_Download = () => {
-
+    // State variables
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
+    const [tableData, setTableData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+    const [error, setError] = useState("");
     const rowsPerPage = 7;
 
 
+    // Role-Based Buttons
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
 
 
-    const data = [
-        {
-            TaskID: "Task001",
-            GroupID: "0001",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task002",
-            GroupID: "0002",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task003",
-            GroupID: "0003",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task004",
-            GroupID: "0001",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task005",
-            GroupID: "0002",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task006",
-            GroupID: "0003",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task007",
-            GroupID: "0001",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task008",
-            GroupID: "0002",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-        {
-            TaskID: "Task009",
-            GroupID: "0003",
-            CreatedDTM: "2025-01-01",
-            ExpireDTM: "1 pm",
-            CreatedBy: "2025-01-01",
-        },
-    ];
+    // Fetch data from the API
+    const fetchData = async () => {
+      try {      
+        const response = await List_Download_Files_from_Download_Log();
+        const formattedData = response.data.map((item) => { 
+            const createdDateStr = typeof item.Created_On === "string" ? item.Created_On.replace(" ", "T") : item.Created_On;
+            const expireDateStr = typeof item.File_Remove_On === "string" ? item.File_Remove_On.replace(" ", "T") : item.File_Remove_On;
+            const createdDate = createdDateStr ? new Date(createdDateStr) : null;
+            const expireDate = expireDateStr ? new Date(expireDateStr) : null;
+            return {
+              TaskID: item.file_download_seq || "N/A",
+              GroupID: item.file_download_seq || "N/A",
+              CreatedDTM: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A",
+              ExpireDTM: isNaN(expireDate) ? "N/A" : expireDate.toLocaleString() || "N/A",
+              Filepath: item.File_Location || "N/A",
+              CreatedBy: item.Deligate_By
+            };
+          });
+          
+          setTableData(formattedData);
+          setIsLoading(false);
+      } catch {
+          setError("Failed to fetch DRC details. Please try again later.");
+          setIsLoading(false);
+      }
+    };
 
-
-    const filteredData = data.filter((row) =>
+    // Fetch data when the component mounts
+    useEffect(() => {
+        fetchData();
+      }, []);
+   
+    // Handle loading state and error
+    const filteredData = tableData.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -100,7 +98,7 @@ const Incident_File_Download = () => {
 
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
-
+    // Calculate the number of pages based on the filtered data length
     const handlePrevPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
@@ -117,15 +115,31 @@ const Incident_File_Download = () => {
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, endIndex);
 
+    // Handle file download
+    const handleDownload = (filepath) => {
+        alert ("Need to configure the download with the server")
 
-    const handleDownload = (taskId) => {
-        try {
+        // try {
+        //     const filename = filepath.split(/[\\/]/).pop();  // Extract the filename from the file path
+        //     const downloadurl = `http://localhost:5000/uploads/${filename}`; // Construct the download URL
 
-            console.log(`Downloading file for task: ${taskId}`);
-        } catch (error) {
-            console.error('Download failed:', error);
+        //     const link = document.createElement("a");
+        //     link.href = downloadurl;
+            
+        //     link.setAttribute("download", filename); // Set the download attribute with the filename
+        //     document.body.appendChild(link);
+        //     link.click(); // Trigger the download
+        //     document.body.removeChild(link); // Clean up the link element
+            
+        //     console.log("Download initiated for:", filename);
 
-        }
+
+
+            
+        // } catch (error) {
+        //     console.error('Download failed:', error);
+
+        // }
     };
 
     return (
@@ -140,7 +154,7 @@ const Incident_File_Download = () => {
                 <div className={GlobalStyle.searchBarContainer}>
                     <input
                         type="text"
-                        placeholder="Search by Task ID, Group ID..."
+                        placeholder=""
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className={GlobalStyle.inputSearch}
@@ -149,7 +163,7 @@ const Incident_File_Download = () => {
                 </div>
             </div>
 
-
+            {/* Table */}
             <div className={GlobalStyle.tableContainer}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
@@ -161,14 +175,15 @@ const Incident_File_Download = () => {
                                 Group ID
                             </th>
                             <th scope="col" className={GlobalStyle.tableHeader}>
+                                Created By
+                            </th>
+                            <th scope="col" className={GlobalStyle.tableHeader}>
                                 Created DTM
                             </th>
                             <th scope="col" className={GlobalStyle.tableHeader}>
                                 Expire DTM
                             </th>
-                            <th scope="col" className={GlobalStyle.tableHeader}>
-                                Created By
-                            </th>
+                            
                             <th scope="col" className={GlobalStyle.tableHeader}>
                                 Download
                             </th>
@@ -176,7 +191,9 @@ const Incident_File_Download = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedData.map((log, index) => (
+                        {paginatedData.map((log, index) => {
+                            // const isExpired = new Date(log.ExpireDTM).toLocaleString() < new Date().toLocaleString();
+                            return(
                             <tr
                                 key={log.TaskID}
                                 className={`${index % 2 === 0
@@ -186,20 +203,55 @@ const Incident_File_Download = () => {
                             >
                                 <td className={GlobalStyle.tableData}>{log.TaskID}</td>
                                 <td className={GlobalStyle.tableData}>{log.GroupID}</td>
-                                <td className={GlobalStyle.tableData}>{log.CreatedDTM}</td>
-                                <td className={GlobalStyle.tableData}>{log.ExpireDTM}</td>
                                 <td className={GlobalStyle.tableData}>{log.CreatedBy}</td>
-                                <td className={GlobalStyle.tableData}>
-                                    <button
-                                        onClick={() => handleDownload(log.TaskID)}
-                                        className="text-blue-600 hover:text-blue-800"
-                                        title="Download file"
+                                <td className={GlobalStyle.tableData}>{new Date(log.CreatedDTM).toLocaleString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true,
+                                        })}</td>
+                                <td className={GlobalStyle.tableData}>{new Date(log.ExpireDTM).toLocaleString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true,
+                                        })}</td>
+                                
+                                <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <div>
+                                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                                        <button
+                                        onClick={() => handleDownload(log.File_Location)}
+                                        className="text-blue-600 hover:text-blue-800 " 
+                                        data-tooltip-id="download-tooltip"
+                                        // disabled={isExpired}
                                     >
                                         <FaDownload />
+
                                     </button>
+                                    )}
+                                </div>
+                                    {/* <button
+                                        onClick={() => handleDownload(log.TaskID)}
+                                        className="text-blue-600 hover:text-blue-800 " 
+                                        data-tooltip-id="download-tooltip"
+                                        disabled={isExpired}
+                                    >
+                                        <FaDownload />
+
+                                    </button> */}
+                                    {/* <Tooltip id="download-tooltip" place="bottom" content={isExpired ? "Download expired" : "Download file"} /> */}
+                                    <Tooltip id="download-tooltip" place="bottom" content="Download file" />
                                 </td>
                             </tr>
-                        ))}
+                          )
+                        })}
                         {filteredData.length === 0 && (
                             <tr>
                                 <td colSpan="6" className="text-center py-4">

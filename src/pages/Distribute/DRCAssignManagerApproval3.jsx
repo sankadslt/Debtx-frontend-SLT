@@ -8,8 +8,8 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: The following page conatins the codes */
 
-import { useState } from "react";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { useState , useEffect } from "react";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -22,16 +22,24 @@ import {
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import one from "/src/assets/images/imagefor1.a.13(one).png";
 import Swal from "sweetalert2";
+import { use } from "react";
+import { Tooltip } from "react-tooltip";
+import { useNavigate } from "react-router-dom";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 
 export default function DRCAssignManagerApproval3() {
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]); // State for filtered data
   const [drcFilter, setDrcFilter] = useState(""); // DRC filter state
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [ approverstatus , setApproverStatus] = useState(""); // Approver status state]
+  const [startDate, setStartDate] = useState(null); // Start date state
+  const [endDate, setEndDate] = useState(null); // End date state
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const navigate = useNavigate(); // For navigation
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
@@ -40,21 +48,93 @@ export default function DRCAssignManagerApproval3() {
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
 
-  // Handle date change
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+
+  // Handle start date change
   const handlestartdatechange = (date) => {
-    setStartDate(date);
+
+
+    if (endDate && date > endDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Start date cannot be later than end date.",
+        confirmButtonColor: "#f1c40f",
+      });
+    
+    }
+    else {
+      setStartDate(date);
     if (endDate) checkdatediffrence(date, endDate);
+    }
+
   };
 
+  // Handle end date change
   const handleenddatechange = (date) => {
-    if (startDate) {
-      checkdatediffrence(startDate, date);
+    if (startDate && date < startDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "End date cannot be earlier than start date.",
+        confirmButtonColor: "#f1c40f",
+      });
+      
     }
-    setEndDate(date);
+    else {
+      if (startDate) {
+        checkdatediffrence(startDate, date);
+      }
+      setEndDate(date);
+
+    }
 
   }
 
-  
+  // Fetch data on component mount
+  useEffect(() => {
+    // Fetch data from the API
+    const fetchDRCData = async () => {
+      const userId = await getLoggedUserId();
+      const payload = {
+        approved_deligated_by: userId,
+      };
+     // console.log("Request Payload:", payload);
+      try {
+        const response = await List_DRC_Assign_Manager_Approval(payload);
+      //  console.log("Response:", response);
+        setFilteredData(response);
+      } catch (error) {
+        console.error("Error fetching DRC assign manager approval:", error);
+      }
+    };
+    fetchDRCData();
+  }, []);
+
+
+    // Function to check date difference and show alert if more than 1 month
     const checkdatediffrence = (startDate, endDate) => {
       const start = new Date(startDate).getTime();
       const end = new Date(endDate).getTime();
@@ -79,7 +159,7 @@ export default function DRCAssignManagerApproval3() {
             handleApicall(startDate, endDate);
           } else {
             setEndDate(null);
-            console.log("EndDate cleared");
+           // console.log("EndDate cleared");
           }
         }
         );
@@ -87,6 +167,7 @@ export default function DRCAssignManagerApproval3() {
       }
     };
 
+    // Function to handle API call for creating task when the date range exceeds 1 month
     const handleApicall = async (startDate, endDate) => {
       try {
         const userId = await getLoggedUserId();
@@ -96,10 +177,10 @@ export default function DRCAssignManagerApproval3() {
           Created_By: userId,
         };
     
-        console.log("Filtered Request Payload:", payload);
+       // console.log("Filtered Request Payload:", payload);
     
         const data = await Create_task_for_DRC_Assign_Manager_Approval(payload);
-        console.log("Response:", data);
+       // console.log("Response:", data);
     
         Swal.fire({
           icon: "success",
@@ -135,23 +216,63 @@ export default function DRCAssignManagerApproval3() {
     if (drcFilter) {
       payload.approver_type = drcFilter;
     }
+    if (approverstatus) {
+      payload.approve_status = approverstatus;
+    }
     if (startDate) {
       payload.date_from = startDate;
     }
     if (endDate) {
       payload.date_to = endDate;
     }
+    const userId = await getLoggedUserId();
+    payload.approved_deligated_by = userId;
 
-    console.log("Filtered Request Data:", payload);
+    //console.log("Filtered Request Data:", payload);
+
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+          Swal.fire({
+            title: "Error",
+            text: "Please select both start and end dates.",
+            icon: "error",
+            confirmButtonColor: "#f1c40f",
+          });
+          return;
+        }
 
     try {
       const response = await List_DRC_Assign_Manager_Approval(payload);
-      console.log("Filtered Response Data:", response);
+     // console.log("Filtered Response Data:", response);
       setFilteredData(response);
     } catch (error) {
       console.error("Error fetching DRC assign manager approval:", error);
     }
   };
+
+  // Clear filters and reset state
+  const handlefilterClear = () => {
+    setDrcFilter("");
+    setStartDate(null);
+    setEndDate(null);
+    setApproverStatus("");
+    
+    const filterclear = async () => {
+      const userId = await getLoggedUserId();
+      const payload = {
+        approved_deligated_by: userId,
+      };
+     // console.log("Request Payload:", payload);
+      try {
+        const response = await List_DRC_Assign_Manager_Approval(payload);
+      //  console.log("Response:", response);
+        setFilteredData(response);
+      } catch (error) {
+        console.error("Error fetching DRC assign manager approval:", error);
+      }
+    };
+    filterclear();
+  };
+
   // Handle pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
@@ -170,7 +291,8 @@ export default function DRCAssignManagerApproval3() {
           .includes(searchQuery.toLowerCase())
       )
     : currentData;
-console.log("Filtered Data:", filteredDataBySearch);
+  //console.log("Filtered Data:", filteredDataBySearch);
+
   //const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
 
@@ -187,6 +309,7 @@ console.log("Filtered Data:", filteredDataBySearch);
   //   }
   // };
 
+  // Function to handle row selection
   const handleRowSelect = (caseid) => {
     const newSelectedRows = new Set(selectedRows);
 
@@ -215,14 +338,16 @@ console.log("Filtered Data:", filteredDataBySearch);
     // }
   };
 
+  // Function to handle approve type change
   const handleOnApproveTypeChange = (e) => {
     setDrcFilter(e.target.value);
   };
 
+  // Function to handle approve button click
   const onApproveButtonClick = async ( ) => {
     const userId = await getLoggedUserId();
     const batchIds = Array.from(selectedRows);
-    console.log("Selected batch IDs:", batchIds);
+   // console.log("Selected batch IDs:", batchIds);
     if (batchIds.length === 0) {
       Swal.fire({
         icon: "warning",
@@ -235,9 +360,13 @@ console.log("Filtered Data:", filteredDataBySearch);
 
     const alreadyApproved = batchIds.some((id) => {
       const record = filteredData.find((row) => row.approver_reference === id);
-      return record?.approved_by !== null;
-  });
+      
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
 
+      return status === "Approve" ;
+
+  });
+  //console.log("Already Approved:", alreadyApproved);
     if (alreadyApproved) {
       Swal.fire({
         icon: "warning",
@@ -247,17 +376,56 @@ console.log("Filtered Data:", filteredDataBySearch);
       });
       return;
     }
+
+    const rejected = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Reject";
+
+    });
+    //console.log("Rejected:", rejected);
+
+    if (rejected) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been rejected.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
     
+   
+
+      // Show confirmation alert before calling API
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to approve the selected record?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+
 
 
     const payload = {
       approver_reference: batchIds,
       approved_by: userId,
     };
-    console.log("Approve payload:", payload);
+    //console.log("Approve payload:", payload);
     try {
       const response = await Approve_DRC_Assign_Manager_Approval(payload);
-      console.log("Approve response:", response);
+      //console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -283,10 +451,11 @@ console.log("Filtered Data:", filteredDataBySearch);
     }
   };
 
+  // Function to handle reject button click
   const onRejectButtonClick = async () => {
     const userId = await getLoggedUserId();
     const batchIds = Array.from(selectedRows);
-    console.log("Selected batch IDs:", batchIds);
+   // console.log("Selected batch IDs:", batchIds);
     if (batchIds.length === 0) {
       Swal.fire({
         icon: "warning",
@@ -296,14 +465,70 @@ console.log("Filtered Data:", filteredDataBySearch);
       });
       return;
     }
+
+    const alreadyApproved = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Approve";
+
+  });
+  //console.log("Already Approved:", alreadyApproved);
+    if (alreadyApproved) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been approved.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    const rejected = batchIds.some((id) => {
+      const record = filteredData.find((row) => row.approver_reference === id);
+
+      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+
+      return status === "Reject";
+
+    });
+    //console.log("Rejected:", rejected);
+
+    if (rejected) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Selected record has already been rejected.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+    
+      // Show confirmation alert before calling API
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to rejected the selected record?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
     const payload = {
       approver_references: batchIds,
       approved_by: userId,
     };
-    console.log("Approve payload:", payload);
+    //console.log("Approve payload:", payload);
     try {
       const response = await Reject_DRC_Assign_Manager_Approval(payload);
-      console.log("Approve response:", response);
+    //  console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -324,34 +549,39 @@ console.log("Filtered Data:", filteredDataBySearch);
         icon: "error",
         title: "Error",
         text: errorMessage,
-        confirmButtonColor: "#f1c40f",
+        confirmButtonColor: "#d33",
       });
     }
   };
 
+  // Function to handle create task button click
   const onCreateTask = async () => {
     const userId = await getLoggedUserId();
-    const batchIds = Array.from(selectedRows);
-    console.log("Selected batch IDs:", batchIds);
-    if (batchIds.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please select at least one record .",
-        confirmButtonColor: "#f1c40f",
-      });
-      return;
-    }
+    //const batchIds = Array.from(selectedRows);
+    //console.log("Selected batch IDs:", batchIds);
+    // if (batchIds.length === 0) {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Warning",
+    //     text: "Please select at least one record .",
+    //     confirmButtonColor: "#f1c40f",
+    //   });
+    //   return;
+    // }
     const payload = {
-      approver_references: batchIds,
+      //approver_references: batchIds, // meka galevva  drop down vala select karana tika yavanna one - check backend
+      approver_type: drcFilter,
+      date_from: startDate,
+      date_to: endDate,
+      approver_status: approverstatus,
       Created_By: userId,
     };
-    console.log("Approve payload:", payload);
+    //console.log("Approve payload:", payload);
     try {
       const response = await Create_task_for_DRC_Assign_Manager_Approval(
         payload
       );
-      console.log("Approve response:", response);
+      //console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -373,91 +603,163 @@ console.log("Filtered Data:", filteredDataBySearch);
         icon: "error",
         title: "Error",
         text: errorMessage,
-        confirmButtonColor: "#f1c40f",
+        confirmButtonColor: "#d33",
       });
     }
   };
 
+  // Function to handle table icon click
   const onTableIconClick = (item) => {
+
+    const formattedParameters = Object.entries(item.parameters)
+    .map(([key, value]) => `  "${key}": ${JSON.stringify(value)}`)
+    .join('\n');
+
     Swal.fire({
+      
       title: "Row Parameters",
-      html: `<pre style="text-align: center; white-space: pre-wrap;">${JSON.stringify(item.parameters, null, 2)}</pre>`,
+      html: `
+      <div style="margin-top: -15px; font-size: 15px; color: #000; margin-bottom: 10px;">
+        <strong>${item.approver_type}</strong>
+      </div>
+      <pre style="text-align: center; white-space: pre-wrap;">${formattedParameters}</pre>
+    `,
       icon: "info",
       confirmButtonText: "Close",
       confirmButtonColor: "#d33",
-      width: "500px", // Adjust width if needed
+      width: "500px",
     });
   };
+
+  // Function to handle hover button click of the table 
+  const onhoverbuttonclick = (caseid) => {
+    navigate("/Incident/Case_Details", {
+      state: { CaseID: caseid }, // Pass the case ID as a parameter
+    });
+   // console.log("Navigating to Case Details with ID:", caseid);
+  }
+
+
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Assigned DRC Summary</h1>
-      <div className="flex justify-between mt-16 mb-6">
-        <div className="flex justify-start mb-8">
-          <div className={GlobalStyle.searchBarContainer}>
-            <input
-              type="text"
-              placeholder=""
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={GlobalStyle.inputSearch}
-            />
-            <FaSearch className={GlobalStyle.searchBarIcon} />
-          </div>
-        </div>
+      <div className="flex justify-end ">
+        {/* Filter Section */}
+        <div  className= {`${GlobalStyle.cardContainer}  w-full mt-6  `}>
+            <div className="flex gap-3">
+              {" "}
+              <div className="flex gap-3 h-[35px] ">
+                <select
+                  className={GlobalStyle.selectBox}
+                  value={drcFilter}
+                  onChange={handleOnApproveTypeChange}
+                  style={{ color: drcFilter === "" ? "gray" : "black" }}
 
-        <div className="flex gap-10">
-          {" "}
-          <div className="flex gap-4 h-[35px] mt-2">
-            <select
-              className={GlobalStyle.selectBox}
-              value={drcFilter}
-              onChange={handleOnApproveTypeChange}
-            >
-              <option value="" hidden>
-                Select Approve Type
-              </option>
-              <option value="DRC Assign Approval">DRC Assign Approval </option>
-              <option value="DRC Re-Assign Approval">DRC Re-Assign Approval</option>
-              <option value="Case Withdrawal Approval">Case Withdrawal Approval</option>
-              <option value="Case Abandoned Approval">Case Abandoned Approval</option>
-              <option value="Case Write-Off Approval">Case Write-Off Approval</option>
-              <option value="Commission Approval">Commission Approval</option>
+                >
+                  <option value="" hidden>
+                    Select Approve Type
+                  </option>
+                  <option value="DRC Assign Approval" style={{ color: "black" }}>DRC Assign Approval </option>
+                  <option value="DRC Re-Assign Approval" style={{ color: "black" }}>DRC Re-Assign Approval</option>
+                  <option value="Case Withdrawal Approval" style={{ color: "black" }}>Case Withdrawal Approval</option>
+                  <option value="Case Abandoned Approval" style={{ color: "black" }}>Case Abandoned Approval</option>
+                  <option value="Case Write-Off Approval" style={{ color: "black" }}>Case Write-Off Approval</option>
+                  <option value="Commission Approval" style={{ color: "black" }}>Commission Approval</option>
+                  
+
+                </select>
+
+                <select 
+                  className={GlobalStyle.selectBox}
+                  value={approverstatus}
+                  onChange={(e) => setApproverStatus(e.target.value)}
+                  style={{ color: approverstatus === "" ? "gray" : "black" }}
+                >
+                  <option value="" hidden>
+                    Select Approve Status
+                  </option>
+                  <option value="Open" style={{ color: "black" }}>Open</option>
+                  <option value="Approve" style={{ color: "black" }}>Approve</option>
+                  <option value="Reject" style={{ color: "black" }}>Reject</option>
+                  
+
+                </select>
+
+
+
+
+              </div>
+                  <label className={GlobalStyle.dataPickerDate}  style={{ marginTop: '5px', display: 'block' }}>Date : </label>
+                  <DatePicker
+                    selected={startDate}
+                    onChange={handlestartdatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="From"
+                    className={GlobalStyle.inputText}
+                  />
+
+                  <DatePicker
+                    selected={endDate}
+                    onChange={handleenddatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="To"
+                    className={GlobalStyle.inputText}
+                  />
+
+                <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                            onClick={applyFilters}
+                            className={`${GlobalStyle.buttonPrimary} h-[35px] `}
+                          >
+                            Filter
+                      </button>
+                    )}
+                 </div>
               
+              {/* <button
+                onClick={applyFilters}
+                className={`${GlobalStyle.buttonPrimary} h-[35px] `}
+              >
+                Filter
+              </button> */}
 
-            </select>
-          </div>
-          <div className="flex flex-col items-center mb-4">
-            <div className={GlobalStyle.datePickerContainer}>
-              <label className={GlobalStyle.dataPickerDate}>Date </label>
-
-              <DatePicker
-                selected={startDate}
-                onChange={handlestartdatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/mm/yyyy"
-                className={GlobalStyle.inputText}
-              />
-
-              <DatePicker
-                selected={endDate}
-                onChange={handleenddatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/mm/yyyy"
-                className={GlobalStyle.inputText}
-              />
+              <div>
+                  {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                    className={`${GlobalStyle.buttonRemove} h-[35px] `}
+                    onClick={handlefilterClear}
+                    >
+                      clear
+                    </button>
+                  )}
+              </div>
+              {/* <button
+                className={`${GlobalStyle.buttonRemove} h-[35px] `}
+                onClick={handlefilterClear}
+                >
+                  clear
+                </button> */}
             </div>
-          </div>
-          <button
-            onClick={applyFilters}
-            className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2`}
-          >
-            Filter
-          </button>
         </div>
       </div>
 
       {/* Search Section */}
+
+      <div className="flex py-2 items-center justify-start gap-2 mt-2 mb-4">
+        <div className={GlobalStyle.searchBarContainer}>
+          <input
+            type="text"
+            placeholder=""  
+
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={GlobalStyle.inputSearch}
+          />
+          <FaSearch className={GlobalStyle.searchBarIcon} />
+        </div>
+      </div>
 
       {/* Table Section */}
       <div className={GlobalStyle.tableContainer}>
@@ -473,12 +775,16 @@ console.log("Filtered Data:", filteredDataBySearch);
                 /> */}
               </th>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
-              <th className={GlobalStyle.tableHeader}>Created on</th>
-              <th className={GlobalStyle.tableHeader}>Created by</th>
-              <th className={GlobalStyle.tableHeader}>Approve Type</th>
               <th className={GlobalStyle.tableHeader}>Approve Status</th>
+              <th className={GlobalStyle.tableHeader}>Approve Type</th>
               <th className={GlobalStyle.tableHeader}>Approve By</th>
               <th className={GlobalStyle.tableHeader}>Remark</th>
+              <th className={GlobalStyle.tableHeader}>Created by</th>
+              <th className={GlobalStyle.tableHeader}>Created on</th>
+              
+              
+              
+              
               <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
@@ -502,44 +808,56 @@ console.log("Filtered Data:", filteredDataBySearch);
                     />
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {item.approver_reference}
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    {new Date(item.created_on).toLocaleDateString("en-GB")}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{item.created_by}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {item.approver_type}
+                    <button 
+                      onClick={() => onhoverbuttonclick(item.approver_reference)}
+                      onMouseOver={(e) => e.currentTarget.style.textDecoration = "underline"} 
+                      onMouseOut={(e) => e.currentTarget.style.textDecoration = "none"} >
+
+                          {item.approver_reference}
+
+                    </button>
                   </td>
                   <td className={GlobalStyle.tableData}>
                   {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
                   </td>
-                  <td className={GlobalStyle.tableData}>{item.approved_by}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {item.approver_type}
+                  </td>
+                  <td className={GlobalStyle.tableData}>{item.approved_deligated_by}</td>
                   <td className={GlobalStyle.tableData}>
                     {item.remark.length > 0
                       ? item.remark[item.remark.length - 1].remark
                       : "N/A"}
                   </td>
+                  
+                  <td className={GlobalStyle.tableData}>{item.created_by}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {new Date(item.created_on).toLocaleDateString("en-GB")}
+                  </td>
+                  
+                  
+                  
+                  
+                  
                   <td className={GlobalStyle.tableData}>
                     <button onClick={() => onTableIconClick(item)}>
+
                       <img
                         src={one}
                         width={15}
                         height={15}
                         alt="Summary"
-                        style={{
-                          position: "relative",
-                          top: "4px",
-                          right: "2px",
-                        }}
+                        data-tooltip-id="my-tooltip"
+                        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                       />
+                      <Tooltip id="my-tooltip" place="bottom" content="View Parameters" />
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="9" className={GlobalStyle.tableData}>
+                <td colSpan="9" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                   No data available
                 </td>
               </tr>
@@ -549,6 +867,7 @@ console.log("Filtered Data:", filteredDataBySearch);
       </div>
 
       {/* Pagination Section */}
+      { filteredDataBySearch.length > 0 && (
       <div className={GlobalStyle.navButtonContainer}>
         <button
           onClick={() => handlePrevNext("prev")}
@@ -572,6 +891,7 @@ console.log("Filtered Data:", filteredDataBySearch);
           <FaArrowRight />
         </button>
       </div>
+      )}
 
       {/* Select All Data Checkbox and Approve Button */}
       <div className="flex justify-end gap-4 mt-4">
@@ -586,25 +906,67 @@ console.log("Filtered Data:", filteredDataBySearch);
           Select All Data
         </label> */}
 
+
         {/* Approve Button */}
-        <button
-          onClick={onRejectButtonClick}
-          className={GlobalStyle.buttonPrimary}
-        >
-          Reject
-        </button>
-        <button
+        
+        {/* <button
           onClick={onApproveButtonClick}
           className={GlobalStyle.buttonPrimary}
         >
           Approve
-        </button>
+        </button> */}
+
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+              <button
+              onClick={onApproveButtonClick}
+              className={GlobalStyle.buttonPrimary}
+            >
+              Approve
+            </button>
+            )}
+        </div>
+
+        {/* Reject Button */}
+
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              onClick={onRejectButtonClick}
+              className={GlobalStyle.buttonRemove}
+            >
+              Reject
+            </button>
+            )}
+        </div>
+        {/* <button
+          onClick={onRejectButtonClick}
+          className={GlobalStyle.buttonRemove}
+        >
+          Reject
+        </button> */}
       </div>
+
+      {/* Create Task Button */}
       <div>
-        <button onClick={onCreateTask} className={GlobalStyle.buttonPrimary}>
+        { filteredDataBySearch.length > 0 && (
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
+            <FaDownload className="mr-2" />
+               Create Task and Let me know
+           </button>
+            )}
+        </div>
+        )}
+
+        {/* <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
+          <FaDownload className="mr-2" />
           Create Task and Let me know
-        </button>
+        </button> */}
       </div>
+
+
     </div>
   );
 }

@@ -69,6 +69,7 @@ export const List_Distribution_Ready_Incidents = async () => {
 };
 
 
+
 export const distribution_ready_incidents_group_by_arrears_band= async () => {
   try {
     const response = await axios.post(`${INCIDENT_URL}/distribution_ready_incidents_group_by_arrears_band`);
@@ -79,7 +80,17 @@ export const distribution_ready_incidents_group_by_arrears_band= async () => {
   }
 };
 
+export const List_Transaction_Logs_Upload_Files = async (requestBody) => {
+  try {
+    const response = await axios.post(`${INCIDENT_URL}/List_Transaction_Logs_Upload_Files`, requestBody);
 
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching transaction logs upload files:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+}
+  
 
 export const List_Incidents_CPE_Collect = async (filters) => {
   try {
@@ -153,3 +164,13 @@ export const getOpenTaskCountforCPECollect = async () => {
   }
 };
 
+
+export const Task_for_Download_Incidents = async (incidentData) => {
+  try {
+      const response = await axios.post(`${INCIDENT_URL}/Task_for_Download_Incidents`, incidentData);
+      return response.data;
+  } catch (error) {
+      console.error("Error creating incident:", error.response?.data || error.message);
+      throw error.response?.data || error;
+  }
+};

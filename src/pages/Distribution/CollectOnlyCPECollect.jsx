@@ -13,10 +13,10 @@ Notes:
 
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
+import Open_CPE_Collect from "../../assets/images/incidents/Only_CPE_Collect.png";
 import {
   List_Incidents_CPE_Collect,
   Forward_CPE_Collect,
@@ -27,22 +27,52 @@ import {
   Open_Task_Count_Forward_CPE_Collect,
 } from "../../services/task/taskService.js";
 import Swal from "sweetalert2";
+import  { Tooltip } from "react-tooltip";
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 export default function CollectOnlyCPECollect() {
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
-  const [error, setError] = useState("");
-  const [selectAllData, setSelectAllData] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [selectedSource, setSelectedSource] = useState("");
-  const [tableData, setTableData] = useState([]);
-  const [isloading, setIsLoading] = useState(true);
-  const [filteredData, setFilteredData] = useState(tableData);
-  const rowsPerPage = 7;
+  const [fromDate, setFromDate] = useState(null); // Usestate for From Date
+  const [toDate, setToDate] = useState(null); // Usestate for To Date
+  const [error, setError] = useState(""); // Usestate for Error
+  const [selectAllData, setSelectAllData] = useState(false); // Usestate for Select All Data
+  const [selectedRows, setSelectedRows] = useState([]); // Usestate for Selected Rows
+  const [searchQuery, setSearchQuery] = useState(""); // Usestate for Search Query
+  const [currentPage, setCurrentPage] = useState(0); // Usestate for Current Page
+  const [selectedSource, setSelectedSource] = useState(""); // Usestate for Selected Source
+  const [tableData, setTableData] = useState([]); // Usestate for Table Data
+  const [isloading, setIsLoading] = useState(true); // Usestate for Loading
+  const [filteredData, setFilteredData] = useState(tableData); // Usestate for Filtered Data
+  const rowsPerPage = 7; // Number of rows per page
   const navigate = useNavigate();
 
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+  // Role-Based Buttons
+      useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
+
+  // Function to fetch incident    
   const fetchData = async () => {
     try {
       const filters = {
@@ -85,7 +115,7 @@ export default function CollectOnlyCPECollect() {
     fetchData();
   }, []);
 
-  
+  // Function to  handle the creation of a task for download button
   const handleCreateTaskForDownload = async ({
     source_type,
     fromDate,
@@ -97,16 +127,28 @@ export default function CollectOnlyCPECollect() {
         text: "Please select a Source Type or provide a date range before creating a task.",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
       });
       return;
     }
 
+    if (!fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select a date range before creating a task.",
+        icon: "warning",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
     if ((fromDate && !toDate) || (!fromDate && toDate)) {
       Swal.fire({
         title: "Incomplete Date Range",
         text: "Both From Date and To Date must be selected together.",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -117,6 +159,8 @@ export default function CollectOnlyCPECollect() {
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Yes, create it!",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
       cancelButtonText: "Cancel",
     });
 
@@ -137,6 +181,7 @@ export default function CollectOnlyCPECollect() {
           text: "Task successfully created",
           icon: "success",
           confirmButtonText: "OK",
+          confirmButtonColor: "#28a745",
         });
       }
     } catch {
@@ -145,10 +190,12 @@ export default function CollectOnlyCPECollect() {
         text: "Error creating task",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33",
       });
     }
   };
 
+  // Function to handle the proceed button click
   const handleProceed = async (Incident_Id) => {
     if (!selectedRows.includes(Incident_Id)) {
       Swal.fire({
@@ -156,6 +203,7 @@ export default function CollectOnlyCPECollect() {
         text: "Row not selected",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f",
       });
       return;
     }
@@ -166,6 +214,8 @@ export default function CollectOnlyCPECollect() {
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, Proceed",
+      cancelButtonColor: "#d33",
+      confirmButtonColor: "#28a745",
       cancelButtonText: "No",
     });
   
@@ -176,10 +226,11 @@ export default function CollectOnlyCPECollect() {
       const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
       if (openTaskCount > 0) {
         Swal.fire({
-          title: "Warning",
+          title: "Action Blocked",
           text: "A task is already in progress.",
           icon: "warning",
           confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f",
         });
         return;
       }
@@ -190,6 +241,7 @@ export default function CollectOnlyCPECollect() {
           text: response.data.message,
           icon: "success",
           confirmButtonText: "OK",
+          confirmButtonColor: "#28a745",
         });
         fetchData();
       }
@@ -199,11 +251,12 @@ export default function CollectOnlyCPECollect() {
         text: error.message,
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33",
       });
     }
   };
 
- 
+  // Function to handle the creation of a task for selected rows
   const handleCreate = async () => {
     if (selectedRows.length === 0) {
       Swal.fire({
@@ -211,6 +264,7 @@ export default function CollectOnlyCPECollect() {
         text: "No rows selected. Please select at least one incident.",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f",
       });
       return;
     }
@@ -219,22 +273,25 @@ export default function CollectOnlyCPECollect() {
       const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
       if (openTaskCount > 0) {
         Swal.fire({
-          title: "Warning",
-          text: "A task is already in progress. Please complete it first.",
+          title: "Action Blocked",
+          text: "A task is already in progress.",
           icon: "warning",
           confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f",
         });
         return;
       }
   
-      if (selectedRows.length > 9) {
+      if (selectedRows.length > 1) {
        
         const confirmCreateTask = await Swal.fire({
           title: "Create Task?",
-          text: "You have selected more than 9 incidents. Do you want to create a task instead?",
+          text: "You have selected more than 5 incidents. Do you want to create a task instead?",
           icon: "question",
           showCancelButton: true,
           confirmButtonText: "Yes, Create Task",
+          cancelButtonColor: "#d33",
+          confirmButtonColor: "#28a745",
           cancelButtonText: "Cancel",
         });
   
@@ -242,7 +299,8 @@ export default function CollectOnlyCPECollect() {
   
         const parameters = {
           Status: "Open CPE Collect",
-          Incident_Ids: selectedRows,
+          //Incident_Ids: selectedRows,
+          Proceed_Date : new Date(),
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
   
@@ -252,6 +310,7 @@ export default function CollectOnlyCPECollect() {
             text: "Task successfully created for forwarding Collect CPE Only incidents.",
             icon: "success",
             confirmButtonText: "OK",
+            confirmButtonColor: "#28a745",
           });
         }
       } else {
@@ -262,6 +321,8 @@ export default function CollectOnlyCPECollect() {
           icon: "question",
           showCancelButton: true,
           confirmButtonText: "Yes, Proceed",
+          cancelButtonColor: "#d33",
+          confirmButtonColor: "#28a745",
           cancelButtonText: "Cancel",
         });
   
@@ -276,6 +337,7 @@ export default function CollectOnlyCPECollect() {
           text: "Successfully forwarded the selected Collect CPE Only incidents.",
           icon: "success",
           confirmButtonText: "OK",
+          confirmButtonColor: "#28a745",
         });
   
         fetchData();
@@ -283,32 +345,100 @@ export default function CollectOnlyCPECollect() {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "An error occurred while processing your request.",
+        text: error.message || "An error occurred while processing your request.",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33",
       });
       console.error("Error:", error);
     }
   };
   
+  // Function to handle the date change for From Date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
-    } else {
+      
+      Swal.fire({
+                                  title: "Error",
+                                  text: "The 'From' date cannot be later than the 'To' date.",
+                                  icon: "error",
+                                  confirmButtonColor: "#f1c40f",
+                              });;
+    } else if (toDate) {
+      // Calculate month gap
+      const diffInMs = toDate - date;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      
+      if (diffInDays > 31) {
+          Swal.fire({
+              title: "Warning",
+              text: "The selected range is more than 1 month.",
+              icon: "warning",
+              confirmButtonColor: "#f1c40f",
+          });
+        
+          return;
+    }
+    setFromDate(date);
+  } 
+    else {
       setError("");
       setFromDate(date);
     }
   };
-
+// else if (toDate){
+//       // Calculate month gap
+//       const diffInMs = toDate - date;
+//       const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      
+//       if (diffInDays > 31) {
+//           Swal.fire({
+//               title: "Warning",
+//               text: "The selected range is more than 1 month.",
+//               icon: "warning",
+//               confirmButtonColor: "#f1c40f",
+//           });
+        
+//           return;
+//       }
+//       setFromDate(date);
+//     }
+  // Function to handle the date change for To Date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
-    } else {
+      
+      Swal.fire({
+        title: "Error",
+        text: "The 'To' date cannot be earlier than the 'From' date.",
+        icon: "error",
+        confirmButtonColor: "#f1c40f",
+      });
+    } else if (fromDate){
+
+          // Calculate month gap
+          const diffInMs = date - fromDate;
+          const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+          
+          if (diffInDays > 31) {
+              Swal.fire({
+                  title: "Warning",
+                  text: "The selected range is more than 1 month.",
+                  icon: "warning",
+                  confirmButtonColor: "#f1c40f",
+              });
+            
+              return;
+        }
+        setToDate(date);
+      }
+    
+    else {
       setError("");
       setToDate(date);
     }
   };
 
+  // Function to handle the search query change
   useEffect(() => {
     setFilteredData(
       tableData.filter((row) =>
@@ -322,12 +452,14 @@ export default function CollectOnlyCPECollect() {
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
+  // Function to handle the previous page button click
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
 
+  // Function to handle the next page button click
   const handleNextPage = () => {
     if (currentPage < pages - 1) {
       setCurrentPage(currentPage + 1);
@@ -338,6 +470,7 @@ export default function CollectOnlyCPECollect() {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
+  // Function to handle the checkbox change for each row
   const handleRowCheckboxChange = (id) => {
     if (selectedRows.includes(id)) {
       setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
@@ -346,6 +479,7 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
+  // Function to handle the select all checkbox change
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
       setSelectedRows([]);
@@ -355,6 +489,7 @@ export default function CollectOnlyCPECollect() {
     setSelectAllData(!selectAllData);
   };
 
+  // Function to handle the filter button click
   const handleFilterClick = () => {
     const from = fromDate ? new Date(fromDate) : null;
     const to = toDate ? new Date(toDate) : null;
@@ -365,6 +500,7 @@ export default function CollectOnlyCPECollect() {
         text: "Please select a Source Type or provide both From Date and To Date.",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f",
       });
       return;
     }
@@ -375,6 +511,7 @@ export default function CollectOnlyCPECollect() {
         text: "Both From Date and To Date must be selected together.",
         icon: "warning",
         confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f",
       });
       return;
     }
@@ -395,6 +532,8 @@ export default function CollectOnlyCPECollect() {
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: "Create Task",
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#d33",
             cancelButtonText: "Cancel",
           }).then((result) => {
             if (result.isConfirmed) {
@@ -414,6 +553,23 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
+  // Function to handle the clear filter button click
+  const handleclearfilter = () => {
+    setFromDate(null);
+    setToDate(null);
+    setSelectedSource("");
+    setSearchQuery("");
+    setSelectAllData(false);
+    setSelectedRows([]);
+    
+  }
+
+  useEffect(() => {
+      if (fromDate === null && toDate === null && selectedSource === "") {
+          fetchData();
+      }
+  }, [fromDate, toDate, selectedSource]);
+
   return (
     <div className={GlobalStyle.fontPoppins}>
       {isloading ? (
@@ -423,11 +579,15 @@ export default function CollectOnlyCPECollect() {
       ) : (
         <div className={GlobalStyle.fontPoppins}>
           <div className="flex justify-between items-center w-full">
-            <h1 className={`${GlobalStyle.headingLarge} m-0`}>
+            <h1 className={`${GlobalStyle.headingLarge} mb-6`}>
               Incidents for Distribute to Collect Only CPE
             </h1>
-            <button
-              className={`${GlobalStyle.buttonPrimary}`}
+            
+          </div>
+          <div className="flex justify-end items-center w-full mb-4">
+          {/* <button
+            
+              className={`${GlobalStyle.buttonPrimary} flex items-center`}
               onClick={() => {
                 handleCreateTaskForDownload({
                   source_type: selectedSource,
@@ -436,58 +596,109 @@ export default function CollectOnlyCPECollect() {
                 });
               }}
             >
+            <FaDownload className="mr-2" />
               Create task and let me know
-            </button>
-          </div>
-
-          <div className="flex justify-end gap-10 my-12 items-center">
-            <div className="flex items-center gap-4">
-              <label>Source:</label>
-              <select
-                className={GlobalStyle.inputText}
-                value={selectedSource}
-                onChange={(e) => setSelectedSource(e.target.value)}
+            </button> */}
+            { paginatedData.length > 0 && (
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+            
+                className={`${GlobalStyle.buttonPrimary} flex items-center`}
+                onClick={() => {
+                  handleCreateTaskForDownload({
+                    source_type: selectedSource,
+                    fromDate: fromDate,
+                    toDate: toDate,
+                  });
+                }}
               >
-                <option value="">Select</option>
-                <option value="Pilot Suspended">Pilot Suspended</option>
-                <option value="Special">Special</option>
-                <option value="Product Terminate">Product Terminate</option>
-              </select>
+              <FaDownload className="mr-2" />
+                Create task and let me know
+              </button>
+              )}
             </div>
+            )}
 
-            <div className="flex items-center gap-4">
-              <label>Date:</label>
-              <DatePicker
-                selected={fromDate}
-                onChange={handleFromDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/MM/yyyy"
-                className={GlobalStyle.inputText}
-              />
-              <DatePicker
-                selected={toDate}
-                onChange={handleToDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/MM/yyyy"
-                className={GlobalStyle.inputText}
-              />
-              {error && <span className={GlobalStyle.errorText}>{error}</span>}
+
+          </div>
+          <div className="flex justify-end">
+            {/* Filter Section */}
+            <div className={`${GlobalStyle.cardContainer}  items-center w-[72vw] mb-8 mt-8`}>
+                <div className="flex items-center gap-4 justify-end">
+                  <div className="flex items-center gap-4">
+                    <label>Source:</label>
+                    <select
+                      className={GlobalStyle.inputText}
+                      value={selectedSource}
+                      onChange={(e) => setSelectedSource(e.target.value)}
+                      style={{ color: selectedSource === "" ? "gray" : "black" }}
+                    >
+                      <option value="" hidden>Select</option>
+                      <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>
+                      <option value="Special" style={{ color: "black" }}>Special</option>
+                      <option value="Product Terminate" style={{ color: "black" }}>Product Terminate</option>
+                    </select>
+                  </div>
+
+                    <div className="flex items-center gap-4">
+                      <label>Date:</label>
+                      <DatePicker
+                        selected={fromDate}
+                        onChange={handleFromDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="From"
+                        className={GlobalStyle.inputText}
+                      />
+                      <DatePicker
+                        selected={toDate}
+                        onChange={handleToDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="To"
+                        className={GlobalStyle.inputText}
+                      />
+                      {error && <span className={GlobalStyle.errorText}>{error}</span>}
+                    </div>
+
+                    {/* <button
+                      className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                      onClick={handleFilterClick}
+                    >
+                      Filter
+                    </button> */}
+
+                    <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                          onClick={handleFilterClick}
+                        >
+                          Filter
+                        </button>
+                        )}
+                      </div>
+
+                    {/* <button className={GlobalStyle.buttonRemove} onClick={handleclearfilter}>
+                                Clear
+                    </button> */}
+                    <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button className={GlobalStyle.buttonRemove} onClick={handleclearfilter}>
+                          Clear
+                        </button>
+                        )}
+                      </div>
+              </div>
             </div>
-
-            <button
-              className={`${GlobalStyle.buttonPrimary} h-[35px]`}
-              onClick={handleFilterClick}
-            >
-              Filter
-            </button>
           </div>
 
           <div className="flex flex-col">
+            {/* Search Section */}
             <div className="mb-4 flex justify-start">
               <div className={GlobalStyle.searchBarContainer}>
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder=""
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={GlobalStyle.inputSearch}
@@ -495,6 +706,7 @@ export default function CollectOnlyCPECollect() {
                 <FaSearch className={GlobalStyle.searchBarIcon} />
               </div>
             </div>
+            {/* Table Section */}
             <div className={GlobalStyle.tableContainer}>
               <table className={GlobalStyle.table}>
                 <thead className={GlobalStyle.thead}>
@@ -507,7 +719,7 @@ export default function CollectOnlyCPECollect() {
                       Status
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      Account No.
+                      Account No
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Action
@@ -528,7 +740,7 @@ export default function CollectOnlyCPECollect() {
                           : "bg-gray-50 bg-opacity-50"
                       } border-b`}
                     >
-                      <td className={GlobalStyle.tableData}>
+                      <td className={GlobalStyle.tableData} >
                         <input
                           type="checkbox"
                           className={"rounded-lg"}
@@ -544,17 +756,21 @@ export default function CollectOnlyCPECollect() {
                       <td className={GlobalStyle.tableData}>
                         <div className="flex justify-center items-center h-full">
                           {row.status === "Open CPE Collect" && (
-                            <div
-                              title="Open CPE Collect"
-                              aria-label="Open CPE Collect"
-                            >
+                            <div>
                               <img
                                 src={Open_CPE_Collect}
                                 alt="Open CPE Collect"
                                 className="w-5 h-5"
+                                data-tooltip-id="open-cpe-collect-tooltip"
                               />
                             </div>
                           )}
+                          <Tooltip
+                            id="open-cpe-collect-tooltip"
+                            place="bottom"
+                            content="Open CPE Collect"
+                            className="tooltip"
+                          />
                         </div>
                       </td>
 
@@ -569,7 +785,17 @@ export default function CollectOnlyCPECollect() {
                       <td
                         className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                       >
-                        <button
+                        {/* <button
+                          className={`${GlobalStyle.buttonPrimary} mx-auto`}
+                          onClick={() => {
+                            handleProceed(row.id);
+                          }}
+                        >
+                          Proceed
+                        </button> */}
+                        <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
                           className={`${GlobalStyle.buttonPrimary} mx-auto`}
                           onClick={() => {
                             handleProceed(row.id);
@@ -577,6 +803,8 @@ export default function CollectOnlyCPECollect() {
                         >
                           Proceed
                         </button>
+                        )}
+                      </div>
                       </td>
                     </tr>
                   ))}
@@ -591,6 +819,8 @@ export default function CollectOnlyCPECollect() {
               </table>
             </div>
           </div>
+
+          {/* Pagination Section */}
 
           {tableData.length > rowsPerPage && (
             <div className={GlobalStyle.navButtonContainer}>
@@ -613,15 +843,17 @@ export default function CollectOnlyCPECollect() {
               </button>
             </div>
           )}
-
+          {/* Back Button Section */}
           <div className="flex justify-start items-center w-full  ">
             <button
               className={`${GlobalStyle.buttonPrimary} `} 
               onClick={() => navigate(-1)}
             >
-              ← Back
+              <FaArrowLeft className="mr-2" />
+              
             </button>
           </div>
+          {/* Select All Data and proceed button Section  */}
           <div className="flex justify-end items-center w-full">
             <label className="flex items-center gap-2">
               <input
@@ -636,12 +868,23 @@ export default function CollectOnlyCPECollect() {
               Select All Data
             </label>
 
-            <button
+            {/* <button
               className={`${GlobalStyle.buttonPrimary} ml-4`}
               onClick={handleCreate}
             >
               Proceed
-            </button>
+            </button> */}
+
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                className={`${GlobalStyle.buttonPrimary} ml-4`}
+                onClick={handleCreate}
+              >
+                Proceed
+              </button>
+              )}
+            </div>
           </div>
         </div>
       )}

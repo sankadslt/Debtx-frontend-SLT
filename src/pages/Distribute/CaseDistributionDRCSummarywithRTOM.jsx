@@ -9,20 +9,25 @@ Notes: The following page conatins the codes */
 
 import { useState , useEffect } from "react";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch , FaArrowLeft } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { useLocation, useNavigate } from "react-router-dom";
 import {List_Case_Distribution_Details_With_Rtoms} from "/src/services/case/CaseServices.js";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 const CaseDistributionDRCSummarywithRTOM = () => {
 
   // State for filters and table
-  const location = useLocation();
-  const batchId = location.state?.BatchID;
-  const drcname = location.state?.DRCName;
-  const drcid = location.state?.DRCID;
-  const [filteredData, setFilteredData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const location = useLocation(); // Get the location object from react-router
+  const navigate = useNavigate(); // Initialize navigate for routing
+  const batchId = location.state?.BatchID; // Get the BatchID from the location state
+  const drcname = location.state?.DRCName; // Get the DRCName from the location state
+  const drcid = location.state?.DRCID; // Get the DRCID from the location state
+  const [filteredData, setFilteredData] = useState([]); // State for filtered data
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   // Filtering the data based on search query
   const filteredDataBySearch = filteredData.filter((row) =>
@@ -32,6 +37,31 @@ const CaseDistributionDRCSummarywithRTOM = () => {
       .includes(searchQuery.toLowerCase())
   );
 
+    // Role-Based Buttons
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+  
+      try {
+        let decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+  
+        if (decoded.exp < currentTime) {
+          refreshAccessToken().then((newToken) => {
+            if (!newToken) return;
+            const newDecoded = jwtDecode(newToken);
+            setUserRole(newDecoded.role);
+          });
+        } else {
+          setUserRole(decoded.role);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }, []);
+
+
+  // UseEffect to fetch data from the API  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -40,7 +70,7 @@ const CaseDistributionDRCSummarywithRTOM = () => {
           drc_id: drcid,
         };
         
-        console.log("Fetching data with payload:", payload);
+       // console.log("Fetching data with payload:", payload);
         
         const response = await List_Case_Distribution_Details_With_Rtoms(payload);
         setFilteredData(response);
@@ -52,22 +82,21 @@ const CaseDistributionDRCSummarywithRTOM = () => {
     fetchData();
   }, [batchId, drcid]);
       
-
-  const handleCreateTask = () => {
-    alert("Create Task and Let Me Know button clicked!");
-  };
-
+// Function to handle back button click  
+const handleonbacknuttonclick = () => {
+  navigate("/pages/Distribute/CaseDistributionDRCSummary", { state: { BatchID: batchId } });
+};
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary</h1>
       <div className=" py-5 mt-2 ml-10 w-fit ">
-        <h2 className={GlobalStyle.headingMedium}>Batch- {batchId || "undefined"}</h2>
-        <h2 className={GlobalStyle.headingMedium}>{drcname || "undefined"}</h2>
+        <h2 className={GlobalStyle.headingMedium}>Batch - {batchId }</h2>
+        <h2 className={GlobalStyle.headingMedium}>DRC Name - {drcname }</h2>
       </div>
 
       {/* Search Section */}
-      <div className="flex py-2 items-center justify-start gap-2 mt-2 mb-4">
+      {/* <div className="flex py-2 items-center gap-2 mt-2 mb-4">
         <div className={GlobalStyle.searchBarContainer}>
           <input
             type="text"
@@ -78,10 +107,14 @@ const CaseDistributionDRCSummarywithRTOM = () => {
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
-      </div>
+      </div> */}
 
       {/* Table Section */}
-      <div className={GlobalStyle.tableContainer}>
+
+      {/* <div className="flex items-center justify-center min-h-full ">
+          <div className={GlobalStyle.cardContainer}></div> */}
+      <div className="flex items-center justify-center min-h-full ">
+      <div className={GlobalStyle.cardContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -103,7 +136,7 @@ const CaseDistributionDRCSummarywithRTOM = () => {
               >
                 <td className={GlobalStyle.tableData}>{item.rtom}</td>
                 <td className={GlobalStyle.tableData}>{item.case_count}</td>
-                <td className={GlobalStyle.tableData}>{item.tot_arrease}</td>
+                <td className={GlobalStyle.tableCurrency}>{item.tot_arrease}</td>
               </tr>
             ))
             ) : (
@@ -117,45 +150,19 @@ const CaseDistributionDRCSummarywithRTOM = () => {
           </tbody>
         </table>
       </div>
+      </div>
+
+      {/* Pagination Section */}
       <br />
 
       {/* Button */}
-      <div className="flex justify-between">
-        <br></br>
-        {/* Right-aligned button */}
-        <button
-          onClick={handleCreateTask}
-          className={GlobalStyle.buttonPrimary} // Same style as Approve button
-        >
-          Create Task and Let Me Know
-        </button>
-      </div>
-      <button>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width={65}
-          height={65}
-          fill="none"
-        >
-          <circle
-            cx={32.5}
-            cy={32.5}
-            r={32.45}
-            fill="#B3CCE3"
-            stroke="#58120E"
-            strokeWidth={0.1}
-            transform="rotate(-90 32.5 32.5)"
-          />
-          <path
-            fill="#001120"
-            d="m36.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L43.782 45.5l3.063-3.064L36.46 32.051Z"
-          />
-          <path
-            fill="#001120"
-            d="m23.46 32.051 10.385-10.384-3.063-3.064-13.449 13.448L30.782 45.5l3.063-3.064L23.46 32.051Z"
-          />
-        </svg>
+    
+      
+      <button className={GlobalStyle.buttonPrimary} onClick={handleonbacknuttonclick}>
+         <FaArrowLeft className="mr-2" />
       </button>
+    
+    
     </div>
   );
 };

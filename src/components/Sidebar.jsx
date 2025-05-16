@@ -7,6 +7,9 @@ import { GrConfigure } from "react-icons/gr";
 import { FaListCheck } from "react-icons/fa6";
 import { BiSolidDiamond } from "react-icons/bi";
 import { HiOutlineDocumentCheck } from "react-icons/hi2";
+import { MdDownload } from "react-icons/md";
+
+
 import { useState, useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../services/auth/authService";
@@ -65,19 +68,19 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Incident List", 
       roles: ["superadmin", "admin", "user"], 
       subItems: [
-        { icon: CgEditFade, label: " Register Accounts", link: "/Incident/Incident_List", roles: ["superadmin", "admin"], subItems: [
-          {icon:CgEditFade, label:"Bulk", link:"/Incident/Incident_List", roles:["superadmin", "admin"]},
+        { icon: CgEditFade, label: " Register Accounts",  roles: ["superadmin", "admin"], subItems: [
+          {icon:CgEditFade, label:"Bulk", link:"/incident/upload-log", roles:["superadmin", "admin"]},
           {icon:CgEditFade, label:"Individual", link:"/Incident/Incident_List", roles:["superadmin", "admin"]}, ] },
-        { icon: CgEditFade, label: "New Reg Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "Filtered Incidents", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "New Reg Incidents", link: "", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "Filtered Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Bulk Upload History", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Rejected log", link: "/Distribution/reject-incident-log", roles: ["superadmin", "admin"] },
       ],
     },
 
-    { icon: MdSpeakerNotes, label: "Case Distribution", link: "/pages/Distribute/DistributionPreparationBulkUpload", roles: ["superadmin", "admin", "user"], subItems: [
+    { icon: MdSpeakerNotes, label: "Case Distribution", link: "", roles: ["superadmin", "admin", "user"], subItems: [
       {icon:CgEditFade, label:"Ready For Distribution", link:"/pages/Distribute/DistributionPreparationBulkUpload", roles:["superadmin", "admin"]},
-      {icon:CgEditFade, label:"Pending Distribution", link:"/pages/Distribute/DistributionPreparationIndividual", roles:["superadmin", "admin"]},
+      {icon:CgEditFade, label:"Pending Distribution", link:"/pages/Distribute/AssignedDRCSummary", roles:["superadmin", "admin"]},
     ] },
 
     {
@@ -95,7 +98,7 @@ const Sidebar = ({ onHoverChange }) => {
         },
         { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "Litigation", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Dispute", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, 
           label: "Disposed List", 
@@ -141,6 +144,8 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
+
+    {icon: MdDownload, label: "Download", link: "/incident/Incident_File_Download", roles: ["superadmin", "admin", "user"]},
     {
       icon: BiSolidDiamond,
       label: "Dummy",

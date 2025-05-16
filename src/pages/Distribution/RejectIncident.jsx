@@ -13,31 +13,60 @@ Notes:
 */
 
 import DatePicker from "react-datepicker";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Import GlobalStyle
-import Reject_Pending from "../../assets/images/Reject_Pending.png";
+import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
 import { Create_Task_Download_Pending_Reject, Create_Task_Forward_F1_Filtered, Create_Task_Reject_F1_Filtered, Forward_F1_Filtered, List_F1_filtered_incidents, Open_Task_Count_Forward_F1_Filtered, Open_Task_Count_Reject_F1_Filtered, Reject_F1_Filtered } from "../../services/distribution/distributionService.js";
 import Swal from "sweetalert2";
+import  { Tooltip } from "react-tooltip";
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 export default function RejectIncident() {
   const navigate = useNavigate();
 
   // Filter state
   const [fromDate, setFromDate] = useState(null); //for date
-  const [toDate, setToDate] = useState(null);
-  const [error, setError] = useState("");
-  const [tableData, setTableData] = useState([]);
-  const [filteredData, setFilteredData] = useState(tableData);
-  const [selectAllData, setSelectAllData] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);  
-  const [selectedSource, setSelectedSource] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [toDate, setToDate] = useState(null); //for date
+  const [error, setError] = useState(""); //for date
+  const [tableData, setTableData] = useState([]); //for table data
+  const [filteredData, setFilteredData] = useState(tableData); //for table data
+  const [selectAllData, setSelectAllData] = useState(false); //for select all data
+  const [selectedRows, setSelectedRows] = useState([]); //for selected rows
+  const [searchQuery, setSearchQuery] = useState(""); //for search query
+  const [currentPage, setCurrentPage] = useState(0);   //for pagination
+  const [selectedSource, setSelectedSource] = useState(""); //for source type
+  const [isLoading, setIsLoading] = useState(true); //for loading state
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+  // Fetch data from API
   const fetchData = async () => {
       try {
         const filters= {
@@ -69,7 +98,8 @@ export default function RejectIncident() {
         setIsLoading(false);
       }
     };
-    
+
+   // Fetch data when the component mounts or when filters change 
    useEffect(() => {
         fetchData();
     }, []);
@@ -78,7 +108,28 @@ export default function RejectIncident() {
   // validation for date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
-      setError("The 'From' date cannot be later than the 'To' date.");
+      Swal.fire({
+                      title: "warning",
+                      text: "The 'From' date cannot be later than the 'To' date.",
+                      icon: "warning",
+                      confirmButtonColor: "#f1c40f"
+                  });;
+    } else if (toDate){
+      // Calculate month gap
+      const diffInMs = toDate - date;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+      if (diffInDays > 31) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "The selected range is more than 1 month.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                });
+              
+                return;
+            }
+            setFromDate(date);
     } else {
       setError("");
       setFromDate(date);
@@ -88,7 +139,28 @@ export default function RejectIncident() {
   // validation for date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
-      setError("The 'To' date cannot be earlier than the 'From' date.");
+      Swal.fire({
+                      title: "warning",
+                      text: "The 'To' date cannot be earlier than the 'From' date.",
+                      icon: "warning",
+                      confirmButtonColor: "#f1c40f"
+                  });
+    } else if (fromDate) {
+      // Calculate month gap
+      const diffInMs = date - fromDate;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+      if (diffInDays > 31) {
+                Swal.fire({
+                    title: "Warning",
+                    text: "The selected range is more than 1 month.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                });
+              
+                return;
+            }
+            setToDate(date);
     } else {
       setError("");
       setToDate(date);
@@ -106,16 +178,19 @@ export default function RejectIncident() {
       )
     );
   }, [searchQuery, tableData]);
+
   // Pagination state
   const rowsPerPage = 7;
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
+  // Pagination functions
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
 
+  // Pagination functions
   const handleNextPage = () => {
     if (currentPage < pages - 1) {
       setCurrentPage(currentPage + 1);
@@ -127,6 +202,7 @@ export default function RejectIncident() {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
+  // Checkbox functions
   const handleRowCheckboxChange = (id) => {
     if (selectedRows.includes(id)) {
       setSelectedRows(selectedRows.filter((id) => id !== id));
@@ -135,6 +211,7 @@ export default function RejectIncident() {
     }
   };
 
+  // Select All Data Checkbox
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
       setSelectedRows([]);
@@ -144,6 +221,7 @@ export default function RejectIncident() {
     setSelectAllData(!selectAllData);
   };
 
+  // Filter function
   const handleFilterClick = () => {
       const from = fromDate ? new Date(fromDate) : null;
       const to = toDate ? new Date(toDate) : null;
@@ -154,6 +232,7 @@ export default function RejectIncident() {
           text: "Please select a Source Type or provide both From Date and To Date.",
           icon: "warning",
           confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f"
         });
         return;
       }
@@ -164,6 +243,7 @@ export default function RejectIncident() {
           text: "Both From Date and To Date must be selected together.",
           icon: "warning",
           confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f"
         });
         return;
       }
@@ -179,6 +259,8 @@ export default function RejectIncident() {
               icon: "warning",
               showCancelButton: true,
               confirmButtonText: "Create Task",
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#d33",
               cancelButtonText: "Cancel",
             }).then((result) => {
               if (result.isConfirmed) {
@@ -196,8 +278,17 @@ export default function RejectIncident() {
         setSearchQuery("")
       }
     };
-    
 
+  // Clear filter function
+  const handleclearFilter = () => {
+    setFromDate(null);
+    setToDate(null);
+    setSelectedSource("");
+    fetchData();
+  }
+    
+    
+  // Create task for download function
   const handleCreateTaskForDownload = async({source_type, fromDate, toDate}) => {
         if (filteredData.length === 0) {
               Swal.fire({
@@ -205,6 +296,7 @@ export default function RejectIncident() {
                 text: "No records to download.",
                 icon: "warning",
                 confirmButtonText: "OK",
+                confirmButtonColor: "#f1c40f"
               });
               return;
         }
@@ -214,8 +306,18 @@ export default function RejectIncident() {
             title: 'Warning',
             text: 'Missing Parameters',
             icon: 'warning',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            confirmButtonColor: "#f1c40f"
           });
+        } else if (!fromDate && !toDate) {
+          Swal.fire({
+            title: "Warning",
+            text: "Please select a date range.",
+            icon: "warning",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
+          });
+          return;
         }
         else if ((fromDate && !toDate) || (!fromDate && toDate)) {
           Swal.fire({
@@ -223,6 +325,7 @@ export default function RejectIncident() {
             text: "Both From Date and To Date must be selected together.",
             icon: "warning",
             confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
           });
           return;
         } else{
@@ -238,7 +341,8 @@ export default function RejectIncident() {
               title: 'Success',
               text: 'Task successfully created',
               icon: 'success',
-              confirmButtonText: 'OK'
+              confirmButtonText: 'OK',
+              confirmButtonColor: "#28a745"
             });
           }
         }catch(error){
@@ -246,19 +350,22 @@ export default function RejectIncident() {
             title: 'Error',
             text: 'Error creating task',
             icon: 'error',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            confirmButtonColor: "#d33"
           });
         }
         }
     };
 
+  // Handle reject function
   const handleReject= async (Incident_Id)=>{
         if(!selectedRows.includes(Incident_Id)){
           Swal.fire({
             title: 'Warning',
             text: 'Row not selected',
             icon: 'warning',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            confirmButtonColor: "#f1c40f"
           });
           return;
         }
@@ -267,10 +374,11 @@ export default function RejectIncident() {
             const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
             if (openTaskCount > 0) {
                     Swal.fire({
-                      title: "Warning",
+                      title: "Action Blocked",
                       text: "A task is already in progress.",
                       icon: "warning",
                       confirmButtonText: "OK",
+                      confirmButtonColor : "#f1c40f"
                     });
                     return;
             }
@@ -281,7 +389,8 @@ export default function RejectIncident() {
                 title: 'Success',
                 text: response.data.message,
                 icon: 'success',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                confirmButtonColor: "#28a745"
               });
               fetchData();
             }  
@@ -290,29 +399,34 @@ export default function RejectIncident() {
               title: 'Error',
               text: error.message,
               icon: 'error',
-              confirmButtonText: 'OK'
+              confirmButtonText: 'OK',
+              confirmButtonColor: "#d33"
             });
         } 
   }
 
+  // Handle reject all function
   const handleRejectAll = async()=>{
     
       try{
-        if (filteredData.length === 0) {
+        if (selectedRows.length === 0) {
           Swal.fire({
             title: "Warning",
-            text: "No records to reject.",
+            text: "No records selected to reject.",
             icon: "warning",
             confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
           });
           return;
         }
         const result = await Swal.fire({
           title: "Confirm",
-          text: "Are you sure you want to move reject all the Reject pending cases?",
+          text:  `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
           icon: "info",
           showCancelButton: true,
-          confirmButtonText: "Reject All",
+          confirmButtonText: "Yes",
+          confirmButtonColor: "#28a745",
+          cancelButtonColor: "#d33",
           cancelButtonText: "Cancel",
          });
 
@@ -321,67 +435,99 @@ export default function RejectIncident() {
             const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
             if (openTaskCount > 0) {
                   Swal.fire({
-                      title: "Warning",
+                      title: "Action Blocked",
                       text: "A task is already in progress.",
                       icon: "warning",
                       confirmButtonText: "OK",
+                      confirmButtonColor: "#f1c40f"
                   });
               return;
             }
-            if(filteredData.length>10){
+            if(selectedRows.length>5){ // okkoma silect karala reject all dunnoth hari  // sweet alert add // add the date to the parameaters //condition change
+                const confirmTask = await Swal.fire({
+                  title: "Info",
+                  text: "More than 5 records selected. Do you want to create a task instead?",
+                  icon: "info",
+                  showCancelButton: true,
+                  confirmButtonText: "Create Task",
+                  cancelButtonText: "Cancel",
+                  confirmButtonColor: "#28a745",
+                  cancelButtonColor: "#d33"
+                });
+
+                if (!confirmTask.isConfirmed) return;
+
+               // const today = new Date().toISOString().split("T")[0];
+               // Proceed_Dtm: new Date().toISOString(),
+
                 const parameters = {
                   Status:"Reject Pending",
+                  Reject_Date: new Date(),
+                  
                 }
                 const response = await Create_Task_Reject_F1_Filtered(parameters);
                 if(response.status===201){
-                  Swal.fire({ 
+                   Swal.fire({
                     title: 'Success',
-                    text: 'Successfully created task to reject F1 filtered incidents',
+                    text: 'Successfully created task to reject the records',
                     icon: 'success',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: "#28a745"
                   });
                 }
-            }else{
-              for (const row of filteredData) {
-                await Reject_F1_Filtered(row.id); 
+            }else{ 
+              // Loop through selected rows and reject each one api call repeat karanawa 
+              for (const row of selectedRows) {
+                await Reject_F1_Filtered(row); 
               }
-              Swal.fire({ 
+              // if i send it like this the api call will not be repeated.
+              //await Reject_F1_Filtered(selectedRows); // selectedRows = [1, 2, 3, 4]
+              Swal.fire({
                 title: 'Success',
-                text: "Successfully rejected F1 filtered incidents",
+                text: "Successfully rejected selected records",
                 icon: 'success',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                confirmButtonColor: "#28a745"
               });
               fetchData();
+              setSelectedRows([]); // Clear selected rows after rejection
+              setSelectAllData(false); // Clear select all checkbox
             }
         }
       }catch(error){
         Swal.fire({
           title: 'Error',
-          text: "Internal server error",
+          text: error.message ||"Internal server error",
           icon: 'error',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          confirmButtonColor: "#d33"
         });
       }   
     }
 
+  // Handle move forward function
     const handleMoveForward = async()=>{
        try{
-       if (filteredData.length === 0) {
-             Swal.fire({
-               title: "Warning",
-               text: "No records to move forward.",
-               icon: "warning",
-               confirmButtonText: "OK",
-             });
+       if  (selectedRows.length === 0) {
+          Swal.fire({
+            title: "Warning",
+            text: "No records selected to forward.",
+            icon: "warning",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#f1c40f"
+          });
              return;
         }
         const result = await Swal.fire({
-             title: "Confirm",
-             text: ":Are you sure you want to move forward all the Reject pending cases?",
-             icon: "info",
-             showCancelButton: true,
-             confirmButtonText: "Forward",
-             cancelButtonText: "Cancel",
+          title: "Confirm",
+          text: `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "Yes, Forward",
+          confirmButtonColor: "#28a745",
+          cancelButtonColor: "#d33",
+          cancelButtonText: "Cancel",
+
         });
 
         if (result.isConfirmed) {
@@ -389,47 +535,72 @@ export default function RejectIncident() {
           const openTaskCount = await Open_Task_Count_Forward_F1_Filtered();
           if (openTaskCount > 0) {
                 Swal.fire({
-                    title: "Warning",
+                    title: "Action Blocked",
                     text: "A task is already in progress.",
                     icon: "warning",
                     confirmButtonText: "OK",
+                    confirmButtonColor: "#f1c40f"
                 });
             return;
           }
 
-          if(filteredData.length>10){
+          if(selectedRows.length>5){ 
+            const confirmTask = await Swal.fire({
+              title: "Info",
+              text: "More than 5 records selected. Do you want to create a task instead?",
+              icon: "info",
+              showCancelButton: true,
+              confirmButtonText: "Create Task",
+              cancelButtonText: "Cancel",
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#d33"
+            });
+
+            if (!confirmTask.isConfirmed) return;
+
+           // const today1 = new Date().toISOString().split("T")[0];
+            // Proceed_Dtm: new Date().toISOString(),
+
               const parameters = {
                 Status:"Reject Pending",
+                Forward_Date: new Date(), 
               }
               const response = await Create_Task_Forward_F1_Filtered(parameters);
               if(response.status===201){
                 Swal.fire({ 
                   title: 'Success',
-                  text: 'Successfully created task to forward F1 filtered incidents',
+                  text: 'Successfully created task to forward the records',
                   icon: 'success',
-                  confirmButtonText: 'OK'
+                  confirmButtonText: 'OK',
+                  confirmButtonColor: "#28a745"
                 });
               }
           
           }else{
-            for (const row of filteredData) {
-              await Forward_F1_Filtered(row.id); 
+
+            for (const row of selectedRows) {
+              await Forward_F1_Filtered(row); 
             }
             Swal.fire({ 
               title: 'Success',
-              text: "Successfully forwarded F1 filtered incidents",
+              text: "Successfully forwarded selected records",
               icon: 'success',
-              confirmButtonText: 'OK'
+              confirmButtonText: 'OK',
+              confirmButtonColor: "#28a745"
             });
             fetchData();
+            setSelectedRows([]); // Clear selected rows after move forward
+            setSelectAllData(false); // Clear select all checkbox
+
           }
         }
       }catch(error){
         Swal.fire({
           title: 'Error',
-          text: error?.message,
+          text: error?.message ||"Internal server error",
           icon: 'error',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          confirmButtonColor: "#d33"
         });
       }   
     }
@@ -443,35 +614,45 @@ export default function RejectIncident() {
       ) : (
       <div className={GlobalStyle.fontPoppins}>
         <div className="flex justify-between items-center w-full">
-          <h1 className={`${GlobalStyle.headingLarge} m-0`}>
+          <h1 className={`${GlobalStyle.headingLarge} mb-4`}>
             Pending Reject Incidents
           </h1>
-          <button
-            className={`${GlobalStyle.buttonPrimary}`}
+          
+        </div>
+
+        <div className="flex justify-end items-center mb-4">
+          {paginatedData.length > 0 && (
+        <button
+            className={`${GlobalStyle.buttonPrimary} flex items-center`}
             onClick={()=>{handleCreateTaskForDownload({
               source_type: selectedSource, 
               fromDate: fromDate, 
               toDate: toDate
             })}}
           >
+            <FaDownload className="mr-2" />
             Create task and let me know
           </button>
+          )}
         </div>
 
         {/* Filter Section */}
-        <div className="flex justify-end gap-10 my-12 items-center">
+        <div  className="flex justify-end"> 
+        <div className= {`${GlobalStyle.cardContainer}  items-center w-[70vw] mb-8 mt-8`}>
           {/* Source Selection */}
+          <div className="flex items-center gap-4 justify-end">
           <div className="flex items-center gap-4">
             <label>Source:</label>
             <select
-              className={GlobalStyle.inputText}
-              value={selectedSource}
+              className={GlobalStyle.selectBox}
+              value={selectedSource} 
               onChange={(e) => setSelectedSource(e.target.value)}
+              style={{ color: selectedSource === "" ? "gray" : "black" }}
             >
-              <option value="">Select</option>
-              <option value="Pilot Suspended">Pilot Suspended</option>
-              <option value="Special">Special</option>
-              <option value="Product Terminate">Product Terminate</option>
+              <option value="" hidden>Select</option>
+              <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>
+              <option value="Special" style={{ color: "black" }}>Special</option>
+              <option value="Product Terminate" style={{ color: "black" }}>Product Terminate</option>
             </select>
           </div>
 
@@ -484,14 +665,14 @@ export default function RejectIncident() {
                   selected={fromDate}
                   onChange={handleFromDateChange}
                   dateFormat="dd/MM/yyyy"
-                  placeholderText="dd/MM/yyyy"
+                  placeholderText="From"
                   className={GlobalStyle.inputText}
                 />
                 <DatePicker
                   selected={toDate}
                   onChange={handleToDateChange}
                   dateFormat="dd/MM/yyyy"
-                  placeholderText="dd/MM/yyyy"
+                  placeholderText="To"
                   className={GlobalStyle.inputText}
                 />
               </div>
@@ -500,12 +681,36 @@ export default function RejectIncident() {
           </div>
 
           {/* Filter Button */}
-          <button
+          <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+               <button
+               className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+               onClick={handleFilterClick}
+             >
+               Filter
+             </button>
+            )}
+          </div>
+          {/* <button
             className={`${GlobalStyle.buttonPrimary} h-[35px]`}
             onClick={handleFilterClick}
           >
             Filter
-          </button>
+          </button> */}
+
+          <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+               <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+               Clear
+              </button>
+            )}
+          </div>
+          {/* <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+                        Clear
+            </button> */}
+
+          </div>
+        </div>
         </div>
 
         {/* Table Section */}
@@ -561,7 +766,7 @@ export default function RejectIncident() {
                         : "bg-gray-50 bg-opacity-50"
                     } border-b`}
                   >
-                    <td className={GlobalStyle.tableData}>
+                    <td className={GlobalStyle.tableData}  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                       <input
                         type="checkbox"
                         className={"rounded-lg"}
@@ -597,12 +802,22 @@ export default function RejectIncident() {
                     <td
                       className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                     >
-                      <button
+                      <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          className={`${GlobalStyle.buttonPrimary} mx-auto`}
+                          onClick={()=>{handleReject(row.id)}}
+                        >
+                          Reject
+                        </button>
+                        )}
+                      </div>
+                      {/* <button
                         className={`${GlobalStyle.buttonPrimary} mx-auto`}
                         onClick={()=>{handleReject(row.id)}}
                       >
                         Reject
-                      </button>
+                      </button> */}
                     </td>
                   </tr>
                 ))}
@@ -645,7 +860,7 @@ export default function RejectIncident() {
               className={`${GlobalStyle.buttonPrimary} `} 
               onClick={() => navigate("/Distribution/filtered-incident")}
             >
-              ← Back
+              <FaArrowLeft className="mr-2" />
             </button>
         </div>
 
@@ -661,18 +876,38 @@ export default function RejectIncident() {
               Select All
             </label>
 
-            <button
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                className={`${GlobalStyle.buttonPrimary} ml-4`}
+                onClick={handleMoveForward}
+              >
+                Move Forward
+              </button>
+              )}
+            </div>
+            {/* <button
               className={`${GlobalStyle.buttonPrimary} ml-4`}
               onClick={handleMoveForward}
             >
               Move Forward
-            </button>
-            <button
-              className={`${GlobalStyle.buttonPrimary} ml-4`}
+            </button> */}
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                className={`${GlobalStyle.buttonRemove} ml-4`}
+                onClick={handleRejectAll}
+              >
+                Reject All
+              </button>
+              )}
+            </div>
+            {/* <button
+              className={`${GlobalStyle.buttonRemove} ml-4`}
               onClick={handleRejectAll}
             >
               Reject All
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
