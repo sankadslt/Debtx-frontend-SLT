@@ -20,20 +20,49 @@ import open from "/src/assets/images/distribution/more_info.png";
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
+import { HiDotsCircleHorizontal } from "react-icons/hi";
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 export default function CaseDistributionDRCTransactions1Batch() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { BatchID } = location.state || {};
-  const [searchQuery, setSearchQuery] = useState("");
-  const [transaction, setTransaction] = useState([]);
+  const navigate = useNavigate(); // Initialize navigate for routing
+  const location = useLocation(); // Get the location object
+  const { BatchID } = location.state || {}; // Extract BatchID from location state
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [transaction, setTransaction] = useState([]); // State for transaction data
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+  // Fetch transaction data when the component mounts or BatchID changes
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = { case_distribution_batch_id: BatchID || "2" };
+        const data = { case_distribution_batch_id: BatchID  };
         const response = await List_all_transaction_seq_of_batch_id(data);
-        console.log("Response", response);
+      //  console.log("Response", response);
         if (response.status === "success") {
           setTransaction(response.data || []); // Ensure `data` is always an array
         } else {
@@ -52,23 +81,25 @@ export default function CaseDistributionDRCTransactions1Batch() {
     fetchData();
   }, [BatchID]);
 
+
+  // Function to handle the button click
   const handleonclick = async () => {
     const userId = await getLoggedUserId();
 
     const payload = {
-      case_distribution_batch_id: BatchID || 2,
+      case_distribution_batch_id: BatchID ,
       Created_By: userId,
     };
 
-    console.log("Payload", payload);
+   // console.log("Payload", payload);
     try {
       const response = await Create_Task_For_case_distribution_transaction(
         payload
       );
-      console.log("Response", response);
+     // console.log("Response", response);
 
       if (response.status === "success") {
-        console.log("Task created successfully");
+      //  console.log("Task created successfully");
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -100,10 +131,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
     }
   };
 
+  // Function to handle the icon click and navigate to the assigned DRC summary page
   const handleoniconclick = () => {
     navigate("/pages/Distribute/AssignedDRCSummary");
   };
 
+  // Function to handle the table icon click and navigate to the case distribution DRC transactions page
   const handletableiconclick = (Batchseq) => {
     navigate("/pages/Distribute/CaseDistributionDRCTransactions-(1Batch)", {
       state: { BatchID, Batchseq },
@@ -228,32 +261,39 @@ export default function CaseDistributionDRCTransactions1Batch() {
                   <td className={GlobalStyle.tableData}
                   
                     style={{ display: "flex", justifyContent: "center" }}>
-                    <button 
-                      
-                      onClick={() => handletableiconclick(item.batch_seq) }
-                      
-                    >
-                      <img
-                          src= {open}
-                          data-tooltip-id="my-tooltip"
-          
-                        ></img>
-                      <Tooltip id="my-tooltip" place="bottom" content="More Info" />
-                      {/* <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={26}
-                        height={29}
-                        fill="none"
-                      >
-                        <path
-                          fill="#000"
-                          fillRule="evenodd"
-                          d="M13 .32c7.18 0 13 5.821 13 13 0 7.18-5.82 13-13 13s-13-5.82-13-13c0-7.179 5.82-13 13-13Zm5.85 11.05a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Z"
-                          clipRule="evenodd"
-                        />
-                      </svg> */}
-                      
-                    </button>
+
+                  <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                       <button 
+                        data-tooltip-id="my-tooltip"
+                       onClick={() => handletableiconclick(item.batch_seq) }
+                       
+                     >
+                       {/* <img
+                           src= {open}
+                           data-tooltip-id="my-tooltip"
+           
+                         ></img> */}
+                         <HiDotsCircleHorizontal size={25} color="#000"  />
+                       <Tooltip id="my-tooltip" place="bottom" content="More Info" />
+                       {/* <svg
+                         xmlns="http://www.w3.org/2000/svg"
+                         width={26}
+                         height={29}
+                         fill="none"
+                       >
+                         <path
+                           fill="#000"
+                           fillRule="evenodd"
+                           d="M13 .32c7.18 0 13 5.821 13 13 0 7.18-5.82 13-13 13s-13-5.82-13-13c0-7.179 5.82-13 13-13Zm5.85 11.05a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Zm-5.85 0a1.95 1.95 0 1 0 0 3.901 1.95 1.95 0 0 0 0-3.9Z"
+                           clipRule="evenodd"
+                         />
+                       </svg> */}
+                       
+                     </button>
+                    )}
+                </div>
+                   
                   </td>
                 </tr>
               ))
@@ -270,16 +310,28 @@ export default function CaseDistributionDRCTransactions1Batch() {
           </table>
         </div>
       </div>
-
-      <div className="flex justify-end">
-        <button
-          onClick={handleonclick}
-          className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px] flex items-center `}
-        >
-           <FaDownload className="mr-2" />
-          Create task and let me know
-        </button>
+      {filteredData.length > 0 && ( 
+        <div className="flex justify-end">
+          <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                      <button
+                      onClick={handleonclick}
+                      className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px] flex items-center `}
+                    >
+                      <FaDownload className="mr-2" />
+                      Create task and let me know
+                    </button>
+                    )}
+                </div>
+          {/* <button
+            onClick={handleonclick}
+            className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px] flex items-center `}
+          >
+            <FaDownload className="mr-2" />
+            Create task and let me know
+          </button> */}
         </div>
+         )}  
         
         {/* Button on the left */}
         <div className="flex justify-start mt-4">

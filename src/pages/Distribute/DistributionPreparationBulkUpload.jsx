@@ -16,16 +16,46 @@ import { List_count_by_drc_commision_rule } from '/src/services/case/CaseService
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import  { Tooltip } from "react-tooltip";
 
-const DistributionPreparationBulkUpload = () => {
-  const navigate = useNavigate();
-  const [services, setServices] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [totalRules, setTotalRules] = useState(0)
-  const recordsPerPage = 4;
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
+const DistributionPreparationBulkUpload = () => {
+  const navigate = useNavigate(); // usestate for routing
+  const [services, setServices] = useState([]); // usestate for services
+  const [currentPage, setCurrentPage] = useState(1); // usestate for current page
+  const [searchQuery, setSearchQuery] = useState(""); // usestate for search query
+  const [totalRules, setTotalRules] = useState(0) // usestate for total rules
+  const recordsPerPage = 4; // Number of records per page
+  const indexOfLastRecord = currentPage * recordsPerPage; // Index of last record
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage; // Index of first record
+
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+  
+     // Role-Based Buttons
+     useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+  
+      try {
+        let decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+  
+        if (decoded.exp < currentTime) {
+          refreshAccessToken().then((newToken) => {
+            if (!newToken) return;
+            const newDecoded = jwtDecode(newToken);
+            setUserRole(newDecoded.role);
+          });
+        } else {
+          setUserRole(decoded.role);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }, []);
+
+    // UseEffect to fetch data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -146,7 +176,7 @@ const DistributionPreparationBulkUpload = () => {
                       {service.case_count}
                     </td>
                     <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <button
+                      {/* <button
                         onClick={() => handleIconClick(service)}
                         className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                       >
@@ -154,7 +184,21 @@ const DistributionPreparationBulkUpload = () => {
                                 alt="file icon" 
                                 data-tooltip-id="filter-tooltip"
                                 className="w-5 h-5"  />
-                      </button>
+                      </button> */}
+
+                      <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          onClick={() => handleIconClick(service)}
+                          className={`${GlobalStyle.bold} text-2xl text-blue-500`}
+                        >
+                          <img src="/src/assets/images/fileicon.png" 
+                                  alt="file icon" 
+                                  data-tooltip-id="filter-tooltip"
+                                  className="w-5 h-5"  />
+                        </button>
+                        )}
+                      </div>
                       <Tooltip id="filter-tooltip" place="bottom" content="Open" />
                     </td>
                   </tr>

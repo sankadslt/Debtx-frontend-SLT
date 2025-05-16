@@ -24,6 +24,9 @@ import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_B
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 
+//import for the case details page
+import CaseDetails from "../pages/Incident/Case_Details"
+
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
 import CollectOnlyCPECollect from "../pages/Distribution/CollectOnlyCPECollect";
@@ -485,6 +488,16 @@ const Routers = () => {
       />
 
       {/* //INCIDENT */}
+
+      <Route
+        path="/Incident/Case_Details"
+        element={
+          <ProtectedRoute
+            element={<CaseDetails />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
       <Route
         path="/Incident/Incident_List"
         element={

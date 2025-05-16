@@ -15,9 +15,12 @@ import { useState , useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; 
 import "react-datepicker/dist/react-datepicker.css";
-import {List_All_Batch_Details , Approve_Batch_or_Batches , Create_task_for_batch_approval} from "/src/services/case/CaseServices.js";
+import {List_All_Batch_Details , Approve_Batch_or_Batches , Create_task_for_batch_approval , Approve_Batch} from "/src/services/case/CaseServices.js";
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 
 export default function DRCAssignManagerApproval2() {
@@ -25,24 +28,49 @@ export default function DRCAssignManagerApproval2() {
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [filteredData, setFilteredData] = useState([]);
+   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+   // Role-Based Buttons
+   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 4;
+
   const fetchData = async () => {
 
     const userId = await getLoggedUserId();
-    console.log("Logged in user ID:", userId);
+   // console.log("Logged in user ID:", userId);
     const payload = {
       approved_deligated_by : userId,
     };
-    console.log("Payload:", payload);
+   // console.log("Payload:", payload);
     try {     
       const response = await List_All_Batch_Details( payload ); 
       setFilteredData(response);
-      console.log("All batch details:", response);
+     // console.log("All batch details:", response);
     } catch (error) {
-      console.error("Error fetching all batch details:", error);
+      //console.error("Error fetching all batch details:", error);
     }
   };
   
@@ -96,7 +124,7 @@ export default function DRCAssignManagerApproval2() {
       setSelectedRows(new Set());
     }
   };
-
+  // This function handles the selection of individual rows
   const handleRowSelect = (batchId) => {
 
     const newSelectedRows = new Set(selectedRows);
@@ -104,11 +132,11 @@ export default function DRCAssignManagerApproval2() {
     if (newSelectedRows.has(batchId)) {
       newSelectedRows.delete(batchId);
     } else {
-      if (newSelectedRows.size >=5) {
+      if (newSelectedRows.size >= 1) {
         Swal.fire({
           icon: "warning",
           title: "Warning",
-          text: "You can only select 5 records at a time.",
+          text: "You can only select 1 record at a time.",
           confirmButtonColor: "#f1c40f",
         });
         return;
@@ -125,13 +153,13 @@ export default function DRCAssignManagerApproval2() {
     }
   };
   
-  console.log("Selected rows:", selectedRows);
+  //console.log("Selected rows:", selectedRows);
   
-  
+  // Function to handle the approve button click
   const onapprovebuttonclick = async () => {
     const userId = await getLoggedUserId();
     const batchIds = Array.from(selectedRows);
-    console.log("Selected batch IDs:", batchIds);
+   // console.log("Selected batch IDs:", batchIds);
     if (batchIds.length === 0) {
       Swal.fire({
         icon: "warning",
@@ -159,13 +187,13 @@ export default function DRCAssignManagerApproval2() {
         }
 
     const payload = {
-      approver_references : batchIds,
+      approver_reference : batchIds,
       approved_by : userId,
     }
-    console.log("Payload:", payload);
+    //console.log("Payload:", payload);
     try {
-          const response = await Approve_Batch_or_Batches (payload); // Use 'await' here
-          console.log("Response:", response);
+          const response = await Approve_Batch (payload); // Use 'await' here
+         // console.log("Response:", response);
           Swal.fire({
             icon: "success",
             title: "Success",
@@ -190,9 +218,15 @@ export default function DRCAssignManagerApproval2() {
         }
   }
 
+  // Function to handle the submit button click
   const onSubmit = async () => {
     const userId = await getLoggedUserId();
-    const batchIds = Array.from(selectedRows);
+    // const batchIds = Array.from(selectedRows);
+
+    // get all the batch ids from the current data
+    const batchIds = currentData
+      .map(item => item.case_distribution_details?.case_distribution_batch_id)
+      .filter(id => id);
 
     if (batchIds.length === 0) {
       Swal.fire({
@@ -209,7 +243,7 @@ export default function DRCAssignManagerApproval2() {
     }
     try {
       const response = await Create_task_for_batch_approval (payload); // Use 'await' here
-      console.log("Response:", response);
+     // console.log("Response:", response);
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -263,10 +297,11 @@ export default function DRCAssignManagerApproval2() {
                
               </th>
               <th className={GlobalStyle.tableHeader}>Batch ID</th>
-              <th className={GlobalStyle.tableHeader}>Created Date</th>
+              
               <th className={GlobalStyle.tableHeader}>DRC Commission rule</th>
               <th className={GlobalStyle.tableHeader}>Case count</th>
-              <th className={GlobalStyle.tableHeader}>Total Arrears</th>
+              {/* <th className={GlobalStyle.tableHeader}>Total Arrears</th> */}
+              <th className={GlobalStyle.tableHeader}>Created Date</th>
             </tr>
           </thead>
           <tbody> 
@@ -291,15 +326,16 @@ export default function DRCAssignManagerApproval2() {
                   />
                 </td>
                 <td className={GlobalStyle.tableData}>{item.case_distribution_details?.case_distribution_batch_id || "N/A"}</td>
-                <td className={GlobalStyle.tableData}>{new Date (item.created_on).toLocaleDateString()}</td>
+                
                 <td className={GlobalStyle.tableData}> {item.case_distribution_details?.drc_commision_rule || "N/A"}</td>
                 <td className={GlobalStyle.tableData}>{item.case_distribution_details?.rulebase_count || "N/A"}</td>
-                <td className={GlobalStyle.tableData}>{item.totalArrears}</td>
+                {/* <td className={GlobalStyle.tableData}>{item.totalArrears}</td> */}
+                <td className={GlobalStyle.tableData}>{new Date (item.created_on).toLocaleDateString("en-GB")}</td>
               </tr>
             ))
             ) : (
               <tr>
-                <td colSpan="6" className={GlobalStyle.tableData}>
+                <td colSpan="6" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                   No data available
                 </td>
               </tr>
@@ -310,6 +346,7 @@ export default function DRCAssignManagerApproval2() {
       </div>
 
       {/* Pagination Section */}
+      { currentData.length > 0 && (
       <div className={GlobalStyle.navButtonContainer}>
         <button
           onClick={() => handlePrevNext("prev")}
@@ -333,11 +370,12 @@ export default function DRCAssignManagerApproval2() {
           <FaArrowRight />
         </button>
       </div>
+      )}
 
       {/* Select All Data Checkbox and Approve Button */}
       <div className="flex justify-end gap-4 mt-4">
         {/* Select All Data Checkbox */}
-        <label className="flex items-center gap-2">
+        {/* <label className="flex items-center gap-2">
           <input
             type="checkbox"
             className="rounded-lg"
@@ -345,22 +383,40 @@ export default function DRCAssignManagerApproval2() {
             onChange={handleSelectAll}
           />
           Select All Data
-        </label>
+        </label> */}
 
         {/* Approve Button */}
-        <button
+        {/* <button
           onClick={onapprovebuttonclick}
           className={GlobalStyle.buttonPrimary}
           //   disabled={selectedRows.size === 0} // Disable if no rows are selected
         >
           Approve
-        </button>
+        </button> */}
+        <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+              <button
+              onClick={onapprovebuttonclick}
+              className={GlobalStyle.buttonPrimary}
+              //   disabled={selectedRows.size === 0} // Disable if no rows are selected
+            >
+              Approve
+            </button>
+              
+              )}
+        </div>
       </div>
       <div>
-        <button onClick={onSubmit} className={`${GlobalStyle.buttonPrimary} flex items-center `} >
-          <FaDownload className="mr-2" />
-          Create task and let me know
-        </button>
+        { currentData.length > 0 && (
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button onClick={onSubmit} className={`${GlobalStyle.buttonPrimary} flex items-center `} >
+              <FaDownload className="mr-2" />
+              Create task and let me know
+            </button>
+            )}
+        </div>
+        )}
       </div>
     </div>
   );

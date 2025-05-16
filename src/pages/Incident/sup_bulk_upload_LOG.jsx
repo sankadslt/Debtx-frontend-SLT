@@ -13,15 +13,30 @@ Notes: This template uses Tailwind CSS */
 import { useCallback, useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight , FaDownload} from "react-icons/fa";
+import { FiUpload } from 'react-icons/fi';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import OpenIcon from "../../assets/images/incidents/Incident_Done.png";
 import InProgressIcon from "../../assets/images/incidents/Incident_InProgress.png";
 import RejectIcon from "../../assets/images/incidents/Incident_Reject.png";
+import uploadopen from "../../assets/images/incidents/Upload_Open.png";
+import uploadinprogress from "../../assets/images/incidents/Upload_InProgress.png";
+import uploadcomplete from "../../assets/images/incidents/Upload_Complete.png";
+import uploadfailerd from "../../assets/images/incidents/Upload_Failed.png";
+
 import {List_Transaction_Logs_Upload_Files} from "../../services/Incidents/incidentService.js";
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from "react-tooltip";
+
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
+import { FaArrowUp } from 'react-icons/fa';
+
+
+
 
 
 
@@ -29,12 +44,15 @@ import { Tooltip } from "react-tooltip";
 const getStatusIcon = (status) => {
     switch (status) {
         case "Open":
-            return OpenIcon;
+            return uploadopen;
 
         case "InProgress":
-            return InProgressIcon;
+            return uploadinprogress;
         case "Reject":
-            return RejectIcon;
+            return uploadfailerd;
+        case "Complete":
+            return uploadcomplete;
+
         default:
             return null;
     }
@@ -55,6 +73,33 @@ const SupBulkUploadLog = () => {
     const [selectedFromDate, setSelectedFromDate] = useState(null);
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState("");
+
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+    
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
 
 
 
@@ -165,11 +210,24 @@ const SupBulkUploadLog = () => {
 
     return (
         <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className={`${GlobalStyle.headingLarge}`}>Incident Upload Log</h1>
-                <button className={GlobalStyle.buttonPrimary} onClick={handleUploadClick}>
+            <div className="flex items-center justify-between mb-4">
+                <h1 className={`${GlobalStyle.headingLarge} `}>Incident Upload Log</h1>
+                
+            </div>
+            <div className="flex justify-end ">
+
+            <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                   <button  className={`${GlobalStyle.buttonPrimary}  flex items-center`} onClick={handleUploadClick}>
+                   <FaArrowUp  className="mr-2" />
+                   Upload a new file
+               </button>
+                    )}
+                </div>
+            {/* <button  className={`${GlobalStyle.buttonPrimary}  flex items-center`} onClick={handleUploadClick}>
+                    <FaArrowUp  className="mr-2" />
                     Upload a new file
-                </button>
+                </button> */}
             </div>
             {/* Filters */}
             <div className="flex justify-end ">
@@ -260,12 +318,26 @@ const SupBulkUploadLog = () => {
                         placeholderText="To"
                         className={GlobalStyle.inputText}
                     />
-                    <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
+                    {/* <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
                         Filter
-                    </button>
-                    <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
+                    </button> */}
+                    <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
+                    Filter
+                </button>
+                    )}
+                </div>
+                    {/* <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
                         Clear
-                    </button>
+                    </button> */}
+                    <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
+                    Clear
+                </button>
+                    )}
+                </div>
                 </div>
                 {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
             </div>

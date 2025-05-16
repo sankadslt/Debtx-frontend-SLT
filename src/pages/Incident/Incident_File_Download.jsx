@@ -17,6 +17,9 @@ import { List_Download_Files_from_Download_Log } from "../../services/file/fileD
 import  { Tooltip } from "react-tooltip";
 
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 
 const Incident_File_Download = () => {
     // State variables
@@ -24,8 +27,34 @@ const Incident_File_Download = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [tableData, setTableData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
     const [error, setError] = useState("");
     const rowsPerPage = 7;
+
+
+    // Role-Based Buttons
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
+
 
     // Fetch data from the API
     const fetchData = async () => {
@@ -41,9 +70,11 @@ const Incident_File_Download = () => {
               GroupID: item.file_download_seq || "N/A",
               CreatedDTM: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A",
               ExpireDTM: isNaN(expireDate) ? "N/A" : expireDate.toLocaleString() || "N/A",
+              Filepath: item.File_Location || "N/A",
               CreatedBy: item.Deligate_By
             };
           });
+          
           setTableData(formattedData);
           setIsLoading(false);
       } catch {
@@ -85,14 +116,30 @@ const Incident_File_Download = () => {
     const paginatedData = filteredData.slice(startIndex, endIndex);
 
     // Handle file download
-    const handleDownload = (taskId) => {
-        try {
+    const handleDownload = (filepath) => {
+        alert ("Need to configure the download with the server")
 
-            console.log(`Downloading file for task: ${taskId}`);
-        } catch (error) {
-            console.error('Download failed:', error);
+        // try {
+        //     const filename = filepath.split(/[\\/]/).pop();  // Extract the filename from the file path
+        //     const downloadurl = `http://localhost:5000/uploads/${filename}`; // Construct the download URL
 
-        }
+        //     const link = document.createElement("a");
+        //     link.href = downloadurl;
+            
+        //     link.setAttribute("download", filename); // Set the download attribute with the filename
+        //     document.body.appendChild(link);
+        //     link.click(); // Trigger the download
+        //     document.body.removeChild(link); // Clean up the link element
+            
+        //     console.log("Download initiated for:", filename);
+
+
+
+            
+        // } catch (error) {
+        //     console.error('Download failed:', error);
+
+        // }
     };
 
     return (
@@ -145,7 +192,7 @@ const Incident_File_Download = () => {
                     </thead>
                     <tbody>
                         {paginatedData.map((log, index) => {
-                            const isExpired = new Date(log.ExpireDTM).toLocaleString() < new Date().toLocaleString();
+                            // const isExpired = new Date(log.ExpireDTM).toLocaleString() < new Date().toLocaleString();
                             return(
                             <tr
                                 key={log.TaskID}
@@ -177,7 +224,20 @@ const Incident_File_Download = () => {
                                         })}</td>
                                 
                                 <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <button
+                                <div>
+                                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                                        <button
+                                        onClick={() => handleDownload(log.File_Location)}
+                                        className="text-blue-600 hover:text-blue-800 " 
+                                        data-tooltip-id="download-tooltip"
+                                        // disabled={isExpired}
+                                    >
+                                        <FaDownload />
+
+                                    </button>
+                                    )}
+                                </div>
+                                    {/* <button
                                         onClick={() => handleDownload(log.TaskID)}
                                         className="text-blue-600 hover:text-blue-800 " 
                                         data-tooltip-id="download-tooltip"
@@ -185,8 +245,9 @@ const Incident_File_Download = () => {
                                     >
                                         <FaDownload />
 
-                                    </button>
-                                    <Tooltip id="download-tooltip" place="bottom" content={isExpired ? "Download expired" : "Download file"} />
+                                    </button> */}
+                                    {/* <Tooltip id="download-tooltip" place="bottom" content={isExpired ? "Download expired" : "Download file"} /> */}
+                                    <Tooltip id="download-tooltip" place="bottom" content="Download file" />
                                 </td>
                             </tr>
                           )

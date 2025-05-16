@@ -336,41 +336,70 @@ import { List_CasesOwened_By_DRC , Create_Task_For_Assigned_drc_case_list_downlo
 import { FaUserEdit, FaUndo } from "react-icons/fa"; 
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
+import { Tooltip } from "react-tooltip";
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 
 
 export default function AssignDRCsLOG() {
-  const navigate = useNavigate();
-  const [filters, setFilters] = useState({});
-  const [cases, setCases] = useState([]); 
-  const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Initialize navigate for routing
+  const [filters, setFilters] = useState({}); // State for filters and table
+  const [cases, setCases] = useState([]);  // State for table data
+  const [error, setError] = useState(null); // State for error handling
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  // Role-Based Buttons
   useEffect(() => {
-    const fetchCases = async () => {
-      try {
-        const requestData = { drc_id: 7 };
-        const data = await List_CasesOwened_By_DRC(requestData);
-        setCases(data);
-      } catch (err) {
-        setError(err.message);
-      } 
-    };
-    fetchCases();
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
   }, []);
+
+  // Fetch cases on component mount
+  // useEffect(() => {
+  //   const fetchCases = async () => {
+  //     try {
+  //       const requestData = { drc_id: 7 };
+  //       const data = await List_CasesOwened_By_DRC(requestData);
+  //       setCases(data);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } 
+  //   };
+  //   fetchCases();
+  // }, []);
 
   const handleFilterChanges = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filterType, setFilterType] = useState("");
-  const [filterValue, setFilterValue] = useState("");
+  const [startDate, setStartDate] = useState(null); // State for start date
+  const [endDate, setEndDate] = useState(null); // State for end date
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const [filterType, setFilterType] = useState(""); // State for filter type (Account No or Case ID)
+  const [filterValue, setFilterValue] = useState(""); // State for filter value (input field)
 
 
-
+  // Search function
   const filteredCases = cases.filter((row) => 
     Object.values(row)
       .join(" ")
@@ -381,12 +410,34 @@ export default function AssignDRCsLOG() {
   const itemsPerPage = 4;
   const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
 
+  // Date change handlers
   const handlestartdatechange = (date) => {
+    if (endDate && date > endDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Start date cannot be after end date.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
     setStartDate(date);
     if (endDate) checkdatediffrence(date, endDate);
   };
 
+  // End date change handler
   const handleenddatechange = (date) => {
+    if (startDate && date < startDate) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "End date cannot be before start date.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
     if (startDate) {
       checkdatediffrence(startDate, date);
     }
@@ -394,6 +445,7 @@ export default function AssignDRCsLOG() {
 
   }
 
+  // Function to check date difference and show alert if more than 1 month
   const checkdatediffrence = (startDate, endDate) => {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
@@ -418,7 +470,7 @@ export default function AssignDRCsLOG() {
           handleApicall(startDate, endDate);
         } else {
           setEndDate(null);
-          console.log("EndDate cleared");
+         // console.log("EndDate cleared");
         }
       }
       );
@@ -426,6 +478,7 @@ export default function AssignDRCsLOG() {
     }
   };
 
+  // Function to handle API call with selected dates and filter values
   const handleApicall = async (startDate, endDate) => {
     const userId =  await getLoggedUserId();
     const payload = {}
@@ -440,13 +493,13 @@ export default function AssignDRCsLOG() {
       payload.case_id = filterValue.trim();
     }
     payload.Created_By = userId;
-    console.log("Filtered Request Payload:", payload);
+   // console.log("Filtered Request Payload:", payload);
 
     // Call API with payload
     const createtask = async () => {
       try {
         const data = await Create_Task_For_Assigned_drc_case_list_download(payload);
-        console.log("Response",data);
+       // console.log("Response",data);
           Swal.fire({
                  icon: "success",
                  title: "Success",
@@ -479,13 +532,23 @@ export default function AssignDRCsLOG() {
 
   // Filter handler
   const handleFilter = () => {
+
+    // if ((startDate && !endDate) || (!startDate && endDate)) {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Warning",
+    //     text: "Please select both start and end dates.",
+    //     confirmButtonColor: "#f1c40f",
+    //   });
+    //   return;
+    // }
     const payload = {}
     payload.drc_id = 7; // Hardcoded DRC ID for testing
     if (startDate) {
-      payload.from_date = startDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+      payload.from_date = startDate; // Format: YYYY-MM-DD
     }
     if (endDate) {
-      payload.to_date = endDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+      payload.to_date = endDate; // Format: YYYY-MM-DD
     }
     // Assign either "account_no" or "case_id" based on selected filterType
 
@@ -495,6 +558,15 @@ export default function AssignDRCsLOG() {
       payload.case_id = filterValue.trim();
     }
 
+     if ((startDate && !endDate) || (!startDate && endDate)) {
+       Swal.fire({
+         title: "Error",
+         text: "Please select both start and end dates.",
+         icon: "error",
+         confirmButtonColor: "#f1c40f",
+       });
+       return;
+     }
 
     console.log("Filtered Request Payload:", payload);
 
@@ -512,6 +584,7 @@ export default function AssignDRCsLOG() {
 
   };
 
+  // Clear filter handler
   const handleclearfilter = () => {
 
     setStartDate(null);
@@ -519,19 +592,20 @@ export default function AssignDRCsLOG() {
     setFilterType("");
     setFilterValue("");
     
-    const fetchCases = async () => {
-      try {
-        const requestData = { drc_id: 7 };
-        const data = await List_CasesOwened_By_DRC(requestData);
-        setCases(data);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    fetchCases();
+    // const fetchCases = async () => {
+    //   try {
+    //     const requestData = { drc_id: 7 };
+    //     const data = await List_CasesOwened_By_DRC(requestData);
+    //     setCases(data);
+    //   } catch (err) {
+    //     setError(err.message);
+    //   }
+    // };
+    // fetchCases();
+    window.location.reload();
   };
 
-
+  // Withdraw button handler
   const handlewithdrawbutton = async (caseID) => {
     const userId =  await getLoggedUserId();
     Swal.fire({
@@ -557,13 +631,13 @@ export default function AssignDRCsLOG() {
           remark_edit_by: userId,
           created_by: userId,
         };
-        console.log("Withdraw Payload:", payload);
+       // console.log("Withdraw Payload:", payload);
 
         // Call API with payload
         const withdrawCase = async () => {
           try {
             const data = await Withdraw_CasesOwened_By_DRC(payload);
-            console.log("Response", data);
+           // console.log("Response", data);
             Swal.fire({
               icon: "success",
               title: "Success",
@@ -599,6 +673,15 @@ export default function AssignDRCsLOG() {
       setCurrentPage(currentPage + 1);
     }
   };
+
+  // Function to handle row click and navigate to details page
+  const onhoverbuttonclick = (caseid) => {
+    navigate("/Incident/Case_Details", {
+      state: { CaseID: caseid }, // Pass the case ID as a parameter
+    });
+   // console.log("Navigating to Case Details with ID:", caseid);
+  }
+
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -655,19 +738,39 @@ export default function AssignDRCsLOG() {
                     />
                   
             
-
-              <button
+                  <div>
+                      {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                          onClick={handleFilter}
+                        >
+                          Filter
+                        </button>
+                      )}
+                  </div>
+              {/* <button
                 className={`${GlobalStyle.buttonPrimary} h-[35px]`}
                 onClick={handleFilter}
               >
                 Filter
-              </button>
-              <button
+              </button> */}
+
+              <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                    className={`${GlobalStyle.buttonRemove} h-[35px]`}
+                    onClick={handleclearfilter} // <-- Corrected here
+                    >
+                        Clear
+                    </button>
+                    )}
+                </div>
+              {/* <button
                 className={`${GlobalStyle.buttonRemove} h-[35px]`}
                 onClick={handleclearfilter} // <-- Corrected here
               >
                 Clear
-              </button>
+              </button> */}
       </div>
 
       {/* Table Section */}
@@ -718,7 +821,16 @@ export default function AssignDRCsLOG() {
                       : GlobalStyle.tableRowOdd
                   }
                 >
-                    <td className={GlobalStyle.tableData}>{caseItem.case_id}</td>
+                    <td className={GlobalStyle.tableData} >
+                      <button
+                      onClick={() => onhoverbuttonclick(caseItem.case_id)}
+                      onMouseOver={(e) => e.currentTarget.style.textDecoration = "underline"} 
+                      onMouseOut={(e) => e.currentTarget.style.textDecoration = "none"}
+                      >
+                        {caseItem.case_id}
+                      </button>
+                      
+                    </td>
                     <td className={GlobalStyle.tableData}>{caseItem.case_current_status}</td>
                     <td className={GlobalStyle.tableData}>{caseItem.account_no}</td>
                     <td className={GlobalStyle.tableCurrency}>{caseItem.current_arrears_amount}</td>
@@ -734,33 +846,40 @@ export default function AssignDRCsLOG() {
                       }) } 
                     </td>
                     <td className={GlobalStyle.tableData}>
-                    {caseItem.end_dtm.trim() && !isNaN(new Date(caseItem.end_dtm.trim()).getTime()) 
-                      ? new Date(caseItem.end_dtm.trim()).toLocaleDateString("en-GB") 
-                      : ""}
+                      {caseItem.end_dtm && typeof caseItem.end_dtm === 'string' && !isNaN(new Date(caseItem.end_dtm.trim()).getTime())
+                        ? new Date(caseItem.end_dtm.trim()).toLocaleDateString("en-GB")
+                        : ""}
                     </td>
-                    <td className={GlobalStyle.tableData}>
+                    <td className={GlobalStyle.tableData} style={ { width: "150px" }}>
                     <button
                     className={GlobalStyle.buttonPrimary}
+                    data-tooltip-id="my-tooltip"
                     onClick={() =>
-                    navigate(
-                    `/pages/Distribute/ReAssignDRC?caseId=${caseItem.case_id}&accountNo=${caseItem.account_no}`
-                     )
+                      navigate('/pages/Distribute/ReAssignDRC', {
+                        state: {
+                          caseId: caseItem.case_id,
+                          accountNo: caseItem.account_no,
+                        },
+                      })
                     }
-                     title="Re-Assign" // Shows tooltip on hover
-                     style={{ marginBottom: "10px" }}
+                    
+                     // Shows tooltip on hover
+                     style={{ marginRight: "5px" }} 
                     >
                     <FaUserEdit /> {/* Icon for Re-Assign */}
+                    <Tooltip id="my-tooltip" place="bottom" content="Re-Assign" />
                     </button>
 
-                    <button className={GlobalStyle.buttonPrimary} title="Withdraw"  onClick={() => handlewithdrawbutton(caseItem.case_id)}>
+                    <button className={GlobalStyle.buttonPrimary}   onClick={() => handlewithdrawbutton(caseItem.case_id)} data-tooltip-id="my-tooltip2">
                     <FaUndo /> {/* Icon for Withdraw */}
+                    <Tooltip id="my-tooltip2" place="bottom" content="Withdraw" />
                     </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className={GlobalStyle.tableData}>
+                  <td colSpan="7" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                     No cases found.
                   </td>
                 </tr>
@@ -773,6 +892,7 @@ export default function AssignDRCsLOG() {
       
 
       {/* Pagination */}
+      { paginatedData.length > 0 && (
       <div className={GlobalStyle.navButtonContainer}>
       <button
           onClick={() => handlePrevNext("prev")}
@@ -796,6 +916,7 @@ export default function AssignDRCsLOG() {
           <FaArrowRight />
         </button>
       </div>
+      )}
     </div>
   );
 }
