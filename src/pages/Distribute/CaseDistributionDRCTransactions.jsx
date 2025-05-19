@@ -17,13 +17,13 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import forwardtoapproval from "/src/assets/images/forwardtoapproval.png";
 import managerapproved from "/src/assets/images/managerapproved.png";
 import proceed from "/src/assets/images/proceed.png";
-import one from "/src/assets/images/imagefor1.a.13(one).png";
-import two from "/src/assets/images/imagefor1.a.13(two).png";
-import three from "/src/assets/images/imagefor1.a.13(three).png";
-import four from "/src/assets/images/imagefor1.a.13(four).png";
+import one from "/src/assets/images/distribution/imagefor1.a.13(one).png";
+import two from "/src/assets/images/distribution/imagefor1.a.13(two).png";
+import three from "/src/assets/images/distribution/imagefor1.a.13(three).png";
+import four from "/src/assets/images/distribution/imagefor1.a.13(four).png";
 import open from "/src/assets/images/distribution/Open.png";
 import Error from "/src/assets/images/distribution/Error.png";
-import Inprogress from "/src/assets/images/distribution/In_progress.png";
+import Inprogress from "/src/assets/images/distribution/In_Progress.png";
 import Complete from "/src/assets/images/distribution/Complete.png";
 import Ammend from "/src/assets/images/distribution/Ammend.png";
 import Distributed from "/src/assets/images/distribution/Distributed.png";
@@ -37,23 +37,56 @@ import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import { fetchAllArrearsBands ,List_count_by_drc_commision_rule ,List_Case_Distribution_DRC_Summary, Create_Task_For_case_distribution, Batch_Forward_for_Proceed } from "/src/services/case/CaseServices.js";
 import Swal from "sweetalert2";
+import { RiShareForwardFill } from "react-icons/ri";
+import { IoListCircleOutline } from "react-icons/io5";
+import { RiExchangeLine } from "react-icons/ri";
+import { HiDotsCircleHorizontal } from "react-icons/hi";
+
+
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 
 
 export default function AssignPendingDRCSummary() {
   
 
-const [startDate, setStartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
+const [startDate, setStartDate] = useState(null); // usestate for start date
+const [endDate, setEndDate] = useState(null); // usestate for end date
 const [filteredData1, setFilteredData1] = useState([]); // Data fetched from API
 const [searchQuery1, setSearchQuery1] = useState(""); // For searching
-const [currentPage1, setCurrentPage1] = useState(1);
-const [disabledRows, setDisabledRows] = useState({});
+const [currentPage1, setCurrentPage1] = useState(1); // Current page for pagination
+const [disabledRows, setDisabledRows] = useState({}); // Disabled rows for buttons
+const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
 const navigate = useNavigate();
 // Items per page
 const itemsPerPage1 = 4;
 
 
+// Role-Based Buttons
+useEffect(() => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) return;
+
+  try {
+    let decoded = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+
+    if (decoded.exp < currentTime) {
+      refreshAccessToken().then((newToken) => {
+        if (!newToken) return;
+        const newDecoded = jwtDecode(newToken);
+        setUserRole(newDecoded.role);
+      });
+    } else {
+      setUserRole(decoded.role);
+    }
+  } catch (error) {
+    console.error("Invalid token:", error);
+  }
+}, []);
 
 // Handle start date change
 const handlestartdatechange = (date) => {
@@ -70,7 +103,7 @@ const handlestartdatechange = (date) => {
   if (endDate) checkdatediffrence(date, endDate);
   }
 };
-
+// Function to Handle end date change
 const handleenddatechange = (date) => {
   if (startDate && date < startDate) {
     Swal.fire({
@@ -112,7 +145,7 @@ const checkdatediffrence = (startDate, endDate) => {
               handleApicall(startDate, endDate);
             } else {
               setEndDate(null);
-              console.log("EndDate cleared");
+             // console.log("EndDate cleared");
             }
           }
           );
@@ -132,10 +165,10 @@ const handleApicall = async (startDate, endDate) => {
       Created_By: userId,
     };
 
-    console.log("Create Task Payload:", payload);
+   // console.log("Create Task Payload:", payload);
    try {
       const response = await Create_Task_For_case_distribution(payload);
-      console.log("Create Task Response:", response);
+     // console.log("Create Task Response:", response);
 
       if (response.status = "success") {
         Swal.fire({
@@ -188,10 +221,20 @@ const applyFilters = async () => {
       requestdata.drc_commision_rule = selectedService;
     }
 
-    console.log("Filtered Request Data:", requestdata);;
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+      Swal.fire({
+        title: "Error",
+        text: "Please select both start and end dates.",
+        icon: "error",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+   //console.log("Filtered Request Data:", requestdata);;
 
     try {
       // Send the filtered data to the backend
+
       const response = await List_Case_Distribution_DRC_Summary(requestdata);
       
       if (Array.isArray(response)) {
@@ -212,18 +255,19 @@ const clearfilters = async () => {
   setEndDate(null);
   setSelectedBand("");
   setSelectedService("");
+  setFilteredData1([]);
 
-  const fetchData = async () => {
-    try {
-      const response = await List_Case_Distribution_DRC_Summary({});
-      if (Array.isArray(response)) {
-        setFilteredData1(response); // Store the fetched data into state
-      }
-    } catch (error) {
-      console.error("API Fetch Error:", error);
-    }
-  };
-  await fetchData();
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await List_Case_Distribution_DRC_Summary({});
+  //     if (Array.isArray(response)) {
+  //       setFilteredData1(response); // Store the fetched data into state
+  //     }
+  //   } catch (error) {
+  //     console.error("API Fetch Error:", error);
+  //   }
+  // };
+  // await fetchData();
   
 };
 
@@ -249,7 +293,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
   const [selectedService, setSelectedService] = useState("");
   const [selectedBandKey, setSelectedBandKey] = useState("");
 
-console.log("Page Data:", paginatedData1);
+//console.log("Page Data:", paginatedData1);
 
   useEffect(() => {
     const fetchArrearsBands = async () => {
@@ -282,21 +326,24 @@ console.log("Page Data:", paginatedData1);
     fetchData();
   }, []);
 
+  // Handle Arrears Band Change
   const handlearrersBandChange = (e) => {
     setSelectedBand(e.target.value);
-    console.log ("Arrears band :",e.target.value);
+   // console.log ("Arrears band :",e.target.value);
 
     const selectedkey = arrearsBands.find((band) => band.value === e.target.value);
     setSelectedBandKey(selectedkey.key);
-    console.log("Selected Band Key :",selectedkey.key);
+   // console.log("Selected Band Key :",selectedkey.key);
   };
 
+
+  // Handle Service Type Change
   const handlesrvicetypeChange = (e) => {
     setSelectedService(e.target.value);
-    console.log("Service type :",e.target.value);
+  //  console.log("Service type :",e.target.value);
   };
 
- 
+  // The function to handle the creation of a task and notify the user
   const handlecreatetaskandletmeknow = async () => {
     const userId = await getLoggedUserId();
 
@@ -308,10 +355,10 @@ console.log("Page Data:", paginatedData1);
       Created_By: userId,
     };
 
-    console.log("Create Task Payload:", payload);
+   // console.log("Create Task Payload:", payload);
    try {
       const response = await Create_Task_For_case_distribution(payload);
-      console.log("Create Task Response:", response);
+     // console.log("Create Task Response:", response);
 
       if (response.status = "success") {
         Swal.fire({
@@ -336,6 +383,8 @@ console.log("Page Data:", paginatedData1);
     }
 
   };
+
+  // Function to handle forward for approval click
   const handleonforwardclick = (batchID) => {
     Swal.fire({
     title: "Are you sure you want to forward for Approval?",
@@ -353,22 +402,31 @@ console.log("Page Data:", paginatedData1);
       const userId = await getLoggedUserId();
 
       const data = paginatedData1.find((item) => item.case_distribution_batch_id === batchID);
-      console.log("Selected Batch Data:", data);
+     // console.log("Selected Batch Data:", data);
       const batchSeqDetails = data?.batch_seq_details?.[0] || {};
       const distribution = batchSeqDetails?.array_of_distributions?.[0] || {};
       const payload = {
-        case_distribution_batch_id: [batchID],
+        case_distribution_batch_id: batchID,
         Proceed_by: userId,
-        plus_drc : distribution.plus_drc || "null",
-        plus_drc_id : distribution.plus_drc_id || "null",
-        minus_drc : distribution.minus_drc  || "null",
-        minus_drc_id : distribution.minus_drc_id  || "null",
+        //plus_drc : distribution.plus_drc || "null",
+       // plus_drc_id : distribution.plus_drc_id || "null",
+       // minus_drc : distribution.minus_drc  || "null",
+       // minus_drc_id : distribution.minus_drc_id  || "null",
         
       };
-      console.log("Forward for Proceed Payload:", payload);
+     // console.log("Forward for Proceed Payload:", payload);
       const response = await Batch_Forward_for_Proceed(payload);
-      console.log("Forward for Proceed Response:", response);
+     // console.log("Forward for Proceed Response:", response);
+
+     Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Forwarded for Proceed successfully.",
+        confirmButtonColor: "#28a745",
+      });
       
+      applyFilters(); // Refresh the data after forwarding
+
     } catch (error){
       console.error (error)
       const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
@@ -386,19 +444,23 @@ console.log("Page Data:", paginatedData1);
   });
   };
 
+  // Function to handle summary click
   const handleonsummaryclick = (batchID) => {
     navigate("/pages/Distribute/CaseDistributionDRCTransactions-1Batch", {
       state: { BatchID: batchID },
     });
-    console.log("Case Distribution batch ID:", batchID);
+   // console.log("Case Distribution batch ID:", batchID);
 };
 
+  // Function to handle exchange click
   const handleonexchangeclick = (batchID) => {
     navigate("/pages/Distribute/AmendAssignedDRC", { 
       state: { BatchID: batchID },
     });
-    console.log("Case Distribution batch ID:", batchID);
+    //console.log("Case Distribution batch ID:", batchID);
 };
+
+  // Function to handle previous and next page navigation
   const handlePrevNext1 = (direction) => {
     if (direction === "prev" && currentPage1 > 1) {
       setCurrentPage1(currentPage1 - 1);
@@ -408,16 +470,17 @@ console.log("Page Data:", paginatedData1);
     }
   };
 
-  
+  // Function to format date
   const formatDate = (isoString) => {
     return isoString ? new Date(isoString).toISOString().split("T")[0] : null;
   };
 
+  // Function to handle full summary click
   const handleonfullsummaryclick = (batchID) => {
     navigate("/pages/Distribute/CaseDistributionDRCSummary", {
       state: { BatchID: batchID },
     });
-    console.log("Case Distribution batch ID:", batchID);
+  //  console.log("Case Distribution batch ID:", batchID);
   };
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
@@ -488,16 +551,34 @@ console.log("Page Data:", paginatedData1);
                 
              
               
-              <button
+              {/* <button
                 onClick={applyFilters}
                 className={`${GlobalStyle.buttonPrimary} h-[35px] `}
               >
                 Filter
-              </button>
+              </button> */}
+              <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                      <button
+                      onClick={applyFilters}
+                      className={`${GlobalStyle.buttonPrimary} h-[35px] `}
+                    >
+                      Filter
+                    </button>
+                    )}
+                </div>
 
-              <button className={`${GlobalStyle.buttonRemove} h-[35px] `}  onClick={clearfilters}>
+              {/* <button className={`${GlobalStyle.buttonRemove} h-[35px] `}  onClick={clearfilters}>
                             Clear 
-                        </button>
+                        </button> */}
+                <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                      <button className={`${GlobalStyle.buttonRemove} h-[35px] `}  onClick={clearfilters}>
+                      Clear 
+                  </button>
+                    )}
+                </div>          
+
             </div>
           </div>
       </div>
@@ -652,31 +733,35 @@ console.log("Page Data:", paginatedData1);
 
                   <td className={GlobalStyle.tableData} style={{ width: "60px", textAlign: "center" }}>
                     <button data-tooltip-id= {`tooltip-summary-${index}`} onClick={() => handleonsummaryclick(item.case_distribution_batch_id)} >
-                    <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "4px"}} />
+                    {/* <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "4px"}} /> */}
+                    <HiDotsCircleHorizontal size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary"/>
 
 
                     <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_batch_id)} disabled= {!!item.forward_for_approvals_on }>
-                    <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} />
+                    {/* <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} /> */}
+                    <RiExchangeLine size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-exchange-${index}`} place="bottom" content="Exchange case count"/>
 
 
                     <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_batch_id)} >
-                    <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} />
+                    {/* <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} /> */}
+                    <IoListCircleOutline size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary"/>
 
 
                     <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_batch_id)} disabled={!!item.forward_for_approvals_on}>
-                    <img
+                    {/* <img
                       src={four}
                       width={15}
                       height={15}
                       alt="Forward"
                       style={{ position: "relative", top: "2px", left: "6px" }}
-                    />
+                    /> */}
+                    < RiShareForwardFill  size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                   </button>
                   <Tooltip id={`tooltip-${item.case_distribution_batch_id}`} place="bottom">
                     Forward for Approval
@@ -695,39 +780,58 @@ console.log("Page Data:", paginatedData1);
 
 
       </div>
-      <div className={`${GlobalStyle.navButtonContainer} mb-14`}>
-        <button
-          onClick={() => handlePrevNext1("prev")}
-          disabled={currentPage1 === 1}
-          className={`${GlobalStyle.navButton} ${
-            currentPage1 === 1 ? "cursor-not-allowed" : ""
-          }`}
-        >
-          <FaArrowLeft />
-        </button>
-        <span>
-          Page {currentPage1} of {totalPages1}
-        </span>
-        <button
-          onClick={() => handlePrevNext1("next")}
-          disabled={currentPage1 === totalPages1}
-          className={`${GlobalStyle.navButton} ${
-            currentPage1 === totalPages1 ? "cursor-not-allowed" : ""
-          }`}
-        >
-          <FaArrowRight />
-        </button>
-      </div>
 
-      <div className="flex justify-end">
+      {filteredSearchData1.length > 0 && ( 
+        
+          <div className={`${GlobalStyle.navButtonContainer} mb-14`}>
+            <button
+              onClick={() => handlePrevNext1("prev")}
+              disabled={currentPage1 === 1}
+              className={`${GlobalStyle.navButton} ${
+                currentPage1 === 1 ? "cursor-not-allowed" : ""
+              }`}
+            >
+              <FaArrowLeft />
+            </button>
+            <span>
+              Page {currentPage1} of {totalPages1}
+            </span>
+            <button
+              onClick={() => handlePrevNext1("next")}
+              disabled={currentPage1 === totalPages1}
+              className={`${GlobalStyle.navButton} ${
+                currentPage1 === totalPages1 ? "cursor-not-allowed" : ""
+              }`}
+            >
+              <FaArrowRight />
+            </button>
+          </div>
+      )}
+
+
+      {/* Create Task and Let Me Know Button */}
+      <div className="flex justify-end mt-4">
         {" "}
-        <button
+        {/* <button
           onClick={handlecreatetaskandletmeknow}
           className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2 flex items-center`}
         >
           <FaDownload className="mr-2" />
           Create task and let me know
-        </button>
+        </button> */}
+         {paginatedData1.length > 0 && ( 
+        <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+              <button
+                onClick={handlecreatetaskandletmeknow}
+                className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2 flex items-center`}
+              >
+                <FaDownload className="mr-2" />
+                Create task and let me know
+              </button>
+              )}
+        </div>
+        )}   
       </div>
     </div>
   );

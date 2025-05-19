@@ -29,7 +29,11 @@ const LOD_Log = () => {
     const [DateType, setDateType] = useState("");
     const [LODdata, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isFiltered, setIsFiltered] = useState(false);
+    const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+    const [totalPages, setTotalPages] = useState(0);
+    const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Track the maximum current page
+    const [isFilterApplied, setIsFilterApplied] = useState(false); // Track if filter is applied
+    const rowsPerPage = 10; // Number of rows per page
     const navigate = useNavigate();
 
     // validation for date
@@ -61,17 +65,45 @@ const LOD_Log = () => {
             Swal.fire("Invalid Input", "Please select at least one filter.", "warning");
             return;
         }
-        fetchData();
-        setIsFiltered(true);
+        // fetchData();
+        setLODData([]); // Reset LOD data before fetching new data
+        setIsMoreDataAvailable(true); // Reset more data available state
+        setMaxCurrentPage(0); // Reset max current page
+        // setTotalAPIPages(1); // Reset total API pages
+        if (currentPage === 1) {
+            fetchData();
+        } else {
+            setCurrentPage(1);
+        }
+        setIsFilterApplied(true); // Set filter applied state to true
     }
 
     // Fetch list of LOD cases
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage + 1);
-            setLODData(LOD);
+            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage);
+            console.log("LOD data:", LOD);
+            setLODData((prevData) => [...prevData, ...LOD]);
+            if (LOD.length === 0) {
+                setIsMoreDataAvailable(false);
+                if (currentPage === 1) {
+                    Swal.fire({
+                        title: "No Results",
+                        text: "No matching data found for the selected filters.",
+                        icon: "warning",
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    });
+                }
+            } else {
+                const maxData = currentPage === 1 ? 10 : 30;
+                if (LOD.length < maxData) {
+                    setIsMoreDataAvailable(false); // More data available
+                }
+            }
         } catch (error) {
+            // console.error("Error fetching LOD data:", error);
             Swal.fire("No Results", "Error fetching data.", "error");
             setLODData([]);
         } finally {
@@ -81,19 +113,25 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        if (isFiltered) {
-            fetchData();
+        if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+            setMaxCurrentPage(currentPage); // Update max current page
+            fetchData(); // Call the function whenever currentPage changes
         }
     }, [currentPage]);
 
     // Handle Filter button
     const clearFilter = async () => {
+        setIsFilterApplied(false); // Reset filter applied state
+        setMaxCurrentPage(0); // Reset max current page
         setLODStatus("");
         setDateType("");
         setFromDate("");
         setToDate("");
         setLODData([]);
-        setIsFiltered(false);
+        setTotalPages(0);
+        setIsMoreDataAvailable(true);
+        setCurrentPage(0);
+        filteredData([]);
     };
 
     // display loading animation when data is loading
@@ -105,47 +143,66 @@ const LOD_Log = () => {
         );
     }
 
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const paginatedData = LODdata.slice(startIndex, startIndex + rowsPerPage);
+
     // handle search
-    const filteredData = LODdata.filter((row) =>
-        String(row.LODID).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.LODBatchNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.NotificationCount).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.CreatedDTM).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.ExpireDTM).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(row.LastResponse).toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredData = paginatedData.filter((row) =>
+        Object.values(row)
+            .join(" ")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
     );
 
     const handlePrevPage = () => {
-        if (currentPage > 0) {
+        if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
         }
     };
 
     // handle next page
     const handleNextPage = async () => {
-        setIsLoading(true);
-        try {
-            const nextPage = currentPage + 1;
-            const nextData = await List_Final_Reminder_Lod_Cases(
-                LODStatus,
-                DateType,
-                fromDate,
-                toDate,
-                "LOD",
-                nextPage + 1
-            );
-
-            // Next page will displayed only if fetch data is not empty
-            if (nextData.length > 0) {
-                setCurrentPage(nextPage);
-                setLODData(nextData);
+        if (isMoreDataAvailable) {
+            setCurrentPage(currentPage + 1);
+        } else {
+            const totalPages = Math.ceil(LODdata.length / rowsPerPage);
+            setTotalPages(totalPages);
+            if (currentPage < totalPages) {
+                setCurrentPage(currentPage + 1);
             }
-        } catch (error) {
-            Swal.fire("Error", "Failed to load next page.", "error");
-        } finally {
-            setIsLoading(false);
         }
+        // console.log("Current page:", currentPage);
+        // console.log("Total pages:", totalPages);
+        // setIsLoading(true);
+        // try {
+        //     const nextPage = currentPage + 1;
+        //     const nextData = await List_Final_Reminder_Lod_Cases(
+        //         LODStatus,
+        //         DateType,
+        //         fromDate,
+        //         toDate,
+        //         "LOD",
+        //         nextPage + 1
+        //     );
+
+        //     // Next page will displayed only if fetch data is not empty
+        //     if (nextData.length > 0) {
+        //         setCurrentPage(nextPage);
+        //         setLODData(nextData);
+        //     }
+        // } catch (error) {
+        //     Swal.fire("Error", "Failed to load next page.", "error");
+        // } finally {
+        //     setIsLoading(false);
+        // }
+    };
+
+    const naviCustomerResponse = (caseId) => {
+        navigate("/pages/LOD/CustomerResponse", { state: { caseId } });
+    };
+
+    const naviCustomerResponseReview = (caseId) => {
+        navigate("/pages/LOD/CustomerResponseReview", { state: { caseId } });
     };
 
 
@@ -287,14 +344,14 @@ const LOD_Log = () => {
                                             <button
                                                 className={GlobalStyle.buttonIcon}
                                                 style={{ fontSize: "24px" }}
-                                                onClick={() => navigate(`/pages/LOD/CustomerResponse/${log.LODID}`)}
+                                                onClick={() => naviCustomerResponse(log.LODID)}
                                             >
                                                 <FaEdit />
                                             </button>
                                             <button
                                                 className={GlobalStyle.buttonIcon}
                                                 style={{ fontSize: "24px" }}
-                                                onClick={() => navigate(`/pages/LOD/CustomerResponseReview/${log.LODID}`)}
+                                                onClick={() => naviCustomerResponseReview(log.LODID)}
                                             >
                                                 <FaEye />
                                             </button>
@@ -315,13 +372,13 @@ const LOD_Log = () => {
 
             {/* Page nevigation buttons */}
             <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
+                <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage <= 1}>
                     <FaArrowLeft />
                 </button>
                 <span className="text-gray-700">
-                    Page {currentPage + 1}
+                    Page {currentPage}
                 </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={!isFiltered}>
+                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === totalPages}>
                     <FaArrowRight />
                 </button>
             </div>

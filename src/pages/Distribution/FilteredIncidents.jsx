@@ -24,8 +24,38 @@ import File_Icon from "../../assets/images/fileicon.png";
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 const FilteredIncident = () => {
-  const navigate = useNavigate();
+
+  const navigate = useNavigate(); // Initialize navigate for routing
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+  // Role-Based Buttons
   const [cases, setCases] = useState([
     { type: "Open for Distribution", count: 0 },
     { type: "Reject pending Cases", count: 0 },
@@ -33,6 +63,7 @@ const FilteredIncident = () => {
     { type: "Collect CPE", count: 0 },
   ]);
 
+  // Function to fetch incident counts
   useEffect(() => {
     const fetchIncidentCounts = async () => {
       try {
@@ -58,12 +89,14 @@ const FilteredIncident = () => {
     fetchIncidentCounts();
   }, []);
 
+  
   const recordsPerPage = 4;
   const [currentPage] = useState(1);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentCases = cases.slice(indexOfFirstRecord, indexOfLastRecord);
 
+  // Function to handle icon click and navigate to the respective page
   const handleIconClick = (type, count) => {
     let path = "";
 
@@ -89,9 +122,11 @@ const FilteredIncident = () => {
           <div>
             <h1 className={GlobalStyle.headingLarge}>Filtered Incidents</h1>
           </div>
-
+          
           <div className="flex items-center justify-center min-h-full pt-20">
             <div className={GlobalStyle.cardContainer}>
+
+               {/* Table Section */}
               <table className={GlobalStyle.table}>
                 <thead className={GlobalStyle.thead}>
                   <tr>
@@ -126,7 +161,7 @@ const FilteredIncident = () => {
                       </td>
 
                       <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <button
+                        {/* <button
                           onClick={() =>
                             handleIconClick(cases.type, cases.count)
                           }
@@ -141,7 +176,27 @@ const FilteredIncident = () => {
                                                           className="w-5 h-5"
                                                         />
                                                       </div>
-                        </button>
+                        </button> */}
+
+                        <div>
+                            {["admin", "superadmin", "slt"].includes(userRole) && (
+                                <button
+                                onClick={() =>
+                                  handleIconClick(cases.type, cases.count)
+                                }
+                                className={`${GlobalStyle.bold} text-2xl text-blue-500`}
+                              >
+                              
+                                <div data-tooltip-id="filter-tooltip" >
+                                  <img
+                                    src={File_Icon}
+                                    alt="File_Icon"
+                                    className="w-5 h-5"
+                                  />
+                                </div>
+                              </button>
+                            )}
+                        </div>
                         <Tooltip id="filter-tooltip" place="bottom" content="Open" />
                           
                       </td>

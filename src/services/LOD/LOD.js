@@ -168,7 +168,7 @@ export const List_Final_Reminder_Lod_Cases = async (case_status, date_type, date
 // Create a customer response
 export const Creat_Customer_Responce = async (case_id, customer_responce, remark, created_by) => {
   try {
-    const response = await axios.post(`${LOD_URL}/Creat_Customer_Responce`, {
+    const response = await axios.post(`${LOD_URL}/Create_Customer_Responce`, {
       case_id: case_id,
       customer_responce: customer_responce,
       remark: remark,

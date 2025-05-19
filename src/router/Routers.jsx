@@ -24,6 +24,9 @@ import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_B
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 
+//import for the case details page
+import CaseDetails from "../pages/Incident/Case_Details"
+
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
 import CollectOnlyCPECollect from "../pages/Distribution/CollectOnlyCPECollect";
@@ -98,6 +101,8 @@ import CustomerResponse from "../pages/LOD/CustomerResponse";
 import CustomerResponseReview from "../pages/LOD/CustomerResponseReview";
 import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList";
 import SettlementPreview from "../pages/Settlement/SettlementPreview";
+import PaymentPreview from "../pages/Money_Transaction/PaymentPreview";
+import CommissionPreview from "../pages/Commission/Commission_Details";
 
 const Routers = () => {
   return (
@@ -495,6 +500,16 @@ const Routers = () => {
       />
 
       {/* //INCIDENT */}
+
+      <Route
+        path="/Incident/Case_Details"
+        element={
+          <ProtectedRoute
+            element={<CaseDetails />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
       <Route
         path="/Incident/Incident_List"
         element={
@@ -552,7 +567,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/MediationBoard/MediationBoardResponse/:caseId"
+        path="/MediationBoard/MediationBoardResponse"
         element={
           <ProtectedRoute
             element={<MediationBoardResponse />}
@@ -571,9 +586,11 @@ const Routers = () => {
           />
         }
       />
+      <Route path="/pages/Money_Transaction/payment/preview" element={<ProtectedRoute element={<PaymentPreview />} allowedRoles={['superadmin']} />} />
 
       {/* //COMMISSION */}
       <Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
+      <Route path="/Commission/preview" element={<ProtectedRoute element={<CommissionPreview />} allowedRoles={['superadmin']} />} />
 
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
@@ -697,7 +714,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/pages/LOD/CustomerResponse/:caseId"
+        path="/pages/LOD/CustomerResponse"
         element={
           <ProtectedRoute
             element={<CustomerResponse />}
@@ -706,7 +723,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/pages/LOD/CustomerResponseReview/:caseId"
+        path="/pages/LOD/CustomerResponseReview"
         element={
           <ProtectedRoute
             element={<CustomerResponseReview />}

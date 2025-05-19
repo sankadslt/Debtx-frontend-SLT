@@ -16,7 +16,7 @@ import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import Open_CPE_Collect from "../../assets/images/Open_CPE_Collect.png";
+import Open_CPE_Collect from "../../assets/images/incidents/Only_CPE_Collect.png";
 import {
   List_Incidents_CPE_Collect,
   Forward_CPE_Collect,
@@ -29,21 +29,50 @@ import {
 import Swal from "sweetalert2";
 import  { Tooltip } from "react-tooltip";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 export default function CollectOnlyCPECollect() {
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
-  const [error, setError] = useState("");
-  const [selectAllData, setSelectAllData] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [selectedSource, setSelectedSource] = useState("");
-  const [tableData, setTableData] = useState([]);
-  const [isloading, setIsLoading] = useState(true);
-  const [filteredData, setFilteredData] = useState(tableData);
-  const rowsPerPage = 7;
+  const [fromDate, setFromDate] = useState(null); // Usestate for From Date
+  const [toDate, setToDate] = useState(null); // Usestate for To Date
+  const [error, setError] = useState(""); // Usestate for Error
+  const [selectAllData, setSelectAllData] = useState(false); // Usestate for Select All Data
+  const [selectedRows, setSelectedRows] = useState([]); // Usestate for Selected Rows
+  const [searchQuery, setSearchQuery] = useState(""); // Usestate for Search Query
+  const [currentPage, setCurrentPage] = useState(0); // Usestate for Current Page
+  const [selectedSource, setSelectedSource] = useState(""); // Usestate for Selected Source
+  const [tableData, setTableData] = useState([]); // Usestate for Table Data
+  const [isloading, setIsLoading] = useState(true); // Usestate for Loading
+  const [filteredData, setFilteredData] = useState(tableData); // Usestate for Filtered Data
+  const rowsPerPage = 7; // Number of rows per page
   const navigate = useNavigate();
 
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+  // Role-Based Buttons
+      useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
+
+  // Function to fetch incident    
   const fetchData = async () => {
     try {
       const filters = {
@@ -86,7 +115,7 @@ export default function CollectOnlyCPECollect() {
     fetchData();
   }, []);
 
-  
+  // Function to  handle the creation of a task for download button
   const handleCreateTaskForDownload = async ({
     source_type,
     fromDate,
@@ -103,6 +132,16 @@ export default function CollectOnlyCPECollect() {
       return;
     }
 
+    if (!fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select a date range before creating a task.",
+        icon: "warning",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
     if ((fromDate && !toDate) || (!fromDate && toDate)) {
       Swal.fire({
         title: "Incomplete Date Range",
@@ -156,6 +195,7 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
+  // Function to handle the proceed button click
   const handleProceed = async (Incident_Id) => {
     if (!selectedRows.includes(Incident_Id)) {
       Swal.fire({
@@ -186,7 +226,7 @@ export default function CollectOnlyCPECollect() {
       const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
       if (openTaskCount > 0) {
         Swal.fire({
-          title: "Warning",
+          title: "Action Blocked",
           text: "A task is already in progress.",
           icon: "warning",
           confirmButtonText: "OK",
@@ -216,7 +256,7 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
- 
+  // Function to handle the creation of a task for selected rows
   const handleCreate = async () => {
     if (selectedRows.length === 0) {
       Swal.fire({
@@ -233,8 +273,8 @@ export default function CollectOnlyCPECollect() {
       const openTaskCount = await Open_Task_Count_Forward_CPE_Collect();
       if (openTaskCount > 0) {
         Swal.fire({
-          title: "Warning",
-          text: "A task is already in progress. Please complete it first.",
+          title: "Action Blocked",
+          text: "A task is already in progress.",
           icon: "warning",
           confirmButtonText: "OK",
           confirmButtonColor: "#f1c40f",
@@ -242,11 +282,11 @@ export default function CollectOnlyCPECollect() {
         return;
       }
   
-      if (selectedRows.length > 9) {
+      if (selectedRows.length > 1) {
        
         const confirmCreateTask = await Swal.fire({
           title: "Create Task?",
-          text: "You have selected more than 9 incidents. Do you want to create a task instead?",
+          text: "You have selected more than 5 incidents. Do you want to create a task instead?",
           icon: "question",
           showCancelButton: true,
           confirmButtonText: "Yes, Create Task",
@@ -259,7 +299,8 @@ export default function CollectOnlyCPECollect() {
   
         const parameters = {
           Status: "Open CPE Collect",
-          Incident_Ids: selectedRows,
+          //Incident_Ids: selectedRows,
+          Proceed_Date : new Date(),
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
   
@@ -304,7 +345,7 @@ export default function CollectOnlyCPECollect() {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "An error occurred while processing your request.",
+        text: error.message || "An error occurred while processing your request.",
         icon: "error",
         confirmButtonText: "OK",
         confirmButtonColor: "#d33",
@@ -313,6 +354,7 @@ export default function CollectOnlyCPECollect() {
     }
   };
   
+  // Function to handle the date change for From Date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
       
@@ -320,14 +362,48 @@ export default function CollectOnlyCPECollect() {
                                   title: "Error",
                                   text: "The 'From' date cannot be later than the 'To' date.",
                                   icon: "error",
-                                  confirmButtonColor: "#d33", 
+                                  confirmButtonColor: "#f1c40f",
                               });;
-    } else {
+    } else if (toDate) {
+      // Calculate month gap
+      const diffInMs = toDate - date;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      
+      if (diffInDays > 31) {
+          Swal.fire({
+              title: "Warning",
+              text: "The selected range is more than 1 month.",
+              icon: "warning",
+              confirmButtonColor: "#f1c40f",
+          });
+        
+          return;
+    }
+    setFromDate(date);
+  } 
+    else {
       setError("");
       setFromDate(date);
     }
   };
-
+// else if (toDate){
+//       // Calculate month gap
+//       const diffInMs = toDate - date;
+//       const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      
+//       if (diffInDays > 31) {
+//           Swal.fire({
+//               title: "Warning",
+//               text: "The selected range is more than 1 month.",
+//               icon: "warning",
+//               confirmButtonColor: "#f1c40f",
+//           });
+        
+//           return;
+//       }
+//       setFromDate(date);
+//     }
+  // Function to handle the date change for To Date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
       
@@ -335,14 +411,34 @@ export default function CollectOnlyCPECollect() {
         title: "Error",
         text: "The 'To' date cannot be earlier than the 'From' date.",
         icon: "error",
-        confirmButtonColor: "#d33", 
+        confirmButtonColor: "#f1c40f",
       });
-    } else {
+    } else if (fromDate){
+
+          // Calculate month gap
+          const diffInMs = date - fromDate;
+          const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+          
+          if (diffInDays > 31) {
+              Swal.fire({
+                  title: "Warning",
+                  text: "The selected range is more than 1 month.",
+                  icon: "warning",
+                  confirmButtonColor: "#f1c40f",
+              });
+            
+              return;
+        }
+        setToDate(date);
+      }
+    
+    else {
       setError("");
       setToDate(date);
     }
   };
 
+  // Function to handle the search query change
   useEffect(() => {
     setFilteredData(
       tableData.filter((row) =>
@@ -356,12 +452,14 @@ export default function CollectOnlyCPECollect() {
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
 
+  // Function to handle the previous page button click
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
 
+  // Function to handle the next page button click
   const handleNextPage = () => {
     if (currentPage < pages - 1) {
       setCurrentPage(currentPage + 1);
@@ -372,6 +470,7 @@ export default function CollectOnlyCPECollect() {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
+  // Function to handle the checkbox change for each row
   const handleRowCheckboxChange = (id) => {
     if (selectedRows.includes(id)) {
       setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
@@ -380,6 +479,7 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
+  // Function to handle the select all checkbox change
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
       setSelectedRows([]);
@@ -389,6 +489,7 @@ export default function CollectOnlyCPECollect() {
     setSelectAllData(!selectAllData);
   };
 
+  // Function to handle the filter button click
   const handleFilterClick = () => {
     const from = fromDate ? new Date(fromDate) : null;
     const to = toDate ? new Date(toDate) : null;
@@ -452,6 +553,7 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
+  // Function to handle the clear filter button click
   const handleclearfilter = () => {
     setFromDate(null);
     setToDate(null);
@@ -483,7 +585,7 @@ export default function CollectOnlyCPECollect() {
             
           </div>
           <div className="flex justify-end items-center w-full mb-4">
-          <button
+          {/* <button
             
               className={`${GlobalStyle.buttonPrimary} flex items-center`}
               onClick={() => {
@@ -496,10 +598,32 @@ export default function CollectOnlyCPECollect() {
             >
             <FaDownload className="mr-2" />
               Create task and let me know
-            </button>
+            </button> */}
+            { paginatedData.length > 0 && (
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+            
+                className={`${GlobalStyle.buttonPrimary} flex items-center`}
+                onClick={() => {
+                  handleCreateTaskForDownload({
+                    source_type: selectedSource,
+                    fromDate: fromDate,
+                    toDate: toDate,
+                  });
+                }}
+              >
+              <FaDownload className="mr-2" />
+                Create task and let me know
+              </button>
+              )}
+            </div>
+            )}
+
 
           </div>
           <div className="flex justify-end">
+            {/* Filter Section */}
             <div className={`${GlobalStyle.cardContainer}  items-center w-[72vw] mb-8 mt-8`}>
                 <div className="flex items-center gap-4 justify-end">
                   <div className="flex items-center gap-4">
@@ -536,21 +660,40 @@ export default function CollectOnlyCPECollect() {
                       {error && <span className={GlobalStyle.errorText}>{error}</span>}
                     </div>
 
-                    <button
+                    {/* <button
                       className={`${GlobalStyle.buttonPrimary} h-[35px]`}
                       onClick={handleFilterClick}
                     >
                       Filter
-                    </button>
+                    </button> */}
 
-                    <button className={GlobalStyle.buttonRemove} onClick={handleclearfilter}>
+                    <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                          onClick={handleFilterClick}
+                        >
+                          Filter
+                        </button>
+                        )}
+                      </div>
+
+                    {/* <button className={GlobalStyle.buttonRemove} onClick={handleclearfilter}>
                                 Clear
-                    </button>
+                    </button> */}
+                    <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button className={GlobalStyle.buttonRemove} onClick={handleclearfilter}>
+                          Clear
+                        </button>
+                        )}
+                      </div>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col">
+            {/* Search Section */}
             <div className="mb-4 flex justify-start">
               <div className={GlobalStyle.searchBarContainer}>
                 <input
@@ -563,6 +706,7 @@ export default function CollectOnlyCPECollect() {
                 <FaSearch className={GlobalStyle.searchBarIcon} />
               </div>
             </div>
+            {/* Table Section */}
             <div className={GlobalStyle.tableContainer}>
               <table className={GlobalStyle.table}>
                 <thead className={GlobalStyle.thead}>
@@ -612,17 +756,21 @@ export default function CollectOnlyCPECollect() {
                       <td className={GlobalStyle.tableData}>
                         <div className="flex justify-center items-center h-full">
                           {row.status === "Open CPE Collect" && (
-                            <div
-                              title="Open CPE Collect"
-                              aria-label="Open CPE Collect"
-                            >
+                            <div>
                               <img
                                 src={Open_CPE_Collect}
                                 alt="Open CPE Collect"
                                 className="w-5 h-5"
+                                data-tooltip-id="open-cpe-collect-tooltip"
                               />
                             </div>
                           )}
+                          <Tooltip
+                            id="open-cpe-collect-tooltip"
+                            place="bottom"
+                            content="Open CPE Collect"
+                            className="tooltip"
+                          />
                         </div>
                       </td>
 
@@ -637,7 +785,17 @@ export default function CollectOnlyCPECollect() {
                       <td
                         className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                       >
-                        <button
+                        {/* <button
+                          className={`${GlobalStyle.buttonPrimary} mx-auto`}
+                          onClick={() => {
+                            handleProceed(row.id);
+                          }}
+                        >
+                          Proceed
+                        </button> */}
+                        <div>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
                           className={`${GlobalStyle.buttonPrimary} mx-auto`}
                           onClick={() => {
                             handleProceed(row.id);
@@ -645,6 +803,8 @@ export default function CollectOnlyCPECollect() {
                         >
                           Proceed
                         </button>
+                        )}
+                      </div>
                       </td>
                     </tr>
                   ))}
@@ -659,6 +819,8 @@ export default function CollectOnlyCPECollect() {
               </table>
             </div>
           </div>
+
+          {/* Pagination Section */}
 
           {tableData.length > rowsPerPage && (
             <div className={GlobalStyle.navButtonContainer}>
@@ -681,7 +843,7 @@ export default function CollectOnlyCPECollect() {
               </button>
             </div>
           )}
-
+          {/* Back Button Section */}
           <div className="flex justify-start items-center w-full  ">
             <button
               className={`${GlobalStyle.buttonPrimary} `} 
@@ -691,6 +853,7 @@ export default function CollectOnlyCPECollect() {
               
             </button>
           </div>
+          {/* Select All Data and proceed button Section  */}
           <div className="flex justify-end items-center w-full">
             <label className="flex items-center gap-2">
               <input
@@ -705,12 +868,23 @@ export default function CollectOnlyCPECollect() {
               Select All Data
             </label>
 
-            <button
+            {/* <button
               className={`${GlobalStyle.buttonPrimary} ml-4`}
               onClick={handleCreate}
             >
               Proceed
-            </button>
+            </button> */}
+
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                className={`${GlobalStyle.buttonPrimary} ml-4`}
+                onClick={handleCreate}
+              >
+                Proceed
+              </button>
+              )}
+            </div>
           </div>
         </div>
       )}

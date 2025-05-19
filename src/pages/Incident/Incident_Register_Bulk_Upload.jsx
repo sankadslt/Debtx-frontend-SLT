@@ -15,22 +15,51 @@ Notes: This template uses Tailwind CSS */
 
 
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { incidentRegisterBulkUpload } from "../../services/Incidents/incidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 const Incident_Register_Bulk_Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [actionType, setActionType] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
     // const handleFileChange = (event) => {
     //     const file = event.target.files[0];
     //     setSelectedFile(file);
     // };
+
+
+    // Role-Based Buttons
+      useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
 
     // Function to handle file selection and validation
     const handleFileChange = (event) => {
@@ -116,6 +145,8 @@ const Incident_Register_Bulk_Upload = () => {
                         title: "Success",
                         text: response.message,
                         confirmButtonColor: "#28a745",
+                    }).then(() => {
+                        window.location.reload();
                     });
                     setSelectedFile(null);  
                     setActionType(null);
@@ -191,13 +222,25 @@ const Incident_Register_Bulk_Upload = () => {
 
                         {/* Submit Button */}
                         <div className="flex justify-end">
-                            <button
+                            {/* <button
                                 type="submit"
                                 className={GlobalStyle.buttonPrimary}
                                 disabled={loading}
                             >
                                 {loading ? "Uploading..." : "Submit"}
-                            </button>
+                            </button> */}
+
+                            <div>
+                                {["admin", "superadmin", "slt"].includes(userRole) && (
+                                    <button
+                                    type="submit"
+                                    className={GlobalStyle.buttonPrimary}
+                                    disabled={loading}
+                                >
+                                    {loading ? "Uploading..." : "Submit"}
+                                </button>
+                                )}
+                            </div>
                         </div>
                     </form>
                 </div>

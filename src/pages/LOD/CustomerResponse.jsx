@@ -13,7 +13,7 @@ Notes: This template uses Tailwind CSS */
 
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -30,7 +30,8 @@ const CustomerResponse = () => {
     const [ResponseRemark, setResponseRemark] = useState("");
     const [isResponseHistory, setIsResponseHistory] = useState(false);
     const navigate = useNavigate();
-    const { caseId } = useParams(); // Get the case_id from the URL parameters
+    const location = useLocation(); // Get the location object from react-router-dom
+    const { caseId } = location.state || {}; // Get the case_id from the URL parameters
     const rowsPerPage = 10; // Number of rows per page
 
     // Handle Submit button

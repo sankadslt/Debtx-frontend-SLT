@@ -13,7 +13,7 @@ Notes: This template uses Tailwind CSS */
 
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useParams } from "react-router-dom";
@@ -25,7 +25,8 @@ const CustomerResponseReview = () => {
     const [currentPagePaymentDetails, setCurrentPagePaymentDetails] = useState(0);
     const [LODdata, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const { caseId } = useParams(); // Get the case_id from the URL parameters
+    const location = useLocation(); // Get the current location object
+    const { caseId } = location.state || {}; // Get the case_id from the URL parameters
     const rowsPerPage = 5; // Number of rows per page
     const navigate = useNavigate();
 
