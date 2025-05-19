@@ -136,6 +136,8 @@ const WriteOffCaseList = () => {
         return;
       }
 
+      console.log(currentPage);
+
       setIsLoading(true);
 
       // Build payload for API
@@ -150,6 +152,8 @@ const WriteOffCaseList = () => {
         page: currentPage,
         limit: rowsPerPage,
       };
+      console.log("Payload sent to API: ", payload);
+      
       // Remove undefined fields for clean API request
       Object.keys(payload).forEach(
         (key) => payload[key] === undefined && delete payload[key]
@@ -238,18 +242,19 @@ const WriteOffCaseList = () => {
 
   // -------------------- Pagination Logic --------------------
 
+  // Handle api calling only when the currentPage incriment more that before
   // Only fetch next page from API if needed
   const handlePageChange = () => {
     if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
       setMaxCurrentPage(currentPage);
-      handleFilter();
+      handleFilter(); // Call the filter function only after the page incrimet
     }
   };
 
   // Watch for page change and trigger data fetch if filter is applied
   useEffect(() => {
     if (isFilterApplied) {
-      handlePageChange();
+      handlePageChange(); // Call the function whenever currentPage changes
     }
     // eslint-disable-next-line
   }, [currentPage]);
