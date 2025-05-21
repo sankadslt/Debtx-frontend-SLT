@@ -589,3 +589,59 @@ export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
   }
 };
 
+export const fetchWithdrawalCases = async (payload) => {
+  try {
+    const accountNumber = Number(payload.accountNumber);
+    if (isNaN(accountNumber)) {
+      throw new Error("Account number must be a valid number.");
+    }
+
+    const response = await axios.post(`${URL}/List_All_Write_off_Cases`, {
+      ...payload,
+      accountNumber,
+    });
+
+    if (response.data.success === false) {
+      throw new Error(response.data.message || "Failed to fetch withdrawal cases.");
+    }
+
+    return {
+      data: response.data.data.map((item) => ({
+        caseId: item.case_id,
+        accountNo: item.account_no,
+        status: item.case_current_status,
+        amount: item.current_arrears_amount,
+        remark: item.remark || "N/A",
+        approvedOn: item.approve?.approved_on || "N/A",
+        withdrawOn: item.Withdraw_on || "N/A",
+        withdrawBy: item.Withdraw_by || "N/A",
+      })),
+      pagination: response.data.pagination,
+    };
+  } catch (error) {
+    console.error("Error fetching withdrawal cases:", error);
+    throw new Error(error.response?.data?.message || error.message || "Unknown error occurred");
+  }
+};
+
+
+
+export const updateCaseRemark = async (caseId, remark) => {
+  try {
+    const response = await axios.patch(
+      `${URL}/Create_Wthdraw_case`, 
+      { caseId, remark }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error updating case remark:",
+      error.response?.data || error.message
+    );
+    throw new Error(error.message || "Failed to connect to the server.");
+  }
+};
+
+
+

@@ -86,6 +86,8 @@ import CustomerResponse from "../pages/LOD/CustomerResponse";
 import CustomerResponseReview from "../pages/LOD/CustomerResponseReview";
 import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList";
 import SettlementPreview from "../pages/Settlement/SettlementPreview";
+import WithdrawalCaseLog from "../pages/Distribute/Withdraw case log";
+import WithdrawCase from "../pages/Distribute/WithdrawCase";
 
 const Routers = () => {
   return (
@@ -642,8 +644,18 @@ const Routers = () => {
           />
         }
       />
-    </Routes>
+        <Route path="/drc/WithdrawCaseLog"
+     element={<ProtectedRoute
+       element={<WithdrawalCaseLog />}
+        allowedRoles={['superadmin' ]} />} />
     
+    <Route path="/drc/WithdrawCase"
+      element={<ProtectedRoute
+        element={<WithdrawCase/>}
+         allowedRoles={['superadmin' ]} />} />
+    </Routes>
+      
+   
     
   );
 };

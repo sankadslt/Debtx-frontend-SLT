@@ -21,6 +21,7 @@ export const loginUser = async (userData) => {
   try {
     const response = await axios.post(`${AUTH_URL}/login`, userData, { withCredentials: true });
     return response.data;
+    
   } catch (error) {
     console.error("Error logging in:", error.response?.data || error.message);
     throw error.response?.data || error;
@@ -62,6 +63,7 @@ export const logoutUser = async () => {
 // Get logged-in user ID from token
 export const getLoggedUserId = async () => {
   let token = localStorage.getItem("accessToken");
+  
   if (!token) return null;
 
   try {
