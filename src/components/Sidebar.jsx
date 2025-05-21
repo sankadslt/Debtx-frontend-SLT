@@ -113,7 +113,21 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
-    {icon: HiOutlineDocumentCheck, label: "Settlement", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
+    {
+      icon: HiOutlineDocumentCheck, 
+      label: "Settlement", 
+      roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: CgEditFade, label: "Settlement ", link: "/pages/Settlement/MonitorSettlement", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "Payment", link: "/pages/Money_Transaction/MoneyTransaction", roles: ["superadmin", "admin"] },
+        { 
+          icon: CgEditFade, 
+          label: "Commission", 
+          link: "/Commission/CommissionCaseList", 
+          roles: ["superadmin", "admin"] 
+        },
+      ],
+    },
     {icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
     {
       icon: MdDoneOutline, 
