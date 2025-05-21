@@ -105,7 +105,7 @@ const Sidebar = ({ onHoverChange }) => {
           roles: ["superadmin", "admin"],
           subItems: [
             {icon:CgEditFade, label:"Write off List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:CgEditFade, label:"Abandoned List", link:"/dashboard", roles:["superadmin", "admin"]},
+            {icon:CgEditFade, label:"Abandoned List", link:"/pages/DisposedList/AbandonedCaseLog", roles:["superadmin", "admin"]},
             {icon:CgEditFade, label:"Withdraw List", link:"/dashboard", roles:["superadmin", "admin"]},
             {icon:CgEditFade, label:"Closed List", link:"/dashboard", roles:["superadmin", "admin"]},
           ],

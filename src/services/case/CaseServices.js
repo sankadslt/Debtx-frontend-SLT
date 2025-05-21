@@ -629,3 +629,21 @@ export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
   }
 };
 
+export const GetAbandonedCaseLogDetailsByAccountNumber = async (
+  payload
+) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Get_Abandoned_Case_Logs`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching request log from recovery officers without user ID:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+

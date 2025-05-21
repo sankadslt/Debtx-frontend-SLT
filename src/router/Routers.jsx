@@ -92,6 +92,9 @@ import SettlementPreview from "../pages/Settlement/SettlementPreview";
 import PaymentPreview from "../pages/Money_Transaction/PaymentPreview";
 import CommissionPreview from "../pages/Commission/Commission_Details";
 
+//Disposed List
+import AbandonedCaseLog from "../pages/DisposedList/AbandonedCaseLog";
+
 const Routers = () => {
   return (
     <Routes>
@@ -659,6 +662,17 @@ const Routers = () => {
           />
         }
       />
+
+      <Route
+        path="/pages/DisposedList/AbandonedCaseLog"
+        element={
+          <ProtectedRoute
+            element={<AbandonedCaseLog />}
+            allowedRoles={["superadmin"]} 
+          />
+        }
+      />
+
     </Routes>
     
     
