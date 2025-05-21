@@ -2,6 +2,7 @@
 Created Date: 2025-02-27
 Created By: sakumini (sakuminic@gmail.com)
 Modified By: Buthmi mithara (buthmimithara1234@gmail.com)
+Modified By: Janani Kumrasiri (tgjkk001@gmail.com)
 Version: node 20
 ui number : 2.17
 Dependencies: tailwind css
@@ -9,401 +10,555 @@ Related Files: (routes)
 Notes:The following page conatins the code for the Mediation Board case list Screen */
 
 import { useState, useEffect } from "react";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import DatePicker from "react-datepicker";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import edit from "../../assets/images/mediationBoard/edit.png";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { commission_type_cases_count } from "../../services/commission/commissionService";
+import { Active_DRC_Details } from "../../services/drc/Drc";
+import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { List_All_DRCs_Mediation_Board_Cases } from "../../services/case/CaseServices";
-// Import status icons with correct file extensions
-import Forward_to_Mediation_Board from "../../assets/images/mediationBoard/Forward_to_Mediation_Board.png";
-import MB_fail_with_pending_non_settlement from "../../assets/images/mediationBoard/MB_fail_with_pending_non_settlement.png";
-import MB_Negotiation from "../../assets/images/mediationBoard/MB_Negotiation.png";
-import MB_Settle_Active from "../../assets/images/mediationBoard/MB_Settle_Active.png";
-import MB_Settle_open_pending from "../../assets/images/mediationBoard/MB_Settle_open_pending.png";
-import MB_Settle_pending from "../../assets/images/mediationBoard/MB_Settle_pending.png";
-import Swal from "sweetalert2";
-// Status icon mapping
-const STATUS_ICONS = {
-  Forward_to_Mediation_Board: {
-    icon: Forward_to_Mediation_Board,
-    tooltip: "Forward to Mediation Board",
-  },
-  MB_fail_with_pending_non_settlement: {
-    icon: MB_fail_with_pending_non_settlement,
-    tooltip: "MB fail with pending non settlement",
-  },
-  MB_Negotiation: {
-    icon: MB_Negotiation,
-    tooltip: "MB Negotiation",
-  },
-  MB_Settle_Active: {
-    icon: MB_Settle_Active,
-    tooltip: "MB Settle Active",
-  },
-  MB_Settle_open_pending: {
-    icon: MB_Settle_open_pending,
-    tooltip: "MB Settle open pending",
-  },
-  MB_Settle_pending: {
-    icon: MB_Settle_pending,
-    tooltip: "MB Settle pending",
-  },
-};
+import { RTOM_Details } from "../../services/RTOM/Rtom";
+import { Tooltip } from "react-tooltip";
+import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
+import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
+import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Request Customer-Info.png";
+import MB_Handover_Customer_Info from "/src/assets/images/Mediation_Board/MB Handover Customer-Info.png";
+import MB_Settle_Pending from "/src/assets/images/Mediation_Board/MB Settle Pending.png";
+import MB_Settle_Open_Pending from "/src/assets/images/Mediation_Board/MB Settle Open Pending.png";
+import MB_Fail_with_Pending_Non_Settlement from "/src/assets/images/Mediation_Board/MB Fail with Pending Non Settlement.png";
 
-
-const StatusIcon = ({ status }) => {
-  const statusInfo = STATUS_ICONS[status];
-
-  if (!statusInfo) return <span>{status}</span>;
-
-  return (
-    <div className="relative group">
-      <img src={statusInfo.icon} alt={status} className="w-6 h-6 cursor-help" />
-      <div className="absolute invisible group-hover:visible bg-gray-800 text-white text-sm rounded px-2 py-1 left-1/2 transform -translate-x-1/2 bottom-full mb-1 whitespace-nowrap z-10">
-        {statusInfo.tooltip}
-        <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-2 h-2 bg-gray-800 rotate-45"></div>
-      </div>
-    </div>
-  );
-};
-
-export default function MediationBoardCaseList() {
-
+const MediationBoardCaseList = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
-  const [error, setError] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedDRC, setSelectedDRC] = useState("");
-  const [selectedRTOM, setSelectedRTOM] = useState("");
+  const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [drcNames, setDrcNames] = useState([]);
+  const [selectedDrcId, setSelectedDrcId] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const [tableData, setTableData] = useState([]);
-  const [isloading, setIsLoading] = useState(true);
-  const [filteredData, setFilteredData] = useState(tableData);
-  const navigate = useNavigate();
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const [totalPages, setTotalPages] = useState(0);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0);
+  const [isFilterApplied, setIsFilterApplied] = useState(false);
+  const [caseId, setCaseId] = useState("");
+  const [searchBy, setSearchBy] = useState("case_id");
+  const [isLoading, setIsLoading] = useState(false);
+  const [caseStatus, setCaseStatus] = useState("");
+  const [rtom, setRtom] = useState("");
+  const [rtomList, setRtomList] = useState([]);
 
-  const rowsPerPage = 7;
+  const rowsPerPage = 10;
 
+  // Decide the icon path based on the status
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Forward to Mediation Board":
+        return Forward_To_Mediation_Board;
+      case "MB Negotiation":
+        return MB_Negotiation;
+      case "MB Request Customer-Info":
+        return MB_Request_Customer_Info;
+      case "MB Handover Customer-Info":
+        return MB_Handover_Customer_Info;
+      case "MB Settle Pending":
+        return MB_Settle_Pending;
+      case "MB Settle Open-Pending":
+        return MB_Settle_Open_Pending;
+      case "MB Fail with Pending Non-Settlement":
+        return MB_Fail_with_Pending_Non_Settlement;
+      default:
+        return "";
+    }
+  };
+
+  // render status icon with tooltip
+  const renderStatusIcon = (status, index) => {
+    const iconPath = getStatusIcon(status);
+
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+
+    const tooltipId = `tooltip-${index}`;
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={iconPath}
+          alt={status}
+          className="w-6 h-6"
+          data-tooltip-id={tooltipId} // Add tooltip ID to image
+        />
+        {/* Tooltip component */}
+        <Tooltip id={tooltipId} place="bottom" effect="solid">
+          {status} {/* Tooltip text is the phase and status */}
+        </Tooltip>
+      </div>
+    );
+  };
+
+  // initial data fetch
+  useEffect(() => {
+    // Fetch DRC names
+    const fetchDrcNames = async () => {
+      try {
+        const names = await Active_DRC_Details(); 
+
+        setDrcNames(names);
+      } catch (error) {
+        console.error("Error fetching DRC names:", error);
+      }
+    };
+
+    // Fetch RTOM
+    const fetchRTOM = async () => {
+      try {
+        const rtom = await RTOM_Details();
+
+        setRtomList(rtom);
+      } catch (error) {
+        console.error("Error fetching DRC names:", error);
+      }
+    };
+
+    setFilteredData([]);
+    fetchDrcNames();
+    fetchRTOM();
+  }, []);
+
+  // Fetch data from API
   const fetchData = async () => {
     try {
-      setIsLoading(true);
-  
-      const filters = {
-        case_current_status: selectedStatus,
-        rtom: selectedRTOM,
-        drc_name: selectedDRC,
-        From_DAT: fromDate ? fromDate.toISOString().split("T")[0] : null,
-        To_DAT: toDate ? toDate.toISOString().split("T")[0] : null,
+
+      const formatDate = (date) => {
+        if (!date) return null;
+        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return offsetDate.toISOString().split('T')[0];
       };
-      
-      const response = await List_All_DRCs_Mediation_Board_Cases(filters);
-      console.log("Response:", response);
-  
-      if (!response?.data) {
-        setTableData([]);
-        setFilteredData([]);
+
+      if (!caseStatus && !rtom && !selectedDrcId && !fromDate && !toDate) {
+        Swal.fire({
+          title: "Warning",
+          text: "No filter is selected. Please, select a filter.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
         return;
       }
-  
-      const formattedData = response.data.map((item) => ({
-        id: item.case_id || "N/A",
-        case_status: item.case_current_status || "N/A",
-        date: item.created_dtm ? new Date(item.created_dtm).toLocaleDateString("en-GB") : "N/A",
-        drc: item.drc_name || "N/A",
-        rtom: item.rtom || "N/A",
-        calling_round: item.mediation_board_call_count || "N/A",
-        next_calling_date: item.latest_next_calling_dtm ? new Date(item.latest_next_calling_dtm).toLocaleDateString("en-GB") : "N/A",
-        created_dtm: item.created_dtm ? new Date(item.created_dtm).toISOString().split("T")[0] : "N/A",
-      }));
-  
-      
-      const filteredResults = formattedData.filter((row) => {
-        const matchesStatus = !selectedStatus || row.case_status === selectedStatus;
-        const matchesDRC = !selectedDRC || row.drc === selectedDRC;
-        const matchesRTOM = !selectedRTOM || row.rtom === selectedRTOM;
-        const matchesDate =
-          (!fromDate || new Date(row.created_dtm) >= fromDate) &&
-          (!toDate || new Date(row.created_dtm) <= toDate);
-  
-        return matchesStatus && matchesDRC && matchesRTOM && matchesDate;
-      });
-  
-      setTableData(formattedData);
-      setFilteredData(filteredResults);
+
+      if ((fromDate && !toDate) || (!fromDate && toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "Both From Date and To Date must be selected.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+
+      const filters = {
+        case_status: caseStatus,
+        From_DAT: formatDate(fromDate),
+        TO_DAT: formatDate(toDate),
+        RTOM: rtom,
+        DRC_ID: selectedDrcId,
+        pages: currentPage,
+      };
+      // console.log("Filters sent to api:", filters);
+
+      setIsLoading(true);
+      const response = await List_All_DRCs_Mediation_Board_Cases(filters);
+
+      if (response && response.data && response.status === "success") {
+        // console.log("Valid data received:", response.data);
+
+        // Append the new data to the existing data
+        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (response.data.length === 0) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false
+            });
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.data.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
+          }
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid Settlement data found in response.",
+          icon: "error"
+        });
+        setFilteredData([]);
+      }
+
     } catch (error) {
-      console.error("Error fetching data:", error);
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Failed to fetch data.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
       setIsLoading(false);
     }
   };
-  
-  useEffect(() => {
-    fetchData();
-  }, []);
 
-  
   const handleFromDateChange = (date) => {
-    if (toDate && date > toDate) {
-      
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "The 'From' date cannot be later than the 'To' date.",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#f1c40f",
-      });
-    } else {
-      setError("");
-      setFromDate(date);
-    }
+    setFromDate(date);
+    validateDates(date, toDate);
   };
 
   const handleToDateChange = (date) => {
-    if (fromDate && date < fromDate) {
-      
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "The 'To' date cannot be earlier than the 'From' date.",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#f1c40f",
-      });
-    } else {
-      setError("");
-      setToDate(date);
-    }
+    setToDate(date);
+    validateDates(fromDate, date);
   };
 
-  useEffect(() => {
-    setFilteredData(
-      tableData.filter((row) =>
-        Object.values(row)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      )
-    );
-  }, [searchQuery]); 
+  const validateDates = (from, to) => {
+    if (from && to) {
 
-  const handleFilterClick = () => {
-    if (!selectedStatus && !selectedDRC && !selectedRTOM && !fromDate && !toDate) {
+      if (from >= to) {
+        Swal.fire({
+          title: "Warning",
+          text: "From date must be before to date",
+          icon: "warning",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#3085d6",
+        });
+        setFromDate(null);
+        setToDate(null);
+        return false;
+      }
+      const oneMonthLater = new Date(from);
+      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+      if (to > oneMonthLater) {
+        Swal.fire({
+          title: "Warning",
+          text: "Date range cannot exceed one month",
+          icon: "warning",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#3085d6",
+        });
+        setFromDate(null);
+        setToDate(null);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // Validate case ID input preventing non-numeric characters
+  const validateCaseId = () => {
+    if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
       Swal.fire({
-        title: "Missing Filters",
-        text: "Please select a filter criteria.",
+        title: "Warning",
+        text: "Invalid input. Only numbers are allowed for Case ID.",
         icon: "warning",
-        confirmButtonText: "OK",
-         confirmButtonColor: "#f1c40f"
+        allowOutsideClick: false,
+        allowEscapeKey: false,
       });
+      setCaseId(""); // Clear the invalid input
       return;
     }
-  
-    const filtered = tableData.filter((row) => {
-      const matchesStatus = !selectedStatus || row.case_status === selectedStatus;
-      const matchesDRC = !selectedDRC || row.drc === selectedDRC;
-      const matchesRTOM = !selectedRTOM || row.rtom === selectedRTOM;
-      const matchesDate =
-        (!fromDate || new Date(row.created_dtm) >= new Date(fromDate)) &&
-        (!toDate || new Date(row.created_dtm) <= new Date(toDate));
-  
-      return matchesStatus && matchesDRC && matchesRTOM && matchesDate;
-    });
-  
-    setFilteredData(filtered);
+  }
+
+  useEffect(() => {
+    validateCaseId(); // Validate case ID input
+  }, [caseId]);
+
+  useEffect(() => {
+    if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      fetchData(); // Call the function whenever currentPage changes
+    }
+  }, [currentPage]);
+
+  // Handle filter button click
+  const handleFilterButton = () => {
+    setFilteredData([]); // Clear previous results
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
+    if (currentPage === 1) {
+      fetchData();
+    } else {
+      setCurrentPage(1);
+    }
+    setIsFilterApplied(true); // Set filter applied state to true
+  }
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+  // console.log("Filtered data:", filteredData);
+
+  // console.log("Paginated data:", paginatedData);
+
+  // Search Section
+  const filteredDataBySearch = paginatedData.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  // handle next arrow click
+  const handleNextPage = () => {
+    if (isMoreDataAvailable) {
+      setCurrentPage(currentPage + 1);
+    } else {
+      const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+      setTotalPages(totalPages);
+      if (currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+      }
+    }
   };
-  
 
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
-
+  // Handle previous arrow click
   const handlePrevPage = () => {
-    if (currentPage > 0) {
+    if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
 
-  const handleNextPage = () => {
-    if (currentPage < pages - 1) {
-      setCurrentPage(currentPage + 1);
-    }
+  // Handle clear button click
+  const handleClear = () => {
+    setCaseStatus("");
+    setRtom("");
+    setFromDate(null);
+    setToDate(null);
+    setSelectedDrcId("");
+    setSearchQuery("");
+    setCurrentPage(0); // Reset to the first page
+    setIsFilterApplied(false); // Reset filter applied state
+    setTotalPages(0); // Reset total pages
+    setFilteredData([]); // Clear filtered data
   };
 
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
+  const navigate = useNavigate();
 
-  
+  // Navigate to the case ID page
+  const naviCaseID = (caseId) => {
+    navigate("", { state: { caseId } });
+  }
+
+  // Navigate to the preview page
+  const naviPreview = (caseID, DRC_ID) => {
+    navigate("/MediationBoard/MediationBoardResponse", { state: { caseID, DRC_ID } });
+  };
+
+  // display loading animation when data is loading
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className={GlobalStyle.fontPoppins}>
-      <h1 className={GlobalStyle.headingLarge}>Mediation Board Case List</h1>
+    <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
+      <h1 className={GlobalStyle.headingLarge + " mb-6"}>Mediation Board Case List</h1>
 
-      {/* Filter section */}
-      <div className={`${GlobalStyle.cardContainer} w-full mb-8 mt-8 justify-end `}> 
-          <div className=" flex gap-4 items-center">
-            {/* Status dropdown */}
-            <div className="">
-              <select
-                className={`${GlobalStyle.selectBox}`}
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                style={{ color: selectedStatus === "" ? "gray" : "black" }}
-              >
-                <option value="" hidden>Status</option>
-                <option value="Forward to Mediation Board" style={{ color: "black" }}>
-                Forward to Mediation Board
-                </option>
-                <option value="MB Request Customer-Info" style={{ color: "black" }}>
-                MB Request Customer-Info
-                </option>
-                <option value=" MB Handover Customer-Info" style={{ color: "black" }}>
-                MB Handover Customer-Info
-                </option>
-                <option value="MB Fail with Pending Non-Settlement" style={{ color: "black" }}>
-                MB Fail with Pending Non-Settlement
-                </option>
-                <option value="MB Negotiation" style={{ color: "black" }}>MB Negotiation</option>
-                <option value="MB Settle Active" style={{ color: "black" }}>MB Settle Active</option>
-                <option value="MB Settle Open-Pending" style={{ color: "black" }}>
-                  MB Settle Open-Pending
-                </option>
-                <option value="MB Settle Pending" style={{ color: "black" }}>MB Settle Pending</option>
-                {/* Add other status options */}
-              </select>
-            </div>
+      <div className={`${GlobalStyle.cardContainer} w-full`}>
+        <div className="flex items-center justify-end w-full space-x-3">
 
-            {/* DRC dropdown */}
-            <div className="">
-              <select
-                className={`${GlobalStyle.selectBox} `}
-                value={selectedDRC}
-                onChange={(e) => setSelectedDRC(e.target.value)}
-                style={{ color: selectedDRC === "" ? "gray" : "black" }}
-
-              >
-                <option value="drc" hidden>DRC</option>
-                <option value="abcd" style={{ color: "black" }}>ABCD</option>
-                {/* Add other DRC options */}
-              </select>
-            </div>
-
-            {/* RTOM dropdown */}
-            <div className="">
-              <select
-                className={`${GlobalStyle.selectBox}`}
-                value={selectedRTOM}
-                onChange={(e) => setSelectedRTOM(e.target.value)}
-                style={{ color: selectedRTOM === "" ? "gray" : "black" }}
-              >
-                <option value="" hidden>RTOM</option>
-                <option value="Standard" style={{ color: "black" }}>Standard</option>
-                {/* Add other RTOM options */}
-              </select>
-            </div>
-
-            <label className={GlobalStyle.dataPickerDate}>Date</label>
-            <DatePicker
-              selected={fromDate}
-              onChange={handleFromDateChange}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="From"
-              className={`${GlobalStyle.inputText}`}
-            />
-            <DatePicker
-              selected={toDate}
-              onChange={handleToDateChange}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="To"
-              className={`${GlobalStyle.inputText} `}
-            />
-
-            {/* Filter button */}
-            <button
-              className={GlobalStyle.buttonPrimary}
-              onClick={handleFilterClick}
-
+          <div className="flex items-center">
+            <select
+              value={caseStatus}
+              onChange={(e) => setCaseStatus(e.target.value)}
+              className={GlobalStyle.selectBox}
+              style={{ color: caseStatus === "" ? "gray" : "black" }}
             >
-              Filter
-            </button>
-            <button className={GlobalStyle.buttonRemove}   >
-                        Clear 
-                    </button>
+              <option value="" hidden>Status</option>
+              <option value="Forward to Mediation Board">Forward to Mediation Board</option>
+              <option value="MB Negotiation">MB Negotiation</option>
+              <option value="MB Request Customer-Info">MB Request Customer-Info</option>
+              <option value="MB Handover Customer-Info">MB Handover Customer-Info</option>
+              <option value="MB Settle Pending">MB Settle Pending</option>
+              <option value="MB Settle Open-Pending">MB Settle Open-Pending</option>
+              <option value="MB Fail with Pending Non-Settlement">MB Fail with Pending Non-Settlement</option>
+            </select>
           </div>
+
+          <div className="flex items-center">
+            <select
+              value={selectedDrcId}
+              onChange={(e) => setSelectedDrcId(e.target.value)}
+              className={GlobalStyle.inputText}
+              style={{ color: selectedDrcId === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>DRC</option>
+              {drcNames.map((drc) => (
+                <option key={drc.key} value={drc.id.toString()}>
+                  {drc.value}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center">
+            <select
+              value={rtom}
+              onChange={(e) => setRtom(e.target.value)}
+              className={GlobalStyle.inputText}
+              style={{ color: rtom === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>RTOM</option>
+              {Object.values(rtomList).map((rtom) => (
+                <option key={rtom.rtom_id} value={rtom.rtom}>
+                  {rtom.rtom}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center">
+            <label className={GlobalStyle.dataPickerDate}>Date</label>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center">
+                <DatePicker
+                  selected={fromDate}
+                  onChange={handleFromDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="From"
+                  className={GlobalStyle.inputText}
+                />
+              </div>
+
+              <div className="flex items-center">
+                <DatePicker
+                  selected={toDate}
+                  onChange={handleToDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="To"
+                  className={GlobalStyle.inputText}
+                />
+              </div>
+            </div>
+          </div>
+
+          <button
+            className={GlobalStyle.buttonPrimary}
+            onClick={handleFilterButton}
+          >
+            Filter
+          </button>
+          <button
+            className={GlobalStyle.buttonRemove}
+            onClick={handleClear}
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-
-      {/* Search bar */}
-      <div className="mb-4 flex justify-start">
+      <div className="mb-4 flex items-center">
         <div className={GlobalStyle.searchBarContainer}>
           <input
             type="text"
+            className={GlobalStyle.inputSearch}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={GlobalStyle.inputSearch}
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
       </div>
 
-      {/* Table */}
       <div className={GlobalStyle.tableContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Status</th>
-              <th className={GlobalStyle.tableHeader}>Date</th>
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>RO Name</th>
               <th className={GlobalStyle.tableHeader}>RTOM</th>
               <th className={GlobalStyle.tableHeader}>Calling Round</th>
+              <th className={GlobalStyle.tableHeader}>Created Date</th>
               <th className={GlobalStyle.tableHeader}>Next Calling Date</th>
               <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((row, index) => (
-              <tr
-                key={index} // Ensure uniqueness
-                className={`${
-                  index % 2 === 0
-                    ? "bg-white bg-opacity-75"
-                    : "bg-gray-50 bg-opacity-50"
-                } border-b`}
-              >
-                <td className={GlobalStyle.tableData}>{row.id}</td>
-                <td
-                  className={`${GlobalStyle.tableData} flex justify-center items-center`}
+            {filteredDataBySearch.length > 0 ? (
+              filteredDataBySearch.map((row, index) => (
+                <tr
+                  key={index}
+                  className={
+                    index % 2 === 0
+                      ? GlobalStyle.tableRowEven
+                      : GlobalStyle.tableRowOdd
+                  }
                 >
-                  <StatusIcon status={row.case_status} />
-                </td>
-                <td className={GlobalStyle.tableData}>{row.date}</td>
-                <td className={GlobalStyle.tableData}>{row.drc}</td>
-                <td className={GlobalStyle.tableData}>{row.ro}</td>
-                <td className={GlobalStyle.tableData}>{row.rtom}</td>
-                <td className={GlobalStyle.tableData}>{row.calling_round}</td>
-                <td className={GlobalStyle.tableData}>
-                  {row.next_calling_date}
-                </td>
-                <td className={GlobalStyle.tableData}>
-                  <img
-                    src={edit}
-                    alt="Edit Case"
-                    className="w-6 h-6 cursor-pointer"
-                    onClick={() =>
-                      navigate(`/MediationBoard/MediationBoardResponse/${row.id}`, {
-                        state: { caseData: row },
-                      })
-                      
-                    }
-                  />
-                </td>
-              </tr>
-            ))}
-            {paginatedData.length === 0 && (
+                  <td
+                    className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                    onClick={() => naviCaseID(item.case_id)}
+                  >
+                    {row.case_id}
+                  </td>
+                  <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
+                    {renderStatusIcon(row.status, index)}
+                    </td>
+                  <td className={GlobalStyle.tableData}>{row.drc_name}</td>
+                  <td className={GlobalStyle.tableData}>{row.ro_name}</td>
+                  <td className={GlobalStyle.tableData}>{row.rtom}</td>
+                  <td className={GlobalStyle.tableData}>{row.calling_round}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.date &&
+                      new Date(row.date).toLocaleString("en-GB", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        // hour: "2-digit",
+                        // minute: "2-digit",
+                        // second: "2-digit",
+                        hour12: true,
+                      })}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.next_calling_date &&
+                      new Date(row.next_calling_date).toLocaleString("en-GB", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        // hour: "2-digit",
+                        // minute: "2-digit",
+                        // second: "2-digit",
+                        hour12: true,
+                      })}
+                  </td>
+                  <td className={GlobalStyle.tableData + " text-center"}>
+                    <button
+                      className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center"
+                      onClick={() => naviPreview(row.case_id, row.drc_id)}
+                    >
+                      !
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
               <tr>
-                <td colSpan="8" className= {GlobalStyle.tableData}  style={{ textAlign: 'center', verticalAlign: 'middle' }} >
-                  {isloading ? "Loading..." : "No results found"}
+                <td colSpan="8" className="text-center py-2">
+                  No records found
                 </td>
               </tr>
             )}
@@ -411,28 +566,31 @@ export default function MediationBoardCaseList() {
         </table>
       </div>
 
-      {/* Pagination */}
-      {filteredData.length > rowsPerPage && (
-        <div className={GlobalStyle.navButtonContainer}>
-          <button
-            className={GlobalStyle.navButton}
-            onClick={handlePrevPage}
-            disabled={currentPage === 0}
-          >
-            <FaArrowLeft />
-          </button>
-          <span>
-            Page {currentPage + 1} of {pages}
-          </span>
-          <button
-            className={GlobalStyle.navButton}
-            onClick={handleNextPage}
-            disabled={currentPage === pages - 1}
-          >
-            <FaArrowRight />
-          </button>
-        </div>
-      )}
-    </div>
+      {
+        filteredData.length != 0 && (
+          <div className={GlobalStyle.navButtonContainer}>
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
+              className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+            >
+              <FaArrowLeft />
+            </button>
+            <span>
+              Page {currentPage}
+            </span>
+            <button
+              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              <FaArrowRight />
+            </button>
+          </div>
+        )
+      }
+    </div >
   );
-}
+};
+
+export default MediationBoardCaseList;
