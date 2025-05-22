@@ -92,6 +92,12 @@ import SettlementPreview from "../pages/Settlement/SettlementPreview";
 import PaymentPreview from "../pages/Money_Transaction/PaymentPreview";
 import CommissionPreview from "../pages/Commission/Commission_Details";
 
+import DRCList from "../pages/DRC/DRCList";
+
+Route
+
+
+
 const Routers = () => {
   return (
     <Routes>
@@ -659,7 +665,16 @@ const Routers = () => {
           />
         }
       />
+
+
+      
+{/* DRC Routes */}
+
+<Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
+
     </Routes>
+
+    
     
     
   );
