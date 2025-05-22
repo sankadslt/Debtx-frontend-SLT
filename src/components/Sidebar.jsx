@@ -58,7 +58,7 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: CgEditFade, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "DRC List", link: "/dashboard", roles: ["superadmin", "admin"], subItems: [
+        { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"], subItems: [
           {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]},
         ] },
       ],
