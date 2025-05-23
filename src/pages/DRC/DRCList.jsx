@@ -123,6 +123,7 @@ const DRCList = () => {
     };
     const fetchData = async (filters) => {
         setIsLoading(true);
+        setCurrentPage(0);
         try {
             const DRCList = await fetchDRCList(filters);
             setData(DRCList);
@@ -188,6 +189,11 @@ const DRCList = () => {
         }
     };
 
+    const naviDRCList = (drc_id) => {
+        console.log("DRC ID:", drc_id);
+        navigate("/pages/Distribute/AssignDRCCaseList", { state: { drc_id } });
+    }
+
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>DRC List</h2>
@@ -207,6 +213,7 @@ const DRCList = () => {
                             value={DRCStatus}
                             onChange={(e) => setDRCStatus(e.target.value)}
                             className={GlobalStyle.selectBox}
+                            style={{ color: DRCStatus === "" ? "gray" : "black" }}
                         >
                             <option value="" disabled hidden>
                                 Select Status
@@ -227,8 +234,9 @@ const DRCList = () => {
                             onClick={() => {
                                 setDRCStatus("");
                                 setSearchQuery("");
-                                setAppliedFilters({ status: "", rtom: "", service: "" });
+                                // setAppliedFilters({ status: "", rtom: "", service: "" });
                                 setCurrentPage(0);
+                                setData([]);
                             }}
                             className={GlobalStyle.buttonRemove}
                         >
@@ -292,10 +300,15 @@ const DRCList = () => {
                                     <td className={GlobalStyle.tableData}>
                                         <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}`}>{log.RTOMCount}</Link>
                                     </td> 
-                                    <td className={GlobalStyle.tableData}></td>
                                     <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
                                         <img src={editImg} alt="Edit" title="Edit" className="w-8 h-8" />
-                                        <img src={ListImg} alt="List" title="List" className="w-8 h-8" />
+                                        <img
+                                            src={ListImg}
+                                            alt="List"
+                                            title="List"
+                                            className="w-8 h-8" 
+                                            onClick={() => naviDRCList(log.DRCID)}
+                                        />
                                     </td>
                                 </tr>
                             ))
