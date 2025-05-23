@@ -27,3 +27,36 @@ export const Active_DRC_Details = async () => {
     throw error;
   }
 };
+
+
+export const List_All_DRC_Details = async (status) => {
+  try {
+    const response = await axios.post(`${URL}/List_All_DRC_Details`, { status });
+
+    const data = response.data;
+
+    const formattedDRCs = data.map((drc) => ({
+      key: drc.drc_id,
+      value: drc.drc_name,
+      id: drc.drc_id,
+      email: drc.drc_email,
+      tel: drc.teli_no,
+      status: drc.drc_status,
+      roCount: drc.ro_count,
+      rtomCount: drc.rtom_count,
+      business_registration_number: drc.drc_business_registration_number ,
+      service_count: drc.service_count ,
+    }));
+
+    return formattedDRCs;
+  } catch (error) {
+    console.error("Error fetching DRCs by status:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+
+
+
