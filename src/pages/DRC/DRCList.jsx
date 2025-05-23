@@ -13,7 +13,7 @@ Notes: This template uses Tailwind CSS */
 
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -35,6 +35,9 @@ const DRCList = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isFiltered, setIsFiltered] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    const currentCurrentPage = location.state?.currentCurrentPage || 0;
+    const currentData = location.state?.currentData || [];
 
     // const getStatusIcon = (status) => {
     //     switch (status?.toLowerCase()) {
@@ -123,6 +126,7 @@ const DRCList = () => {
     };
     const fetchData = async (filters) => {
         setIsLoading(true);
+        setCurrentPage(0);
         try {
             const DRCList = await fetchDRCList(filters);
             setData(DRCList);
@@ -147,8 +151,19 @@ const DRCList = () => {
     };
 
     useEffect(() => {
+        if (currentCurrentPage) {
+            setCurrentPage(currentCurrentPage);
+        }
+
+        if (currentData) {
+            setData(currentData);
+            return;
+        }
         fetchData({});
     }, []);
+
+    console.log("Data:", data);
+    console.log("Current Page:", currentPage);
 
     const HandleAddDRC = () => navigate("/Master/Add_DRC");
 
@@ -188,6 +203,17 @@ const DRCList = () => {
         }
     };
 
+    const naviDRCList = (drc_id) => {
+        console.log("DRC ID:", drc_id);
+        navigate("/pages/Distribute/AssignDRCCaseList", { 
+            state: { 
+                drc_id,
+                currentCurrentPage: currentPage,
+                currentData: data,
+            } 
+        });
+    }
+
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>DRC List</h2>
@@ -207,6 +233,7 @@ const DRCList = () => {
                             value={DRCStatus}
                             onChange={(e) => setDRCStatus(e.target.value)}
                             className={GlobalStyle.selectBox}
+                            style={{ color: DRCStatus === "" ? "gray" : "black" }}
                         >
                             <option value="" disabled hidden>
                                 Select Status
@@ -227,8 +254,9 @@ const DRCList = () => {
                             onClick={() => {
                                 setDRCStatus("");
                                 setSearchQuery("");
-                                setAppliedFilters({ status: "", rtom: "", service: "" });
+                                // setAppliedFilters({ status: "", rtom: "", service: "" });
                                 setCurrentPage(0);
+                                setData([]);
                             }}
                             className={GlobalStyle.buttonRemove}
                         >
@@ -292,10 +320,15 @@ const DRCList = () => {
                                     <td className={GlobalStyle.tableData}>
                                         <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}`}>{log.RTOMCount}</Link>
                                     </td> 
-                                    <td className={GlobalStyle.tableData}></td>
                                     <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
                                         <img src={editImg} alt="Edit" title="Edit" className="w-8 h-8" />
-                                        <img src={ListImg} alt="List" title="List" className="w-8 h-8" />
+                                        <img
+                                            src={ListImg}
+                                            alt="List"
+                                            title="List"
+                                            className="w-8 h-8" 
+                                            onClick={() => naviDRCList(log.DRCID)}
+                                        />
                                     </td>
                                 </tr>
                             ))

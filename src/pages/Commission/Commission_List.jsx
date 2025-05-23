@@ -374,57 +374,57 @@ const Commission_List = () => {
   };
 
   const HandleCreateTaskDownloadCommissiontList = async () => {
-  
-      const userData = await getLoggedUserId(); // Assign user ID
-  
-      if (!fromDate || !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "Please select From Date and To Date.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        return;
+
+    const userData = await getLoggedUserId(); // Assign user ID
+
+    if (!fromDate || !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select From Date and To Date.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      return;
+    }
+
+    // if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+    //   Swal.fire({
+    //     title: "Warning",
+    //     text: "To date should be greater than or equal to From date",
+    //     icon: "warning",
+    //     allowOutsideClick: false,
+    //     allowEscapeKey: false
+    //   });
+    //   setToDate(null);
+    //   setFromDate(null);
+    //   return;
+    // }
+
+    // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+    //   Swal.fire({
+    //     title: "Warning",
+    //     text: "Invalid input. Only numbers are allowed for Case ID.",
+    //     icon: "warning",
+    //     allowOutsideClick: false,
+    //     allowEscapeKey: false,
+    //   });
+    //   setCaseId(""); // Clear the invalid input
+    //   return;
+    // }
+
+    setIsCreatingTask(true);
+    try {
+      const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
+      if (response === "success") {
+        Swal.fire(response, `Task created successfully!`, "success");
       }
-  
-      // if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-      //   Swal.fire({
-      //     title: "Warning",
-      //     text: "To date should be greater than or equal to From date",
-      //     icon: "warning",
-      //     allowOutsideClick: false,
-      //     allowEscapeKey: false
-      //   });
-      //   setToDate(null);
-      //   setFromDate(null);
-      //   return;
-      // }
-  
-      // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-      //   Swal.fire({
-      //     title: "Warning",
-      //     text: "Invalid input. Only numbers are allowed for Case ID.",
-      //     icon: "warning",
-      //     allowOutsideClick: false,
-      //     allowEscapeKey: false,
-      //   });
-      //   setCaseId(""); // Clear the invalid input
-      //   return;
-      // }
-  
-      setIsCreatingTask(true);
-      try {
-        const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
-        if (response === "success") {
-          Swal.fire(response, `Task created successfully!`, "success");
-        }
-      } catch (error) {
-        Swal.fire("Error", error.message || "Failed to create task.", "error");
-      } finally {
-        setIsCreatingTask(false);
-      }
-    };
+    } catch (error) {
+      Swal.fire("Error", error.message || "Failed to create task.", "error");
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
 
   const navigate = useNavigate();
 
@@ -477,96 +477,100 @@ const Commission_List = () => {
           </div>
         </div>
       </div>
+      {/* Filter Section */}
+      <div className="flex justify-end">
+        <div className={`${GlobalStyle.cardContainer} w-full`}>
+          <div className="flex flex-wrap items-center justify-end w-full space-x-4 space-y-3">
+            <select
+              value={searchBy}
+              onChange={(e) => setSearchBy(e.target.value)}
+              className={GlobalStyle.selectBox}
+              style={{ color: searchBy === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>select</option>
+              <option value="Account No">Account No</option>
+              <option value="case_id">Case ID</option>
+            </select>
 
-      <div className={`${GlobalStyle.cardContainer} w-full`}>
-        <div className="flex flex-wrap items-center justify-end w-full gap-3">
-          <select
-            value={searchBy}
-            onChange={(e) => setSearchBy(e.target.value)}
-            className={GlobalStyle.selectBox}
-            style={{ color: searchBy === "" ? "gray" : "black" }}
-          >
-            <option value="" hidden>select</option>
-            <option value="Account No">Account No</option>
-            <option value="case_id">Case ID</option>
-          </select>
+            <input
+              type="text"
+              value={searchBy === "case_id" ? caseId : accountNo}
+              onChange={(e) =>
+                searchBy === "case_id"
+                  ? setCaseId(e.target.value)
+                  : setAccountNo(e.target.value)
+              }
+              className={GlobalStyle.inputText}
+              placeholder={searchBy === "case_id" ? "Case ID" : "Account Number"}
+            />
 
-          <input
-            type="text"
-            value={searchBy === "case_id" ? caseId : accountNo}
-            onChange={(e) =>
-              searchBy === "case_id"
-                ? setCaseId(e.target.value)
-                : setAccountNo(e.target.value)
-            }
-            className={GlobalStyle.inputText}
-            placeholder={searchBy === "case_id" ? "Case ID" : "Account Number"}
-          />
+            <select
+              value={commissionType}
+              onChange={(e) => setCommissionType(e.target.value)}
+              className={GlobalStyle.selectBox}
+              style={{ color: commissionType === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>Commission Type</option>
+              <option value="Commissioned">Commissioned</option>
+              <option value="Unresolved Commission">Unresolved Commission</option>
+              <option value="Pending Commission">Pending Commission</option>
+            </select>
 
-          <select
-            value={commissionType}
-            onChange={(e) => setCommissionType(e.target.value)}
-            className={GlobalStyle.inputText}
-            style={{ color: commissionType === "" ? "gray" : "black" }}
-          >
-            <option value="" hidden>Commission Type</option>
-            <option value="Commissioned">Commissioned</option>
-            <option value="Unresolved Commission">Unresolved Commission</option>
-            <option value="Pending Commission">Pending Commission</option>
-          </select>
+            <select
+              value={selectedDrcId}
+              onChange={(e) => setSelectedDrcId(e.target.value)}
+              className={GlobalStyle.selectBox}
+              style={{ color: selectedDrcId === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>Select DRC</option>
+              {drcNames.map((drc) => (
+                <option key={drc.key} value={drc.id.toString()}>
+                  {drc.value}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={selectedDrcId}
-            onChange={(e) => setSelectedDrcId(e.target.value)}
-            className={GlobalStyle.inputText}
-            style={{ color: selectedDrcId === "" ? "gray" : "black" }}
-          >
-            <option value="" hidden>Select DRC</option>
-            {drcNames.map((drc) => (
-              <option key={drc.key} value={drc.id.toString()}>
-                {drc.value}
-              </option>
-            ))}
-          </select>
+            <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2">
+              <label className={GlobalStyle.dataPickerDate}>Date</label>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center">
+                  <DatePicker
+                    selected={fromDate}
+                    onChange={handleFromDateChange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="From"
+                    className={GlobalStyle.inputText}
+                  />
+                </div>
 
-          <label className={GlobalStyle.dataPickerDate}>Date</label>
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <DatePicker
-                selected={fromDate}
-                onChange={handleFromDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="From"
-                className={GlobalStyle.inputText}
-              />
+                <div className="flex items-center">
+                  <DatePicker
+                    selected={toDate}
+                    onChange={handleToDateChange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="To"
+                    className={GlobalStyle.inputText}
+                  />
+                </div>
+              </div>
+
+              <button
+                className={GlobalStyle.buttonPrimary}
+                onClick={handleFilterButton}
+              >
+                Filter
+              </button>
+              <button
+                className={GlobalStyle.buttonRemove}
+                onClick={handleClear}
+              >
+                Clear
+              </button>
             </div>
-
-            <div className="flex items-center">
-              <DatePicker
-                selected={toDate}
-                onChange={handleToDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="To"
-                className={GlobalStyle.inputText}
-              />
-            </div>
+            {dateError && (
+              <div className="text-red-500 text-sm mt-1">{dateError}</div>
+            )}
           </div>
-
-          <button
-            className={GlobalStyle.buttonPrimary}
-            onClick={handleFilterButton}
-          >
-            Filter
-          </button>
-          <button
-            className={GlobalStyle.buttonRemove}
-            onClick={handleClear}
-          >
-            Clear
-          </button>
-          {dateError && (
-            <div className="text-red-500 text-sm mt-1">{dateError}</div>
-          )}
         </div>
       </div>
 

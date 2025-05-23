@@ -37,7 +37,7 @@ const MediationBoardResponse = () => {
         try {
             const CaseDetails = await Case_Details_for_DRC(caseID, DRC_ID);
             if (CaseDetails) {
-                setCaseData(CaseDetails);
+                setCaseData(CaseDetails[0]);
             } else {
                 Swal.fire({
                     title: "Error",
