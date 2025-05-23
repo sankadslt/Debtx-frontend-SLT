@@ -13,7 +13,7 @@ Notes: This template uses Tailwind CSS */
 
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -35,6 +35,9 @@ const DRCList = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isFiltered, setIsFiltered] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    const currentCurrentPage = location.state?.currentCurrentPage || 0;
+    const currentData = location.state?.currentData || [];
 
     // const getStatusIcon = (status) => {
     //     switch (status?.toLowerCase()) {
@@ -148,8 +151,19 @@ const DRCList = () => {
     };
 
     useEffect(() => {
+        if (currentCurrentPage) {
+            setCurrentPage(currentCurrentPage);
+        }
+
+        if (currentData) {
+            setData(currentData);
+            return;
+        }
         fetchData({});
     }, []);
+
+    console.log("Data:", data);
+    console.log("Current Page:", currentPage);
 
     const HandleAddDRC = () => navigate("/Master/Add_DRC");
 
@@ -191,7 +205,13 @@ const DRCList = () => {
 
     const naviDRCList = (drc_id) => {
         console.log("DRC ID:", drc_id);
-        navigate("/pages/Distribute/AssignDRCCaseList", { state: { drc_id } });
+        navigate("/pages/Distribute/AssignDRCCaseList", { 
+            state: { 
+                drc_id,
+                currentCurrentPage: currentPage,
+                currentData: data,
+            } 
+        });
     }
 
     return (

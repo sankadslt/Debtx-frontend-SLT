@@ -3,7 +3,8 @@
 // Created By: H.P.R Chandrasekara (hprchandrasekara@gmail.com)
 // Last Modified Date : 2025-01-07
 // Modified Date: 2025-01-07
-// Modified By: H.P.R Chandrasekara (hprchandrasekara@gmail.com)
+// Modified By: H.P.R Chandrasekara (hprchandrasekara@gmail.com)\
+// Modified By: Janani Kumarasiri (jkktg001@gmail.com)
 // Version: node 11
 // ui number : 1.18
 // Dependencies: tailwind css
@@ -193,7 +194,11 @@ export default function ReAssignDRC() {
         confirmButtonColor: "#d33",
       });
     }
-
+    setNewEntry({
+      drckey: "",
+      drc: "",
+      remark: ""
+    });
   };
 
   // Function to handle the search functionality

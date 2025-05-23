@@ -4,6 +4,8 @@
 // Last Modified Date: 2024-01-07
 // Modified Date: 2024-01-07
 // Modified By: H.P.R Chandrasekara (hprchandrasekara@gmail.com)
+// Modified Date: 2024-01-07
+// Modified By: Janani Kumarasiri (jkktg001@gmail.com)
 // Version: node 11
 // ui number :1.17
 // Dependencies: tailwind css
@@ -354,6 +356,8 @@ export default function AssignDRCsLOG() {
   const { currentfilters } = location.state || {}; // Get the filters from the URL parameters
   const { CurrentData } = location.state || {}; // Get the filters from the URL parameters
   const { currentCurrentPage } = location.state || {}; // Get the filters from the URL parameters
+  const currentCurrentPageFromDRCList = location.state?.currentCurrentPage || 0;
+  const currentDataPageFromDRCList = location.state?.currentData || [];
 
   // Role-Based Buttons
   useEffect(() => {
@@ -443,8 +447,8 @@ export default function AssignDRCsLOG() {
   const handleenddatechange = (date) => {
     if (startDate && date < startDate) {
       Swal.fire({
-        icon: "error",
-        title: "Error",
+        icon: "warning",
+        title: "warning",
         text: "End date cannot be before start date.",
         confirmButtonColor: "#f1c40f",
       });
@@ -575,9 +579,9 @@ export default function AssignDRCsLOG() {
 
      if ((startDate && !endDate) || (!startDate && endDate)) {
        Swal.fire({
-         title: "Error",
+         title: "warning",
          text: "Please select both start and end dates.",
-         icon: "error",
+         icon: "warning",
          confirmButtonColor: "#f1c40f",
        });
        return;
@@ -592,6 +596,12 @@ export default function AssignDRCsLOG() {
         setCases(data);
       } catch (err) {
         setError(err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Error fetching data. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
         setCases([]);
       }
     }
@@ -708,7 +718,7 @@ export default function AssignDRCsLOG() {
     <h1 className={`${GlobalStyle.headingMedium} mb-5`}>DRC : TCM</h1>
 
        {/* Filter Section */}
-       <div className= {`${GlobalStyle.cardContainer}  w-full mt-6 flex justify-center gap-5 mb-7 `}>
+       <div className= {`${GlobalStyle.cardContainer}  w-full mt-6 flex justify-center gap-5 mb-7 flex-wrap `}>
               <div className="flex gap-2">
                   
                 {/* Filter Dropdown (Account No or Case ID) */}
@@ -935,6 +945,19 @@ export default function AssignDRCsLOG() {
         </button>
       </div>
       )}
+      <button 
+        className={`${GlobalStyle.buttonPrimary} mt-4`} 
+        onClick={() => navigate("/pages/DRC/DRCList",
+          {
+            state: {
+              currentCurrentPage: currentCurrentPageFromDRCList,
+              currentData: currentDataPageFromDRCList,
+            },
+          }
+        )}
+      >
+        <FaArrowLeft className="mr-2" />
+      </button>
     </div>
   );
 }
