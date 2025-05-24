@@ -26,6 +26,7 @@ import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 
 //import for the case details page
 import CaseDetails from "../pages/Incident/Case_Details"
+import Case_List from "../pages/Incident/Case_List";
 
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
@@ -68,6 +69,8 @@ import CommissionCaseList from "../pages/Commission/Commission_List";
 //Settlement
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
 import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
+
+//Litigation
 import { Litigation_List } from "../pages/Litigation/Litigation_List";
 import { Litigation_Documentation } from "../pages/Litigation/Litigation_Documentation";
 import { Litigation_Submission_Document_Summary } from "../pages/Litigation/Litigation_Submission_Document_Summary";
@@ -77,6 +80,7 @@ import { Litigation_Case_Details } from "../pages/Litigation/Litigation_Case_Det
 
 //SettlementPlan
 import CreateSettlementPlan from "../pages/CreateSettlement/CreateSettlementPlan";
+import { Change_Litigation_Submission_Document_Summary } from "../pages/Litigation/Change_Litigation_Submission_Document_Summary";
 
 //LOD
 import Digital_Signature_LOD from "../pages/LOD/Digital_Signature_LOD";
@@ -86,6 +90,14 @@ import CustomerResponse from "../pages/LOD/CustomerResponse";
 import CustomerResponseReview from "../pages/LOD/CustomerResponseReview";
 import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList";
 import SettlementPreview from "../pages/Settlement/SettlementPreview";
+import PaymentPreview from "../pages/Money_Transaction/PaymentPreview";
+import CommissionPreview from "../pages/Commission/Commission_Details";
+
+import DRCList from "../pages/DRC/DRCList";
+
+Route
+
+
 
 const Routers = () => {
   return (
@@ -494,6 +506,15 @@ const Routers = () => {
         }
       />
       <Route
+        path="/Incident/Case_List"
+        element={
+          <ProtectedRoute
+            element={<Case_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
         path="/Incident/Incident_List"
         element={
           <ProtectedRoute
@@ -550,7 +571,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/MediationBoard/MediationBoardResponse/:caseId"
+        path="/MediationBoard/MediationBoardResponse"
         element={
           <ProtectedRoute
             element={<MediationBoardResponse />}
@@ -569,9 +590,11 @@ const Routers = () => {
           />
         }
       />
+      <Route path="/pages/Money_Transaction/payment/preview" element={<ProtectedRoute element={<PaymentPreview />} allowedRoles={['superadmin']} />} />
 
       {/* //COMMISSION */}
       <Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
+      <Route path="/Commission/preview" element={<ProtectedRoute element={<CommissionPreview />} allowedRoles={['superadmin']} />} />
 
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
@@ -592,6 +615,7 @@ const Routers = () => {
       <Route path="/pages/Litigation/Litigation_List" element={<ProtectedRoute element={<Litigation_List />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Documentation" element={<ProtectedRoute element={<Litigation_Documentation />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Submission_Document_Summary" element={<ProtectedRoute element={<Litigation_Submission_Document_Summary />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Litigation/Change_Litigation_Submission_Document_Summary" element={<ProtectedRoute element={<Change_Litigation_Submission_Document_Summary />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Submission" element={<ProtectedRoute element={<Litigation_Submission />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Court_Details_Update" element={<ProtectedRoute element={<Litigation_Court_Details_Update />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Litigation/Litigation_Case_Details" element={<ProtectedRoute element={<Litigation_Case_Details />} allowedRoles={['superadmin']} />} />
@@ -625,7 +649,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/pages/LOD/CustomerResponse/:caseId"
+        path="/pages/LOD/CustomerResponse"
         element={
           <ProtectedRoute
             element={<CustomerResponse />}
@@ -634,7 +658,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/pages/LOD/CustomerResponseReview/:caseId"
+        path="/pages/LOD/CustomerResponseReview"
         element={
           <ProtectedRoute
             element={<CustomerResponseReview />}
@@ -651,7 +675,16 @@ const Routers = () => {
           />
         }
       />
+
+
+      
+{/* DRC Routes */}
+
+<Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
+
     </Routes>
+
+    
     
     
   );
