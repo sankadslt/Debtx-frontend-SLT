@@ -26,6 +26,7 @@ import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 
 //import for the case details page
 import CaseDetails from "../pages/Incident/Case_Details"
+import Case_List from "../pages/Incident/Case_List";
 
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
@@ -91,6 +92,12 @@ import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList"
 import SettlementPreview from "../pages/Settlement/SettlementPreview";
 import PaymentPreview from "../pages/Money_Transaction/PaymentPreview";
 import CommissionPreview from "../pages/Commission/Commission_Details";
+
+import DRCList from "../pages/DRC/DRCList";
+
+Route
+
+
 
 const Routers = () => {
   return (
@@ -499,6 +506,15 @@ const Routers = () => {
         }
       />
       <Route
+        path="/Incident/Case_List"
+        element={
+          <ProtectedRoute
+            element={<Case_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
         path="/Incident/Incident_List"
         element={
           <ProtectedRoute
@@ -659,7 +675,16 @@ const Routers = () => {
           />
         }
       />
+
+
+      
+{/* DRC Routes */}
+
+<Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
+
     </Routes>
+
+    
     
     
   );
