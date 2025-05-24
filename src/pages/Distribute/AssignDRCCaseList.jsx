@@ -4,6 +4,8 @@
 // Last Modified Date: 2024-01-07
 // Modified Date: 2024-01-07
 // Modified By: H.P.R Chandrasekara (hprchandrasekara@gmail.com)
+// Modified Date: 2024-01-07
+// Modified By: Janani Kumarasiri (jkktg001@gmail.com)
 // Version: node 11
 // ui number :1.17
 // Dependencies: tailwind css
@@ -329,7 +331,7 @@
 
 import DatePicker from "react-datepicker";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaCircle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, data } from "react-router-dom";
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { List_CasesOwened_By_DRC , Create_Task_For_Assigned_drc_case_list_download , Withdraw_CasesOwened_By_DRC } from "../../services/case/CaseServices";
@@ -349,6 +351,13 @@ export default function AssignDRCsLOG() {
   const [cases, setCases] = useState([]);  // State for table data
   const [error, setError] = useState(null); // State for error handling
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const location = useLocation();
+  const { drc_id } = location.state || {};// Get the case_id from the URL parameters
+  const { currentfilters } = location.state || {}; // Get the filters from the URL parameters
+  const { CurrentData } = location.state || {}; // Get the filters from the URL parameters
+  const { currentCurrentPage } = location.state || {}; // Get the filters from the URL parameters
+  const currentCurrentPageFromDRCList = location.state?.currentCurrentPage || 0;
+  const currentDataPageFromDRCList = location.state?.currentData || [];
 
   // Role-Based Buttons
   useEffect(() => {
@@ -371,6 +380,14 @@ export default function AssignDRCsLOG() {
     } catch (error) {
       console.error("Invalid token:", error);
     }
+
+    if (CurrentData){
+      setCases(CurrentData);
+    } 
+
+    if (currentCurrentPage){
+      setCurrentPage(currentCurrentPage);
+    };
   }, []);
 
   // Fetch cases on component mount
@@ -430,8 +447,8 @@ export default function AssignDRCsLOG() {
   const handleenddatechange = (date) => {
     if (startDate && date < startDate) {
       Swal.fire({
-        icon: "error",
-        title: "Error",
+        icon: "warning",
+        title: "warning",
         text: "End date cannot be before start date.",
         confirmButtonColor: "#f1c40f",
       });
@@ -482,7 +499,8 @@ export default function AssignDRCsLOG() {
   const handleApicall = async (startDate, endDate) => {
     const userId =  await getLoggedUserId();
     const payload = {}
-    payload.drc_id = 7; // Hardcoded DRC ID for testing
+    // payload.drc_id = 7; // Hardcoded DRC ID for testing
+    payload.drc_id = drc_id;
     payload.from_date = startDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
     payload.to_date = endDate.toISOString().split("T")[0]; // Format: YYYY-MM-DD
 
@@ -532,7 +550,7 @@ export default function AssignDRCsLOG() {
 
   // Filter handler
   const handleFilter = () => {
-
+    setCurrentPage(1);
     // if ((startDate && !endDate) || (!startDate && endDate)) {
     //   Swal.fire({
     //     icon: "warning",
@@ -543,7 +561,8 @@ export default function AssignDRCsLOG() {
     //   return;
     // }
     const payload = {}
-    payload.drc_id = 7; // Hardcoded DRC ID for testing
+    // payload.drc_id = 7; // Hardcoded DRC ID for testing
+    payload.drc_id = drc_id;
     if (startDate) {
       payload.from_date = startDate; // Format: YYYY-MM-DD
     }
@@ -560,9 +579,9 @@ export default function AssignDRCsLOG() {
 
      if ((startDate && !endDate) || (!startDate && endDate)) {
        Swal.fire({
-         title: "Error",
+         title: "warning",
          text: "Please select both start and end dates.",
-         icon: "error",
+         icon: "warning",
          confirmButtonColor: "#f1c40f",
        });
        return;
@@ -577,6 +596,12 @@ export default function AssignDRCsLOG() {
         setCases(data);
       } catch (err) {
         setError(err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Error fetching data. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
         setCases([]);
       }
     }
@@ -693,7 +718,7 @@ export default function AssignDRCsLOG() {
     <h1 className={`${GlobalStyle.headingMedium} mb-5`}>DRC : TCM</h1>
 
        {/* Filter Section */}
-       <div className= {`${GlobalStyle.cardContainer}  w-full mt-6 flex justify-center gap-5 mb-7 `}>
+       <div className= {`${GlobalStyle.cardContainer}  w-full mt-6 flex justify-center gap-5 mb-7 flex-wrap `}>
               <div className="flex gap-2">
                   
                 {/* Filter Dropdown (Account No or Case ID) */}
@@ -859,6 +884,9 @@ export default function AssignDRCsLOG() {
                         state: {
                           caseId: caseItem.case_id,
                           accountNo: caseItem.account_no,
+                          CurrentData: cases,
+                          drc_id: drc_id,
+                          currentCurrentPage: currentPage,
                         },
                       })
                     }
@@ -917,6 +945,19 @@ export default function AssignDRCsLOG() {
         </button>
       </div>
       )}
+      <button 
+        className={`${GlobalStyle.buttonPrimary} mt-4`} 
+        onClick={() => navigate("/pages/DRC/DRCList",
+          {
+            state: {
+              currentCurrentPage: currentCurrentPageFromDRCList,
+              currentData: currentDataPageFromDRCList,
+            },
+          }
+        )}
+      >
+        <FaArrowLeft className="mr-2" />
+      </button>
     </div>
   );
 }
