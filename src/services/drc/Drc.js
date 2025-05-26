@@ -35,8 +35,11 @@ export const List_All_DRC_Details = async (status, pages = 1) => {
       pages,
     });
 
+    console.log("Full DRC API response:", response.data);
+
     // Extract from response structure
-    const drcArray = response.data?.data?.drcDetails;
+    // const drcArray = response.data?.data?.drcDetails;
+    const drcArray = response.data;
 
     if (!Array.isArray(drcArray)) {
       throw new Error("Invalid DRC data format received");
@@ -64,6 +67,7 @@ export const List_All_DRC_Details = async (status, pages = 1) => {
     throw error;
   }
 };
+
 
 export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
   try {

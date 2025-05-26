@@ -85,6 +85,7 @@ const DRCList = () => {
       <img src={iconPath} alt={status} className="w-6 h-6" title={status} />
     );
   };
+
   // Updated fetchDRCList function to use dummy data
   const fetchDRCList = async (filters) => {
     try {
@@ -111,6 +112,7 @@ const DRCList = () => {
       );
     }
   };
+
   const fetchData = async (filters) => {
     setIsLoading(true);
     try {
