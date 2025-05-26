@@ -148,7 +148,7 @@ const DRCList = () => {
     fetchData({});
   }, []);
 
-  const HandleAddDRC = () => navigate("/Master/Add_DRC");
+  const HandleAddDRC = () => navigate("/pages/DRC/Add_DRC");
 
   if (isLoading) {
     return (

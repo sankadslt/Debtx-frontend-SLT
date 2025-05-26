@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import { fetchRTOMs } from "../../services/rtom/RtomService";
+import { fetchRTOMs } from "../../services/RTOM/RtomService";
 import Swal from "sweetalert2";
 
 import ActiveIcon from "../../assets/images/rtom/ROTM_Active.png";
@@ -43,6 +43,7 @@ const RtomList = () => {
                     rtom_status: filtersApplied ? appliedStatus : "",
                     pages: currentPage
                 });
+                console.log("RTOMs fetched:", rtoms); // Debugging log
                 setData(rtoms);
             } catch (error) {
                 Swal.fire("Error", error.message || "Failed to load RTOMs", "error");
