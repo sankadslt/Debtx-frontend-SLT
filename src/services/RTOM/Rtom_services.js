@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
-const RTOM_URL = `${BASE_URL}/rtom`;
+const RTOM_URL = `${BASE_URL}/RTOM`;
 
 export const fetchRTOMs = async (filters = {}) => {
   try {
