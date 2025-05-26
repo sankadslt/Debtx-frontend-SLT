@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
-import { createRTOM } from "../../services/RTOM/Rtom_services";
+import { createRTOM } from "../../services/rtom/RtomService";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getLoggedUserId } from "../../services/auth/authService";
