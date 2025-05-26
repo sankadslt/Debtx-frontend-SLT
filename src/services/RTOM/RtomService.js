@@ -17,7 +17,7 @@ const URL = `${BASE_URL}/RTOM`;
 
 export const createRTOM = async (rtomData) => {
   try {
-    const response = await axios.post(`${BASE_URL}/Create_Active_RTOM`, {
+    const response = await axios.post(`${URL}/Create_Active_RTOM`, {
       billing_center_code: rtomData.billingCenterCode,
       rtom_name: rtomData.name,
       area_code: rtomData.areaCode,
@@ -55,7 +55,7 @@ export const getRTOMDetails = async () => {
 
 export const fetchRTOMDetails = async (rtomId) => {
   try {
-    const response = await axios.post(`${RTOM_URL}/List_RTOM_Details_By_RTOM_ID`, {
+    const response = await axios.post(`${URL}/List_RTOM_Details_By_RTOM_ID`, {
       rtom_id: rtomId
     });
     
@@ -110,7 +110,7 @@ export const updateRTOMStatus = async (rtom_id, rtom_status, updated_by, reason 
 
 export const updateRTOMDetails = async (rtomData) => {
   try {
-    const response = await axios.post(`${BASE_URL}/Update_RTOM_Details`, rtomData);
+    const response = await axios.post(`${URL}/Update_RTOM_Details`, rtomData);
     
     if (response.data.status === "success") {
       return response.data;
@@ -213,7 +213,7 @@ export const getActiveRTOMsByDRCID = async (drc_id) => {
 
 export const fetchRTOMs = async (filters = {}) => {
   try {
-    const response = await axios.post(`${BASE_URL}/List_All_RTOM_Details`, {
+    const response = await axios.post(`${URL}/List_All_RTOM_Details`, {
       rtom_status: filters.rtom_status,
       pages: filters.pages || 1
     });
