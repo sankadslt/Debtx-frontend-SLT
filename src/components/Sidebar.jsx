@@ -59,7 +59,7 @@ const Sidebar = ({ onHoverChange }) => {
       subItems: [
         { icon: CgEditFade, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"], subItems: [
-          {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]},
+        //  {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]},
         ] },
       ],
     },
@@ -144,8 +144,8 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Configuration", 
       roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: CgEditFade, label: "RTOM List", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
+        { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin"] },
+       // { icon: CgEditFade, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Filter Option", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Arrears Bands and Respective Initial Amounts", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Settlement Plans", link: "/dashboard", roles: ["superadmin"] },
