@@ -402,7 +402,7 @@ const MediationBoardCaseList = () => {
             <select
               value={selectedDrcId}
               onChange={(e) => setSelectedDrcId(e.target.value)}
-              className={GlobalStyle.inputText}
+              className={GlobalStyle.selectBox}
               style={{ color: selectedDrcId === "" ? "gray" : "black" }}
             >
               <option value="" hidden>DRC</option>
@@ -418,7 +418,7 @@ const MediationBoardCaseList = () => {
             <select
               value={rtom}
               onChange={(e) => setRtom(e.target.value)}
-              className={GlobalStyle.inputText}
+              className={GlobalStyle.selectBox}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
               <option value="" hidden>RTOM</option>
