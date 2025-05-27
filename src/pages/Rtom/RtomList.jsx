@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import { fetchRTOMs } from "../../services/rtom/Rtom_services";
+import { fetchRTOMs } from "../../services/RTOM/Rtom_services";
 import Swal from "sweetalert2";
 
 import ActiveIcon from "../../assets/images/rtom/ROTM_Active.png";
