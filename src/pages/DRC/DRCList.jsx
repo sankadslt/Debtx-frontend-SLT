@@ -85,6 +85,7 @@ const DRCList = () => {
       <img src={iconPath} alt={status} className="w-6 h-6" title={status} />
     );
   };
+
   // Updated fetchDRCList function to use dummy data
   const fetchDRCList = async (filters) => {
     try {
@@ -111,6 +112,7 @@ const DRCList = () => {
       );
     }
   };
+
   const fetchData = async (filters) => {
     setIsLoading(true);
     try {
@@ -287,7 +289,6 @@ const DRCList = () => {
                       {log.RTOMCount}
                     </Link>
                   </td>{" "}
-                  <td className={GlobalStyle.tableData}></td>
                   <td
                     className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}
                   >
@@ -295,14 +296,14 @@ const DRCList = () => {
                       src={editImg}
                       alt="Edit"
                       title="Edit"
-                      className="w-8 h-8 cursor-pointer"
+                      className="w-6 h-6 cursor-pointer"
                       onClick={() => handleEditClick(log.DRCID)}
                     />
                     <img
                       src={ListImg}
                       alt="List"
                       title="List"
-                      className="w-8 h-8"
+                      className="w-6 h-6"
                     />
                   </td>
                 </tr>
