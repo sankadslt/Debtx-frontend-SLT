@@ -102,7 +102,7 @@ import DRCInfoEdit from "../pages/DRC/DRCInfoEdit";
 //Rtom
 
 import RtomList from "../pages/Rtom/RtomList";
-import RtomInfo from "../pages/Rtom/RtomInfo";
+// import RtomInfo from "../pages/Rtom/RtomInfo";
 import AddRtom from "../pages/Rtom/AddRtom";
 import RtomInfoEdit from "../pages/Rtom/RtomInfoEdit";
 
@@ -697,7 +697,7 @@ const Routers = () => {
 
       {/* RTOM      */}
       <Route path="/pages/Rtom/RtomList" element={<ProtectedRoute element={<RtomList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfo/:rtomId" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
+      {/* <Route path="/pages/Rtom/RtomInfo/:rtomId" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} /> */}
       <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/RtomInfoEdit/:rtomId" element={<ProtectedRoute element={<RtomInfoEdit />} allowedRoles={['superadmin']} />} />
     </Routes>
