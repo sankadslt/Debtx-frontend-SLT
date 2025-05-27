@@ -103,7 +103,7 @@ import DRCInfoEdit from "../pages/DRC/DRCInfoEdit";
 //Rtom
 
 import RtomList from "../pages/Rtom/RtomList";
-import RtomInfo from "../pages/Rtom/RtomInfo";
+import RtomInfo from "../pages/Rtom/Rtominfo";
 import AddRtom from "../pages/Rtom/AddRtom";
 import RtomInfoEdit from "../pages/Rtom/RtomInfoEdit";
 import RtomInfoEnd from "../pages/Rtom/RtomInfoEnd";
