@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import edit_info from "../../assets/images/edit-info.svg";
-import { fetchRTOMDetails } from "../../services/rtom/RtomService";
+import { fetchRTOMDetails } from "../../services/RTOM/RtomService";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 
