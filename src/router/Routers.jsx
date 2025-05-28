@@ -93,7 +93,21 @@ import SettlementPreview from "../pages/Settlement/SettlementPreview";
 import PaymentPreview from "../pages/Money_Transaction/PaymentPreview";
 import CommissionPreview from "../pages/Commission/Commission_Details";
 
+// DRC
+import Add_DRC from "../pages/DRC/Add_DRC";
 import DRCList from "../pages/DRC/DRCList";
+import DRCInfo from "../pages/DRC/DRCInfo";
+import DRCDetails from "../pages/DRC/DRCDetails";
+import DRCInfoEdit from "../pages/DRC/DRCInfoEdit";
+
+//Rtom
+
+import RtomList from "../pages/Rtom/RtomList";
+import RtomInfo from "../pages/Rtom/Rtominfo";
+import AddRtom from "../pages/Rtom/AddRtom";
+import RtomInfoEdit from "../pages/Rtom/RtomInfoEdit";
+import RtomInfoEnd from "../pages/Rtom/RtomInfoEnd";
+import ListofServicetype from "../pages/Rtom/ListofServicetype";
 
 Route
 
@@ -677,11 +691,26 @@ const Routers = () => {
       />
 
 
+    {/* RTOM      */}
+    <Route path="/pages/Rtom/RtomList" element={<ProtectedRoute element={<RtomList />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Rtom/RtomInfo/:rtomId" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Rtom/RtomInfoEnd/:rtomId" element={<ProtectedRoute element={<RtomInfoEnd />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Rtom/ListofServiceType" element={<ProtectedRoute element={<ListofServicetype />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/Rtom/RtomInfoEdit/:rtomId" element={<ProtectedRoute element={<RtomInfoEdit />} allowedRoles={['superadmin']} />} />
+
+     {/* //MASTER DRC */}
+    <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/DRC/DRCDetails" element={<ProtectedRoute element={<DRCDetails />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/DRC/DRCInfo" element={<ProtectedRoute element={<DRCInfo />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} />
       
-{/* DRC Routes */}
-
-<Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
-
+    {/* //MASTER DRC
+    <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/DRC/DRCInfo" element={<ProtectedRoute element={<DRCInfo />} allowedRoles={['superadmin']} />} />
+    <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} /> */}
     </Routes>
 
     
