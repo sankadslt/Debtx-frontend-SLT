@@ -58,8 +58,8 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: CgEditFade, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "DRC List", link: "/dashboard", roles: ["superadmin", "admin"], subItems: [
-          {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]},
+        { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"], subItems: [
+        //  {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]},
         ] },
       ],
     },
@@ -88,7 +88,7 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Cases",
       roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: CgEditFade, label: "Case List", link: "/dashboard", roles: ["superadmin", "admin"] },
+        // { icon: CgEditFade, label: "Case List", link: "/Incident/Case_List", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, 
           label: "DRC Assigned Case List", 
           roles: ["superadmin", "admin"], 
@@ -105,15 +105,13 @@ const Sidebar = ({ onHoverChange }) => {
           roles: ["superadmin", "admin"],
           subItems: [
             {icon:CgEditFade, label:"Write off List", link:"/dashboard", roles:["superadmin", "admin"]},
-            {icon:CgEditFade, label:"Abandoned List", link:"/pages/DisposedList/AbandonedCaseLog", roles:["superadmin", "admin"]},
+            {icon:CgEditFade, label:"Abandoned List", link:"/dashboard", roles:["superadmin", "admin"]},
             {icon:CgEditFade, label:"Withdraw List", link:"/dashboard", roles:["superadmin", "admin"]},
             {icon:CgEditFade, label:"Closed List", link:"/dashboard", roles:["superadmin", "admin"]},
           ],
         },
       ],
     },
-
-    {icon: HiOutlineDocumentCheck, label: "Settlement", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
     {icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
     {
       icon: MdDoneOutline, 
@@ -130,37 +128,37 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Configuration", 
       roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: CgEditFade, label: "RTOM List", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Filter Option", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Arrears Bands and Respective Initial Amounts", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Settlement Plans", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Commission Plans", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Commission Rates", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Negotiation Field Resons", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "MB Field Reasons", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Reqest Type", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Bonus", link: "/dashboard", roles: ["superadmin"] },
+        { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin"] },
+       // { icon: CgEditFade, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "Filter Option", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "Arrears Bands and Respective Initial Amounts", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "Settlement Plans", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "Commission Plans", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "Commission Rates", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "Negotiation Field Resons", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "MB Field Reasons", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "Reqest Type", link: "/dashboard", roles: ["superadmin"] },
+        // { icon: CgEditFade, label: "Bonus", link: "/dashboard", roles: ["superadmin"] },
       ],
     },
 
 
     {icon: MdDownload, label: "Download", link: "/incident/Incident_File_Download", roles: ["superadmin", "admin", "user"]},
-    {
-      icon: BiSolidDiamond,
-      label: "Dummy",
-      roles: ["superadmin", "admin", "user"],
-      subItems: [
-        {
-          label: "Dummy",
-          subItems: [
-            { icon: CgEditFade, label: "Distribute Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
-            { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
-          ],
-        },
-        { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
-      ],
-    },
+    // {
+    //   icon: BiSolidDiamond,
+    //   label: "Dummy",
+    //   roles: ["superadmin", "admin", "user"],
+    //   subItems: [
+    //     {
+    //       label: "Dummy",
+    //       subItems: [
+    //         { icon: CgEditFade, label: "Distribute Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
+    //         { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
+    //       ],
+    //     },
+    //     { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
+    //   ],
+    // },
   ];
 
   // Filter menu items based on user role
