@@ -26,6 +26,7 @@ import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 
 //import for the case details page
 import CaseDetails from "../pages/Incident/Case_Details"
+import Case_List from "../pages/Incident/Case_List";
 
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
@@ -542,6 +543,15 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<Incident_File_Download />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/Incident/Case_List"
+        element={
+          <ProtectedRoute
+            element={< Case_List />}
             allowedRoles={["superadmin"]}
           />
         }

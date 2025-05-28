@@ -647,3 +647,37 @@ export const GetAbandonedCaseLogDetailsByAccountNumber = async (
   }
 };
 
+export const GetFilteredCaseLists = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Get_Case_Lists`,
+      payload
+    );
+
+    if (response.data.success === false) {
+      throw new Error(response.data.message || "Failed to fetch withdrawal cases.");
+    }
+
+    return { 
+    data: response.data.data.map((item) => ({
+      caseid: item.case_id,
+      casecurrentstatus: item.case_current_status,
+      accountno: item.account_no,                                 
+      drccommisionrule: item.drc_commision_rule,
+      currentarrearsamount: item.current_arrears_amount,
+      rtom: item.rtom,                                 
+      createddtm: item.created_dtm,
+      lastpaymentdate: item.last_payment_date
+    })),
+
+  };
+  } catch (error) {
+    console.error(
+      "Error fetching case list data:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+

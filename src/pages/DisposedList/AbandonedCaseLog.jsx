@@ -28,19 +28,23 @@ const StatusIcon = ({ status }) => {
 };
 
 export default function AbandonedCaseLog() {
+  // State Variables
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
   const [abandonedCases, setAbandonedCases] = useState([]);
   const [filteredCases, setFilteredCases] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
+  //const [caseId, setCaseId] = useState(""); 
   const [status, setStatus] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [accountNumber, setAccountNo] = useState("");
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
   useEffect(() => {
     const loadUser = async () => {
-      await getLoggedUserId(); // Optional: Set user state if needed
+      await getLoggedUserId(); 
     };
     loadUser();
   }, []);
@@ -69,6 +73,8 @@ export default function AbandonedCaseLog() {
 
     try {
       const response = await GetAbandonedCaseLogDetailsByAccountNumber(payload);
+      console.log("Payload sent to API:", payload);
+
 
       if (response.data.success) {
         setAbandonedCases(response.data.data);
@@ -114,8 +120,8 @@ export default function AbandonedCaseLog() {
           onChange={(e) => setStatus(e.target.value)}
           className={GlobalStyle.selectBox}
         >
-          <option value="">Status</option>
-          <option value="Pending Write Off">pending write off</option>
+          <option value="" hidden>Status</option>
+          <option value="Pending Write Off">Pending Write Off</option>
           <option value="Pending Abandoned">Pending Abandoned</option>
           <option value="Abandoned">Abandoned</option>
         </select>
@@ -171,8 +177,8 @@ export default function AbandonedCaseLog() {
             {paginatedData.length > 0 ? (
               paginatedData.map((row, index) => (
                 <tr key={index} className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} border-b`}>
-                  <td className={GlobalStyle.tableData}>{row.caseId}</td>
-                  <td className={GlobalStyle.tableData}>{row.amount}</td>
+                  <td className={GlobalStyle.tableData}>{row.case_id}</td>
+                  <td className={GlobalStyle.tableData}>{row.bss_arrears_amount}</td>
                   <td className={GlobalStyle.tableData}><StatusIcon status={row.status} /></td>
                   <td className={GlobalStyle.tableData}>{row.remark}</td>
                   <td className={GlobalStyle.tableData}>{row.abandonedBy}</td>
