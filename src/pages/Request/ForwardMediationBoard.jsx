@@ -3,6 +3,7 @@
 // Created By:W.R.S.M.Bandara
 // Last Modified Date: 2025/03/14
 // Modified By: savindyabandara413@gmail.com, ytheenura5@gmail.com
+// Modified By: Janani Kumarasiri (jkktg001@gmail.com)
 // Version: node 11
 // ui number : v2.11
 // Dependencies: tailwind css
@@ -11,7 +12,7 @@
 import React, { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { useNavigate, useLocation, } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   List_Details_Of_Mediation_Board_Acceptance,
   Submit_Mediation_Board_Acceptance,
@@ -29,67 +30,75 @@ const ForwardMediationBoard = () => {
   const [NegotiationHistory, setNegotiationHistory] = useState([]);
   const [mediationboard, setMediationBoard] = useState([]); // State for mediation board data
 
-  const [calendarMonth, setCalendarMonth] = useState(); // State for calendar month input
-  
- 
+  const [calendarMonth, setCalendarMonth] = useState(); // State for calendar month input\
+
+
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const caseId = location.state?.case_Id;
-  const userInteraction = location.state?.User_Interaction_TYPE;
-  const delegateUserId = location.state?.Delegate_User_id;
-  const locationLogId = location.state?.INteraction_Log_ID;
-  const interationid = location.state?.INteraction_ID;
+  // const caseId = location.state?.case_Id;
+  // const requestType = location.state?.User_Interaction_TYPE;
+  // const delegateUserId = location.state?.Delegate_User_id;
+  // const INteraction_Log_ID = location.state?.INteraction_Log_ID;
+  // const interationid = location.state?.INteraction_ID;
 
-  console.log("passed case id is ", caseId);
-  console.log("passed user interaction ", userInteraction);
-  console.log("passed delegate id", delegateUserId);
-  console.log("passed Interaction_Log_ID ", locationLogId);
-  console.log("passed Interaction_ID ", interationid);
+  const caseId = 6;
+  const INteraction_Log_ID = 1;
+  const interationid = 4;
 
-  const months = Data?.monitor_months; // Assuming this is the requested period in months
-  const requestType = userInteraction;
+  // console.log("passed case id is ", caseId);
+  // console.log("passed user interaction ", requestType);
+  // console.log("passed delegate id", delegateUserId);
+  // console.log("passed Interaction_Log_ID ", INteraction_Log_ID);
+  // console.log("passed Interaction_ID ", interationid);
 
-  let request_mode = "";
-    if (
-      requestType === "Mediation board forward request letter" || 
-      requestType === "Negotiation Settlement plan Request" ||
-      requestType === "Negotiation period extend Request" ||
-      requestType === "Negotiation customer further information Request" ||
-      requestType === "Negotiation Customer request service" 
-    ) {
-      request_mode = "Negotiation";
-    } else if (
-      requestType === "Mediation Board Settlement plan Request"||
-      requestType === "Mediation Board period extend Request" ||
-      requestType === "Mediation Board customer further information request" ||
-      requestType === "Mediation Board Customer request service" 
-      
-    ) {
-      request_mode = "Mediation Board";
-    }
+  const months = Data?.validity_period_months;
+  // const requestType = userInteraction;
+  const requestType = "Mediation board forward request letter" // for testing
 
-    console.log("Request Mode:", request_mode);
+  // let request_mode = "";
+  // if (
+  //   requestType === "Mediation board forward request letter" ||
+  //   requestType === "Negotiation Settlement plan Request" ||
+  //   requestType === "Negotiation period extend Request" ||
+  //   requestType === "Negotiation customer further information Request" ||
+  //   requestType === "Negotiation Customer request service"
+  // ) {
+  //   request_mode = "Negotiation";
+  // } else if (
+  //   requestType === "Mediation Board Settlement plan Request" ||
+  //   requestType === "Mediation Board period extend Request" ||
+  //   requestType === "Mediation Board customer further information request" ||
+  //   requestType === "Mediation Board Customer request service"
 
-  
+  // ) {
+  //   request_mode = "Mediation Board";
+  // }
+
+  // console.log("Request Mode:", request_mode);
+
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentPAge, setCurrentPAge] = useState(1);
-  const [CUrrentPage, setCUrrentPage] = useState(1);
+  const [currentPage1, setCurrentPage1] = useState(1);
+  const [currentPage2, setCurrentPage2] = useState(1);
   const recordsPerPage = 5;
+
+  // Negotiation History Pagination
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = NegotiationHistory.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(NegotiationHistory.length / recordsPerPage);
 
-
-  const indexOfLastRecord1 = currentPAge * recordsPerPage;
+  // Request History Pagination
+  const indexOfLastRecord1 = currentPage1 * recordsPerPage;
   const indexOfFirstRecord1 = indexOfLastRecord1 - recordsPerPage;
   const currentData1 = requesthistory.slice(indexOfFirstRecord1, indexOfLastRecord1);
   const totalPAges = Math.ceil(requesthistory.length / recordsPerPage);
 
-  const indexOfLastRecord2 = CUrrentPage * recordsPerPage;
+  // Mediation Board Pagination
+  const indexOfLastRecord2 = currentPage2 * recordsPerPage;
   const indexOfFirstRecord2 = indexOfLastRecord2 - recordsPerPage;
   const currentData2 = mediationboard.slice(indexOfFirstRecord2, indexOfLastRecord2);
   const TOtalPages = Math.ceil(mediationboard.length / recordsPerPage);
@@ -97,6 +106,8 @@ const ForwardMediationBoard = () => {
   const handlebackbuttonClick = () => {
     navigate("/additional_request_log");
   };
+
+  // Negotiation History Navigation Handle
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -105,41 +116,46 @@ const ForwardMediationBoard = () => {
     }
   };
 
+  // Request History Navigation Handle
   const handlepagnation = (direction) => {
-    if (direction === "prev" && currentPAge > 1) {
-      setCurrentPAge(currentPAge - 1);
-    } else if (direction === "next" && currentPAge < totalPAges) {
-      setCurrentPAge(currentPAge + 1);
+    if (direction === "prev" && currentPage1 > 1) {
+      setCurrentPage1(currentPage1 - 1);
+    } else if (direction === "next" && currentPage1 < totalPAges) {
+      setCurrentPage1(currentPage1 + 1);
     }
   };
 
+  // Mediation Board Navigation Handle
   const handlePrevNext1 = (direction) => {
-    if (direction === "prev" && CUrrentPage > 1) {
-      setCUrrentPage(CUrrentPage - 1);
-    } else if (direction === "next" && CUrrentPage < TOtalPages) {
-      setCUrrentPage(CUrrentPage + 1);
+    if (direction === "prev" && currentPage2 > 1) {
+      setCurrentPage2(currentPage2 - 1);
+    } else if (direction === "next" && currentPage2 < TOtalPages) {
+      setCurrentPage2(currentPage2 + 1);
     }
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const userData = await getLoggedUserId();
+
         const payload = {
           case_id: caseId,
-          User_Intraction_Type: userInteraction,
-          delegate_user_id: delegateUserId,
-          Interaction_Log_ID: locationLogId,
+          User_Interaction_Type: requestType,
+          delegate_user_id: userData,
+          Interaction_Log_ID: INteraction_Log_ID,
         };
-        console.log("payload", payload);
+        // console.log("payload", payload);
+
         const response = await List_Details_Of_Mediation_Board_Acceptance(
           payload
         );
-        console.log("response", response);
+        // console.log("response", response);
 
         setData(response);
 
-        if (response?.Request_History) {
-          setrequesthistory(response?.Request_History);
+        if (response?.ro_requests) {
+          setrequesthistory(response?.ro_requests);
         } else {
           setrequesthistory([]);
         }
@@ -154,43 +170,94 @@ const ForwardMediationBoard = () => {
         } else {
           setMediationBoard([]);
         }
-        console.log("The fetched mediation board is this", mediationboard);
-        console.log("The fetched negotiation history is this", NegotiationHistory);
-        console.log("The fetched request history is this", requesthistory);
+        // console.log("The fetched mediation board is this", mediationboard);
+        // console.log("The fetched negotiation history is this", NegotiationHistory);
+        // console.log("The fetched request history is this", requesthistory);
       } catch (error) {
-        console.log("error", error);
+        Swal.fire({
+          title: "Error",
+          text: "Error fetching data.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+        // console.log("error", error);
       }
     };
     fetchData();
-  }, [caseId, userInteraction, delegateUserId, locationLogId]);
+  }, [caseId, requestType, INteraction_Log_ID]);
 
+  // Handdle withdraw button function
+  // const handleWithdraw = async () => {
+  //   const loggedUserId = await getLoggedUserId();
+  //   const payload = {
+  //     create_by: loggedUserId,
+  //     Interaction_Log_ID: INteraction_Log_ID,
+  //     case_id: caseId,
+  //     User_Interaction_Type: requestType,
+  //     Request_Mode: request_mode,
+  //     Interaction_ID: interationid,
+  //     "Request Accept": acceptRequest,
+  //     Reamrk: remarkText,
+  //     No_of_Calendar_Month: calendarMonth,
+  //     Letter_Send: letterSent
+  //   };
+  //   console.log("payload", payload);
+  //   try {
+  //     const response = await Withdraw_Mediation_Board_Acceptance(payload);
+  //     console.log("response", response);
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Success",
+  //       text: "Selected records have been withdrawn successfully.",
+  //       confirmButtonColor: "#28a745",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error withdrawing batch:", error);
 
- const handleWithdraw = async () => {
+  //     const errorMessage = error?.response?.data?.message ||
+  //       error?.message ||
+  //       "An error occurred. Please try again.";
+
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: errorMessage,
+  //       confirmButtonColor: "#d33",
+  //     });
+  //   }
+  // };
+
+  // Handle submit function
+  const handleSubmit = async () => {
     const loggedUserId = await getLoggedUserId();
+
     const payload = {
       create_by: loggedUserId,
-      Interaction_Log_ID: locationLogId,
+      Interaction_Log_ID: INteraction_Log_ID,
       case_id: caseId,
-      User_Interaction_Type: userInteraction,
-      Request_Mode: request_mode,
-      Interaction_ID : interationid,
-      "Request Accept": acceptRequest,
+      User_Interaction_Type: requestType,
+      // Request_Mode: request_mode,
+      Interaction_ID: interationid,
+      requestAccept: acceptRequest,
       Reamrk: remarkText,
       No_of_Calendar_Month: calendarMonth,
       Letter_Send: letterSent
     };
-    console.log("payload", payload);
+    // console.log("payload", payload);
+
     try {
-      const response = await Withdraw_Mediation_Board_Acceptance(payload);
-      console.log("response", response);
+      const response = await Submit_Mediation_Board_Acceptance(payload);
+      // console.log("response", response);
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "Selected records have been withdrawn successfully.",
+        text: "Selected records have been approved successfully.",
         confirmButtonColor: "#28a745",
       });
+      navigate("/additional_request_log");
+
     } catch (error) {
-      console.error("Error withdrawing batch:", error);
+      // console.error("Error approving batch:", error);
 
       const errorMessage = error?.response?.data?.message ||
         error?.message ||
@@ -203,49 +270,7 @@ const ForwardMediationBoard = () => {
         confirmButtonColor: "#d33",
       });
     }
-  };
-
-
-  const handleSubmit = async () => {
-    const loggedUserId = await getLoggedUserId();
-    const payload = {
-      create_by: loggedUserId,
-      Interaction_Log_ID: locationLogId,
-      case_id: caseId,
-      User_Interaction_Type: userInteraction,
-      Request_Mode: request_mode,
-      Interaction_ID : interationid,
-      "Request Accept": acceptRequest,
-      Reamrk: remarkText,
-      No_of_Calendar_Month: calendarMonth,
-      Letter_Send: letterSent
-    };
-    console.log("payload", payload);
-    try {
-      const response = await Submit_Mediation_Board_Acceptance(payload);
-      console.log("response", response);
-      Swal.fire({
-              icon: "success",
-              title: "Success",
-              text: "Selected records have been approved successfully.",
-              confirmButtonColor: "#28a745",
-            });
-
-      } catch (error) {
-            console.error("Error approving batch:", error);
-            
-            const errorMessage = error?.response?.data?.message || 
-                                   error?.message || 
-                                   "An error occurred. Please try again.";
-      
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: errorMessage,
-              confirmButtonColor: "#d33",
-            });
-          }
-    }
+  }
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -259,6 +284,7 @@ const ForwardMediationBoard = () => {
             <col style={{ width: "20px" }} />
             <col />
           </colgroup>
+          {/* Infomation card */}
           <tbody>
             <tr>
               <td className="py-2"><strong>Case ID</strong></td>
@@ -291,144 +317,101 @@ const ForwardMediationBoard = () => {
               <tr>
                 <td className="py-2"><strong>Validity Expire Date</strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2"> {Data?.validity_expire_date}</td>
+                {/* <td className="py-2"> {new Date(Data?.validity_expire_dtm).toLocaleDateString("en-GB")} </td> */}
               </tr>
             )}
             <tr>
               <td className="py-2"><strong>Last Payment Date</strong></td>
               <td className="py-2"> <strong> : </strong> </td>
-              <td className="py-2"> {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}</td>
+              <td className="py-2"> {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")} </td>
             </tr>
             {requestType === "Mediation board forward request letter" && (
               <tr>
                 <td className="py-2"><strong>Customer Type Name</strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2"> {Data?.Customer_Type_Name}</td>
+                <td className="py-2"> {Data?.customer_type_name}</td>
               </tr>
             )}
             {requestType === "Mediation board forward request letter" && (
               <tr>
                 <td className="py-2"><strong>Account Manager Code</strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2"> {Data?.ACCOUNT_MANAGER}</td>
+                <td className="py-2"> {Data?.account_manager_code}</td>
               </tr>
             )}
             {requestType === "Mediation board forward request letter" && (
               <tr>
                 <td className="py-2"><strong>Credit Class No</strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2"> {Data?.customer_name}</td>
+                <td className="py-2"></td>
               </tr>
             )}
             {requestType === "Mediation board forward request letter" && (
               <tr>
                 <td className="py-2"><strong>Credit Class Name</strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2"> {Data?.customer_name}</td>
+                <td className="py-2"></td>
               </tr>
             )}
           </tbody>
-
         </table>
-        {/* <p className="mb-2">
-          <strong>Case ID: </strong>
-          {caseId}
-        </p>
-        <p className="mb-2">
-          <strong>Customer Ref: </strong> {Data?.customer_ref}
-        </p>
-        <p className="mb-2">
-          <strong>Account no: </strong>
-          {Data?.account_no}
-        </p>
-        {requestType === "Mediation board forward request letter" && (
-            <p className="mb-2">
-              <strong>Customer Name: </strong> {Data?.customer_name}
-            </p>
-          )}
-        <p className="mb-2">
-          <strong>Arrears Amount: </strong> {Data?.current_arrears_amount}
-        </p>
-        {requestType === "Mediation board forward request letter" && (
-            <p className="mb-2">
-              <strong> Validity Expire Date: </strong> {Data?.customer_name}
-            </p>
-          )}
-        <p className="mb-2">
-          <strong>Last Payment Date: </strong>{" "}
-          {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")}
-        </p>
-        {requestType === "Mediation board forward request letter" && (
-            <p className="mb-2">
-              <strong> Customer Type Name: </strong> {Data?.Customer_Type_Name}
-            </p>
-          )}
-          {requestType === "Mediation board forward request letter" && (
-            <p className="mb-2">
-              <strong> Account Manager Code: </strong> {Data?.ACCOUNT_MANAGER}
-            </p>
-          )}
-        {requestType === "Mediation board forward request letter" && (
-            <p className="mb-2">
-              <strong> Credit Class No: </strong> {Data?.customer_name}
-            </p>
-          )}
-        {requestType === "Mediation board forward request letter" && (
-            <p className="mb-2">
-              <strong> Credit Class Name: </strong> {Data?.customer_name}
-            </p>
-          )} */}
-        
+
+        {/* Negotiation History */}
 
       </div>
       {NegotiationHistory.length > 0 && (
-      <div className="mt-10 mb-6">
-        <label className={GlobalStyle.remarkTopic}>
-          Negotiation History :{" "}
-        </label>
-        <div className={GlobalStyle.tableContainer}>
-          <table className={GlobalStyle.table}>
-            <thead className={GlobalStyle.thead}>
-              <tr>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Date
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Negotiation
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Remark
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentData.map((detail, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0
-                      ? GlobalStyle.tableRowEven
-                      : GlobalStyle.tableRowOdd
-                  }`}
-                >
-                  <td className={GlobalStyle.tableData}> {new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {detail.field_reason}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{detail.remark}</td>
+        <div className="mt-10 mb-6">
+          <label className={GlobalStyle.remarkTopic}>
+            Negotiation History :{" "}
+          </label>
+          <div className={GlobalStyle.tableContainer}>
+            <table className={GlobalStyle.table}>
+              <thead className={GlobalStyle.thead}>
+                <tr>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    Date
+                  </th>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    Negotiation
+                  </th>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    Remark
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          
-        </div>
-        <div className={GlobalStyle.navButtonContainer}>
+              </thead>
+              <tbody>
+                {currentData && currentData.length > 0 ? (
+                  currentData.map((detail, index) => (
+                    <tr
+                      key={index}
+                      className={`${index % 2 === 0
+                        ? GlobalStyle.tableRowEven
+                        : GlobalStyle.tableRowOdd
+                        }`}
+                    >
+                      <td className={GlobalStyle.tableData}> {new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {detail.field_reason}
+                      </td>
+                      <td className={GlobalStyle.tableData}>{detail.remark}</td>
+                    </tr>
+                  ))) : (
+                  <tr>
+                    <td colSpan="3" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
+                      No negotiation history available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+          </div>
+          <div className={GlobalStyle.navButtonContainer}>
             <button
               onClick={() => handlePrevNext("prev")}
               disabled={currentPage === 1}
-              className={`${GlobalStyle.navButton} ${
-                currentPage === 1 ? "cursor-not-allowed" : ""
-              }`}
+              className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+                }`}
             >
               <FaArrowLeft />
             </button>
@@ -438,84 +421,87 @@ const ForwardMediationBoard = () => {
             <button
               onClick={() => handlePrevNext("next")}
               disabled={currentPage === totalPages}
-              className={`${GlobalStyle.navButton} ${
-                currentPage === totalPages ? "cursor-not-allowed" : ""
-              }`}
+              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+                }`}
             >
               <FaArrowRight />
             </button>
           </div>
-      </div>
-      )}
+        </div>)}
 
       {/* Mediation board */}
 
       {mediationboard.length > 0 && (
         <div className="mt-10 mb-6">
-        <label className={GlobalStyle.remarkTopic}>
-          MediationBoard History :{" "}
-        </label>
-        <div className={GlobalStyle.tableContainer}>
-          <table className={GlobalStyle.table}>
-            <thead className={GlobalStyle.thead}>
-              <tr>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Date
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Negotiation
-                </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
-                  Remark
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentData2.map((detail, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0
-                      ? GlobalStyle.tableRowEven
-                      : GlobalStyle.tableRowOdd
-                  }`}
-                >
-                  <td className={GlobalStyle.tableData}> {new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {detail.customer_response}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{detail.comment}</td>
+          <label className={GlobalStyle.remarkTopic}>
+            MediationBoard History :{" "}
+          </label>
+          <div className={GlobalStyle.tableContainer}>
+            <table className={GlobalStyle.table}>
+              <thead className={GlobalStyle.thead}>
+                <tr>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    Date
+                  </th>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    Customer Response
+                  </th>
+                  <th scope="col" className={GlobalStyle.tableHeader}>
+                    Remark
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          
-        </div>
-        <div className={GlobalStyle.navButtonContainer}>
+              </thead>
+              <tbody>
+                {currentData2 && currentData2.length > 0 ? (
+                  currentData2.map((detail, index) => (
+                    <tr
+                      key={index}
+                      className={`${index % 2 === 0
+                        ? GlobalStyle.tableRowEven
+                        : GlobalStyle.tableRowOdd
+                        }`}
+                    >
+                      <td className={GlobalStyle.tableData}> {new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {detail.customer_response}
+                      </td>
+                      <td className={GlobalStyle.tableData}>{detail.comment}</td>
+                    </tr>
+                  ))) : (
+                  <tr>
+                    <td colSpan="3" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
+                      No mediation board history available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+          </div>
+          <div className={GlobalStyle.navButtonContainer}>
             <button
               onClick={() => handlePrevNext1("prev")}
-              disabled={CUrrentPage === 1}
-              className={`${GlobalStyle.navButton} ${
-                CUrrentPage === 1 ? "cursor-not-allowed" : ""
-              }`}
+              disabled={currentPage2 === 1}
+              className={`${GlobalStyle.navButton} ${currentPage2 === 1 ? "cursor-not-allowed" : ""
+                }`}
             >
               <FaArrowLeft />
             </button>
             <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-              Page {CUrrentPage} of {TOtalPages}
+              Page {currentPage2} of {TOtalPages}
             </span>
             <button
               onClick={() => handlePrevNext1("next")}
-              disabled={CUrrentPage === TOtalPages}
-              className={`${GlobalStyle.navButton} ${
-                CUrrentPage === TOtalPages ? "cursor-not-allowed" : ""
-              }`}
+              disabled={currentPage2 === TOtalPages}
+              className={`${GlobalStyle.navButton} ${currentPage2 === TOtalPages ? "cursor-not-allowed" : ""
+                }`}
             >
               <FaArrowRight />
             </button>
           </div>
-      </div>
+        </div>
       )}
+
       {/* Request history table */}
       <div className="mt-10 mb-6">
         <label className={GlobalStyle.remarkTopic}>Request History : </label>
@@ -527,7 +513,7 @@ const ForwardMediationBoard = () => {
                   Date
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  Negotiation
+                  Request
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Remark
@@ -535,49 +521,53 @@ const ForwardMediationBoard = () => {
               </tr>
             </thead>
             <tbody>
-              {currentData1.map((detail, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0
+              {currentData1 && currentData1.length > 0 ? (
+                currentData1.map((detail, index) => (
+                  <tr
+                    key={index}
+                    className={`${index % 2 === 0
                       ? GlobalStyle.tableRowEven
                       : GlobalStyle.tableRowOdd
-                  }`}
-                >
-                  <td className={GlobalStyle.tableData}>{new Date(detail.CreateDTM).toLocaleDateString("en-GB")}</td>
-                  <td className={GlobalStyle.tableData}>
-                    {detail.User_Interaction_Type}
+                      }`}
+                  >
+                    <td className={GlobalStyle.tableData}>{new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
+                    <td className={GlobalStyle.tableData}>
+                      {detail.ro_request}
+                    </td>
+                    <td className={GlobalStyle.tableData}>{detail.request_remark}</td>
+                  </tr>
+                ))) : (
+                <tr>
+                  <td colSpan="3" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
+                    No request history available.
                   </td>
-                  <td className={GlobalStyle.tableData}>{detail.User_Interaction_Status}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
 
         <div className={GlobalStyle.navButtonContainer}>
-            <button
-              onClick={() => handlepagnation("prev")}
-              disabled={currentPAge === 1}
-              className={`${GlobalStyle.navButton} ${
-                currentPAge === 1 ? "cursor-not-allowed" : ""
+          <button
+            onClick={() => handlepagnation("prev")}
+            disabled={currentPage1 === 1}
+            className={`${GlobalStyle.navButton} ${currentPage1 === 1 ? "cursor-not-allowed" : ""
               }`}
-            >
-              <FaArrowLeft />
-            </button>
-            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-              Page {currentPAge} of {totalPAges}
-            </span>
-            <button
-              onClick={() => handlepagnation("next")}
-              disabled={currentPAge === totalPAges}
-              className={`${GlobalStyle.navButton} ${
-                currentPAge === totalPAges ? "cursor-not-allowed" : ""
+          >
+            <FaArrowLeft />
+          </button>
+          <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+            Page {currentPage1} of {totalPAges}
+          </span>
+          <button
+            onClick={() => handlepagnation("next")}
+            disabled={currentPage1 === totalPAges}
+            className={`${GlobalStyle.navButton} ${currentPage1 === totalPAges ? "cursor-not-allowed" : ""
               }`}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
+          >
+            <FaArrowRight />
+          </button>
+        </div>
       </div>
 
       {/* forward mediation board */}
@@ -611,16 +601,18 @@ const ForwardMediationBoard = () => {
             </div>
           </div>
 
-          <div className="mb-6">
-            <label className={GlobalStyle.remarkTopic}>Remark</label>
-            <textarea
-              value={remarkText}
-              onChange={(e) => setRemarkText(e.target.value)}
-              className={`${GlobalStyle.remark}`}
-              rows="5"
-              disabled={acceptRequest === "Yes"}
-            ></textarea>
-          </div>
+          {acceptRequest === "No" && (
+            <div className="mb-6">
+              <label className={GlobalStyle.remarkTopic}>Remark</label>
+              <textarea
+                value={remarkText}
+                onChange={(e) => setRemarkText(e.target.value)}
+                className={`${GlobalStyle.remark}`}
+                rows="5"
+              // disabled={acceptRequest === "Yes"}
+              ></textarea>
+            </div>
+          )}
 
           {acceptRequest === "Yes" && (
             <div className="mb-6 flex items-center">
@@ -638,7 +630,7 @@ const ForwardMediationBoard = () => {
             {acceptRequest !== "Yes" && (
               <button
                 className={GlobalStyle.buttonPrimary}
-                onClick={handleWithdraw}
+              // onClick={handleWithdraw}
               >
                 Withdraw
               </button>
@@ -654,7 +646,7 @@ const ForwardMediationBoard = () => {
       )}
 
       {/* validity period extension */}
-      {(requestType === "Negotiation period extend Request" || requestType === "Mediation Board period extend Request" ) && (
+      {(requestType === "Negotiation period extend Request" || requestType === "Mediation Board period extend Request") && (
         <div>
           <div className="mb-6">
             <label className={GlobalStyle.remarkTopic}>
@@ -718,7 +710,7 @@ const ForwardMediationBoard = () => {
           <div className="flex gap-4">
             <button
               className={GlobalStyle.buttonPrimary}
-              onClick={handleWithdraw}
+            // onClick={handleWithdraw}
             >
               Withdraw
             </button>
@@ -739,69 +731,69 @@ const ForwardMediationBoard = () => {
         requestType === "Mediation Board Settlement plan Request" ||
         requestType === "Mediation Board customer further information request" ||
         requestType === "Mediation Board Customer request service"
-) && (
-        <div>
-          <div className="mt-10 mb-6">
-            <label className={GlobalStyle.remarkTopic}>Request provided:</label>
-            <div className="flex justify-left gap-8 mt-2">
-              <label className="flex items">
-                <input
-                  type="radio"
-                  value="Yes"
-                  name="acceptRequest"
-                  checked={acceptRequest === "Yes"}
-                  className="mr-2"
-                  onChange={(e) => setAcceptRequest(e.target.value)}
-                  disabled={months >= 5}
-                />
-                Yes
-              </label>
-              <label className="flex items">
-                <input
-                  type="radio"
-                  value="No"
-                  name="acceptRequest"
-                  checked={acceptRequest === "No"}
-                  className="mr-2"
-                  onChange={(e) => setAcceptRequest(e.target.value)}
-                />
-                No
-              </label>
+      ) && (
+          <div>
+            <div className="mt-10 mb-6">
+              <label className={GlobalStyle.remarkTopic}>Request provided:</label>
+              <div className="flex justify-left gap-8 mt-2">
+                <label className="flex items">
+                  <input
+                    type="radio"
+                    value="Yes"
+                    name="acceptRequest"
+                    checked={acceptRequest === "Yes"}
+                    className="mr-2"
+                    onChange={(e) => setAcceptRequest(e.target.value)}
+                    disabled={months >= 5}
+                  />
+                  Yes
+                </label>
+                <label className="flex items">
+                  <input
+                    type="radio"
+                    value="No"
+                    name="acceptRequest"
+                    checked={acceptRequest === "No"}
+                    className="mr-2"
+                    onChange={(e) => setAcceptRequest(e.target.value)}
+                  />
+                  No
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className={GlobalStyle.remarkTopic}>Remark</label>
+              <textarea
+                value={remarkText}
+                onChange={(e) => setRemarkText(e.target.value)}
+                className={`${GlobalStyle.remark}`}
+                rows="5"
+              ></textarea>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                className={GlobalStyle.buttonPrimary}
+                onClick={handleSubmit}
+              >
+                Submit
+              </button>
             </div>
           </div>
-
-          <div className="mb-6">
-            <label className={GlobalStyle.remarkTopic}>Remark</label>
-            <textarea
-              value={remarkText}
-              onChange={(e) => setRemarkText(e.target.value)}
-              className={`${GlobalStyle.remark}`}
-              rows="5"
-            ></textarea>
-          </div>
-
-          <div className="flex gap-4">
-            <button
-              className={GlobalStyle.buttonPrimary}
-              onClick={handleSubmit}
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      )}
+        )}
 
       {/* Back button */}
 
       <div className="flex justify-start items-center w-full  mt-8 ">
-            <button
-              className={`${GlobalStyle.buttonPrimary} `} 
-             onClick={handlebackbuttonClick}
-            >
-              <FaArrowLeft className="mr-2" />
-              
-            </button>
-          </div>
+        <button
+          className={`${GlobalStyle.buttonPrimary} `}
+          onClick={handlebackbuttonClick}
+        >
+          <FaArrowLeft className="mr-2" />
+
+        </button>
+      </div>
     </div>
   );
 };
