@@ -628,4 +628,14 @@ export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
     throw error;
   }
 };
-
+export const fetchCaseDetails = async (caseId) => {
+  try {
+    const response = await axios.get(`${URL}/listdownCaseDetailsByCaseId/${caseId}`, {
+      },);
+  
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching case details:', error);
+    throw error;
+  }
+};
