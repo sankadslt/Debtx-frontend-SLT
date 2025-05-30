@@ -556,6 +556,18 @@ export default function DRCAssignManagerApproval3() {
 
   // Function to handle create task button click
   const onCreateTask = async () => {
+
+    if(!startDate || !endDate) {
+          Swal.fire({
+            title: "warning",
+            text: "Please select both start and end dates.",
+            icon: "warning",
+            confirmButtonColor: "#f1c40f",
+          });
+          return;
+        }
+
+
     const userId = await getLoggedUserId();
     //const batchIds = Array.from(selectedRows);
     //console.log("Selected batch IDs:", batchIds);
