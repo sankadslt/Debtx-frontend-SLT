@@ -624,13 +624,17 @@ export const fetchWithdrawalCases = async (payload) => {
   }
 };
 
-
-
-export const updateCaseRemark = async (caseId, remark) => {
+ 
+export const updateCaseRemark = async (caseId, remark, token) => {
   try {
     const response = await axios.patch(
-      `${URL}/Create_Wthdraw_case`, 
-      { caseId, remark }
+      `${URL}/Create_Wthdraw_case`,
+      { caseId, remark },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,   
+        },
+      }
     );
 
     return response.data;
@@ -639,9 +643,18 @@ export const updateCaseRemark = async (caseId, remark) => {
       "Error updating case remark:",
       error.response?.data || error.message
     );
-    throw new Error(error.message || "Failed to connect to the server.");
+    throw new Error(error.response?.data?.message || error.message || "Failed to connect to the server.");
   }
 };
 
-
-
+export const fetchCaseDetails = async (caseId) => {
+  try {
+    const response = await axios.get(`${URL}/listdownCaseDetailsByCaseId/${caseId}`, {
+      },);
+  
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching case details:', error);
+    throw error;
+  }
+};

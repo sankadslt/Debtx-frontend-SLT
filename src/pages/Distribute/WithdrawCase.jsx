@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
+import axios from "axios";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft } from "react-icons/fa";
 import { updateCaseRemark } from "../../services/case/CaseServices.js";
 
 const WithdrawCase = () => {
@@ -11,7 +11,6 @@ const WithdrawCase = () => {
   const [error, setError] = useState(null);
 
   const handleWithdraw = async () => {
-    // Validate inputs
     if (!caseId || !remark) {
       setError("Case ID and remark are required.");
       return;
@@ -21,17 +20,21 @@ const WithdrawCase = () => {
     setError(null);
 
     try {
-      const response = await updateCaseRemark(caseId, remark);
+      
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("No token provided");
+
+    
+      const response = await updateCaseRemark(caseId, remark, token);
 
       if (response.success) {
-        console.log("Remark updated successfully:", response);
-        setRemark(""); // Clear input
- 
-        // ✅ Show success SweetAlert
+        setRemark("");
+        setCaseId("");
+
         Swal.fire({
           icon: "success",
           title: "Success",
-          text: "Case remark updated successfully!",
+          text: response.message || "Case remark updated successfully!",
           confirmButtonColor: "#3085d6",
         });
       } else {
@@ -39,7 +42,7 @@ const WithdrawCase = () => {
       }
     } catch (error) {
       console.error("Error during API call:", error);
-      setError("Failed to connect to the server. Please try again later.");
+      setError(error.message || "Failed to connect to the server. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +53,7 @@ const WithdrawCase = () => {
       <div className="w-full max-w-md p-6">
         <h1 className={`${GlobalStyle.headingLarge} text-center mb-6`}>Withdraw Case</h1>
 
-        {/* Case ID Input */}
+      
         <div className="mb-10">
           <label className={`${GlobalStyle.headingSmall} block mb-1`}>Case ID:</label>
           <input
@@ -61,7 +64,7 @@ const WithdrawCase = () => {
           />
         </div>
 
-        {/* Remark Input */}
+        
         <div className="mb-6">
           <label className={`${GlobalStyle.headingSmall} block mb-1`}>Remark:</label>
           <textarea
@@ -72,10 +75,10 @@ const WithdrawCase = () => {
           />
         </div>
 
-        {/* Error Message */}
+    
         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
-        {/* Withdraw Button */}
+     
         <div className="text-right">
           <button
             className={`${GlobalStyle.buttonPrimary} px-6 py-2`}

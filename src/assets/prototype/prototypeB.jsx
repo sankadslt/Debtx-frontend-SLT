@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import GlobalStyle from "./GlobalStyle";
 
 const PrototypeB = () => {
-  const [fromDate, setFromDate] = useState(null); //for date
+  const [fromDate, setFromDate] = useState(null); 
   const [toDate, setToDate] = useState(null); // for date
   const [error, setError] = useState(""); // for error message
   const [searchQuery, setSearchQuery] = useState(""); // for searching

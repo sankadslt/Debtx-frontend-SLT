@@ -88,6 +88,8 @@ import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList"
 import SettlementPreview from "../pages/Settlement/SettlementPreview";
 import WithdrawalCaseLog from "../pages/Distribute/Withdraw case log";
 import WithdrawCase from "../pages/Distribute/WithdrawCase";
+import CaseDetails from "../pages/Incident/Case_Details";
+import Case_List from "../pages/Incident/Case_List";
 
 const Routers = () => {
   return (
@@ -526,6 +528,26 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<Incident_File_Download />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+<Route
+        path="/incident/Case_Details"
+        element={
+          <ProtectedRoute
+            element={<CaseDetails/>}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+<Route
+        path="/incident/Case_List"
+        element={
+          <ProtectedRoute
+            element={<Case_List/>}
             allowedRoles={["superadmin"]}
           />
         }
