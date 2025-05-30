@@ -92,9 +92,9 @@ useEffect(() => {
 const handlestartdatechange = (date) => {
   if(endDate && date > endDate) {
     Swal.fire({
-      title: "Error",
+      title: "warning",
       text: "From date cannot be after the To date.",
-      icon: "error",
+      icon: "warning",
       confirmButtonColor: "#f1c40f",
     });
   setStartDate(null);
@@ -107,9 +107,9 @@ const handlestartdatechange = (date) => {
 const handleenddatechange = (date) => {
   if (startDate && date < startDate) {
     Swal.fire({
-      title: "Error",
+      title: "warning",
       text: "To date cannot be before the From date.",
-      icon: "error",
+      icon: "warning",
       confirmButtonColor: "#f1c40f",
     });
     setEndDate(null);
@@ -204,7 +204,10 @@ const handleApicall = async (startDate, endDate) => {
 
 // Fetch the data and set it to filteredData1 state
 const applyFilters = async () => {
+
   const fetchData = async () => {
+
+    
     
     const requestdata = {};
 
@@ -345,6 +348,18 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
 
   // The function to handle the creation of a task and notify the user
   const handlecreatetaskandletmeknow = async () => {
+
+    if(!startDate || !endDate) {
+      Swal.fire({
+        title: "warning",
+        text: "Please select both start and end dates.",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+
     const userId = await getLoggedUserId();
 
     const payload = {

@@ -84,6 +84,10 @@ export default function CaseDistributionDRCTransactions1Batch() {
 
   // Function to handle the button click
   const handleonclick = async () => {
+
+    
+
+
     const userId = await getLoggedUserId();
 
     const payload = {
