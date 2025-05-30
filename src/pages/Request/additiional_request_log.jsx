@@ -552,21 +552,24 @@ const RecoveryOfficerRequests = () => {
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Amount
                 </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
+                {/* <th scope="col" className={GlobalStyle.tableHeader}>
                   Validity Period
-                </th>
+                </th> */}
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   DRC
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Request Type
                 </th>
+                 <th scope="col" className={GlobalStyle.tableHeader}>
+                  Validity Period
+                </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Requested date
                 </th>
-                <th scope="col" className={GlobalStyle.tableHeader}>
+                {/* <th scope="col" className={GlobalStyle.tableHeader}>
                   Approved
-                </th>
+                </th> */}
                 <th scope="col" className={GlobalStyle.tableHeader}></th>
               </tr>
             </thead>
@@ -605,6 +608,13 @@ const RecoveryOfficerRequests = () => {
                   <td className={GlobalStyle.tableCurrency}>
                     {row.current_arrears_amount ?? ""}
                   </td>
+                  
+                  <td className={GlobalStyle.tableData}>
+                    {row.drc_name}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    {row.User_Interaction_Type}
+                  </td>
                   <td className={GlobalStyle.tableData}>
                     {row.Validity_Period
                       ? row.Validity_Period.split(" - ")
@@ -622,17 +632,11 @@ const RecoveryOfficerRequests = () => {
                       : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {row.drc_id ?? ""}
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    {row.User_Interaction_Type}
-                  </td>
-                  <td className={GlobalStyle.tableData}>
                     {new Date(row.CreateDTM).toLocaleDateString("en-GB")}
                   </td>
-                  <td className={GlobalStyle.tableData}>
+                  {/* <td className={GlobalStyle.tableData}>
                     {row.Request_Accept}
-                  </td>
+                  </td> */}
                   <td
                     className={`${GlobalStyle.tableData} text-center px-6 py-4`}
                   >
