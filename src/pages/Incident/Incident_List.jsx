@@ -123,10 +123,10 @@ const Incident_List = () => {
     const handleFromDateChange = (date) => {
         if (toDate && date > toDate) {
             Swal.fire({
-                title: "Error",
+                title: "Warning",
                 text: "From date cannot be after the To date.",
-                icon: "error",
-                confirmButtonColor: "#f1c40f", 
+                icon: "warning",
+                confirmButtonColor: "#f1c40f",
             });
         } else if (toDate) {
             // Calculate month gap
@@ -155,10 +155,10 @@ const Incident_List = () => {
     const handleToDateChange = (date) => {
         if (fromDate && date < fromDate) {
             Swal.fire({
-                title: "Error",
+                title: "Warning",
                 text: "To date cannot be before the From date.",
-                icon: "error",
-                confirmButtonColor: "#f1c40f", 
+                icon: "warning",
+                confirmButtonColor: "#f1c40f",
             });
         } else if (fromDate) {
             // Calculate month gap
