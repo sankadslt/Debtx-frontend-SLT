@@ -275,17 +275,26 @@ const DRCList = () => {
                   <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                   <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
                   <td className={GlobalStyle.tableData}>
-                    <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}`}>
+                    <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}&drcname=${encodeURIComponent(
+                          log.DRCName
+                        )}&tab=Services`}
+                      >
                       {log.ServiceCount}
                     </Link>
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}`}>
+                    <Link
+                      to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}&drcname=${encodeURIComponent(
+                        log.DRCName
+                      )}&tab=RO`}
+                    >
                       {log.ROCount}
                     </Link>
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}`}>
+                    <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}&drcname=${encodeURIComponent(
+                          log.DRCName
+                        )}&tab=RTOM`}>
                       {log.RTOMCount}
                     </Link>
                   </td>{" "}
