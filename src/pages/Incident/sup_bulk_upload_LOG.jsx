@@ -43,7 +43,7 @@ import { FaArrowUp } from 'react-icons/fa';
 // Function to get the status icon based on the status value
 const getStatusIcon = (status) => {
     switch (status) {
-        case "Open":
+        case "Upload Open":
             return uploadopen;
 
         case "InProgress":
@@ -56,6 +56,7 @@ const getStatusIcon = (status) => {
         default:
             return null;
     }
+   
 };
 
 
