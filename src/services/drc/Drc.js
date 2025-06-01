@@ -67,25 +67,63 @@ export const List_All_DRC_Details = async (status, pages = 1) => {
 };
 
 
-export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
+// export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
+//   try {
+//     if (!drc_id) throw new Error("drc_id is required");
+//     const response = await axios.post(
+//       `${URL2}/List_RO_Details_Owen_By_DRC_ID`,
+//       { drc_id }
+//     );
+
+//     const data = response.data;
+
+//     const formattedROs = data.map((ro, index) => ({
+//       key: index,
+//       ro_name: ro.ro_name,
+//       status: ro.status,
+//       ro_end_date: ro.ro_end_dtm,
+//       ro_contact_no: ro.ro_contact_no,
+//     }));
+
+//     return formattedROs;
+//   } catch (error) {
+//     console.error(
+//       "Error fetching RO list by DRC ID:",
+//       error.response?.data || error.message
+//     );
+//     throw error;
+//   }
+// };
+
+export const List_RO_Details_Owen_By_DRC_ID = async (payload) => {
   try {
-    if (!drc_id) throw new Error("drc_id is required");
+    if (!payload?.drc_id) {
+      throw new Error("drc_id is required");
+    }
+
     const response = await axios.post(
       `${URL2}/List_RO_Details_Owen_By_DRC_ID`,
-      { drc_id }
+      payload
     );
 
-    const data = response.data;
+    const { data, current_page, per_page } = response.data;
 
     const formattedROs = data.map((ro, index) => ({
-      key: index,
+      key: (current_page - 1) * per_page + index, // Useful for React keys in table rows
       ro_name: ro.ro_name,
       status: ro.status,
       ro_end_date: ro.ro_end_dtm,
       ro_contact_no: ro.ro_contact_no,
     }));
 
-    return formattedROs;
+    return {
+      roList: formattedROs,
+      pagination: {
+        currentPage: current_page,
+        perPage: per_page,
+      },
+    };
+
   } catch (error) {
     console.error(
       "Error fetching RO list by DRC ID:",
@@ -95,15 +133,18 @@ export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
   }
 };
 
-export const List_RTOM_Details_Owen_By_DRC_ID = async (drc_id) => {
+export const List_RTOM_Details_Owen_By_DRC_ID = async (payload) => {
   try {
-    if (!drc_id) throw new Error("drc_id is required");
+
+    if (!payload?.drc_id) {
+      throw new Error("drc_id is required");
+    }
     const response = await axios.post(
       `${URL}/List_RTOM_Details_Owen_By_DRC_ID`,
-      { drc_id }
+      payload
     );
 
-    const data = response.data;
+    const {data} = response.data;
 
     const formattedRtomData = data.map((rtom, index) => ({
       key: index,
@@ -114,7 +155,9 @@ export const List_RTOM_Details_Owen_By_DRC_ID = async (drc_id) => {
       ro_count: rtom.ro_count,
     }));
 
-    return formattedRtomData;
+    return {
+      rtomList: formattedRtomData
+    };
   } catch (error) {
     console.error(
       "Error fetching RTOMs by DRC ID:",
@@ -124,24 +167,31 @@ export const List_RTOM_Details_Owen_By_DRC_ID = async (drc_id) => {
   }
 };
 
-export const List_Service_Details_Owen_By_DRC_ID = async (drc_id) => {
+export const List_Service_Details_Owen_By_DRC_ID = async (payload) => {
   try {
-    if (!drc_id) throw new Error("drc_id is required");
+    
+    if (!payload?.drc_id) {
+      throw new Error("drc_id is required");
+    }
     const response = await axios.post(
       `${URL}/List_Service_Details_Owen_By_DRC_ID`,
-      { drc_id }
+      payload
     );
 
-    const data = response.data;
+    console.log(response);
+    
+    const {services} = response.data;
 
-    const formattedServices = data.map((service, index) => ({
+    const formattedServices = services.map((service, index) => ({
       key: index,
       service_type: service.service_type,
       enable_date: service.enable_date,
       status: service.status,
     }));
 
-    return formattedServices;
+    return {
+      servicesList: formattedServices
+    };
   } catch (error) {
     console.error(
       "Error fetching services by DRC ID:",

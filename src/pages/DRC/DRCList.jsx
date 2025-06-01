@@ -124,6 +124,8 @@ const DRCList = () => {
         }
     };
 
+ 
+
     const handleFilter = () => {
         setFiltersApplied(true);
         setAppliedStatus(statusFilter);
@@ -323,6 +325,8 @@ const DRCList = () => {
             </div>
         </div>
     );
+
+     
 };
 
 export default DRCList;

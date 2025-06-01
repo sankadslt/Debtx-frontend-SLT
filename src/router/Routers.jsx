@@ -103,7 +103,7 @@ import DRCInfoEdit from "../pages/DRC/DRCInfoEdit";
 //Rtom
 
 import RtomList from "../pages/Rtom/RtomList";
-import RtomInfo from "../pages/Rtom/RtomInfo";
+import RtomInfo from "../pages/Rtom/Rtominfo";
 import AddRtom from "../pages/Rtom/AddRtom";
 import RtomInfoEdit from "../pages/Rtom/RtomInfoEdit";
 import RtomInfoEnd from "../pages/Rtom/RtomInfoEnd";
@@ -711,12 +711,6 @@ const Routers = () => {
     <Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/DRC/DRCInfo" element={<ProtectedRoute element={<DRCInfo />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} /> */}
-
-      {/* RTOM      */}
-      <Route path="/pages/Rtom/RtomList" element={<ProtectedRoute element={<RtomList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfo/:rtomId" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfoEdit/:rtomId" element={<ProtectedRoute element={<RtomInfoEdit />} allowedRoles={['superadmin']} />} />
     </Routes>
 
     

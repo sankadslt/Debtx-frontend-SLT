@@ -447,7 +447,7 @@ const MediationBoardResponse = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={() => navigate("/MediationBoard/MediationBoardCaseList")}
                 >
                     <FaArrowLeft />
