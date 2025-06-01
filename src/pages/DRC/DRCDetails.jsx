@@ -10,12 +10,13 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { List_RO_Details_Owen_By_DRC_ID, List_RTOM_Details_Owen_By_DRC_ID, List_Service_Details_Owen_By_DRC_ID } from "../../services/drc/Drc";
+import { getActiveServiceDetails, List_RO_Details_Owen_By_DRC_ID, List_RTOM_Details_Owen_By_DRC_ID, List_Service_Details_Owen_By_DRC_ID } from "../../services/drc/Drc";
 import { useLocation, useSearchParams } from "react-router-dom";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
 import Swal from "sweetalert2";
+import { getActiveRTOMsByDRCID } from "../../services/RTOM/RtomService";
 
 const DRCDetails = () => {
   const location =useLocation();
@@ -39,9 +40,34 @@ const DRCDetails = () => {
   const [serviceFilter, setServiceFilter] = useState("");
 
   const statuses = ["Active", "Inactive"];
-  const rtomNames = ["RTOM 1", "RTOM 2", "RTOM 3", "RTOM 4"];
-  const serviceTypes = ["PEO", "LTE", "FTTH", "DSL"];
+  // const rtomNames = ["RTOM 1", "RTOM 2", "RTOM 3", "RTOM 4"];
+  // const serviceTypes = ["PEO", "LTE", "FTTH", "DSL"];
 
+  const [rtoms, setRtoms] =useState([]);
+  const [services, setServices] =useState([]);
+  
+  //Fetch RTOMs
+  useEffect(() => {
+    const fetchRTOMs = async () => {
+      if (!drcId) return;
+      const result = await getActiveRTOMsByDRCID(drcId);
+      // console.log("Active RTOMs", result);
+      
+      setRtoms(result);
+    };
+
+    const fetchServices =async () => {
+      if (!drcId) return;
+      const result =await getActiveServiceDetails(drcId);
+      // console.log(result.data);
+      
+      setServices(result.data);
+    }
+
+    fetchRTOMs();
+    fetchServices();
+  }, [drcId]);
+  
   // Status Icons
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
@@ -76,7 +102,6 @@ const DRCDetails = () => {
       status: status,
       rtom: rtomFilter,
       service: serviceFilter,
-      search: searchQuery
     };
     
     setAppliedFilters(newFilters);
@@ -91,15 +116,7 @@ const DRCDetails = () => {
       status: "", 
       rtom: "", 
       service: "",
-      search: "" 
     });
-  };
-
-  // Handle search when Enter key is pressed
-  const handleSearchKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleFilter();
-    }
   };
 
   const renderTabContent = () => {
@@ -176,9 +193,9 @@ const DRCDetails = () => {
                 <option value="" disabled hidden>
                   Select RTOM
                 </option>
-                {rtomNames.map((rtomOption, index) => (
-                  <option key={index} value={rtomOption}>
-                    {rtomOption}
+                {rtoms.map((rtom, index) => (
+                  <option key={index} value={rtom.rtom_id}>
+                    {rtom.area_name}
                   </option>
                 ))}
               </select>
@@ -194,9 +211,9 @@ const DRCDetails = () => {
                 <option value="" disabled hidden>
                   Select Service
                 </option>
-                {serviceTypes.map((serviceOption, index) => (
-                  <option key={index} value={serviceOption}>
-                    {serviceOption}
+                {services.map((service, index) => (
+                  <option key={index} value={service.service_type}>
+                    {service.service_type}
                   </option>
                 ))}
               </select>
@@ -228,7 +245,6 @@ const DRCDetails = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleSearchKeyPress}
             className={GlobalStyle.inputSearch}
             placeholder="Search..."
           />
@@ -291,23 +307,22 @@ function ROList({ drcId, renderStatusIcon, filters, searchQuery }) {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filterdData.slice(startIndex, endIndex);
 
-  useEffect(()=>{
-    console.log("Filterd Data: ", filterdData);
+  // useEffect(()=>{
+  //   console.log("Filterd Data: ", filterdData);
     
-  }, [filterdData])
+  // }, [filterdData])
 
-  useEffect(() => {
-    console.log("total pages", totalPages);
-    console.log("Current Page", currentPage);
-    console.log("is MOre data available", isMoreDataAvailable);
+  // useEffect(() => {
+  //   console.log("total pages", totalPages);
+  //   console.log("Current Page", currentPage);
+  //   console.log("is MOre data available", isMoreDataAvailable);
 
-  },[currentPage])
+  // },[currentPage])
 
   // Effect to handle filter changes and initial load
   useEffect(() => {
-    console.log("Filters", filters);
-    
-    console.log("Filters use Effect Called");
+    // console.log("Filters", filters);
+    // console.log("Filters use Effect Called");
     
     // Reset everything when filters change
     fetchedPages.current.clear();
@@ -323,20 +338,42 @@ function ROList({ drcId, renderStatusIcon, filters, searchQuery }) {
     initialLoad.current = false;
   }, [filters]);
   
+  // useEffect(() => {
+  //   if (
+  //     currentPage === 1 || 
+  //     fetchedPages.current.has(currentPage) ||
+  //     (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
+  //   ) {
+  //     return;
+  //   }
+
+  //   fetchedPages.current.add(currentPage);
+  //   fetchROList(currentPage, filters);
+  //   console.log("Pagination use Effect Called");
+
+  // }, [currentPage]);
+
   useEffect(() => {
-    if (
-      currentPage === 1 || 
-      fetchedPages.current.has(currentPage) ||
-      (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
-    ) {
-      return;
+    const shouldFetchMoreData = () => {
+      const totalFetchedPages = Math.ceil(filterdData.length / rowsPerPage);
+
+      // Fetch only when the current page exceeds fetched pages and more data is available
+      return (
+        currentPage > totalFetchedPages &&
+        isMoreDataAvailable &&
+        !fetchedPages.current.has(currentPage)
+      );
+    };
+
+    if (shouldFetchMoreData()) {
+      fetchedPages.current.add(currentPage);
+
+      // Fetch the "next chunk" — calculate which backend page to request
+      const backendPage = Math.floor((currentPage - 2) / 3) + 2;
+      fetchROList(backendPage, filters);
+      // console.log("Fetching for backend page:", backendPage);
     }
-
-    fetchedPages.current.add(currentPage);
-    fetchROList(currentPage, filters);
-    console.log("Pagination use Effect Called");
-
-  }, [currentPage]);
+  }, [currentPage, filterdData.length, isMoreDataAvailable]);
 
   // Function to handle searching through current results
   const getFilteredResults = () => {
@@ -535,23 +572,22 @@ function RTOMList({ drcId, filters, searchQuery }) {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filterdData.slice(startIndex, endIndex);
   
-  useEffect(()=>{
-    console.log("Filterd Data: ", filterdData);
+  // useEffect(()=>{
+  //   console.log("Filterd Data: ", filterdData);
     
-  }, [filterdData])
+  // }, [filterdData])
 
-  useEffect(() => {
-    console.log("total pages", totalPages);
-    console.log("Current Page", currentPage);
-    console.log("is MOre data available", isMoreDataAvailable);
+  // useEffect(() => {
+  //   console.log("total pages", totalPages);
+  //   console.log("Current Page", currentPage);
+  //   console.log("is MOre data available", isMoreDataAvailable);
 
-  },[currentPage])
+  // },[currentPage])
 
   // Effect to handle filter changes and initial load
   useEffect(() => {
-    console.log("Filters", filters);
-    
-    console.log("Filters use Effect Called");
+    // console.log("Filters", filters);
+    // console.log("Filters use Effect Called");
     
     // Reset everything when filters change
     fetchedPages.current.clear();
@@ -567,21 +603,43 @@ function RTOMList({ drcId, filters, searchQuery }) {
     initialLoad.current = false;
   }, [filters]);
 
-  // Effect to handle pagination
+  // // Effect to handle pagination
+  // useEffect(() => {
+  //   if (
+  //     currentPage === 1 || 
+  //     fetchedPages.current.has(currentPage) ||
+  //     (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
+  //   ) {
+  //     return;
+  //   }
+
+  //   fetchedPages.current.add(currentPage);
+  //   fetchRTOMList(currentPage, filters);
+  //   console.log("Pagination use Effect Called");
+
+  // }, [currentPage]);
+
   useEffect(() => {
-    if (
-      currentPage === 1 || 
-      fetchedPages.current.has(currentPage) ||
-      (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
-    ) {
-      return;
+    const shouldFetchMoreData = () => {
+      const totalFetchedPages = Math.ceil(filterdData.length / rowsPerPage);
+
+      // Fetch only when the current page exceeds fetched pages and more data is available
+      return (
+        currentPage > totalFetchedPages &&
+        isMoreDataAvailable &&
+        !fetchedPages.current.has(currentPage)
+      );
+    };
+
+    if (shouldFetchMoreData()) {
+      fetchedPages.current.add(currentPage);
+
+      // Fetch the "next chunk" — calculate which backend page to request
+      const backendPage = Math.floor((currentPage - 2) / 3) + 2;
+      fetchRTOMList(backendPage, filters);
+      // console.log("Fetching for backend page:", backendPage);
     }
-
-    fetchedPages.current.add(currentPage);
-    fetchRTOMList(currentPage, filters);
-    console.log("Pagination use Effect Called");
-
-  }, [currentPage]);
+  }, [currentPage, filterdData.length, isMoreDataAvailable]);
 
   // Function to handle searching through current results
   const getFilteredResults = () => {
@@ -610,7 +668,7 @@ function RTOMList({ drcId, filters, searchQuery }) {
       setIsLoading(true);
       const response = await List_RTOM_Details_Owen_By_DRC_ID(payload).catch((error) => {
       
-        if (error.response && error.response.status === 404) {
+      if (error.response && error.response.status === 404) {
         Swal.fire({
           title: "No Results",
           text: "No matching data found for the selected filters.",
@@ -626,7 +684,7 @@ function RTOMList({ drcId, filters, searchQuery }) {
       });
       setIsLoading(false);
 
-      console.log("RTOM response: ", response);
+      // console.log("RTOM response: ", response);
 
       if (response?.rtomList) {
         setFilteredData(prevData => 
@@ -786,23 +844,22 @@ function ServicesList({ drcId, renderStatusIcon, filters, searchQuery }) {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filterdData.slice(startIndex, endIndex);
 
-  useEffect(()=>{
-    console.log("Filterd Data: ", filterdData);
+  // useEffect(()=>{
+  //   console.log("Filterd Data: ", filterdData);
     
-  }, [filterdData])
+  // }, [filterdData])
 
-  useEffect(() => {
-    console.log("total pages", totalPages);
-    console.log("Current Page", currentPage);
-    console.log("is MOre data available", isMoreDataAvailable);
+  // useEffect(() => {
+  //   console.log("total pages", totalPages);
+  //   console.log("Current Page", currentPage);
+  //   console.log("is MOre data available", isMoreDataAvailable);
 
-  },[currentPage])
+  // },[currentPage])
 
   // Effect to handle filter changes and initial load
   useEffect(() => {
-    console.log("Filters", filters);
-    
-    console.log("Filters use Effect Called");
+    // console.log("Filters", filters);  
+    // console.log("Filters use Effect Called");
     
     // Reset everything when filters change
     fetchedPages.current.clear();
@@ -818,23 +875,45 @@ function ServicesList({ drcId, renderStatusIcon, filters, searchQuery }) {
     initialLoad.current = false;
   }, [filters]);
 
-  // Effect to handle pagination
+  // // Effect to handle pagination
+  // useEffect(() => {
+  //   if (
+  //     currentPage === 1 || 
+  //     fetchedPages.current.has(currentPage) ||
+  //     (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
+  //   ) {
+  //     return;
+  //   }
+
+  //   fetchedPages.current.add(currentPage);
+  //   fetchServicesList(currentPage, filters);
+  //   console.log("Pagination use Effect Called");
+
+  // }, [currentPage]);
+
   useEffect(() => {
-    if (
-      currentPage === 1 || 
-      fetchedPages.current.has(currentPage) ||
-      (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
-    ) {
-      return;
+    const shouldFetchMoreData = () => {
+      const totalFetchedPages = Math.ceil(filterdData.length / rowsPerPage);
+
+      // Fetch only when the current page exceeds fetched pages and more data is available
+      return (
+        currentPage > totalFetchedPages &&
+        isMoreDataAvailable &&
+        !fetchedPages.current.has(currentPage)
+      );
+    };
+
+    if (shouldFetchMoreData()) {
+      fetchedPages.current.add(currentPage);
+
+      // Fetch the "next chunk" — calculate which backend page to request
+      const backendPage = Math.floor((currentPage - 2) / 3) + 2;
+      fetchServicesList(backendPage, filters);
+      // console.log("Fetching for backend page:", backendPage);
     }
+  }, [currentPage, filterdData.length, isMoreDataAvailable]);
 
-    fetchedPages.current.add(currentPage);
-    fetchServicesList(currentPage, filters);
-    console.log("Pagination use Effect Called");
-
-  }, [currentPage]);
-
-    // Function to handle searching through current results
+  // Function to handle searching through current results
   const getFilteredResults = () => {
     if (!searchQuery) return paginatedData;
     
