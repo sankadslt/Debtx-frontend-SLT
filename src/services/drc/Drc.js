@@ -10,11 +10,10 @@ export const Active_DRC_Details = async () => {
     const response = await axios.get(`${URL}/Active_DRC_Details`);
     const data = response.data.data.mongoData;
 
-    // Extract and return the drc_name for all active DRCs
 
     const drcNames = data.map((drc) => ({
-      key: drc.drc_id, // Use _id as key
-      value: drc.drc_name, // Use drc_name as the display value
+      key: drc.drc_id, 
+      value: drc.drc_name, 
       id: drc.drc_id,
     }));
 
@@ -37,7 +36,6 @@ export const List_All_DRC_Details = async (status, pages = 1) => {
 
     console.log("Full DRC API response:", response.data);
 
-    // Extract from response structure
     // const drcArray = response.data?.data?.drcDetails;
     const drcArray = response.data;
 
@@ -334,6 +332,33 @@ export const registerDRC = async (drcData) => {
 };
 
 
+export const listAllDRCDetails = async (filters = {}) => {
+  try {
+    const response = await axios.post(`${URL}/List_All_DRC_Details`, {
+      status: filters.status || "",
+      pages: filters.pages || 1,
+      search: filters.search || ""
+    });
 
+    const drcArray = Array.isArray(response.data) ? response.data : response.data.data;
+    
+    if (!Array.isArray(drcArray)) {
+      throw new Error("Invalid DRC data format received");
+    }
 
-
+    return drcArray.map(drc => ({
+      drc_id: drc.drc_id,
+      drc_name: drc.drc_name,
+      drc_status: drc.drc_status,
+      drc_contact_no: drc.drc_contact_no || drc.teli_no, 
+      drc_business_registration_number: drc.drc_business_registration_number,
+      service_count: drc.service_count || 0,
+      ro_count: drc.ro_count || 0,
+      rtom_count: drc.rtom_count || 0
+    }));
+    
+  } catch (error) {
+    console.error("Error fetching DRCs:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to fetch DRC details");
+  }
+};
