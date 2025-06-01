@@ -588,9 +588,13 @@ const DRCInfo = () => {
       {/* End button */}
       {!showEndFields && (
       <div className="flex justify-between mt-4 w-full px-8">
-        <button className={GlobalStyle.navButton} onClick={goBack}>
-                              <FaArrowLeft />  Back
-                              </button>
+       <button
+                          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                          onClick={goBack}
+                        >
+                          <FaArrowLeft />
+                          <span>Back</span>
+                        </button>
 
         <button
           onClick={() => setShowEndFields(true)}
