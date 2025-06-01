@@ -276,7 +276,7 @@ const DRCList = () => {
                                     <td className={GlobalStyle.tableData}>{log.RTOMCount}</td>
                                     <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
                                         <button 
-                                            onClick={() => navigate(`/pages/Distribute/Edit_DRC/${log.DRCID}`)}
+                                            onClick={() => navigate(`/pages/DRC/DRCInfo`, { state: { drcId: log.DRCID } })}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
                                             <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
