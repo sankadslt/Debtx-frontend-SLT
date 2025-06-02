@@ -452,7 +452,7 @@ const RequestResponseLog = () => {
       </div>
 
       
-        <div className={GlobalStyle.tableContainer}>
+         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
