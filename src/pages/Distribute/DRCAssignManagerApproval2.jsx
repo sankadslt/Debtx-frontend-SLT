@@ -289,7 +289,7 @@ export default function DRCAssignManagerApproval2() {
       {/* Search Section */}
 
       {/* Table Section */}
-      <div className={GlobalStyle.tableContainer}>
+       <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
