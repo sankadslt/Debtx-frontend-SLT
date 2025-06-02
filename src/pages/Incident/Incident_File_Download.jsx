@@ -164,7 +164,7 @@ const Incident_File_Download = () => {
             </div>
 
             {/* Table */}
-            <div className={GlobalStyle.tableContainer}>
+            <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
