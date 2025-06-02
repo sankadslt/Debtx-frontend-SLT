@@ -356,7 +356,7 @@ const MediationBoardCaseList = () => {
 
   // Navigate to the case ID page
   const naviCaseID = (caseId) => {
-    navigate("", { state: { caseId } });
+    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
   }
 
   // Navigate to the preview page
@@ -510,7 +510,7 @@ const MediationBoardCaseList = () => {
                 >
                   <td
                     className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
-                    onClick={() => naviCaseID(item.case_id)}
+                    onClick={() => naviCaseID(row.case_id)}
                   >
                     {row.case_id}
                   </td>
