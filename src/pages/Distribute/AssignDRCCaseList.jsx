@@ -826,7 +826,7 @@ export default function AssignDRCsLOG() {
                   Account No
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  Arrears Amount
+                  Arrears Amount (LKR)
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Assigned Date and Time
