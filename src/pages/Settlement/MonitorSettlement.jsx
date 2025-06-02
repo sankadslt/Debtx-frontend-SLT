@@ -484,8 +484,8 @@ const Monitor_settlement = () => {
           <h1 className={GlobalStyle.headingLarge}>Settlement List</h1>
 
           {/* Filters Section */}
-          <div className={`${GlobalStyle.cardContainer} w-full`}>
-            <div className="flex items-center justify-end w-full space-x-3">
+          <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
+            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
 
               <div className="flex items-center">
                 <select
@@ -494,9 +494,9 @@ const Monitor_settlement = () => {
                   className={`${GlobalStyle.selectBox}`}
                   style={{ color: searchBy === "" ? "gray" : "black" }}
                 >
-                  <option value="" hidden>Select</option>
-                  <option value="account_no">Account Number</option>
-                  <option value="case_id">Case ID</option>
+                  <option value="" hidden >Select</option>
+                  <option value="account_no" style={{ color: "black" }}>Account Number</option>
+                  <option value="case_id" style={{ color: "black" }}>Case ID</option>
                 </select>
               </div>
 
@@ -522,12 +522,12 @@ const Monitor_settlement = () => {
                   style={{ color: phase === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Phase</option>
-                  <option value="Negotiation">Negotiation</option>
-                  <option value="Mediation Board">Mediation Board</option>
-                  <option value="Litigation">Litigation</option>
-                  <option value="LOD">LOD</option>
-                  <option value="WRIT">WRIT</option>
-                  <option value="Dispute">Dispute</option>
+                  <option value="Negotiation" style={{ color: "black" }}>Negotiation</option>
+                  <option value="Mediation Board" style={{ color: "black" }}>Mediation Board</option>
+                  <option value="Litigation" style={{ color: "black" }}>Litigation</option>
+                  <option value="LOD" style={{ color: "black" }}>LOD</option>
+                  <option value="WRIT" style={{ color: "black" }}>WRIT</option>
+                  <option value="Dispute" style={{ color: "black" }}>Dispute</option>
                 </select>
               </div>
 
@@ -539,44 +539,44 @@ const Monitor_settlement = () => {
                   style={{ color: status === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Status</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Open_Pending">Open Pending</option>
-                  <option value="Active">Active</option>
+                  <option value="Pending" style={{ color: "black" }}>Pending</option>
+                  <option value="Open_Pending" style={{ color: "black" }}>Open Pending</option>
+                  <option value="Active" style={{ color: "black" }}>Active</option>
                 </select>
               </div>
 
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               {/* <div className={GlobalStyle.datePickerContainer}> */}
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center">
+              {/* <div className="flex items-center space-x-2"> */}
+                {/* <div className="flex items-center"> */}
                   <DatePicker
                     selected={fromDate}
                     onChange={handlestartdatechange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="From"
-                    className={`${GlobalStyle.inputText}`}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
-                </div>
+                {/* </div> */}
 
-                <div className="flex items-center">
+                {/* <div className="flex items-center"> */}
                   <DatePicker
                     selected={toDate}
                     onChange={handleenddatechange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="To"
-                    className={`${GlobalStyle.inputText}`}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
-                </div>
-              </div>
+                {/* </div> */}
+              {/* </div> */}
 
               <button
-                className={GlobalStyle.buttonPrimary}
+                className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
                 onClick={handleFilterButton}
               >
                 Filter
               </button>
               <button
-                className={GlobalStyle.buttonRemove}
+                className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
                 onClick={handleClear}
               >
                 Clear
@@ -598,7 +598,7 @@ const Monitor_settlement = () => {
           </div>
 
           {/* Table */}
-          <div className={`${GlobalStyle.tableContainer} mt-10`}>
+          <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -638,16 +638,19 @@ const Monitor_settlement = () => {
                         <img
                           src={more}
                           onClick={() => naviPreview(item.case_id, item.settlement_id)}
-                          title="More"
-                          alt="more icon"
+                          
+                          data-tooltip-id="tooltip-more"
                           className="w-5 h-5 cursor-pointer"
                         />
+                        <Tooltip id="tooltip-more" place="bottom" effect="solid">
+                          More Details
+                        </Tooltip>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={9} className="text-center">No cases available</td>
+                    <td colSpan={9} className={`${GlobalStyle.tableData} text-center`}>No cases available</td>
                   </tr>
                 )}
               </tbody>
