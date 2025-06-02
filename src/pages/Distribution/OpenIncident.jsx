@@ -423,7 +423,7 @@ const fetchData = async () => {
         </div>
 
        {/* Table Section */}
-        <div className={GlobalStyle.tableContainer}>
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
