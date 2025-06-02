@@ -715,7 +715,7 @@ useEffect(() => {
                     Account No.
                   </th>
                   <th scope="col" className={GlobalStyle.tableHeader}>
-                    Amount
+                    Amount (LKR)
                   </th>
                   <th scope="col" className={GlobalStyle.tableHeader}>
                     Source Type
