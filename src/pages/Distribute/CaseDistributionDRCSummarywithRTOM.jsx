@@ -115,6 +115,7 @@ const handleonbacknuttonclick = () => {
           <div className={GlobalStyle.cardContainer}></div> */}
       <div className="flex items-center justify-center min-h-full ">
       <div className={GlobalStyle.cardContainer}>
+        <div className="overflow-x-auto">
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -149,6 +150,7 @@ const handleonbacknuttonclick = () => {
           }
           </tbody>
         </table>
+        </div>
       </div>
       </div>
 

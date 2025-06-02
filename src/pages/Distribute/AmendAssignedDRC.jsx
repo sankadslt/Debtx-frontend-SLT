@@ -279,7 +279,7 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
 
       {/* Card Section */}
       <div className="flex flex-col items-center justify-center mb-4">
-        <div className={`${GlobalStyle.cardContainer}`}>
+        <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
           <table>
             <tbody>
               <tr>
@@ -331,11 +331,11 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
 
       {/* case count Bar */}
       <div className="flex justify-center items-center w-full">
-      <div className={`${GlobalStyle.miniCaseCountBar}  `}>
-        <div className="flex px-3 py-2 items-center  gap-10 ">
+      <div className={`${GlobalStyle.miniCaseCountBar} w-full max-w-[52rem] `}>
+        <div className="flex flex-wrap px-3 py-2 items-center  gap-4 sm:gap-10 ">
           <img src={Minorc} alt="Icon" className="w-[20px] h-[20px] " />
           {/* dropdown */}
-          <div className="flex gap-10">
+          <div className="flex gap-10 flex-wrap">
             <select
               className={GlobalStyle.selectBox}
               value={newEntry.DRC1}
@@ -354,7 +354,7 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
             
           </div>
           {/* dropdown */}
-          <div className="flex gap-10">
+          <div className="flex gap-10 flex-wrap">
             <select
               className={GlobalStyle.selectBox}
               value={newEntry.RTOM}
@@ -377,7 +377,7 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
             </select>
           </div>
           {/* textbox */}
-          <div className="flex gap-7">
+          <div className="flex gap-7 flex-wrap">
             <h1 className={GlobalStyle.headingMedium}>
               Assigned case count:{assignedCaseCount}
               
@@ -385,7 +385,7 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
             <input
               type="number"
               placeholder="Enter case count"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} min-w-[120px] w-full sm:w-auto`}
               value={newEntry.Count}
               min="1"
               onChange={(e) =>
@@ -460,26 +460,30 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
         </div>
-        <div className={GlobalStyle.tableContainer}>
+         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
                 <th className={GlobalStyle.tableHeader}>RTOM</th>
                 <th className={GlobalStyle.tableHeader}>DRC 1</th>
                 <th
-                  className={`${GlobalStyle.tableHeader} flex justify-center items-center`}
+                  className={`${GlobalStyle.tableHeader} `}
                 >
+                  <div className="flex justify-center items-center">
                   <img
                     src={Minorbw}
                     alt="Icon"
                     className="w-[20px] h-[20px] "
                   />
+                </div>
                 </th>
                 <th className={GlobalStyle.tableHeader}>DRC 2</th>
                 <th
-                  className={`${GlobalStyle.tableHeader} flex justify-center items-center`}
+                  className={`${GlobalStyle.tableHeader}`}
                 >
+                <div className="flex justify-center items-center">
                   <img src={Plusbw} alt="Icon" className="w-[20px] h-[20px] " />
+                </div>
                 </th>
                 <th className={GlobalStyle.tableHeader}></th>
               </tr>

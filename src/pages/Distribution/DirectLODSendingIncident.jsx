@@ -616,10 +616,10 @@ useEffect(() => {
 
         {/* Filter Section */}
         <div className="flex justify-end">
-        <div className={`${GlobalStyle.cardContainer}  items-center w-[70vw] mb-8 mt-8`}>
-          <div className="flex items-center gap-4 justify-end">
+        <div className={`${GlobalStyle.cardContainer} w-full items-center md:w-[72vw] mb-8 mt-8`}>
+          <div className="flex flex-wrap items-center gap-4 justify-end">
           {/* Source Dropdown */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
             <label>Source:</label>
             <select
               className={GlobalStyle.selectBox}
@@ -635,21 +635,21 @@ useEffect(() => {
           </div>
 
           {/* Date Picker Section */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
             <label>Date:</label>
             <DatePicker
               selected={fromDate}
               onChange={handleFromDateChange}
               dateFormat="dd/MM/yyyy"
               placeholderText="From"
-              className={GlobalStyle.inputText}
+               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
             />
             <DatePicker
               selected={toDate}
               onChange={handleToDateChange}
               dateFormat="dd/MM/yyyy"
               placeholderText="To"
-              className={GlobalStyle.inputText}
+               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
             />
             {error && <span className={GlobalStyle.errorText}>{error}</span>}
           </div>
@@ -664,7 +664,7 @@ useEffect(() => {
           <div>
               {["admin", "superadmin", "slt"].includes(userRole) && (
                 <button
-                className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                className={`${GlobalStyle.buttonPrimary} h-[35px] w-full sm:w-auto`}
                 onClick={handleFilterClick}
               >
                 Filter
@@ -676,7 +676,7 @@ useEffect(() => {
             </button> */}
             <div>
               {["admin", "superadmin", "slt"].includes(userRole) && (
-                <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+                <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`} onClick={handlefilterclear} >
                 Clear
                 </button>
               )}
@@ -700,7 +700,7 @@ useEffect(() => {
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
           </div>
-          <div className={GlobalStyle.tableContainer}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>

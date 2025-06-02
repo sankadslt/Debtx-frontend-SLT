@@ -378,91 +378,91 @@ const MediationBoardCaseList = () => {
       <h1 className={GlobalStyle.headingLarge + " mb-6"}>Mediation Board Case List</h1>
 
       <div className={`${GlobalStyle.cardContainer} w-full`}>
-        <div className="flex items-center justify-end w-full space-x-3">
+        <div className="flex  flex-wrap xl:flex-nowrap items-center justify-end w-full gap-3">
 
-          <div className="flex items-center">
+          <div className="flex  flex-wrap items-center">
             <select
               value={caseStatus}
               onChange={(e) => setCaseStatus(e.target.value)}
-              className={GlobalStyle.selectBox}
+             className={`${GlobalStyle.selectBox} `}
               style={{ color: caseStatus === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Status</option>
-              <option value="Forward to Mediation Board">Forward to Mediation Board</option>
-              <option value="MB Negotiation">MB Negotiation</option>
-              <option value="MB Request Customer-Info">MB Request Customer-Info</option>
-              <option value="MB Handover Customer-Info">MB Handover Customer-Info</option>
-              <option value="MB Settle Pending">MB Settle Pending</option>
-              <option value="MB Settle Open-Pending">MB Settle Open-Pending</option>
-              <option value="MB Fail with Pending Non-Settlement">MB Fail with Pending Non-Settlement</option>
+              <option value="Forward to Mediation Board" style={{ color: "black" }}>Forward to Mediation Board</option>
+              <option value="MB Negotiation" style={{ color: "black" }}>MB Negotiation</option>
+              <option value="MB Request Customer-Info" style={{ color: "black" }}>MB Request Customer-Info</option>
+              <option value="MB Handover Customer-Info" style={{ color: "black" }}>MB Handover Customer-Info</option>
+              <option value="MB Settle Pending" style={{ color: "black" }}>MB Settle Pending</option>
+              <option value="MB Settle Open-Pending" style={{ color: "black" }}>MB Settle Open-Pending</option>
+              <option value="MB Fail with Pending Non-Settlement" style={{ color: "black" }}>MB Fail with Pending Non-Settlement</option>
             </select>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex flex-wrap items-center">
             <select
               value={selectedDrcId}
               onChange={(e) => setSelectedDrcId(e.target.value)}
-              className={GlobalStyle.selectBox}
+              className={`${GlobalStyle.selectBox} `}
               style={{ color: selectedDrcId === "" ? "gray" : "black" }}
             >
               <option value="" hidden>DRC</option>
               {drcNames.map((drc) => (
-                <option key={drc.key} value={drc.id.toString()}>
+                <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
                   {drc.value}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex flex-wrap  items-center">
             <select
               value={rtom}
               onChange={(e) => setRtom(e.target.value)}
-              className={GlobalStyle.selectBox}
+              className={`${GlobalStyle.selectBox}`}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
               <option value="" hidden>RTOM</option>
               {Object.values(rtomList).map((rtom) => (
-                <option key={rtom.rtom_id} value={rtom.rtom}>
+                <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
                   {rtom.rtom}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="flex items-center">
-            <label className={GlobalStyle.dataPickerDate}>Date</label>
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center">
+          {/* <div className="flex items-center"> */}
+            <label className={GlobalStyle.dataPickerDate}>Date:</label>
+            {/* <div className="flex items-center space-x-2"> */}
+              {/* <div className="flex items-center"> */}
                 <DatePicker
                   selected={fromDate}
                   onChange={handleFromDateChange}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="From"
-                  className={GlobalStyle.inputText}
+                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                 />
-              </div>
+              {/* </div> */}
 
-              <div className="flex items-center">
+              {/* <div className="flex items-center"> */}
                 <DatePicker
                   selected={toDate}
                   onChange={handleToDateChange}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="To"
-                  className={GlobalStyle.inputText}
+                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                 />
-              </div>
-            </div>
-          </div>
+              {/* </div> */}
+            {/* </div> */}
+          {/* </div> */}
 
           <button
-            className={GlobalStyle.buttonPrimary}
+            className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
             onClick={handleFilterButton}
           >
             Filter
           </button>
           <button
-            className={GlobalStyle.buttonRemove}
+             className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
             onClick={handleClear}
           >
             Clear
@@ -482,7 +482,7 @@ const MediationBoardCaseList = () => {
         </div>
       </div>
 
-      <div className={GlobalStyle.tableContainer}>
+       <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -549,15 +549,19 @@ const MediationBoardCaseList = () => {
                     <button
                       className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center"
                       onClick={() => naviPreview(row.case_id, row.drc_id)}
+                      data-tooltip-id={`tooltip-${row.case_id}`}
                     >
                       !
                     </button>
+                    <Tooltip id={`tooltip-${row.case_id}`} place="bottom" effect="solid">
+                      <span>More Info</span>
+                    </Tooltip>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="text-center py-2">
+                <td colSpan="8" className= {GlobalStyle.tableData + " text-center"}>
                   No records found
                 </td>
               </tr>

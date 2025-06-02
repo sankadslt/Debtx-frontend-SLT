@@ -161,7 +161,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
 
       {/* Card Section */}
       <div className="flex flex-col items-center justify-center mb-4">
-        <div className={`${GlobalStyle.cardContainer}`}>
+        <div className={`${GlobalStyle.cardContainer} w-full max-w-lg`}>
           <table>
             <colgroup>
               <col  />
@@ -298,6 +298,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
         { Batchseq === 1 ? (
           <div className="flex items-center justify-center mb-4">
               <div className={GlobalStyle.cardContainer}>
+                 <div className="overflow-x-auto">
                 <table className={GlobalStyle.table}>
                   <thead className={GlobalStyle.thead}>
                     <tr>
@@ -336,10 +337,11 @@ export default function CaseDistributionDRCTransactions1Batch() {
                     )}
                   </tbody>
                 </table>
+                </div>
               </div> 
           </div>
         ) : (
-          <div className={GlobalStyle.tableContainer}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -349,14 +351,18 @@ export default function CaseDistributionDRCTransactions1Batch() {
                   <th scope="col" className={GlobalStyle.tableHeader}>
                     DRC 1
                   </th>
-                  <th scope="col" className={`${GlobalStyle.tableHeader} flex justify-center items-center`}>
-                    <img src={minus} width={17} height={17} alt="Min" />
+                  <th scope="col" className={`${GlobalStyle.tableHeader} `} >
+                    <div className="flex justify-center items-center">
+                      <img src={minus} width={17} height={17} alt="Min" />
+                    </div>
                   </th>
                   <th scope="col" className={GlobalStyle.tableHeader}>
                     DRC 2
                   </th>
-                  <th scope="col" className={`${GlobalStyle.tableHeader} flex justify-center items-center`}>
-                    <img src={plus} width={17} height={17} alt="Plus" />
+                  <th scope="col" className={`${GlobalStyle.tableHeader}`}>
+                    <div className="flex justify-center items-center">
+                      <img src={plus} width={17} height={17} alt="Plus" />
+                    </div>
                   </th>
                 </tr>
               </thead>
