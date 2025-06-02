@@ -67,7 +67,7 @@ const DRCList = () => {
         return activeIcon;
       case "inactive":
         return inactiveIcon;
-      case "ended":
+      case "terminate":
         return terminatedIcon;
       default:
         return null;

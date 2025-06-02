@@ -249,10 +249,10 @@ const CaseDistributionDRCSummary = () => {
 
       {/* Filter Section */}
       <div className="flex justify-end">
-            <div className={`${GlobalStyle.cardContainer}  w-[30vw] flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4 `}>
+            <div className={`${GlobalStyle.cardContainer}  w-[30vw] flex px-3  sm:w-[30vw] py-2 items-center justify-end  w-full flex-wrap sm:flex-row gap-4 mt-20 mb-4 `}>
               {/* DRC Select Dropdown */}
               <select
-                className={GlobalStyle.selectBox}
+                 className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
                 value={selectedDRC} 
                 onChange={handleDRCChange}
                 style={{ color: selectedDRC === "" ? "gray" : "black" }}
@@ -274,7 +274,7 @@ const CaseDistributionDRCSummary = () => {
                     {["admin", "superadmin", "slt"].includes(userRole) && (
                     <button
                     onClick={handleFilter}
-                    className={`${GlobalStyle.buttonPrimary}`}
+                    className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
                   >
                     Filter
                   </button>  
@@ -291,7 +291,7 @@ const CaseDistributionDRCSummary = () => {
               {/* Reset Button */}
               <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                    <button className={`${GlobalStyle.buttonRemove} h-[35px] `} onClick={handleclearfilters}  >
+                    <button className={`${GlobalStyle.buttonRemove} h-[35px]  w-full sm:w-auto`} onClick={handleclearfilters}  >
                     Clear 
                     </button>             
                     )}
@@ -318,7 +318,7 @@ const CaseDistributionDRCSummary = () => {
       </div>
 
       {/* Table Section */}
-      <div className={GlobalStyle.tableContainer}>
+       <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>

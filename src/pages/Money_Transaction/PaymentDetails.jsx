@@ -23,6 +23,7 @@ import Swal from 'sweetalert2';
 import { getLoggedUserId } from "../../services/auth/authService";
 import { List_All_Payment_Cases } from "../../services/Transaction/Money_TransactionService";
 import { Create_task_for_Download_Payment_Case_List } from "../../services/Transaction/Money_TransactionService";
+import { Tooltip } from "react-tooltip";
 
 const PaymentDetails = () => {
   // State Variables
@@ -356,7 +357,7 @@ const PaymentDetails = () => {
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full`}>
-            <div className="flex items-center justify-end w-full space-x-3">
+            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
 
               <div className="flex items-center">
                 <select
@@ -366,8 +367,8 @@ const PaymentDetails = () => {
                   style={{ color: searchBy === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select</option>
-                  <option value="account_no">Account Number</option>
-                  <option value="case_id">Case ID</option>
+                  <option value="account_no" style={{ color: "black" }}>Account Number</option>
+                  <option value="case_id" style={{ color: "black" }}>Case ID</option>
                 </select>
               </div>
 
@@ -393,49 +394,49 @@ const PaymentDetails = () => {
                   style={{ color: phase === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select Phase</option>
-                  <option value="Register">Register</option>
-                  <option value="Distribution">Distribution</option>
-                  <option value="Negotiation">Negotiation</option>
-                  <option value="Mediation Board">Mediation Board</option>
-                  <option value="Letter Of Demand">Letter Of Demand</option>
-                  <option value="Litigation">Litigation</option>
-                  <option value="Dispute">Dispute</option>
-                  <option value="WRIT">WRIT</option>
+                  <option value="Register" style={{ color: "black" }}>Register</option>
+                  <option value="Distribution" style={{ color: "black" }}>Distribution</option>
+                  <option value="Negotiation" style={{ color: "black" }}>Negotiation</option>
+                  <option value="Mediation Board" style={{ color: "black" }}>Mediation Board</option>
+                  <option value="Letter Of Demand" style={{ color: "black" }}>Letter Of Demand</option>
+                  <option value="Litigation" style={{ color: "black" }}>Litigation</option>
+                  <option value="Dispute" style={{ color: "black" }}>Dispute</option>
+                  <option value="WRIT" style={{ color: "black" }}>WRIT</option>
                 </select>
               </div>
 
-              <label className={GlobalStyle.dataPickerDate} style={{ whiteSpace: "nowrap" }}>Paid Date</label>
+              <label className={GlobalStyle.dataPickerDate} style={{ whiteSpace: "nowrap" }}>Paid Date :</label>
               {/* <div className={GlobalStyle.datePickerContainer}> */}
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center">
+              {/* <div className="flex items-center space-x-2">
+                <div className="flex items-center"> */}
                   <DatePicker
                     selected={fromDate}
                     onChange={handlestartdatechange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="From"
-                    className={`${GlobalStyle.inputText}`}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
-                </div>
+                {/* </div> */}
 
-                <div className="flex items-center">
+                {/* <div className="flex items-center"> */}
                   <DatePicker
                     selected={toDate}
                     onChange={handleenddatechange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="To"
-                    className={`${GlobalStyle.inputText}`}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
-                </div>
-              </div>
+                {/* </div>
+              </div> */}
 
               <button
-                className={GlobalStyle.buttonPrimary}
+                 className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
                 onClick={handleFilterButton}
               >
                 Filter
               </button>
               <button
-                className={GlobalStyle.buttonRemove}
+                 className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
                 onClick={handleClear}
               >
                 Clear
@@ -457,7 +458,7 @@ const PaymentDetails = () => {
           </div>
 
           {/* Table */}
-          <div className={`${GlobalStyle.tableContainer} mt-10`}>
+          <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -523,17 +524,20 @@ const PaymentDetails = () => {
                         <img
                           src={more}
                           onClick={() => naviPreview(item.Case_ID, item.Money_Transaction_ID)}
-                          title="More"
-                          alt="more icon"
+                          data-tooltip-id="my-tooltip"
                           className="w-5 h-5 cursor-pointer"
+
                         />
+                        <Tooltip id="my-tooltip" place="bottom" effect="solid">
+                          More Details
+                        </Tooltip>
                       </td>
 
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={9} className="text-center">No cases available</td>
+                    <td colSpan={9} className={`${GlobalStyle.tableData} text-center`}>No cases available</td>
                   </tr>
                 )}
               </tbody>

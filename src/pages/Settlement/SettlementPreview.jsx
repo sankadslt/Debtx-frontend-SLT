@@ -147,8 +147,8 @@ const SettlementPreview = () => {
             </div>
 
             {/* Case details card */}
-            <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
+            <div className="flex flex-wrap gap-4 mt-4 justify-center">
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement ID</div>
@@ -196,7 +196,7 @@ const SettlementPreview = () => {
                     </div>
                 </div>
 
-                <div className={`${GlobalStyle.cardContainer}`}>
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Status</div>
@@ -231,7 +231,7 @@ const SettlementPreview = () => {
             {/* Settilement Plan table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Settlement Plan</b></h2>
 
-            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+            <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -309,7 +309,7 @@ const SettlementPreview = () => {
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Received Settlement Plan</b></h2>
 
             <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Phase</div>
@@ -356,7 +356,7 @@ const SettlementPreview = () => {
                 </div>
             </div>
 
-            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+            <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
