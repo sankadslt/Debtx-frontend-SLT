@@ -37,11 +37,11 @@ const ForwardMediationBoard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const caseId = location.state?.case_id;
-  const requestType = location.state?.User_Interaction_Type;
+  const caseId = location.state?.case_Id;
+  const requestType = location.state?.User_Interaction_TYPE;
   // const delegateUserId = location.state?.delegate_user_id;
-  const INteraction_Log_ID = location.state?.Interaction_Log_ID;
-  const interationid = location.state?.Interaction_ID;
+  const INteraction_Log_ID = location.state?.INteraction_Log_ID;
+  const interationid = location.state?.INteraction_ID;
 
   // const caseId = 6;
   // const INteraction_Log_ID = 1;
@@ -138,14 +138,18 @@ const ForwardMediationBoard = () => {
     const fetchData = async () => {
       try {
         const userData = await getLoggedUserId();
+        console.log("Logged User ID:", userData);
 
+        if (!caseId || !requestType || !INteraction_Log_ID) {
+          return;
+        }
+        
         const payload = {
           case_id: caseId,
           User_Interaction_Type: requestType,
           delegate_user_id: userData,
           Interaction_Log_ID: INteraction_Log_ID,
         };
-        // console.log("payload", payload);
 
         const response = await List_Details_Of_Mediation_Board_Acceptance(
           payload
