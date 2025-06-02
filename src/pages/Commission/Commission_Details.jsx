@@ -85,7 +85,7 @@ const CommissionPreview = () => {
 
             {/* Case details card */}
             <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-2xl`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Case ID</div>
@@ -150,7 +150,7 @@ const CommissionPreview = () => {
             </div>
 
             <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-2xl`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Commission Status</div>
@@ -225,7 +225,7 @@ const CommissionPreview = () => {
             </div>
 
             <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-2xl`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Catalog ID</div>

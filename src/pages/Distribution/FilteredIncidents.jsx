@@ -124,10 +124,11 @@ const FilteredIncident = () => {
           </div>
           
           <div className="flex items-center justify-center min-h-full pt-20">
-            <div className={GlobalStyle.cardContainer}>
+            <div className= {`${GlobalStyle.cardContainer} w-full max-w-lg`}>
 
                {/* Table Section */}
-              <table className={GlobalStyle.table}>
+               <div className="overflow-x-auto w-full">
+              <table className={GlobalStyle.table} >
                 <thead className={GlobalStyle.thead}>
                   <tr>
                     <th scope="col" className={GlobalStyle.tableHeader}>
@@ -211,6 +212,7 @@ const FilteredIncident = () => {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         </main>
