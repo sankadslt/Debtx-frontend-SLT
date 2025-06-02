@@ -22,6 +22,11 @@ import {
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
+import { Tooltip } from "react-tooltip";
+import RO_Negotiation from "/src/assets/images/Negotiation/RO_Negotiation.png";
+import RO_Negotiation_FMB_Pending from "/src/assets/images/Negotiation/RO_Negotiation_FMB_Pending.png";
+import RO_Negotiation_Extension_Pending from "/src/assets/images/Negotiation/RO Negotiation extend pending.png";
+import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
 
 const RecoveryOfficerRequests = () => {
   const [fromDate, setFromDate] = useState(null);
@@ -82,7 +87,7 @@ const RecoveryOfficerRequests = () => {
   //             // Calculate month gap
   //             const diffInMs = toDate - date;
   //             const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-              
+
   //             if (diffInDays > 31) {
   //                 Swal.fire({
   //                     title: "Warning",
@@ -90,26 +95,66 @@ const RecoveryOfficerRequests = () => {
   //                     icon: "warning",
   //                     confirmButtonColor: "#f1c40f",
   //                 });
-                  
+
   //                 return;
   //             }
   //             setFromDate(date);
   //         } else {
   //             setFromDate(date);
-              
+
   //         }
-          
+
   //     };
 
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "RO Negotiation":
+        return RO_Negotiation;
+      case "RO Negotiation FMB Pending":
+        return RO_Negotiation_FMB_Pending;
+      case "RO Negotiation Extension Pending":
+        return RO_Negotiation_Extension_Pending;
+      case "MB Negotiation":
+        return MB_Negotiation;
+      default:
+        return null; // Return null or a default icon if status doesn't match
+    }
+  };
 
-   //fetch all drc names
+  // render status icon with tooltip
+  const renderStatusIcon = (status, index) => {
+    const iconPath = getStatusIcon(status);
+
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+
+    const tooltipId = `tooltip-${index}`;
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={iconPath}
+          alt={status}
+          className="w-6 h-6"
+          data-tooltip-id={tooltipId} // Add tooltip ID to image
+        />
+        {/* Tooltip component */}
+        <Tooltip id={tooltipId} place="bottom" effect="solid">
+          {status}
+        </Tooltip>
+      </div>
+    );
+  };
+
+  //fetch all drc names
   useEffect(() => {
     const fetchDRCNames = async () => {
       try {
         const Names = await Active_DRC_Details();
         setDrcNames(Names);
         console.log("Fetched DRC Names:", Names);
-        
+
       } catch (error) {
         console.error("Error fetching drc names:", error);
       }
@@ -144,7 +189,7 @@ const RecoveryOfficerRequests = () => {
       setFromDate(date);
     }
   };
-      
+
 
   // validation for date
   const handleToDateChange = (date) => {
@@ -283,7 +328,7 @@ const RecoveryOfficerRequests = () => {
         state: {
           case_Id: case_id,
           User_Interaction_TYPE: User_Interaction_Type,
-        //  Delegate_User_id: delegate_user_id,
+          //  Delegate_User_id: delegate_user_id,
           INteraction_Log_ID: Interaction_Log_ID,
           INteraction_ID: Interaction_ID,
         },
@@ -316,7 +361,7 @@ const RecoveryOfficerRequests = () => {
         const payload = {
           delegate_user_id: userId,
           User_Interaction_Type: requestType,
-         // "Request Accept": approved,
+          // "Request Accept": approved,
           date_from: fromDate,
           drc_id: selectedBand,
           date_to: toDate,
@@ -325,7 +370,7 @@ const RecoveryOfficerRequests = () => {
         const response = await ListAllRequestLogFromRecoveryOfficers(payload);
 
         const data = Array.isArray(response.data) ? response.data : [];
-         console.log("the response given by the api", data);
+        console.log("the response given by the api", data);
         setcount(response.count);
         console.log("the count of the  response:", response.count);
         setRequestsData(data);
@@ -349,7 +394,7 @@ const RecoveryOfficerRequests = () => {
 
   }
 
-    
+
 
   // const setshowall = () => {
   //   alert("show all clicked");
@@ -381,7 +426,7 @@ const RecoveryOfficerRequests = () => {
     navigate("/Incident/Case_Details", {
       state: { CaseID: caseid }, // Pass the case ID as a parameter
     });
-   // console.log("Navigating to Case Details with ID:", caseid);
+    // console.log("Navigating to Case Details with ID:", caseid);
   }
 
   return (
@@ -394,21 +439,23 @@ const RecoveryOfficerRequests = () => {
           Request Count : {count}
         </span> */}
         <div className={GlobalStyle.countBarMainBox}>
-              {/* <span>Request Count</span> */}
-              <p className={GlobalStyle.countBarMainTopic}> {count}</p>
-            </div>
+          {/* <span>Request Count</span> */}
+          <p className={GlobalStyle.countBarMainTopic}> {count}</p>
+        </div>
 
         {/* <button className={GlobalStyle.buttonPrimary} >
           Show All
         </button> */}
       </div>
       {/* Filter Section */}
+
         <div className=" flex justify-end">
           <div className={`${GlobalStyle.cardContainer} w-full flex  flex-wrap justify-end gap-4 items-center mb-8 mt-8`}>
             <div className="flex items-center gap-2">
               {/* <span className={GlobalStyle.headingMedium}>Request Type:</span> */}
               <select 
               className= {GlobalStyle.selectBox}
+
               style={{ color: selectedBand === "" ? "gray" : "black" }}
               value={drcNames.find(item => item.key === selectedBand)?.value || ""}
               onChange={(e) => {
@@ -417,62 +464,62 @@ const RecoveryOfficerRequests = () => {
                 if (selected) {
                   setSelectedBand(selected.key); // or setSelectedBand(selected)
                 }
-                  else {
+                else {
                   setSelectedBand(""); // fallback
                 }
               }}
-              >
-                <option value="" hidden > Drc </option>
-                {/* <option value="7"> Drc 7 </option> */}
-                  {drcNames.map(({ key, value }) => (
-                    <option key={key} value={value} style={{ color: "black" }}>
-                      {value}
-                    </option>
-                  ))}
-              </select>
+            >
+              <option value="" hidden > Drc </option>
+              {/* <option value="7"> Drc 7 </option> */}
+              {drcNames.map(({ key, value }) => (
+                <option key={key} value={value} style={{ color: "black" }}>
+                  {value}
+                </option>
+              ))}
+            </select>
 
 
 
-              <select
-                value={requestType}
-                onChange={(e) => setRequestType(e.target.value)}
-                className={GlobalStyle.selectBox}
-                style={{ color: requestType === "" ? "gray" : "black" }}
-              >
-                <option value="" hidden>
+            <select
+              value={requestType}
+              onChange={(e) => setRequestType(e.target.value)}
+              className={GlobalStyle.selectBox}
+              style={{ color: requestType === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>
                 Request Type
-                </option>
-                <option value="Mediation board forward request letter" style={{ color: "black" }}>
-                  Mediation board forward request letter
-                </option>
-                <option value="Negotiation Settlement plan Request" style={{ color: "black" }}>
-                  Negotiation Settlement plan Request
-                </option>
-                <option value="Negotiation period extend Request" style={{ color: "black" }}>
-                  Negotiation period extend Request
-                </option>
-                <option value="Negotiation customer further information Request" style={{ color: "black" }}>
-                  Negotiation customer further information Request
-                </option>
-                <option value="Negotiation Customer request service" style={{ color: "black" }}>
-                  Negotiation Customer request service
-                </option>
-                <option value="Mediation Board Settlement plan Request" style={{ color: "black" }}>
-                  Mediation Board Settlement plan Request
-                </option>
-                <option value="Mediation Board period extend Request" style={{ color: "black" }}>
-                  Mediation Board period extend Request
-                </option>
-                <option value="Mediation Board customer further information request" style={{ color: "black" }}>
-                  Mediation Board customer further information request
-                </option>
-                <option value="Mediation Board Customer request service" style={{ color: "black" }}>
-                  Mediation Board Customer request service
-                </option>
-              </select>
-            </div>
+              </option>
+              <option value="Mediation board forward request letter" style={{ color: "black" }}>
+                Mediation board forward request letter
+              </option>
+              <option value="Negotiation Settlement plan Request" style={{ color: "black" }}>
+                Negotiation Settlement plan Request
+              </option>
+              <option value="Negotiation period extend Request" style={{ color: "black" }}>
+                Negotiation period extend Request
+              </option>
+              <option value="Negotiation customer further information Request" style={{ color: "black" }}>
+                Negotiation customer further information Request
+              </option>
+              <option value="Negotiation Customer request service" style={{ color: "black" }}>
+                Negotiation Customer request service
+              </option>
+              <option value="Mediation Board Settlement plan Request" style={{ color: "black" }}>
+                Mediation Board Settlement plan Request
+              </option>
+              <option value="Mediation Board period extend Request" style={{ color: "black" }}>
+                Mediation Board period extend Request
+              </option>
+              <option value="Mediation Board customer further information request" style={{ color: "black" }}>
+                Mediation Board customer further information request
+              </option>
+              <option value="Mediation Board Customer request service" style={{ color: "black" }}>
+                Mediation Board Customer request service
+              </option>
+            </select>
+          </div>
 
-            {/* <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
               <span className={GlobalStyle.headingMedium}> Approved:</span>
               <select
                 value={approved}
@@ -487,6 +534,7 @@ const RecoveryOfficerRequests = () => {
                 <option value="Reject" style={{ color: "black" }}>Reject</option>
               </select>
             </div> */}
+
 
             {/* <div className={GlobalStyle.datePickerContainer}> */}
               <span className={GlobalStyle.dataPickerDate}>Date :</span>
@@ -515,7 +563,9 @@ const RecoveryOfficerRequests = () => {
             <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}  onClick={handleclearbutton} >
                         Clear 
                     </button>
-          </div>
+
+         
+        </div>
       </div>
 
       {/* Table Section */}
@@ -535,8 +585,10 @@ const RecoveryOfficerRequests = () => {
         </div>
 
         {/* Table Section */}
+
         
          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
@@ -561,7 +613,7 @@ const RecoveryOfficerRequests = () => {
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Request Type
                 </th>
-                 <th scope="col" className={GlobalStyle.tableHeader}>
+                <th scope="col" className={GlobalStyle.tableHeader}>
                   Validity Period
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
@@ -577,19 +629,18 @@ const RecoveryOfficerRequests = () => {
               {paginatedData.map((row, index) => (
                 <tr
                   key={index}
-                  className={`${
-                    index % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
+                  className={`${index % 2 === 0
+                    ? "bg-white bg-opacity-75"
+                    : "bg-gray-50 bg-opacity-50"
+                    } border-b`}
                 >
                   <td className={GlobalStyle.tableData}>
-                    <button 
+                    <button
                       onClick={() => onhoverbuttonclick(row.case_id)}
-                      onMouseOver={(e) => e.currentTarget.style.textDecoration = "underline"} 
+                      onMouseOver={(e) => e.currentTarget.style.textDecoration = "underline"}
                       onMouseOut={(e) => e.currentTarget.style.textDecoration = "none"} >
 
-                          {row.case_id}
+                      {row.case_id}
 
                     </button>
                     {/* <a
@@ -600,7 +651,8 @@ const RecoveryOfficerRequests = () => {
                     </a> */}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {row.case_current_status}
+                    {/* {row.case_current_status} */}
+                    {renderStatusIcon(row.case_current_status, index)}
                   </td>
                   <td className={GlobalStyle.tableData}>
                     {row.User_Interaction_Status}
@@ -608,7 +660,7 @@ const RecoveryOfficerRequests = () => {
                   <td className={GlobalStyle.tableCurrency}>
                     {row.current_arrears_amount ?? ""}
                   </td>
-                  
+
                   <td className={GlobalStyle.tableData}>
                     {row.drc_name}
                   </td>
@@ -618,17 +670,17 @@ const RecoveryOfficerRequests = () => {
                   <td className={GlobalStyle.tableData}>
                     {row.Validity_Period
                       ? row.Validity_Period.split(" - ")
-                          .map((date) =>
-                            new Date(date.split("T")[0]).toLocaleDateString(
-                              "en-GB",
-                              {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                              }
-                            )
+                        .map((date) =>
+                          new Date(date.split("T")[0]).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            }
                           )
-                          .join(" - ")
+                        )
+                        .join(" - ")
                       : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
@@ -659,7 +711,7 @@ const RecoveryOfficerRequests = () => {
               ))}
               {paginatedData.length === 0 && (
                 <tr>
-                  <td colSpan="10" className= {GlobalStyle.tableData} style={{ textAlign: 'center' }}> 
+                  <td colSpan="10" className={GlobalStyle.tableData} style={{ textAlign: 'center' }}>
                     No results found
                   </td>
                 </tr>

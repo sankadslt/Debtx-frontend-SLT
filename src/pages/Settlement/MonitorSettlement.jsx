@@ -633,7 +633,7 @@ const Monitor_settlement = () => {
                       </td>
                       <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
                       <td className={GlobalStyle.tableData}> {item.settlement_phase || "N/A"} </td>
-                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-CA") || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-GB") || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>
                         <img
                           src={more}

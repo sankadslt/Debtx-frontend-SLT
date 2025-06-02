@@ -37,15 +37,15 @@ const ForwardMediationBoard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // const caseId = location.state?.case_Id;
-  // const requestType = location.state?.User_Interaction_TYPE;
-  // const delegateUserId = location.state?.Delegate_User_id;
-  // const INteraction_Log_ID = location.state?.INteraction_Log_ID;
-  // const interationid = location.state?.INteraction_ID;
+  const caseId = location.state?.case_id;
+  const requestType = location.state?.User_Interaction_Type;
+  // const delegateUserId = location.state?.delegate_user_id;
+  const INteraction_Log_ID = location.state?.Interaction_Log_ID;
+  const interationid = location.state?.Interaction_ID;
 
-  const caseId = 6;
-  const INteraction_Log_ID = 1;
-  const interationid = 4;
+  // const caseId = 6;
+  // const INteraction_Log_ID = 1;
+  // const interationid = 4;
 
   // console.log("passed case id is ", caseId);
   // console.log("passed user interaction ", requestType);
@@ -55,7 +55,7 @@ const ForwardMediationBoard = () => {
 
   const months = Data?.validity_period_months;
   // const requestType = userInteraction;
-  const requestType = "Mediation board forward request letter" // for testing
+  // const requestType = "Mediation board forward request letter" // for testing
 
   // let request_mode = "";
   // if (
