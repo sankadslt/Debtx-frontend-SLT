@@ -404,7 +404,7 @@ const RecoveryOfficerRequests = () => {
       </div>
       {/* Filter Section */}
         <div className=" flex justify-end">
-          <div className={`${GlobalStyle.cardContainer} w-[75vw] flex justify-end gap-4 items-center mb-8 mt-8`}>
+          <div className={`${GlobalStyle.cardContainer} w-full flex  flex-wrap justify-end gap-4 items-center mb-8 mt-8`}>
             <div className="flex items-center gap-2">
               {/* <span className={GlobalStyle.headingMedium}>Request Type:</span> */}
               <select 
@@ -488,31 +488,31 @@ const RecoveryOfficerRequests = () => {
               </select>
             </div> */}
 
-            <div className={GlobalStyle.datePickerContainer}>
-              <span className={GlobalStyle.dataPickerDate}>Date </span>
+            {/* <div className={GlobalStyle.datePickerContainer}> */}
+              <span className={GlobalStyle.dataPickerDate}>Date :</span>
               <DatePicker
                 selected={fromDate}
                 onChange={handleFromDateChange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="From"
-                className={GlobalStyle.inputText}
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               />
               <DatePicker
                 selected={toDate}
                 onChange={handleToDateChange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="To"
-                className={GlobalStyle.inputText}
+                 className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               />
-            </div>
+            {/* </div> */}
             {error && <span className={GlobalStyle.errorText}>{error}</span>}
             <button
-              className={GlobalStyle.buttonPrimary}
+              className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
               onClick={onfilterbuttonclick} // Reset to first page when filter is applied
             >
               Filter
             </button>
-            <button className={GlobalStyle.buttonRemove}  onClick={handleclearbutton} >
+            <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}  onClick={handleclearbutton} >
                         Clear 
                     </button>
           </div>
@@ -536,7 +536,7 @@ const RecoveryOfficerRequests = () => {
 
         {/* Table Section */}
         
-        <div className={GlobalStyle.tableContainer}>
+         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
