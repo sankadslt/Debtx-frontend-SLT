@@ -20,6 +20,7 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { List_All_DRCs_Mediation_Board_Cases } from "../../services/case/CaseServices";
 import { RTOM_Details } from "../../services/RTOM/Rtom";
+import { List_All_Active_RTOMs } from "../../services/RTOM/Rtom";
 import { Tooltip } from "react-tooltip";
 import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
 import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
@@ -115,7 +116,7 @@ const MediationBoardCaseList = () => {
     // Fetch RTOM
     const fetchRTOM = async () => {
       try {
-        const rtom = await RTOM_Details();
+        const rtom = await List_All_Active_RTOMs();
 
         setRtomList(rtom);
       } catch (error) {
@@ -423,7 +424,7 @@ const MediationBoardCaseList = () => {
             >
               <option value="" hidden>RTOM</option>
               {Object.values(rtomList).map((rtom) => (
-                <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
+                <option key={rtom.rtom_id} value={rtom.rtom_id} style={{ color: "black" }}>
                   {rtom.rtom}
                 </option>
               ))}
@@ -519,7 +520,7 @@ const MediationBoardCaseList = () => {
                     </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{row.ro_name}</td>
-                  <td className={GlobalStyle.tableData}>{row.rtom}</td>
+                  <td className={GlobalStyle.tableData}>{row.area}</td>
                   <td className={GlobalStyle.tableData}>{row.calling_round}</td>
                   <td className={GlobalStyle.tableData}>
                     {row.date &&
