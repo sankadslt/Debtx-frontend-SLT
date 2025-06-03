@@ -82,13 +82,6 @@ const Case_List = () => {
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
     );
-  
-    // const filteredData = data.filter((row) =>
-    //     Object.values(row)
-    //         .join(" ")
-    //         .toLowerCase()
-    //         .includes(searchQuery.toLowerCase())
-    // );
 
      const handleFilter = async () => {
         try {
@@ -155,13 +148,11 @@ const Case_List = () => {
               throw error;
             }
           });
-          setIsLoading(false); // Set loading state to false
-    
+
           // Updated response handling
           if (response && response.data) {
-            // console.log("Valid data received:", response.data);
-    
-            setFilteredData((prevData) => [...prevData, ...response.data]);
+            // console.log("Valid data received:", response.data);    
+            setFilteredData(response.data);
     
             if (response.data.length === 0) {
               setIsMoreDataAvailable(false); // No more data available
@@ -196,11 +187,27 @@ const Case_List = () => {
             text: "Failed to fetch filtered data. Please try again.",
             icon: "error"
           });
+        } finally {
+          setIsLoading(false); // always reset loading
         }
       };
 
+      const handleClear = () => {
+        setRtoms("");
+        setArrearsBand("");
+        setCaseStatus("");
+        setServiceType("");
+        setFromDate(null);
+        setToDate(null);
+        setSearchQuery("");                                              
+        setCurrentPage(0); // Reset to the first page
+        setIsFilterApplied(false); // Reset filter applied state
+        setTotalPages(0); // Reset total pages
+        setFilteredData([]); // Clear filtered data
+      };
+
       useEffect(() => {
-          if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+          if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage && currentPage !== 1) {
             setMaxCurrentPage(currentPage); // Update max current page
             handleFilter(); // Call the function whenever currentPage changes
           }
@@ -256,131 +263,112 @@ const Case_List = () => {
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Case List</h2>
 
-            <div className="w-full mb-8 mt-8">
-                {/* Filter Section */}
-                <div className="grid grid-cols-4 gap-6 w-full">
+          <div className={`${GlobalStyle.cardContainer} w-full`}>
+            {/* Filter Section */}
+            <div className="grid grid-cols-4 gap-6 w-full">
+              <select
+                value={rtoms}
+                onChange={(e) => setRtoms(e.target.value)}
+                className={GlobalStyle.selectBox}
+              >
+                <option value="">RTOM</option>
+                <option value="GL">GL</option>
+                <option value="MH">MH</option>
+                <option value="RTOM-1">RTOM-1</option>
+                <option value="RTOM-2">RTOM-2</option>
+                <option value="RTOM-3">RTOM-3</option>
+                <option value="RTOM-4">RTOM-4</option>
+                <option value="RTOM-6">RTOM-6</option>
+              </select>
 
-                    {/* <select
-                        value={status1}
-                        onChange={(e) => setStatus1(e.target.value)}
-                        className={GlobalStyle.selectBox}
-                    >
-                        <option value="">Select</option>
-                        <option value="Open">Open</option>
-                        <option value="Closed">Closed</option>
-                        <option value="Pending">Pending</option>
-                    </select> */}
+              {/* <select
+                value={status4}
+                          onChange={(e) => setStatus4(e.target.value)}
+                          className={GlobalStyle.selectBox}
+                      >
+                          <option value="">DRC</option>
+                          <option value="Open">Open</option>
+                          <option value="Closed">Closed</option>
+                          <option value="Pending">Pending</option>
+                      </select> */}
+                        
 
+              <select
+                value={arrearsBand}
+                onChange={(e) => setArrearsBand(e.target.value)}
+                className={GlobalStyle.selectBox}
+              >
+                <option value="">Arrears Band</option>
+                <option value="AB-5_10">AB-5_10</option>
+                <option value="AB-10_25">AB-10_25</option>
+                <option value="AB-25_50">AB-25_50</option>
+                <option value="AB-50_100">AB-50_100</option>
+                </select>
 
-                    {/* <select
-                        value={status2}
-                        onChange={(e) => setStatus2(e.target.value)}
-                        className={GlobalStyle.selectBox}
-                    >
-                        <option value=""></option>
-                        <option value="Open">Open</option>
-                        <option value="Closed">Closed</option>
-                        <option value="Pending">Pending</option>
-                    </select> */}
+                <select
+                  value={caseStatus}
+                  onChange={(e) => setCaseStatus(e.target.value)}
+                  className={GlobalStyle.selectBox}
+                >
+                  <option value="">Status</option>
+                  <option value="Forward to Mediation Board">Forward to Mediation Board</option>
+                  <option value="Pending Write Off">Pending Write Off</option>
+                  <option value="Pending Withdraw">Pending Withdraw</option>
+                  <option value="MB Negotiation">MB Negotiation</option>
+                </select>
 
+                <select
+                  value={serviceType}
+                  onChange={(e) => setServiceType(e.target.value)}
+                  className={GlobalStyle.selectBox}
+                >
+                  <option value="">Service Type</option>
+                  <option value="PEO TV">PEO TV</option>
+                  <option value="CP Collect">CP Collect</option>
+                </select>
 
-                    <select
-                        value={rtoms}
-                        onChange={(e) => setRtoms(e.target.value)}
-                        className={GlobalStyle.selectBox}
-                    >
-                        <option value="">RTOM</option>
-                        <option value="MH">MH</option>
-                        <option value="RTOM-1">RTOM-1</option>
-                        <option value="RTOM-2">RTOM-2</option>
-                        <option value="RTOM-3">RTOM-3</option>
-                    </select>
-
-
-                    {/* <select
-                        value={status4}
-                        onChange={(e) => setStatus4(e.target.value)}
-                        className={GlobalStyle.selectBox}
-                    >
-                        <option value="">DRC</option>
-                        <option value="Open">Open</option>
-                        <option value="Closed">Closed</option>
-                        <option value="Pending">Pending</option>
-                    </select> */}
-
-
-                    <select
-                        value={arrearsBand}
-                        onChange={(e) => setArrearsBand(e.target.value)}
-                        className={GlobalStyle.selectBox}
-                    >
-                        <option value="">Arrears Band</option>
-                        <option value="AB-5_10">AB-5_10</option>
-                        <option value="AB-10_25">AB-10_25</option>
-                        <option value="AB-25_50">AB-25_50</option>
-                        <option value="AB-50_100">AB-50_100</option>
-                    </select>
-
-
-                    <select
-                        value={caseStatus}
-                        onChange={(e) => setCaseStatus(e.target.value)}
-                        className={GlobalStyle.selectBox}
-                    >
-                        <option value="">Status</option>
-                        <option value="Forward to Mediation Board">Forward to Mediation Board</option>
-                        <option value="Pending Write Off">Pending Write Off</option>
-                        <option value="Pending Withdraw">Pending Withdraw</option>                        
-                    </select>
-
-
-                    <select
-                        value={serviceType}
-                        onChange={(e) => setServiceType(e.target.value)}
-                        className={GlobalStyle.selectBox}
-                    >
-                        <option value="">Service Type</option>
-                        <option value="PEO TV">PEO TV</option>
-                        <option value="CP Collect">CP Collect</option>
-                    </select>
-
-
-                    <label className={GlobalStyle.dataPickerDate}>Date</label>
-                        {/* <div className={GlobalStyle.datePickerContainer}> */}
+            {/* Date + Buttons in one row */}
+            <div className="col-span-4 flex items-center justify-between w-full mt-2">
               <div className="flex items-center space-x-2">
-                <div className="flex items-center">
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={handlestartdatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="From"
-                    className={`${GlobalStyle.inputText}`}
-                  />
-                </div>
+                <label className={GlobalStyle.dataPickerDate}>Date</label>
 
-                <div className="flex items-center">
-                  <DatePicker
-                    selected={toDate}
-                    onChange={handleenddatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="To"
-                    className={`${GlobalStyle.inputText}`}
-                  />
-                </div>
+                <DatePicker
+                  selected={fromDate}
+                  onChange={handlestartdatechange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="From"
+                  className={GlobalStyle.inputText}
+                />
+
+                <DatePicker
+                  selected={toDate}
+                  onChange={handleenddatechange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="To"
+                  className={GlobalStyle.inputText}
+                />
               </div>
-                </div>
+
+          <div className="flex space-x-2">
+            <button
+              className={GlobalStyle.buttonPrimary}
+              onClick={handleFilter}
+            >
+              Filter
+            </button>
+
+            <button
+              className={GlobalStyle.buttonRemove}
+              onClick={handleClear}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
-                <div className="flex justify-end mt-6">
-                    <button 
-                        onClick={handleFilter} 
-                        className={GlobalStyle.buttonPrimary}
-                    >
-                        Filter
-                    </button>
-                </div>
-
-            </div>
 
 
 
@@ -436,33 +424,44 @@ const Case_List = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredDataBySearch.length > 0 ? (
-                                filteredDataBySearch.map((row, index) => (
-                                    <tr
-                                    key={index}
-                                     className={`${
-                                        index % 2 === 0 ? "bg-white bg-opacity-75" : "bg-gray-50 bg-opacity-50"
-                                        } border-b`}
-                                    >
-                                        <td className={GlobalStyle.tableData}>{row. caseid}</td>
-                                        <td className={GlobalStyle.tableData}>{row.casecurrentstatus}</td>
-                                        <td className={GlobalStyle.tableData}>{row.accountno}</td>
-                                        <td className={GlobalStyle.tableData}>{row.drccommisionrule}</td>
-                                        <td className={GlobalStyle.tableData}>{row.currentarrearsamount}</td>
-                                        {/* <td className={GlobalStyle.tableData}>{log.agent}</td> */}
-                                        <td className={GlobalStyle.tableData}>{row.rtom}</td>
-                                        <td className={GlobalStyle.tableData}>{row.createddtm}</td>
-                                        <td className={GlobalStyle.tableData}>{row.lastpaymentdate}</td>
-                                    </tr>
-                                    ))
-                                    ) : (
-                                        <tr>
-                                        <td colSpan="8" className="text-center py-4">
-                                            No logs found
-                                        </td>
-                                        </tr>
-                                    )}
-                                    </tbody> 
+                          {filteredDataBySearch.length > 0 ? (
+                            filteredDataBySearch.map((row, index) => {
+                              // Format created date
+                              const createdDate = row.createddtm
+                                ? new Date(row.createddtm).toISOString().split('T')[0]
+                                : '';
+
+                              // Format last paid date
+                              const lastPaidDate = row.lastpaymentdate
+                                ? new Date(row.lastpaymentdate).toISOString().split('T')[0]
+                                : '';
+
+                              return (
+                                <tr
+                                  key={index}
+                                  className={`${
+                                    index % 2 === 0 ? "bg-white bg-opacity-75" : "bg-gray-50 bg-opacity-50"
+                                  } border-b`}
+                                >
+                                  <td className={GlobalStyle.tableData}>{row.caseid}</td>
+                                  <td className={GlobalStyle.tableData}>{row.casecurrentstatus}</td>
+                                  <td className={GlobalStyle.tableData}>{row.accountno}</td>
+                                  <td className={GlobalStyle.tableData}>{row.drccommisionrule}</td>
+                                  <td className={GlobalStyle.tableData}>{row.currentarrearsamount}</td>
+                                  <td className={GlobalStyle.tableData}>{row.rtom}</td>
+                                  <td className={GlobalStyle.tableData}>{createdDate}</td>
+                                  <td className={GlobalStyle.tableData}>{lastPaidDate}</td>
+                                </tr>
+                              );
+                            })
+                          ) : (
+                            <tr>
+                              <td colSpan="8" className="text-center py-4">
+                                No logs found
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
                     </table>
                 </div>
             </div>
