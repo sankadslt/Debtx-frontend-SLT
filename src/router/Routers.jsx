@@ -92,8 +92,8 @@ import Final_Reminder_LOD_Hold_List from "../pages/LOD/FinalReminderLODHoldList"
 import SettlementPreview from "../pages/Settlement/SettlementPreview";
 import WithdrawalCaseLog from "../pages/Distribute/Withdraw case log";
 import WithdrawCase from "../pages/Distribute/WithdrawCase";
-import CaseDetails from "../pages/Incident/Case_Details";
-import Case_List from "../pages/Incident/Case_List";
+ 
+ 
 import PaymentPreview from "../pages/Money_Transaction/PaymentPreview";
 import CommissionPreview from "../pages/Commission/Commission_Details";
 
