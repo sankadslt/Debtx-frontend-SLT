@@ -11,12 +11,14 @@ Related Files:
 Notes: This template uses Tailwind CSS */
 
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import { createIncident } from "../../services/Incidents/incidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload} from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 
 const Incident_Register_Individual = () => {
@@ -28,6 +30,32 @@ const Incident_Register_Individual = () => {
   
   const [errors, setErrors] = useState({}); // Validation errors state
   const [errors1, setErrors1] = useState({}); // Additional validation errors state
+
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+
+  // Role-Based Buttons 
+      useEffect(() => {
+          const token = localStorage.getItem("accessToken");
+          if (!token) return;
+      
+          try {
+            let decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+      
+            if (decoded.exp < currentTime) {
+              refreshAccessToken().then((newToken) => {
+                if (!newToken) return;
+                const newDecoded = jwtDecode(newToken);
+                setUserRole(newDecoded.role);
+              });
+            } else {
+              setUserRole(decoded.role);
+            }
+          } catch (error) {
+            console.error("Invalid token:", error);
+          }
+        }, []);
 
   // Validation function to check if the form is filled correctly
   const validateForm = () => {
@@ -44,11 +72,18 @@ const Incident_Register_Individual = () => {
     if (calendarMonth < 1 || calendarMonth > 3)
       newErrors1.calendarMonth = "Calendar month must be between 1 and 3.";
     
-    if (actionType === "collect CPE" && !contactNumber) {
-      newErrors.contactNumber = "*";
+    // if (actionType === "collect CPE" && !contactNumber) {
+    //   newErrors.contactNumber = "*";
+    // } 
+    if (contactNumber) {
+      if (!/^\d+$/.test(contactNumber)) { // Check if contact number contains only digits
+        newErrors1.contactNumber = "Contact number must contain only digits.";
+      } else if (contactNumber.length !== 10) { // Check if contact number is less than 10 digits
+        newErrors1.contactNumber = "Contact number must be exactly 10 digits.";
+      }
     }
 
-    setErrors(newErrors);
+    setErrors(newErrors); 
     setErrors1(newErrors1);
     return Object.keys(newErrors).length === 0 && Object.keys(newErrors1).length === 0;
     
@@ -126,7 +161,7 @@ const handleSubmit = async (e) => {
   return (
     <div className={`p-6 ${GlobalStyle.fontPoppins}`}>
       
-      <div className="flex justify-center">
+      <div className="flex flex-wrap justify-center sm:px-6 lg:px-8 overflow-auto">
         <div className={`${GlobalStyle.cardContainer} mt-4 `}>
         <h1 className={`${GlobalStyle.headingLarge} mb-4 flex justify-center items-center`}>Incident Register</h1>
           <h2 className={`${GlobalStyle.headingMedium} mb-6 flex justify-center items-center`}>Incident Details</h2>
@@ -202,7 +237,8 @@ const handleSubmit = async (e) => {
 
           {/* Form for incident registration */}
           <div className="flex items-center justify-center ">
-            <form onSubmit={handleSubmit} className="space-y-6   ">
+            <form onSubmit={handleSubmit} className="space-y-6  w-full  ">
+              <div className="overflow-x-auto w-full">
               <table className=" text-sm" >
                 <tbody>
                   {/* Account No */}
@@ -295,7 +331,9 @@ const handleSubmit = async (e) => {
                           className={`${GlobalStyle.inputText} w-full px-2 py-1`}
                         />
                         </div>
-                        
+                        {errors1.contactNumber && (
+                          <p className="text-red-500 text-xs mt-1">{errors1.contactNumber}</p>
+                        )}
                       </td>
                     </tr>
                   )}
@@ -359,10 +397,16 @@ const handleSubmit = async (e) => {
                   </tr>
                 </tbody>
               </table>
+              </div>
 
               {/* Submit Button */}
               <div className="pt-4 flex justify-end">
-                <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button>
+              <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button>
+                    )}
+                </div>
+                {/* <button type="submit" className={GlobalStyle.buttonPrimary}>Submit</button> */}
               </div>
             </form>
             </div>

@@ -20,13 +20,19 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload  } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
-import { fetchIncidents } from "../../services/Incidents/incidentService";
-import { Task_for_Download_Incidents } from "../../services/task/taskService.js";
+import { fetchIncidents ,Task_for_Download_Incidents } from "../../services/Incidents/incidentService.js";
+//import { Task_for_Download_Incidents } from "../../services/task/taskService.js"; // moved to the incident service 
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
+import { FaPlus } from 'react-icons/fa';
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 import opeanincident from  "/src/assets/images/incidents/Incident_Open.png"
 import rejectincident from  "/src/assets/images/incidents/Incident_Reject.png"
 import inprogressincident from  "/src/assets/images/incidents/Incident_InProgress.png"
+import errorincident from "/src/assets/images/incidents/Incident_Error.png"
+import error from "/src/assets/images/incidents/Reject.png"
+
 
 const Incident_List = () => {
     const [currentPage, setCurrentPage] = useState(0); // Pagination state
@@ -41,7 +47,33 @@ const Incident_List = () => {
     const [isLoading, setIsLoading] = useState(false); // Loading state for task creation
     const [isCreatingTask, setIsCreatingTask] = useState(false); 
     const [isFiltered, setIsFiltered] = useState(false); // Filtered state for filtering data
+
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
     const navigate = useNavigate();
+
+
+    // Role-Based Button
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
 
 
     // / Function to get the status icon based on the status value
@@ -49,10 +81,14 @@ const Incident_List = () => {
         switch (status?.toLowerCase()) {
             case "incident open":
                 return opeanincident;
-            case "incident reject":
-                return rejectincident;
             case "incident inprogress":
                 return inprogressincident;
+            case "incident error":
+                return errorincident;
+            case "reject" :
+                return error;
+            case "incident reject":
+                return rejectincident;
             default:
                 return null;
         }
@@ -87,10 +123,10 @@ const Incident_List = () => {
     const handleFromDateChange = (date) => {
         if (toDate && date > toDate) {
             Swal.fire({
-                title: "Error",
+                title: "Warning",
                 text: "From date cannot be after the To date.",
-                icon: "error",
-                confirmButtonColor: "#f1c40f", 
+                icon: "warning",
+                confirmButtonColor: "#f1c40f",
             });
         } else if (toDate) {
             // Calculate month gap
@@ -119,10 +155,10 @@ const Incident_List = () => {
     const handleToDateChange = (date) => {
         if (fromDate && date < fromDate) {
             Swal.fire({
-                title: "Error",
+                title: "Warning",
                 text: "To date cannot be before the From date.",
-                icon: "error",
-                confirmButtonColor: "#f1c40f", 
+                icon: "warning",
+                confirmButtonColor: "#f1c40f",
             });
         } else if (fromDate) {
             // Calculate month gap
@@ -212,20 +248,22 @@ const Incident_List = () => {
     const HandleCreateTask = async () => {
         if (!fromDate || !toDate) {
             Swal.fire({
-                title: "Error",
+                title: "Warning",
                 text: "Both 'From' and 'To' dates are required.",
-                icon: "error",
-                confirmButtonColor: "#d33", 
+                icon: "warning",
+                confirmButtonColor: "#f1c40f",
+                
             });
             return;
         }
         if (!isFiltered) {
             
             Swal.fire({
-                title: "Error",
+                title: "warning",
                 text: "Please apply filters that return data before creating a task.",
-                icon: "error",
-                confirmButtonColor: "#d33", 
+                icon: "warning",
+                confirmButtonColor: "#f1c40f",
+                
             });
             return;
         }
@@ -311,18 +349,22 @@ const Incident_List = () => {
         }
     };
 
+     
+    
     return (
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>Incident List</h2>
 
-            <div className="flex justify-end mt-6">
-                <button onClick={HandleAddIncident} className={GlobalStyle.buttonPrimary}>
+
+            <div className="flex  justify-end mt-6">
+                <button onClick={HandleAddIncident}  className={`${GlobalStyle.buttonPrimary} flex items-center`}>
+                    <FaPlus className="mr-2"/>
                     Add Incident
                 </button>
             </div>
             {/*Filter section */}
             <div className= {`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
-                <div className="flex items-center justify-end w-full space-x-6">
+                <div className="flex flex-wrap  md:flex-nowrap  items-center justify-end w-full  space-x-6">
                     <select value={status1} onChange={(e) => setStatus1(e.target.value)} style={{ color: status1 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden >Action Type</option>
                         <option value="collect arrears" style={{ color: "black" }}>collect arrears</option>
@@ -336,7 +378,7 @@ const Incident_List = () => {
                         <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
                     </select>
 
-                    <select value={status3} onChange={(e) => setStatus3(e.target.value)} style={{ color: status3 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
+                    <select value={status3} onChange={(e) => setStatus3(e.target.value)} style={{ color: status3 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox} >
                         <option value="" hidden>Source Type</option>
                         <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>
                         <option value="Product Terminate"style={{ color: "black" }}>Product Terminate</option>
@@ -344,13 +386,26 @@ const Incident_List = () => {
                     </select>
                     
                     <label className={GlobalStyle.dataPickerDate}>Date:</label>
-                    <DatePicker selected={fromDate} onChange={handleFromDateChange} dateFormat="dd/MM/yyyy" placeholderText="From " className={GlobalStyle.inputText} />
-                    <DatePicker selected={toDate} onChange={handleToDateChange} dateFormat="dd/MM/yyyy" placeholderText="To " className={GlobalStyle.inputText} />
+                    <DatePicker selected={fromDate} onChange={handleFromDateChange} dateFormat="dd/MM/yyyy" placeholderText="From "  className={`${GlobalStyle.inputText} w-full sm:w-auto`} />
+                    <DatePicker selected={toDate} onChange={handleToDateChange} dateFormat="dd/MM/yyyy" placeholderText="To "  className={`${GlobalStyle.inputText} w-full sm:w-auto`} />
                    
-                    <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
-                    <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+                    {/* <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button> */}
+                    <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                   <button onClick={handleFilter} className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}>Filter</button>
+                    )}
+                </div>
+
+                <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`} onClick={handlefilterclear} >
+                  Clear 
+              </button>
+                    )}
+                </div>
+                    {/* <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
                         Clear 
-                    </button>
+                    </button> */}
                     
                 </div>
             </div>
@@ -370,7 +425,7 @@ const Incident_List = () => {
             </div>
 
              {/* Table Section */}
-            <div className={GlobalStyle.tableContainer}>
+            <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -422,6 +477,7 @@ const Incident_List = () => {
             </div>
             
              {/* Pagnation section */}
+             { filteredData.length > 0 && ( 
             <div className={GlobalStyle.navButtonContainer}>
                 <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 0}>
                     <FaArrowLeft />
@@ -433,17 +489,32 @@ const Incident_List = () => {
                     <FaArrowRight />
                 </button>
             </div>
+            )}
                         
             {/* Create Task Button */}
             <div className="flex justify-end mt-6">
-                <button 
+                { paginatedData.length > 0 && (
+                <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button 
+                  onClick={HandleCreateTask} 
+                  className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
+                  disabled={isCreatingTask}
+              >   
+                  <FaDownload className="mr-2" />
+                  {isCreatingTask ? 'Creating Tasks...' : '  Create task and let me know'}
+              </button>
+                    )}
+                </div>
+                )}
+                {/* <button 
                     onClick={HandleCreateTask} 
                     className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
                     disabled={isCreatingTask}
                 >   
                     <FaDownload className="mr-2" />
                     {isCreatingTask ? 'Creating Tasks...' : '  Create task and let me know'}
-                </button>
+                </button> */}
             </div>
         </div>
     );

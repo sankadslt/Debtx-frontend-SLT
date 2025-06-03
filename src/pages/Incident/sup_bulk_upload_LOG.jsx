@@ -13,31 +13,50 @@ Notes: This template uses Tailwind CSS */
 import { useCallback, useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight , FaDownload} from "react-icons/fa";
+import { FiUpload } from 'react-icons/fi';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import OpenIcon from "../../assets/images/incidents/Incident_Done.png";
 import InProgressIcon from "../../assets/images/incidents/Incident_InProgress.png";
 import RejectIcon from "../../assets/images/incidents/Incident_Reject.png";
+import uploadopen from "../../assets/images/incidents/Upload_Open.png";
+import uploadinprogress from "../../assets/images/incidents/Upload_InProgress.png";
+import uploadcomplete from "../../assets/images/incidents/Upload_Complete.png";
+import uploadfailerd from "../../assets/images/incidents/Upload_Failed.png";
+
 import {List_Transaction_Logs_Upload_Files} from "../../services/Incidents/incidentService.js";
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from "react-tooltip";
+
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
+import { FaArrowUp } from 'react-icons/fa';
+
+
+
 
 
 
 // Function to get the status icon based on the status value
 const getStatusIcon = (status) => {
     switch (status) {
-        case "Open":
-            return OpenIcon;
+        case "Upload Open":
+            return uploadopen;
 
         case "InProgress":
-            return InProgressIcon;
+            return uploadinprogress;
         case "Reject":
-            return RejectIcon;
+            return uploadfailerd;
+        case "Complete":
+            return uploadcomplete;
+
         default:
             return null;
     }
+   
 };
 
 
@@ -55,6 +74,33 @@ const SupBulkUploadLog = () => {
     const [selectedFromDate, setSelectedFromDate] = useState(null);
     const [selectedToDate, setSelectedToDate] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState("");
+
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+    
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
 
 
 
@@ -165,17 +211,30 @@ const SupBulkUploadLog = () => {
 
     return (
         <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className={`${GlobalStyle.headingLarge}`}>Incident Upload Log</h1>
-                <button className={GlobalStyle.buttonPrimary} onClick={handleUploadClick}>
+            <div className="flex items-center justify-between mb-4">
+                <h1 className={`${GlobalStyle.headingLarge} `}>Incident Upload Log</h1>
+                
+            </div>
+            <div className="flex justify-end ">
+
+            <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                   <button  className={`${GlobalStyle.buttonPrimary}  flex items-center`} onClick={handleUploadClick}>
+                   <FaArrowUp  className="mr-2" />
+                   Upload a new file
+               </button>
+                    )}
+                </div>
+            {/* <button  className={`${GlobalStyle.buttonPrimary}  flex items-center`} onClick={handleUploadClick}>
+                    <FaArrowUp  className="mr-2" />
                     Upload a new file
-                </button>
+                </button> */}
             </div>
             {/* Filters */}
             <div className="flex justify-end ">
-            <div className= {`${GlobalStyle.cardContainer}  w-[70vw] mb-8 mt-8  `} > {/* Filter Section Small issue with the viewport width. or 
+            <div className= {`${GlobalStyle.cardContainer}  w-full md:w-[75vw] mb-8 mt-8  `} > {/* Filter Section Small issue with the viewport width. or 
                                                                                         else can use  w-3/4  */}
-                <div className="flex items-center gap-4 justify-end">
+                <div className="flex items-center gap-4 justify-end flex-wrap">
                     
                     <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className={GlobalStyle.selectBox} style={{ color: selectedStatus === "" ? "gray" : "black" }}>
                         <option value="" hidden>Status</option>
@@ -183,6 +242,8 @@ const SupBulkUploadLog = () => {
                         <option value="InProgress" style={{ color: "black" }}>In Progress</option>
                         <option value="Reject" style={{ color: "black" }}>Reject</option>
                     </select>
+
+                     <div className="flex items-center gap-2 sm:w-auto  sm:items-center "></div>
                     <label className={GlobalStyle.dataPickerDate}>Date:</label>
                     
                     <DatePicker
@@ -219,7 +280,7 @@ const SupBulkUploadLog = () => {
                         }}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="From"
-                        className={GlobalStyle.inputText}
+                         className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                     />
                     
                     <DatePicker
@@ -258,14 +319,28 @@ const SupBulkUploadLog = () => {
                         
                         dateFormat="dd/MM/yyyy"
                         placeholderText="To"
-                        className={GlobalStyle.inputText}
+                         className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                     />
-                    <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
+                    {/* <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
                         Filter
-                    </button>
-                    <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
+                    </button> */}
+                    <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`} onClick={validateAndFetchData}>
+                    Filter
+                </button>
+                    )}
+                </div>
+                    {/* <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
                         Clear
-                    </button>
+                    </button> */}
+                    <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`} onClick={clearFilters}>
+                    Clear
+                </button>
+                    )}
+                </div>
                 </div>
                 {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
             </div>
@@ -290,7 +365,7 @@ const SupBulkUploadLog = () => {
                 <div className="text-center py-4">Loading...</div>
             ) : (
                 /* Table */
-                <div className={GlobalStyle.tableContainer}>
+                <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
                     <table className={GlobalStyle.table}>
                         <thead className={GlobalStyle.thead}>
                             <tr>

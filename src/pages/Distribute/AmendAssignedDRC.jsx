@@ -13,10 +13,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaSearch ,FaArrowLeft } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import Minorbw from "../../assets/images/minorbw.png";
-import Plusbw from "../../assets/images/plusbw.png";
-import Minorc from "../../assets/images/minorc.png";
-import Plusc from "../../assets/images/plusc.png";
+import Minorbw from "../../assets/images/distribution/minorbw.png";
+import Plusbw from "../../assets/images/distribution/plusbw.png";
+import Minorc from "../../assets/images/distribution/minorc.png";
+import Plusc from "../../assets/images/distribution/plusc.png";
 import {
   List_all_transaction_seq_of_batch_id,
   Case_Distribution_Details_With_Drc_Rtom_ByBatchId,
@@ -25,31 +25,59 @@ import {
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
+
 export default function AmendAssignedDRC() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { BatchID } = location.state || {};
-  const [searchQuery, setSearchQuery] = useState("");
-  const [cpeData, setCpeData] = useState([]);
-  const [transaction, setTransaction] = useState([]);
+  const navigate = useNavigate(); // Initialize navigate for routing
+  const location = useLocation(); // Get the location object from react-router
+  const { BatchID } = location.state || {}; // Get the BatchID from the location state
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [cpeData, setCpeData] = useState([]); // State for table data
+  const [transaction, setTransaction] = useState([]); // State for transaction data
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
   const [newEntry, setNewEntry] = useState({
     DRC1: "",
     DRC2: "",
     RTOM: "",
     Count: "",
     
-  });
-  console.log("BatchID", BatchID);
+  }); // State for new entry
+  //console.log("BatchID", BatchID);
+const [drcData, setdrcData] = useState([]); // State for DRC data
 
-  const [drcData, setdrcData] = useState([]);
+      // Role-Based Buttons
+      useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
 
+  // Function to fetch data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = { case_distribution_batch_id: BatchID || 2 };
-        console.log("Data", data);
+        const data = { case_distribution_batch_id: BatchID};
+        //console.log("Data", data);
         const response = await List_all_transaction_seq_of_batch_id(data);
-        console.log("Response", response);
+        //console.log("Response", response);
         if (response.status === "success") {
           setTransaction(response.data || []); // Ensure `data` is always an array
         } else {
@@ -68,14 +96,15 @@ export default function AmendAssignedDRC() {
     fetchData();
   }, [BatchID]);
 
+  // Function to fetch DRC data from the API
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const data = { case_distribution_batch_id: BatchID || 2 };
-        console.log("Data", data);
+        const data = { case_distribution_batch_id: BatchID };
+       // console.log("Data", data);
         const response =
           await Case_Distribution_Details_With_Drc_Rtom_ByBatchId(data);
-        console.log("Retrival", response);
+        //console.log("Retrival", response);
         if (response.status === "success") {
           setdrcData(response.data || []); // Ensure `data` is always an array
         } else {
@@ -94,6 +123,7 @@ export default function AmendAssignedDRC() {
     fetchDetails();
   }, [BatchID]);
 
+  // Function to fetch DRC data from the API
   const handleonclick = async() => {
     const user_id = await getLoggedUserId();
 
@@ -108,16 +138,16 @@ export default function AmendAssignedDRC() {
         }));
     
     const payload = {
-        case_distribution_batch_id: BatchID || 1,
+        case_distribution_batch_id: BatchID ,
         drc_list: drc_list,
         created_by: user_id,
         };
-    console.log("Payload", payload);
+    //console.log("Payload", payload);
 
     try {
         const response = await Exchange_DRC_RTOM_Cases(payload);
         if (response.status === "success") {
-            console.log("Success", response);
+            //console.log("Success", response);
             setCpeData([]); // Clear table data after successful submission
             
             Swal.fire({
@@ -147,6 +177,7 @@ export default function AmendAssignedDRC() {
     }
   };
 
+  // Function to handle delete button click
   const handledeleteclick = (RTOM, DRC1, DRC2) => {
     setCpeData(
       cpeData.filter(
@@ -156,14 +187,26 @@ export default function AmendAssignedDRC() {
     ); // Remove selected entry
   };
 
+  // Function to handle add button click
   const handleaddclick = () => {
     if (!newEntry.RTOM || !newEntry.DRC1 || !newEntry.Count || !newEntry.DRC2) {
-      alert("Please fill all fields before adding.");
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please fill in all fields.",
+        confirmButtonColor: "#ffc107",
+      });
       return;
     } 
     
     if (parseInt(newEntry.Count, 10) > assignedCaseCount) {
-        alert("Entered case count cannot be greater than the assigned case count.");
+        
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Entered case count cannot be greater than the assigned case count.",
+          confirmButtonColor: "#ffc107",
+        });
         return;
       }
       
@@ -200,7 +243,9 @@ export default function AmendAssignedDRC() {
     .reduce((total, item) => total + item.case_count, 0) || 0;
 
 
-    console.log("filteredData", filteredData);
+    //console.log("filteredData", filteredData);
+
+  // Function to handle DRC1 selection change  
   const handleselectchangeDRC1 = (e) => {
     const selectedDRCName = e.target.value;
     const selectedDRCID = drcData.find((item) => item.drc_name === selectedDRCName);
@@ -209,6 +254,7 @@ export default function AmendAssignedDRC() {
        selectedDRCID: selectedDRCID ? selectedDRCID.drc_id : null});
   };
 
+  // Function to handle DRC2 selection change
   const handleselectchangeDRC2 = (e) => {
     const selectedDRCName2 = e.target.value;
     const selectedDRCID2 = drcData.find((item) => item.drc_name === selectedDRCName2);
@@ -217,7 +263,7 @@ export default function AmendAssignedDRC() {
        selectedDRCID2: selectedDRCID2 ? selectedDRCID2.drc_id : null});
   };
 
-
+  // Function to handle back button click
   const handleoniconclick = () => {
     navigate("/pages/Distribute/AssignedDRCSummary", );
   }
@@ -233,7 +279,7 @@ export default function AmendAssignedDRC() {
 
       {/* Card Section */}
       <div className="flex flex-col items-center justify-center mb-4">
-        <div className={`${GlobalStyle.cardContainer}`}>
+        <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
           <table>
             <tbody>
               <tr>
@@ -285,11 +331,11 @@ export default function AmendAssignedDRC() {
 
       {/* case count Bar */}
       <div className="flex justify-center items-center w-full">
-      <div className={`${GlobalStyle.miniCaseCountBar}  `}>
-        <div className="flex px-3 py-2 items-center  gap-10 ">
+      <div className={`${GlobalStyle.miniCaseCountBar} w-full max-w-[52rem] `}>
+        <div className="flex flex-wrap px-3 py-2 items-center  gap-4 sm:gap-10 ">
           <img src={Minorc} alt="Icon" className="w-[20px] h-[20px] " />
           {/* dropdown */}
-          <div className="flex gap-10">
+          <div className="flex gap-10 flex-wrap">
             <select
               className={GlobalStyle.selectBox}
               value={newEntry.DRC1}
@@ -308,7 +354,7 @@ export default function AmendAssignedDRC() {
             
           </div>
           {/* dropdown */}
-          <div className="flex gap-10">
+          <div className="flex gap-10 flex-wrap">
             <select
               className={GlobalStyle.selectBox}
               value={newEntry.RTOM}
@@ -331,7 +377,7 @@ export default function AmendAssignedDRC() {
             </select>
           </div>
           {/* textbox */}
-          <div className="flex gap-7">
+          <div className="flex gap-7 flex-wrap">
             <h1 className={GlobalStyle.headingMedium}>
               Assigned case count:{assignedCaseCount}
               
@@ -339,7 +385,7 @@ export default function AmendAssignedDRC() {
             <input
               type="number"
               placeholder="Enter case count"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} min-w-[120px] w-full sm:w-auto`}
               value={newEntry.Count}
               min="1"
               onChange={(e) =>
@@ -373,14 +419,28 @@ export default function AmendAssignedDRC() {
         </div>
         {/* button */}
         <div className="flex justify-end mr-5">
-          <button
+
+        <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                    onClick={handleaddclick}
+                    className={`${GlobalStyle.buttonPrimary} w-[80px] h-[35px]`}
+                    
+                    
+                  >
+                    Add
+                  </button>
+                    
+                    )}
+         </div>
+          {/* <button
             onClick={handleaddclick}
             className={`${GlobalStyle.buttonPrimary} w-[80px] h-[35px]`}
             
             
           >
             Add
-          </button>
+          </button> */}
         </div>
       </div>
       </div>
@@ -400,26 +460,30 @@ export default function AmendAssignedDRC() {
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
         </div>
-        <div className={GlobalStyle.tableContainer}>
+         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
                 <th className={GlobalStyle.tableHeader}>RTOM</th>
                 <th className={GlobalStyle.tableHeader}>DRC 1</th>
                 <th
-                  className={`${GlobalStyle.tableHeader} flex justify-center items-center`}
+                  className={`${GlobalStyle.tableHeader} `}
                 >
+                  <div className="flex justify-center items-center">
                   <img
                     src={Minorbw}
                     alt="Icon"
                     className="w-[20px] h-[20px] "
                   />
+                </div>
                 </th>
                 <th className={GlobalStyle.tableHeader}>DRC 2</th>
                 <th
-                  className={`${GlobalStyle.tableHeader} flex justify-center items-center`}
+                  className={`${GlobalStyle.tableHeader}`}
                 >
+                <div className="flex justify-center items-center">
                   <img src={Plusbw} alt="Icon" className="w-[20px] h-[20px] " />
+                </div>
                 </th>
                 <th className={GlobalStyle.tableHeader}></th>
               </tr>
@@ -441,6 +505,8 @@ export default function AmendAssignedDRC() {
                     <td className={GlobalStyle.tableData}>{item.DRC2}</td>
                     <td className={GlobalStyle.tableData}>{item.DRC2Count}</td>
                     <td className={GlobalStyle.tableData}>
+                    <div>
+                      {["admin", "superadmin", "slt"].includes(userRole) && (
                       <button
                         onClick={() =>
                           handledeleteclick(item.RTOM, item.DRC1, item.DRC2)
@@ -449,6 +515,8 @@ export default function AmendAssignedDRC() {
                       >
                         Delete
                       </button>
+                      )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -466,12 +534,23 @@ export default function AmendAssignedDRC() {
 
       {/* Button */}
       <div className="flex justify-end">
-        <button
-          onClick={handleonclick}
-          className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px]`}
-        >
-          Submit
-        </button>
+        <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+              <button
+              onClick={handleonclick}
+              className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px]`}
+            >
+              Submit
+            </button>
+              
+              )}
+        </div>
+          {/* <button
+            onClick={handleonclick}
+            className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px]`}
+          >
+            Submit
+          </button> */}
       </div>
 
       <div className="flex justify-start mt-4">

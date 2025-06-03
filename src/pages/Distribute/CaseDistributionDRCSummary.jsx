@@ -18,24 +18,53 @@ import {List_Case_Distribution_Details , Create_Task_For_case_distribution_drc_s
 import {getLoggedUserId} from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
+import { HiDotsCircleHorizontal } from "react-icons/hi";
+
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const CaseDistributionDRCSummary = () => {
 
 
   // State for filters and table
-  const [selectedDRC, setSelectedDRC] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDRCKey, setSelectedDRCKey] = useState("");
-  const [drcNames, setDrcNames] = useState([]);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const batchId = location.state?.BatchID;
+  const [selectedDRC, setSelectedDRC] = useState(""); // State for selected DRC
+  const [filteredData, setFilteredData] = useState([]); // State for filtered data
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [selectedDRCKey, setSelectedDRCKey] = useState(""); // State for selected DRC key
+  const [drcNames, setDrcNames] = useState([]); // State for DRC names
+  const location = useLocation(); // Get the current location
+  const navigate = useNavigate(); // Initialize navigate for routing
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+  const batchId = location.state?.BatchID; // Get the batch ID from the location state
 
 
+
+  // Role-Based Buttons
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+  
+      try {
+        let decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+  
+        if (decoded.exp < currentTime) {
+          refreshAccessToken().then((newToken) => {
+            if (!newToken) return;
+            const newDecoded = jwtDecode(newToken);
+            setUserRole(newDecoded.role);
+          });
+        } else {
+          setUserRole(decoded.role);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }, []);
 
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // State for current page
   const recordsPerPage = 7;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -54,6 +83,7 @@ const CaseDistributionDRCSummary = () => {
     indexOfLastRecord
   );
 
+  // useEffect to fetch DRC names
    useEffect(() => {
       const fetchDRCNames = async () => {
         try {
@@ -81,14 +111,14 @@ const CaseDistributionDRCSummary = () => {
       setSelectedDRC(selectedValue);
       setSelectedDRCKey(selectedKey);
   
-      console.log("Selected DRC: ", selectedValue);
-      console.log("Selected DRC ID: ", selectedKey);
+     // console.log("Selected DRC: ", selectedValue);
+     // console.log("Selected DRC ID: ", selectedKey);
     }
   };
 
   useEffect(() => {
     const payload = {
-      case_distribution_batch_id: batchId || "2",
+      case_distribution_batch_id: batchId ,
     };
     const fetchFilteredData = async () => {
       try {
@@ -105,10 +135,10 @@ const CaseDistributionDRCSummary = () => {
   // Handle filter action - all filtering happens here
   const handleFilter = () => {
     const payload = {
-      case_distribution_batch_id: batchId || "2",
+      case_distribution_batch_id: batchId ,
       drc_id: selectedDRCKey,
     };
-    console.log("Filter payload: ", payload);
+   // console.log("Filter payload: ", payload);
     const fetchFilteredData = async () => {
       try {
         const filteredData = await List_Case_Distribution_Details(payload);
@@ -128,9 +158,9 @@ const CaseDistributionDRCSummary = () => {
     setSelectedDRCKey("");
     setSearchQuery("");
     const payload = {
-      case_distribution_batch_id: batchId || "2",
+      case_distribution_batch_id: batchId,
     };
-    console.log("Clear filters payload: ", payload);
+   // console.log("Clear filters payload: ", payload);
     const fetchFilteredData = async () => {
       try {
         const filteredData = await List_Case_Distribution_Details(payload);
@@ -152,13 +182,13 @@ const CaseDistributionDRCSummary = () => {
       Created_By: userId,
       case_distribution_batch_id : batchId,
     };
-    console.log("Create task payload: ", payload);
+   // console.log("Create task payload: ", payload);
     if (!selectedDRCKey) {
       Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "Select a DRC to create a task",
-                confirmButtonColor: "#d33",
+        icon: "warning",
+        title: "Warning",
+        text: "Please select a DRC before creating a task.",
+        confirmButtonColor: "#f1c40f",
               });
           return;
 
@@ -166,7 +196,7 @@ const CaseDistributionDRCSummary = () => {
     const createTask = async () => {
       try {
         const response = await Create_Task_For_case_distribution_drc_summery(payload);
-        console.log("Create task response: ", response);
+      //  console.log("Create task response: ", response);
         Swal.fire({
             icon: "success",
             title: "Success",
@@ -191,18 +221,19 @@ const CaseDistributionDRCSummary = () => {
     createTask();
   };
 
+  // Handle button click to navigate to DRC summary page
   const handleonbuttonclicked = ( drc_name , drc_id ) => {
     navigate("/pages/Distribute/CaseDistributionDRCSummarywithRTOM", {
       state:  {BatchID: batchId || "2" , DRCName: drc_name , DRCID: drc_id},
       
   });
-    console.log("Name: ", drc_name);
-    console.log("ID: ", drc_id);
-    console.log("Batch ID: ", batchId);
+   // console.log("Name: ", drc_name);
+   // console.log("ID: ", drc_id);
+   // console.log("Batch ID: ", batchId);
 
   };
 
-
+  // Handle back button click to navigate to the previous page
   const handleonbacknuttonclick = () => {
     navigate("/pages/Distribute/AssignedDRCSummary", {
   });
@@ -214,14 +245,14 @@ const CaseDistributionDRCSummary = () => {
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Distributed DRC Summary </h1>
-      <h2 className={GlobalStyle.headingMedium}>Batch - {batchId || "Undefined"} </h2>
+      <h2 className={GlobalStyle.headingMedium}>Batch - {batchId } </h2>
 
       {/* Filter Section */}
       <div className="flex justify-end">
-            <div className={`${GlobalStyle.cardContainer}  w-[30vw] flex px-3 py-2 items-center justify-end gap-4 mt-20 mb-4 `}>
+            <div className={`${GlobalStyle.cardContainer}  w-[30vw] flex px-3  sm:w-[30vw] py-2 items-center justify-end  w-full flex-wrap sm:flex-row gap-4 mt-20 mb-4 `}>
               {/* DRC Select Dropdown */}
               <select
-                className={GlobalStyle.selectBox}
+                 className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
                 value={selectedDRC} 
                 onChange={handleDRCChange}
                 style={{ color: selectedDRC === "" ? "gray" : "black" }}
@@ -238,17 +269,37 @@ const CaseDistributionDRCSummary = () => {
               </select>
 
               {/* Filter Button */}
-              <button
+
+              <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                    onClick={handleFilter}
+                    className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+                  >
+                    Filter
+                  </button>  
+                    
+                    )}
+                </div>
+              {/* <button
                 onClick={handleFilter}
                 className={`${GlobalStyle.buttonPrimary}`}
               >
                 Filter
-              </button>
+              </button> */}
 
               {/* Reset Button */}
-              <button className={`${GlobalStyle.buttonRemove} h-[35px] `} onClick={handleclearfilters}  >
+              <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button className={`${GlobalStyle.buttonRemove} h-[35px]  w-full sm:w-auto`} onClick={handleclearfilters}  >
+                    Clear 
+                    </button>             
+                    )}
+                </div>
+              
+              {/* <button className={`${GlobalStyle.buttonRemove} h-[35px] `} onClick={handleclearfilters}  >
                             Clear 
-              </button>
+              </button> */}
             </div>
         </div>
 
@@ -267,7 +318,7 @@ const CaseDistributionDRCSummary = () => {
       </div>
 
       {/* Table Section */}
-      <div className={GlobalStyle.tableContainer}>
+       <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -285,7 +336,7 @@ const CaseDistributionDRCSummary = () => {
             {currentData.length >0?  (
               currentData.map((item, index) => (
                 <tr
-                  key={item.caseId}
+                key={`${item.caseId}-${index}`}
                   className={
                     index % 2 === 0
                       ? GlobalStyle.tableRowEven
@@ -311,14 +362,20 @@ const CaseDistributionDRCSummary = () => {
                     {item.proceed_on ? new Date(item.proceed_on).toLocaleDateString('en-GB') : ""}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)} >
-                                            <img
+                  <div>
+                  {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)} data-tooltip-id="my-tooltip" >
+                                            {/* <img
                                                 src= {open}
                                                 data-tooltip-id="my-tooltip"
                                 
-                                              ></img>
+                                              ></img> */}
+                                     <HiDotsCircleHorizontal size={25} color="#000"  />   
+
                       <Tooltip id="my-tooltip" place="bottom" content="More Info" />
                     </button>
+                  )}
+                  </div>
                   </td>
                 </tr>
               ))): (
@@ -336,17 +393,32 @@ const CaseDistributionDRCSummary = () => {
       <br></br>
 
       {/* Button */}
+      { currentData.length > 0 && (
       <div className="flex justify-between">
         <br></br>
         {/* Right-aligned button */}
-        <button
+        <div>
+            {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+            onClick={handleCreateTask}
+            className={`${GlobalStyle.buttonPrimary} flex items-center `} // Same style as Approve button
+          >
+            <FaDownload className="mr-2" />
+            Create Task and Let Me Know
+          </button>
+            
+            )}
+        </div>
+        {/* <button
           onClick={handleCreateTask}
           className={`${GlobalStyle.buttonPrimary} flex items-center `} // Same style as Approve button
         >
           <FaDownload className="mr-2" />
           Create Task and Let Me Know
-        </button>
+        </button> */}
       </div>
+      )}
+
       {/* Button on the left */}
       <button className={GlobalStyle.buttonPrimary} onClick={handleonbacknuttonclick}>
          <FaArrowLeft className="mr-2" />
