@@ -167,7 +167,7 @@ const MediationBoardResponse = () => {
 
             {/* Case details card */}
             <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
+                <div className={`${GlobalStyle.cardContainer}  w-full max-w-lg`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Case ID</div>
@@ -247,7 +247,7 @@ const MediationBoardResponse = () => {
             {/* Mediation Board Negotiation History table */}
             <h2 className={`${GlobalStyle.headingMedium}`}><b>Mediation Board Negotiation History</b></h2>
 
-            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+            <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -312,7 +312,7 @@ const MediationBoardResponse = () => {
             {/* Payment Details table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Payment Details</b></h2>
 
-            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+            <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -385,9 +385,9 @@ const MediationBoardResponse = () => {
             </div>
 
             {/* Request Additional Details Table */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Requested Additional Details</b></h2>
+            <h2 className={`${GlobalStyle.headingMedium} mt-4 `}><b>Requested Additional Details</b></h2>
 
-            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+            <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -447,7 +447,7 @@ const MediationBoardResponse = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={() => navigate("/MediationBoard/MediationBoardCaseList")}
                 >
                     <FaArrowLeft />

@@ -92,9 +92,9 @@ useEffect(() => {
 const handlestartdatechange = (date) => {
   if(endDate && date > endDate) {
     Swal.fire({
-      title: "Error",
+      title: "warning",
       text: "From date cannot be after the To date.",
-      icon: "error",
+      icon: "warning",
       confirmButtonColor: "#f1c40f",
     });
   setStartDate(null);
@@ -107,9 +107,9 @@ const handlestartdatechange = (date) => {
 const handleenddatechange = (date) => {
   if (startDate && date < startDate) {
     Swal.fire({
-      title: "Error",
+      title: "warning",
       text: "To date cannot be before the From date.",
-      icon: "error",
+      icon: "warning",
       confirmButtonColor: "#f1c40f",
     });
     setEndDate(null);
@@ -204,7 +204,10 @@ const handleApicall = async (startDate, endDate) => {
 
 // Fetch the data and set it to filteredData1 state
 const applyFilters = async () => {
+
   const fetchData = async () => {
+
+    
     
     const requestdata = {};
 
@@ -345,6 +348,18 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
 
   // The function to handle the creation of a task and notify the user
   const handlecreatetaskandletmeknow = async () => {
+
+    if(!startDate || !endDate) {
+      Swal.fire({
+        title: "warning",
+        text: "Please select both start and end dates.",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+
     const userId = await getLoggedUserId();
 
     const payload = {
@@ -489,8 +504,8 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
 
       {/* Filter Section */}
       <div className={`${GlobalStyle.cardContainer} w-full mt-6 `}>
-        <div className= "flex justify-between gap-10 ">
-            <div className="flex gap-10">
+        <div className= "flex justify-end gap-10 ">
+            <div className="flex flex-wrap  gap-10">
               {" "}
               <div className="flex gap-4 h-[35px] ">
                 <select
@@ -538,7 +553,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     onChange={handlestartdatechange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="From"
-                    className={GlobalStyle.inputText}
+                     className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
 
                   <DatePicker
@@ -546,7 +561,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     onChange={handleenddatechange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="To"
-                    className={GlobalStyle.inputText}
+                     className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
                 
              
@@ -561,7 +576,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     {["admin", "superadmin", "slt"].includes(userRole) && (
                       <button
                       onClick={applyFilters}
-                      className={`${GlobalStyle.buttonPrimary} h-[35px] `}
+                      className={`${GlobalStyle.buttonPrimary} w-full h-[35px] sm:w-auto`}
                     >
                       Filter
                     </button>
@@ -573,7 +588,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                         </button> */}
                 <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                      <button className={`${GlobalStyle.buttonRemove} h-[35px] `}  onClick={clearfilters}>
+                      <button className={`${GlobalStyle.buttonRemove} h-[35px] w-full sm:w-auto`}  onClick={clearfilters}>
                       Clear 
                   </button>
                     )}
@@ -600,7 +615,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
             </div>
           </div>
         </div>
-        <div className={`${GlobalStyle.tableContainer}`}>
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={`${GlobalStyle.table}`}>
           <thead className={`${GlobalStyle.thead}`}>
             <tr className="border border-[#0087FF] border-opacity-15">

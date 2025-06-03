@@ -638,10 +638,10 @@ export default function RejectIncident() {
 
         {/* Filter Section */}
         <div  className="flex justify-end"> 
-        <div className= {`${GlobalStyle.cardContainer}  items-center w-[70vw] mb-8 mt-8`}>
+        <div className= {`${GlobalStyle.cardContainer}  items-center w-full md:w-[70vw] mb-8 mt-8`}>
           {/* Source Selection */}
-          <div className="flex items-center gap-4 justify-end">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4 justify-end">
+          <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
             <label>Source:</label>
             <select
               className={GlobalStyle.selectBox}
@@ -657,26 +657,26 @@ export default function RejectIncident() {
           </div>
 
           {/* Date Picker Section */}
-          <div className="flex items-center gap-2 ">
-            <div className={GlobalStyle.datePickerContainer}>
-              <label className={GlobalStyle.dataPickerDate}>Date:</label>
-              <div className="flex gap-2">
+          <div className="flex items-center gap-2 sm:w-auto  sm:items-center ">
+            {/* <div className={GlobalStyle.datePickerContainer}> */}
+              <label className= {`${GlobalStyle.dataPickerDate} `}>Date:</label>
+              <div className="flex flex-wrap gap-2 justify-end"> 
                 <DatePicker
                   selected={fromDate}
                   onChange={handleFromDateChange}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="From"
-                  className={GlobalStyle.inputText}
+                   className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                 />
                 <DatePicker
                   selected={toDate}
                   onChange={handleToDateChange}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="To"
-                  className={GlobalStyle.inputText}
+                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                 />
               </div>
-            </div>
+            {/* </div> */}
             {error && <span className={GlobalStyle.errorText}>{error}</span>}
           </div>
 
@@ -684,7 +684,7 @@ export default function RejectIncident() {
           <div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
                <button
-               className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+               className={`${GlobalStyle.buttonPrimary} h-[35px] w-full sm:w-auto`}
                onClick={handleFilterClick}
              >
                Filter
@@ -700,7 +700,7 @@ export default function RejectIncident() {
 
           <div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
-               <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+               <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`} onClick={handleclearFilter}>
                Clear
               </button>
             )}
@@ -727,7 +727,7 @@ export default function RejectIncident() {
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
           </div>
-          <div className={GlobalStyle.tableContainer}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -879,7 +879,7 @@ export default function RejectIncident() {
             <div>
               {["admin", "superadmin", "slt"].includes(userRole) && (
                 <button
-                className={`${GlobalStyle.buttonPrimary} ml-4`}
+                className={`${GlobalStyle.buttonPrimary} ml-4 w-full sm:w-auto`}
                 onClick={handleMoveForward}
               >
                 Move Forward
@@ -895,7 +895,7 @@ export default function RejectIncident() {
             <div>
               {["admin", "superadmin", "slt"].includes(userRole) && (
                 <button
-                className={`${GlobalStyle.buttonRemove} ml-4`}
+                className={`${GlobalStyle.buttonRemove} ml-4 w-full sm:w-auto`}
                 onClick={handleRejectAll}
               >
                 Reject All
