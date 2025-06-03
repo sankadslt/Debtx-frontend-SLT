@@ -22,6 +22,8 @@ import { List_All_DRCs_Mediation_Board_Cases } from "../../services/case/CaseSer
 import { RTOM_Details } from "../../services/RTOM/Rtom";
 import { List_All_Active_RTOMs } from "../../services/RTOM/Rtom";
 import { Tooltip } from "react-tooltip";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
 import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
 import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Request Customer-Info.png";
@@ -49,6 +51,7 @@ const MediationBoardCaseList = () => {
   const [caseStatus, setCaseStatus] = useState("");
   const [rtom, setRtom] = useState("");
   const [rtomList, setRtomList] = useState([]);
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   const rowsPerPage = 10;
 
@@ -102,10 +105,30 @@ const MediationBoardCaseList = () => {
 
   // initial data fetch
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+
     // Fetch DRC names
     const fetchDrcNames = async () => {
       try {
-        const names = await Active_DRC_Details(); 
+        const names = await Active_DRC_Details();
 
         setDrcNames(names);
       } catch (error) {
@@ -385,7 +408,7 @@ const MediationBoardCaseList = () => {
             <select
               value={caseStatus}
               onChange={(e) => setCaseStatus(e.target.value)}
-             className={`${GlobalStyle.selectBox} `}
+              className={`${GlobalStyle.selectBox} `}
               style={{ color: caseStatus === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Status</option>
@@ -432,42 +455,46 @@ const MediationBoardCaseList = () => {
           </div>
 
           {/* <div className="flex items-center"> */}
-            <label className={GlobalStyle.dataPickerDate}>Date:</label>
-            {/* <div className="flex items-center space-x-2"> */}
-              {/* <div className="flex items-center"> */}
-                <DatePicker
-                  selected={fromDate}
-                  onChange={handleFromDateChange}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="From"
-                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                />
-              {/* </div> */}
-
-              {/* <div className="flex items-center"> */}
-                <DatePicker
-                  selected={toDate}
-                  onChange={handleToDateChange}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="To"
-                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                />
-              {/* </div> */}
-            {/* </div> */}
+          <label className={GlobalStyle.dataPickerDate}>Date:</label>
+          {/* <div className="flex items-center space-x-2"> */}
+          {/* <div className="flex items-center"> */}
+          <DatePicker
+            selected={fromDate}
+            onChange={handleFromDateChange}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="From"
+            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+          />
           {/* </div> */}
 
-          <button
-            className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-            onClick={handleFilterButton}
-          >
-            Filter
-          </button>
-          <button
-             className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
-            onClick={handleClear}
-          >
-            Clear
-          </button>
+          {/* <div className="flex items-center"> */}
+          <DatePicker
+            selected={toDate}
+            onChange={handleToDateChange}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="To"
+            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+          />
+          {/* </div> */}
+          {/* </div> */}
+          {/* </div> */}
+
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+              onClick={handleFilterButton}
+            >
+              Filter
+            </button>
+          )}
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+              onClick={handleClear}
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
@@ -483,7 +510,7 @@ const MediationBoardCaseList = () => {
         </div>
       </div>
 
-       <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -517,7 +544,7 @@ const MediationBoardCaseList = () => {
                   </td>
                   <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
                     {renderStatusIcon(row.status, index)}
-                    </td>
+                  </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{row.ro_name}</td>
                   <td className={GlobalStyle.tableData}>{row.area}</td>
@@ -562,7 +589,7 @@ const MediationBoardCaseList = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className= {GlobalStyle.tableData + " text-center"}>
+                <td colSpan="8" className={GlobalStyle.tableData + " text-center"}>
                   No records found
                 </td>
               </tr>

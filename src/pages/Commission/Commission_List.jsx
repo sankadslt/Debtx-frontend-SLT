@@ -21,6 +21,8 @@ import { getLoggedUserId } from "../../services/auth/authService";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const Commission_List = () => {
   const [selectValue, setSelectValue] = useState("Account No");
@@ -50,9 +52,47 @@ const Commission_List = () => {
   const [caseId, setCaseId] = useState("");
   const [searchBy, setSearchBy] = useState("case_id");
   const [isLoading, setIsLoading] = useState(false);
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   const rowsPerPage = 10;
+  // useEffect(() => {
+  //   const fetchDrcNames = async () => {
+  //     try {
+  //       const names = await Active_DRC_Details();
+
+  //       setDrcNames(names);
+  //     } catch (error) {
+  //       console.error("Error fetching DRC names:", error);
+  //     }
+  //   };
+  //   // fetchData();
+  //   setFilteredData(data);
+  //   fetchDrcNames();
+  //   fetchCommissionCounts();
+  // }, []);
+
+  // Role-Based Buttons
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+
     const fetchDrcNames = async () => {
       try {
         const names = await Active_DRC_Details();
@@ -534,39 +574,41 @@ const Commission_List = () => {
             <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2">
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               {/* <div className="flex items-center space-x-2"> */}
-                {/* <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={handleFromDateChange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="From"
-                    className={GlobalStyle.inputText}
-                  />
-                {/* </div> */}
-
-                {/* <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={toDate}
-                    onChange={handleToDateChange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="To"
-                    className={GlobalStyle.inputText}
-                  />
-                {/* </div> */}
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={fromDate}
+                onChange={handleFromDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={GlobalStyle.inputText}
+              />
               {/* </div> */}
 
-              <button
-                className={GlobalStyle.buttonPrimary}
-                onClick={handleFilterButton}
-              >
-                Filter
-              </button>
-              <button
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={toDate}
+                onChange={handleToDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={GlobalStyle.inputText}
+              />
+              {/* </div> */}
+              {/* </div> */}
+
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={GlobalStyle.buttonPrimary}
+                  onClick={handleFilterButton}
+                >
+                  Filter
+                </button>
+              )}
+              {["admin", "superadmin", "slt"].includes(userRole) && (<button
                 className={GlobalStyle.buttonRemove}
                 onClick={handleClear}
               >
                 Clear
-              </button>
+              </button>)}
             </div>
             {dateError && (
               <div className="text-red-500 text-sm mt-1">{dateError}</div>
@@ -587,7 +629,7 @@ const Commission_List = () => {
         </div>
       </div>
 
-     <div className={`${GlobalStyle.tableContainer}  overflow-x-auto`}>
+      <div className={`${GlobalStyle.tableContainer}  overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -656,7 +698,7 @@ const Commission_List = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className= {GlobalStyle.tableData + " text-center"}>
+                <td colSpan="8" className={GlobalStyle.tableData + " text-center"}>
                   No records found
                 </td>
               </tr>
@@ -688,15 +730,17 @@ const Commission_List = () => {
           </div>
         )
       }
-      <button
-        onClick={HandleCreateTaskDownloadCommissiontList}
-        className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-        disabled={isCreatingTask}
-        style={{ display: 'flex', alignItems: 'center', marginTop: '16px' }}
-      >
-        {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-      </button>
+      {["admin", "superadmin", "slt"].includes(userRole) && (
+        <button
+          onClick={HandleCreateTaskDownloadCommissiontList}
+          className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+          disabled={isCreatingTask}
+          style={{ display: 'flex', alignItems: 'center', marginTop: '16px' }}
+        >
+          {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+          {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+        </button>
+      )}
     </div >
   );
 };

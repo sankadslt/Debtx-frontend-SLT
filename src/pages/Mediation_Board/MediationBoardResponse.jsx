@@ -16,6 +16,8 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { Case_Details_for_DRC } from "../../services/case/CaseServices";
 import Swal from "sweetalert2";
 import { Accept_Non_Settlement_Request_from_Mediation_Board } from "../../services/case/CaseServices";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 import { getLoggedUserId } from "../../services/auth/authService";
 
 const MediationBoardResponse = () => {
@@ -30,6 +32,7 @@ const MediationBoardResponse = () => {
     const [nonSettlementAccept, setNonSettlementAccept] = useState(false);
     const rowsPerPage = 5; // Number of rows per page
     const navigate = useNavigate();
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
     // fetching case details
     const fetchCaseDetails = async () => {
@@ -63,6 +66,26 @@ const MediationBoardResponse = () => {
     };
 
     useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            let decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+
+            if (decoded.exp < currentTime) {
+                refreshAccessToken().then((newToken) => {
+                    if (!newToken) return;
+                    const newDecoded = jwtDecode(newToken);
+                    setUserRole(newDecoded.role);
+                });
+            } else {
+                setUserRole(decoded.role);
+            }
+        } catch (error) {
+            console.error("Invalid token:", error);
+        }
+
         fetchCaseDetails();
     }, []);
 
@@ -234,12 +257,12 @@ const MediationBoardResponse = () => {
                     </div>
 
                     <div className="mt-8 flex justify-end max-w-4xl">
-                        <button
+                        {["admin", "superadmin", "slt"].includes(userRole) && (<button
                             onClick={handleSubmit}
                             className={`${GlobalStyle.buttonPrimary} px-8`}
                         >
                             Submit
-                        </button>
+                        </button>)}
                     </div>
                 </div>
             )}

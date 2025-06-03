@@ -210,7 +210,7 @@ const PaymentDetails = () => {
       // Updated response handling
       if (response && response.data) {
         // console.log("Valid data received:", response.data);
-        
+
         setFilteredData((prevData) => [...prevData, ...response.data]);
 
         if (response.data.length === 0) {
@@ -435,38 +435,42 @@ const PaymentDetails = () => {
               {/* <div className={GlobalStyle.datePickerContainer}> */}
               {/* <div className="flex items-center space-x-2">
                 <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={handlestartdatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="From"
-                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  />
-                {/* </div> */}
+              <DatePicker
+                selected={fromDate}
+                onChange={handlestartdatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div> */}
 
-                {/* <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={toDate}
-                    onChange={handleenddatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="To"
-                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  />
-                {/* </div>
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={toDate}
+                onChange={handleenddatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div>
               </div> */}
 
-              <button
-                 className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-                onClick={handleFilterButton}
-              >
-                Filter
-              </button>
-              <button
-                 className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
-                onClick={handleClear}
-              >
-                Clear
-              </button>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+                  onClick={handleFilterButton}
+                >
+                  Filter
+                </button>
+              )}
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                  onClick={handleClear}
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
@@ -593,15 +597,17 @@ const PaymentDetails = () => {
             </button>
           </div>
 
-          <button
-            onClick={HandleCreateTaskDownloadPaymentList}
-            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-            disabled={isCreatingTask}
-            style={{ display: 'flex', alignItems: 'center' }}
-          >
-            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-          </button>
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              onClick={HandleCreateTaskDownloadPaymentList}
+              className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+              disabled={isCreatingTask}
+              style={{ display: 'flex', alignItems: 'center' }}
+            >
+              {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+              {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+            </button>
+          )}
         </main>
       </div>
     </div>
