@@ -20,6 +20,8 @@ import { Settlement_Details_By_Settlement_ID_Case_ID } from "../../services/sett
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Create_Task_For_Downloard_Settlement_Details_By_Case_ID } from "../../services/settlement/SettlementServices";
 import Swal from 'sweetalert2';
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const SettlementPreview = () => {
     // const [currentPage, setCurrentPage] = useState(0);
@@ -33,6 +35,7 @@ const SettlementPreview = () => {
     const { settlementID } = location.state || {};// Get the settlementID from the URL parameters
     const rowsPerPage = 5; // Number of rows per page
     const navigate = useNavigate();
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
     // fetching case details
     const fetchCaseDetails = async () => {
@@ -55,9 +58,34 @@ const SettlementPreview = () => {
         }
     };
 
+    // Role-Based Buttons
     useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            let decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+
+            if (decoded.exp < currentTime) {
+                refreshAccessToken().then((newToken) => {
+                    if (!newToken) return;
+                    const newDecoded = jwtDecode(newToken);
+                    setUserRole(newDecoded.role);
+                });
+            } else {
+                setUserRole(decoded.role);
+            }
+        } catch (error) {
+            console.error("Invalid token:", error);
+        }
+
         fetchCaseDetails();
     }, []);
+
+    // useEffect(() => {
+    //     fetchCaseDetails();
+    // }, []);
 
     // display loading animation when data is loading
     if (isLoading) {
@@ -135,15 +163,17 @@ const SettlementPreview = () => {
                 <h2 className={GlobalStyle.headingLarge}>Settlement Details</h2>
 
                 {/* Button to create task */}
-                <button
-                    onClick={HandleCreateTaskDownloadSettlementDetailsByCaseID}
-                    className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-                    disabled={isCreatingTask}
-                    style={{ display: 'flex', alignItems: 'center' }}
-                >
-                    {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-                    {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-                </button>
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                        onClick={HandleCreateTaskDownloadSettlementDetailsByCaseID}
+                        className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                        disabled={isCreatingTask}
+                        style={{ display: 'flex', alignItems: 'center' }}
+                    >
+                        {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                    </button>
+                )}
             </div>
 
             {/* Case details card */}
@@ -423,7 +453,7 @@ const SettlementPreview = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={handleBackButton}
                 >
                     <FaArrowLeft />
