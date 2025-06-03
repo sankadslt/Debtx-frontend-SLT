@@ -20,6 +20,7 @@ import { Create_task_for_Download_Commision_Case_List } from "../../services/com
 import { getLoggedUserId } from "../../services/auth/authService";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
 
 const Commission_List = () => {
   const [selectValue, setSelectValue] = useState("Account No");
@@ -484,7 +485,7 @@ const Commission_List = () => {
             <select
               value={searchBy}
               onChange={(e) => setSearchBy(e.target.value)}
-              className={GlobalStyle.selectBox}
+              className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: searchBy === "" ? "gray" : "black" }}
             >
               <option value="" hidden>select</option>
@@ -532,8 +533,8 @@ const Commission_List = () => {
 
             <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2">
               <label className={GlobalStyle.dataPickerDate}>Date</label>
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center">
+              {/* <div className="flex items-center space-x-2"> */}
+                {/* <div className="flex items-center"> */}
                   <DatePicker
                     selected={fromDate}
                     onChange={handleFromDateChange}
@@ -541,9 +542,9 @@ const Commission_List = () => {
                     placeholderText="From"
                     className={GlobalStyle.inputText}
                   />
-                </div>
+                {/* </div> */}
 
-                <div className="flex items-center">
+                {/* <div className="flex items-center"> */}
                   <DatePicker
                     selected={toDate}
                     onChange={handleToDateChange}
@@ -551,8 +552,8 @@ const Commission_List = () => {
                     placeholderText="To"
                     className={GlobalStyle.inputText}
                   />
-                </div>
-              </div>
+                {/* </div> */}
+              {/* </div> */}
 
               <button
                 className={GlobalStyle.buttonPrimary}
@@ -586,7 +587,7 @@ const Commission_List = () => {
         </div>
       </div>
 
-      <div className={GlobalStyle.tableContainer}>
+     <div className={`${GlobalStyle.tableContainer}  overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -643,15 +644,19 @@ const Commission_List = () => {
                     <button
                       className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center"
                       onClick={() => naviPreview(row.Commission_ID)}
+                      data-tooltip-id="preview-tooltip"
                     >
                       ⋯
                     </button>
+                    <Tooltip id="preview-tooltip" place="bottom" effect="solid">
+                      More Details
+                    </Tooltip>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="text-center py-2">
+                <td colSpan="8" className= {GlobalStyle.tableData + " text-center"}>
                   No records found
                 </td>
               </tr>

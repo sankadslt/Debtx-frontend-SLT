@@ -91,6 +91,7 @@ const fetchData = async () => {
   try {
     const response = await List_Distribution_Ready_Incidents();
     setData(response.data);
+    console.log("Fetched Data:", response.data);
 
     const distributionResponse = await distribution_ready_incidents_group_by_arrears_band();
     setDistributionData(distributionResponse);
@@ -423,7 +424,7 @@ const fetchData = async () => {
         </div>
 
        {/* Table Section */}
-        <div className={GlobalStyle.tableContainer}>
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
@@ -432,7 +433,7 @@ const fetchData = async () => {
                 <th className={GlobalStyle.tableHeader}>Status</th>
                 <th className={GlobalStyle.tableHeader}>Account No</th>
                 <th className={GlobalStyle.tableHeader}>Action</th>
-                <th className={GlobalStyle.tableHeader}>Amount</th>
+                <th className={GlobalStyle.tableHeader}>Amount (LKR)</th>
                 <th className={GlobalStyle.tableHeader}>Source Type</th>
               </tr>
             </thead>

@@ -314,7 +314,7 @@ const RecoveryOfficerRequests = () => {
     console.log("delegate_user_id", delegate_user_id);
     console.log("Interaction_Log_ID", Interaction_Log_ID);
     console.log("Interaction_ID", Interaction_ID);
-    if (User_Interaction_Type === "Mediation Board Settlement plan Request") {
+    if (User_Interaction_Type === "Mediation Board Settlement plan Request" || User_Interaction_Type === "Negotiation Settlement plan Request") {
       navigate("/pages/CreateSettlement/CreateSettlementPlan", {
         state: {
           case_Id: case_id,
@@ -448,12 +448,14 @@ const RecoveryOfficerRequests = () => {
         </button> */}
       </div>
       {/* Filter Section */}
-      <div className=" flex justify-end">
-        <div className={`${GlobalStyle.cardContainer} w-[75vw] flex justify-end gap-4 items-center mb-8 mt-8`}>
-          <div className="flex items-center gap-2">
-            {/* <span className={GlobalStyle.headingMedium}>Request Type:</span> */}
-            <select
-              className={GlobalStyle.selectBox}
+
+        <div className=" flex justify-end">
+          <div className={`${GlobalStyle.cardContainer} w-full flex  flex-wrap justify-end gap-4 items-center mb-8 mt-8`}>
+            <div className="flex items-center gap-2">
+              {/* <span className={GlobalStyle.headingMedium}>Request Type:</span> */}
+              <select 
+              className= {GlobalStyle.selectBox}
+
               style={{ color: selectedBand === "" ? "gray" : "black" }}
               value={drcNames.find(item => item.key === selectedBand)?.value || ""}
               onChange={(e) => {
@@ -533,33 +535,36 @@ const RecoveryOfficerRequests = () => {
               </select>
             </div> */}
 
-          <div className={GlobalStyle.datePickerContainer}>
-            <span className={GlobalStyle.dataPickerDate}>Date </span>
-            <DatePicker
-              selected={fromDate}
-              onChange={handleFromDateChange}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="From"
-              className={GlobalStyle.inputText}
-            />
-            <DatePicker
-              selected={toDate}
-              onChange={handleToDateChange}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="To"
-              className={GlobalStyle.inputText}
-            />
-          </div>
-          {error && <span className={GlobalStyle.errorText}>{error}</span>}
-          <button
-            className={GlobalStyle.buttonPrimary}
-            onClick={onfilterbuttonclick} // Reset to first page when filter is applied
-          >
-            Filter
-          </button>
-          <button className={GlobalStyle.buttonRemove} onClick={handleclearbutton} >
-            Clear
-          </button>
+
+            {/* <div className={GlobalStyle.datePickerContainer}> */}
+              <span className={GlobalStyle.dataPickerDate}>Date :</span>
+              <DatePicker
+                selected={fromDate}
+                onChange={handleFromDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              <DatePicker
+                selected={toDate}
+                onChange={handleToDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                 className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+            {/* </div> */}
+            {error && <span className={GlobalStyle.errorText}>{error}</span>}
+            <button
+              className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+              onClick={onfilterbuttonclick} // Reset to first page when filter is applied
+            >
+              Filter
+            </button>
+            <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}  onClick={handleclearbutton} >
+                        Clear 
+                    </button>
+
+         
         </div>
       </div>
 
@@ -581,7 +586,9 @@ const RecoveryOfficerRequests = () => {
 
         {/* Table Section */}
 
-        <div className={GlobalStyle.tableContainer}>
+        
+         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>

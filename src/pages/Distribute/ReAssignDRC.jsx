@@ -344,7 +344,7 @@ export default function ReAssignDRC() {
             </div>
           </div>
 
-          <div className={GlobalStyle.tableContainer}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -432,7 +432,7 @@ export default function ReAssignDRC() {
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
           </div>
-          <div className={GlobalStyle.tableContainer}>
+           <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>

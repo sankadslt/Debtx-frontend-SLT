@@ -431,7 +431,7 @@ const RequestResponseLog = () => {
 
       <h1 className={`${GlobalStyle.headingLarge} mb-8`}>Request Response Log</h1>
       <div className="flex justify-end">
-        <div className={`${GlobalStyle.cardContainer}  w-[65vw] flex px-3 py-2 items-center justify-end gap-4 mt-7 mb-4`}>
+        <div className={`${GlobalStyle.cardContainer}  w-[75vw] flex justify-end gap-4 items-center mb-8 mt-8`}>
 
 
           <div className="flex gap-4 justify-end">
@@ -504,9 +504,11 @@ const RequestResponseLog = () => {
       </div>
 
 
-      <div className={GlobalStyle.tableContainer}>
-        <table className={GlobalStyle.table}>
-          <thead className={GlobalStyle.thead}>
+      
+         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+          <table className={GlobalStyle.table}>
+            <thead className={GlobalStyle.thead}>
+
             <tr>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Status</th>
