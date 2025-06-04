@@ -42,6 +42,8 @@ import WRIT_Settle_Active from "/src/assets/images/Settlement/WRIT_Settle_Active
 import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle_Pending.png";
 import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
 import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const Monitor_settlement = () => {
   // State Variables
@@ -56,6 +58,7 @@ const Monitor_settlement = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
@@ -77,6 +80,29 @@ const Monitor_settlement = () => {
   // const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   // const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   // const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
 
   // return Icon based on settlement status and settlement phase
   const getStatusIcon = (phase, status) => {
@@ -430,7 +456,7 @@ const Monitor_settlement = () => {
 
   // Function to navigate to the case ID page
   const naviCaseID = (caseId) => {
-    navigate("", { state: { caseId } });
+    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
   }
 
   // Function to handle the creation of tasks for downloading settlement list
@@ -548,39 +574,43 @@ const Monitor_settlement = () => {
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               {/* <div className={GlobalStyle.datePickerContainer}> */}
               {/* <div className="flex items-center space-x-2"> */}
-                {/* <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={handlestartdatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="From"
-                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  />
-                {/* </div> */}
-
-                {/* <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={toDate}
-                    onChange={handleenddatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="To"
-                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  />
-                {/* </div> */}
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={fromDate}
+                onChange={handlestartdatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
               {/* </div> */}
 
-              <button
-                className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-                onClick={handleFilterButton}
-              >
-                Filter
-              </button>
-              <button
-                className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
-                onClick={handleClear}
-              >
-                Clear
-              </button>
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={toDate}
+                onChange={handleenddatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div> */}
+              {/* </div> */}
+
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+                  onClick={handleFilterButton}
+                >
+                  Filter
+                </button>
+              )}
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                  onClick={handleClear}
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
@@ -638,7 +668,7 @@ const Monitor_settlement = () => {
                         <img
                           src={more}
                           onClick={() => naviPreview(item.case_id, item.settlement_id)}
-                          
+
                           data-tooltip-id="tooltip-more"
                           className="w-5 h-5 cursor-pointer"
                         />
@@ -678,15 +708,17 @@ const Monitor_settlement = () => {
             </button>
           </div>
 
-          <button
-            onClick={HandleCreateTaskDownloadSettlementList}
-            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-            disabled={isCreatingTask}
-            style={{ display: 'flex', alignItems: 'center' }}
-          >
-            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-          </button>
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              onClick={HandleCreateTaskDownloadSettlementList}
+              className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+              disabled={isCreatingTask}
+              style={{ display: 'flex', alignItems: 'center' }}
+            >
+              {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+              {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+            </button>
+          )}
         </main>
       </div>
     </div>

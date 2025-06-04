@@ -430,7 +430,7 @@ const Commission_List = () => {
   const navigate = useNavigate();
 
   const naviCaseID = (caseId) => {
-    navigate("", { state: { caseId } });
+    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
   }
 
   const naviPreview = (Commission_ID) => {
@@ -614,7 +614,7 @@ const Commission_List = () => {
                 >
                   <td
                     className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
-                    onClick={() => naviCaseID(item.case_id)}
+                    onClick={() => naviCaseID(row.Case_ID)}
                   >
                     {row.Case_ID}
                   </td>
