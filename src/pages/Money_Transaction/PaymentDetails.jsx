@@ -495,10 +495,10 @@ const PaymentDetails = () => {
                   <th className={GlobalStyle.tableHeader}>Case ID</th>
                   <th className={GlobalStyle.tableHeader}>Account No.</th>
                   <th className={GlobalStyle.tableHeader}>Settlement ID</th>
-                  <th className={GlobalStyle.tableHeader}>Amount</th>
+                  <th className={GlobalStyle.tableHeader}>Amount (LKR)</th>
                   <th className={GlobalStyle.tableHeader}>Type</th>
                   <th className={GlobalStyle.tableHeader}>Phase </th>
-                  <th className={GlobalStyle.tableHeader}>Settled Balance</th>
+                  <th className={GlobalStyle.tableHeader}>Settled Balance (LKR)</th>
                   <th className={GlobalStyle.tableHeader}>Paid DTM</th>
                   <th className={GlobalStyle.tableHeader}></th>
                 </tr>
@@ -523,21 +523,10 @@ const PaymentDetails = () => {
                       </td>
                       <td className={GlobalStyle.tableData}>{item.Account_No || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.Settlement_ID || "N/A"}</td>
-                      <td className={GlobalStyle.tableCurrency}>
-                        {item.Money_Transaction_Amount?.toLocaleString("en-LK", {
-                          style: "currency",
-                          currency: "LKR",
-                        })}
-                      </td>
+                      <td className={GlobalStyle.tableCurrency}>{item.Money_Transaction_Amount}</td>
                       <td className={GlobalStyle.tableData}>{item.Transaction_Type || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.Settlement_Phase || "N/A"}</td>
-                      <td className={GlobalStyle.tableCurrency}>
-                        {/* {parseInt(item.Cummulative_Settled_Balance) ? parseInt(item.Cummulative_Settled_Balance).toLocaleString("en-US") : "-"} */}
-                        {item.Cummulative_Settled_Balance?.toLocaleString("en-LK", {
-                          style: "currency",
-                          currency: "LKR",
-                        })}
-                      </td>
+                      <td className={GlobalStyle.tableCurrency}>{item.Cummulative_Settled_Balance}</td>
                       <td className={GlobalStyle.tableData}>
                         {item.Money_Transaction_Date &&
                           new Date(item.Money_Transaction_Date).toLocaleString("en-GB", {

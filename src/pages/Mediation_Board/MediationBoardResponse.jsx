@@ -340,8 +340,8 @@ const MediationBoardResponse = () => {
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Date</th>
-                            <th className={GlobalStyle.tableHeader}>Paid Amount</th>
-                            <th className={GlobalStyle.tableHeader}>Settled Balance</th>
+                            <th className={GlobalStyle.tableHeader}>Paid Amount (LKR)</th>
+                            <th className={GlobalStyle.tableHeader}>Settled Balance (LKR)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -366,22 +366,8 @@ const MediationBoardResponse = () => {
                                                 // hour12: true,
                                             })}
                                     </td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.payment &&
-                                            log.payment.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.settle_balanced &&
-                                            log.settle_balanced.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.payment}</td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.settle_balanced}</td>
                                 </tr>
                             ))
                         ) : (

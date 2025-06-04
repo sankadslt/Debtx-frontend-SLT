@@ -636,7 +636,7 @@ const Commission_List = () => {
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Commission Status</th>
               <th className={GlobalStyle.tableHeader}>DRC</th>
-              <th className={GlobalStyle.tableHeader}>Commission Amount</th>
+              <th className={GlobalStyle.tableHeader}>Commission Amount (LKR)</th>
               <th className={GlobalStyle.tableHeader}>Commission Type</th>
               <th className={GlobalStyle.tableHeader}>Commission Action</th>
               <th className={GlobalStyle.tableHeader}>Created Date</th>
@@ -662,12 +662,7 @@ const Commission_List = () => {
                   </td>
                   <td className={GlobalStyle.tableData}>{row.Commission_Status}</td>
                   <td className={GlobalStyle.tableData}>{row.DRC_Name}</td>
-                  <td className={GlobalStyle.tableCurrency}>
-                    {row.Commission_Amount?.toLocaleString("en-LK", {
-                      style: "currency",
-                      currency: "LKR",
-                    })}
-                  </td>
+                  <td className={GlobalStyle.tableCurrency}>{row.Commission_Amount}</td>
                   <td className={GlobalStyle.tableData}>{row.Commission_Type}</td>
                   <td className={GlobalStyle.tableData}>{row.Commission_Action}</td>
                   <td className={GlobalStyle.tableData}>

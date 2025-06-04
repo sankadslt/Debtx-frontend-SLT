@@ -179,7 +179,7 @@ const PaymentPreview = () => {
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Money transaction Reference</th>
                             <th className={GlobalStyle.tableHeader}>Money Transaction Reference Type</th>
-                            <th className={GlobalStyle.tableHeader}>Money Transaction Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Money Transaction Amount (LKR)</th>
                             <th className={GlobalStyle.tableHeader}>Money Transaction Date</th>
                             <th className={GlobalStyle.tableHeader}>Money Transaction Type</th>
                         </tr>
@@ -196,14 +196,7 @@ const PaymentPreview = () => {
                                 >
                                     <td className={GlobalStyle.tableData}>{log.money_transaction_ref}</td>
                                     <td className={GlobalStyle.tableData}>{log.money_transaction_reference_type}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.money_transaction_amount &&
-                                            log.money_transaction_amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.money_transaction_amount}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log?.money_transaction_date &&
                                             new Date(log.money_transaction_date).toLocaleString("en-GB", {
