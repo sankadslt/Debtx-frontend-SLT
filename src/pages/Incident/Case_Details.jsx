@@ -207,59 +207,78 @@ const CaseDetails = () => {
 
     const renderBasicInfoCard = (basicInfo) => {
         if (!basicInfo) return null;
-
-        const infoFields = [
-            [
-                { label: 'Account No', value: basicInfo.accountNo || basicInfo.account_no || 'N/A' },
-                { label: 'Customer Ref', value: basicInfo.customerRef || basicInfo.customer_ref || 'N/A' },
-                { label: 'Area', value: basicInfo.area || 'N/A' }
-            ],
-            [
-                { label: 'Rtom', value: basicInfo.rtom || 'N/A' },
-                { label: 'Arrears Amount', value: basicInfo.arrearsAmount || basicInfo.arrears_amount || 'N/A' },
-                { label: 'Action Type', value: basicInfo.actionType || basicInfo.action_type || 'N/A' }
-            ],
-            [
-                { label: 'Current Status', value: basicInfo.currentStatus || basicInfo.current_status || 'N/A' },
-                { label: 'Last Payment Date', 
-                  value: basicInfo.lastPaymentDate ? formatDate(basicInfo.lastPaymentDate) : 
-                        basicInfo.last_payment_date ? formatDate(basicInfo.last_payment_date) : 'N/A' },
-                { label: 'Last BSS Reading Date', 
-                  value: basicInfo.lastBssReadingDate ? formatDate(basicInfo.lastBssReadingDate) : 
-                        basicInfo.last_bss_reading_date ? formatDate(basicInfo.last_bss_reading_date) : 'N/A' }
-            ]
-        ];
-
+      
+        const formatDate = (dateStr) => {
+          const date = new Date(dateStr);
+          return isNaN(date) ? 'Invalid Date' : date.toLocaleDateString();
+        };
+      
+        const getValue = (...fields) => {
+          for (const field of fields) {
+            if (field && field !== '') return field;
+          }
+          return 'N/A';
+        };
+      
         return (
-            // <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-gray-200">
-                   <div className={`${GlobalStyle.cardContainer}p-6 mb-8`}>
-                     
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {infoFields.map((column, colIndex) => (
-                        <div key={`col-${colIndex}`} className="space-y-4">
-                            {column.map((field, fieldIndex) => (
-                                <div key={`field-${colIndex}-${fieldIndex}`} className="flex flex-col">
-                                    <span className="text-sm font-semibold text-gray-700 mb-1">{field.label}:</span>
-                                    <span className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded border">
-                                        {field.value}
-                                    </span>
-                                </div>
-                            ))}
+          <div className=" p-1 mb-6">
+            <div className="max-w-8xl mx-auto flex flex-wrap justify-between">
+              {/* Left column */}
+              <div className="w-full sm:w-[auto]  space-y-3 width-50 ">
+                {[
+                  { label: 'Account No', value: getValue(basicInfo.accountNo, basicInfo.account_no) },
+                  { label: 'Customer Ref', value: getValue(basicInfo.customerRef, basicInfo.customer_ref) },
+                  {
+                    label: 'Area',
+                    custom: (
+                      <div className="flex items-center space-x-4">
+                        <div className="text-sm text-gray-900 bg-gray-50 px-3 py-1.5 rounded border w-24">
+                          {getValue(basicInfo.area, basicInfo.area_name)}
                         </div>
-                    ))}
-                </div>
-
-                {(basicInfo.remark || basicInfo.remarks) && (
-                    <div className="flex flex-col mt-4">
-                        <span className="text-sm font-semibold text-gray-700 mb-2">Remark:</span>
-                        <div className="text-sm text-gray-900 bg-gray-50 px-4 py-3 rounded border min-h-[60px]">
-                            {basicInfo.remark || basicInfo.remarks || 'No remarks available'}
+                        <span className="font-bold text-sm w-16 text-center">RTOM</span>
+                        <div className="text-sm text-gray-900 bg-gray-50 px-3 py-1.5 rounded border w-24">
+                          {getValue(basicInfo.rtom, basicInfo.rtom_name)}
                         </div>
+                      </div>
+                    ),
+                  },
+                  { label: 'Arrears amount', value: getValue(basicInfo.arrearsAmount, basicInfo.arrears_amount) },
+                  { label: 'Action type', value: getValue(basicInfo.actionType, basicInfo.action_type) },
+                  { label: 'Remark', value: getValue(basicInfo.remark, basicInfo.remark_text) },
+                ].map(({ label, value, custom }, index) => (
+                  <div key={index} className="flex items-center space-x-4">
+                    <span className="font-bold text-sm w-28">{label}</span>
+                    {custom || (
+                      <div className="text-sm text-gray-900 flex-1 bg-gray-50 px-3 py-1.5 rounded border">
+                        {value}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+      
+              {/* Right column */}
+              <div className="w-full sm:w-1/2 space-y-3 mt-6 sm:mt-0">
+                {[
+                  { label: 'Created dtm', value: formatDate(getValue(basicInfo.createdDtm, basicInfo.created_dtm)) },
+                  { label: 'Days count', value: getValue(basicInfo.daysCount, basicInfo.days_count) },
+                  { label: 'Current status', value: getValue(basicInfo.currentStatus, basicInfo.current_status) },
+                  { label: 'Last payment date', value: formatDate(getValue(basicInfo.lastPaymentDate, basicInfo.last_payment_date)) },
+                  { label: 'Last BSS Reading date', value: formatDate(getValue(basicInfo.lastBSSReadingDate, basicInfo.last_bss_reading_date)) },
+                ].map(({ label, value }, index) => (
+                  <div key={index} className="flex items-center space-x-4 justify-end">
+                    <span className="font-bold text-sm w-40 text-right">{label}</span>
+                    <div className="text-sm text-gray-900 bg-gray-50 px-3 py-1.5 rounded border w-48">
+                      {value}
                     </div>
-                )}
+                  </div>
+                ))}
+              </div>
             </div>
+          </div>
         );
-    };
+      };
+      
 
     const CollapsibleSection = ({ title, children, sectionKey }) => {
         const isOpen = openSections[sectionKey];
