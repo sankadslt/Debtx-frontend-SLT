@@ -639,3 +639,37 @@ export const fetchCaseDetails = async (caseId) => {
     throw error;
   }
 };
+
+ 
+export const fetchUserTasks = async (token, delegate_user_id) => {
+ 
+  try {
+    const response = await axios.post(
+      `${URL}/List_All_Open_Requests_For_To_Do_List`,
+      { delegate_user_id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    
+    const tasks = response.data.data.map(task => {
+      const showParamsNotEmpty = Array.isArray(task.showParameters) && task.showParameters.length > 0;
+      return {
+        ...task,
+        Case_ID: showParamsNotEmpty && task.parameters?.case_id !== undefined
+          ? task.parameters.case_id
+          : undefined,
+      };
+    });
+
+    return tasks;
+
+  } catch (error) {
+    console.error("Error fetching user tasks:", error.message);
+    throw error;
+  }
+};
+

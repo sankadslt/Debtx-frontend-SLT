@@ -324,7 +324,8 @@ import logo from "../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken, logoutUser } from "../services/auth/authService";
-import { fetchUserTasks, markTaskAsCompleted } from "../services/userTask/userTaskService";
+import { markTaskAsCompleted } from "../services/userTask/userTaskService";
+import { fetchUserTasks } from "../services/case/CaseServices.js";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -423,17 +424,16 @@ const Navbar = () => {
   const toggleTaskList = () => setIsTaskListOpen((prev) => !prev);
 
   const pendingTasksCount = userData
-    ? taskData.filter((task) => task.userId === userData.user_id && !task.completed).length
+    ? taskData.filter((task) => !task.completed).length
     : 0;
 
-  const markTaskAsDoneAndNavigate = async (user_id, url) => {
+  const markTaskAsDoneAndNavigate = async (taskId, url) => {
     try {
-      const response = await markTaskAsCompleted(localStorage.getItem("accessToken"), user_id);
-
+      const response = await markTaskAsCompleted(localStorage.getItem("accessToken"), taskId);
       if (response) {
         setTaskData((prev) =>
           prev.map((task) =>
-            task._id === user_id ? { ...task, completed: true } : task
+            task._id === taskId ? { ...task, completed: true } : task
           )
         );
         navigate(url);
@@ -445,16 +445,11 @@ const Navbar = () => {
     }
   };
 
-  const handleTaskClick = (user_id, url) => {
-    const task = taskData.find((task) => task._id === user_id);
-
-    if (!task) {
-      console.error("Task not found:", user_id);
-      return;
-    }
-
+  const handleTaskClick = (taskId, url) => {
+    const task = taskData.find((task) => task._id === taskId);
+    if (!task) return;
     if (!task.completed) {
-      markTaskAsDoneAndNavigate(user_id, url);
+      markTaskAsDoneAndNavigate(taskId, url);
     } else {
       navigate(url);
     }
@@ -467,17 +462,22 @@ const Navbar = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const tasks = await fetchUserTasks(localStorage.getItem("accessToken"), userData?.user_id);
+        const delegate_user_id = userData?.id;
+        const token = localStorage.getItem("accessToken");
+        if (!delegate_user_id || !token) return;
 
-        setTaskData(tasks);
+        const tasks = await fetchUserTasks(token, delegate_user_id);
+        const enriched = tasks.map((t) => ({
+          ...t,
+          task: t.Process || "Untitled Task",
+        }));
+        setTaskData(enriched);
       } catch (error) {
         console.error("Error fetching tasks:", error.message);
       }
     };
 
-    if (userData) {
-      fetchTasks();
-    }
+    if (userData) fetchTasks();
 
     const handleClickOutside = (event) => {
       if (
@@ -532,21 +532,22 @@ const Navbar = () => {
                   }
                 }}
               >
-                {taskData
-                  .filter((task) => task.user_id === userData?.id)
-                  .slice(0, visibleTasks)
-                  .map((task) => (
+                {taskData.slice(0, visibleTasks).map((task) => (
                     <li
                       key={task._id}
                       className="flex items-center justify-between py-3 px-2 hover:bg-gray-700 rounded-lg"
                     >
+                    <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <span
-                          className={`w-3 h-3 rounded-full ${
-                            task.completed ? "bg-green-500" : "bg-red-500"
-                          }`}
-                        ></span>
-                        <span>{task.task}</span>
+                        <span className={`w-3 h-3 rounded-full ${task.completed ? "bg-green-500" : "bg-red-500"}`}></span>
+                       <span className="font-medium">{task.task}</span>
+                      </div>
+     
+{task.Case_ID !== undefined && (
+  <span className="text-xs text-gray-300">Case ID: {task.Case_ID}</span>
+)}
+
+
                       </div>
                       <button
                         onClick={() => handleTaskClick(task._id, task.url)}
