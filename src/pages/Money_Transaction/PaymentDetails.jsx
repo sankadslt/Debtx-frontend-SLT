@@ -24,6 +24,8 @@ import { getLoggedUserId } from "../../services/auth/authService";
 import { List_All_Payment_Cases } from "../../services/Transaction/Money_TransactionService";
 import { Create_task_for_Download_Payment_Case_List } from "../../services/Transaction/Money_TransactionService";
 import { Tooltip } from "react-tooltip";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const PaymentDetails = () => {
   // State Variables
@@ -39,6 +41,7 @@ const PaymentDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // State to track if more data is available
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
@@ -54,6 +57,29 @@ const PaymentDetails = () => {
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
   const navigate = useNavigate();
+
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
@@ -302,7 +328,7 @@ const PaymentDetails = () => {
   };
 
   const naviCaseID = (caseId) => {
-    navigate("", { state: { caseId } });
+    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
   }
 
   // Function to handle the creation of tasks for downloading settlement list
