@@ -266,8 +266,8 @@ const SettlementPreview = () => {
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Installment Seq.</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount</th>
-                            <th className={GlobalStyle.tableHeader}>Cumulative Settle Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount (LKR)</th>
+                            <th className={GlobalStyle.tableHeader}>Cumulative Settle Amount (LKR)</th>
                             <th className={GlobalStyle.tableHeader}>Plan Date</th>
                         </tr>
                     </thead>
@@ -282,22 +282,8 @@ const SettlementPreview = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Installment_Settle_Amount &&
-                                            log.Installment_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Cumulative_Settle_Amount &&
-                                            log.Cumulative_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.Installment_Settle_Amount}</td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.Cumulative_Settle_Amount}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log?.Plan_Date &&
                                             new Date(log.Plan_Date).toLocaleString("en-GB", {
@@ -391,7 +377,7 @@ const SettlementPreview = () => {
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Installment Seq.</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount (LKR)</th>
                             <th className={GlobalStyle.tableHeader}>Plan Date</th>
                         </tr>
                     </thead>
@@ -406,14 +392,7 @@ const SettlementPreview = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Installment_Settle_Amount &&
-                                            log.Installment_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.Installment_Settle_Amount}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log?.Plan_Date &&
                                             new Date(log.Plan_Date).toLocaleString("en-GB", {
