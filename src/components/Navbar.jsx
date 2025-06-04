@@ -19,7 +19,7 @@
 //     setUserData(null);
 //     navigate("/");
 //   };
-  
+
 
 //   const loadUser = async () => {
 //     try {
@@ -35,17 +35,17 @@
 //       handleLogout();
 //     }
 //   };
-  
+
 //   useEffect(() => {
 //     const token = localStorage.getItem("accessToken");
-  
+
 //     if (token) {
 //       loadUser();
 //     } else {
 //       handleLogout();
 //     }
 //   }, []);
-  
+
 
 //   const defaultUser = {
 //     name: "Guest",
@@ -110,7 +110,7 @@
 //           console.error("No token found in localStorage");
 //           return;
 //         }
-    
+
 //         const response = await fetch(
 //           `http://localhost:5000/api/taskList/task/${id}`,
 //           {
@@ -124,7 +124,7 @@
 //             }),
 //           }
 //         );
-    
+
 //         if (response.ok) {
 //           setTaskData((prev) =>
 //             prev.map((task) =>
@@ -140,7 +140,7 @@
 //         console.error("Error updating task status:", error);
 //       }
 //     };
-    
+
 
 //   const handleTaskClick = (id, url) => {
 //     const task = taskData.find((task) => task._id === id);
@@ -533,34 +533,33 @@ const Navbar = () => {
                 }}
               >
                 {taskData.slice(0, visibleTasks).map((task) => (
-                    <li
-                      key={task._id}
-                      className="flex items-center justify-between py-3 px-2 hover:bg-gray-700 rounded-lg"
-                    >
+                  <li
+                    key={task._id}
+                    className="flex items-center justify-between py-3 px-2 hover:bg-gray-700 rounded-lg"
+                  >
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <span className={`w-3 h-3 rounded-full ${task.completed ? "bg-green-500" : "bg-red-500"}`}></span>
-                       <span className="font-medium">{task.task}</span>
+                        <span className="font-medium">{task.task}</span>
                       </div>
-     
-{task.Case_ID !== undefined && (
-  <span className="text-xs text-gray-300">Case ID: {task.Case_ID}</span>
-)}
+
+                      {task.Case_ID !== undefined && (
+                        <span className="text-xs text-gray-300">Case ID: {task.Case_ID}</span>
+                      )}
 
 
-                      </div>
-                      <button
-                        onClick={() => handleTaskClick(task._id, task.url)}
-                        className={`text-xs font-semibold py-1 px-2 rounded-md ${
-                          task.completed
-                            ? "bg-green-600 text-white hover:bg-green-700"
-                            : "bg-blue-500 text-white hover:bg-blue-600"
+                    </div>
+                    <button
+                      onClick={() => handleTaskClick(task._id, task.url)}
+                      className={`text-xs font-semibold py-1 px-2 rounded-md ${task.completed
+                          ? "bg-green-600 text-white hover:bg-green-700"
+                          : "bg-blue-500 text-white hover:bg-blue-600"
                         }`}
-                      >
-                        {task.completed ? "Done" : "Mark as Read"}
-                      </button>
-                    </li>
-                  ))}
+                    >
+                      {task.completed ? "Done" : "Mark as Read"}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           )}
