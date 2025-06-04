@@ -18,12 +18,19 @@ import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { GetFilteredCaseLists } from "../../services/case/CaseServices";
+import { fetchAllArrearsBands } from '../../services/case/CaseServices';
+import { getActiveRTOMDetails } from '../../services/drc/Drc';
+import { Active_DRC_Details } from '../../services/drc/Drc';
 
 const Case_List = () => {
 
     // State Variables
-    const [rtoms, setRtoms] = useState("");
-    const [arrearsBand, setArrearsBand] = useState("");
+    const [rtomList, setRtomList] = useState([]); 
+    const [rtom, setRtom] = useState("");
+    const [activeDRC, setActiveDRC] = useState([]);
+    const [selectedDRC, setSelectedDRC] = useState("");
+    const [arrearsBand, setArrearsBand] = useState([]); // Hold the list of arrears bands fetched from the backend API
+    const [selectedBand, setSelectedBand] = useState(""); // Currently selected arrears band in the dropdown
     const [caseStatus, setCaseStatus] = useState("");
     const [serviceType, setServiceType] = useState("");
     const [fromDate, setFromDate] = useState(null);
@@ -48,6 +55,18 @@ const Case_List = () => {
     const paginatedData = filteredData.slice(startIndex, endIndex);
 
     const navigate = useNavigate();
+
+    // const handleRtomChange = (e) => {
+    //   setSelectedRtom(e.target.value);
+    // };
+
+    const handleArrersBandChange = (e) => {
+      setSelectedBand(e.target.value);
+    };
+
+    const handleDRCChange = (e) => {
+      setSelectedDRC(e.target.value);
+    };    
     
     const handlestartdatechange = (date) => {
         setFromDate(date);
@@ -75,6 +94,41 @@ const Case_List = () => {
           }
     }, [fromDate, toDate]);
 
+    useEffect(() => {
+      // fetch Arrears Bands
+        const fetchArrearsBands = async () => {
+          try {
+            const bands = await fetchAllArrearsBands();
+            setArrearsBand(bands);
+          } catch (error) {
+            console.error("Error fetching arrears bands:", error);
+          }
+        };
+
+      // fetch RTOM
+      const fetchRTOMs = async () => {
+          try {
+            const rtom = await getActiveRTOMDetails();
+            setRtomList(rtom);
+          } catch (error) {
+            console.error("Error fetching rtom:", error);
+          }
+        };
+
+      // fetch Active DRCs
+      const fetchActiveDRCs = async () => {
+          try {
+            const drcs = await Active_DRC_Details();
+            setActiveDRC(drcs);
+          } catch (error) {
+            console.error("Error fetching drc:", error);
+          }
+        };
+        fetchArrearsBands();
+        fetchRTOMs();
+        fetchActiveDRCs();
+      }, []);   
+
     // Search Section
     const filteredDataBySearch = paginatedData.filter((row) =>
     Object.values(row)
@@ -92,7 +146,7 @@ const Case_List = () => {
             return offsetDate.toISOString().split('T')[0];
           };
     
-          if (!rtoms && !arrearsBand && !caseStatus && !serviceType && !fromDate && !toDate) {
+          if (!rtom && !arrearsBand && !caseStatus && !serviceType && !fromDate && !toDate) {
             Swal.fire({
               title: "Warning",
               text: "No filter is selected. Please, select a filter.",
@@ -121,7 +175,7 @@ const Case_List = () => {
           console.log(currentPage);
     
           const payload = {
-            rtom: rtoms,
+            RTOM: rtom,
             arrears_band: arrearsBand,
             case_current_status: caseStatus,           
             drc_commision_rule: serviceType,
@@ -193,8 +247,9 @@ const Case_List = () => {
       };
 
       const handleClear = () => {
-        setRtoms("");
-        setArrearsBand("");
+        setRtom("");
+        setSelectedDRC("");
+        setSelectedBand("");
         setCaseStatus("");
         setServiceType("");
         setFromDate(null);
@@ -267,43 +322,48 @@ const Case_List = () => {
             {/* Filter Section */}
             <div className="grid grid-cols-4 gap-6 w-full">
               <select
-                value={rtoms}
-                onChange={(e) => setRtoms(e.target.value)}
+                value={rtom}
+                onChange={(e) => setRtom(e.target.value)}
                 className={GlobalStyle.selectBox}
+                style={{ color: rtom === "" ? "gray" : "black" }}
               >
-                <option value="">RTOM</option>
-                <option value="GL">GL</option>
-                <option value="MH">MH</option>
-                <option value="RTOM-1">RTOM-1</option>
-                <option value="RTOM-2">RTOM-2</option>
-                <option value="RTOM-3">RTOM-3</option>
-                <option value="RTOM-4">RTOM-4</option>
-                <option value="RTOM-6">RTOM-6</option>
+                <option value=""hidden>RTOM</option>
+                {Object.values(rtomList).map((rtom) => (
+                  <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
+                  {rtom.rtom}
+                  </option>
+                ))}
+
               </select>
 
-              {/* <select
-                value={status4}
-                          onChange={(e) => setStatus4(e.target.value)}
-                          className={GlobalStyle.selectBox}
-                      >
-                          <option value="">DRC</option>
-                          <option value="Open">Open</option>
-                          <option value="Closed">Closed</option>
-                          <option value="Pending">Pending</option>
-                      </select> */}
+              <select
+                value={selectedDRC}
+                onChange={handleDRCChange}
+                className={GlobalStyle.selectBox}
+                style={{ color: selectedDRC === "" ? "gray" : "black" }}
+              >
+                <option value="">DRC</option>
+                {activeDRC.map(({ key, value }) => (
+                <option key={key} value={value} style={{ color: "black" }}>
+                  {value}
+                </option>
+                ))}                          
+              </select>
                         
 
               <select
-                value={arrearsBand}
-                onChange={(e) => setArrearsBand(e.target.value)}
+                value={selectedBand}
+                onChange={handleArrersBandChange}
                 className={GlobalStyle.selectBox}
+                style={{ color: selectedBand === "" ? "gray" : "black" }}
               >
                 <option value="">Arrears Band</option>
-                <option value="AB-5_10">AB-5_10</option>
-                <option value="AB-10_25">AB-10_25</option>
-                <option value="AB-25_50">AB-25_50</option>
-                <option value="AB-50_100">AB-50_100</option>
-                </select>
+                {arrearsBand.map(({ key, value }) => (
+                <option key={key} value={value} style={{ color: "black" }}>
+                  {value}
+                </option>
+                ))}
+              </select>
 
                 <select
                   value={caseStatus}
