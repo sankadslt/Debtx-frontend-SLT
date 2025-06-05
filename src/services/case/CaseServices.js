@@ -699,37 +699,66 @@ export const fetchCaseDetails = async (caseId) => {
     throw error;
   }
 };
-
  
 export const fetchUserTasks = async (token, delegate_user_id) => {
- 
   try {
-    const response = await axios.post(
+    const { data } = await axios.post(
       `${URL}/List_All_Open_Requests_For_To_Do_List`,
       { delegate_user_id },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    
-    const tasks = response.data.data.map(task => {
-      const showParamsNotEmpty = Array.isArray(task.showParameters) && task.showParameters.length > 0;
-      return {
-        ...task,
-        Case_ID: showParamsNotEmpty && task.parameters?.case_id !== undefined
-          ? task.parameters.case_id
-          : undefined,
-      };
-    });
+    return data.data.map(task => {
+      const result = { ...task };
+      const filteredParameters =
+        task.filtered_parameters && typeof task.filtered_parameters === "object"
+          ? task.filtered_parameters
+          : {};
 
-    return tasks;
+      for (const [key, value] of Object.entries(filteredParameters)) {
+        result[key] = value;
+      }
+
+     
+      result.showParameters = Object.keys(filteredParameters);
+
+      return result;
+    });
 
   } catch (error) {
     console.error("Error fetching user tasks:", error.message);
     throw error;
   }
 };
+export const GetFilteredCaseLists = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Get_Case_Lists`,
+      payload
+    );
 
+    if (response.data.success === false) {
+      throw new Error(response.data.message || "Failed to fetch withdrawal cases.");
+    }
+
+    return { 
+    data: response.data.data.map((item) => ({
+      caseid: item.case_id,
+      casecurrentstatus: item.case_current_status,
+      accountno: item.account_no,                                 
+      drccommisionrule: item.drc_commision_rule,
+      currentarrearsamount: item.current_arrears_amount,
+      rtom: item.rtom,                                 
+      createddtm: item.created_dtm,
+      lastpaymentdate: item.last_payment_date
+    })),
+
+  };
+  } catch (error) {
+    console.error(
+      "Error fetching case list data:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
