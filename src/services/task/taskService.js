@@ -183,3 +183,44 @@ export const Task_for_Download_Incidents = async (incidentData) => {
     throw error;
   }
 };
+
+export const Handle_Interaction_Acknowledgement = async (delegate_user_id, task_id) => {
+ 
+  try {
+    const response = await axios.post(
+      `${TASK_URL}/Handle_Interaction_Acknowledgement`,
+      {
+        delegate_user_id,
+        Interaction_Log_ID: task_id
+      },
+      // {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      // }
+    );
+
+    
+    // const tasks = response.data.data.map(task => {
+    //   const showParamsNotEmpty = Array.isArray(task.showParameters) && task.showParameters.length > 0;
+    //   return {
+    //     ...task,
+    //     Case_ID: showParamsNotEmpty && task.parameters?.case_id !== undefined
+    //       ? task.parameters.case_id
+    //       : undefined,
+    //   };
+    // });
+
+    // return tasks;
+
+    if (response.status === 200) {
+      return response;
+    } else {
+      throw error;
+    }
+
+  } catch (error) {
+    console.error("Error fetching user tasks:", error.message);
+    throw error;
+  }
+};
