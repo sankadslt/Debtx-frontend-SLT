@@ -275,10 +275,18 @@ export const getActiveRTOMDetails = async () => {
 export const getActiveServiceDetails = async () => {
   try {
     const response = await axios.get(
-      `${BASE_URL}/service/Active_Service_Details`
+      `${URL}/service/Active_Service_Details`
     );
     console.log("Active service details data:", response.data.data);
-    return response.data;
+    const data = response.data.data.mongoData;
+    const serviceNames = data.map((service) => ({
+      key: service.service_id,  
+      value: service.service_name,   
+      id: service.service_id,
+    }));
+
+    return { data: serviceNames };  
+
   } catch (error) {
     console.error(
       "Error fetching active services:",
