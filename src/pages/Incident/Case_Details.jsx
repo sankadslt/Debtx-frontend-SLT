@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lu
 import { fetchCaseDetails } from '../../services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useLocation, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 
 const CaseDetails = () => {
@@ -25,10 +26,24 @@ const CaseDetails = () => {
                 if (response.success) {
                     setCaseData(response.data);
                 } else {
-                    setError(response.message || 'Failed to load case details');
+                    // setError(response.message || 'Failed to load case details');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Failed to load case details',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: "#d33"
+                    });
                 }
             } catch (err) {
-                setError(err.message || 'An error occurred while fetching case details');
+                // setError(err.message || 'An error occurred while fetching case details');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message || 'Failed to load case details',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: "#d33"
+                });
             } finally {
                 setLoading(false);
             }
