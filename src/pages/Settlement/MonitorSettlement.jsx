@@ -230,13 +230,7 @@ const Monitor_settlement = () => {
         title: "Date Range Exceeded",
         text: "The selected dates shouldn't have more than a 1-month gap.",
         icon: "warning",
-        // allowOutsideClick: false,
-        // allowEscapeKey: false,
-        // showCancelButton: true,
-        // confirmButtonText: "Yes",
-        // confirmButtonColor: "#28a745",
-        // cancelButtonText: "No",
-        // cancelButtonColor: "#d33",
+        confirmButtonColor: "#f1c40f"
       })
       setToDate(null);
       setFromDate(null);
@@ -252,7 +246,8 @@ const Monitor_settlement = () => {
         text: "To date should be greater than or equal to From date",
         icon: "warning",
         allowOutsideClick: false,
-        allowEscapeKey: false
+        allowEscapeKey: false,
+        confirmButtonColor: "#28a745"
       });
       setToDate(null);
       setFromDate(null);
@@ -284,7 +279,8 @@ const Monitor_settlement = () => {
           text: "No filter is selected. Please, select a filter.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -297,7 +293,8 @@ const Monitor_settlement = () => {
           text: "Both From Date and To Date must be selected.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -325,7 +322,8 @@ const Monitor_settlement = () => {
             text: "No matching data found for the selected filters.",
             icon: "warning",
             allowOutsideClick: false,
-            allowEscapeKey: false
+            allowEscapeKey: false,
+            confirmButtonColor: "#f1c40f"
           });
           setFilteredData([]);
           return null;
@@ -349,7 +347,8 @@ const Monitor_settlement = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
             });
           }
         } else {
@@ -363,7 +362,8 @@ const Monitor_settlement = () => {
         Swal.fire({
           title: "Error",
           text: "No valid Settlement data found in response.",
-          icon: "error"
+          icon: "error",
+          confirmButtonColor: "#d33"
         });
         setFilteredData([]);
       }
@@ -372,7 +372,8 @@ const Monitor_settlement = () => {
       Swal.fire({
         title: "Error",
         text: "Failed to fetch filtered data. Please try again.",
-        icon: "error"
+        icon: "error",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -386,6 +387,7 @@ const Monitor_settlement = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       setCaseId(""); // Clear the invalid input
       return;
@@ -470,7 +472,8 @@ const Monitor_settlement = () => {
         text: "Please select From Date and To Date.",
         icon: "warning",
         allowOutsideClick: false,
-        allowEscapeKey: false
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -479,10 +482,20 @@ const Monitor_settlement = () => {
     try {
       const response = await Create_Task_For_Downloard_Settlement_List(userData, phase, status, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
-        Swal.fire(response, `Task created successfully!`, "success");
+        Swal.fire({
+          title: response, 
+          text: `Task created successfully!`, 
+          icon: "success",
+          confirmButtonColor: "#28a745"
+        });
       }
     } catch (error) {
-      Swal.fire("Error", error.message || "Failed to create task.", "error");
+      Swal.fire({
+        title: "Error", 
+        text: error.message || "Failed to create task.", 
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
     } finally {
       setIsCreatingTask(false);
     }
@@ -688,7 +701,7 @@ const Monitor_settlement = () => {
           </div>
 
           {/* Pagination Section */}
-          <div className={GlobalStyle.navButtonContainer}>
+          {filteredDataBySearch.length > 0 && (<div className={GlobalStyle.navButtonContainer}>
             <button
               onClick={() => handlePrevNext("prev")}
               disabled={currentPage <= 1}
@@ -706,9 +719,9 @@ const Monitor_settlement = () => {
             >
               <FaArrowRight />
             </button>
-          </div>
+          </div>)}
 
-          {["admin", "superadmin", "slt"].includes(userRole) && (
+          {["admin", "superadmin", "slt"].includes(userRole) && filteredDataBySearch.length > 0 && (
             <button
               onClick={HandleCreateTaskDownloadSettlementList}
               className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}

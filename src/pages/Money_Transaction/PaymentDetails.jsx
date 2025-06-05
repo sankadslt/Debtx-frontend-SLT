@@ -104,13 +104,7 @@ const PaymentDetails = () => {
         title: "Date Range Exceeded",
         text: "The selected dates shouldn't have more than a 1-month gap.",
         icon: "warning",
-        // allowOutsideClick: false,
-        // allowEscapeKey: false,
-        // showCancelButton: true,
-        // confirmButtonText: "Yes",
-        // confirmButtonColor: "#28a745",
-        // cancelButtonText: "No",
-        // cancelButtonColor: "#d33",
+        confirmButtonColor: "#f1c40f"
       })
       setToDate(null);
       setFromDate(null);
@@ -125,7 +119,8 @@ const PaymentDetails = () => {
         text: "To date should be greater than or equal to From date",
         icon: "warning",
         allowOutsideClick: false,
-        allowEscapeKey: false
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       setToDate(null);
       setFromDate(null);
@@ -157,7 +152,8 @@ const PaymentDetails = () => {
           text: "No filter is selected. Please, select a filter.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -170,7 +166,8 @@ const PaymentDetails = () => {
           text: "Both From Date and To Date must be selected.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -197,7 +194,8 @@ const PaymentDetails = () => {
             text: "No matching data found for the selected filters.",
             icon: "warning",
             allowOutsideClick: false,
-            allowEscapeKey: false
+            allowEscapeKey: false,
+            confirmButtonColor: "#f1c40f"
           });
           setFilteredData([]);
           return null;
@@ -221,7 +219,8 @@ const PaymentDetails = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
             });
           }
         } else {
@@ -241,7 +240,8 @@ const PaymentDetails = () => {
       Swal.fire({
         title: "Error",
         text: "Failed to fetch filtered data. Please try again.",
-        icon: "error"
+        icon: "error",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -255,6 +255,7 @@ const PaymentDetails = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       setCaseId(""); // Clear the invalid input
       return;
@@ -298,6 +299,7 @@ const PaymentDetails = () => {
   const handleFilterButton = () => { // Reset to the first page
     setFilteredData([]); // Clear previous results
     setMaxCurrentPage(0); // Reset max current page
+    setIsMoreDataAvailable(true); // Reset more data available state
     // setTotalAPIPages(1); // Reset total API pages
     if (currentPage === 1) {
       handleFilter();
@@ -318,6 +320,8 @@ const PaymentDetails = () => {
     setIsFilterApplied(false); // Reset filter applied state
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
     // setTotalAPIPages(1); // Reset total API pages
   };
 
@@ -342,7 +346,8 @@ const PaymentDetails = () => {
         text: "Please select From Date and To Date.",
         icon: "warning",
         allowOutsideClick: false,
-        allowEscapeKey: false
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -351,10 +356,20 @@ const PaymentDetails = () => {
     try {
       const response = await Create_task_for_Download_Payment_Case_List(userData, phase, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
-        Swal.fire(response, `Task created successfully!`, "success");
+        Swal.fire({
+          title: response, 
+          text: `Task created successfully!`, 
+          icon: "success",
+          confirmButtonColor: "#28a745"
+        });
       }
     } catch (error) {
-      Swal.fire("Error", error.message || "Failed to create task.", "error");
+      Swal.fire({
+        title: "Error", 
+        text: error.message || "Failed to create task.", 
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
     } finally {
       setIsCreatingTask(false);
     }
@@ -564,7 +579,7 @@ const PaymentDetails = () => {
           </div>
 
           {/* Pagination Section */}
-          <div className={GlobalStyle.navButtonContainer}>
+          {filteredDataBySearch.length > 0 && (<div className={GlobalStyle.navButtonContainer}>
             <button
               onClick={() => handlePrevNext("prev")}
               disabled={currentPage <= 1}
@@ -584,9 +599,9 @@ const PaymentDetails = () => {
             >
               <FaArrowRight />
             </button>
-          </div>
+          </div>)}
 
-          {["admin", "superadmin", "slt"].includes(userRole) && (
+          {["admin", "superadmin", "slt"].includes(userRole) && filteredDataBySearch.length > 0 && (
             <button
               onClick={HandleCreateTaskDownloadPaymentList}
               className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}

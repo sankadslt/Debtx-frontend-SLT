@@ -47,7 +47,8 @@ const PaymentPreview = () => {
                 text: "Error fetching payment details",
                 icon: "error",
                 allowOutsideClick: false,
-                allowEscapeKey: false
+                allowEscapeKey: false,
+                confirmButtonColor: "#d33"
             });
             setPaymentData([]);
         } finally {
@@ -223,17 +224,19 @@ const PaymentPreview = () => {
                 </table>
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPagePaymentDetails} disabled={currentPagePaymentDetails === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPagePaymentDetails + 1} of {pagesPaymentDetails}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPagePaymentDetails} disabled={currentPagePaymentDetails === pagesPaymentDetails - 1}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {dataInPagePaymentDetails.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPagePaymentDetails} disabled={currentPagePaymentDetails === 0}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPagePaymentDetails + 1} of {pagesPaymentDetails}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPagePaymentDetails} disabled={currentPagePaymentDetails === pagesPaymentDetails - 1}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
 
             {/* Commission Details Card */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Commission Details</b></h2>

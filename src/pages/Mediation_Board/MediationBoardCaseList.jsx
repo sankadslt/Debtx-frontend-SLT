@@ -168,7 +168,8 @@ const MediationBoardCaseList = () => {
           text: "No filter is selected. Please, select a filter.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -181,7 +182,8 @@ const MediationBoardCaseList = () => {
           text: "Both From Date and To Date must be selected.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -214,7 +216,8 @@ const MediationBoardCaseList = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
             });
           }
         } else {
@@ -227,7 +230,8 @@ const MediationBoardCaseList = () => {
         Swal.fire({
           title: "Error",
           text: "No valid Settlement data found in response.",
-          icon: "error"
+          icon: "error",
+          confirmButtonColor: "#d33"
         });
         setFilteredData([]);
       }
@@ -238,6 +242,7 @@ const MediationBoardCaseList = () => {
         text: error.message || "Failed to fetch data.",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33"
       });
     } finally {
       setIsLoading(false);
@@ -263,7 +268,7 @@ const MediationBoardCaseList = () => {
           text: "From date must be before to date",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -278,7 +283,7 @@ const MediationBoardCaseList = () => {
           text: "Date range cannot exceed one month",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -298,6 +303,7 @@ const MediationBoardCaseList = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       setCaseId(""); // Clear the invalid input
       return;

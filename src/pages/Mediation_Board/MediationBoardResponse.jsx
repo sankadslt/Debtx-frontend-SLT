@@ -47,7 +47,8 @@ const MediationBoardResponse = () => {
                     text: "Error fetching case details",
                     icon: "error",
                     allowOutsideClick: false,
-                    allowEscapeKey: false
+                    allowEscapeKey: false,
+                    confirmButtonColor: "#d33"
                 });
                 setCaseData([]);
             }
@@ -57,7 +58,8 @@ const MediationBoardResponse = () => {
                 text: "Error fetching case details",
                 icon: "error",
                 allowOutsideClick: false,
-                allowEscapeKey: false
+                allowEscapeKey: false,
+                confirmButtonColor: "#d33"
             });
             setCaseData([]);
         } finally {
@@ -102,7 +104,12 @@ const MediationBoardResponse = () => {
     const handleSubmit = async () => {
         try {
             if (!nonSettlementAccept) {
-                Swal.fire("Error", "You must accept Non-Settlement before submitting.", "error");
+                Swal.fire({
+                    title: "Error",
+                    text: "You must accept Non-Settlement before submitting.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
                 return;
             }
 
@@ -112,14 +119,29 @@ const MediationBoardResponse = () => {
             const response = await Accept_Non_Settlement_Request_from_Mediation_Board(caseID, received_by);
 
             if (response === 200) {
-                Swal.fire("Success", "Non-Settlement request accepted successfully!", "success");
+                Swal.fire({
+                    title: "Success",
+                    text: "Non-Settlement request accepted successfully!",
+                    icon: "success",
+                    confirmButtonColor: "#28a745"
+                });
                 navigate("/MediationBoard/MediationBoardCaseList");
             } else {
-                Swal.fire("Error", "Failed to submit Non-Settlement acceptance.", "error");
+                Swal.fire({
+                    title: "Error", 
+                    text: "Failed to submit Non-Settlement acceptance.", 
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
                 setNonSettlementAccept(false);
             }
         } catch {
-            Swal.fire("Error", "Failed to submit Non-Settlement acceptance.", "error");
+            Swal.fire({
+                title: "Error", 
+                text: "Failed to submit Non-Settlement acceptance.", 
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
             setNonSettlementAccept(false);
         } finally {
             setIsLoading(false);
@@ -320,17 +342,19 @@ const MediationBoardResponse = () => {
                 </table>
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPageMBNegotiationeHistory} disabled={currentPage === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPage + 1} of {pagesMBNegotiationHistory}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPageMBNegotiationHistory} disabled={currentPage === pagesMBNegotiationHistory - 1}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {dataInPageMBNegotiationHistory.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPageMBNegotiationeHistory} disabled={currentPage === 0}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPage + 1} of {pagesMBNegotiationHistory}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPageMBNegotiationHistory} disabled={currentPage === pagesMBNegotiationHistory - 1}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
 
             {/* Payment Details table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Payment Details</b></h2>
@@ -381,17 +405,19 @@ const MediationBoardResponse = () => {
                 </table>
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPagePaymentDetails} disabled={currentPagePaymentDetails === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPagePaymentDetails + 1} of {pagesPaymentDetails}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPagePaymentDetails} disabled={currentPagePaymentDetails === pagesPaymentDetails - 1}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {dataInPagePaymentDetails.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPagePaymentDetails} disabled={currentPagePaymentDetails === 0}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPagePaymentDetails + 1} of {pagesPaymentDetails}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPagePaymentDetails} disabled={currentPagePaymentDetails === pagesPaymentDetails - 1}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
 
             {/* Request Additional Details Table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4 `}><b>Requested Additional Details</b></h2>
@@ -442,21 +468,23 @@ const MediationBoardResponse = () => {
                 </table>
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPageroRequests} disabled={currentPageroRequests === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPageroRequests + 1} of {pagesroRequests}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPageroRequests} disabled={currentPageroRequests === pagesroRequests - 1}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {dataInPageroRequests.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPageroRequests} disabled={currentPageroRequests === 0}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPageroRequests + 1} of {pagesroRequests}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPageroRequests} disabled={currentPageroRequests === pagesroRequests - 1}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
 
             <div>
                 <button
-                    className={GlobalStyle.buttonPrimary}
+                    className={`${GlobalStyle.buttonPrimary} mt-4`}
                     onClick={() => navigate("/MediationBoard/MediationBoardCaseList")}
                 >
                     <FaArrowLeft />
