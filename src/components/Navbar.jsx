@@ -325,7 +325,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken, logoutUser } from "../services/auth/authService";
 import { markTaskAsCompleted } from "../services/userTask/userTaskService";
-import { fetchUserTasks } from "../services/case/CaseServices.js";
+import { fetchUserTasks } from "../services/task/taskService";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
