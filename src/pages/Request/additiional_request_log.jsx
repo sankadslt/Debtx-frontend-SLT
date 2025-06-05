@@ -314,7 +314,7 @@ const RecoveryOfficerRequests = () => {
     console.log("delegate_user_id", delegate_user_id);
     console.log("Interaction_Log_ID", Interaction_Log_ID);
     console.log("Interaction_ID", Interaction_ID);
-    if (User_Interaction_Type === "Mediation Board Settlement plan Request") {
+    if (User_Interaction_Type === "Mediation Board Settlement plan Request" || User_Interaction_Type === "Negotiation Settlement plan Request") {
       navigate("/pages/CreateSettlement/CreateSettlementPlan", {
         state: {
           case_Id: case_id,

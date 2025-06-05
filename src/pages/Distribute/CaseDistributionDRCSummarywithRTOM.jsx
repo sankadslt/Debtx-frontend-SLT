@@ -121,7 +121,7 @@ const handleonbacknuttonclick = () => {
             <tr>
               <th className={GlobalStyle.tableHeader}>RTOM</th>
               <th className={GlobalStyle.tableHeader}>Case Count</th>
-              <th className={GlobalStyle.tableHeader}>Arrears Amount</th>
+              <th className={GlobalStyle.tableHeader}>Arrears Amount (LKR)</th>
             </tr>
           </thead>
           <tbody>
