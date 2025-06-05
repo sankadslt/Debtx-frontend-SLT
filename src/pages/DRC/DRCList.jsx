@@ -281,8 +281,10 @@ const DRCList = () => {
                                         >
                                             <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
                                         </button>
-                                        <button 
-                                            onClick={() => navigate(`/pages/Distribute/DRC_Details/${log.DRCID}`)}
+                                       <button 
+                                            onClick={() => navigate(`/pages/DRC/DRCDetails`, { 
+                                                state: { drcId: log.DRCID } 
+                                            })}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
                                             <img src={ListImg} alt="Details" title="Details" className="w-6 h-6" />
