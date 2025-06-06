@@ -230,15 +230,15 @@ const DRCInfo = () => {
 
           <table className={`${GlobalStyle.table} min-w-full text-left`}>
             <tbody>
-              <tr>
+              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
                 <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
                 >
                   Added Date
                 </td>
-                <td className="w-4 text-left">:</td>
+                <td className="hidden sm:table-cell w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
+                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
                 >
                   {companyData.create_on
                     ? new Date(companyData.create_on).toLocaleDateString()
