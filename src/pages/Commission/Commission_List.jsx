@@ -137,7 +137,8 @@ const Commission_List = () => {
           text: "No filter is selected. Please, select a filter.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f",
         });
         setToDate(null);
         setFromDate(null);
@@ -150,7 +151,8 @@ const Commission_List = () => {
           text: "Both From Date and To Date must be selected.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f",
         });
         setToDate(null);
         setFromDate(null);
@@ -187,7 +189,8 @@ const Commission_List = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f",
             });
           }
         } else {
@@ -202,7 +205,8 @@ const Commission_List = () => {
         Swal.fire({
           title: "Error",
           text: "No valid Settlement data found in response.",
-          icon: "error"
+          icon: "error",
+          confirmButtonColor: "#d33",
         });
         setFilteredData([]);
       }
@@ -223,6 +227,7 @@ const Commission_List = () => {
         text: error.message || "Failed to fetch data.",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33",
       });
     } finally {
       setIsLoading(false);
@@ -248,7 +253,7 @@ const Commission_List = () => {
           text: "From date must be before to date",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -263,7 +268,7 @@ const Commission_List = () => {
           text: "Date range cannot exceed one month",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -283,6 +288,7 @@ const Commission_List = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",
       });
       setCaseId(""); // Clear the invalid input
       return;
@@ -424,7 +430,8 @@ const Commission_List = () => {
         text: "Please select From Date and To Date.",
         icon: "warning",
         allowOutsideClick: false,
-        allowEscapeKey: false
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",
       });
       return;
     }
@@ -458,10 +465,20 @@ const Commission_List = () => {
     try {
       const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
-        Swal.fire(response, `Task created successfully!`, "success");
+        Swal.fire({
+          title: response, 
+          text: `Task created successfully!`, 
+          icon: "success",
+          confirmButtonColor: "#28a745",
+        });
       }
     } catch (error) {
-      Swal.fire("Error", error.message || "Failed to create task.", "error");
+      Swal.fire({
+        title: "Error", 
+        text: error.message || "Failed to create task.", 
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
     } finally {
       setIsCreatingTask(false);
     }
@@ -725,7 +742,7 @@ const Commission_List = () => {
           </div>
         )
       }
-      {["admin", "superadmin", "slt"].includes(userRole) && (
+      {["admin", "superadmin", "slt"].includes(userRole)&& filteredDataBySearch.length > 0 && (
         <button
           onClick={HandleCreateTaskDownloadCommissiontList}
           className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
