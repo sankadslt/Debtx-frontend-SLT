@@ -368,11 +368,11 @@ const DRCInfo = () => {
           </h2>
 
           <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
-            <table className={`${GlobalStyle.table} min-w-full inline-block align-middle`}>
+            <table className={`${GlobalStyle.table} min-w-full table-fixed sm:table-auto align-middle`}>
               <thead className={`${GlobalStyle.thead} overflow-hidden`}>
                 <tr>
                   <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
+                    className={`${GlobalStyle.tableHeader} px-2 py-3 tracking-wider hidden sm:table-cell whitespace-nowrap text-left`}
                   >
                     Service Type
                   </th>
@@ -438,7 +438,7 @@ const DRCInfo = () => {
           </h2>
 
           <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
-            <table className={`${GlobalStyle.table} min-w-full inline-block align-middle`}>
+            <table className={`${GlobalStyle.table} min-w-full table-fixed sm:table-auto align-middle`}>
               <thead className={`${GlobalStyle.thead}overflow-hidden`}>
                 <tr>
                   <th
