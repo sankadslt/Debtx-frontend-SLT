@@ -50,7 +50,8 @@ const SettlementPreview = () => {
                 text: "Error fetching settlement details",
                 icon: "error",
                 allowOutsideClick: false,
-                allowEscapeKey: false
+                allowEscapeKey: false,
+                confirmButtonColor: "#d33"
             });
             setSettlementData([]);
         } finally {
@@ -147,10 +148,20 @@ const SettlementPreview = () => {
         try {
             const response = await Create_Task_For_Downloard_Settlement_Details_By_Case_ID(userData, caseId, settlementID);
             if (response === "success") {
-                Swal.fire(response, `Task created successfully!`, "success");
+                Swal.fire({
+                    title: response,
+                    text: `Task created successfully!`,
+                    icon: "success",
+                    confirmButtonColor: "#28a745"
+                });
             }
         } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
+            Swal.fire({
+                title: "Error",
+                text: error.message || "Failed to create task.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
         } finally {
             setIsCreatingTask(false);
         }
@@ -266,8 +277,8 @@ const SettlementPreview = () => {
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Installment Seq.</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount</th>
-                            <th className={GlobalStyle.tableHeader}>Cumulative Settle Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount (LKR)</th>
+                            <th className={GlobalStyle.tableHeader}>Cumulative Settle Amount (LKR)</th>
                             <th className={GlobalStyle.tableHeader}>Plan Date</th>
                         </tr>
                     </thead>
@@ -282,22 +293,8 @@ const SettlementPreview = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Installment_Settle_Amount &&
-                                            log.Installment_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Cumulative_Settle_Amount &&
-                                            log.Cumulative_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.Installment_Settle_Amount}</td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.Cumulative_Settle_Amount}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log?.Plan_Date &&
                                             new Date(log.Plan_Date).toLocaleString("en-GB", {
@@ -323,17 +320,19 @@ const SettlementPreview = () => {
                 </table>
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPageSettlementPlans} disabled={currentPageSettlementPlans === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPageSettlementPlans + 1} of {pagesSettlementPlans}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPageSettlementPlans} disabled={currentPageSettlementPlans === pagesSettlementPlans - 1}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {dataInPageSettlementPlans.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPageSettlementPlans} disabled={currentPageSettlementPlans === 0}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPageSettlementPlans + 1} of {pagesSettlementPlans}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPageSettlementPlans} disabled={currentPageSettlementPlans === pagesSettlementPlans - 1}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
 
             {/* Received Settlement Plan Table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Received Settlement Plan</b></h2>
@@ -391,7 +390,7 @@ const SettlementPreview = () => {
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Installment Seq.</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount (LKR)</th>
                             <th className={GlobalStyle.tableHeader}>Plan Date</th>
                         </tr>
                     </thead>
@@ -406,14 +405,7 @@ const SettlementPreview = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.Installment_Settle_Amount &&
-                                            log.Installment_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.Installment_Settle_Amount}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log?.Plan_Date &&
                                             new Date(log.Plan_Date).toLocaleString("en-GB", {
@@ -439,21 +431,23 @@ const SettlementPreview = () => {
                 </table>
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPagesettlementPlanRecievedDetails} disabled={currentPagesettlementPlanRecievedDetails === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPagesettlementPlanRecievedDetails + 1} of {pagessettlementPlanRecievedDetails}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPagesettlementPlanRecievedDetails} disabled={currentPagesettlementPlanRecievedDetails === pagessettlementPlanRecievedDetails - 1}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {dataInPagesettlementPlanRecievedDetails.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPagesettlementPlanRecievedDetails} disabled={currentPagesettlementPlanRecievedDetails === 0}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPagesettlementPlanRecievedDetails + 1} of {pagessettlementPlanRecievedDetails}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPagesettlementPlanRecievedDetails} disabled={currentPagesettlementPlanRecievedDetails === pagessettlementPlanRecievedDetails - 1}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
 
             <div>
                 <button
-                    className={GlobalStyle.buttonPrimary}
+                    className={`${GlobalStyle.buttonPrimary} mt-4`}
                     onClick={handleBackButton}
                 >
                     <FaArrowLeft />

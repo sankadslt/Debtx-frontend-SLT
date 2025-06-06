@@ -21,6 +21,8 @@ import { getLoggedUserId } from "../../services/auth/authService";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const Commission_List = () => {
   const [selectValue, setSelectValue] = useState("Account No");
@@ -50,9 +52,47 @@ const Commission_List = () => {
   const [caseId, setCaseId] = useState("");
   const [searchBy, setSearchBy] = useState("case_id");
   const [isLoading, setIsLoading] = useState(false);
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   const rowsPerPage = 10;
+  // useEffect(() => {
+  //   const fetchDrcNames = async () => {
+  //     try {
+  //       const names = await Active_DRC_Details();
+
+  //       setDrcNames(names);
+  //     } catch (error) {
+  //       console.error("Error fetching DRC names:", error);
+  //     }
+  //   };
+  //   // fetchData();
+  //   setFilteredData(data);
+  //   fetchDrcNames();
+  //   fetchCommissionCounts();
+  // }, []);
+
+  // Role-Based Buttons
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+
     const fetchDrcNames = async () => {
       try {
         const names = await Active_DRC_Details();
@@ -97,7 +137,8 @@ const Commission_List = () => {
           text: "No filter is selected. Please, select a filter.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f",
         });
         setToDate(null);
         setFromDate(null);
@@ -110,7 +151,8 @@ const Commission_List = () => {
           text: "Both From Date and To Date must be selected.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f",
         });
         setToDate(null);
         setFromDate(null);
@@ -147,7 +189,8 @@ const Commission_List = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f",
             });
           }
         } else {
@@ -162,7 +205,8 @@ const Commission_List = () => {
         Swal.fire({
           title: "Error",
           text: "No valid Settlement data found in response.",
-          icon: "error"
+          icon: "error",
+          confirmButtonColor: "#d33",
         });
         setFilteredData([]);
       }
@@ -183,6 +227,7 @@ const Commission_List = () => {
         text: error.message || "Failed to fetch data.",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33",
       });
     } finally {
       setIsLoading(false);
@@ -208,7 +253,7 @@ const Commission_List = () => {
           text: "From date must be before to date",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -223,7 +268,7 @@ const Commission_List = () => {
           text: "Date range cannot exceed one month",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -243,6 +288,7 @@ const Commission_List = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",
       });
       setCaseId(""); // Clear the invalid input
       return;
@@ -384,7 +430,8 @@ const Commission_List = () => {
         text: "Please select From Date and To Date.",
         icon: "warning",
         allowOutsideClick: false,
-        allowEscapeKey: false
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",
       });
       return;
     }
@@ -418,10 +465,20 @@ const Commission_List = () => {
     try {
       const response = await Create_task_for_Download_Commision_Case_List(userData, selectedDrcId, commissionType, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
-        Swal.fire(response, `Task created successfully!`, "success");
+        Swal.fire({
+          title: response, 
+          text: `Task created successfully!`, 
+          icon: "success",
+          confirmButtonColor: "#28a745",
+        });
       }
     } catch (error) {
-      Swal.fire("Error", error.message || "Failed to create task.", "error");
+      Swal.fire({
+        title: "Error", 
+        text: error.message || "Failed to create task.", 
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
     } finally {
       setIsCreatingTask(false);
     }
@@ -534,39 +591,41 @@ const Commission_List = () => {
             <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2">
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               {/* <div className="flex items-center space-x-2"> */}
-                {/* <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={handleFromDateChange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="From"
-                    className={GlobalStyle.inputText}
-                  />
-                {/* </div> */}
-
-                {/* <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={toDate}
-                    onChange={handleToDateChange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="To"
-                    className={GlobalStyle.inputText}
-                  />
-                {/* </div> */}
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={fromDate}
+                onChange={handleFromDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={GlobalStyle.inputText}
+              />
               {/* </div> */}
 
-              <button
-                className={GlobalStyle.buttonPrimary}
-                onClick={handleFilterButton}
-              >
-                Filter
-              </button>
-              <button
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={toDate}
+                onChange={handleToDateChange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={GlobalStyle.inputText}
+              />
+              {/* </div> */}
+              {/* </div> */}
+
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={GlobalStyle.buttonPrimary}
+                  onClick={handleFilterButton}
+                >
+                  Filter
+                </button>
+              )}
+              {["admin", "superadmin", "slt"].includes(userRole) && (<button
                 className={GlobalStyle.buttonRemove}
                 onClick={handleClear}
               >
                 Clear
-              </button>
+              </button>)}
             </div>
             {dateError && (
               <div className="text-red-500 text-sm mt-1">{dateError}</div>
@@ -587,14 +646,14 @@ const Commission_List = () => {
         </div>
       </div>
 
-     <div className={`${GlobalStyle.tableContainer}  overflow-x-auto`}>
+      <div className={`${GlobalStyle.tableContainer}  overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Commission Status</th>
               <th className={GlobalStyle.tableHeader}>DRC</th>
-              <th className={GlobalStyle.tableHeader}>Commission Amount</th>
+              <th className={GlobalStyle.tableHeader}>Commission Amount (LKR)</th>
               <th className={GlobalStyle.tableHeader}>Commission Type</th>
               <th className={GlobalStyle.tableHeader}>Commission Action</th>
               <th className={GlobalStyle.tableHeader}>Created Date</th>
@@ -620,12 +679,7 @@ const Commission_List = () => {
                   </td>
                   <td className={GlobalStyle.tableData}>{row.Commission_Status}</td>
                   <td className={GlobalStyle.tableData}>{row.DRC_Name}</td>
-                  <td className={GlobalStyle.tableCurrency}>
-                    {row.Commission_Amount?.toLocaleString("en-LK", {
-                      style: "currency",
-                      currency: "LKR",
-                    })}
-                  </td>
+                  <td className={GlobalStyle.tableCurrency}>{row.Commission_Amount}</td>
                   <td className={GlobalStyle.tableData}>{row.Commission_Type}</td>
                   <td className={GlobalStyle.tableData}>{row.Commission_Action}</td>
                   <td className={GlobalStyle.tableData}>
@@ -656,7 +710,7 @@ const Commission_List = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className= {GlobalStyle.tableData + " text-center"}>
+                <td colSpan="8" className={GlobalStyle.tableData + " text-center"}>
                   No records found
                 </td>
               </tr>
@@ -688,15 +742,17 @@ const Commission_List = () => {
           </div>
         )
       }
-      <button
-        onClick={HandleCreateTaskDownloadCommissiontList}
-        className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-        disabled={isCreatingTask}
-        style={{ display: 'flex', alignItems: 'center', marginTop: '16px' }}
-      >
-        {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-      </button>
+      {["admin", "superadmin", "slt"].includes(userRole)&& filteredDataBySearch.length > 0 && (
+        <button
+          onClick={HandleCreateTaskDownloadCommissiontList}
+          className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+          disabled={isCreatingTask}
+          style={{ display: 'flex', alignItems: 'center', marginTop: '16px' }}
+        >
+          {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+          {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+        </button>
+      )}
     </div >
   );
 };
