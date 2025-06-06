@@ -246,55 +246,55 @@ const DRCInfo = () => {
                 </td>
               </tr>
 
-              <tr>
+              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
                 <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
                 >
                   Business Reg No
                 </td>
-                <td className="w-4 text-left">:</td>
+                <td className="hidden sm:table-cell w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
+                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
                 >
                   {companyData.drc_business_registration_number ||
                     "Not specified"}
                 </td>
               </tr>
-              <tr>
+              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
                 <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
                 >
                   Contact Number
                 </td>
-                <td className="w-4 text-left">:</td>
+                <td className="hidden sm:table-cell w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
+                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
                 >
                   {companyData.drc_contact_no || "Not specified"}
                 </td>
               </tr>
-              <tr>
+              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
                 <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
                 >
                   Address
                 </td>
-                <td className="w-4 text-left">:</td>
+                <td className="hidden sm:table-cell w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
+                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
                 >
                   {companyData.drc_address || "Not specified"}
                 </td>
               </tr>
-              <tr>
+              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
                 <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
                 >
                   Email
                 </td>
-                <td className="w-4 text-left">:</td>
+                <td className="hidden sm:table-cell w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
+                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
                 >
                   {companyData.drc_email || "Not specified"}
                 </td>
