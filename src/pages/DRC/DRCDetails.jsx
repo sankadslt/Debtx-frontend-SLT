@@ -7,221 +7,166 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { List_RO_Details_Owen_By_DRC_ID, List_RTOM_Details_Owen_By_DRC_ID, List_Service_Details_Owen_By_DRC_ID } from "../../services/drc/Drc";
-import { useSearchParams } from "react-router-dom";
+import { getActiveServiceDetails, List_RO_Details_Owen_By_DRC_ID, List_RTOM_Details_Owen_By_DRC_ID, List_Service_Details_Owen_By_DRC_ID } from "../../services/drc/Drc";
+import { useLocation, useSearchParams } from "react-router-dom";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
+import Swal from "sweetalert2";
+import { getActiveRTOMsByDRCID } from "../../services/RTOM/RtomService";
 
 const DRCDetails = () => {
-  const [activeTab, setActiveTab] = useState("RO");
+  const location =useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  const drcId = queryParams.get("drcid");
+  const drcName = queryParams.get("drcname");
+  const initialTab = queryParams.get("tab") || "RO";
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
+  const [appliedFilters, setAppliedFilters] = useState({ 
+    status: "", 
+    rtom: "", 
+    service: "" 
+  });
+    
+  // Filter States
   const [status, setStatus] = useState("");
   const [rtomFilter, setRtomFilter] = useState("");
   const [serviceFilter, setServiceFilter] = useState("");
-  const [appliedFilters, setAppliedFilters] = useState({ status: "", rtom: "", service: "" });
-  const [searchParams] = useSearchParams();
-  const drcId = searchParams.get("drcid");
 
-  const rowsPerPage = 7;
   const statuses = ["Active", "Inactive"];
-  const rtomNames = ["RTOM 1", "RTOM 2", "RTOM 3", "RTOM 4"];
-  const serviceTypes = ["PEO", "LTE", "FTTH", "DSL"];
+  // const rtomNames = ["RTOM 1", "RTOM 2", "RTOM 3", "RTOM 4"];
+  // const serviceTypes = ["PEO", "LTE", "FTTH", "DSL"];
 
-  const [roListData, setRoListData] = useState([]);
-  const [rtomListData, setRtomListData] = useState([]);
-  const [servicesListData, setServicesListData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-     const getStatusIcon = (status) => {
-          switch (status?.toLowerCase()) {
-              case "active":
-                  return activeIcon;
-              case "inactive":
-                  return inactiveIcon;
-              case "ended":
-                  return terminatedIcon;
-              default:
-                  return null;
-          }
-      };
+  const [rtoms, setRtoms] =useState([]);
+  const [services, setServices] =useState([]);
   
+  //Fetch RTOMs
+  useEffect(() => {
+    const fetchRTOMs = async () => {
+      if (!drcId) return;
+      const result = await getActiveRTOMsByDRCID(drcId);
+      // console.log("Active RTOMs", result);
+      
+      setRtoms(result);
+    };
+
+    const fetchServices =async () => {
+      if (!drcId) return;
+      const result =await getActiveServiceDetails(drcId);
+      // console.log(result.data);
+      
+      setServices(result.data);
+    }
+
+    fetchRTOMs();
+    fetchServices();
+  }, [drcId]);
   
-      const renderStatusIcon = (status) => {
-          const iconPath = getStatusIcon(status);
-  
-          if (!iconPath) {
-              return <span>{status}</span>;
-          }
-  
-          return (
-              <img
-                  src={iconPath}
-                  alt={status}
-                  className="w-6 h-6"
-                  title={status}
-              />
-          );
-      };
-
-  const fetchROList = async () => {
-    const res = await List_RO_Details_Owen_By_DRC_ID(drcId);
-    return res.map((ro) => ({
-      name: ro.ro_name,
-      status: ro.status,
-      enableDate: (ro.ro_end_date || "").split("T")[0],
-      contact: ro.ro_contact_no,
-    }));
-  };
-
-  const fetchRtomList = async () => {
-    const res = await List_RTOM_Details_Owen_By_DRC_ID(drcId);
-    return res.map((rtom) => ({
-      name: rtom.area_name,
-      abbreviation: rtom.rtom_abbreviation,
-      enableDate: (rtom.created_dtm || "").split("T")[0],
-      rtom_contact_number: rtom.rtom_mobile_no
-    ?.map(item => item.mobile_number)
-    .join(", "), // Join mobile numbers as comma-separated string
-      roCount: rtom.ro_count,
-    }));
-  };
-
-  const fetchServicesList = async () => {
-    const res = await List_Service_Details_Owen_By_DRC_ID(drcId);
-    return res.map((svc) => ({
-      type: svc.service_type,
-      enableDate: (svc.enable_date || "").split("T")[0],
-      status: svc.status,
-    }));
-  };
-
-  const fetchAllLists = async () => {
-    setIsLoading(true);
-    try {
-      const [ro, rtom, svc] = await Promise.all([
-        fetchROList(),
-        fetchRtomList(),
-        fetchServicesList(),
-      ]);
-      setRoListData(ro);
-      setRtomListData(rtom);
-      setServicesListData(svc);
-    } catch (err) {
-      console.error("Error fetching DRC details:", err);
-    } finally {
-      setIsLoading(false);
+  // Status Icons
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+        return activeIcon;
+      case "inactive":
+        return inactiveIcon;
+      case "ended":
+        return terminatedIcon;
+      default:
+        return null;
     }
   };
-
-  useEffect(() => {
-    fetchAllLists();
-  }, []);
-
-  const filteredData =
-    activeTab === "RO"
-      ? roListData.filter((row) => {
-        const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = !appliedFilters.status || row.status === appliedFilters.status;
-        return matchesSearchQuery && matchesStatus;
-      })
-      : activeTab === "RTOM"
-        ? rtomListData.filter((row) => {
-          const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
-          const matchesRtom = !appliedFilters.rtom || row.name === appliedFilters.rtom;
-          return matchesSearchQuery && matchesRtom;
-        })
-        : activeTab === "Services"
-          ? servicesListData.filter((row) => {
-            const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesService = !appliedFilters.service || row.type === appliedFilters.service;
-            const matchesStatus = !appliedFilters.status || row.status === appliedFilters.status;
-            return matchesSearchQuery && matchesService && matchesStatus;
-          })
-          : [];
-
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
-  const handlePrevPage = () => currentPage > 0 && setCurrentPage(currentPage - 1);
-  const handleNextPage = () => currentPage < pages - 1 && setCurrentPage(currentPage + 1);
-  const handleFilter = () => {
-    setAppliedFilters({ status, rtom: rtomFilter, service: serviceFilter });
-    setCurrentPage(0);
+  
+  const renderStatusIcon = (status) => {
+    const iconPath = getStatusIcon(status);
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+    return (
+      <img
+        src={iconPath}
+        alt={status}
+        className="w-6 h-6"
+        title={status}
+      />
+    );
   };
 
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
+ const handleFilter = () => {
+    const newFilters = {
+      status: status,
+      rtom: rtomFilter,
+      service: serviceFilter,
+    };
+    
+    setAppliedFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setStatus("");
+    setRtomFilter("");
+    setServiceFilter("");
+    setSearchQuery("");
+    setAppliedFilters({ 
+      status: "", 
+      rtom: "", 
+      service: "",
+    });
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "RO":
+        return (
+          <ROList
+            drcId={drcId}
+            renderStatusIcon={renderStatusIcon}
+            filters={appliedFilters}
+            searchQuery={searchQuery}
+          />
+        );
+      case "RTOM":
+        return (
+          <RTOMList
+            drcId={drcId}
+            renderStatusIcon={renderStatusIcon}
+            filters={appliedFilters}
+            searchQuery={searchQuery}
+
+          />
+        );
+      case "Services":
+        return (
+          <ServicesList
+            drcId={drcId}
+            renderStatusIcon={renderStatusIcon}
+            filters={appliedFilters}
+            searchQuery={searchQuery}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className={GlobalStyle.fontPoppins}>
       <div className="flex justify-between items-center mb-8">
-        <h1 className={GlobalStyle.headingLarge}>Sensus - Sensus BPO Services (Pvt) Ltd</h1>
+        <h1 className={GlobalStyle.headingLarge}>{drcName}</h1>
       </div>
 
       {/* Filter Section */}
-      <div className="grid justify-end mb-10">
+      <div className="grid justify-end mb-4">
         <div className={`${GlobalStyle.cardContainer} w-auto h-auto py-4 px-6`}>
           <div className="flex justify-end items-center gap-4">
 
-            {/* RO Tab Filters */}
-            {activeTab === "RO" && (
-              <>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className={GlobalStyle.selectBox}
-                >
-                  <option value="" disabled hidden>
-                    Select Status
-                  </option>
-                  {statuses.map((statusOption, index) => (
-                    <option key={index} value={statusOption}>
-                      {statusOption}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={rtomFilter}
-                  onChange={(e) => setRtomFilter(e.target.value)}
-                  className={GlobalStyle.selectBox}
-                >
-                  <option value="" disabled hidden>
-                    Select RTOM
-                  </option>
-                  {rtomNames.map((rtomOption, index) => (
-                    <option key={index} value={rtomOption}>
-                      {rtomOption}
-                    </option>
-                  ))}
-                </select>
-              </>
-            )}
-
-            {/* RTOM Tab Filter */}
-            {activeTab === "RTOM" && (
-              <select
-                value={rtomFilter}
-                onChange={(e) => setRtomFilter(e.target.value)}
-                className={GlobalStyle.selectBox}
-              >
-                <option value="" disabled hidden>
-                  Select RTOM
-                </option>
-                {rtomNames.map((rtomOption, index) => (
-                  <option key={index} value={rtomOption}>
-                    {rtomOption}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            {/* Services Tab Filter */}
-            {activeTab === "Services" && (
+            {/* Status Filter (shown for RO and Services tabs) */}
+            {(activeTab === "RO" || activeTab === "Services") && (
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -238,30 +183,60 @@ const DRCDetails = () => {
               </select>
             )}
 
+            {/* RTOM Filter (shown for RO and RTOM tabs) */}
+            {(activeTab === "RO" || activeTab === "RTOM") && (
+              <select
+                value={rtomFilter}
+                onChange={(e) => setRtomFilter(e.target.value)}
+                className={GlobalStyle.selectBox}
+              >
+                <option value="" disabled hidden>
+                  Select RTOM
+                </option>
+                {rtoms.map((rtom, index) => (
+                  <option key={index} value={rtom.rtom_id}>
+                    {rtom.area_name}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {/* Service Filter (shown for Services tab) */}
+            {activeTab === "Services" && (
+              <select
+                value={serviceFilter}
+                onChange={(e) => setServiceFilter(e.target.value)}
+                className={GlobalStyle.selectBox}
+              >
+                <option value="" disabled hidden>
+                  Select Service
+                </option>
+                {services.map((service, index) => (
+                  <option key={index} value={service.service_type}>
+                    {service.service_type}
+                  </option>
+                ))}
+              </select>
+            )}
+
             {/* Filter Button */}
-            <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>
+            <button 
+              onClick={handleFilter} 
+              className={GlobalStyle.buttonPrimary}
+            >
               Filter
             </button>
 
             {/* Clear Button */}
             <button
-              onClick={() => {
-                setStatus("");
-                setRtomFilter("");
-                setSearchQuery?.(""); // optional chaining if exists
-                setAppliedFilters({ status: "", rtom: "" });
-                setCurrentPage?.(0); // optional chaining if exists
-              }}
+              onClick={handleClearFilters}
               className={GlobalStyle.buttonRemove}
             >
               Clear
             </button>
-
           </div>
         </div>
       </div>
-
-
 
       {/* Search Section */}
       <div className="mb-4 flex justify-start">
@@ -271,8 +246,12 @@ const DRCDetails = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={GlobalStyle.inputSearch}
+            placeholder="Search..."
           />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
+          <FaSearch 
+            className={GlobalStyle.searchBarIcon} 
+            onClick={handleFilter}
+          />
         </div>
       </div>
 
@@ -281,11 +260,15 @@ const DRCDetails = () => {
         {["RO", "RTOM", "Services"].map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-8 py-2 ${activeTab === tab
-              ? "border-b-2 border-blue-500 font-bold"
-              : "text-gray-500"
-              }`}
+            onClick={() => {
+              setActiveTab(tab);
+              handleClearFilters(); // Clear filters when switching tabs
+            }}
+            className={`px-8 py-2 ${
+              activeTab === tab
+                ? "border-b-2 border-blue-500 font-bold"
+                : "text-gray-500"
+            }`}
           >
             {tab} List
           </button>
@@ -293,38 +276,213 @@ const DRCDetails = () => {
       </div>
 
       {/* Table */}
+      <div>
+        {renderTabContent()}
+      </div>
+    </div>
+  );
+};
+
+export default DRCDetails;   
+
+// RO List
+function ROList({ drcId, renderStatusIcon, filters, searchQuery }) {
+  const fetchedPages = useRef(new Set());
+  const initialLoad = useRef(true);
+
+  //data states
+  const [filterdData, setFilteredData] =useState([]);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+
+  //Pagination
+  const rowsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const [isLoading, setIsLoading] =useState(false);
+  // const totalPages = Math.ceil(data.length / rowsPerPage);
+
+  // variables need for table
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filterdData.slice(startIndex, endIndex);
+
+  // useEffect(()=>{
+  //   console.log("Filterd Data: ", filterdData);
+    
+  // }, [filterdData])
+
+  // useEffect(() => {
+  //   console.log("total pages", totalPages);
+  //   console.log("Current Page", currentPage);
+  //   console.log("is MOre data available", isMoreDataAvailable);
+
+  // },[currentPage])
+
+  // Effect to handle filter changes and initial load
+  useEffect(() => {
+    // console.log("Filters", filters);
+    // console.log("Filters use Effect Called");
+    
+    // Reset everything when filters change
+    fetchedPages.current.clear();
+    setFilteredData([]);
+    setCurrentPage(1);
+    setIsMoreDataAvailable(true);
+    
+    // Only fetch if it's not the initial load or if filters changed
+    if (!initialLoad.current || Object.keys(filters).length > 0) {
+      fetchROList(1, filters);
+    }
+    
+    initialLoad.current = false;
+  }, [filters]);
+  
+  // useEffect(() => {
+  //   if (
+  //     currentPage === 1 || 
+  //     fetchedPages.current.has(currentPage) ||
+  //     (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
+  //   ) {
+  //     return;
+  //   }
+
+  //   fetchedPages.current.add(currentPage);
+  //   fetchROList(currentPage, filters);
+  //   console.log("Pagination use Effect Called");
+
+  // }, [currentPage]);
+
+  useEffect(() => {
+    const shouldFetchMoreData = () => {
+      const totalFetchedPages = Math.ceil(filterdData.length / rowsPerPage);
+
+      // Fetch only when the current page exceeds fetched pages and more data is available
+      return (
+        currentPage > totalFetchedPages &&
+        isMoreDataAvailable &&
+        !fetchedPages.current.has(currentPage)
+      );
+    };
+
+    if (shouldFetchMoreData()) {
+      fetchedPages.current.add(currentPage);
+
+      // Fetch the "next chunk" — calculate which backend page to request
+      const backendPage = Math.floor((currentPage - 2) / 3) + 2;
+      fetchROList(backendPage, filters);
+      // console.log("Fetching for backend page:", backendPage);
+    }
+  }, [currentPage, filterdData.length, isMoreDataAvailable]);
+
+  // Function to handle searching through current results
+  const getFilteredResults = () => {
+    if (!searchQuery) return paginatedData;
+    
+    return paginatedData.filter(item => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        (item.ro_name && item.ro_name.toString().toLowerCase().includes(searchLower)) ||
+        (item.status && item.status.toLowerCase().includes(searchLower)) ||
+        (item.ro_contact_no && item.ro_contact_no.toString().toLowerCase().includes(searchLower))
+      );
+    });
+  };
+
+  const filteredDataBySearch = getFilteredResults();
+
+  const fetchROList = async (page, filtersOverride = {}) => {
+    try {
+      const payload = {
+        drc_id: drcId,
+        pages: page,
+        ...filtersOverride,
+      };
+
+      setIsLoading(true);
+      const response = await List_RO_Details_Owen_By_DRC_ID(payload).catch((error) => {
+        if (error.response && error.response.status === 404) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+          setFilteredData([]);
+          return null;
+        } else {
+          throw error;
+        }
+      });
+      setIsLoading(false);
+
+      if (response?.roList) {
+        setFilteredData(prevData => 
+          page === 1 ? response.roList : [...prevData, ...response.roList]
+        );
+        
+        // Update pagination states
+        const totalItems = page === 1 ? response.roList.length : filterdData.length + response.roList.length;
+        setTotalPages(Math.ceil(totalItems / rowsPerPage));
+        
+        // Check if more data is available
+        const maxData = page === 1 ? 10 : 30;
+        setIsMoreDataAvailable(response.roList.length === maxData);
+        
+        if (response.roList.length === 0 && page === 1) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid data found in response.",
+          icon: "error"
+        });
+        setFilteredData([]);
+      }
+    } catch (error) {
+      console.error("Error filtering cases:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data. Please try again.",
+        icon: "error"
+      });
+    }
+  };
+
+  // Handle Pagination
+  const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next") {
+      const calculatedTotalPages = Math.ceil(filterdData.length / rowsPerPage);
+      if (currentPage < calculatedTotalPages || isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      }
+    }
+  };
+
+  return (
+    <>
       <div className={GlobalStyle.tableContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
-              {activeTab === "RO" && (
-                <>
-                  <th className={GlobalStyle.tableHeader}>RO Name</th>
-                  <th className={GlobalStyle.tableHeader}>Status</th>
-                  <th className={GlobalStyle.tableHeader}>Enable Date</th>
-                  <th className={GlobalStyle.tableHeader}>Contact Number</th>
-                </>
-              )}
-              {activeTab === "RTOM" && (
-                <>
-                  <th className={GlobalStyle.tableHeader}>RTOM Name</th>
-                  <th className={GlobalStyle.tableHeader}>Abbreviation</th>
-                  <th className={GlobalStyle.tableHeader}>Enable Date</th>
-                  <th className={GlobalStyle.tableHeader}>Contact</th>
-                  <th className={GlobalStyle.tableHeader}>RO Count</th>
-                </>
-              )}
-              {activeTab === "Services" && (
-                <>
-                  <th className={GlobalStyle.tableHeader}>SERVICE TYPE</th>
-                  <th className={GlobalStyle.tableHeader}>ENABLE DATE</th>
-                  <th className={GlobalStyle.tableHeader}>STATUS</th>
-                </>
-              )}
+              <th className={GlobalStyle.tableHeader}>RO Name</th>
+              <th className={GlobalStyle.tableHeader}>Status</th>
+              <th className={GlobalStyle.tableHeader}>Enable Date</th>
+              <th className={GlobalStyle.tableHeader}>Contact Number</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((row, index) => (
+            {filteredDataBySearch.map((row, index) => (
               <tr
                 key={index}
                 className={
@@ -333,66 +491,601 @@ const DRCDetails = () => {
                     : GlobalStyle.tableRowOdd
                 }
               >
-                {activeTab === "RO" && (
-                  <>
-                    <td className={GlobalStyle.tableData}>{row.name}</td>
-                    <td className={GlobalStyle.tableData}>{renderStatusIcon(row.status)}</td>
-                    <td className={GlobalStyle.tableData}>{row.enableDate}</td>
-                    <td className={GlobalStyle.tableData}>{row.contact}</td>
-                  </>
-                )}
-                {activeTab === "RTOM" && (
-                  <>
-                    <td className={GlobalStyle.tableData}>{row.name}</td>
-                    <td className={GlobalStyle.tableData}>{row.abbreviation}</td>
-                    <td className={GlobalStyle.tableData}>{row.enableDate}</td>
-                     <td className={GlobalStyle.tableData}>{row.rtom_contact_number}</td> 
-                     
-                    {/* Services Tab Filter <td className={GlobalStyle.tableData}>
-                      {row.rtom_mobile_no?.map((item) => item.contact).join(", ")}
-                    </td> */}
-
-                    
-                    <td className={GlobalStyle.tableData}>{row.roCount}</td>
-                  </>
-                )}
-                {activeTab === "Services" && (
-                  <>
-                    <td className={GlobalStyle.tableData}>{row.type}</td>
-                    <td className={GlobalStyle.tableData}>{row.enableDate}</td>
-                    <td className={GlobalStyle.tableData}>{renderStatusIcon(row.status)}</td>
-                  </>
-                )}
+                <td className={GlobalStyle.tableData}>{row.ro_name || "N/A"}</td>
+                <td className={GlobalStyle.tableData}>
+                  {renderStatusIcon(row.status)}
+                </td>
+                <td className={GlobalStyle.tableData}>{row.ro_end_date || "N/A"}</td>
+                <td className={GlobalStyle.tableData}>{row.ro_contact_no || "N/A"}</td>
               </tr>
             ))}
+            {isLoading && (
+              <tr>
+                <td colSpan="4" className="text-center py-4">
+                  Loading...
+                </td>
+              </tr>
+            )}
+            {!isLoading && filteredDataBySearch.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center py-4">
+                  No results found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {/* Pagination Section */}
+      <div className={GlobalStyle.navButtonContainer}>
+        <button
+          onClick={() => handlePrevNext("prev")}
+          disabled={currentPage <= 1 || isLoading}
+          className={`${GlobalStyle.navButton} ${
+            currentPage <= 1 || isLoading ? "cursor-not-allowed opacity-50" : ""
+          }`}
+        >
+          <FaArrowLeft />
+        </button>
+        
+        <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+          Page {currentPage}
+        </span>
+        
+        <button
+          onClick={() => handlePrevNext("next")}
+          disabled={
+            (!isMoreDataAvailable && currentPage >= Math.ceil(filterdData.length / rowsPerPage)) || 
+            isLoading
+          }
+          className={`${GlobalStyle.navButton} ${
+            (!isMoreDataAvailable && currentPage >= Math.ceil(filterdData.length / rowsPerPage)) || isLoading 
+              ? "cursor-not-allowed opacity-50" 
+              : ""
+          }`}
+        >
+          <FaArrowRight />
+        </button>
+      </div>
+    </>
+  );
+}
+
+// RTOM List
+function RTOMList({ drcId, filters, searchQuery }) {
+  const fetchedPages = useRef(new Set());
+  const initialLoad = useRef(true);
+
+  //data states
+  const [filterdData, setFilteredData] =useState([]);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+
+  //Pagination
+  const rowsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const [isLoading, setIsLoading] =useState(false);
+
+  // variables need for table
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filterdData.slice(startIndex, endIndex);
+  
+  // useEffect(()=>{
+  //   console.log("Filterd Data: ", filterdData);
+    
+  // }, [filterdData])
+
+  // useEffect(() => {
+  //   console.log("total pages", totalPages);
+  //   console.log("Current Page", currentPage);
+  //   console.log("is MOre data available", isMoreDataAvailable);
+
+  // },[currentPage])
+
+  // Effect to handle filter changes and initial load
+  useEffect(() => {
+    // console.log("Filters", filters);
+    // console.log("Filters use Effect Called");
+    
+    // Reset everything when filters change
+    fetchedPages.current.clear();
+    setFilteredData([]);
+    setCurrentPage(1);
+    setIsMoreDataAvailable(true);
+    
+    // Only fetch if it's not the initial load or if filters changed
+    if (!initialLoad.current || Object.keys(filters).length > 0) {
+      fetchRTOMList(1, filters);
+    }
+    
+    initialLoad.current = false;
+  }, [filters]);
+
+  // // Effect to handle pagination
+  // useEffect(() => {
+  //   if (
+  //     currentPage === 1 || 
+  //     fetchedPages.current.has(currentPage) ||
+  //     (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
+  //   ) {
+  //     return;
+  //   }
+
+  //   fetchedPages.current.add(currentPage);
+  //   fetchRTOMList(currentPage, filters);
+  //   console.log("Pagination use Effect Called");
+
+  // }, [currentPage]);
+
+  useEffect(() => {
+    const shouldFetchMoreData = () => {
+      const totalFetchedPages = Math.ceil(filterdData.length / rowsPerPage);
+
+      // Fetch only when the current page exceeds fetched pages and more data is available
+      return (
+        currentPage > totalFetchedPages &&
+        isMoreDataAvailable &&
+        !fetchedPages.current.has(currentPage)
+      );
+    };
+
+    if (shouldFetchMoreData()) {
+      fetchedPages.current.add(currentPage);
+
+      // Fetch the "next chunk" — calculate which backend page to request
+      const backendPage = Math.floor((currentPage - 2) / 3) + 2;
+      fetchRTOMList(backendPage, filters);
+      // console.log("Fetching for backend page:", backendPage);
+    }
+  }, [currentPage, filterdData.length, isMoreDataAvailable]);
+
+  // Function to handle searching through current results
+  const getFilteredResults = () => {
+    if (!searchQuery) return paginatedData;
+    
+    return paginatedData.filter(item => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        (item.area_name && item.area_name.toString().toLowerCase().includes(searchLower)) ||
+        (item.rtom_abbreviation && item.rtom_abbreviation.toLowerCase().includes(searchLower))
+      );
+    });
+  };
+
+  const filteredDataBySearch = getFilteredResults();
+
+
+  const fetchRTOMList = async (page, filtersOverride = {}) => {
+    try {
+      const payload = {
+        drc_id: drcId,
+        pages: page,
+        ...filtersOverride,
+      };
+
+      setIsLoading(true);
+      const response = await List_RTOM_Details_Owen_By_DRC_ID(payload).catch((error) => {
+      
+      if (error.response && error.response.status === 404) {
+        Swal.fire({
+          title: "No Results",
+          text: "No matching data found for the selected filters.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+          setFilteredData([]);
+          return null;
+        } else {
+          throw error;
+        }
+      });
+      setIsLoading(false);
+
+      // console.log("RTOM response: ", response);
+
+      if (response?.rtomList) {
+        setFilteredData(prevData => 
+          page === 1 ? response.rtomList : [...prevData, ...response.rtomList]
+        );
+        
+        // Update pagination states
+        const totalItems = page === 1 ? response.rtomList.length : filterdData.length + response.rtomList.length;
+        setTotalPages(Math.ceil(totalItems / rowsPerPage));
+        
+        // Check if more data is available
+        const maxData = page === 1 ? 10 : 30;
+        setIsMoreDataAvailable(response.rtomList.length === maxData);
+        
+        if (response.rtomList.length === 0 && page === 1) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid data found in response.",
+          icon: "error"
+        });
+        setFilteredData([]);
+      }
+    } catch (error) {
+      console.error("Error filtering cases:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data. Please try again.",
+        icon: "error"
+      });
+    }
+  };
+
+  // Handle Pagination
+  const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next") {
+      const calculatedTotalPages = Math.ceil(filterdData.length / rowsPerPage);
+      if (currentPage < calculatedTotalPages || isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      }
+    }
+  };
+
+  return (
+    <>
+      <div className={GlobalStyle.tableContainer}>
+        <table className={GlobalStyle.table}>
+          <thead className={GlobalStyle.thead}>
+            <tr>
+              <th className={GlobalStyle.tableHeader}>RTOM Name</th>
+              <th className={GlobalStyle.tableHeader}>Abbreviation</th>
+              <th className={GlobalStyle.tableHeader}>Enable Date</th>
+              <th className={GlobalStyle.tableHeader}>Contact</th>
+              <th className={GlobalStyle.tableHeader}>RO Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredDataBySearch.map((row, index) => (
+              <tr
+                key={index}
+                className={
+                  index % 2 === 0
+                    ? GlobalStyle.tableRowEven
+                    : GlobalStyle.tableRowOdd
+                }
+              >
+                <td className={GlobalStyle.tableData}>{row.area_name || "N/A"}</td>
+                <td className={GlobalStyle.tableData}>{row.rtom_abbreviation || "N/A"}</td>
+                <td className={GlobalStyle.tableData}>{row.created_dtm ? new Date(row.created_dtm).toLocaleDateString() : "N/A"}</td>
+                <td className={GlobalStyle.tableData}>{row.rtom_contact_number?.[0]?.mobile_number || "N/A"}</td>
+                <td className={GlobalStyle.tableData}>{row.ro_count || "N/A"}</td>
+              </tr>
+            ))}
+            {isLoading && (
+              <tr>
+                <td colSpan="5" className="text-center py-4">
+                  Loading...
+                </td>
+              </tr>
+            )}
+            {!isLoading && filteredDataBySearch.length === 0 && (
+              <tr>
+                <td colSpan="5" className="text-center py-4">
+                  No results found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
-      {filteredData.length > rowsPerPage && (
-        <div className={GlobalStyle.navButtonContainer}>
-          <button
-            className={GlobalStyle.navButton}
-            onClick={handlePrevPage}
-            disabled={currentPage === 0}
-          >
-            <FaArrowLeft />
-          </button>
-          <span>
-            Page {currentPage + 1} of {pages}
-          </span>
-          <button
-            className={GlobalStyle.navButton}
-            onClick={handleNextPage}
-            disabled={currentPage === pages - 1}
-          >
-            <FaArrowRight />
-          </button>
-        </div>
-      )}
-    </div>
+      {/* Pagination Section */}
+      <div className={GlobalStyle.navButtonContainer}>
+        <button
+          onClick={() => handlePrevNext("prev")}
+          disabled={currentPage <= 1 || isLoading}
+          className={`${GlobalStyle.navButton} ${
+            currentPage <= 1 || isLoading ? "cursor-not-allowed opacity-50" : ""
+          }`}
+        >
+          <FaArrowLeft />
+        </button>
+        
+        <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+          Page {currentPage}
+        </span>
+        
+        <button
+          onClick={() => handlePrevNext("next")}
+          disabled={
+            (!isMoreDataAvailable && currentPage >= Math.ceil(filterdData.length / rowsPerPage)) || 
+            isLoading
+          }
+          className={`${GlobalStyle.navButton} ${
+            (!isMoreDataAvailable && currentPage >= Math.ceil(filterdData.length / rowsPerPage)) || isLoading 
+              ? "cursor-not-allowed opacity-50" 
+              : ""
+          }`}
+        >
+          <FaArrowRight />
+        </button>
+      </div>
+    </>
+   
   );
-};
+}
 
-export default DRCDetails;   
+// Services List
+function ServicesList({ drcId, renderStatusIcon, filters, searchQuery }) {
+  const fetchedPages = useRef(new Set());
+  const initialLoad = useRef(true);
+
+  //data states
+  const [filterdData, setFilteredData] =useState([]);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+
+  //Pagination
+  const rowsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const [isLoading, setIsLoading] =useState(false);
+  // const totalPages = Math.ceil(data.length / rowsPerPage);
+
+  // variables need for table
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filterdData.slice(startIndex, endIndex);
+
+  // useEffect(()=>{
+  //   console.log("Filterd Data: ", filterdData);
+    
+  // }, [filterdData])
+
+  // useEffect(() => {
+  //   console.log("total pages", totalPages);
+  //   console.log("Current Page", currentPage);
+  //   console.log("is MOre data available", isMoreDataAvailable);
+
+  // },[currentPage])
+
+  // Effect to handle filter changes and initial load
+  useEffect(() => {
+    // console.log("Filters", filters);  
+    // console.log("Filters use Effect Called");
+    
+    // Reset everything when filters change
+    fetchedPages.current.clear();
+    setFilteredData([]);
+    setCurrentPage(1);
+    setIsMoreDataAvailable(true);
+    
+    // Only fetch if it's not the initial load or if filters changed
+    if (!initialLoad.current || Object.keys(filters).length > 0) {
+      fetchServicesList(1, filters);
+    }
+    
+    initialLoad.current = false;
+  }, [filters]);
+
+  // // Effect to handle pagination
+  // useEffect(() => {
+  //   if (
+  //     currentPage === 1 || 
+  //     fetchedPages.current.has(currentPage) ||
+  //     (!isMoreDataAvailable && currentPage <= Math.ceil(filterdData.length / rowsPerPage))
+  //   ) {
+  //     return;
+  //   }
+
+  //   fetchedPages.current.add(currentPage);
+  //   fetchServicesList(currentPage, filters);
+  //   console.log("Pagination use Effect Called");
+
+  // }, [currentPage]);
+
+  useEffect(() => {
+    const shouldFetchMoreData = () => {
+      const totalFetchedPages = Math.ceil(filterdData.length / rowsPerPage);
+
+      // Fetch only when the current page exceeds fetched pages and more data is available
+      return (
+        currentPage > totalFetchedPages &&
+        isMoreDataAvailable &&
+        !fetchedPages.current.has(currentPage)
+      );
+    };
+
+    if (shouldFetchMoreData()) {
+      fetchedPages.current.add(currentPage);
+
+      // Fetch the "next chunk" — calculate which backend page to request
+      const backendPage = Math.floor((currentPage - 2) / 3) + 2;
+      fetchServicesList(backendPage, filters);
+      // console.log("Fetching for backend page:", backendPage);
+    }
+  }, [currentPage, filterdData.length, isMoreDataAvailable]);
+
+  // Function to handle searching through current results
+  const getFilteredResults = () => {
+    if (!searchQuery) return paginatedData;
+    
+    return paginatedData.filter(item => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        (item.service_type && item.service_type.toString().toLowerCase().includes(searchLower)) ||
+        (item.status && item.status.toLowerCase().includes(searchLower))
+      );
+    });
+  };
+
+    const filteredDataBySearch = getFilteredResults();
+
+
+  const fetchServicesList = async (page, filtersOverride = {}) => {
+    try {
+      const payload = {
+        drc_id: drcId,
+        pages: page,
+        ...filtersOverride,
+      };
+
+      setIsLoading(true);
+      const response = await List_Service_Details_Owen_By_DRC_ID(payload).catch((error) => {
+        if (error.response && error.response.status === 404) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+          setFilteredData([]);
+          return null;
+        } else {
+          throw error;
+        }
+      });
+      setIsLoading(false);
+
+      if (response?.servicesList) {
+        setFilteredData(prevData => 
+          page === 1 ? response.servicesList : [...prevData, ...response.servicesList]
+        );
+        
+        // Update pagination states
+        const totalItems = page === 1 ? response.servicesList.length : filterdData.length + response.servicesList.length;
+        setTotalPages(Math.ceil(totalItems / rowsPerPage));
+        
+        // Check if more data is available
+        const maxData = page === 1 ? 10 : 30;
+        setIsMoreDataAvailable(response.servicesList.length === maxData);
+        
+        if (response.servicesList.length === 0 && page === 1) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          });
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid data found in response.",
+          icon: "error"
+        });
+        setFilteredData([]);
+      }
+    } catch (error) {
+      console.error("Error filtering cases:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data. Please try again.",
+        icon: "error"
+      });
+    }
+  };
+
+  // Handle Pagination
+  const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next") {
+      const calculatedTotalPages = Math.ceil(filterdData.length / rowsPerPage);
+      if (currentPage < calculatedTotalPages || isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      }
+    }
+  };
+
+  return (
+    <>
+      <div className={GlobalStyle.tableContainer}>
+        <table className={GlobalStyle.table}>
+          <thead className={GlobalStyle.thead}>
+            <tr>
+              <th className={GlobalStyle.tableHeader}>SERVICE TYPE</th>
+              <th className={GlobalStyle.tableHeader}>ENABLE DATE</th>
+              <th className={GlobalStyle.tableHeader}>STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredDataBySearch.map((row, index) => (
+              <tr
+                key={index}
+                className={
+                  index % 2 === 0
+                    ? GlobalStyle.tableRowEven
+                    : GlobalStyle.tableRowOdd
+                }
+              >
+                <td className={GlobalStyle.tableData}>{row.service_type || "N/A"}</td>
+                <td className={GlobalStyle.tableData}>{row.enable_date ? new Date(row.enable_date).toLocaleDateString() : "N/A"}</td>
+                <td className={GlobalStyle.tableData}>
+                  {renderStatusIcon(row.status)}
+                </td>
+              </tr>
+            ))}
+            {isLoading && (
+              <tr>
+                <td colSpan="3" className="text-center py-4">
+                  Loading...
+                </td>
+              </tr>
+            )}
+            {!isLoading && filteredDataBySearch.length === 0 && (
+              <tr>
+                <td colSpan="3" className="text-center py-4">
+                  No results found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Section */}
+      <div className={GlobalStyle.navButtonContainer}>
+        <button
+          onClick={() => handlePrevNext("prev")}
+          disabled={currentPage <= 1 || isLoading}
+          className={`${GlobalStyle.navButton} ${
+            currentPage <= 1 || isLoading ? "cursor-not-allowed opacity-50" : ""
+          }`}
+        >
+          <FaArrowLeft />
+        </button>
+        
+        <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+          Page {currentPage}
+        </span>
+        
+        <button
+          onClick={() => handlePrevNext("next")}
+          disabled={
+            (!isMoreDataAvailable && currentPage >= Math.ceil(filterdData.length / rowsPerPage)) || 
+            isLoading
+          }
+          className={`${GlobalStyle.navButton} ${
+            (!isMoreDataAvailable && currentPage >= Math.ceil(filterdData.length / rowsPerPage)) || isLoading 
+              ? "cursor-not-allowed opacity-50" 
+              : ""
+          }`}
+        >
+          <FaArrowRight />
+        </button>
+      </div>
+    </>
+    
+  );
+}
+

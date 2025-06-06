@@ -10,11 +10,10 @@ export const Active_DRC_Details = async () => {
     const response = await axios.get(`${URL}/Active_DRC_Details`);
     const data = response.data.data.mongoData;
 
-    // Extract and return the drc_name for all active DRCs
 
     const drcNames = data.map((drc) => ({
-      key: drc.drc_id, // Use _id as key
-      value: drc.drc_name, // Use drc_name as the display value
+      key: drc.drc_id, 
+      value: drc.drc_name, 
       id: drc.drc_id,
     }));
 
@@ -37,7 +36,6 @@ export const List_All_DRC_Details = async (status, pages = 1) => {
 
     console.log("Full DRC API response:", response.data);
 
-    // Extract from response structure
     // const drcArray = response.data?.data?.drcDetails;
     const drcArray = response.data;
 
@@ -69,25 +67,63 @@ export const List_All_DRC_Details = async (status, pages = 1) => {
 };
 
 
-export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
+// export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
+//   try {
+//     if (!drc_id) throw new Error("drc_id is required");
+//     const response = await axios.post(
+//       `${URL2}/List_RO_Details_Owen_By_DRC_ID`,
+//       { drc_id }
+//     );
+
+//     const data = response.data;
+
+//     const formattedROs = data.map((ro, index) => ({
+//       key: index,
+//       ro_name: ro.ro_name,
+//       status: ro.status,
+//       ro_end_date: ro.ro_end_dtm,
+//       ro_contact_no: ro.ro_contact_no,
+//     }));
+
+//     return formattedROs;
+//   } catch (error) {
+//     console.error(
+//       "Error fetching RO list by DRC ID:",
+//       error.response?.data || error.message
+//     );
+//     throw error;
+//   }
+// };
+
+export const List_RO_Details_Owen_By_DRC_ID = async (payload) => {
   try {
-    if (!drc_id) throw new Error("drc_id is required");
+    if (!payload?.drc_id) {
+      throw new Error("drc_id is required");
+    }
+
     const response = await axios.post(
       `${URL2}/List_RO_Details_Owen_By_DRC_ID`,
-      { drc_id }
+      payload
     );
 
-    const data = response.data;
+    const { data, current_page, per_page } = response.data;
 
     const formattedROs = data.map((ro, index) => ({
-      key: index,
+      key: (current_page - 1) * per_page + index, // Useful for React keys in table rows
       ro_name: ro.ro_name,
       status: ro.status,
       ro_end_date: ro.ro_end_dtm,
       ro_contact_no: ro.ro_contact_no,
     }));
 
-    return formattedROs;
+    return {
+      roList: formattedROs,
+      pagination: {
+        currentPage: current_page,
+        perPage: per_page,
+      },
+    };
+
   } catch (error) {
     console.error(
       "Error fetching RO list by DRC ID:",
@@ -97,15 +133,18 @@ export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
   }
 };
 
-export const List_RTOM_Details_Owen_By_DRC_ID = async (drc_id) => {
+export const List_RTOM_Details_Owen_By_DRC_ID = async (payload) => {
   try {
-    if (!drc_id) throw new Error("drc_id is required");
+
+    if (!payload?.drc_id) {
+      throw new Error("drc_id is required");
+    }
     const response = await axios.post(
       `${URL}/List_RTOM_Details_Owen_By_DRC_ID`,
-      { drc_id }
+      payload
     );
 
-    const data = response.data;
+    const {data} = response.data;
 
     const formattedRtomData = data.map((rtom, index) => ({
       key: index,
@@ -116,7 +155,9 @@ export const List_RTOM_Details_Owen_By_DRC_ID = async (drc_id) => {
       ro_count: rtom.ro_count,
     }));
 
-    return formattedRtomData;
+    return {
+      rtomList: formattedRtomData
+    };
   } catch (error) {
     console.error(
       "Error fetching RTOMs by DRC ID:",
@@ -126,24 +167,31 @@ export const List_RTOM_Details_Owen_By_DRC_ID = async (drc_id) => {
   }
 };
 
-export const List_Service_Details_Owen_By_DRC_ID = async (drc_id) => {
+export const List_Service_Details_Owen_By_DRC_ID = async (payload) => {
   try {
-    if (!drc_id) throw new Error("drc_id is required");
+    
+    if (!payload?.drc_id) {
+      throw new Error("drc_id is required");
+    }
     const response = await axios.post(
       `${URL}/List_Service_Details_Owen_By_DRC_ID`,
-      { drc_id }
+      payload
     );
 
-    const data = response.data;
+    console.log(response);
+    
+    const {services} = response.data;
 
-    const formattedServices = data.map((service, index) => ({
+    const formattedServices = services.map((service, index) => ({
       key: index,
       service_type: service.service_type,
       enable_date: service.enable_date,
       status: service.status,
     }));
 
-    return formattedServices;
+    return {
+      servicesList: formattedServices
+    };
   } catch (error) {
     console.error(
       "Error fetching services by DRC ID:",
@@ -334,6 +382,33 @@ export const registerDRC = async (drcData) => {
 };
 
 
+export const listAllDRCDetails = async (filters = {}) => {
+  try {
+    const response = await axios.post(`${URL}/List_All_DRC_Details`, {
+      status: filters.status || "",
+      pages: filters.pages || 1,
+      search: filters.search || ""
+    });
 
+    const drcArray = Array.isArray(response.data) ? response.data : response.data.data;
+    
+    if (!Array.isArray(drcArray)) {
+      throw new Error("Invalid DRC data format received");
+    }
 
-
+    return drcArray.map(drc => ({
+      drc_id: drc.drc_id,
+      drc_name: drc.drc_name,
+      drc_status: drc.drc_status,
+      drc_contact_no: drc.drc_contact_no || drc.teli_no, 
+      drc_business_registration_number: drc.drc_business_registration_number,
+      service_count: drc.service_count || 0,
+      ro_count: drc.ro_count || 0,
+      rtom_count: drc.rtom_count || 0
+    }));
+    
+  } catch (error) {
+    console.error("Error fetching DRCs:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to fetch DRC details");
+  }
+};
