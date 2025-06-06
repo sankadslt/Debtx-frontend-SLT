@@ -209,7 +209,7 @@ const DRCInfo = () => {
 
       <div className="w-full flex justify-center">
         <div
-          className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}
+          className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl mx-4 sm:mx-auto`}
         >
           {/* Edit button */}
           <div className="absolute top-4 right-4">
@@ -511,7 +511,7 @@ const DRCInfo = () => {
       {showEndFields && (
         <div className="w-full flex justify-center mt-6">
           <div
-            className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}
+            className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl mx-4 sm:mx-auto`}
           >
             <table className={`${GlobalStyle.table} min-w-full text-left`}>
               <tbody>
