@@ -275,7 +275,7 @@ export const getActiveRTOMDetails = async () => {
 export const getActiveServiceDetails = async () => {
   try {
     const response = await axios.get(
-      `${URL}/service/Active_Service_Details`
+      `${BASE_URL}/service/Active_Service_Details`
     );
     console.log("Active service details data:", response.data.data);
     const data = response.data.data.mongoData;

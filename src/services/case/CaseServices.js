@@ -549,13 +549,13 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
       throw new Error("case_id is required");
     }
 
-  
-    const user_id = await getLoggedUserId();
-    const recieved_by = user_id || "Unknown User"; 
 
-    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {  
-      case_id, 
-      recieved_by 
+    const user_id = await getLoggedUserId();
+    const recieved_by = user_id || "Unknown User";
+
+    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {
+      case_id,
+      recieved_by
     });
 
     return response.status;
@@ -631,8 +631,8 @@ export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
 export const fetchCaseDetails = async (caseId) => {
   try {
     const response = await axios.get(`${URL}/listdownCaseDetailsByCaseId/${caseId}`, {
-      },);
-  
+    },);
+
     return response.data;
   } catch (error) {
     console.error('Error fetching case details:', error);
@@ -658,35 +658,56 @@ export const GetAbandonedCaseLogDetailsByAccountNumber = async (
   }
 };
 
-export const GetFilteredCaseLists = async (payload) => {
+export const GetFilteredCaseLists = async ({
+  case_status,
+  From_DAT,
+  TO_DAT,
+  RTOM,
+  DRC,
+  arrears_band,
+  service_type,
+  pages
+}) => {
   try {
-    const response = await axios.post(
-      `${URL}/Get_Case_Lists`,
-      payload
-    );
+    const payload = {
+      case_status,
+      From_DAT,
+      TO_DAT,
+      RTOM,
+      DRC,
+      arrears_band,
+      service_type,
+      pages
+    };
 
-    if (response.data.success === false) {
-      throw new Error(response.data.message || "Failed to fetch withdrawal cases.");
+    
+
+    const response = await axios.post(`${URL}/getCaseLists`, payload);
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
     }
 
-    return { 
-    data: response.data.data.map((item) => ({
-      caseid: item.case_id,
-      casecurrentstatus: item.case_current_status,
-      accountno: item.account_no,                                 
-      drccommisionrule: item.drc_commision_rule,
-      currentarrearsamount: item.current_arrears_amount,
-      rtom: item.rtom,                                 
-      createddtm: item.created_dtm,
-      lastpaymentdate: item.last_payment_date
-    })),
-
-  };
+    return {
+      data: response.data.data.map(item => ({
+        caseid: item.case_id,
+        casecurrentstatus: item.status,
+        accountno: item.account_no,
+        amount: item.current_arrears_amount,
+        servicetype: item.service_type,
+        Agent:item.drc_name,
+        drccommisionrule: item.service_type,
+        currentarrearsamount: item.current_arrears_amount,
+        rtom: item.rtom,
+        createddtm: item.date,
+        lastpaymentdate: item.last_payment_date // If not included in backend response, this may be undefined
+      }))
+    };
   } catch (error) {
-    console.error(
-      "Error fetching case list data:",
-      error.response?.data || error.message
-    );
+    console.error("Case list error:", error);
+    if (error.response?.status === 404) {
+      return { data: [] };
+    }
     throw error;
   }
 };
