@@ -439,7 +439,7 @@ const DRCInfo = () => {
 
           <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
             <table className={`${GlobalStyle.table} min-w-full table-fixed sm:table-auto align-middle`}>
-              <thead className={`${GlobalStyle.thead}overflow-hidden`}>
+              <thead className={`${GlobalStyle.thead} overflow-hidden`}>
                 <tr>
                   <th
                     className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
