@@ -730,35 +730,78 @@ export const fetchUserTasks = async (token, delegate_user_id) => {
     throw error;
   }
 };
-export const GetFilteredCaseLists = async (payload) => {
-  try {
-    const response = await axios.post(
-      `${URL}/Get_Case_Lists`,
-      payload
-    );
+ 
 
-    if (response.data.success === false) {
-      throw new Error(response.data.message || "Failed to fetch withdrawal cases.");
+export const GetFilteredCaseLists = async ({
+  case_current_status,
+  From_DAT,
+  TO_DAT,
+  RTOM,
+  DRC,
+  arrears_band:selectedBand,
+  service_type,
+  pages
+}) => {
+  try {
+    const payload = {
+      case_current_status,
+      From_DAT,
+      TO_DAT,
+      RTOM,
+      DRC,
+      arrears_band: selectedBand,
+      service_type,
+      pages
+    };
+
+    
+
+    const response = await axios.post(`${URL}/getCaseLists`, payload);
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
     }
 
-    return { 
-    data: response.data.data.map((item) => ({
-      caseid: item.case_id,
-      casecurrentstatus: item.case_current_status,
-      accountno: item.account_no,                                 
-      drccommisionrule: item.drc_commision_rule,
-      currentarrearsamount: item.current_arrears_amount,
-      rtom: item.rtom,                                 
-      createddtm: item.created_dtm,
-      lastpaymentdate: item.last_payment_date
-    })),
-
-  };
+    return {
+      data: response.data.data.map(item => ({
+        caseid: item.case_id,
+        casecurrentstatus: item.status,
+        accountno: item.account_no,
+        amount: item.current_arrears_amount,
+        servicetype: item.service_type,
+        Agent:item.drc_name,
+        drccommisionrule: item.service_type,
+        currentarrearsamount: item.current_arrears_amount,
+        rtom: item.rtom,
+        Created_On: item.date,
+        Created_On: item.last_payment_date  
+      }))
+    };
   } catch (error) {
-    console.error(
-      "Error fetching case list data:",
-      error.response?.data || error.message
-    );
+    console.error("Case list error:", error);
+    if (error.response?.status === 404) {
+      return { data: [] };
+    }
     throw error;
   }
 };
+ 
+ 
+ export const getCaseStatusList = async () => {
+  try {
+    const response = await axios.get(`${URL}/CaseStatus`);  
+    
+    if (response.data.status === "success") {
+      
+      return response.data.data.map((status) => ({
+        key: status._id,
+        value: status.case_status  
+      }));
+    }
+    throw new Error(response.data.message || "Failed to fetch case statuses");
+  } catch (error) {
+    console.error("Error fetching case statuses:", error.response?.data || error.message);
+    throw error;
+  }
+};
+

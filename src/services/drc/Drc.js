@@ -250,29 +250,8 @@ export const updateDRCInfo = async (
     throw new Error(error.response?.data?.message || "Failed to update DRC");
   }
 };
- 
-export const  List_All_Active_RTOMs= async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/RTOM/List_All_Active_RTOMs`);
-    return response.data;
-  } catch (error) {
-    // Handle API errors
-    if (error.response) {
-      console.error("API Error:", error.response.data);
-      throw new Error(
-        error.response.data.message || "Failed to fetch active RTOMs"
-      );
-    } else if (error.request) {
-      console.error("Network Error:", error.request);
-      throw new Error("Network error. No response received from server.");
-    } else {
-      console.error("Request Error:", error.message);
-      throw new Error("Error setting up request: " + error.message);
-    }
-  }
-};
 
-export const  getActiveRTOMDetails = async () => {
+export const getActiveRTOMDetails = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/RTOM/List_All_Active_RTOMs`);
     return response.data;
@@ -293,31 +272,18 @@ export const  getActiveRTOMDetails = async () => {
   }
 };
 // getActiveServiceDetails
- // services/drc/Drc.js
 export const getActiveServiceDetails = async () => {
   try {
-    const response = await axios.get(
-      `${BASE_URL}/service/Active_Service_Details`
-    );
-    console.log("Active service details data:", response.data.data);
-    const data = response.data.data.mongoData;
-    const serviceNames = data.map((service) => ({
-      key: service.service_id,  
-      value: service.service_name,   
-      id: service.service_id,
-    }));
-
-    return { data: serviceNames };  
-
+      const response = await axios.get(`${BASE_URL}/service/Active_Service_Details`);
+      return response.data.data; // Make sure this returns an array of {id, value} objects
   } catch (error) {
-    console.error(
-      "Error fetching active services:",
-      error.response?.data || error.message
-    );
-    throw error;
+      console.error(
+          "Error fetching active services:",
+          error.response?.data || error.message
+      );
+      throw error;
   }
 };
-
 export const getSLTCoordinators = async () => {
   try {
     const response = await axios.post(
@@ -362,7 +328,6 @@ export const registerDRC = async (drcData) => {
     }
   }
 };
-
 
 
 

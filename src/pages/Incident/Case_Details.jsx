@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchCaseDetails } from '../../services/case/CaseServices.js';  
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { useLocation, useNavigate } from 'react-router-dom';
  
  
 const CaseDetails = () => {
@@ -11,10 +10,7 @@ const CaseDetails = () => {
     const [error, setError] = useState(null);
     const [openSections, setOpenSections] = useState({});
     const [currentIndices, setCurrentIndices] = useState({});
-    const location = useLocation();
-    const navigate = useNavigate();
-    
-    const caseId = location.state?.CaseID || null; // Get caseId from state or URL params
+    const caseId = 4;
 
     useEffect(() => {
         const loadCaseDetails = async () => {
