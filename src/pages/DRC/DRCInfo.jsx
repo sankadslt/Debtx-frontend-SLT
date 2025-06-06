@@ -367,9 +367,9 @@ const DRCInfo = () => {
             Services
           </h2>
 
-          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-            <table className={`${GlobalStyle.table} min-w-full`}>
-              <thead className={GlobalStyle.thead}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
+            <table className={`${GlobalStyle.table} min-w-full inline-block align-middle`}>
+              <thead className={`${GlobalStyle.thead} overflow-hidden`}>
                 <tr>
                   <th
                     className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
@@ -437,9 +437,9 @@ const DRCInfo = () => {
             RTOM Areas
           </h2>
 
-          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-            <table className={`${GlobalStyle.table} min-w-full`}>
-              <thead className={GlobalStyle.thead}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
+            <table className={`${GlobalStyle.table} min-w-full inline-block align-middle`}>
+              <thead className={`${GlobalStyle.thead}overflow-hidden`}>
                 <tr>
                   <th
                     className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
