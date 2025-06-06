@@ -530,7 +530,7 @@ const DRCInfo = () => {
                         selected={endDate}
                         onChange={(date) => setEndDate(date)}
                         dateFormat="dd/MM/yyyy"
-                        className={`${GlobalStyle.inputText} w-full text-left`}
+                        className={`${GlobalStyle.inputText} w-full text-left min-w-0`}
                         maxDate={new Date()} // Only allow current date or earlier
                         minDate={new Date()} // Only allow current date or later
                         // This combination effectively restricts to current date only
@@ -557,7 +557,7 @@ const DRCInfo = () => {
                         }
                       }}
                       rows="4"
-                      className={`${GlobalStyle.inputText} w-full text-left ${
+                      className={`${GlobalStyle.inputText} w-full text-left resize-none ${
                         remarkError ? "border-red-500" : ""
                       }`}
                       placeholder="Enter reason for ending DRC relationship"
