@@ -451,26 +451,26 @@ const DRCInfo = () => {
           </h2>
 
           <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
-            <table className={`${GlobalStyle.table} min-w-full table-fixed sm:table-auto align-middle`}>
-              <thead className={`${GlobalStyle.thead} overflow-hidden`}>
+            <table className={`${GlobalStyle.table} min-w-full`}>
+              <thead className={`${GlobalStyle.thead} overflow-hidden hidden sm:table-header-group`}>
                 <tr>
                   <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
+                    className={`${GlobalStyle.tableHeader} text-left`}
                   >
                     RTOM ID
                   </th>
                   <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
+                    className={`${GlobalStyle.tableHeader} text-left`}
                   >
                     Changed On
                   </th>
                   <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
+                    className={`${GlobalStyle.tableHeader} text-left`}
                   ></th>
                 </tr>
               </thead>
                 
-                <tbody>
+              <tbody>
               {companyData.rtom &&
                 companyData.rtom.map((rtom, index) => (
                   <tr
@@ -479,17 +479,30 @@ const DRCInfo = () => {
                       index % 2 === 0
                         ? "bg-white bg-opacity-75"
                         : "bg-gray-50 bg-opacity-50"
-                    } border-b`}
+                    } border-b block sm:table-row`}
                   >
-                    <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                    <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
+                      <div className="sm:hidden font-medium text-gray-600 mb-1">
+                        RTOM ID:
+                      </div>
+                      <div className="whitespace-normal break-words">
                       {rtom.rtom_id}
+                      </div>
                     </td>
-                    <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
+                    <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
+                      <div className="sm:hidden font-medium text-gray-600 mb-1">
+                        Changed On:
+                      </div>
+                      <div className="whitespace-normal">
                       {rtom.status_update_dtm
                         ? new Date(rtom.status_update_dtm).toLocaleDateString()
                         : "Not specified"}
+                      </div>
                     </td>
-                    <td className={`${GlobalStyle.tableData} text-left`}>
+                    <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
+                      <div className="sm:hidden font-medium text-gray-600 mb-1">
+                        Status:
+                      </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input 
                           type="checkbox" 
@@ -511,7 +524,7 @@ const DRCInfo = () => {
                   </td>
                 </tr>
               )}
-            </tbody>
+              </tbody>
 
             </table>
           </div>
