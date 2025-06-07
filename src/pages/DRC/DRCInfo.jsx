@@ -541,15 +541,15 @@ const DRCInfo = () => {
           >
             <table className={`${GlobalStyle.table} min-w-full text-left`}>
               <tbody>
-                <tr>
+                <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
                   <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
+                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
                   >
                     End Date
                   </td>
-                  <td className="w-4 text-left">:</td>
+                  <td className="hidden sm:table-cell w-4 text-left">:</td>
                   <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
+                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0`}
                   >
                     <div className="flex justify-start w-full">
                       <DatePicker
@@ -564,15 +564,15 @@ const DRCInfo = () => {
                     </div>
                   </td>
                 </tr>
-                <tr>
+                <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
                   <td
-                    className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
+                    className={`${GlobalStyle.tableData} underline sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4 font-semibold`}
                   >
                     Remark
                   </td>
-                  <td className="w-4 text-left">:</td>
+                  <td className="hidden sm:table-cell w-4 text-left">:</td>
                   <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
+                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0`}
                   >
                     <textarea
                       value={remark}
@@ -583,7 +583,7 @@ const DRCInfo = () => {
                         }
                       }}
                       rows="4"
-                      className={`${GlobalStyle.inputText} w-full text-left resize-none ${
+                      className={`${GlobalStyle.inputText} w-full text-left resize-none min-w-0 ${
                         remarkError ? "border-red-500" : ""
                       }`}
                       placeholder="Enter reason for ending DRC relationship"
