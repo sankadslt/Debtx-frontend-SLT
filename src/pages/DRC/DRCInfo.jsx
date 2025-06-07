@@ -368,21 +368,21 @@ const DRCInfo = () => {
           </h2>
 
           <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
-            <table className={`${GlobalStyle.table} min-w-full table-fixed sm:table-auto align-middle`}>
-              <thead className={`${GlobalStyle.thead} overflow-hidden`}>
+            <table className={`${GlobalStyle.table} min-w-full`}>
+              <thead className={`${GlobalStyle.thead} hidden sm:table-header-group`}>
                 <tr>
                   <th
-                    className={`${GlobalStyle.tableHeader} px-2 py-3 tracking-wider hidden sm:table-cell whitespace-nowrap text-left`}
+                    className={`${GlobalStyle.tableHeader} text-left`}
                   >
                     Service Type
                   </th>
                   <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
+                    className={`${GlobalStyle.tableHeader} text-left`}
                   >
                     Changed On
                   </th>
                   <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
+                    className={`${GlobalStyle.tableHeader} text-left`}
                   ></th>
                 </tr>
               </thead>
@@ -395,17 +395,30 @@ const DRCInfo = () => {
                         index % 2 === 0
                           ? "bg-white bg-opacity-75"
                           : "bg-gray-50 bg-opacity-50"
-                      } border-b`}
+                      } border-b block sm:table-row`}
                     >
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {service.service_type}
+                      <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
+                        <div className="sm:hidden font-medium text-gray-600 mb-1">
+                          Service Type: 
+                        </div>
+                        <div className="whitespace-normal break-words">
+                          {service.service_type}
+                        </div>
                       </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
-                        {service.status_update_dtm
+                      <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
+                        <div className="sm:hidden font-medium text-gray-600 mb-1">
+                          Changed On: 
+                        </div>
+                        <div className="whitespace-nowrap">
+                          {service.status_update_dtm
                           ? new Date(service.status_update_dtm).toLocaleDateString()
                           : "Not specified"}
+                        </div>
                       </td>
-                      <td className={`${GlobalStyle.tableData} text-left`}>
+                      <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
+                        <div className="sm:hidden font-medium text-gray-600 mb-1">
+                          Status: 
+                        </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input 
                             type="checkbox" 
