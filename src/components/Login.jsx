@@ -1,17 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { loginUser } from "../services/auth/authService";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF } from "react-icons/fa";
 import logo from "../assets/images/logo.png";
+import axios from "axios";
+
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 
 const Login = () => {
+  const { instance, accounts } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [socialLoading, setSocialLoading] = useState(""); // Track which social login is in progress
+  const [socialLoading, setSocialLoading] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -21,29 +26,40 @@ const Login = () => {
       const response = await loginUser({ email, password });
       localStorage.setItem("accessToken", response.accessToken);
       localStorage.setItem("user", JSON.stringify(response.user));
-
-    //  console.log("Logged in successfully. Token:", response.accessToken);
-
       navigate("/dashboard");
     } catch (error) {
       setError(error.response?.data?.message || "Login failed");
     }
   };
 
-  const handleSocialLogin = (platform) => {
-    setSocialLoading(platform); // Set the platform that is being logged in
-    setTimeout(() => {
-      // Simulate a social login call, replace with actual social login logic
-      console.log(`Logging in with ${platform}`);
-      setSocialLoading(""); // Reset after simulating login
-    }, 2000); // Simulating a delay
-  };
+const handleAzureLogin = async () => {
+  setSocialLoading("Azure");
+  try {
+    const loginResponse = await instance.loginPopup({
+      scopes: ["openid", "profile", "email"],
+    });
 
-  
+    const idToken = loginResponse.idToken;
+
+    // Send the ID token to your backend to verify the user
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/azure`, {
+      code: idToken,
+    });
+
+    localStorage.setItem("accessToken", response.data.accessToken);
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+    navigate("/dashboard");
+  } catch (err) {
+    console.error("Azure login failed:", err);
+    setError("Azure login failed. Please contact support.");
+  } finally {
+    setSocialLoading("");
+  }
+};
 
   return (
-    <div className="flex justify-center  items-center">
-      <div className="w-full max-w-md bg-white  p-8 rounded-lg shadow-2xl bg-opacity-70">
+    <div className="flex justify-center items-center">
+      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-2xl bg-opacity-70">
         <div className="flex justify-center mb-6">
           <img src={logo} alt="Logo" className="h-20" />
         </div>
@@ -95,8 +111,8 @@ const Login = () => {
           <div className="flex justify-center space-x-4">
             <button
               className="p-2 rounded-full bg-white border hover:bg-gray-100"
-              onClick={() => handleSocialLogin("Google")}
-              disabled={socialLoading !== ""} // Disable all buttons while one is loading
+              onClick={() => console.log("Google login placeholder")}
+              disabled={socialLoading !== ""}
             >
               {socialLoading === "Google" ? (
                 <span>Pending...</span>
@@ -106,13 +122,26 @@ const Login = () => {
             </button>
             <button
               className="p-2 rounded-full bg-white border hover:bg-gray-100"
-              onClick={() => handleSocialLogin("Facebook")}
-              disabled={socialLoading !== ""} // Disable all buttons while one is loading
+              onClick={() => console.log("Facebook login placeholder")}
+              disabled={socialLoading !== ""}
             >
               {socialLoading === "Facebook" ? (
                 <span>Pending...</span>
               ) : (
                 <FaFacebookF className="text-2xl text-blue-600" />
+              )}
+            </button>
+            <button
+              className="p-2 rounded-full bg-white border hover:bg-gray-100"
+              onClick={handleAzureLogin}
+              disabled={socialLoading !== ""}
+            >
+              {socialLoading === "Azure" ? (
+                <span>Pending...</span>
+              ) : (
+                <span className="text-blue-800 font-semibold text-sm">
+                  Azure
+                </span>
               )}
             </button>
           </div>
