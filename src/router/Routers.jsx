@@ -111,6 +111,7 @@ import ListofServicetype from "../pages/Rtom/ListofServicetype";
 
 //USER  
 import UserList from "../pages/User/UserList";
+import UserInfo  from "../pages/User/UserInfo";
 
 
 
@@ -715,6 +716,9 @@ const Routers = () => {
 
     {/* User */}
       <Route path="/pages/User/UserList" element={<ProtectedRoute element={<UserList />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
+      
+      {/* RTOM */}
 
     </Routes>
 
