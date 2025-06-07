@@ -320,19 +320,34 @@ export const getActiveRTOMDetails = async () => {
   }
 };
 // getActiveServiceDetails
-export const getActiveServiceDetails = async () => {
+export const getActiveServiceDetails = async (drcId) => {
   try {
-    const response = await axios.get(
-      `${BASE_URL}/service/Active_Service_Details`
+    const response = await axios.post(
+      `${BASE_URL}/service/List_Service_Details_Owen_By_DRC_ID`,
+      { drc_id: drcId }
     );
-    console.log("Active service details data:", response.data.data);
-    return response.data;
+
+    if (response.data?.services) {
+      return {
+        status: 'success',
+        data: response.data.services.map(service => ({
+          service_type: service.service_type,
+          status: service.status
+        }))
+      };
+    }
+    
+    throw new Error("Invalid service data format received");
   } catch (error) {
-    console.error(
-      "Error fetching active services:",
-      error.response?.data || error.message
-    );
-    throw error;
+    console.error("Error fetching active services:", error.response?.data || error.message);
+    return {
+      status: 'error',
+      message: error.response?.data?.message || 'Failed to retrieve active services',
+      errors: {
+        code: error.response?.status || 500,
+        description: error.message || 'An unexpected error occurred while fetching active services'
+      }
+    };
   }
 };
 
