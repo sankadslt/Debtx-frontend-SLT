@@ -325,7 +325,7 @@ const CaseDistributionDRCSummary = () => {
               
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>Count</th>
-              <th className={GlobalStyle.tableHeader}>Total Arreas</th>
+              <th className={GlobalStyle.tableHeader}>Total Arreas (LKR)</th>
               <th className={GlobalStyle.tableHeader}>Created dtm</th>
               <th className={GlobalStyle.tableHeader}>Proceed On</th>
               

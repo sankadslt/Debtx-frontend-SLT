@@ -639,3 +639,4 @@ export const fetchCaseDetails = async (caseId) => {
     throw error;
   }
 };
+

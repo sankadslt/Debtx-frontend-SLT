@@ -253,7 +253,7 @@ const CommissionPreview = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={handleBackButton}
                 >
                     <FaArrowLeft />
