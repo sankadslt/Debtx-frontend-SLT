@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/edit-info.svg";
 import add from "../../assets/images/add.svg";
@@ -6,10 +6,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
+import { getUserDetailsById } from "../../services/user/user_services";
 
 const UserInfo = () => {
   const location = useLocation();
   const user_id = location.state?.userId;
+
+  //For testing
+  // const user_id ="test@gmail.com";
 
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
@@ -20,161 +24,174 @@ const UserInfo = () => {
   const [isActive, setIsActive] = useState(true);
   const [emailError, setEmailError] = useState("");
 
+  const [loading, setLoading] =useState(false);
+  const [error, setError] =useState("");
+  const [userInfo, setUserInfo] =useState({
+    user_name: "",
+    user_type: "",
+    user_mail: "",
+    login_method: "",
+    user_roles: [],
+    created_dtm: "",
+    created_by: "",
+    approved_dtm: "",
+    approved_by: "",
+    remark: []
+  });
+
   const [isEditing, setIsEditing] = useState(false);
   const [showEndSection, setShowEndSection] = useState(false);
   const [showLogHistory, setShowLogHistory] = useState(false);
 
-  const [formData, setFormData] = useState({
-    userType: "",
-    userMail: "",
-    loginMethod: "",
-    userRoles: [],
-    createdOn: "",
-    createdBy: "",
-    approvedOn: "",
-    approvedBy: "",
-  });
+  // const [formData, setFormData] = useState({
+  //   userType: "",
+  //   userMail: "",
+  //   loginMethod: "",
+  //   userRoles: [],
+  //   createdOn: "",
+  //   createdBy: "",
+  //   approvedOn: "",
+  //   approvedBy: "",
+  // });
 
-  // Dummy data for View table - User Roles
-  const [userRolesData, setUserRolesData] = useState([
-    {
-      roleName: "GM",
-      active: true,
-    },
-    {
-      roleName: "DGM",
-      active: true,
-    },
-    {
-      roleName: "Legal Officer",
-      active: true,
-    },
-  ]);
-
-  // Dropdown data for User Roles
-  const availableRoles = [
-    { role_name: "GM" },
-    { role_name: "DGM" },
-    { role_name: "Legal Officer" },
-    { role_name: "Manager" },
-    { role_name: "Assistant Manager" },
-    { role_name: "Officer" },
-    { role_name: "Executive" },
-    { role_name: "Senior Executive" },
-  ];
-
-  // Log history data
-  const logHistoryData = [
-    {
-      editedOn: "mm/dd/yyyy",
-      action: "Sensus BPO Services (Pvt) Ltd....",
-      editedBy: "Damithri",
-    },
-    {
-      editedOn: "mm/dd/yyyy",
-      action: "Central Management Services (Pvt) Ltd",
-      editedBy: "Saniru",
-    },
-  ];
+  // // Dropdown data for User Roles
+  // const availableRoles = [
+  //   { role_name: "GM" },
+  //   { role_name: "DGM" },
+  //   { role_name: "Legal Officer" },
+  //   { role_name: "Manager" },
+  //   { role_name: "Assistant Manager" },
+  //   { role_name: "Officer" },
+  //   { role_name: "Executive" },
+  //   { role_name: "Senior Executive" },
+  // ];
 
   useEffect(() => {
-    // Simulating API call
-    const getUserInfo = async () => {
+    const fetchUserInfoById = async () => {
       try {
-        // mock data for demonstration
-        const mockData = {
-          user_type: "Admin",
-          user_mail: "user@example.com",
-          login_method: "Email",
-          user_roles: [
-            { name: "GM", status: true },
-            { name: "DGM", status: true },
-            { name: "Legal Officer", status: false },
-          ],
-          created_on: "2024-06-06",
-          created_by: "System",
-          approved_on: "2024-06-07",
-          approved_by: "Admin",
-        };
-        setFormData({
-          userType: mockData?.user_type || "",
-          userMail: mockData?.user_mail || "",
-          loginMethod: mockData?.login_method || "",
-          userRoles: mockData?.user_roles || [],
-          createdOn: mockData?.created_on || "",
-          createdBy: mockData?.created_by || "",
-          approvedOn: mockData?.approved_on || "",
-          approvedBy: mockData?.approved_by || "",
-        });
+        setLoading(true);
+        const fetchedData = await getUserDetailsById(user_id);
+        // console.log("Fetched User Info: ", fetchedData);
+
+        if (fetchedData) {
+          setUserInfo(fetchedData.data);
+        }
+        setLoading(false);
+        
+        // setFormData({
+        //   userType: mockData?.user_type || "",
+        //   userMail: mockData?.user_mail || "",
+        //   loginMethod: mockData?.login_method || "",
+        //   userRoles: mockData?.user_roles || [],
+        //   createdOn: mockData?.created_on || "",
+        //   createdBy: mockData?.created_by || "",
+        //   approvedOn: mockData?.approved_on || "",
+        //   approvedBy: mockData?.approved_by || "",
+        // });
       } catch (err) {
         console.error("Error fetching User info:", err);
+        setError("Failed to load user information. Please try again later.")
+        setLoading(false);
+
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load User information",
+        });
       }
     };
 
-    getUserInfo();
+    fetchUserInfoById();
   }, [user_id]);
 
   const toggleEdit = () => {
-    setIsEditing(!isEditing);
-    setEmailError("");
+    // setIsEditing(!isEditing);
+    // setEmailError("");
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
 
-    if (name === "userMail") {
-      setEmailError("");
-    }
+  //   if (name === "userMail") {
+  //     setEmailError("");
+  //   }
+  // };
+
+  // const isValidEmail = (email) => {
+  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //   return emailRegex.test(email);
+  // };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   };
 
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  // const handleSave = () => {
+  //   if (!formData.userMail.trim()) {
+  //     setEmailError("User Mail is required");
+  //     return;
+  //   } else if (!isValidEmail(formData.userMail)) {
+  //     setEmailError("Please enter a valid email address");
+  //     return;
+  //   }
 
-  const handleSave = () => {
-    if (!formData.userMail.trim()) {
-      setEmailError("User Mail is required");
-      return;
-    } else if (!isValidEmail(formData.userMail)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
+  //   toggleEdit();
+  // };
 
-    toggleEdit();
-  };
+  // const addUserRole = () => {
+  //   if (
+  //     selectedRole &&
+  //     !userRolesData.some((item) => item.roleName === selectedRole)
+  //   ) {
+  //     setUserRolesData([
+  //       ...userRolesData,
+  //       { roleName: selectedRole, active: false },
+  //     ]);
+  //     setSelectedRole("");
+  //   }
+  // };
 
-  const addUserRole = () => {
-    if (
-      selectedRole &&
-      !userRolesData.some((item) => item.roleName === selectedRole)
-    ) {
-      setUserRolesData([
-        ...userRolesData,
-        { roleName: selectedRole, active: false },
-      ]);
-      setSelectedRole("");
-    }
-  };
+  // const startIndex = currentPage * rowsPerPage;
+  // const endIndex = startIndex + rowsPerPage;
+  // const paginatedData = userRolesData.slice(startIndex, endIndex);
 
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = userRolesData.slice(startIndex, endIndex);
+  // const toggleUserRole = (index) => {
+  //   const updatedData = [...userRolesData];
+  //   updatedData[index].active = !updatedData[index].active;
+  //   setUserRolesData(updatedData);
+  // };
 
-  const toggleUserRole = (index) => {
-    const updatedData = [...userRolesData];
-    updatedData[index].active = !updatedData[index].active;
-    setUserRolesData(updatedData);
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
       <div className={`${GlobalStyle.headingLarge} mb-6 sm:mb-8`}>
-        <span>User ID - User Name</span>
+        <span>{user_id} - {userInfo.user_name}</span>
       </div>
 
       {/* Card box */}
@@ -183,7 +200,7 @@ const UserInfo = () => {
           {/* Edit Mode UI */}
           {isEditing ? (
             <div className="space-y-4">
-              <div className="flex justify-end items-center mb-4">
+              {/*<div className="flex justify-end items-center mb-4">
                 <div className="flex items-center">
                   <label className="inline-flex relative items-center cursor-pointer">
                     <input
@@ -197,7 +214,6 @@ const UserInfo = () => {
                 </div>
               </div>
 
-              {/* Edit Table */}
               <div className="overflow-x-auto">
                 <table className="mb-6 sm:mb-8 w-full">
                   <tbody>
@@ -257,7 +273,6 @@ const UserInfo = () => {
                       </td>
                     </tr>
 
-                    {/* User Role Dropdown with Add Button */}
                     <tr>
                       <td>
                         <label className={GlobalStyle.headingMedium}>
@@ -291,7 +306,6 @@ const UserInfo = () => {
                     <tr>
                       <td colSpan="3">
                         <div className="mt-4">
-                          {/* User Roles Table */}
                           <div
                             className={`${GlobalStyle.tableContainer} overflow-x-auto`}
                           >
@@ -311,7 +325,7 @@ const UserInfo = () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {paginatedData.map((row, index) => (
+                                {formData.userRoles.map((row, index) => (
                                   <tr
                                     key={index}
                                     className={`${
@@ -405,7 +419,6 @@ const UserInfo = () => {
                 </table>
               </div>
 
-              {/* Save button in edit mode */}
               <div className="flex justify-end mt-4">
                 <button
                   onClick={handleSave}
@@ -413,7 +426,7 @@ const UserInfo = () => {
                 >
                   Save
                 </button>
-              </div>
+              </div> */}
             </div>
           ) : (
             <>
@@ -432,6 +445,8 @@ const UserInfo = () => {
               <div className="overflow-x-auto">
                 <table className="mb-6 sm:mb-8 w-full">
                   <tbody>
+
+                    {/* User type */}
                     <tr>
                       <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
@@ -443,47 +458,59 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formData.userType}
+                          {userInfo.user_type}
                         </label>
                       </td>
                     </tr>
+
+                    {/* User Mail */}
                     <tr>
-                      <td>
+                      <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
                           User Mail
                         </p>
                       </td>
-                      <td>:</td>
-                      <td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formData.userMail}
+                          {userInfo.user_mail}
                         </label>
                       </td>
                     </tr>
+
+                    {/* Login Method */}
                     <tr>
-                      <td>
+                      <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
                           Login Method
                         </p>
                       </td>
-                      <td>:</td>
-                      <td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formData.loginMethod}
+                          {userInfo.login_method}
                         </label>
                       </td>
                     </tr>
+
+                    {/* User Roles */}
                     <tr>
-                      <td>
+                      <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          <strong>User Roles</strong>
+                          User Roles
                         </p>
                       </td>
-                      <td>:</td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
                     </tr>
                     <tr>
                       <td colSpan="3">
-                        <div className="mt-4">
+                        <div className="mb-4">
                           {/* User Roles Table */}
                           <div
                             className={`${GlobalStyle.tableContainer} overflow-x-auto`}
@@ -504,8 +531,8 @@ const UserInfo = () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {formData.userRoles.length > 0 ? (
-                                  formData.userRoles.map((role, index) => (
+                                {userInfo.user_roles.length > 0 ? (
+                                  userInfo.user_roles.map((role, index) => (
                                     <tr
                                       key={index}
                                       className={`${
@@ -517,7 +544,7 @@ const UserInfo = () => {
                                       <td
                                         className={`${GlobalStyle.tableData} flex justify-center items-center`}
                                       >
-                                        <span>{role.name}</span>
+                                        <span>{role}</span>
                                       </td>
                                       <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center items-center">
@@ -551,55 +578,71 @@ const UserInfo = () => {
                         </div>
                       </td>
                     </tr>
+
+                    {/* Created On */}
                     <tr>
-                      <td>
+                      <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
                           Created On
                         </p>
                       </td>
-                      <td>:</td>
-                      <td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formData.createdOn}
+                          {formatDate(userInfo.created_dtm)}
                         </label>
                       </td>
-                    </tr>
+                    </tr>                   
+
+                    {/* Created by */}
                     <tr>
-                      <td>
+                      <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
                           Created By
                         </p>
                       </td>
-                      <td>:</td>
-                      <td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formData.createdBy}
+                          {userInfo.created_by}
                         </label>
                       </td>
                     </tr>
+
+                    {/* Approved on */}
                     <tr>
-                      <td>
+                      <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          Approved on
+                          Approved On
                         </p>
                       </td>
-                      <td>:</td>
-                      <td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formData.approvedOn}
+                          {formatDate(userInfo.approved_dtm)}
                         </label>
                       </td>
                     </tr>
+
+                    {/* Approved by */}
                     <tr>
-                      <td>
+                      <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          Approved by
+                          Approved By
                         </p>
                       </td>
-                      <td>:</td>
-                      <td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formData.approvedBy}
+                          {userInfo.approved_by}
                         </label>
                       </td>
                     </tr>
@@ -727,7 +770,7 @@ const UserInfo = () => {
                 </thead>
 
                 <tbody>
-                  {logHistoryData.map((log, index) => (
+                  {userInfo.remark.map((log, index) => (
                     <tr
                       key={index}
                       className={`${
@@ -736,12 +779,12 @@ const UserInfo = () => {
                           : GlobalStyle.tableRowOdd
                       } border-b`}
                     >
-                      <td className={GlobalStyle.tableData}>{log.editedOn}</td>
-                      <td className={GlobalStyle.tableData}>{log.action}</td>
-                      <td className={GlobalStyle.tableData}>{log.editedBy}</td>
+                      <td className={GlobalStyle.tableData}>{formatDate(log.remark_dtm)}</td>
+                      <td className={GlobalStyle.tableData}>{log.remark}</td>
+                      <td className={GlobalStyle.tableData}>{log.remark_by}</td>
                     </tr>
                   ))}
-                  {logHistoryData.length === 0 && (
+                  {userInfo.remark.length === 0 && (
                     <tr>
                       <td colSpan="3" className="text-center py-4">
                         No results found
