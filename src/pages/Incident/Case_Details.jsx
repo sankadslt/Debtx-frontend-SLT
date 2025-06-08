@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchCaseDetails } from '../../services/case/CaseServices.js';  
+import { fetchCaseDetails } from '../../services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useLocation, useNavigate } from 'react-router-dom';
- 
- 
+import Swal from 'sweetalert2';
+
+
 const CaseDetails = () => {
     const [caseData, setCaseData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -13,22 +14,36 @@ const CaseDetails = () => {
     const [currentIndices, setCurrentIndices] = useState({});
     const location = useLocation();
     const navigate = useNavigate();
-    
+
     const caseId = location.state?.CaseID || null; // Get caseId from state or URL params
 
     useEffect(() => {
         const loadCaseDetails = async () => {
             try {
-               // const token = localStorage.getItem("accessToken");
+                // const token = localStorage.getItem("accessToken");
                 const response = await fetchCaseDetails(caseId);
-                
+
                 if (response.success) {
                     setCaseData(response.data);
                 } else {
-                    setError(response.message || 'Failed to load case details');
+                    // setError(response.message || 'Failed to load case details');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Failed to load case details',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: "#d33"
+                    });
                 }
             } catch (err) {
-                setError(err.message || 'An error occurred while fetching case details');
+                // setError(err.message || 'An error occurred while fetching case details');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message || 'Failed to load case details',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: "#d33"
+                });
             } finally {
                 setLoading(false);
             }
@@ -42,7 +57,7 @@ const CaseDetails = () => {
             ...prev,
             [sectionName]: !prev[sectionName]
         }));
-        
+
         if (!currentIndices[sectionName]) {
             setCurrentIndices(prev => ({
                 ...prev,
@@ -54,17 +69,17 @@ const CaseDetails = () => {
     const navigateCard = (sectionKey, direction) => {
         const sectionData = getSectionData(sectionKey);
         const maxIndex = Array.isArray(sectionData) ? sectionData.length - 1 : 0;
-        
+
         setCurrentIndices(prev => {
             const currentIndex = prev[sectionKey] || 0;
             let newIndex = currentIndex;
-            
+
             if (direction === 'next') {
                 newIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
             } else {
                 newIndex = currentIndex > 0 ? currentIndex - 1 : maxIndex;
             }
-            
+
             return {
                 ...prev,
                 [sectionKey]: newIndex
@@ -74,7 +89,7 @@ const CaseDetails = () => {
 
     const getSectionData = (sectionKey) => {
         const sectionMap = {
-      
+
             'drc': caseData?.drcInfo,
             'roNegotiateArrears': caseData?.roNegotiations,
             'roCpeCollections': caseData?.roCpeCollections,
@@ -92,7 +107,7 @@ const CaseDetails = () => {
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         try {
-            return new Date(dateString).toLocaleDateString("en-GB")|| "";
+            return new Date(dateString).toLocaleDateString("en-GB") || "";
         } catch {
             return dateString;
         }
@@ -132,11 +147,11 @@ const CaseDetails = () => {
 
     const renderCard = (data, title) => {
         if (!data) return <p className="text-gray-500">No data available</p>;
-    
+
         if (title === "DRC" && data.recoveryOfficers) {
             return (
                 <div className="space-y-6">
-                  
+
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {Object.entries(data)
@@ -157,7 +172,7 @@ const CaseDetails = () => {
                                 ))}
                         </div>
                     </div>
-     
+
                     <div className="mt-4">
                         <h3 className="text-sm font-medium text-gray-600 mb-3">Recovery Officers</h3>
                         {renderRecoveryOfficers(data.recoveryOfficers)}
@@ -165,8 +180,8 @@ const CaseDetails = () => {
                 </div>
             );
         }
-    
-       
+
+
         return (
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -188,7 +203,7 @@ const CaseDetails = () => {
             </div>
         );
     };
-    
+
     const renderReferenceDataCard = (data, currentIndex) => {
         if (!data) return <p className="text-gray-500">No data available</p>;
 
@@ -225,19 +240,23 @@ const CaseDetails = () => {
             ],
             [
                 { label: 'Current Status', value: basicInfo.currentStatus || basicInfo.current_status || 'N/A' },
-                { label: 'Last Payment Date', 
-                  value: basicInfo.lastPaymentDate ? formatDate(basicInfo.lastPaymentDate) : 
-                        basicInfo.last_payment_date ? formatDate(basicInfo.last_payment_date) : 'N/A' },
-                { label: 'Last BSS Reading Date', 
-                  value: basicInfo.lastBssReadingDate ? formatDate(basicInfo.lastBssReadingDate) : 
-                        basicInfo.last_bss_reading_date ? formatDate(basicInfo.last_bss_reading_date) : 'N/A' }
+                {
+                    label: 'Last Payment Date',
+                    value: basicInfo.lastPaymentDate ? formatDate(basicInfo.lastPaymentDate) :
+                        basicInfo.last_payment_date ? formatDate(basicInfo.last_payment_date) : 'N/A'
+                },
+                {
+                    label: 'Last BSS Reading Date',
+                    value: basicInfo.lastBssReadingDate ? formatDate(basicInfo.lastBssReadingDate) :
+                        basicInfo.last_bss_reading_date ? formatDate(basicInfo.last_bss_reading_date) : 'N/A'
+                }
             ]
         ];
 
         return (
             // <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-gray-200">
-                   <div className={`${GlobalStyle.cardContainer}p-6 mb-8`}>
-                     
+            <div className={`${GlobalStyle.cardContainer}p-6 mb-8`}>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {infoFields.map((column, colIndex) => (
                         <div key={`col-${colIndex}`} className="space-y-4">
@@ -269,7 +288,7 @@ const CaseDetails = () => {
         const isOpen = openSections[sectionKey];
         const currentIndex = currentIndices[sectionKey] || 0;
         const sectionData = getSectionData(sectionKey);
-        
+
         let totalItems = 0;
         if (sectionKey === 'referenceData' && sectionData) {
             totalItems = (sectionData.products?.length || 0) + (sectionData.contacts?.length || 0);
@@ -279,7 +298,7 @@ const CaseDetails = () => {
 
         return (
             <div className="mb-2">
-                <div 
+                <div
                     className="bg-[rgb(30_38_89)] text-white p-3 rounded-lg cursor-pointer flex justify-between items-center hover:bg-[rgb(40_48_100)] transition-colors"
                     onClick={() => toggleSection(sectionKey)}
                 >
@@ -321,48 +340,48 @@ const CaseDetails = () => {
     };
 
     const handleBackClick = () => {
-      navigate(-1); 
+        navigate(-1);
     };
 
     const handleDownloadClick = () => {
-       
+
     };
 
     if (loading) {
         return (
-            <div className="font-sans p-6 bg-gray-50 min-h-screen flex items-center justify-center">
-                <div className="text-lg">Loading case details...</div>
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
         );
     }
 
-    if (error) {
-        return (
-            <div className="font-sans p-6 bg-gray-50 min-h-screen flex items-center justify-center">
-                <div className="text-red-600">Error: {error}</div>
-            </div>
-        );
-    }
+    // if (error) {
+    //     return (
+    //         <div className="font-sans p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+    //             <div className="text-red-600">Error: {error}</div>
+    //         </div>
+    //     );
+    // }
 
-    if (!caseData) {
-        return (
-            <div className="font-sans p-6 bg-gray-50 min-h-screen flex items-center justify-center">
-                <div className="text-gray-600">No case data found</div>
-            </div>
-        );
-    }
+    // if (!caseData) {
+    //     return (
+    //         <div className="font-sans p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+    //             <div className="text-gray-600">No case data found</div>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="font-sans p-6 min-h-screen relative">
             <div className="relative z-10 mb-8">
                 <div className="flex justify-between items-start">
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Case Details</h1>
-                    
+
                     <div className="bg-white rounded-lg shadow-md p-6 min-w-64">
                         <div className="space-y-2">
                             {[
                                 { label: 'Case ID', value: caseData.caseInfo.caseId },
-                                { label: 'Created dtm', value: new Date(caseData.caseInfo.createdDtm).toLocaleDateString() },
+                                { label: 'Created dtm', value: new Date(caseData.caseInfo.createdDtm).toLocaleDateString("en-GB") },
                                 { label: 'Days count', value: caseData.caseInfo.daysCount }
                             ].map((item, index) => (
                                 <div key={`case-info-${index}`} className="flex justify-between">
@@ -382,7 +401,7 @@ const CaseDetails = () => {
             <div className="space-y-2 mb-8">
                 {caseData.referenceData && (
                     <CollapsibleSection title="Reference Data" sectionKey="referenceData">
-                        {renderReferenceDataCard(caseData.referenceData, currentIndices['referenceData'] || 0,"Reference Data")}
+                        {renderReferenceDataCard(caseData.referenceData, currentIndices['referenceData'] || 0, "Reference Data")}
                     </CollapsibleSection>
                 )}
 
@@ -440,7 +459,7 @@ const CaseDetails = () => {
                     </CollapsibleSection>
                 )}
 
-             
+
 
                 {caseData.lod && (
                     <CollapsibleSection title="LOD" sectionKey="lod">
@@ -450,20 +469,20 @@ const CaseDetails = () => {
             </div>
 
             <div className="flex justify-between items-center">
-  <button 
-    className={`${GlobalStyle.navButton} p-3`}
-    onClick={handleBackClick}
-  >
-    <ArrowLeft className="text-gray-600" size={20} />
-  </button>
+                <button
+                    className={`${GlobalStyle.buttonPrimary} p-3`}
+                    onClick={handleBackClick}
+                >
+                    <ArrowLeft className="text-gray-600" size={20} />
+                </button>
 
-  <button 
-    className={`${GlobalStyle.buttonPrimary} px-6 py-2`}
-    onClick={handleDownloadClick}
-  >
-    Download
-  </button>
-</div>
+                <button
+                    className={`${GlobalStyle.buttonPrimary} px-6 py-2`}
+                    onClick={handleDownloadClick}
+                >
+                    Download
+                </button>
+            </div>
         </div>
     );
 };
