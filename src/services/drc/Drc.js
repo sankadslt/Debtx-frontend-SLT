@@ -319,11 +319,12 @@ export const getActiveRTOMDetails = async () => {
     }
   }
 };
-// getActiveServiceDetails
+
+
 export const getActiveServiceDetails = async (drcId) => {
   try {
     const response = await axios.post(
-      `${BASE_URL}/service/List_Service_Details_Owen_By_DRC_ID`,
+      `${URL}/List_Service_Details_Owen_By_DRC_ID`, 
       { drc_id: drcId }
     );
 
