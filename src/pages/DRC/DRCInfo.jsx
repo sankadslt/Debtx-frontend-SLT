@@ -8,8 +8,10 @@ Notes: The following page contains the codes */
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import "react-datepicker/dist/react-datepicker.css";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+
 import Swal from "sweetalert2";
 import Edit from "../../assets/images/edit-info.svg";
 import {
@@ -17,7 +19,6 @@ import {
   terminateCompanyByDRCID,
 } from "../../services/drc/Drc";
 import {  FaArrowLeft } from "react-icons/fa";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { getLoggedUserId } from "../../services/auth/authService";
 
@@ -29,13 +30,14 @@ const DRCInfo = () => {
   // Check for drcId in location state first, then fallback to search params
   const drcId = location.state?.drcId || searchParams.get("drcid") || "";
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
   const [showEndFields, setShowEndFields] = useState(false);
   const [endDate, setEndDate] = useState(new Date());
   const [remark, setRemark] = useState("");
   const [remarkError, setRemarkError] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [companyData, setCompanyData] = useState({
     drc_id: "",
     create_on: "",
@@ -79,7 +81,6 @@ const DRCInfo = () => {
     fetchCompanyData();
   }, [drcId]);
 
-  // Replace the existing handleNavigateToEdit function with this:
   const handleNavigateToEdit = () => {
     const drcIdToUse = drcId || companyData.drc_id;
     navigate(`/pages/DRC/DRCInfoEdit`, {
@@ -102,14 +103,13 @@ const DRCInfo = () => {
     loadUser();
   }, []);
 
-  // Replace the handleEndSubmit function with this improved version
   const handleEndSubmit = async () => {
     try {
       let remarkBy = userData
         ? userData.id || userData.userId || userData
         : "system";
 
-      // Format the date as needed by the API
+      
       const formattedDate =
         endDate instanceof Date ? endDate : new Date(endDate);
 
@@ -122,10 +122,8 @@ const DRCInfo = () => {
         });
       }
 
-      // Reset error state
       setRemarkError(false);
 
-      // Show loading indicator
       Swal.fire({
         title: "Processing...",
         text: "Please wait while terminating the DRC",
@@ -135,7 +133,6 @@ const DRCInfo = () => {
         },
       });
 
-      // Call the API to terminate the company
       const response = await terminateCompanyByDRCID(
         companyData.drc_id,
         remark,
@@ -143,10 +140,9 @@ const DRCInfo = () => {
         formattedDate
       );
 
-      // Close loading indicator
       Swal.close();
 
-      // Success message with more details
+      // Success message 
       Swal.fire({
         icon: "success",
         title: "Termination Successful",
@@ -157,11 +153,9 @@ const DRCInfo = () => {
         allowOutsideClick: false,
       }).then((result) => {
         if (result.isConfirmed) {
-          // Reset the form fields
           setRemark("");
           setShowEndFields(false);
 
-          // Navigate to refresh the data
           navigate(-1);
         }
       });
@@ -191,7 +185,6 @@ const DRCInfo = () => {
     );
   }
 
-  // Get the current active coordinator (assuming the last one in the array is current)
   const currentCoordinator =
     companyData.slt_coordinator && companyData.slt_coordinator.length > 0
       ? companyData.slt_coordinator[companyData.slt_coordinator.length - 1]
@@ -209,7 +202,7 @@ const DRCInfo = () => {
 
       <div className="w-full flex justify-center">
         <div
-          className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl mx-4 sm:mx-auto`}
+          className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}
         >
           {/* Edit button */}
           <div className="absolute top-4 right-4">
@@ -230,15 +223,15 @@ const DRCInfo = () => {
 
           <table className={`${GlobalStyle.table} min-w-full text-left`}>
             <tbody>
-              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+              <tr>
                 <td
-                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                 >
                   Added Date
                 </td>
-                <td className="hidden sm:table-cell w-4 text-left">:</td>
+                <td className="w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
+                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
                 >
                   {companyData.create_on
                     ? new Date(companyData.create_on).toLocaleDateString()
@@ -246,55 +239,55 @@ const DRCInfo = () => {
                 </td>
               </tr>
 
-              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+              <tr>
                 <td
-                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                 >
                   Business Reg No
                 </td>
-                <td className="hidden sm:table-cell w-4 text-left">:</td>
+                <td className="w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
+                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
                 >
                   {companyData.drc_business_registration_number ||
                     "Not specified"}
                 </td>
               </tr>
-              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+              <tr>
                 <td
-                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                 >
                   Contact Number
                 </td>
-                <td className="hidden sm:table-cell w-4 text-left">:</td>
+                <td className="w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
+                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
                 >
                   {companyData.drc_contact_no || "Not specified"}
                 </td>
               </tr>
-              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+              <tr>
                 <td
-                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                 >
                   Address
                 </td>
-                <td className="hidden sm:table-cell w-4 text-left">:</td>
+                <td className="w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
+                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
                 >
                   {companyData.drc_address || "Not specified"}
                 </td>
               </tr>
-              <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+              <tr>
                 <td
-                  className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                 >
                   Email
                 </td>
-                <td className="hidden sm:table-cell w-4 text-left">:</td>
+                <td className="w-4 text-left">:</td>
                 <td
-                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
+                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
                 >
                   {companyData.drc_email || "Not specified"}
                 </td>
@@ -302,7 +295,7 @@ const DRCInfo = () => {
             </tbody>
           </table>
 
-          {/* SLT Coordinator Section */}
+         
           <h2
             className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
           >
@@ -312,41 +305,41 @@ const DRCInfo = () => {
           {currentCoordinator ? (
             <table className={`${GlobalStyle.table} min-w-full text-left`}>
               <tbody>
-                <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+                <tr>
                   <td
-                    className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                   >
                     Service No
                   </td>
-                  <td className="hidden sm:table-cell w-4 text-left">:</td>
+                  <td className="w-4 text-left">:</td>
                   <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
+                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
                   >
                     {currentCoordinator.service_no || "Not specified"}
                   </td>
                 </tr>
-                <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+                <tr>
                   <td
-                    className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                   >
                     Name
                   </td>
-                  <td className="hidden sm:table-cell w-4 text-left">:</td>
+                  <td className="w-4 text-left">:</td>
                   <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
+                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
                   >
                     {currentCoordinator.slt_coordinator_name || "Not specified"}
                   </td>
                 </tr>
-                <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+                <tr>
                   <td
-                    className={`${GlobalStyle.tableData} font-medium sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                   >
                     Email
                   </td>
-                  <td className="hidden sm:table-cell w-4 text-left">:</td>
+                  <td className="w-4 text-left">:</td>
                   <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0 border-b sm:border-b-0`}
+                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
                   >
                     {currentCoordinator.slt_coordinator_email ||
                       "Not specified"}
@@ -360,29 +353,29 @@ const DRCInfo = () => {
             </div>
           )}
 
-          {/* Services Section */}
+         
           <h2
             className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
           >
             Services
           </h2>
 
-          <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
             <table className={`${GlobalStyle.table} min-w-full`}>
-              <thead className={`${GlobalStyle.thead} hidden sm:table-header-group`}>
+              <thead className={GlobalStyle.thead}>
                 <tr>
                   <th
-                    className={`${GlobalStyle.tableHeader} text-left`}
+                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                   >
                     Service Type
                   </th>
                   <th
-                    className={`${GlobalStyle.tableHeader} text-left`}
+                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                   >
                     Changed On
                   </th>
                   <th
-                    className={`${GlobalStyle.tableHeader} text-left`}
+                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                   ></th>
                 </tr>
               </thead>
@@ -395,30 +388,17 @@ const DRCInfo = () => {
                         index % 2 === 0
                           ? "bg-white bg-opacity-75"
                           : "bg-gray-50 bg-opacity-50"
-                      } border-b block sm:table-row`}
+                      } border-b`}
                     >
-                      <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
-                        <div className="sm:hidden font-medium text-gray-600 mb-1">
-                          Service Type: 
-                        </div>
-                        <div className="whitespace-normal break-words">
-                          {service.service_type}
-                        </div>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {service.service_type}
                       </td>
-                      <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
-                        <div className="sm:hidden font-medium text-gray-600 mb-1">
-                          Changed On: 
-                        </div>
-                        <div className="whitespace-nowrap">
-                          {service.status_update_dtm
+                      <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
+                        {service.status_update_dtm
                           ? new Date(service.status_update_dtm).toLocaleDateString()
                           : "Not specified"}
-                        </div>
                       </td>
-                      <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
-                        <div className="sm:hidden font-medium text-gray-600 mb-1">
-                          Status: 
-                        </div>
+                      <td className={`${GlobalStyle.tableData} text-left`}>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input 
                             type="checkbox" 
@@ -450,27 +430,27 @@ const DRCInfo = () => {
             RTOM Areas
           </h2>
 
-          <div className={`${GlobalStyle.tableContainer} overflow-x-auto -mx-4 sm:mx-0`}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
             <table className={`${GlobalStyle.table} min-w-full`}>
-              <thead className={`${GlobalStyle.thead} overflow-hidden hidden sm:table-header-group`}>
+              <thead className={GlobalStyle.thead}>
                 <tr>
                   <th
-                    className={`${GlobalStyle.tableHeader} text-left`}
+                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                   >
                     RTOM ID
                   </th>
                   <th
-                    className={`${GlobalStyle.tableHeader} text-left`}
+                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                   >
                     Changed On
                   </th>
                   <th
-                    className={`${GlobalStyle.tableHeader} text-left`}
+                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                   ></th>
                 </tr>
               </thead>
                 
-              <tbody>
+                <tbody>
               {companyData.rtom &&
                 companyData.rtom.map((rtom, index) => (
                   <tr
@@ -479,30 +459,17 @@ const DRCInfo = () => {
                       index % 2 === 0
                         ? "bg-white bg-opacity-75"
                         : "bg-gray-50 bg-opacity-50"
-                    } border-b block sm:table-row`}
+                    } border-b`}
                   >
-                    <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
-                      <div className="sm:hidden font-medium text-gray-600 mb-1">
-                        RTOM ID:
-                      </div>
-                      <div className="whitespace-normal break-words">
+                    <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                       {rtom.rtom_id}
-                      </div>
                     </td>
-                    <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
-                      <div className="sm:hidden font-medium text-gray-600 mb-1">
-                        Changed On:
-                      </div>
-                      <div className="whitespace-normal">
+                    <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
                       {rtom.status_update_dtm
                         ? new Date(rtom.status_update_dtm).toLocaleDateString()
                         : "Not specified"}
-                      </div>
                     </td>
-                    <td className={`${GlobalStyle.tableData} block sm:table-cell`}>
-                      <div className="sm:hidden font-medium text-gray-600 mb-1">
-                        Status:
-                      </div>
+                    <td className={`${GlobalStyle.tableData} text-left`}>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input 
                           type="checkbox" 
@@ -524,55 +491,55 @@ const DRCInfo = () => {
                   </td>
                 </tr>
               )}
-              </tbody>
+            </tbody>
 
             </table>
           </div>
 
-          {/* Card Container ends here */}
+         
         </div>
       </div>
 
-      {/* Termination Section in its own card */}
+     
       {showEndFields && (
         <div className="w-full flex justify-center mt-6">
           <div
-            className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl mx-4 sm:mx-auto`}
+            className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}
           >
             <table className={`${GlobalStyle.table} min-w-full text-left`}>
               <tbody>
-                <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+                <tr>
                   <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4`}
+                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
                   >
                     End Date
                   </td>
-                  <td className="hidden sm:table-cell w-4 text-left">:</td>
+                  <td className="w-4 text-left">:</td>
                   <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0`}
+                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
                   >
                     <div className="flex justify-start w-full">
                       <DatePicker
                         selected={endDate}
                         onChange={(date) => setEndDate(date)}
                         dateFormat="dd/MM/yyyy"
-                        className={`${GlobalStyle.inputText} w-full text-left min-w-0`}
-                        maxDate={new Date()} // Only allow current date or earlier
-                        minDate={new Date()} // Only allow current date or later
-                        // This combination effectively restricts to current date only
+                        className={`${GlobalStyle.inputText} w-full text-left`}
+                        maxDate={new Date()} 
+                        minDate={new Date()} 
+                      
                       />
                     </div>
                   </td>
                 </tr>
-                <tr className="flex flex-col sm:table-row border-b sm:border-b-0">
+                <tr>
                   <td
-                    className={`${GlobalStyle.tableData} underline sm:whitespace-nowrap text-left py-2 sm:py-3 sm:w-1/4 font-semibold`}
+                    className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
                   >
                     Remark
                   </td>
-                  <td className="hidden sm:table-cell w-4 text-left">:</td>
+                  <td className="w-4 text-left">:</td>
                   <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left pb-4 sm:pb-0`}
+                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
                   >
                     <textarea
                       value={remark}
@@ -583,7 +550,7 @@ const DRCInfo = () => {
                         }
                       }}
                       rows="4"
-                      className={`${GlobalStyle.inputText} w-full text-left resize-none min-w-0 ${
+                      className={`${GlobalStyle.inputText} w-full text-left ${
                         remarkError ? "border-red-500" : ""
                       }`}
                       placeholder="Enter reason for ending DRC relationship"
@@ -611,11 +578,10 @@ const DRCInfo = () => {
         </div>
       )}
 
-      {/* End button */}
       {!showEndFields && (
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 px-4 sm:px-8">
+      <div className="flex justify-between mt-4 w-full px-8">
        <button
-                          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2 w-full sm:w-auto justify-center`}
+                          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
                           onClick={goBack}
                         >
                           <FaArrowLeft />
@@ -624,7 +590,7 @@ const DRCInfo = () => {
 
         <button
           onClick={() => setShowEndFields(true)}
-          className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+          className={GlobalStyle.buttonPrimary}
         >
           End
         </button>
