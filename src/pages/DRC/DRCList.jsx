@@ -306,13 +306,15 @@ const DRCList = () => {
             </div>
 
             <div className={GlobalStyle.navButtonContainer}>
+                <div className="navbatn ">
                 <button
-                    className={GlobalStyle.navButton}
-                    onClick={handlePrevPage}
-                    disabled={currentPage === 1}
+                        className={`${GlobalStyle.navButton} ${currentPage === 1 ? 'hover:opacity-50 cursor-not-allowed' : ''}`}
+                            onClick={handlePrevPage}
+                 disabled={currentPage === 1}
                 >
-                    <FaArrowLeft />
+                  <FaArrowLeft />
                 </button>
+            </div>
 
                 <span>Page {currentPage}</span>
 
