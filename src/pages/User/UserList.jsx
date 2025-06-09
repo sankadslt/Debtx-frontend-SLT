@@ -52,9 +52,9 @@ const UserList = () => {
         page: currentPage + 1, // Backend expects 1-based page numbers
         ...(appliedFilters.userRole && { user_roles: appliedFilters.userRole.toLowerCase()}),
         ...(appliedFilters.userType && { user_type: appliedFilters.userType.toLowerCase() }),
-        ...(appliedFilters.status !== "" && { 
-          user_status: appliedFilters.status === "Active" ? true : false 
-        }),
+        ...(appliedFilters.status !== "" && {
+        user_status: appliedFilters.status.toLowerCase()
+      }),
       };
 
       const response = await getAllUserDetails(requestData);
@@ -63,7 +63,7 @@ const UserList = () => {
         // Transform backend data to match frontend structure
         const transformedData = response.data.map(user => ({
           user_id: user.user_id,
-          status: user.user_status ? "Active" : "Inactive",
+          status: user.user_status,
           user_type: user.user_type?.toUpperCase() || "",
           user_role: user.user_roles || "",
           user_name: user.user_name,
@@ -89,7 +89,17 @@ const UserList = () => {
       }
     } catch (error) {
       console.error("Error fetching users:", error);
-      setError(error.message || "Failed to fetch users");
+      if(appliedFilters){
+        Swal.fire({
+          title: "Warning",
+          text: "No matching users found fo the selected filters.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+      }else {
+        setError(error.message || "Failed to fetch users");
+      }
       setRoData([]);
       setPaginationInfo({
         total: 0,
@@ -182,7 +192,14 @@ const UserList = () => {
     setTooltipVisible(null);
   };
 
-  if (isLoading) return <div className="flex justify-center items-center h-64">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+  
   if (error) return <div className="flex justify-center items-center h-64 text-red-500">Error: {error}</div>;
 
   return (
@@ -254,8 +271,8 @@ const UserList = () => {
                 style={{ color: status === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>Status</option>
-                <option value="Active" style={{ color: "black" }}>Active</option>
-                <option value="Inactive" style={{ color: "black" }}>Inactive</option>
+                <option value="enabled" style={{ color: "black" }}>Active</option>
+                <option value="disabled" style={{ color: "black" }}>Inactive</option>
               </select>
             </div>
             
@@ -307,7 +324,7 @@ const UserList = () => {
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_id}</td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
                     <div className="relative flex items-center justify-center">
-                      {user.status === "Active" ? (
+                      {user.status === "enabled" ? (
                         <div className="relative">
                           <img 
                             src={activeIcon} 
@@ -366,7 +383,7 @@ const UserList = () => {
 
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
-            {paginatedData.map((user, index) => (
+            {paginatedData.map((user) => (
               <div key={user.user_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
