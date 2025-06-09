@@ -21,3 +21,18 @@ export const getUserDetailsById = async (user_id) => {
   }
 };
 
+export const getAllUserDetails = async (requestData = {}) => {
+  try {
+    const response = await axios.post(`${USER_URL}/List_All_User_Details`, requestData);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all user details:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to fetch all user details",
+      }
+    );
+  }
+};
+

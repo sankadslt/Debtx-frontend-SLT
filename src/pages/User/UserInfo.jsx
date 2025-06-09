@@ -11,7 +11,7 @@ Notes:The following page conatins the code for the User Info Screen */
 import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/edit-info.svg";
-import add from "../../assets/images/add.svg";
+// import add from "../../assets/images/add.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useLocation } from "react-router-dom";
@@ -20,10 +20,10 @@ import { getUserDetailsById } from "../../services/user/user_services";
 
 const UserInfo = () => {
   const location = useLocation();
-  // const user_id = location.state?.userId;
+  const user_id = location.state?.userId;
 
   //For testing
-  const user_id ="test@gmail.com";
+  // const user_id ="test@gmail.com";
 
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;

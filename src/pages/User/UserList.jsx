@@ -7,22 +7,23 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the User list Screen */
 
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import activeIcon from "../../assets/images/User/User_Active.png";
 import deactiveIcon from "../../assets/images/User/User_Inactive.png";
-import terminateIcon from "../../assets/images/User/User_Terminate.png";
+// import terminateIcon from "../../assets/images/User/User_Terminate.png";
+import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
- 
-
+import { getAllUserDetails } from "../../services/user/user_services"; 
 const UserList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [status, setStatus] = useState("");
-  const [userRole, setUserRole] = useState(""); // Added missing state
-  const [userType, setUserType] = useState(""); // Added missing state
+  const [userRole, setUserRole] = useState("");
+  const [userType, setUserType] = useState("");
   const [appliedFilters, setAppliedFilters] = useState({ 
     status: "", 
     userRole: "", 
@@ -32,67 +33,90 @@ const UserList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tooltipVisible, setTooltipVisible] = useState(null);
+  const [paginationInfo, setPaginationInfo] = useState({
+    total: 0,
+    page: 1,
+    perPage: 10,
+    totalPages: 1
+  });
 
   const rowsPerPage = 10;
 
-  useEffect(() => {
-    // Mock data for Users based on the updated structure
-    const mockUserData = [
-      {
-        user_id: "0001",
-        status: "Active",
-        user_type: "SLT",
-        user_role: "Admin",
-        user_name: "W.M. Wimalasiri",
-        user_email: "wimal@example.com",
-        created_on: "2024-01-15"
-      },
-      {
-        user_id: "0002",
-        status: "Inactive",
-        user_type: "DRC",
-        user_role: "User",
-        user_name: "R.A. Siripala",
-        user_email: "siripala@example.com",
-        created_on: "2024-02-10"
-      },
-      {
-        user_id: "0003",
-        status: "Terminate",
-        user_type: "RO",
-        user_role: "Moderator",
-        user_name: "K.S. Fernando",
-        user_email: "fernando@example.com",
-        created_on: "2024-03-05"
-      }
-    ];
+  // Fetch users from backend
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    setError(null);
     
-    setRoData(mockUserData);
-    setIsLoading(false);
-  }, []);
+    try {
+      const requestData = {
+        page: currentPage + 1, // Backend expects 1-based page numbers
+        ...(appliedFilters.userRole && { user_roles: appliedFilters.userRole.toLowerCase()}),
+        ...(appliedFilters.userType && { user_type: appliedFilters.userType.toLowerCase() }),
+        ...(appliedFilters.status !== "" && { 
+          user_status: appliedFilters.status === "Active" ? true : false 
+        }),
+      };
 
+      const response = await getAllUserDetails(requestData);
+      
+      if (response.status === "success") {
+        // Transform backend data to match frontend structure
+        const transformedData = response.data.map(user => ({
+          user_id: user.user_id,
+          status: user.user_status ? "Active" : "Inactive",
+          user_type: user.user_type?.toUpperCase() || "",
+          user_role: user.user_roles || "",
+          user_name: user.user_name,
+          user_email: user.user_mail,
+          created_on: new Date(user.created_dtm).toLocaleDateString('en-CA')
+        }));
+        
+        setRoData(transformedData);
+        setPaginationInfo(response.pagination || {
+          total: transformedData.length,
+          page: currentPage + 1,
+          perPage: 10,
+          totalPages: Math.ceil(transformedData.length / 10)
+        });
+      } else {
+        setRoData([]);
+        setPaginationInfo({
+          total: 0,
+          page: 1,
+          perPage: 10,
+          totalPages: 1
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setError(error.message || "Failed to fetch users");
+      setRoData([]);
+      setPaginationInfo({
+        total: 0,
+        page: 1,
+        perPage: 10,
+        totalPages: 1
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [appliedFilters, currentPage]);
+
+  // Client-side search for immediate feedback (optional - you can move this to backend too)
   const filteredData = roData.filter((row) => {
     const matchesSearchQuery = Object.values(row)
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     
-    const matchesStatus =
-      appliedFilters.status === "" ||
-      row.status.toLowerCase() === appliedFilters.status.toLowerCase();
-    
-    const matchesUserRole =
-      appliedFilters.userRole === "" ||
-      row.user_role.toLowerCase() === appliedFilters.userRole.toLowerCase();
-    
-    const matchesUserType =
-      appliedFilters.userType === "" ||
-      row.user_type.toLowerCase() === appliedFilters.userType.toLowerCase();
-
-    return matchesSearchQuery && matchesStatus && matchesUserRole && matchesUserType;
+    return matchesSearchQuery;
   });
 
-  const handleFilter = () => {
+  const handleFilter = async () => {
     // Check if at least one filter is selected
     if (!status && !userRole && !userType) {
       Swal.fire({
@@ -105,7 +129,7 @@ const UserList = () => {
       return;
     }
 
-    // Update appliedFilters when the Filter button is clicked
+    // Update appliedFilters and reset to first page
     setAppliedFilters({ 
       status, 
       userRole, 
@@ -127,10 +151,8 @@ const UserList = () => {
     setCurrentPage(0);
   };
 
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
+  const pages = paginationInfo.totalPages;
+  const paginatedData = searchQuery ? filteredData : roData; // Use filtered data if searching, otherwise use backend data
 
   const handlePrevPage = () => {
     if (currentPage > 0) setCurrentPage(currentPage - 1);
@@ -144,7 +166,6 @@ const UserList = () => {
     setStatus(e.target.value || "");
   };
 
-  // Added missing handler functions
   const handleUserRoleChange = (e) => {
     setUserRole(e.target.value || "");
   };
@@ -161,8 +182,8 @@ const UserList = () => {
     setTooltipVisible(null);
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) return <div className="flex justify-center items-center h-64">Loading...</div>;
+  if (error) return <div className="flex justify-center items-center h-64 text-red-500">Error: {error}</div>;
 
   return (
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
@@ -170,7 +191,7 @@ const UserList = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
         <h1 className={`${GlobalStyle.headingLarge} text-xl sm:text-2xl lg:text-3xl`}>User List</h1>
         <Link to="/config/add-user">
-          <button className="py-2 px-6 sm:px-8 bg-blue-600 text-white rounded-full w-full sm:w-auto text-sm sm:text-base">
+          <button className={GlobalStyle.buttonPrimary}>
             User Register
           </button>
         </Link>
@@ -179,13 +200,14 @@ const UserList = () => {
       {/* Search and Filters - Responsive */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4 lg:gap-0">
         {/* Search Bar */}
-        <div className={`${GlobalStyle.searchBarContainer} w-full lg:w-auto`}>
+        <div className={GlobalStyle.searchBarContainer} >
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`${GlobalStyle.inputSearch} w-full`}
           />
+          <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
 
         {/* Filters */}
@@ -200,11 +222,11 @@ const UserList = () => {
                 style={{ color: userRole === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>User Role</option>
-                <option value="GM" style={{ color: "black" }}>GM</option>
-                <option value="DGM" style={{ color: "black" }}>DGM</option>
-                <option value="Legal" style={{ color: "black" }}>Legal Officer</option>
-                <option value="Manager" style={{ color: "black" }}>Manager</option>
-                <option value="Recovery Staff" style={{ color: "black" }}>Recovery Staff</option>
+                <option value="user" style={{ color: "black" }}>User</option>
+                <option value="admin" style={{ color: "black" }}>Admin</option>
+                <option value="superadmin" style={{ color: "black" }}>Super Admin</option>
+                <option value="drc_admin" style={{ color: "black" }}>DRC Admin</option>
+                <option value="drc_user" style={{ color: "black" }}>DRC User</option>
               </select>
             </div>
 
@@ -234,7 +256,6 @@ const UserList = () => {
                 <option value="" hidden>Status</option>
                 <option value="Active" style={{ color: "black" }}>Active</option>
                 <option value="Inactive" style={{ color: "black" }}>Inactive</option>
-                <option value="Terminated" style={{ color: "black" }}>Terminated</option>
               </select>
             </div>
             
@@ -267,6 +288,7 @@ const UserList = () => {
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER ID</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>STATUS</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER TYPE</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER ROLE</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER NAME</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER EMAIL</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>CREATED ON</th>
@@ -300,7 +322,7 @@ const UserList = () => {
                             </div>
                           )}
                         </div>
-                      ) : user.status === "Inactive" ? (
+                      ) : (
                         <div className="relative">
                           <img 
                             src={deactiveIcon} 
@@ -315,31 +337,17 @@ const UserList = () => {
                             </div>
                           )}
                         </div>
-                      ) : user.status === "Terminate" ? (
-                        <div className="relative">
-                          <img 
-                            src={terminateIcon} 
-                            alt="Terminate" 
-                            className="h-5 w-5 lg:h-6 lg:w-6"
-                            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
-                            onMouseLeave={hideTooltip}
-                          />
-                          {tooltipVisible === `status-${user.user_id}` && (
-                            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-                              Terminate Status
-                            </div>
-                          )}
-                        </div>
-                      ) : null}
+                      )}
                     </div>
                   </td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_type}</td>
+                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_role}</td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_name}</td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm break-all`}>{user.user_email}</td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.created_on}</td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
                     <div className="flex justify-center">
-                      <Link to={`/config/user-details/${user.user_id}`}>
+                      <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
                         <img src={more_info} alt="More Info" className="h-5 w-5 lg:h-6 lg:w-6" />
                       </Link>
                     </div>
@@ -348,7 +356,7 @@ const UserList = () => {
               ))}
               {paginatedData.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="text-center py-4 text-sm">
+                  <td colSpan="8" className="text-center py-4 text-sm">
                     No results found
                   </td>
                 </tr>
@@ -362,7 +370,7 @@ const UserList = () => {
               <div key={user.user_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-900">#{user.user_id}</span>
+                    <span className="text-sm font-semibold text-gray-900">#{user.user_id}</span> 
                     <div className="flex items-center">
                       {user.status === "Active" ? (
                         <img src={activeIcon} alt="Active" className="h-5 w-5" />
@@ -372,7 +380,7 @@ const UserList = () => {
                       <span className="ml-1 text-xs text-gray-600">{user.status}</span>
                     </div>
                   </div>
-                  <Link to={`/config/user-details/${user.user_id}`}>
+                   <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
                     <img src={more_info} alt="More Info" className="h-5 w-5" />
                   </Link>
                 </div>
@@ -389,6 +397,10 @@ const UserList = () => {
                   <div className="flex justify-between">
                     <span className="text-xs text-gray-500">Type:</span>
                     <span className="text-sm text-gray-700">{user.user_type}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-500">Role:</span>
+                    <span className="text-sm text-gray-700">{user.user_role}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-xs text-gray-500">Created:</span>
@@ -408,24 +420,24 @@ const UserList = () => {
       </div>
 
       {/* Pagination - Responsive */}
-      {filteredData.length > rowsPerPage && (
+      {paginationInfo.total > rowsPerPage && (
         <div className={`${GlobalStyle.navButtonContainer} flex-col sm:flex-row gap-4 sm:gap-0 mt-6`}>
           <button 
             className={`${GlobalStyle.navButton} text-sm px-4 py-2`}
             onClick={handlePrevPage} 
             disabled={currentPage === 0}
           >
-            Previous
-          </button>
+           <FaArrowLeft />
+            </button>
           <span className="flex items-center justify-center text-sm">
-            Page {currentPage + 1} of {pages}
+            Page {currentPage + 1} of {pages} 
           </span>
           <button 
             className={`${GlobalStyle.navButton} text-sm px-4 py-2`}
             onClick={handleNextPage} 
             disabled={currentPage === pages - 1}
           >
-            Next
+           <FaArrowRight />
           </button>
         </div>
       )}
@@ -434,6 +446,13 @@ const UserList = () => {
 };
 
 export default UserList;
+
+
+
+
+
+
+
 
 
 // import { useState, useEffect } from "react";
@@ -522,6 +541,18 @@ export default UserList;
 //   });
 
 //   const handleFilter = () => {
+//     // Check if at least one filter is selected
+//     if (!status && !userRole && !userType) {
+//       Swal.fire({
+//         title: "Warning",
+//         text: "No filter is selected. Please, select a filter.",
+//         icon: "warning",
+//         allowOutsideClick: false,
+//         allowEscapeKey: false
+//       });
+//       return;
+//     }
+
 //     // Update appliedFilters when the Filter button is clicked
 //     setAppliedFilters({ 
 //       status, 
@@ -614,13 +645,14 @@ export default UserList;
 //                 value={userRole}
 //                 onChange={handleUserRoleChange}
 //                 className={`${GlobalStyle.selectBox} w-full text-sm`}
+//                 style={{ color: userRole === "" ? "gray" : "black" }}
 //               >
 //                 <option value="" hidden>User Role</option>
-//                 <option value="GM">GM</option>
-//                 <option value="DGM">DGM</option>
-//                 <option value="Legal">Legal Officer</option>
-//                 <option value="Manager">Manager</option>
-//                 <option value="Recovery Staff">Recovery Staff</option>
+//                 <option value="GM" style={{ color: "black" }}>GM</option>
+//                 <option value="DGM" style={{ color: "black" }}>DGM</option>
+//                 <option value="Legal" style={{ color: "black" }}>Legal Officer</option>
+//                 <option value="Manager" style={{ color: "black" }}>Manager</option>
+//                 <option value="Recovery Staff" style={{ color: "black" }}>Recovery Staff</option>
 //               </select>
 //             </div>
 
@@ -630,11 +662,12 @@ export default UserList;
 //                 value={userType}
 //                 onChange={handleUserTypeChange}
 //                 className={`${GlobalStyle.selectBox} w-full text-sm`}
+//                 style={{ color: userType === "" ? "gray" : "black" }}
 //               >
 //                 <option value="" hidden>User Type</option>
-//                 <option value="SLT">SLT</option>
-//                 <option value="DRC">DRC</option>
-//                 <option value="RO">RO</option>
+//                 <option value="SLT" style={{ color: "black" }}>SLT</option>
+//                 <option value="DRC" style={{ color: "black" }}>DRC</option>
+//                 <option value="RO" style={{ color: "black" }}>RO</option>
 //               </select>
 //             </div>
             
@@ -644,11 +677,12 @@ export default UserList;
 //                 value={status}
 //                 onChange={handleStatusChange}
 //                 className={`${GlobalStyle.selectBox} w-full text-sm`}
+//                 style={{ color: status === "" ? "gray" : "black" }}
 //               >
 //                 <option value="" hidden>Status</option>
-//                 <option value="Active">Active</option>
-//                 <option value="Inactive">Inactive</option>
-//                 <option value="Terminated">Terminated</option>
+//                 <option value="Active" style={{ color: "black" }}>Active</option>
+//                 <option value="Inactive" style={{ color: "black" }}>Inactive</option>
+//                 <option value="Terminated" style={{ color: "black" }}>Terminated</option>
 //               </select>
 //             </div>
             
