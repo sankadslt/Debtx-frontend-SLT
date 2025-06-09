@@ -658,12 +658,12 @@ export default function DRCAssignManagerApproval3() {
       <h1 className={GlobalStyle.headingLarge}>Assigned DRC Summary</h1>
       <div className="flex justify-end ">
         {/* Filter Section */}
-        <div  className= {`${GlobalStyle.cardContainer}  w-full mt-6  `}>
-            <div className="flex gap-3">
+        <div  className= {`${GlobalStyle.cardContainer}  w-full mt-6    `}>
+            <div className="flex  flex-wrap gap-3">
               {" "}
-              <div className="flex gap-3 h-[35px] ">
+              {/* <div className="flex flex-wrap gap-3 h-[35px] "> */}
                 <select
-                  className={GlobalStyle.selectBox}
+                  className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
                   value={drcFilter}
                   onChange={handleOnApproveTypeChange}
                   style={{ color: drcFilter === "" ? "gray" : "black" }}
@@ -683,7 +683,7 @@ export default function DRCAssignManagerApproval3() {
                 </select>
 
                 <select 
-                  className={GlobalStyle.selectBox}
+                  className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
                   value={approverstatus}
                   onChange={(e) => setApproverStatus(e.target.value)}
                   style={{ color: approverstatus === "" ? "gray" : "black" }}
@@ -701,14 +701,15 @@ export default function DRCAssignManagerApproval3() {
 
 
 
-              </div>
+              {/* </div> */}
+
                   <label className={GlobalStyle.dataPickerDate}  style={{ marginTop: '5px', display: 'block' }}>Date : </label>
                   <DatePicker
                     selected={startDate}
                     onChange={handlestartdatechange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="From"
-                    className={GlobalStyle.inputText}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
 
                   <DatePicker
@@ -716,14 +717,14 @@ export default function DRCAssignManagerApproval3() {
                     onChange={handleenddatechange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="To"
-                    className={GlobalStyle.inputText}
+                   className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
 
                 <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
                         <button
                             onClick={applyFilters}
-                            className={`${GlobalStyle.buttonPrimary} h-[35px] `}
+                            className={`${GlobalStyle.buttonPrimary} h-[35px] w-full sm:w-auto`}
                           >
                             Filter
                       </button>
@@ -740,7 +741,7 @@ export default function DRCAssignManagerApproval3() {
               <div>
                   {["admin", "superadmin", "slt"].includes(userRole) && (
                     <button
-                    className={`${GlobalStyle.buttonRemove} h-[35px] `}
+                    className={`${GlobalStyle.buttonRemove} h-[35px]  w-full sm:w-auto`}
                     onClick={handlefilterClear}
                     >
                       clear
@@ -774,7 +775,7 @@ export default function DRCAssignManagerApproval3() {
       </div>
 
       {/* Table Section */}
-      <div className={GlobalStyle.tableContainer}>
+       <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>

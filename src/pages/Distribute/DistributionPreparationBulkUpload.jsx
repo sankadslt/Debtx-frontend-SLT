@@ -143,7 +143,8 @@ const DistributionPreparationBulkUpload = () => {
 
           {/* Table Section */}
           <div className="flex items-center justify-center min-h-full ">
-          <div className={GlobalStyle.cardContainer}>
+           <div className= {`${GlobalStyle.cardContainer} w-full max-w-lg`}>
+            <div className="overflow-x-auto w-full">
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -213,6 +214,7 @@ const DistributionPreparationBulkUpload = () => {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
           </div>
 

@@ -22,7 +22,6 @@ const DRCDetails = () => {
   const location =useLocation();
   const queryParams = new URLSearchParams(location.search);
 
-  const drcId = queryParams.get("drcid");
   const drcName = queryParams.get("drcname");
   const initialTab = queryParams.get("tab") || "RO";
 
@@ -33,6 +32,7 @@ const DRCDetails = () => {
     rtom: "", 
     service: "" 
   });
+  const drcId = location.state?.drcId;
     
   // Filter States
   const [status, setStatus] = useState("");

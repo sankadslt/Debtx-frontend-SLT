@@ -161,7 +161,7 @@ const handleSubmit = async (e) => {
   return (
     <div className={`p-6 ${GlobalStyle.fontPoppins}`}>
       
-      <div className="flex justify-center">
+      <div className="flex flex-wrap justify-center sm:px-6 lg:px-8 overflow-auto">
         <div className={`${GlobalStyle.cardContainer} mt-4 `}>
         <h1 className={`${GlobalStyle.headingLarge} mb-4 flex justify-center items-center`}>Incident Register</h1>
           <h2 className={`${GlobalStyle.headingMedium} mb-6 flex justify-center items-center`}>Incident Details</h2>
@@ -237,7 +237,8 @@ const handleSubmit = async (e) => {
 
           {/* Form for incident registration */}
           <div className="flex items-center justify-center ">
-            <form onSubmit={handleSubmit} className="space-y-6   ">
+            <form onSubmit={handleSubmit} className="space-y-6  w-full  ">
+              <div className="overflow-x-auto w-full">
               <table className=" text-sm" >
                 <tbody>
                   {/* Account No */}
@@ -396,6 +397,7 @@ const handleSubmit = async (e) => {
                   </tr>
                 </tbody>
               </table>
+              </div>
 
               {/* Submit Button */}
               <div className="pt-4 flex justify-end">

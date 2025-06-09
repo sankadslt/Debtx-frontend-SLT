@@ -405,10 +405,10 @@ export default function RejectIncidentlog() {
 
       {/* Filter Section */}
       <div  className="flex justify-end">
-          <div className={`${GlobalStyle.cardContainer}  items-center w-[70vw] mb-8 mt-8`}>
-            <div className="flex items-center gap-4 justify-end">
+          <div className={`${GlobalStyle.cardContainer}  w-full md:w-[70vw] mb-8 mt-8`}>
+            <div className="flex flex-wrap gap-4 justify-end">
                 {/* Source Dropdown */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 sm:w-auto  sm:flex-row sm:items-center">
                   <select
                     className={GlobalStyle.inputText}
                     value={selectedAction}
@@ -423,21 +423,21 @@ export default function RejectIncidentlog() {
                 </div>
 
                 {/* Date Picker Section */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
                   <label>Date:</label>
                   <DatePicker
                     selected={fromDate}
                     onChange={handleFromDateChange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="From"
-                    className={GlobalStyle.inputText}
+                   className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
                   <DatePicker
                     selected={toDate}
                     onChange={handleToDateChange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="To"
-                    className={GlobalStyle.inputText}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
                   {error && <span className={GlobalStyle.errorText}>{error}</span>}
                 </div>
@@ -452,7 +452,7 @@ export default function RejectIncidentlog() {
                 <div>
                         {["admin", "superadmin", "slt"].includes(userRole) && (
                           <button
-                          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                          className={`${GlobalStyle.buttonPrimary} w-full h-[35px] sm:w-auto`}
                           onClick={handleFilterClick}
                         >
                           Filter
@@ -465,7 +465,9 @@ export default function RejectIncidentlog() {
                             </button> */}
                             <div>
                         {["admin", "superadmin", "slt"].includes(userRole) && (
-                          <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+                          <button 
+                           className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
+                           onClick={handleclearFilter}>
                           Clear
                            </button>
                         )}
@@ -489,8 +491,8 @@ export default function RejectIncidentlog() {
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
         </div>
-        <div className={GlobalStyle.tableContainer}>
-          <table className={GlobalStyle.table}>
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
+          <table className={`${GlobalStyle.table} min-w-full`}>
             <thead className={GlobalStyle.thead}>
               <tr>
                 {/* <th scope="col" className={GlobalStyle.tableHeader}></th> */}

@@ -100,8 +100,8 @@ const PaymentPreview = () => {
             </div>
 
             {/* Case details card */}
-            <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
+            <div className="flex flex-wrap gap-4 mt-4 justify-center">
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-lg`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Case ID</div>
@@ -137,7 +137,7 @@ const PaymentPreview = () => {
                     </div>
                 </div>
 
-                <div className={`${GlobalStyle.cardContainer}`}>
+                <div className={`${GlobalStyle.cardContainer}  w-full max-w-lg`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Phase</div>
@@ -173,7 +173,7 @@ const PaymentPreview = () => {
             {/* Payment table */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Money Transaction details</b></h2>
 
-            <div className={`${GlobalStyle.tableContainer} mt-4`}>
+            <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -246,7 +246,7 @@ const PaymentPreview = () => {
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Commission Details</b></h2>
 
             <div className="flex gap-4 mt-4 justify-center">
-                <div className={`${GlobalStyle.cardContainer}`}>
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-2xl`}>
                     <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settled Effected Amount for Commission</div>

@@ -719,14 +719,14 @@ export default function AssignDRCsLOG() {
 
        {/* Filter Section */}
        <div className= {`${GlobalStyle.cardContainer}  w-full mt-6 flex justify-center gap-5 mb-7 flex-wrap `}>
-              <div className="flex gap-2">
+              <div className="flex flex-nowrap gap-2">
                   
                 {/* Filter Dropdown (Account No or Case ID) */}
               
                   <select
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
-                    className={`${GlobalStyle.selectBox} h-[36px]`}
+                    className={`${GlobalStyle.selectBox} h-[36px] w-full sm:w:auto`}
                     style={{ color: filterType === "" ? "gray" : "black" }}
                   >
                     <option value="" hidden>Select</option>
@@ -740,7 +740,7 @@ export default function AssignDRCsLOG() {
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
                     placeholder={`Enter ${filterType}`}
-                    className={`${GlobalStyle.inputText} `}
+                    className={`${GlobalStyle.inputText}  w-full sm:w-auto`}
                   />
                 </div>
               </div>
@@ -752,21 +752,21 @@ export default function AssignDRCsLOG() {
                       onChange={handlestartdatechange}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="From"
-                      className={GlobalStyle.inputText}
+                      className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                     />
                     <DatePicker
                       selected={endDate}
                       onChange={handleenddatechange}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="To"
-                      className={GlobalStyle.inputText}
+                      className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                     />
                   
             
                   <div>
                       {["admin", "superadmin", "slt"].includes(userRole) && (
                           <button
-                          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                          className={`${GlobalStyle.buttonPrimary} h-[35px] w-full sm:w-auto`}
                           onClick={handleFilter}
                         >
                           Filter
@@ -783,7 +783,7 @@ export default function AssignDRCsLOG() {
               <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
                     <button
-                    className={`${GlobalStyle.buttonRemove} h-[35px]`}
+                    className={`${GlobalStyle.buttonRemove} h-[35px] w-full sm:w-auto`}
                     onClick={handleclearfilter} // <-- Corrected here
                     >
                         Clear
@@ -812,7 +812,7 @@ export default function AssignDRCsLOG() {
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
         </div>{" "}
-        <div className={GlobalStyle.tableContainer}>
+         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
           <table className={`${GlobalStyle.table}`}>
             <thead className={GlobalStyle.thead}>
               <tr>
@@ -826,7 +826,7 @@ export default function AssignDRCsLOG() {
                   Account No
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  Arrears Amount
+                  Arrears Amount (LKR)
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Assigned Date and Time

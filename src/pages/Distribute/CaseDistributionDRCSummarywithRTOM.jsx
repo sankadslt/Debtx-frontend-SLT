@@ -115,12 +115,13 @@ const handleonbacknuttonclick = () => {
           <div className={GlobalStyle.cardContainer}></div> */}
       <div className="flex items-center justify-center min-h-full ">
       <div className={GlobalStyle.cardContainer}>
+        <div className="overflow-x-auto">
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>RTOM</th>
               <th className={GlobalStyle.tableHeader}>Case Count</th>
-              <th className={GlobalStyle.tableHeader}>Arrears Amount</th>
+              <th className={GlobalStyle.tableHeader}>Arrears Amount (LKR)</th>
             </tr>
           </thead>
           <tbody>
@@ -149,6 +150,7 @@ const handleonbacknuttonclick = () => {
           }
           </tbody>
         </table>
+        </div>
       </div>
       </div>
 

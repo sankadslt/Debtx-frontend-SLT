@@ -364,7 +364,7 @@ const Incident_List = () => {
             </div>
             {/*Filter section */}
             <div className= {`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
-                <div className="flex items-center justify-end w-full space-x-6">
+                <div className="flex flex-wrap  md:flex-nowrap  items-center justify-end w-full  space-x-6">
                     <select value={status1} onChange={(e) => setStatus1(e.target.value)} style={{ color: status1 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden >Action Type</option>
                         <option value="collect arrears" style={{ color: "black" }}>collect arrears</option>
@@ -378,7 +378,7 @@ const Incident_List = () => {
                         <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
                     </select>
 
-                    <select value={status3} onChange={(e) => setStatus3(e.target.value)} style={{ color: status3 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
+                    <select value={status3} onChange={(e) => setStatus3(e.target.value)} style={{ color: status3 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox} >
                         <option value="" hidden>Source Type</option>
                         <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>
                         <option value="Product Terminate"style={{ color: "black" }}>Product Terminate</option>
@@ -386,19 +386,19 @@ const Incident_List = () => {
                     </select>
                     
                     <label className={GlobalStyle.dataPickerDate}>Date:</label>
-                    <DatePicker selected={fromDate} onChange={handleFromDateChange} dateFormat="dd/MM/yyyy" placeholderText="From " className={GlobalStyle.inputText} />
-                    <DatePicker selected={toDate} onChange={handleToDateChange} dateFormat="dd/MM/yyyy" placeholderText="To " className={GlobalStyle.inputText} />
+                    <DatePicker selected={fromDate} onChange={handleFromDateChange} dateFormat="dd/MM/yyyy" placeholderText="From "  className={`${GlobalStyle.inputText} w-full sm:w-auto`} />
+                    <DatePicker selected={toDate} onChange={handleToDateChange} dateFormat="dd/MM/yyyy" placeholderText="To "  className={`${GlobalStyle.inputText} w-full sm:w-auto`} />
                    
                     {/* <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button> */}
                     <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                   <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
+                   <button onClick={handleFilter} className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}>Filter</button>
                     )}
                 </div>
 
                 <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button className={GlobalStyle.buttonRemove} onClick={handlefilterclear} >
+                  <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`} onClick={handlefilterclear} >
                   Clear 
               </button>
                     )}
@@ -425,7 +425,7 @@ const Incident_List = () => {
             </div>
 
              {/* Table Section */}
-            <div className={GlobalStyle.tableContainer}>
+            <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>

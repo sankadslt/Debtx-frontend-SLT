@@ -57,10 +57,10 @@ const Sidebar = ({ onHoverChange }) => {
       label: "User List",
       roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: CgEditFade, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
+        // { icon: CgEditFade, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
 
         { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"]},
-        {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]}
+        // {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]}
 
       ],
     },
@@ -72,7 +72,7 @@ const Sidebar = ({ onHoverChange }) => {
         { icon: CgEditFade, label: " Register Accounts",  roles: ["superadmin", "admin"], subItems: [
           {icon:CgEditFade, label:"Bulk", link:"/incident/upload-log", roles:["superadmin", "admin"]},
           {icon:CgEditFade, label:"Individual", link:"/Incident/Incident_List", roles:["superadmin", "admin"]}, ] },
-        { icon: CgEditFade, label: "New Reg Incidents", link: "", roles: ["superadmin", "admin"] },
+        // { icon: CgEditFade, label: "New Reg Incidents", link: "", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Filtered Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Bulk Upload History", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Rejected log", link: "/Distribution/reject-incident-log", roles: ["superadmin", "admin"] },
@@ -173,21 +173,21 @@ const Sidebar = ({ onHoverChange }) => {
 
 
     {icon: MdDownload, label: "Download", link: "/incident/Incident_File_Download", roles: ["superadmin", "admin", "user"]},
-    {
-      icon: BiSolidDiamond,
-      label: "Dummy",
-      roles: ["superadmin", "admin", "user"],
-      subItems: [
-        {
-          label: "Dummy",
-          subItems: [
-            { icon: CgEditFade, label: "Distribute Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
-            { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
-          ],
-        },
-        { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
-      ],
-    },
+    // {
+    //   icon: BiSolidDiamond,
+    //   label: "Dummy",
+    //   roles: ["superadmin", "admin", "user"],
+    //   subItems: [
+    //     {
+    //       label: "Dummy",
+    //       subItems: [
+    //         { icon: CgEditFade, label: "Distribute Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
+    //         // { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
+    //       ],
+    //     },
+    //     // { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
+    //   ],
+    // },
   ];
 
   // Filter menu items based on user role

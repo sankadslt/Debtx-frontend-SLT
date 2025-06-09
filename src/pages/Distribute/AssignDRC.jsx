@@ -303,10 +303,10 @@ const AssignDRC = () => {
 
         {/* Service Type and Table */}
         <div className="relative">
-          <div className="flex items-center my-10 space-x-4 gap-14">
+          <div className="flex items-center my-10 space-x-4 gap-14 flex-col sm:flex-row sm:items-center">
             {/* Arrears Band Dropdown */}
             <select
-              className={`${GlobalStyle.selectBox}`}
+              className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
               value={selectedBand}
               onChange={handleArrearsBandChange}
               disabled={totalDistributedAmount > 0}
@@ -327,12 +327,12 @@ const AssignDRC = () => {
               Total Count: {arrearsbandTotal}
             </div>
           </div>
-          <div className="flex justify-between items-center my-10  ">
-            <div className="flex items-center space-x-10 gap-9">
+          <div className="flex justify-between items-center my-10 lg:flex-row flex-col lg:items-center">
+            <div className="flex items-center space-x-10 gap-9 flex-col sm:flex-row sm:items-center ">
 
                 {/* DRC Dropdown */}
                 <select
-                  className={`${GlobalStyle.selectBox}  w-44`}
+                  className={`${GlobalStyle.selectBox}  w-full sm:w-44`}
                   value={newEntry.drc}
                   onChange={(e) =>{
                     const selectedDRC = drcNames.find((drc) => drc.value === e.target.value);
@@ -384,7 +384,7 @@ const AssignDRC = () => {
                 </div>
             </div>
 
-            <div className="flex justify-end items-center  space-x-4">
+            <div className="flex justify-end items-center sm:items-center flex-col sm:flex-row   space-x-4">
               <div>
                 {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
                   Pie Chart 1
@@ -392,7 +392,7 @@ const AssignDRC = () => {
 
                 <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                      <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
+                      <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5  w-full sm:w-auto `} onClick={handlepiechart1}>
                       Pie Chart 1
                   </button>
                     )}
@@ -406,7 +406,7 @@ const AssignDRC = () => {
                 </button> */}
                 <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                      <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
+                      <button className={`${GlobalStyle.buttonPrimary} h-10   w-full sm:w-auto`} onClick={handlepiechart2}>
                       Pie Chart 2
                   </button>
                     )}
@@ -443,7 +443,7 @@ const AssignDRC = () => {
                   <FaSearch className={GlobalStyle.searchBarIcon} />
                 </div>
               </div>{" "}
-              <div className={`${GlobalStyle.tableContainer} `}>
+              <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
                 <table
                   className={`${GlobalStyle.table}`}
                   aria-labelledby="drc-table"

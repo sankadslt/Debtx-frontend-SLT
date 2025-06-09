@@ -42,6 +42,8 @@ import WRIT_Settle_Active from "/src/assets/images/Settlement/WRIT_Settle_Active
 import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle_Pending.png";
 import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
 import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const Monitor_settlement = () => {
   // State Variables
@@ -56,6 +58,7 @@ const Monitor_settlement = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
@@ -77,6 +80,29 @@ const Monitor_settlement = () => {
   // const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   // const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
   // const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
 
   // return Icon based on settlement status and settlement phase
   const getStatusIcon = (phase, status) => {
@@ -430,7 +456,7 @@ const Monitor_settlement = () => {
 
   // Function to navigate to the case ID page
   const naviCaseID = (caseId) => {
-    navigate("", { state: { caseId } });
+    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
   }
 
   // Function to handle the creation of tasks for downloading settlement list
@@ -484,8 +510,8 @@ const Monitor_settlement = () => {
           <h1 className={GlobalStyle.headingLarge}>Settlement List</h1>
 
           {/* Filters Section */}
-          <div className={`${GlobalStyle.cardContainer} w-full`}>
-            <div className="flex items-center justify-end w-full space-x-3">
+          <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
+            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
 
               <div className="flex items-center">
                 <select
@@ -494,9 +520,9 @@ const Monitor_settlement = () => {
                   className={`${GlobalStyle.selectBox}`}
                   style={{ color: searchBy === "" ? "gray" : "black" }}
                 >
-                  <option value="" hidden>Select</option>
-                  <option value="account_no">Account Number</option>
-                  <option value="case_id">Case ID</option>
+                  <option value="" hidden >Select</option>
+                  <option value="account_no" style={{ color: "black" }}>Account Number</option>
+                  <option value="case_id" style={{ color: "black" }}>Case ID</option>
                 </select>
               </div>
 
@@ -522,12 +548,12 @@ const Monitor_settlement = () => {
                   style={{ color: phase === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Phase</option>
-                  <option value="Negotiation">Negotiation</option>
-                  <option value="Mediation Board">Mediation Board</option>
-                  <option value="Litigation">Litigation</option>
-                  <option value="LOD">LOD</option>
-                  <option value="WRIT">WRIT</option>
-                  <option value="Dispute">Dispute</option>
+                  <option value="Negotiation" style={{ color: "black" }}>Negotiation</option>
+                  <option value="Mediation Board" style={{ color: "black" }}>Mediation Board</option>
+                  <option value="Litigation" style={{ color: "black" }}>Litigation</option>
+                  <option value="LOD" style={{ color: "black" }}>LOD</option>
+                  <option value="WRIT" style={{ color: "black" }}>WRIT</option>
+                  <option value="Dispute" style={{ color: "black" }}>Dispute</option>
                 </select>
               </div>
 
@@ -539,48 +565,52 @@ const Monitor_settlement = () => {
                   style={{ color: status === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Status</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Open_Pending">Open Pending</option>
-                  <option value="Active">Active</option>
+                  <option value="Pending" style={{ color: "black" }}>Pending</option>
+                  <option value="Open_Pending" style={{ color: "black" }}>Open Pending</option>
+                  <option value="Active" style={{ color: "black" }}>Active</option>
                 </select>
               </div>
 
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               {/* <div className={GlobalStyle.datePickerContainer}> */}
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center">
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={handlestartdatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="From"
-                    className={`${GlobalStyle.inputText}`}
-                  />
-                </div>
+              {/* <div className="flex items-center space-x-2"> */}
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={fromDate}
+                onChange={handlestartdatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div> */}
 
-                <div className="flex items-center">
-                  <DatePicker
-                    selected={toDate}
-                    onChange={handleenddatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="To"
-                    className={`${GlobalStyle.inputText}`}
-                  />
-                </div>
-              </div>
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={toDate}
+                onChange={handleenddatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div> */}
+              {/* </div> */}
 
-              <button
-                className={GlobalStyle.buttonPrimary}
-                onClick={handleFilterButton}
-              >
-                Filter
-              </button>
-              <button
-                className={GlobalStyle.buttonRemove}
-                onClick={handleClear}
-              >
-                Clear
-              </button>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+                  onClick={handleFilterButton}
+                >
+                  Filter
+                </button>
+              )}
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                  onClick={handleClear}
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
@@ -598,7 +628,7 @@ const Monitor_settlement = () => {
           </div>
 
           {/* Table */}
-          <div className={`${GlobalStyle.tableContainer} mt-10`}>
+          <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -633,21 +663,24 @@ const Monitor_settlement = () => {
                       </td>
                       <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
                       <td className={GlobalStyle.tableData}> {item.settlement_phase || "N/A"} </td>
-                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-CA") || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-GB") || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>
                         <img
                           src={more}
                           onClick={() => naviPreview(item.case_id, item.settlement_id)}
-                          title="More"
-                          alt="more icon"
+
+                          data-tooltip-id="tooltip-more"
                           className="w-5 h-5 cursor-pointer"
                         />
+                        <Tooltip id="tooltip-more" place="bottom" effect="solid">
+                          More Details
+                        </Tooltip>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={9} className="text-center">No cases available</td>
+                    <td colSpan={9} className={`${GlobalStyle.tableData} text-center`}>No cases available</td>
                   </tr>
                 )}
               </tbody>
@@ -675,15 +708,17 @@ const Monitor_settlement = () => {
             </button>
           </div>
 
-          <button
-            onClick={HandleCreateTaskDownloadSettlementList}
-            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-            disabled={isCreatingTask}
-            style={{ display: 'flex', alignItems: 'center' }}
-          >
-            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-          </button>
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              onClick={HandleCreateTaskDownloadSettlementList}
+              className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+              disabled={isCreatingTask}
+              style={{ display: 'flex', alignItems: 'center' }}
+            >
+              {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+              {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+            </button>
+          )}
         </main>
       </div>
     </div>

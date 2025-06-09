@@ -167,7 +167,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
       {/* Card Section */}
       {transaction.length > 0 && transaction[0] && (
         <div className="flex flex-col items-center justify-center mb-4">
-        <div className={`${GlobalStyle.cardContainer}`}>
+        <div className={`${GlobalStyle.cardContainer} w-full max-w-lg`}>
           <table >
           <colgroup>
             <col  />
@@ -218,7 +218,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
         </div>
-        <div className={GlobalStyle.tableContainer}>
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>

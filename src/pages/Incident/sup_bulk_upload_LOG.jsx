@@ -232,9 +232,9 @@ const SupBulkUploadLog = () => {
             </div>
             {/* Filters */}
             <div className="flex justify-end ">
-            <div className= {`${GlobalStyle.cardContainer}  w-[70vw] mb-8 mt-8  `} > {/* Filter Section Small issue with the viewport width. or 
+            <div className= {`${GlobalStyle.cardContainer}  w-full md:w-[75vw] mb-8 mt-8  `} > {/* Filter Section Small issue with the viewport width. or 
                                                                                         else can use  w-3/4  */}
-                <div className="flex items-center gap-4 justify-end">
+                <div className="flex items-center gap-4 justify-end flex-wrap">
                     
                     <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className={GlobalStyle.selectBox} style={{ color: selectedStatus === "" ? "gray" : "black" }}>
                         <option value="" hidden>Status</option>
@@ -242,6 +242,8 @@ const SupBulkUploadLog = () => {
                         <option value="InProgress" style={{ color: "black" }}>In Progress</option>
                         <option value="Reject" style={{ color: "black" }}>Reject</option>
                     </select>
+
+                     <div className="flex items-center gap-2 sm:w-auto  sm:items-center "></div>
                     <label className={GlobalStyle.dataPickerDate}>Date:</label>
                     
                     <DatePicker
@@ -278,7 +280,7 @@ const SupBulkUploadLog = () => {
                         }}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="From"
-                        className={GlobalStyle.inputText}
+                         className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                     />
                     
                     <DatePicker
@@ -317,14 +319,14 @@ const SupBulkUploadLog = () => {
                         
                         dateFormat="dd/MM/yyyy"
                         placeholderText="To"
-                        className={GlobalStyle.inputText}
+                         className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                     />
                     {/* <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
                         Filter
                     </button> */}
                     <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                    <button className={GlobalStyle.buttonPrimary} onClick={validateAndFetchData}>
+                    <button  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`} onClick={validateAndFetchData}>
                     Filter
                 </button>
                     )}
@@ -334,7 +336,7 @@ const SupBulkUploadLog = () => {
                     </button> */}
                     <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                    <button className={GlobalStyle.buttonRemove} onClick={clearFilters}>
+                    <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`} onClick={clearFilters}>
                     Clear
                 </button>
                     )}
@@ -363,7 +365,7 @@ const SupBulkUploadLog = () => {
                 <div className="text-center py-4">Loading...</div>
             ) : (
                 /* Table */
-                <div className={GlobalStyle.tableContainer}>
+                <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
                     <table className={GlobalStyle.table}>
                         <thead className={GlobalStyle.thead}>
                             <tr>

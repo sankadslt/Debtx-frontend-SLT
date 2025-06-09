@@ -624,9 +624,9 @@ export default function CollectOnlyCPECollect() {
           </div>
           <div className="flex justify-end">
             {/* Filter Section */}
-            <div className={`${GlobalStyle.cardContainer}  items-center w-[72vw] mb-8 mt-8`}>
-                <div className="flex items-center gap-4 justify-end">
-                  <div className="flex items-center gap-4">
+            <div className={`${GlobalStyle.cardContainer} w-full items-center md:w-[72vw] mb-8 mt-8`}>
+                <div className="flex  gap-4 justify-end flex-wrap">
+                  <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
                     <label>Source:</label>
                     <select
                       className={GlobalStyle.inputText}
@@ -641,21 +641,21 @@ export default function CollectOnlyCPECollect() {
                     </select>
                   </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
                       <label>Date:</label>
                       <DatePicker
                         selected={fromDate}
                         onChange={handleFromDateChange}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="From"
-                        className={GlobalStyle.inputText}
+                         className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                       />
                       <DatePicker
                         selected={toDate}
                         onChange={handleToDateChange}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="To"
-                        className={GlobalStyle.inputText}
+                         className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                       />
                       {error && <span className={GlobalStyle.errorText}>{error}</span>}
                     </div>
@@ -670,7 +670,7 @@ export default function CollectOnlyCPECollect() {
                     <div>
                         {["admin", "superadmin", "slt"].includes(userRole) && (
                           <button
-                          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                          className={`${GlobalStyle.buttonPrimary} h-[35px]  w-full sm:w-auto`}
                           onClick={handleFilterClick}
                         >
                           Filter
@@ -683,7 +683,9 @@ export default function CollectOnlyCPECollect() {
                     </button> */}
                     <div>
                         {["admin", "superadmin", "slt"].includes(userRole) && (
-                          <button className={GlobalStyle.buttonRemove} onClick={handleclearfilter}>
+                          <button 
+                          className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                          onClick={handleclearfilter}>
                           Clear
                         </button>
                         )}
@@ -707,7 +709,7 @@ export default function CollectOnlyCPECollect() {
               </div>
             </div>
             {/* Table Section */}
-            <div className={GlobalStyle.tableContainer}>
+             <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
               <table className={GlobalStyle.table}>
                 <thead className={GlobalStyle.thead}>
                   <tr>
