@@ -17,13 +17,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import { getUserDetailsById } from "../../services/user/user_services";
+import completeIcon from "../../assets/images/complete.png";
+
 
 const UserInfo = () => {
   const location = useLocation();
-  const user_id = location.state?.userId;
-
-  //For testing
-  // const user_id ="test@gmail.com";
+  const user_id = location.state?.user_id;
 
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
@@ -211,7 +210,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.user_type}
+                          {userInfo.user_type || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -228,7 +227,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.user_mail}
+                          {userInfo.user_mail || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -245,7 +244,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.login_method}
+                          {userInfo.login_method || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -301,7 +300,7 @@ const UserInfo = () => {
                                       </td>
                                       <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center items-center">
-                                          <label className="inline-flex relative items-center cursor-pointer">
+                                          {/* <label className="inline-flex relative items-center cursor-pointer">
                                             <input
                                               type="checkbox"
                                               className="sr-only peer"
@@ -310,7 +309,12 @@ const UserInfo = () => {
                                               disabled
                                             />
                                             <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                                          </label>
+                                          </label> */}
+                                          <img 
+                                            src={completeIcon} 
+                                            alt="Active" 
+                                            className="h-5 w-5 lg:h-6 lg:w-6"
+                                          />
                                         </div>
                                       </td>
                                     </tr>
@@ -344,7 +348,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formatDate(userInfo.created_dtm)}
+                          {formatDate(userInfo.created_dtm) || "N/A"}
                         </label>
                       </td>
                     </tr>                   
@@ -361,7 +365,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.created_by}
+                          {userInfo.created_by || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -378,7 +382,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formatDate(userInfo.approved_dtm)}
+                          {formatDate(userInfo.approved_dtm) || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -395,7 +399,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.approved_by}
+                          {userInfo.approved_by || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -493,7 +497,7 @@ const UserInfo = () => {
       )}
 
       {/* Log History button */}
-      <div className="flex gap-4 pl-0 sm:pl-20 mt-4">
+      <div className="flex gap-4 pl-0 sm:pl-20 my-4">
         <button
           className={GlobalStyle.buttonPrimary}
           onClick={() => setShowLogHistory(!showLogHistory)}
@@ -523,19 +527,22 @@ const UserInfo = () => {
                 </thead>
 
                 <tbody>
-                  {userInfo.remark.map((log, index) => (
-                    <tr
-                      key={index}
-                      className={`${
-                        index % 2 === 0
-                          ? GlobalStyle.tableRowEven
-                          : GlobalStyle.tableRowOdd
-                      } border-b`}
-                    >
-                    
-                    </tr>
-                  ))}
-                  {userInfo.remark.length === 0 && (
+                  {userInfo.remark?.length > 0 ? (
+                    userInfo.remark?.map((log, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0
+                            ? GlobalStyle.tableRowEven
+                            : GlobalStyle.tableRowOdd
+                        } border-b`}
+                      >
+                        <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{formatDate(log.remark_dtm) || "N/A"}</td>
+                        <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{log.remark  || "N/A"}</td>
+                        <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{log.remark_by  || "N/A"}</td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
                       <td colSpan="3" className="text-center py-4">
                         No results found
