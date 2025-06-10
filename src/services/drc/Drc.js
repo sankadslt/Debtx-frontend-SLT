@@ -28,7 +28,7 @@ export const Active_DRC_Details = async () => {
   }
 };
 
-export const List_All_DRC_Details = async (status, pages = 1) => {
+export const listAllDRCDetails = async (status, pages = 1) => {
   try {
     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
       status,
