@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
-import editImg from "../../assets/images/more.svg";  
+import editImg from "../../assets/images/more.svg";
 import ListImg from "../../assets/images/ConfigurationImg/list.png";  
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png"; 
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
@@ -56,12 +56,25 @@ const DRCList = () => {
         try {
             const response = await listAllDRCDetails({
                 status: filters.status || "",
-                pages: filters.page || 1
+                page: filters.page || 1
             });
             
-            setHasMoreData(response.length === 10);
+            // Check if response has the expected structure
+            if (!response || !response.data || !Array.isArray(response.data)) {
+                console.error("Invalid response structure:", response);
+                throw new Error("Invalid response format from server");
+            }
             
-            return response.map(drc => ({
+            const drcData = response.data;
+            
+            // Determine if there's more data based on pagination info or data length
+            const hasMore = response.pagination 
+                ? response.pagination.page < response.pagination.totalPages
+                : drcData.length === 10; // Fallback to length check
+            
+            setHasMoreData(hasMore);
+            
+            return drcData.map(drc => ({
                 DRCID: drc.drc_id,
                 Status: drc.drc_status,
                 BusinessRegNo: drc.drc_business_registration_number,
@@ -328,9 +341,7 @@ const DRCList = () => {
                 )}
             </div>
         </div>
-    );
-
-     
+    );     
 };
 
 export default DRCList;
