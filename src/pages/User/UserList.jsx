@@ -42,6 +42,18 @@ const UserList = () => {
 
   const rowsPerPage = 10;
 
+  const userRoles = [
+    { value: "", label: "User Role", hidden: true },
+    { value: "GM", label: "GM" },
+    { value: "DGM", label: "DGM" },
+    { value: "legal_officer", label: "Legal Officer" },
+    { value: "manager", label: "Manager" },
+    { value: "slt_coordinator", label: "SLT Coordinator" },
+    { value: "DRC_user", label: "DRC User" },
+    { value: "recovery_staff", label: "Recovery Staff" },
+    { value: "rtom", label: "RTOM" }
+  ];
+
   // Fetch users from backend
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -50,10 +62,10 @@ const UserList = () => {
     try {
       const requestData = {
         page: currentPage + 1, // Backend expects 1-based page numbers
-        ...(appliedFilters.userRole && { user_roles: appliedFilters.userRole.toLowerCase()}),
-        ...(appliedFilters.userType && { user_type: appliedFilters.userType.toLowerCase() }),
+        ...(appliedFilters.userRole && { user_roles: appliedFilters.userRole}),
+        ...(appliedFilters.userType && { user_type: appliedFilters.userType}),
         ...(appliedFilters.status !== "" && {
-        user_status: appliedFilters.status.toLowerCase()
+        user_status: appliedFilters.status
       }),
       };
 
@@ -65,7 +77,7 @@ const UserList = () => {
           user_id: user.user_id,
           status: user.user_status,
           user_type: user.user_type?.toUpperCase() || "",
-          user_role: user.user_roles || "",
+          user_role: user.user_roles?.map(r => r.user_role).join(", ") || "",
           user_name: user.user_name,
           user_email: user.user_mail,
           created_on: new Date(user.created_dtm).toLocaleDateString('en-CA')
@@ -238,12 +250,22 @@ const UserList = () => {
                 className={`${GlobalStyle.selectBox} w-full text-sm`}
                 style={{ color: userRole === "" ? "gray" : "black" }}
               >
-                <option value="" hidden>User Role</option>
+                {/* <option value="" hidden>User Role</option>
                 <option value="user" style={{ color: "black" }}>User</option>
                 <option value="admin" style={{ color: "black" }}>Admin</option>
                 <option value="superadmin" style={{ color: "black" }}>Super Admin</option>
                 <option value="drc_admin" style={{ color: "black" }}>DRC Admin</option>
-                <option value="drc_user" style={{ color: "black" }}>DRC User</option>
+                <option value="drc_user" style={{ color: "black" }}>DRC User</option> */}
+                {userRoles.map((role) => (
+                  <option
+                    key={role.value}
+                    value={role.value}
+                    hidden={role.hidden}
+                    style={{ color: "black" }}
+                  >
+                    {role.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -271,8 +293,8 @@ const UserList = () => {
                 style={{ color: status === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>Status</option>
-                <option value="enabled" style={{ color: "black" }}>Active</option>
-                <option value="disabled" style={{ color: "black" }}>Inactive</option>
+                <option value="true" style={{ color: "black" }}>Active</option>
+                <option value="false" style={{ color: "black" }}>Inactive</option>
               </select>
             </div>
             
@@ -324,7 +346,7 @@ const UserList = () => {
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_id}</td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
                     <div className="relative flex items-center justify-center">
-                      {user.status === "enabled" ? (
+                      {user.status === "true" ? (
                         <div className="relative">
                           <img 
                             src={activeIcon} 
