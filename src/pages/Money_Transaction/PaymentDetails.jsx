@@ -104,13 +104,7 @@ const PaymentDetails = () => {
         title: "Date Range Exceeded",
         text: "The selected dates shouldn't have more than a 1-month gap.",
         icon: "warning",
-        // allowOutsideClick: false,
-        // allowEscapeKey: false,
-        // showCancelButton: true,
-        // confirmButtonText: "Yes",
-        // confirmButtonColor: "#28a745",
-        // cancelButtonText: "No",
-        // cancelButtonColor: "#d33",
+        confirmButtonColor: "#f1c40f"
       })
       setToDate(null);
       setFromDate(null);
@@ -125,7 +119,8 @@ const PaymentDetails = () => {
         text: "To date should be greater than or equal to From date",
         icon: "warning",
         allowOutsideClick: false,
-        allowEscapeKey: false
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       setToDate(null);
       setFromDate(null);
@@ -157,7 +152,8 @@ const PaymentDetails = () => {
           text: "No filter is selected. Please, select a filter.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -170,7 +166,8 @@ const PaymentDetails = () => {
           text: "Both From Date and To Date must be selected.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -197,7 +194,8 @@ const PaymentDetails = () => {
             text: "No matching data found for the selected filters.",
             icon: "warning",
             allowOutsideClick: false,
-            allowEscapeKey: false
+            allowEscapeKey: false,
+            confirmButtonColor: "#f1c40f"
           });
           setFilteredData([]);
           return null;
@@ -210,7 +208,7 @@ const PaymentDetails = () => {
       // Updated response handling
       if (response && response.data) {
         // console.log("Valid data received:", response.data);
-        
+
         setFilteredData((prevData) => [...prevData, ...response.data]);
 
         if (response.data.length === 0) {
@@ -221,7 +219,8 @@ const PaymentDetails = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
             });
           }
         } else {
@@ -241,7 +240,8 @@ const PaymentDetails = () => {
       Swal.fire({
         title: "Error",
         text: "Failed to fetch filtered data. Please try again.",
-        icon: "error"
+        icon: "error",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -255,6 +255,7 @@ const PaymentDetails = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       setCaseId(""); // Clear the invalid input
       return;
@@ -298,6 +299,7 @@ const PaymentDetails = () => {
   const handleFilterButton = () => { // Reset to the first page
     setFilteredData([]); // Clear previous results
     setMaxCurrentPage(0); // Reset max current page
+    setIsMoreDataAvailable(true); // Reset more data available state
     // setTotalAPIPages(1); // Reset total API pages
     if (currentPage === 1) {
       handleFilter();
@@ -318,6 +320,8 @@ const PaymentDetails = () => {
     setIsFilterApplied(false); // Reset filter applied state
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
     // setTotalAPIPages(1); // Reset total API pages
   };
 
@@ -342,7 +346,8 @@ const PaymentDetails = () => {
         text: "Please select From Date and To Date.",
         icon: "warning",
         allowOutsideClick: false,
-        allowEscapeKey: false
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       return;
     }
@@ -351,10 +356,20 @@ const PaymentDetails = () => {
     try {
       const response = await Create_task_for_Download_Payment_Case_List(userData, phase, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
-        Swal.fire(response, `Task created successfully!`, "success");
+        Swal.fire({
+          title: response, 
+          text: `Task created successfully!`, 
+          icon: "success",
+          confirmButtonColor: "#28a745"
+        });
       }
     } catch (error) {
-      Swal.fire("Error", error.message || "Failed to create task.", "error");
+      Swal.fire({
+        title: "Error", 
+        text: error.message || "Failed to create task.", 
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
     } finally {
       setIsCreatingTask(false);
     }
@@ -435,38 +450,42 @@ const PaymentDetails = () => {
               {/* <div className={GlobalStyle.datePickerContainer}> */}
               {/* <div className="flex items-center space-x-2">
                 <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={handlestartdatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="From"
-                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  />
-                {/* </div> */}
+              <DatePicker
+                selected={fromDate}
+                onChange={handlestartdatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div> */}
 
-                {/* <div className="flex items-center"> */}
-                  <DatePicker
-                    selected={toDate}
-                    onChange={handleenddatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="To"
-                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  />
-                {/* </div>
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={toDate}
+                onChange={handleenddatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div>
               </div> */}
 
-              <button
-                 className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-                onClick={handleFilterButton}
-              >
-                Filter
-              </button>
-              <button
-                 className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
-                onClick={handleClear}
-              >
-                Clear
-              </button>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+                  onClick={handleFilterButton}
+                >
+                  Filter
+                </button>
+              )}
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                  onClick={handleClear}
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
@@ -491,10 +510,10 @@ const PaymentDetails = () => {
                   <th className={GlobalStyle.tableHeader}>Case ID</th>
                   <th className={GlobalStyle.tableHeader}>Account No.</th>
                   <th className={GlobalStyle.tableHeader}>Settlement ID</th>
-                  <th className={GlobalStyle.tableHeader}>Amount</th>
+                  <th className={GlobalStyle.tableHeader}>Amount (LKR)</th>
                   <th className={GlobalStyle.tableHeader}>Type</th>
                   <th className={GlobalStyle.tableHeader}>Phase </th>
-                  <th className={GlobalStyle.tableHeader}>Settled Balance</th>
+                  <th className={GlobalStyle.tableHeader}>Settled Balance (LKR)</th>
                   <th className={GlobalStyle.tableHeader}>Paid DTM</th>
                   <th className={GlobalStyle.tableHeader}></th>
                 </tr>
@@ -519,21 +538,10 @@ const PaymentDetails = () => {
                       </td>
                       <td className={GlobalStyle.tableData}>{item.Account_No || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.Settlement_ID || "N/A"}</td>
-                      <td className={GlobalStyle.tableCurrency}>
-                        {item.Money_Transaction_Amount?.toLocaleString("en-LK", {
-                          style: "currency",
-                          currency: "LKR",
-                        })}
-                      </td>
+                      <td className={GlobalStyle.tableCurrency}>{item.Money_Transaction_Amount}</td>
                       <td className={GlobalStyle.tableData}>{item.Transaction_Type || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>{item.Settlement_Phase || "N/A"}</td>
-                      <td className={GlobalStyle.tableCurrency}>
-                        {/* {parseInt(item.Cummulative_Settled_Balance) ? parseInt(item.Cummulative_Settled_Balance).toLocaleString("en-US") : "-"} */}
-                        {item.Cummulative_Settled_Balance?.toLocaleString("en-LK", {
-                          style: "currency",
-                          currency: "LKR",
-                        })}
-                      </td>
+                      <td className={GlobalStyle.tableCurrency}>{item.Cummulative_Settled_Balance}</td>
                       <td className={GlobalStyle.tableData}>
                         {item.Money_Transaction_Date &&
                           new Date(item.Money_Transaction_Date).toLocaleString("en-GB", {
@@ -571,7 +579,7 @@ const PaymentDetails = () => {
           </div>
 
           {/* Pagination Section */}
-          <div className={GlobalStyle.navButtonContainer}>
+          {filteredDataBySearch.length > 0 && (<div className={GlobalStyle.navButtonContainer}>
             <button
               onClick={() => handlePrevNext("prev")}
               disabled={currentPage <= 1}
@@ -591,17 +599,19 @@ const PaymentDetails = () => {
             >
               <FaArrowRight />
             </button>
-          </div>
+          </div>)}
 
-          <button
-            onClick={HandleCreateTaskDownloadPaymentList}
-            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-            disabled={isCreatingTask}
-            style={{ display: 'flex', alignItems: 'center' }}
-          >
-            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-          </button>
+          {["admin", "superadmin", "slt"].includes(userRole) && filteredDataBySearch.length > 0 && (
+            <button
+              onClick={HandleCreateTaskDownloadPaymentList}
+              className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+              disabled={isCreatingTask}
+              style={{ display: 'flex', alignItems: 'center' }}
+            >
+              {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+              {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+            </button>
+          )}
         </main>
       </div>
     </div>

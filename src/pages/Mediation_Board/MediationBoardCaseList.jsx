@@ -22,6 +22,8 @@ import { List_All_DRCs_Mediation_Board_Cases } from "../../services/case/CaseSer
 import { RTOM_Details } from "../../services/RTOM/Rtom";
 import { List_All_Active_RTOMs } from "../../services/RTOM/Rtom";
 import { Tooltip } from "react-tooltip";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
 import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
 import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Request Customer-Info.png";
@@ -49,6 +51,7 @@ const MediationBoardCaseList = () => {
   const [caseStatus, setCaseStatus] = useState("");
   const [rtom, setRtom] = useState("");
   const [rtomList, setRtomList] = useState([]);
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   const rowsPerPage = 10;
 
@@ -102,10 +105,30 @@ const MediationBoardCaseList = () => {
 
   // initial data fetch
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+
     // Fetch DRC names
     const fetchDrcNames = async () => {
       try {
-        const names = await Active_DRC_Details(); 
+        const names = await Active_DRC_Details();
 
         setDrcNames(names);
       } catch (error) {
@@ -145,7 +168,8 @@ const MediationBoardCaseList = () => {
           text: "No filter is selected. Please, select a filter.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -158,7 +182,8 @@ const MediationBoardCaseList = () => {
           text: "Both From Date and To Date must be selected.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
         });
         setToDate(null);
         setFromDate(null);
@@ -191,7 +216,8 @@ const MediationBoardCaseList = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
             });
           }
         } else {
@@ -204,7 +230,8 @@ const MediationBoardCaseList = () => {
         Swal.fire({
           title: "Error",
           text: "No valid Settlement data found in response.",
-          icon: "error"
+          icon: "error",
+          confirmButtonColor: "#d33"
         });
         setFilteredData([]);
       }
@@ -215,6 +242,7 @@ const MediationBoardCaseList = () => {
         text: error.message || "Failed to fetch data.",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33"
       });
     } finally {
       setIsLoading(false);
@@ -240,7 +268,7 @@ const MediationBoardCaseList = () => {
           text: "From date must be before to date",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -255,7 +283,7 @@ const MediationBoardCaseList = () => {
           text: "Date range cannot exceed one month",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -275,6 +303,7 @@ const MediationBoardCaseList = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       setCaseId(""); // Clear the invalid input
       return;
@@ -385,7 +414,7 @@ const MediationBoardCaseList = () => {
             <select
               value={caseStatus}
               onChange={(e) => setCaseStatus(e.target.value)}
-             className={`${GlobalStyle.selectBox} `}
+              className={`${GlobalStyle.selectBox} `}
               style={{ color: caseStatus === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Status</option>
@@ -432,42 +461,46 @@ const MediationBoardCaseList = () => {
           </div>
 
           {/* <div className="flex items-center"> */}
-            <label className={GlobalStyle.dataPickerDate}>Date:</label>
-            {/* <div className="flex items-center space-x-2"> */}
-              {/* <div className="flex items-center"> */}
-                <DatePicker
-                  selected={fromDate}
-                  onChange={handleFromDateChange}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="From"
-                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                />
-              {/* </div> */}
-
-              {/* <div className="flex items-center"> */}
-                <DatePicker
-                  selected={toDate}
-                  onChange={handleToDateChange}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="To"
-                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                />
-              {/* </div> */}
-            {/* </div> */}
+          <label className={GlobalStyle.dataPickerDate}>Date:</label>
+          {/* <div className="flex items-center space-x-2"> */}
+          {/* <div className="flex items-center"> */}
+          <DatePicker
+            selected={fromDate}
+            onChange={handleFromDateChange}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="From"
+            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+          />
           {/* </div> */}
 
-          <button
-            className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-            onClick={handleFilterButton}
-          >
-            Filter
-          </button>
-          <button
-             className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
-            onClick={handleClear}
-          >
-            Clear
-          </button>
+          {/* <div className="flex items-center"> */}
+          <DatePicker
+            selected={toDate}
+            onChange={handleToDateChange}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="To"
+            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+          />
+          {/* </div> */}
+          {/* </div> */}
+          {/* </div> */}
+
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+              onClick={handleFilterButton}
+            >
+              Filter
+            </button>
+          )}
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+              onClick={handleClear}
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
@@ -483,7 +516,7 @@ const MediationBoardCaseList = () => {
         </div>
       </div>
 
-       <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -517,7 +550,7 @@ const MediationBoardCaseList = () => {
                   </td>
                   <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
                     {renderStatusIcon(row.status, index)}
-                    </td>
+                  </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{row.ro_name}</td>
                   <td className={GlobalStyle.tableData}>{row.area}</td>
@@ -562,7 +595,7 @@ const MediationBoardCaseList = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className= {GlobalStyle.tableData + " text-center"}>
+                <td colSpan="8" className={GlobalStyle.tableData + " text-center"}>
                   No records found
                 </td>
               </tr>
