@@ -52,6 +52,8 @@ const DRCList = () => {
         );
     };
 
+    
+
     const fetchDRCList = async (filters) => {
         try {
             const response = await listAllDRCDetails({
@@ -104,11 +106,17 @@ const DRCList = () => {
         // Apply search filter
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
-            result = result.filter(item =>
-                item.DRCName.toLowerCase().includes(query) ||
-                item.BusinessRegNo.toLowerCase().includes(query) ||
-                item.ContactNo.toLowerCase().includes(query)
+            result = result.filter(item =>{
+                const drcName=item.DRCName?.toLowerCase() || '';
+                const businessRegNo=item.BusinessRegNo?.toLowerCase() || '';
+                const contactNo=item.ContactNo?.toLowerCase() || '';
+
+                return (
+                drcName.includes(query) ||
+                businessRegNo.includes(query) ||
+                contactNo.includes(query)
             );
+        });
         }
         
         return result;
