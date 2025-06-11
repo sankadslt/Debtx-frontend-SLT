@@ -734,9 +734,20 @@ export const fetchUserTasks = async (token, delegate_user_id) => {
 
 export const GetFilteredCaseLists = async (payload) => {
   try {
-  
+    const payload = {
+      case_current_status,
+      From_DAT,
+      TO_DAT,
+      RTOM,
+      DRC,
+      arrears_band: selectedBand,
+      service_type,
+      pages
+    };
 
-  const response = await axios.post(`${URL}/List_All_Cases`, payload);
+    
+
+    const response = await axios.post(`${URL}/List_All_Cases`, payload);
 
     if (response.data.status === "error") {
       throw new Error(response.data.message);
