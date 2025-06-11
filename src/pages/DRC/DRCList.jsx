@@ -87,7 +87,7 @@ const DRCList = () => {
             
         } catch (error) {
             console.error("Error fetching DRC list:", error);
-            throw new Error(error.message || "Failed to load DRC data");
+            throw new Error("DRC data not found");
         }
     };
 
