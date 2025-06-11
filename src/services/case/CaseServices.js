@@ -732,37 +732,18 @@ export const fetchUserTasks = async (token, delegate_user_id) => {
 };
  
 
-export const GetFilteredCaseLists = async ({
-  case_current_status,
-  From_DAT,
-  TO_DAT,
-  RTOM,
-  DRC,
-  arrears_band:selectedBand,
-  service_type,
-  pages
-}) => {
+export const GetFilteredCaseLists = async (payload) => {
   try {
-    const payload = {
-      case_current_status,
-      From_DAT,
-      TO_DAT,
-      RTOM,
-      DRC,
-      arrears_band: selectedBand,
-      service_type,
-      pages
-    };
+  
 
-    
-
-    const response = await axios.post(`${URL}/getCaseLists`, payload);
+  const response = await axios.post(`${URL}/List_All_Cases`, payload);
 
     if (response.data.status === "error") {
       throw new Error(response.data.message);
     }
 
     return {
+      status: "success",
       data: response.data.data.map(item => ({
         caseid: item.case_id,
         casecurrentstatus: item.status,
@@ -774,7 +755,7 @@ export const GetFilteredCaseLists = async ({
         currentarrearsamount: item.current_arrears_amount,
         rtom: item.rtom,
         Created_On: item.date,
-        Created_On: item.last_payment_date  
+        Lastpaymentdate: item.last_payment_date  
       }))
     };
   } catch (error) {
@@ -804,5 +785,3 @@ export const GetFilteredCaseLists = async ({
     throw error;
   }
 };
-
-
