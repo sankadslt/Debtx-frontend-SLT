@@ -305,7 +305,7 @@ const UserInfo = () => {
                                       <td
                                         className={`${GlobalStyle.tableData} flex justify-center items-center`}
                                       >
-                                        <span>{role}</span>
+                                        <span>{role.user_role}</span>
                                       </td>
                                       <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center items-center">
