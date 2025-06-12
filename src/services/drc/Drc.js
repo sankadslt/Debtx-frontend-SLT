@@ -290,11 +290,8 @@ export const getActiveRTOMDetails = async () => {
 // getActiveServiceDetails
 export const getActiveServiceDetails = async () => {
   try {
-    const response = await axios.get(
-      `${BASE_URL}/service/Active_Service_Details`
-    );
-    console.log("Active service details data:", response.data.data);
-    return response.data;
+      const response = await axios.get(`${BASE_URL}/service/Active_Service_Details`);
+      return response.data.data; // Make sure this returns an array of {id, value} objects
   } catch (error) {
     console.error(
       "Error fetching active services:",

@@ -326,6 +326,7 @@ const MediationBoardCaseList = () => {
     setFilteredData([]); // Clear previous results
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
+    setTotalPages(0); // Reset total pages
     if (currentPage === 1) {
       fetchData();
     } else {

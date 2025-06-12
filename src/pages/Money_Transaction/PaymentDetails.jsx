@@ -12,7 +12,7 @@ Dependencies: tailwind css
 Related Files:
 Notes:  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -44,10 +44,9 @@ const PaymentDetails = () => {
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [isFilterApplied, setIsFilterApplied] = useState(false);
   const rowsPerPage = 10; // Number of rows per page
 
   // variables need for table
@@ -55,6 +54,7 @@ const PaymentDetails = () => {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
+  const hasMounted = useRef(false);
 
   const navigate = useNavigate();
 
@@ -83,33 +83,10 @@ const PaymentDetails = () => {
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
-    if (toDate) checkdatediffrence(date, toDate);
   };
 
   const handleenddatechange = (date) => {
     setToDate(date);
-    if (fromDate) checkdatediffrence(fromDate, date);
-  };
-
-  // Function to check the difference between two dates
-  const checkdatediffrence = (startDate, endDate) => {
-    const start = new Date(startDate).getTime();
-    const end = new Date(endDate).getTime();
-    const diffInMs = end - start;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-    const diffInMonths = diffInDays / 30;
-
-    if (diffInMonths > 1) {
-      Swal.fire({
-        title: "Date Range Exceeded",
-        text: "The selected dates shouldn't have more than a 1-month gap.",
-        icon: "warning",
-        confirmButtonColor: "#f1c40f"
-      })
-      setToDate(null);
-      setFromDate(null);
-      return;
-    }
   };
 
   useEffect(() => {
@@ -136,8 +113,39 @@ const PaymentDetails = () => {
       .includes(searchQuery.toLowerCase())
   );
 
-  //Fetching data from API
-  const handleFilter = async () => {
+  const filterValidations = () => {
+    if (!caseId && !phase && !status && !fromDate && !toDate && !accountNo) {
+      Swal.fire({
+        title: "Warning",
+        text: "No filter is selected. Please, select a filter.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Both From Date and To Date must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    return true; // All validations passed
+  }
+
+  const CallAPI = async () => {
     try {
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
@@ -145,36 +153,6 @@ const PaymentDetails = () => {
         const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
         return offsetDate.toISOString().split('T')[0];
       };
-
-      if (!caseId && !phase && !status && !fromDate && !toDate && !accountNo) {
-        Swal.fire({
-          title: "Warning",
-          text: "No filter is selected. Please, select a filter.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          confirmButtonColor: "#f1c40f"
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      if ((fromDate && !toDate) || (!fromDate && toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "Both From Date and To Date must be selected.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          confirmButtonColor: "#f1c40f"
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      console.log(currentPage);
 
       const payload = {
         case_id: caseId,
@@ -229,22 +207,29 @@ const PaymentDetails = () => {
             setIsMoreDataAvailable(false); // More data available
           }
         }
-
         // setFilteredData(response.data.data);
       } else {
-        console.error("No valid Settlement data found in response:", response);
+        // console.error("No valid Settlement data found in response:", response);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to fetch filtered data. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
         setFilteredData([]);
       }
     } catch (error) {
-      console.error("Error filtering cases:", error);
+      // console.error("Error filtering cases:", error);
       Swal.fire({
         title: "Error",
         text: "Failed to fetch filtered data. Please try again.",
         icon: "error",
         confirmButtonColor: "#d33"
       });
+    } finally {
+      setIsLoading(false); // Ensure loading state is reset
     }
-  };
+  }
 
   // Validate case ID input preventing non-numeric characters
   const validateCaseId = () => {
@@ -269,9 +254,14 @@ const PaymentDetails = () => {
 
   // Fetch data when the component mounts
   useEffect(() => {
-    if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      handleFilter(); // Call the function whenever currentPage changes
+      CallAPI(); // Call the function whenever currentPage changes
     }
   }, [currentPage]);
 
@@ -297,16 +287,21 @@ const PaymentDetails = () => {
 
   // handle filter button click
   const handleFilterButton = () => { // Reset to the first page
-    setFilteredData([]); // Clear previous results
     setMaxCurrentPage(0); // Reset max current page
     setIsMoreDataAvailable(true); // Reset more data available state
+    setTotalPages(0); // Reset total pages
     // setTotalAPIPages(1); // Reset total API pages
-    if (currentPage === 1) {
-      handleFilter();
+    const isValid = filterValidations(); // Validate filters
+    if (!isValid) {
+      return; // If validation fails, do not proceed
     } else {
-      setCurrentPage(1);
+      setFilteredData([]); // Clear previous results
+      if (currentPage === 1) {
+        CallAPI();
+      } else {
+        setCurrentPage(1);
+      }
     }
-    setIsFilterApplied(true); // Set filter applied state to true
   }
 
   const handleClear = () => {
@@ -316,13 +311,17 @@ const PaymentDetails = () => {
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
-    setCurrentPage(0); // Reset to the first page
-    setIsFilterApplied(false); // Reset filter applied state
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
     // setTotalAPIPages(1); // Reset total API pages
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   };
 
   const naviPreview = (caseId, moneyTransactionID) => {
@@ -357,16 +356,16 @@ const PaymentDetails = () => {
       const response = await Create_task_for_Download_Payment_Case_List(userData, phase, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
         Swal.fire({
-          title: response, 
-          text: `Task created successfully!`, 
+          title: response,
+          text: `Task created successfully!`,
           icon: "success",
           confirmButtonColor: "#28a745"
         });
       }
     } catch (error) {
       Swal.fire({
-        title: "Error", 
-        text: error.message || "Failed to create task.", 
+        title: "Error",
+        text: error.message || "Failed to create task.",
         icon: "error",
         confirmButtonColor: "#d33"
       });
