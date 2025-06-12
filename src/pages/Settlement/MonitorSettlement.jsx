@@ -202,35 +202,35 @@ const Monitor_settlement = () => {
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
-    if (toDate) checkdatediffrence(date, toDate);
+    // if (toDate) checkdatediffrence(date, toDate);
   };
 
   const handleenddatechange = (date) => {
     setToDate(date);
-    if (fromDate) checkdatediffrence(fromDate, date);
+    // if (fromDate) checkdatediffrence(fromDate, date);
   };
 
   // Check the difference between two dates
   // If the difference is more than 1 month, show a warning
-  const checkdatediffrence = (startDate, endDate) => {
-    const start = new Date(startDate).getTime();
-    const end = new Date(endDate).getTime();
-    const diffInMs = end - start;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-    const diffInMonths = diffInDays / 30;
+  // const checkdatediffrence = (startDate, endDate) => {
+  //   const start = new Date(startDate).getTime();
+  //   const end = new Date(endDate).getTime();
+  //   const diffInMs = end - start;
+  //   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  //   const diffInMonths = diffInDays / 30;
 
-    if (diffInMonths > 1) {
-      Swal.fire({
-        title: "Date Range Exceeded",
-        text: "The selected dates shouldn't have more than a 1-month gap.",
-        icon: "warning",
-        confirmButtonColor: "#f1c40f"
-      })
-      setToDate(null);
-      setFromDate(null);
-      return;
-    }
-  };
+  //   if (diffInMonths > 1) {
+  //     Swal.fire({
+  //       title: "Date Range Exceeded",
+  //       text: "The selected dates shouldn't have more than a 1-month gap.",
+  //       icon: "warning",
+  //       confirmButtonColor: "#f1c40f"
+  //     })
+  //     setToDate(null);
+  //     setFromDate(null);
+  //     return;
+  //   }
+  // };
 
   // Check if toDate is greater than fromDate
   useEffect(() => {
@@ -432,7 +432,6 @@ const Monitor_settlement = () => {
 
   // Handle Filter Button click
   const handleFilterButton = () => {
-    setFilteredData([]); // Clear previous results
     setIsMoreDataAvailable(true); // Reset more data available state
     setTotalPages(0); // Reset total pages
     setMaxCurrentPage(0); // Reset max current page
@@ -440,6 +439,7 @@ const Monitor_settlement = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setFilteredData([]); // Clear previous results
       if (currentPage === 1) {
         callAPI();
       } else {
