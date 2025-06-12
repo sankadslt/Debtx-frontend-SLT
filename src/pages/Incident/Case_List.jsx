@@ -9,9 +9,10 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import Swal from "sweetalert2";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -20,13 +21,14 @@ import { fetchAllArrearsBands } from '../../services/case/CaseServices';
 import { List_All_Active_RTOMs } from "../../services/RTOM/Rtom";
 import { Active_DRC_Details } from '../../services/drc/Drc';
 import { getActiveServiceDetails } from "../../services/drc/Drc";
-
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
 import Pending_Assign_Agent_Approval from "/src/assets/images/distribution/Pending_Assign_Agent_Approval.png";
 import Open_Assign_Agent from "/src/assets/images/distribution/Open_Assign_Agent.png";
 import Open_With_Agent from "/src/assets/images/distribution/Open_With_Agent.png";
-import RO_Negotiation from "/src/assets/images/Negotiation/RO_Negotiation.png"; 
-import RO_Settle_Pending from "/src/assets/images/Negotiation/RO_Settle_Pending.png";         
+import RO_Negotiation from "/src/assets/images/Negotiation/RO_Negotiation.png";
+import RO_Settle_Pending from "/src/assets/images/Negotiation/RO_Settle_Pending.png";
 import RO_Settle_Open_Pending from "/src/assets/images/Negotiation/RO_Settle_Open_Pending.png";
 import RO_Settle_Active from "/src/assets/images/Negotiation/RO_Settle_Active.png";
 import RO_Negotiation_extend_pending from "/src/assets/images/Negotiation/RO Negotiation extend pending.png";
@@ -38,9 +40,9 @@ import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Requ
 import MB_Handover_Customer_Info from "/src/assets/images/Mediation_Board/MB Handover Customer-Info.png";
 import MB_Settle_Pending from "/src/assets/images/Mediation_Board/MB Settle Pending.png";
 import MB_Settle_Open_Pending from "/src/assets/images/Mediation_Board/MB Settle Open Pending.png";
-import MB_Settle_Active from "/src/assets/images/Mediation_Board/MB Settle Active.png"; 
+import MB_Settle_Active from "/src/assets/images/Mediation_Board/MB Settle Active.png";
 import MB_Fail_with_Pending_Non_Settlement from "/src/assets/images/Mediation_Board/MB Fail with Pending Non Settlement.png";
-import MB_Fail_with_non_settlement from "/src/assets/images/Mediation_Board/MB Fail with non settlement.png"; 
+import MB_Fail_with_non_settlement from "/src/assets/images/Mediation_Board/MB Fail with non settlement.png";
 import Pending_FTL_LOD from "/src/assets/images/LOD/Pending_FTL_LOD.png";
 import Initial_FTL_LOD from "/src/assets/images/LOD/Initial_FTL_LOD.png";
 import FTL_LOD_Settle_Pending from "/src/assets/images/LOD/FTL_LOD_Settle_Pending.png";
@@ -71,97 +73,153 @@ const Case_List = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
   const rowsPerPage = 10;
+  const hasMounted = useRef(false);
+  const navigate = useNavigate();
 
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
   //Decide the icon path based on the status
-    const getStatusIcon = (status) => {
-      switch (status) {
-        case "Open Assign Agent":
-          return Open_Assign_Agent;         
-        case "Open With Agent":
-        case "Open with Agent":
-          return Open_With_Agent;
-        case "Pending Assign Agent Approval":
-          return Pending_Assign_Agent_Approval;                
-        case "RO Negotiation":
-          return RO_Negotiation;
-        case "Negotiation Settle Pending":
-            return RO_Settle_Pending;
-        case "Negotiation Settle Open-Pending":
-          return RO_Settle_Open_Pending;
-        case "Negotiation Settle Active":
-          return RO_Settle_Active;
-        case "RO Negotiation Extension Pending":
-          return RO_Negotiation_extend_pending;
-        case "RO Negotiation Extended":
-          return RO_Negotiation_extended;
-        case "RO Negotiation FMB Pending":
-          return RO_Negotiation_FMB_Pending;
-        case "Forward to Mediation Board":
-          return Forward_To_Mediation_Board;
-        case "MB Negotiation":
-        case "MB Negotiaion":
-          return MB_Negotiation;
-        case "MB Request Customer-Info":
-          return MB_Request_Customer_Info;
-        case "MB Handover Customer-Info":
-          return MB_Handover_Customer_Info;
-        case "MB Settle Pending":
-          return MB_Settle_Pending;
-        case "MB Settle Open-Pending":
-          return MB_Settle_Open_Pending;
-        case "MB Settle Active":
-          return MB_Settle_Active;
-        case "MB Fail with Pending Non-Settlement":
-          return MB_Fail_with_Pending_Non_Settlement;
-        case "MB Fail with Non-Settlementt":
-          return MB_Fail_with_non_settlement;
-        case "Pending FTL LOD":
-          return Pending_FTL_LOD;
-        case "Initial FTL LOD":
-          return Initial_FTL_LOD;
-        case "FTL LOD Settle Pending":
-          return FTL_LOD_Settle_Pending;
-        case "FTL LOD Settle Open-Pending":
-          return FTL_LOD_Settle_Open_Pending; 
-        case "FTL LOD Settle Active":
-          return FTL_LOD_Settle_Active;
-        case "LIT Prescribed":
-          return LIT_Prescribed;          
-        default:
-          return "";
-      }
-    };
+  // const getStatusIcon = (status) => {
+  //   switch (status) {
+  //     case "Open Assign Agent":
+  //       return Open_Assign_Agent;
+  //     case "Open With Agent":
+  //     case "Open with Agent":
+  //       return Open_With_Agent;
+  //     case "Pending Assign Agent Approval":
+  //       return Pending_Assign_Agent_Approval;
+  //     case "RO Negotiation":
+  //       return RO_Negotiation;
+  //     case "Negotiation Settle Pending":
+  //       return RO_Settle_Pending;
+  //     case "Negotiation Settle Open-Pending":
+  //       return RO_Settle_Open_Pending;
+  //     case "Negotiation Settle Active":
+  //       return RO_Settle_Active;
+  //     case "RO Negotiation Extension Pending":
+  //       return RO_Negotiation_extend_pending;
+  //     case "RO Negotiation Extended":
+  //       return RO_Negotiation_extended;
+  //     case "RO Negotiation FMB Pending":
+  //       return RO_Negotiation_FMB_Pending;
+  //     case "Forward to Mediation Board":
+  //       return Forward_To_Mediation_Board;
+  //     case "MB Negotiation":
+  //     case "MB Negotiaion":
+  //       return MB_Negotiation;
+  //     case "MB Request Customer-Info":
+  //       return MB_Request_Customer_Info;
+  //     case "MB Handover Customer-Info":
+  //       return MB_Handover_Customer_Info;
+  //     case "MB Settle Pending":
+  //       return MB_Settle_Pending;
+  //     case "MB Settle Open-Pending":
+  //       return MB_Settle_Open_Pending;
+  //     case "MB Settle Active":
+  //       return MB_Settle_Active;
+  //     case "MB Fail with Pending Non-Settlement":
+  //       return MB_Fail_with_Pending_Non_Settlement;
+  //     case "MB Fail with Non-Settlementt":
+  //       return MB_Fail_with_non_settlement;
+  //     case "Pending FTL LOD":
+  //       return Pending_FTL_LOD;
+  //     case "Initial FTL LOD":
+  //       return Initial_FTL_LOD;
+  //     case "FTL LOD Settle Pending":
+  //       return FTL_LOD_Settle_Pending;
+  //     case "FTL LOD Settle Open-Pending":
+  //       return FTL_LOD_Settle_Open_Pending;
+  //     case "FTL LOD Settle Active":
+  //       return FTL_LOD_Settle_Active;
+  //     case "LIT Prescribed":
+  //       return LIT_Prescribed;
+  //     default:
+  //       return "";
+  //   }
+  // };
 
-    //render status icon with tooltip
-      const renderStatusIcon = (status, index) => {
-        console.log("Status received:", status);
-        const iconPath = getStatusIcon(status);
-    
-        if (!iconPath) {
-          return <span>{status}</span>;
-        }
-    
-        const tooltipId = `tooltip-${status.replace(/\s+/g, "-")}-${index}`;
-    
-        return (
-          <div className="flex items-center gap-2">
-            <img
-              src={iconPath}
-              alt={status}
-              className="w-6 h-6"
-              data-tooltip-id={tooltipId} // Add tooltip ID to image
-            />
-            {/* Tooltip component */}
-            <Tooltip id={tooltipId} place="bottom" effect="solid">
-              {status} {/* Tooltip text is the phase and status */}
-            </Tooltip>
-          </div>
-        );
-      };
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Pending Assign Agent":
+        return;
+      case "Pending Assign Agent Approval":
+        return Pending_Assign_Agent_Approval;
+      case "Open Assign Agent":
+        return Open_Assign_Agent;
+      case "Open With Agent":
+        return Open_With_Agent;
+      case "RO Negotiation":
+        return RO_Negotiation;
+      case "Negotiation Settle Pending":
+        return RO_Settle_Pending;
+      case "Negotiation Settle Open-Pending":
+        return RO_Settle_Open_Pending;
+      case "Negotiation Settle Active":
+        return RO_Settle_Active;
+      case "RO Negotiation Extension Pending":
+        return RO_Negotiation_extend_pending;
+      case "RO Negotiation Extended":
+        return RO_Negotiation_extended;
+      case "RO Negotiation FMB Pending":
+        return RO_Negotiation_FMB_Pending;
+      case "Forward to Mediation Board":
+        return Forward_To_Mediation_Board;
+      case "MB Negotiation":
+        return MB_Negotiation;
+      case "MB Handover Customer-Info":
+        return MB_Handover_Customer_Info;
+      case "MB Settle Pending":
+        return MB_Settle_Pending;
+      case "MB Settle Open-Pending":
+        return MB_Settle_Open_Pending;
+      case "MB Settle Active":
+        return MB_Settle_Active;
+      case "MB Fail with Pending Non-Settlement":
+        return MB_Fail_with_Pending_Non_Settlement;
+      case "MB Fail with Non-Settlement":
+        return MB_Fail_with_non_settlement;
+      case "Pending FTL LOD":
+        return Pending_FTL_LOD;
+      case "Initial FTL LOD":
+        return Initial_FTL_LOD;
+      case "FTL LOD Settle Pending":
+        return FTL_LOD_Settle_Pending;
+      case "FTL LOD Settle Open-Pending":
+        return FTL_LOD_Settle_Open_Pending;
+      case "FTL LOD Settle Active":
+        return FTL_LOD_Settle_Active;
+    }
+  }
+
+  //render status icon with tooltip
+  const renderStatusIcon = (status, index) => {
+    console.log("Status received:", status);
+    const iconPath = getStatusIcon(status);
+
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+
+    const tooltipId = `tooltip-${status.replace(/\s+/g, "-")}-${index}`;
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={iconPath}
+          alt={status}
+          className="w-6 h-6"
+          data-tooltip-id={tooltipId} // Add tooltip ID to image
+        />
+        {/* Tooltip component */}
+        <Tooltip id={tooltipId} place="bottom" effect="solid">
+          {status} {/* Tooltip text is the phase and status */}
+        </Tooltip>
+      </div>
+    );
+  };
 
   // Initial data fetch
   useEffect(() => {
@@ -226,37 +284,151 @@ const Case_List = () => {
     fetchArrearsBands();
     fetchCaseStatusList();
     fetchServiceTypes();
+
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
   }, []);
 
   // Filter data from API 
-  const handleFilter = async () => {
+  // const handleFilter = async () => {
+  //   try {
+  //     if (!rtom && !selectedDRC && !selectedBand && !selectedCaseStatus && !selectedServiceType && !fromDate && !toDate) {
+  //       Swal.fire({
+  //         title: "Warning",
+  //         text: "No filter is selected. Please, select a filter.",
+  //         icon: "warning",
+  //         allowOutsideClick: false,
+  //         allowEscapeKey: false,
+  //         confirmButtonColor: "#f1c40f"
+  //       });
+  //       setToDate(null);
+  //       setFromDate(null);
+  //       return;
+  //     }
+
+  //     if ((fromDate && !toDate) || (!fromDate && toDate)) {
+  //       Swal.fire({
+  //         title: "Warning",
+  //         text: "Both From Date and To Date must be selected.",
+  //         icon: "warning",
+  //         allowOutsideClick: false,
+  //         allowEscapeKey: false,
+  //         confirmButtonColor: "#f1c40f"
+  //       });
+  //       setToDate(null);
+  //       setFromDate(null);
+  //       return;
+  //     }
+
+  //     const payload = {
+  //       case_current_status: selectedCaseStatus,
+  //       From_DAT: fromDate ? fromDate.toISOString().split('T')[0] : null,
+  //       TO_DAT: toDate ? toDate.toISOString().split('T')[0] : null,
+  //       RTOM: rtom,
+  //       DRC: selectedDRC,
+  //       arrears_band: selectedBand,
+  //       service_type: selectedServiceType,
+  //       pages: currentPage
+  //     };
+
+  //     setIsLoading(true);
+
+  //     const response = await GetFilteredCaseLists(payload);
+  //     if (response && response.data && response.status === "success") {
+
+  //       // Append the new data to the existing data
+  //       setFilteredData((prevData) => [...prevData, ...response.data]);
+  //       if (response.data.length === 0) {
+  //         setIsMoreDataAvailable(false); // No more data available
+  //         if (currentPage === 1) {
+  //           Swal.fire({
+  //             title: "No Results",
+  //             text: "No matching data found for the selected filters.",
+  //             icon: "warning",
+  //             allowOutsideClick: false,
+  //             allowEscapeKey: false,
+  //             confirmButtonColor: "#f1c40f"
+  //           });
+  //         }
+  //       } else {
+  //         const maxData = currentPage === 1 ? 10 : 30;
+  //         if (response.data.length < maxData) {
+  //           setIsMoreDataAvailable(false); // More data available
+  //         }
+  //       }
+  //     } else {
+  //       Swal.fire({
+  //         title: "Error",
+  //         text: "No valid Settlement data found in response.",
+  //         icon: "error",
+  //         confirmButtonColor: "#d33"
+  //       });
+  //       setFilteredData([]);
+  //     }
+  //   } catch (error) {
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: error.message || "Failed to fetch data.",
+  //       icon: "error",
+  //       confirmButtonText: "OK",
+  //       confirmButtonColor: "#d33"
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  const filterValidation = () => {
+    if (!rtom && !selectedDRC && !selectedBand && !selectedCaseStatus && !selectedServiceType && !fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "No filter is selected. Please, select a filter.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Both From Date and To Date must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    return true;
+  }
+
+  const CallAPI = async () => {
     try {
-      if (!rtom && !selectedDRC && !selectedBand && !selectedCaseStatus && !selectedServiceType && !fromDate && !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "No filter is selected. Please, select a filter.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      if ((fromDate && !toDate) || (!fromDate && toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "Both From Date and To Date must be selected.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
       const payload = {
         case_current_status: selectedCaseStatus,
         From_DAT: fromDate ? fromDate.toISOString().split('T')[0] : null,
@@ -283,7 +455,8 @@ const Case_List = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
             });
           }
         } else {
@@ -296,20 +469,22 @@ const Case_List = () => {
         Swal.fire({
           title: "Error",
           text: "No valid Settlement data found in response.",
-          icon: "error"
+          icon: "error",
+          confirmButtonColor: "#d33"
         });
         setFilteredData([]);
       }
-      } catch (error) {
-        Swal.fire({
-          title: "Error",
-          text: error.message || "Failed to fetch data.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Failed to fetch data.",
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#d33"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlestartdatechange = (date) => {
@@ -319,45 +494,56 @@ const Case_List = () => {
 
   const handleenddatechange = (date) => {
     setToDate(date);
-    validateDates(date, toDate);
+    validateDates(fromDate, date);
   };
 
   const validateDates = (from, to) => {
-      if (from && to) {  
-        if (from >= to) {
-          Swal.fire({
-            title: "Warning",
-            text: "From date must be before to date",
-            icon: "warning",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#3085d6",
-          });
-          setFromDate(null);
-          setToDate(null);
-          return false;
-        }
-      }  
-      return true;
+    if (from && to) {
+      if (from >= to) {
+        Swal.fire({
+          title: "Warning",
+          text: "From date must be before to date",
+          icon: "warning",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f",
+        });
+        setFromDate(null);
+        setToDate(null);
+        return false;
+      }
+    }
+    return true;
   };
 
   useEffect(() => {
-      if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
-        setMaxCurrentPage(currentPage); // Update max current page
-        handleFilter(); // Call the function whenever currentPage changes
-      }
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      CallAPI(); // Call the function whenever currentPage changes
+    }
   }, [currentPage]);
 
   // Handle filter button click
   const handleFilterButton = () => {
     setFilteredData([]);
     setIsMoreDataAvailable(true);
+    setTotalPages(0); // Reset total pages
     setMaxCurrentPage(0);
-    if (currentPage === 1) {
-      handleFilter();
+    const isValid = filterValidation();
+    if (!isValid) {
+      return; // If validation fails, do not proceed
     } else {
-      setCurrentPage(1);
+      if (currentPage === 1) {
+        CallAPI();
+      } else {
+        setCurrentPage(1);
+      }
+      setIsFilterApplied(true);
     }
-    setIsFilterApplied(true);
   }
 
   // Search Section
@@ -379,7 +565,7 @@ const Case_List = () => {
         setCurrentPage(currentPage + 1);
       }
     }
-  };  
+  };
 
   // Handle previous arrow click
   const handlePrevPage = () => {
@@ -397,16 +583,27 @@ const Case_List = () => {
     setSelectedCaseStatus("");
     setFromDate(null);
     setToDate(null);
-    setSearchQuery("");
-    setCurrentPage(1);
     setIsFilterApplied(false);
+    setIsMoreDataAvailable(true);
+    setMaxCurrentPage(0);
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   };
 
   const handleCreateTask = () => {
     console.log("Create task button clicked");
   };
+
+  // Function to navigate to the case ID page
+  const naviCaseID = (caseId) => {
+    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
+  }
 
   // display loading animation when data is loading
   if (isLoading) {
@@ -424,7 +621,7 @@ const Case_List = () => {
       <div className="flex justify-end">
         <div className={`${GlobalStyle.cardContainer} w-full`}>
           <div className="flex flex-wrap items-center justify-end w-full space-x-4 space-y-3">
-            
+
             <select
               value={rtom}
               onChange={(e) => setRtom(e.target.value)}
@@ -459,7 +656,7 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedBand === "" ? "gray" : "black" }}
             >
-              <option value="">Arrears Band</option>
+              <option value="" hidden>Arrears Band</option>
               {arrearsBand.map(({ key, value }) => (
                 <option key={key} value={key} style={{ color: "black" }}>
                   {value}
@@ -495,39 +692,43 @@ const Case_List = () => {
               ))}
             </select>
 
-            <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2">
-              <label className={GlobalStyle.dataPickerDate}>Date:</label>
+            {/* <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2"> */}
+            <label className={GlobalStyle.dataPickerDate}>Date:</label>
 
-              <DatePicker
-                selected={fromDate}
-                onChange={handlestartdatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="From"
-                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-              />
+            <DatePicker
+              selected={fromDate}
+              onChange={handlestartdatechange}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="From"
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+            />
 
-              <DatePicker
-                selected={toDate}
-                onChange={handleenddatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="To"
-                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-              />
+            <DatePicker
+              selected={toDate}
+              onChange={handleenddatechange}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="To"
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+            />
 
+            {["admin", "superadmin", "slt"].includes(userRole) && (
               <button
                 className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
                 onClick={handleFilterButton}
               >
                 Filter
               </button>
+            )}
 
+            {["admin", "superadmin", "slt"].includes(userRole) && (
               <button
                 className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
                 onClick={handleClear}
               >
                 Clear
               </button>
-            </div>
+            )}
+            {/* </div> */}
           </div>
         </div>
       </div>
@@ -556,13 +757,13 @@ const Case_List = () => {
                 Status
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Account No.
+                Account No
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
                 Service Type
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Amount
+                Amount (LKR)
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
                 Agent
@@ -592,24 +793,27 @@ const Case_List = () => {
                 return (
                   <tr
                     key={index}
-                  className={
-                    index % 2 === 0
-                      ? GlobalStyle.tableRowEven
-                      : GlobalStyle.tableRowOdd
-                  }
+                    className={
+                      index % 2 === 0
+                        ? GlobalStyle.tableRowEven
+                        : GlobalStyle.tableRowOdd
+                    }
                   >
-                    <td className={GlobalStyle.tableData}>{row.caseid || "N/A"}</td>
+                    {/* <td className={GlobalStyle.tableData}>{row.caseid || "N/A"}</td> */}
+                    <td
+                      className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                      onClick={() => naviCaseID(row.caseid)}
+                    >
+                      {row.caseid || "N/A"}
+                    </td>
                     {/* <td className={GlobalStyle.tableData}>{row.casecurrentstatus || "N/A"}</td> */}
                     <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
                       {renderStatusIcon(row.casecurrentstatus || "N/A")}</td>
                     <td className={GlobalStyle.tableData}>{row.accountno || "N/A"}</td>
                     <td className={GlobalStyle.tableData}>{row.servicetype || "N/A"}</td>
-                    <td className={GlobalStyle.tableCurrency}>{row.amount.toLocaleString("en-LK", { 
-                      style: "currency", 
-                      currency: "LKR", }
-                      )}</td>
+                    <td className={GlobalStyle.tableCurrency}>{row.amount}</td>
                     <td className={GlobalStyle.tableData}>{row.Agent || "N/A"}</td>
-                    <td className={GlobalStyle.tableData}>{row.rtom || "N/A"}</td>
+                    <td className={GlobalStyle.tableData}>{row.area || "N/A"}</td>
                     <td className={GlobalStyle.tableData}>{row.Created_On &&
                       new Date(row.Created_On).toLocaleString("en-GB", {
                         year: "numeric",
@@ -663,12 +867,20 @@ const Case_List = () => {
       )}
 
       <div className="flex justify-end mt-6">
-        <button
-          onClick={handleCreateTask}
-          className={GlobalStyle.buttonPrimary}
-        >
-          Create task and let me know
-        </button>
+        {["admin", "superadmin", "slt"].includes(userRole) && filteredData.length !== 0 && (
+          <button
+            // onClick={HandleCreateTaskDownloadSettlementList}
+            // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+            // disabled={isCreatingTask}
+            className={GlobalStyle.buttonPrimary}
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            {/* {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
+            <FaDownload style={{ marginRight: '8px' }} />
+            Create Task and let me know
+          </button>
+        )}
       </div>
     </div>
   );
