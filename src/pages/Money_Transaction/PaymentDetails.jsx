@@ -300,6 +300,7 @@ const PaymentDetails = () => {
     setFilteredData([]); // Clear previous results
     setMaxCurrentPage(0); // Reset max current page
     setIsMoreDataAvailable(true); // Reset more data available state
+    setTotalPages(0); // Reset total pages
     // setTotalAPIPages(1); // Reset total API pages
     if (currentPage === 1) {
       handleFilter();
