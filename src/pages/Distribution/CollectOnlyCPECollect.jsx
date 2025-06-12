@@ -624,9 +624,9 @@ export default function CollectOnlyCPECollect() {
           </div>
           <div className="flex justify-end">
             {/* Filter Section */}
-            <div className={`${GlobalStyle.cardContainer} w-full items-center md:w-[72vw] mb-8 mt-8`}>
+            <div className={`${GlobalStyle.cardContainer} w-full items-center md:w-[75vw] mb-8 mt-8`}>
                 <div className="flex  gap-4 justify-end flex-wrap">
-                  <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
+                  <div className="flex flex-wrap items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
                     <label>Source:</label>
                     <select
                       className={GlobalStyle.inputText}
@@ -641,8 +641,8 @@ export default function CollectOnlyCPECollect() {
                     </select>
                   </div>
 
-                    <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
-                      <label>Date:</label>
+                    {/* <div className="flex flex-wrap items-center gap-4 sm:w-auto sm:flex-row sm:items-center"> */}
+                      <label className="mt-1">Date:</label>
                       <DatePicker
                         selected={fromDate}
                         onChange={handleFromDateChange}
@@ -657,8 +657,8 @@ export default function CollectOnlyCPECollect() {
                         placeholderText="To"
                          className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                       />
-                      {error && <span className={GlobalStyle.errorText}>{error}</span>}
-                    </div>
+                      {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
+                    {/* </div> */}
 
                     {/* <button
                       className={`${GlobalStyle.buttonPrimary} h-[35px]`}
