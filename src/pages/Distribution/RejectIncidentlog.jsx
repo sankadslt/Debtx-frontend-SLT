@@ -142,7 +142,7 @@ export default function RejectIncidentlog() {
           setTableData(formattedData);
           setIsLoading(false);
       } catch {
-          setError("Failed to fetch DRC details. Please try again later.");
+          // setError("Failed to fetch DRC details. Please try again later.");
           setIsLoading(false);
       }
     };
@@ -405,12 +405,12 @@ export default function RejectIncidentlog() {
 
       {/* Filter Section */}
       <div  className="flex justify-end">
-          <div className={`${GlobalStyle.cardContainer}  w-full md:w-[70vw] mb-8 mt-8`}>
+          <div className={`${GlobalStyle.cardContainer}  w-full md:w-[73vw] mb-8 mt-8`}>
             <div className="flex flex-wrap gap-4 justify-end">
                 {/* Source Dropdown */}
                 <div className="flex items-center gap-4 sm:w-auto  sm:flex-row sm:items-center">
                   <select
-                    className={GlobalStyle.inputText}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                     value={selectedAction}
                     onChange={(e) => setSelectedAction(e.target.value)}
                     style={{ color: selectedAction === "" ? "gray" : "black" }}
@@ -423,8 +423,8 @@ export default function RejectIncidentlog() {
                 </div>
 
                 {/* Date Picker Section */}
-                <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
-                  <label>Date:</label>
+                {/* <div className="flex flex-wrap items-center gap-4 sm:w-auto sm:flex-row sm:items-center"> */}
+                  <label className="mt-1">Date:</label>
                   <DatePicker
                     selected={fromDate}
                     onChange={handleFromDateChange}
@@ -439,8 +439,8 @@ export default function RejectIncidentlog() {
                     placeholderText="To"
                     className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
-                  {error && <span className={GlobalStyle.errorText}>{error}</span>}
-                </div>
+                  {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
+                {/* </div> */}
 
                 {/* Filter Button */}
                 {/* <button

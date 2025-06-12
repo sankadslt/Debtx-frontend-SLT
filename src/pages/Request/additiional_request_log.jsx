@@ -307,13 +307,15 @@ const RecoveryOfficerRequests = () => {
     User_Interaction_Type,
     delegate_user_id,
     Interaction_Log_ID,
-    Interaction_ID
+    Interaction_ID,
+    drc_id
   ) => {
     console.log("case_id", case_id);
     console.log("User_Interaction_Type", User_Interaction_Type);
     console.log("delegate_user_id", delegate_user_id);
     console.log("Interaction_Log_ID", Interaction_Log_ID);
     console.log("Interaction_ID", Interaction_ID);
+    console.log("drc_id", drc_id);
     if (User_Interaction_Type === "Mediation Board Settlement plan Request" || User_Interaction_Type === "Negotiation Settlement plan Request") {
       navigate("/pages/CreateSettlement/CreateSettlementPlan", {
         state: {
@@ -321,6 +323,9 @@ const RecoveryOfficerRequests = () => {
           User_Interaction_TYPE: User_Interaction_Type,
           Delegate_User_id: delegate_user_id,
           INteraction_Log_ID: Interaction_Log_ID,
+          PlanType: "Type A",
+          DRC: drc_id,
+
         },
       });
     } else {
@@ -450,11 +455,11 @@ const RecoveryOfficerRequests = () => {
       {/* Filter Section */}
 
         <div className=" flex justify-end">
-          <div className={`${GlobalStyle.cardContainer} w-full flex  flex-wrap justify-end gap-4 items-center mb-8 mt-8`}>
+          <div className={`${GlobalStyle.cardContainer} w-full flex  flex-wrap justify-end gap-5 items-center mb-8 mt-8`}>
             <div className="flex items-center gap-2">
               {/* <span className={GlobalStyle.headingMedium}>Request Type:</span> */}
               <select 
-              className= {GlobalStyle.selectBox}
+              className={`${GlobalStyle.selectBox}  w-35 md:w-40`}
 
               style={{ color: selectedBand === "" ? "gray" : "black" }}
               value={drcNames.find(item => item.key === selectedBand)?.value || ""}
@@ -483,7 +488,7 @@ const RecoveryOfficerRequests = () => {
             <select
               value={requestType}
               onChange={(e) => setRequestType(e.target.value)}
-              className={GlobalStyle.selectBox}
+               className={`${GlobalStyle.selectBox}   `}
               style={{ color: requestType === "" ? "gray" : "black" }}
             >
               <option value="" hidden>
@@ -700,7 +705,8 @@ const RecoveryOfficerRequests = () => {
                           row.User_Interaction_Type,
                           row.delegate_user_id,
                           row.Interaction_Log_ID,
-                          row.Interaction_ID
+                          row.Interaction_ID,
+                          row.drc_id
                         )
                       }
                     >

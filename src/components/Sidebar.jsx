@@ -90,13 +90,15 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         // { icon: CgEditFade, label: "Case List", link: "/Incident/Case_List", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, 
-          label: "DRC Assigned Case List", 
-          roles: ["superadmin", "admin"], 
-          subItems: [
-            {icon:CgEditFade, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
-          ],
-        },
+        // { icon: CgEditFade, 
+        //   label: "DRC Assigned Case List", 
+        //   roles: ["superadmin", "admin"], 
+        //   subItems: [
+        //     {icon:CgEditFade, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
+        //   ],
+        // },
+        { icon: CgEditFade, label: "Case List", roles: ["superadmin", "admin"], link: "/Incident/Case_List"},
+        { icon: CgEditFade, label: "DRC - Mediation Board List", roles: ["superadmin", "admin"], link: "/MediationBoard/MediationBoardCaseList"},
         // { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },

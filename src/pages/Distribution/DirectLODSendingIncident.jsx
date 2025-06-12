@@ -616,7 +616,7 @@ useEffect(() => {
 
         {/* Filter Section */}
         <div className="flex justify-end">
-        <div className={`${GlobalStyle.cardContainer} w-full items-center md:w-[72vw] mb-8 mt-8`}>
+        <div className={`${GlobalStyle.cardContainer} w-full items-center md:w-[72vw] mb-8 mt-8 gap-1`}>
           <div className="flex flex-wrap items-center gap-4 justify-end">
           {/* Source Dropdown */}
           <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
@@ -635,7 +635,7 @@ useEffect(() => {
           </div>
 
           {/* Date Picker Section */}
-          <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
+          {/* <div className="flex items-center gap-4 sm:w-auto sm:flex-row sm:items-center"> */}
             <label>Date:</label>
             <DatePicker
               selected={fromDate}
@@ -651,8 +651,8 @@ useEffect(() => {
               placeholderText="To"
                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
             />
-            {error && <span className={GlobalStyle.errorText}>{error}</span>}
-          </div>
+            {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
+          {/* </div> */}
 
           {/* Filter Button */}
           {/* <button

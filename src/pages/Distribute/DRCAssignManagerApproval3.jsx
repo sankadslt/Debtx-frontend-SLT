@@ -659,7 +659,7 @@ export default function DRCAssignManagerApproval3() {
       <div className="flex justify-end ">
         {/* Filter Section */}
         <div  className= {`${GlobalStyle.cardContainer}  w-full mt-6    `}>
-            <div className="flex  flex-wrap gap-3">
+            <div className="flex  flex-wrap  justify-end gap-3">
               {" "}
               {/* <div className="flex flex-wrap gap-3 h-[35px] "> */}
                 <select
