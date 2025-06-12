@@ -51,7 +51,8 @@ const CommissionPreview = () => {
                 text: "Error fetching payment details",
                 icon: "error",
                 allowOutsideClick: false,
-                allowEscapeKey: false
+                allowEscapeKey: false,
+                confirmBuuttonCoolor: "#d33"
             });
             setCommissionData([]);
         } finally {
