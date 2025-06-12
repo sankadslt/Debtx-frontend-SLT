@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { loginUser } from "../services/auth/authService";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebookF } from "react-icons/fa";
+// import { FcGoogle } from "react-icons/fc";
+// import { FaFacebookF } from "react-icons/fa";
 import logo from "../assets/images/logo.png";
 import axios from "axios";
 
@@ -109,7 +109,7 @@ const handleAzureLogin = async () => {
           <div className="text-center text-gray-500">Or sign in with</div>
 
           <div className="flex justify-center space-x-4">
-            <button
+           {/* <button
               className="p-2 rounded-full bg-white border hover:bg-gray-100"
               onClick={() => console.log("Google login placeholder")}
               disabled={socialLoading !== ""}
@@ -119,8 +119,8 @@ const handleAzureLogin = async () => {
               ) : (
                 <FcGoogle className="text-2xl" />
               )}
-            </button>
-            <button
+            </button> */}
+            {/*<button
               className="p-2 rounded-full bg-white border hover:bg-gray-100"
               onClick={() => console.log("Facebook login placeholder")}
               disabled={socialLoading !== ""}
@@ -130,7 +130,7 @@ const handleAzureLogin = async () => {
               ) : (
                 <FaFacebookF className="text-2xl text-blue-600" />
               )}
-            </button>
+            </button>*/}
             <button
               className="p-2 rounded-full bg-white border hover:bg-gray-100"
               onClick={handleAzureLogin}
