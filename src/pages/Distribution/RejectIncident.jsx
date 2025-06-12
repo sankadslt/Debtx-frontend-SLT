@@ -74,7 +74,7 @@ export default function RejectIncident() {
           FromDate:fromDate,
           ToDate:toDate
         }
-        console.log("Filters:", filters);
+        //console.log("Filters:", filters);
         const response = await List_F1_filtered_incidents(filters);
         const formattedData = response?.data.map((item) => {
           
