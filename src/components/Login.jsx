@@ -146,12 +146,12 @@ const handleAzureLogin = async () => {
             </button>
           </div>
 
-          <p className="text-center text-gray-500">
+          {/* <p className="text-center text-gray-500">
             Don't have an account?{" "}
             <a href="/register" className="text-blue-500 hover:underline">
               Register
             </a>
-          </p>
+          </p> */}
         </form>
       </div>
     </div>
