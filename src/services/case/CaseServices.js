@@ -566,8 +566,10 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
 };
 
 export const Assign_DRC_To_Case = async (payload) => {
+
   try {
-    const response = await axios.post(`${URL}/Assign_DRC_To_Case`, payload);
+
+    const response = await axios.post(`${URL}/Assign_DRC_To_Case`,payload);
     return response.data;
   } catch (error) {
     console.error(
@@ -734,20 +736,10 @@ export const fetchUserTasks = async (token, delegate_user_id) => {
 
 export const GetFilteredCaseLists = async (payload) => {
   try {
-    const payload = {
-      case_current_status,
-      From_DAT,
-      TO_DAT,
-      RTOM,
-      DRC,
-      arrears_band: selectedBand,
-      service_type,
-      pages
-    };
-
+     
     
 
-    const response = await axios.post(`${URL}/List_All_Cases`, payload);
+    const response = await axios.post(`${URL}/List_All_Cases`,payload);
 
     if (response.data.status === "error") {
       throw new Error(response.data.message);
@@ -787,7 +779,7 @@ export const GetFilteredCaseLists = async (payload) => {
       
       return response.data.data.map((status) => ({
         key: status._id,
-        value: status.case_status  
+        value: status.case_status 
       }));
     }
     throw new Error(response.data.message || "Failed to fetch case statuses");

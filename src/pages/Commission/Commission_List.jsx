@@ -816,7 +816,8 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload, FaTimes } from "react-icons/fa";
-import { List_All_Commission_Cases } from "../../services/commission/commissionService";
+import { List_All_Commission_Cases,ForwardToApprovals} from "../../services/commission/commissionService";
+ 
 import { commission_type_cases_count } from "../../services/commission/commissionService";
 import { Active_DRC_Details } from "../../services/drc/Drc";
 import { Create_task_for_Download_Commision_Case_List } from "../../services/commission/commissionService";
@@ -1305,9 +1306,10 @@ const Commission_List = () => {
       // Count only unresolved cases
       if (item.Commission_Type === "Unresolved Commission") {
         drcGroups[item.DRC_Name].caseCount++;
+        drcGroups[item.DRC_Name].totalAmount += parseFloat(item.Commission_Amount) || 0;
       }
       // Sum all commission amounts
-      drcGroups[item.DRC_Name].totalAmount += parseFloat(item.Commission_Amount) || 0;
+     
     });
 
     // Convert to array
@@ -1320,10 +1322,12 @@ const Commission_List = () => {
   };
 
   const handleConfirmForward = async () => {
+    const userData = await getLoggedUserId();
     setIsForwarding(true);
     try {
        
-    const response =  await ForwardToApprovalsAPI(selectedDrcId, fromDate, toDate);
+    const response =  await ForwardToApprovals(selectedDrcId,userData);
+
       
       setIsModalOpen(false);
       if(response === "success")
