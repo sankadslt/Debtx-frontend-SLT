@@ -8,7 +8,7 @@ ui number :8.1
 Dependencies: tailwind css
 Related Files:  router.js.js (routes) */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -40,11 +40,10 @@ const Commission_List = () => {
     pendingCount: 0,
     unresolvedCount: 0,
   });
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [dateError, setDateError] = useState("");
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [commissionType, setCommissionType] = useState("");
@@ -53,6 +52,7 @@ const Commission_List = () => {
   const [searchBy, setSearchBy] = useState("case_id");
   const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const hasMounted = useRef(false);
 
   const rowsPerPage = 10;
   // useEffect(() => {
@@ -122,42 +122,45 @@ const Commission_List = () => {
     }
   };
 
-  const fetchData = async () => {
-    try {
+  const filterValidations = () => {
+    if (!caseId && !accountNo && !commissionType && !selectedDrcId && !fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "No filter is selected. Please, select a filter.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
 
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Both From Date and To Date must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    return true;
+  }
+
+  const CallAPI = async () => {
+    try {
       const formatDate = (date) => {
         if (!date) return null;
         const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
         return offsetDate.toISOString().split('T')[0];
       };
-
-      if (!caseId && !accountNo && !commissionType && !selectedDrcId && !fromDate && !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "No filter is selected. Please, select a filter.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          confirmButtonColor: "#f1c40f",
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      if ((fromDate && !toDate) || (!fromDate && toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "Both From Date and To Date must be selected.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          confirmButtonColor: "#f1c40f",
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
 
       const filters = {
         case_id: caseId,
@@ -210,17 +213,6 @@ const Commission_List = () => {
         });
         setFilteredData([]);
       }
-
-      // setCommissionCounts(
-      //   response?.counts || {
-      //     total: 0,
-      //     commissioned: 0,
-      //     unresolvedCommission: 0,
-      //   }
-      // );
-      // console.log(response.counts);
-      // setData(response.data);
-      // setFilteredData(response.data);
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -232,7 +224,7 @@ const Commission_List = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   const handleFromDateChange = (date) => {
     setFromDate(date);
@@ -259,23 +251,7 @@ const Commission_List = () => {
         setToDate(null);
         return false;
       }
-      const oneMonthLater = new Date(from);
-      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
-
-      if (to > oneMonthLater) {
-        Swal.fire({
-          title: "Warning",
-          text: "Date range cannot exceed one month",
-          icon: "warning",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#f1c40f",
-        });
-        setFromDate(null);
-        setToDate(null);
-        return false;
-      }
     }
-
     return true;
   };
 
@@ -340,24 +316,33 @@ const Commission_List = () => {
   // };
 
   useEffect(() => {
-    if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      fetchData(); // Call the function whenever currentPage changes
+      CallAPI(); // Call the function whenever currentPage changes
     }
   }, [currentPage]);
 
   const handleFilterButton = () => { // Reset to the first page
-    setFilteredData([]); // Clear previous results
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
     setTotalPages(0); // Reset total pages
     // setTotalAPIPages(1); // Reset total API pages
-    if (currentPage === 1) {
-      fetchData();
+    const isValid = filterValidations(); // Validate filters
+    if (!isValid) {
+      return; // If validation fails, do not proceed
     } else {
-      setCurrentPage(1);
+      setFilteredData([]); // Clear previous results
+      if (currentPage === 1) {
+        CallAPI();
+      } else {
+        setCurrentPage(1);
+      }
     }
-    setIsFilterApplied(true); // Set filter applied state to true
   }
 
   // const getSearchedData = () => {
@@ -415,10 +400,15 @@ const Commission_List = () => {
     setToDate(null);
     setSelectedDrcId("");
     setSearchQuery("");
-    setCurrentPage(0); // Reset to the first page
-    setIsFilterApplied(false); // Reset filter applied state
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    setIsMoreDataAvailable(true); // Reset more data available state
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   };
 
   const HandleCreateTaskDownloadCommissiontList = async () => {
