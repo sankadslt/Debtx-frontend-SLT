@@ -68,7 +68,7 @@ import PaymentDetails from "../pages/Money_Transaction/PaymentDetails";
 import CommissionCaseList from "../pages/Commission/Commission_List";
 //Settlement
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
-import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
+// import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 
 //Litigation
 import { Litigation_List } from "../pages/Litigation/Litigation_List";
@@ -613,7 +613,7 @@ const Routers = () => {
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
       <Route path="/lod/ftl-log/preview" element={<ProtectedRoute element={<SettlementPreview />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
+      {/* <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} /> */}
       {/* //Create SETTLEMENT */}
       <Route
         path="/pages/CreateSettlement/CreateSettlementPlan"

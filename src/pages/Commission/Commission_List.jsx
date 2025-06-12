@@ -178,6 +178,8 @@ const Commission_List = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f",
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -328,6 +330,7 @@ const Commission_List = () => {
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
     setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
     } else {
