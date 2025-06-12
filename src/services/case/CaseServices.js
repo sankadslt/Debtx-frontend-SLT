@@ -682,6 +682,7 @@ export const GetFilteredCaseLists = async ({
         drccommisionrule: item.service_type,
         currentarrearsamount: item.current_arrears_amount,
         rtom: item.rtom,
+        area: item.area,
         Created_On: item.date,
         Lastpaymentdate: item.last_payment_date  
       }))

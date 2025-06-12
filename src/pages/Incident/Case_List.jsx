@@ -9,7 +9,8 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -74,20 +75,82 @@ const Case_List = () => {
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
   const rowsPerPage = 10;
+  const hasMounted = useRef(false);
+  const navigate = useNavigate();
 
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
   //Decide the icon path based on the status
+  // const getStatusIcon = (status) => {
+  //   switch (status) {
+  //     case "Open Assign Agent":
+  //       return Open_Assign_Agent;
+  //     case "Open With Agent":
+  //     case "Open with Agent":
+  //       return Open_With_Agent;
+  //     case "Pending Assign Agent Approval":
+  //       return Pending_Assign_Agent_Approval;
+  //     case "RO Negotiation":
+  //       return RO_Negotiation;
+  //     case "Negotiation Settle Pending":
+  //       return RO_Settle_Pending;
+  //     case "Negotiation Settle Open-Pending":
+  //       return RO_Settle_Open_Pending;
+  //     case "Negotiation Settle Active":
+  //       return RO_Settle_Active;
+  //     case "RO Negotiation Extension Pending":
+  //       return RO_Negotiation_extend_pending;
+  //     case "RO Negotiation Extended":
+  //       return RO_Negotiation_extended;
+  //     case "RO Negotiation FMB Pending":
+  //       return RO_Negotiation_FMB_Pending;
+  //     case "Forward to Mediation Board":
+  //       return Forward_To_Mediation_Board;
+  //     case "MB Negotiation":
+  //     case "MB Negotiaion":
+  //       return MB_Negotiation;
+  //     case "MB Request Customer-Info":
+  //       return MB_Request_Customer_Info;
+  //     case "MB Handover Customer-Info":
+  //       return MB_Handover_Customer_Info;
+  //     case "MB Settle Pending":
+  //       return MB_Settle_Pending;
+  //     case "MB Settle Open-Pending":
+  //       return MB_Settle_Open_Pending;
+  //     case "MB Settle Active":
+  //       return MB_Settle_Active;
+  //     case "MB Fail with Pending Non-Settlement":
+  //       return MB_Fail_with_Pending_Non_Settlement;
+  //     case "MB Fail with Non-Settlementt":
+  //       return MB_Fail_with_non_settlement;
+  //     case "Pending FTL LOD":
+  //       return Pending_FTL_LOD;
+  //     case "Initial FTL LOD":
+  //       return Initial_FTL_LOD;
+  //     case "FTL LOD Settle Pending":
+  //       return FTL_LOD_Settle_Pending;
+  //     case "FTL LOD Settle Open-Pending":
+  //       return FTL_LOD_Settle_Open_Pending;
+  //     case "FTL LOD Settle Active":
+  //       return FTL_LOD_Settle_Active;
+  //     case "LIT Prescribed":
+  //       return LIT_Prescribed;
+  //     default:
+  //       return "";
+  //   }
+  // };
+
   const getStatusIcon = (status) => {
     switch (status) {
+      case "Pending Assign Agent":
+        return;
+      case "Pending Assign Agent Approval":
+        return Pending_Assign_Agent_Approval;
       case "Open Assign Agent":
         return Open_Assign_Agent;
       case "Open With Agent":
-      case "Open with Agent":
         return Open_With_Agent;
-      case "Pending Assign Agent Approval":
-        return Pending_Assign_Agent_Approval;
       case "RO Negotiation":
         return RO_Negotiation;
       case "Negotiation Settle Pending":
@@ -105,10 +168,7 @@ const Case_List = () => {
       case "Forward to Mediation Board":
         return Forward_To_Mediation_Board;
       case "MB Negotiation":
-      case "MB Negotiaion":
         return MB_Negotiation;
-      case "MB Request Customer-Info":
-        return MB_Request_Customer_Info;
       case "MB Handover Customer-Info":
         return MB_Handover_Customer_Info;
       case "MB Settle Pending":
@@ -119,7 +179,7 @@ const Case_List = () => {
         return MB_Settle_Active;
       case "MB Fail with Pending Non-Settlement":
         return MB_Fail_with_Pending_Non_Settlement;
-      case "MB Fail with Non-Settlementt":
+      case "MB Fail with Non-Settlement":
         return MB_Fail_with_non_settlement;
       case "Pending FTL LOD":
         return Pending_FTL_LOD;
@@ -131,12 +191,8 @@ const Case_List = () => {
         return FTL_LOD_Settle_Open_Pending;
       case "FTL LOD Settle Active":
         return FTL_LOD_Settle_Active;
-      case "LIT Prescribed":
-        return LIT_Prescribed;
-      default:
-        return "";
     }
-  };
+  }
 
   //render status icon with tooltip
   const renderStatusIcon = (status, index) => {
@@ -460,9 +516,14 @@ const Case_List = () => {
   };
 
   useEffect(() => {
-    if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      handleFilter(); // Call the function whenever currentPage changes
+      CallAPI(); // Call the function whenever currentPage changes
     }
   }, [currentPage]);
 
@@ -522,16 +583,27 @@ const Case_List = () => {
     setSelectedCaseStatus("");
     setFromDate(null);
     setToDate(null);
-    setSearchQuery("");
-    setCurrentPage(1);
     setIsFilterApplied(false);
+    setIsMoreDataAvailable(true);
+    setMaxCurrentPage(0);
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   };
 
   const handleCreateTask = () => {
     console.log("Create task button clicked");
   };
+
+  // Function to navigate to the case ID page
+  const naviCaseID = (caseId) => {
+    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
+  }
 
   // display loading animation when data is loading
   if (isLoading) {
@@ -685,13 +757,13 @@ const Case_List = () => {
                 Status
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Account No.
+                Account No
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
                 Service Type
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                Amount
+                Amount (LKR)
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
                 Agent
@@ -727,19 +799,21 @@ const Case_List = () => {
                         : GlobalStyle.tableRowOdd
                     }
                   >
-                    <td className={GlobalStyle.tableData}>{row.caseid || "N/A"}</td>
+                    {/* <td className={GlobalStyle.tableData}>{row.caseid || "N/A"}</td> */}
+                    <td
+                      className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                      onClick={() => naviCaseID(row.caseid)}
+                    >
+                      {row.caseid || "N/A"}
+                    </td>
                     {/* <td className={GlobalStyle.tableData}>{row.casecurrentstatus || "N/A"}</td> */}
                     <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
                       {renderStatusIcon(row.casecurrentstatus || "N/A")}</td>
                     <td className={GlobalStyle.tableData}>{row.accountno || "N/A"}</td>
                     <td className={GlobalStyle.tableData}>{row.servicetype || "N/A"}</td>
-                    <td className={GlobalStyle.tableCurrency}>{row.amount.toLocaleString("en-LK", {
-                      style: "currency",
-                      currency: "LKR",
-                    }
-                    )}</td>
+                    <td className={GlobalStyle.tableCurrency}>{row.amount}</td>
                     <td className={GlobalStyle.tableData}>{row.Agent || "N/A"}</td>
-                    <td className={GlobalStyle.tableData}>{row.rtom || "N/A"}</td>
+                    <td className={GlobalStyle.tableData}>{row.area || "N/A"}</td>
                     <td className={GlobalStyle.tableData}>{row.Created_On &&
                       new Date(row.Created_On).toLocaleString("en-GB", {
                         year: "numeric",
