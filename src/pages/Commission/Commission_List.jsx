@@ -55,21 +55,6 @@ const Commission_List = () => {
   const hasMounted = useRef(false);
 
   const rowsPerPage = 10;
-  // useEffect(() => {
-  //   const fetchDrcNames = async () => {
-  //     try {
-  //       const names = await Active_DRC_Details();
-
-  //       setDrcNames(names);
-  //     } catch (error) {
-  //       console.error("Error fetching DRC names:", error);
-  //     }
-  //   };
-  //   // fetchData();
-  //   setFilteredData(data);
-  //   fetchDrcNames();
-  //   fetchCommissionCounts();
-  // }, []);
 
   // Role-Based Buttons
   useEffect(() => {
@@ -108,6 +93,7 @@ const Commission_List = () => {
     fetchCommissionCounts();
   }, []);
 
+  // Fetch commission counts on component mount
   const fetchCommissionCounts = async () => {
     try {
       const response = await commission_type_cases_count({});
@@ -122,6 +108,7 @@ const Commission_List = () => {
     }
   };
 
+  // Function to validate filters before API call
   const filterValidations = () => {
     if (!caseId && !accountNo && !commissionType && !selectedDrcId && !fromDate && !toDate) {
       Swal.fire({
@@ -154,6 +141,7 @@ const Commission_List = () => {
     return true;
   }
 
+  // Function to call the API with the selected filters
   const CallAPI = async () => {
     try {
       const formatDate = (date) => {
@@ -178,11 +166,6 @@ const Commission_List = () => {
 
       if (response && response.data && response.status === "success") {
         console.log("Valid data received:", response.data);
-        // console.log(response.data.pagination.pages);
-        // const totalPages = Math.ceil(response.data.pagination.total / rowsPerPage);
-        // setTotalPages(totalPages);
-        // setTotalAPIPages(response.data.pagination.pages); // Set the total pages from the API response
-        // Append the new data to the existing data
         setFilteredData((prevData) => [...prevData, ...response.data]);
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
@@ -195,6 +178,8 @@ const Commission_List = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f",
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -202,8 +187,6 @@ const Commission_List = () => {
             setIsMoreDataAvailable(false); // More data available
           }
         }
-
-        // setFilteredData(response.data.data);
       } else {
         Swal.fire({
           title: "Error",
@@ -275,46 +258,6 @@ const Commission_List = () => {
     validateCaseId(); // Validate case ID input
   }, [caseId]);
 
-  // const handleFilterClick = () => {
-  //   // if (fromDate && toDate && !validateDates(fromDate, toDate)) {
-  //   //   return;
-  //   // }
-
-  //   const selectedDrcIdMapped = selectedDrcId
-  //     ? parseInt(selectedDrcId, 10)
-  //     : null;
-
-  //   let filtered = data.filter((row) => {
-  //     let matchesSearch = true;
-  //     let matchesPhase = true;
-  //     let matchesDate = true;
-
-  //     if (inputFilter.trim() !== "") {
-  //       if (selectValue === "Case ID") {
-  //         const caseIdFilter = parseInt(inputFilter, 10);
-  //         matchesSearch = row.case_id === caseIdFilter;
-  //       } else if (selectValue === "Account No") {
-  //         matchesSearch =
-  //           row.account_no &&
-  //           row.account_no.toLowerCase().includes(inputFilter.toLowerCase());
-  //       }
-  //     }
-
-  //     if (selectedDrcIdMapped !== null) {
-  //       matchesPhase = row.drc_id === selectedDrcIdMapped;
-  //     }
-
-  //     const rowDate = new Date(row.created_on);
-  //     if (fromDate && rowDate < fromDate) matchesDate = false;
-  //     if (toDate && rowDate > toDate) matchesDate = false;
-
-  //     return matchesSearch && matchesPhase && matchesDate;
-  //   });
-
-  //   setFilteredData(filtered);
-  //   setCurrentPage(0);
-  // };
-
   useEffect(() => {
     if (!hasMounted.current) {
       hasMounted.current = true;
@@ -327,6 +270,7 @@ const Commission_List = () => {
     }
   }, [currentPage]);
 
+  // Handle filter button click
   const handleFilterButton = () => { // Reset to the first page
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
@@ -345,23 +289,8 @@ const Commission_List = () => {
     }
   }
 
-  // const getSearchedData = () => {
-  //   if (!searchQuery.trim()) return filteredData;
-
-  //   return filteredData.filter((row) =>
-  //     Object.values(row).some((value) =>
-  //       value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-  //     )
-  //   );
-  // };
-
-  // const pages = Math.ceil(getSearchedData().length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
-  // const currentData = getSearchedData().slice(startIndex, startIndex + rowsPerPage);
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-  // console.log("Filtered data:", filteredData);
-
-  // console.log("Paginated data:", paginatedData);
 
   // Search Section
   const filteredDataBySearch = paginatedData.filter((row) =>
@@ -372,9 +301,6 @@ const Commission_List = () => {
   );
 
   const handleNextPage = () => {
-    // if (currentPage < pages - 1) {
-    //   setCurrentPage(currentPage + 1);
-    // }
     if (isMoreDataAvailable) {
       setCurrentPage(currentPage + 1);
     } else {
@@ -392,6 +318,7 @@ const Commission_List = () => {
     }
   };
 
+  // Clear all filters and reset state
   const handleClear = () => {
     setCaseId("");
     setAccountNo("");
@@ -403,6 +330,7 @@ const Commission_List = () => {
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
     setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
     } else {
@@ -411,6 +339,7 @@ const Commission_List = () => {
     }
   };
 
+  // Handle task creation for downloading commission case list
   const HandleCreateTaskDownloadCommissiontList = async () => {
 
     const userData = await getLoggedUserId(); // Assign user ID
@@ -426,31 +355,6 @@ const Commission_List = () => {
       });
       return;
     }
-
-    // if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-    //   Swal.fire({
-    //     title: "Warning",
-    //     text: "To date should be greater than or equal to From date",
-    //     icon: "warning",
-    //     allowOutsideClick: false,
-    //     allowEscapeKey: false
-    //   });
-    //   setToDate(null);
-    //   setFromDate(null);
-    //   return;
-    // }
-
-    // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-    //   Swal.fire({
-    //     title: "Warning",
-    //     text: "Invalid input. Only numbers are allowed for Case ID.",
-    //     icon: "warning",
-    //     allowOutsideClick: false,
-    //     allowEscapeKey: false,
-    //   });
-    //   setCaseId(""); // Clear the invalid input
-    //   return;
-    // }
 
     setIsCreatingTask(true);
     try {

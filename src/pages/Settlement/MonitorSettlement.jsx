@@ -334,22 +334,7 @@ const Monitor_settlement = () => {
       console.log("Payload sent to API: ", payload);
 
       setIsLoading(true); // Set loading state to true
-      const response = await listAllSettlementCases(payload).catch((error) => {
-        if (error.response && error.response.status === 404) {
-          Swal.fire({
-            title: "No Results",
-            text: "No matching data found for the selected filters.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonColor: "#f1c40f"
-          });
-          setFilteredData([]);
-          return null;
-        } else {
-          throw error;
-        }
-      });
+      const response = await listAllSettlementCases(payload);
       setIsLoading(false); // Set loading state to false
 
       // Updated response handling
@@ -369,6 +354,8 @@ const Monitor_settlement = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f"
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
