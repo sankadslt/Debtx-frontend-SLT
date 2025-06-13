@@ -9,21 +9,30 @@ Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
 
-import { useEffect, useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
+import {
+  FaSearch,
+  FaArrowLeft,
+  FaArrowRight,
+  FaDownload,
+} from "react-icons/fa";
 import Swal from "sweetalert2";
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { GetFilteredCaseLists, getCaseStatusList } from "../../services/case/CaseServices";
-import { fetchAllArrearsBands } from '../../services/case/CaseServices';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import {
+  GetFilteredCaseLists,
+  getCaseStatusList,
+} from "../../services/case/CaseServices";
+import { fetchAllArrearsBands } from "../../services/case/CaseServices";
 import { List_All_Active_RTOMs } from "../../services/RTOM/Rtom";
-import { Active_DRC_Details } from '../../services/drc/Drc';
+import { Active_DRC_Details } from "../../services/drc/Drc";
 import { getActiveServiceDetails } from "../../services/drc/Drc";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
+import Pending_Assign_Agent from "/src/assets/images/distribution/Pending_Assign_Agent.png";
 import Pending_Assign_Agent_Approval from "/src/assets/images/distribution/Pending_Assign_Agent_Approval.png";
 import Open_Assign_Agent from "/src/assets/images/distribution/Open_Assign_Agent.png";
 import Open_With_Agent from "/src/assets/images/distribution/Open_With_Agent.png";
@@ -36,8 +45,9 @@ import RO_Negotiation_extended from "/src/assets/images/Negotiation/RO Negotiati
 import RO_Negotiation_FMB_Pending from "/src/assets/images/Negotiation/RO_Negotiation_FMB_Pending.png";
 import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
 import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
-import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Request Customer-Info.png";
+
 import MB_Handover_Customer_Info from "/src/assets/images/Mediation_Board/MB Handover Customer-Info.png";
+import MB_Request_Customer_Info from "src/assets/images/Mediation_Board/MB Request Customer-Info.png";
 import MB_Settle_Pending from "/src/assets/images/Mediation_Board/MB Settle Pending.png";
 import MB_Settle_Open_Pending from "/src/assets/images/Mediation_Board/MB Settle Open Pending.png";
 import MB_Settle_Active from "/src/assets/images/Mediation_Board/MB Settle Active.png";
@@ -49,6 +59,40 @@ import FTL_LOD_Settle_Pending from "/src/assets/images/LOD/FTL_LOD_Settle_Pendin
 import FTL_LOD_Settle_Open_Pending from "/src/assets/images/LOD/FTL_LOD_Settle_Open_Pending.png";
 import FTL_LOD_Settle_Active from "/src/assets/images/LOD/FTL_LOD_Settle_Active.png";
 import LIT_Prescribed from "/src/assets/images/LOD/LIT_Prescribed.png";
+import LOD_Settle_Open_Pending from "/src/assets/images/LOD/LOD_Settle_Open_Pending.png";
+import LOD_Settle_Pending from "src/assets/images/LOD/LOD_Settle_Pending.png";
+import LOD_Settle_Active from "src/assets/images/LOD/LOD_Settle_Active.png";
+import Final_Reminder_Settle_Open_Pending from "src/assets/images/LOD/Final_Reminder_Settle_Open_Pending.png";
+import Final_Reminder_Settle_Pending from "src/assets/images/LOD/Final_Reminder_Settle_Pending.png";
+import Final_Reminder_Settle_Active from "src/assets/images/LOD/Final_Reminder_Settle_Active.png";
+import Litigation_Settle_Pending from "src/assets/images/litigation/status/Litigation_Settle_Pending.png";
+import Litigation_Settle_Open_Pending from "src/assets/images/litigation/status/Litigation_Settle_Open_Pending.png";
+import Litigation_Settle_Active from "src/assets/images/litigation/status/Litigation_Settle_Active.png";
+import Write_Off from "src/assets/images/stop/Write-Off.png";
+import Pending_Write_Off  from "src/assets/images/stop/Pending Write-Off.png";
+import Case_Close from "src/assets/images/stop/Case Closed.png";
+import Withdraw from "src/assets/images/Abnormal/Withdraw.png";
+import Abandoned from "src/assets/images/Abnormal/Abandoned.png";
+import WRIT_Settle_Active from "src/assets/images/WRIT/WRIT_Settle_Active.png";
+import WRIT_Settle_Open_Pending from "src/assets/images/WRIT/WRIT_Settle_Open-Pending.png";
+import WRIT_Settle_Pending from "src/assets/images/WRIT/WRIT_Settle_Pending.png";
+import Re_WRIT from "src/assets/images/WRIT/RE-WRIT.png";
+import Forward_to_Re_WRIT from "src/assets/images/WRIT/Forward_To_RE-WRIT.png";
+import WRIT from "src/assets/images/WRIT/WRIT.png";
+import Dispute_Settle_Active from "src/assets/images/Dispute/Dispute_Settle_Active.png";
+import Dispute_Settle_Open_Pending from "src/assets/images/Dispute/Dispute_Settle_Open_Pending.png";
+import Dispute_Settle_Pending from "src/assets/images/Dispute/Dispute_Settle_Pending.png";
+import Forward_LOD_Dispute from "src/assets/images/Dispute/Forward_LOD_Dispute.png";
+import Litigation_Settle_Active from "src/assets/images/litigation/status/Litigation_Settle_Active.png";
+import Fail_Legal_Action from "src/assets/images/litigation/status/FLA.png";
+import Fail_from_Legal_Unit from "src/assets/images/litigation/status/FLU.png";
+import Initial_Litigation from "src/assets/images/litigation/status/Initial_Litigation.png";
+import LOD_Monitoring_Expire from "src/assets/images/LOD/LOD_Monitoring_Expire.png";
+import Initial_LOD from "src/assets/images/LOD/Initial_LOD.png";
+import Final_Reminder from "src/assets/images/LOD/Final_Reminder.png";
+
+
+
 
 const Case_List = () => {
   // State Variables
@@ -79,72 +123,15 @@ const Case_List = () => {
   const navigate = useNavigate();
 
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
-  //Decide the icon path based on the status
-  // const getStatusIcon = (status) => {
-  //   switch (status) {
-  //     case "Open Assign Agent":
-  //       return Open_Assign_Agent;
-  //     case "Open With Agent":
-  //     case "Open with Agent":
-  //       return Open_With_Agent;
-  //     case "Pending Assign Agent Approval":
-  //       return Pending_Assign_Agent_Approval;
-  //     case "RO Negotiation":
-  //       return RO_Negotiation;
-  //     case "Negotiation Settle Pending":
-  //       return RO_Settle_Pending;
-  //     case "Negotiation Settle Open-Pending":
-  //       return RO_Settle_Open_Pending;
-  //     case "Negotiation Settle Active":
-  //       return RO_Settle_Active;
-  //     case "RO Negotiation Extension Pending":
-  //       return RO_Negotiation_extend_pending;
-  //     case "RO Negotiation Extended":
-  //       return RO_Negotiation_extended;
-  //     case "RO Negotiation FMB Pending":
-  //       return RO_Negotiation_FMB_Pending;
-  //     case "Forward to Mediation Board":
-  //       return Forward_To_Mediation_Board;
-  //     case "MB Negotiation":
-  //     case "MB Negotiaion":
-  //       return MB_Negotiation;
-  //     case "MB Request Customer-Info":
-  //       return MB_Request_Customer_Info;
-  //     case "MB Handover Customer-Info":
-  //       return MB_Handover_Customer_Info;
-  //     case "MB Settle Pending":
-  //       return MB_Settle_Pending;
-  //     case "MB Settle Open-Pending":
-  //       return MB_Settle_Open_Pending;
-  //     case "MB Settle Active":
-  //       return MB_Settle_Active;
-  //     case "MB Fail with Pending Non-Settlement":
-  //       return MB_Fail_with_Pending_Non_Settlement;
-  //     case "MB Fail with Non-Settlementt":
-  //       return MB_Fail_with_non_settlement;
-  //     case "Pending FTL LOD":
-  //       return Pending_FTL_LOD;
-  //     case "Initial FTL LOD":
-  //       return Initial_FTL_LOD;
-  //     case "FTL LOD Settle Pending":
-  //       return FTL_LOD_Settle_Pending;
-  //     case "FTL LOD Settle Open-Pending":
-  //       return FTL_LOD_Settle_Open_Pending;
-  //     case "FTL LOD Settle Active":
-  //       return FTL_LOD_Settle_Active;
-  //     case "LIT Prescribed":
-  //       return LIT_Prescribed;
-  //     default:
-  //       return "";
-  //   }
-  // };
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + rowsPerPage
+  );
 
   const getStatusIcon = (status) => {
     switch (status) {
       case "Pending Assign Agent":
-        return;
+        return Pending_Assign_Agent;
       case "Pending Assign Agent Approval":
         return Pending_Assign_Agent_Approval;
       case "Open Assign Agent":
@@ -169,6 +156,8 @@ const Case_List = () => {
         return Forward_To_Mediation_Board;
       case "MB Negotiation":
         return MB_Negotiation;
+      case "MB Request Customer-Info":
+        return MB_Request_Customer_Info;
       case "MB Handover Customer-Info":
         return MB_Handover_Customer_Info;
       case "MB Settle Pending":
@@ -191,8 +180,94 @@ const Case_List = () => {
         return FTL_LOD_Settle_Open_Pending;
       case "FTL LOD Settle Active":
         return FTL_LOD_Settle_Active;
+      case "LIT Prescribed":
+        return LIT_Prescribed;
+      case "Final Reminder":
+        return Final_Reminder;
+      case "Initial LOD":
+        return Initial_LOD;
+      case "LOD Settle Pending":
+        return LOD_Settle_Pending;
+      case "LOD Settle Open-Pending":
+        return LOD_Settle_Open_Pending;
+      case "LOD Settle Active":
+        return LOD_Settle_Active;
+      case "Final Reminder Settle Pending":
+        return Final_Reminder_Settle_Pending;
+      case "Final Reminder Settle Open-Pending":
+        return Final_Reminder_Settle_Open_Pending;
+      case "Final Reminder Settle Active":
+        return Final_Reminder_Settle_Active;
+      case "LOD Monitoring Expire":
+        return LOD_Monitoring_Expire;
+      case "Initial Litigation":
+        return Initial_Litigation;
+      case "Pending FTL":
+        return Pending_FTL;
+      case "Forward To Litigation":
+        return Forward_To_Litigation;
+      case "Fail from Legal Unit":
+        return Fail_from_Legal_Unit;
+      case "Fail Legal Action":
+        return Fail_Legal_Action;
+      case "Litigation":
+        return Litigation;
+      case "Litigation Settle Pending":
+        return Litigation_Settle_Pending;
+      case "Litigation Settle Open-Pending":
+        return Litigation_Settle_Open_Pending;
+      case "Litigation Settle Active":
+        return Litigation_Settle_Active;
+      case "LOD Monitoring Expire":
+        return LOD_Monitoring_Expire;
+      case "Forward LOD Dispute":
+        return Forward_LOD_Dispute;
+      case "Dispute Settle Pending":
+        return Dispute_Settle_Pending;
+      case "Dispute Settle Open-Pending":
+        return Dispute_Settle_Open_Pending;
+      case "Dispute Settle Active":
+        return Dispute_Settle_Active;
+      case "Pending Forward to WRIT":
+        return Pending_Forward_to_WRIT;
+      case "WRIT":
+        return WRIT;
+      case "Forward to Re-WRIT":
+        return Forward_to_Re_WRIT;
+      case "Re-WRIT":
+        return Re_WRIT;
+      case "WRIT Settle Pending":
+        return WRIT_Settle_Pending;
+      case "WRIT Settle Open-Pending":
+        return WRIT_Settle_Open_Pending;
+      case "WRIT Settle Active":
+        return WRIT_Settle_Active;
+      case "Re-WRIT Settle Pending":
+        return Re - WRIT_Settle_Pending;
+      case "Re-WRIT Settle Open-Pending":
+        return Re_WRIT_Settle_Open_Pending;
+      case "Re-WRIT Settle Active":
+        return Re_WRIT_Settle_Active;
+      case "Pending Abandoned":
+        return Pending_Abandoned;
+      case "Abandoned":
+        return Abandoned;
+      case "Pending Withdraw":
+        return Pending_Withdraw;
+      case "Withdraw":
+        return Withdraw;
+      case "Case Close":
+        return Case_Close;
+      case "Ready for Write-Off":
+        return Ready_for_Write_Off;
+      case "Approval Pending Write-Off":
+        return Approval_Pending_Write_Off;
+      case "Pending Write-Off":
+        return Pending_Write_Off;
+      case "Write-Off":
+        return Write_Off;
     }
-  }
+  };
 
   //render status icon with tooltip
   const renderStatusIcon = (status, index) => {
@@ -268,9 +343,9 @@ const Case_List = () => {
       try {
         const services = await getActiveServiceDetails();
         // Transform the data to match what the dropdown expects
-        const transformedServices = services.map(service => ({
-          id: service.service_id,    // using service_id as the id
-          value: service.service_type  // using service_type as the display value
+        const transformedServices = services.map((service) => ({
+          id: service.service_id, // using service_id as the id
+          value: service.service_type, // using service_type as the display value
         }));
         setServiceTypes(transformedServices);
         console.log("Transformed services:", transformedServices); // For debugging
@@ -306,7 +381,7 @@ const Case_List = () => {
     }
   }, []);
 
-  // Filter data from API 
+  // Filter data from API
   // const handleFilter = async () => {
   //   try {
   //     if (!rtom && !selectedDRC && !selectedBand && !selectedCaseStatus && !selectedServiceType && !fromDate && !toDate) {
@@ -396,14 +471,22 @@ const Case_List = () => {
   // };
 
   const filterValidation = () => {
-    if (!rtom && !selectedDRC && !selectedBand && !selectedCaseStatus && !selectedServiceType && !fromDate && !toDate) {
+    if (
+      !rtom &&
+      !selectedDRC &&
+      !selectedBand &&
+      !selectedCaseStatus &&
+      !selectedServiceType &&
+      !fromDate &&
+      !toDate
+    ) {
       Swal.fire({
         title: "Warning",
         text: "No filter is selected. Please, select a filter.",
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        confirmButtonColor: "#f1c40f"
+        confirmButtonColor: "#f1c40f",
       });
       setToDate(null);
       setFromDate(null);
@@ -417,7 +500,7 @@ const Case_List = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        confirmButtonColor: "#f1c40f"
+        confirmButtonColor: "#f1c40f",
       });
       setToDate(null);
       setFromDate(null);
@@ -425,26 +508,25 @@ const Case_List = () => {
     }
 
     return true;
-  }
+  };
 
   const CallAPI = async () => {
     try {
       const payload = {
         case_current_status: selectedCaseStatus,
-        From_DAT: fromDate ? fromDate.toISOString().split('T')[0] : null,
-        TO_DAT: toDate ? toDate.toISOString().split('T')[0] : null,
+        From_DAT: fromDate ? fromDate.toISOString().split("T")[0] : null,
+        TO_DAT: toDate ? toDate.toISOString().split("T")[0] : null,
         RTOM: rtom,
         DRC: selectedDRC,
         arrears_band: selectedBand,
         service_type: selectedServiceType,
-        pages: currentPage
+        pages: currentPage,
       };
 
       setIsLoading(true);
 
       const response = await GetFilteredCaseLists(payload);
       if (response && response.data && response.status === "success") {
-
         // Append the new data to the existing data
         setFilteredData((prevData) => [...prevData, ...response.data]);
         if (response.data.length === 0) {
@@ -456,7 +538,7 @@ const Case_List = () => {
               icon: "warning",
               allowOutsideClick: false,
               allowEscapeKey: false,
-              confirmButtonColor: "#f1c40f"
+              confirmButtonColor: "#f1c40f",
             });
           }
         } else {
@@ -470,7 +552,7 @@ const Case_List = () => {
           title: "Error",
           text: "No valid Settlement data found in response.",
           icon: "error",
-          confirmButtonColor: "#d33"
+          confirmButtonColor: "#d33",
         });
         setFilteredData([]);
       }
@@ -480,7 +562,7 @@ const Case_List = () => {
         text: error.message || "Failed to fetch data.",
         icon: "error",
         confirmButtonText: "OK",
-        confirmButtonColor: "#d33"
+        confirmButtonColor: "#d33",
       });
     } finally {
       setIsLoading(false);
@@ -544,7 +626,7 @@ const Case_List = () => {
       }
       setIsFilterApplied(true);
     }
-  }
+  };
 
   // Search Section
   const filteredDataBySearch = paginatedData.filter((row) =>
@@ -603,7 +685,7 @@ const Case_List = () => {
   // Function to navigate to the case ID page
   const naviCaseID = (caseId) => {
     navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
-  }
+  };
 
   // display loading animation when data is loading
   if (isLoading) {
@@ -621,16 +703,21 @@ const Case_List = () => {
       <div className="flex justify-end">
         <div className={`${GlobalStyle.cardContainer} w-full`}>
           <div className="flex flex-wrap items-center justify-end w-full space-x-4 space-y-3">
-
             <select
               value={rtom}
               onChange={(e) => setRtom(e.target.value)}
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>RTOM</option>
+              <option value="" hidden>
+                RTOM
+              </option>
               {rtomList.map((rtom) => (
-                <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
+                <option
+                  key={rtom.rtom_id}
+                  value={rtom.rtom}
+                  style={{ color: "black" }}
+                >
                   {rtom.rtom}
                 </option>
               ))}
@@ -642,9 +729,15 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedDRC === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>DRC</option>
+              <option value="" hidden>
+                DRC
+              </option>
               {activeDRC.map((drc) => (
-                <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
+                <option
+                  key={drc.key}
+                  value={drc.id.toString()}
+                  style={{ color: "black" }}
+                >
                   {drc.value}
                 </option>
               ))}
@@ -656,7 +749,9 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedBand === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>Arrears Band</option>
+              <option value="" hidden>
+                Arrears Band
+              </option>
               {arrearsBand.map(({ key, value }) => (
                 <option key={key} value={key} style={{ color: "black" }}>
                   {value}
@@ -670,7 +765,9 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedCaseStatus === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>Case Status</option>
+              <option value="" hidden>
+                Case Status
+              </option>
               {caseStatusList.map(({ key, value }) => (
                 <option key={key} value={value} style={{ color: "black" }}>
                   {value}
@@ -684,9 +781,15 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedServiceType === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>Service Type</option>
+              <option value="" hidden>
+                Service Type
+              </option>
               {serviceTypes.map((service) => (
-                <option key={service.id} value={service.id} style={{ color: "black" }}>
+                <option
+                  key={service.id}
+                  value={service.id}
+                  style={{ color: "black" }}
+                >
                   {service.value}
                 </option>
               ))}
@@ -782,7 +885,7 @@ const Case_List = () => {
           <tbody>
             {filteredDataBySearch.length > 0 ? (
               filteredDataBySearch.map((row, index) => {
-                const createdDate = row.createddtm
+                const createdDate = row.createddtm;
                 //   ? new Date(row.createddtm).toLocaleDateString()
                 //   : '';
 
@@ -807,35 +910,53 @@ const Case_List = () => {
                       {row.caseid || "N/A"}
                     </td>
                     {/* <td className={GlobalStyle.tableData}>{row.casecurrentstatus || "N/A"}</td> */}
-                    <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
-                      {renderStatusIcon(row.casecurrentstatus || "N/A")}</td>
-                    <td className={GlobalStyle.tableData}>{row.accountno || "N/A"}</td>
-                    <td className={GlobalStyle.tableData}>{row.servicetype || "N/A"}</td>
+                    <td
+                      className={`${GlobalStyle.tableData} flex items-center justify-center`}
+                    >
+                      {renderStatusIcon(row.casecurrentstatus || "N/A")}
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      {row.accountno || "N/A"}
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      {row.servicetype || "N/A"}
+                    </td>
                     <td className={GlobalStyle.tableCurrency}>{row.amount}</td>
-                    <td className={GlobalStyle.tableData}>{row.Agent || "N/A"}</td>
-                    <td className={GlobalStyle.tableData}>{row.area || "N/A"}</td>
-                    <td className={GlobalStyle.tableData}>{row.Created_On &&
-                      new Date(row.Created_On).toLocaleString("en-GB", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
+                    <td className={GlobalStyle.tableData}>
+                      {row.Agent || "N/A"}
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      {row.area || "N/A"}
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      {row.Created_On &&
+                        new Date(row.Created_On).toLocaleString("en-GB", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
 
-                        hour12: true,
-                      })}</td>
-                    <td className={GlobalStyle.tableData}>{row.Lastpaymentdate &&
-                      new Date(row.Lastpaymentdate).toLocaleString("en-GB", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
+                          hour12: true,
+                        })}
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      {row.Lastpaymentdate &&
+                        new Date(row.Lastpaymentdate).toLocaleString("en-GB", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
 
-                        hour12: true,
-                      })}</td>
+                          hour12: true,
+                        })}
+                    </td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan="9" className={GlobalStyle.tableData + " text-center"}>
+                <td
+                  colSpan="9"
+                  className={GlobalStyle.tableData + " text-center"}
+                >
                   No records found
                 </td>
               </tr>
@@ -849,7 +970,9 @@ const Case_List = () => {
           <button
             onClick={handlePrevPage}
             disabled={currentPage <= 1}
-            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+            className={`${GlobalStyle.navButton} ${
+              currentPage <= 1 ? "cursor-not-allowed" : ""
+            }`}
           >
             <FaArrowLeft />
           </button>
@@ -859,7 +982,9 @@ const Case_List = () => {
           <button
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
-            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+            className={`${GlobalStyle.navButton} ${
+              currentPage === totalPages ? "cursor-not-allowed" : ""
+            }`}
           >
             <FaArrowRight />
           </button>
@@ -867,20 +992,21 @@ const Case_List = () => {
       )}
 
       <div className="flex justify-end mt-6">
-        {["admin", "superadmin", "slt"].includes(userRole) && filteredData.length !== 0 && (
-          <button
-            // onClick={HandleCreateTaskDownloadSettlementList}
-            // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-            // disabled={isCreatingTask}
-            className={GlobalStyle.buttonPrimary}
-            style={{ display: 'flex', alignItems: 'center' }}
-          >
-            {/* {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+        {["admin", "superadmin", "slt"].includes(userRole) &&
+          filteredData.length !== 0 && (
+            <button
+              // onClick={HandleCreateTaskDownloadSettlementList}
+              // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+              // disabled={isCreatingTask}
+              className={GlobalStyle.buttonPrimary}
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              {/* {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
             {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
-            <FaDownload style={{ marginRight: '8px' }} />
-            Create Task and let me know
-          </button>
-        )}
+              <FaDownload style={{ marginRight: "8px" }} />
+              Create Task and let me know
+            </button>
+          )}
       </div>
     </div>
   );

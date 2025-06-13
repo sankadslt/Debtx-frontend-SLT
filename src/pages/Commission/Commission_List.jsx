@@ -1,4 +1,4 @@
-// /*Purpose: This template is used for the SLT Commission List1 (8.1).
+ // /*Purpose: This template is used for the SLT Commission List1 (8.1).
 // Created Date: 2025-03-13
 // Created By: U.H.Nandali Linara (nadalilinara5@gmail.com)
 // Modified By : Lasandi Randini (randini-im20057@stu.kln.ac.lk)
@@ -833,89 +833,94 @@ const ForwardApprovalsModal = ({ isOpen, onClose, summaryData, onConfirm, isLoad
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-       
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-         
+    <div className={GlobalStyle.popupBoxContainer}>
+      <div className={`${GlobalStyle.popupBoxBody} max-h-[80vh] max-w-[90vh] overflow-hidden`}>
+        {/* Header */}
+        <div className={GlobalStyle.popupBox}>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className={GlobalStyle.popupBoxCloseButton}
           >
             <FaTimes size={20} />
           </button>
         </div>
-
+  
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                    DRC 
-                  </th>
-                  <th className="py-4 px-6 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                    Case Count
-                  </th>
-                  <th className="py-4 px-6 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                    Total Commission Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {summaryData.map((item, index) => (
-                  <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                    <td className="py-4 px-6 text-sm text-gray-900 border-b border-gray-100">
-                      {item.drcName}
-                    </td>
-                    <td className="py-4 px-6 text-sm text-gray-900 text-center border-b border-gray-100">
-                      {item.caseCount}
-                    </td>
-                    <td className="py-4 px-6 text-sm text-gray-900 text-right border-b border-gray-100 font-medium">
-                      {item.totalAmount.toLocaleString('en-US', { 
-                        minimumFractionDigits: 2, 
-                        maximumFractionDigits: 2 
-                      })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+          <table className={GlobalStyle.table}>
+            <thead className={GlobalStyle.thead}>
+              <tr>
+                <th className={GlobalStyle.tableHeader}>
+                  
+                </th>
+                <th className={GlobalStyle.tableHeader}>DRC</th>
+                <th className={GlobalStyle.tableHeader}>Case Count</th>
+                <th className={GlobalStyle.tableHeader}>Total Commission Amount</th>
+                <th className={GlobalStyle.tableHeader}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summaryData.map((item, index) => (
+                <tr
+                  key={index}
+                  className={
+                    index % 2 === 0
+                      ? GlobalStyle.tableRowEven
+                      : GlobalStyle.tableRowOdd
+                  }
+                >
+                  <td className={GlobalStyle.tableData}>
+                  <input type="checkbox" className="ml-2" />
+                  </td>
+                  <td className={GlobalStyle.tableData}>{item.drcName}</td>
+                  <td className={`${GlobalStyle.tableData} text-center`}>
+                    {item.caseCount}
+                  </td>
+                  <td className={GlobalStyle.tableCurrency}>
+                    {item.totalAmount.toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                  {summaryData.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No data available for forwarding
           </div>
-
-          {/* {summaryData.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No data available for forwarding
-            </div>
-          )} */}
+        ) : (
+          <div className={`${GlobalStyle.flexCenter} `}>
+            <button
+              onClick={onConfirm}
+              disabled={isLoading || summaryData.length === 0}
+              className={`${GlobalStyle.buttonPrimary} ${
+                isLoading || summaryData.length === 0
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              }`}
+            >
+              {isLoading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                  Processing...
+                </div>
+              ) : (
+                'Approve'
+              )}
+            </button>
+          </div>
+        )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end space-x-4 p-6 border-t border-gray-200 bg-gray-50">
-         
-          <button
-            onClick={onConfirm}
-            disabled={isLoading || summaryData.length === 0}
-            className={`px-6 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors ${
-              isLoading || summaryData.length === 0
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
-            }`}
-          >
-            {isLoading ? (
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                Processing...
-              </div>
-            ) : (
-              'Approve'
-            )}
-          </button>
-        </div>
+  
+        
       </div>
     </div>
   );
+  
 };
 
 const Commission_List = () => {
@@ -946,7 +951,7 @@ const Commission_List = () => {
   const [searchBy, setSearchBy] = useState("case_id");
   const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
-  const [forwardSummary, setForwardSummary] = useState([]); // For storing forward approval summary
+  const [forwardSummary, setForwardSummary] = useState([]);  
   
   // New state for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1622,6 +1627,7 @@ const Commission_List = () => {
         </button>
       )}
     </div >
+    <div style={{ visibility: filteredDataBySearch.length > 0 ? "visible" : "hidden" }}>
     {["admin", "superadmin", "slt"].includes(userRole) && (
     <button
     onClick={HandleForwardToApprovals}
@@ -1633,6 +1639,7 @@ const Commission_List = () => {
           </button>
        
       )}
+  </div>
   </div>
       {/* Forward Approvals Modal */}
       <ForwardApprovalsModal
