@@ -486,6 +486,15 @@ const Monitor_settlement = () => {
     setFilteredData([]); // Clear filtered data
     setMaxCurrentPage(0); // Reset max current page
     setIsMoreDataAvailable(true); // Reset more data available state
+    // Clear committed filters
+    setCommittedFilters({
+      caseId: "",
+      accountNo: "",
+      phase: "",
+      status: "",
+      fromDate: null,
+      toDate: null
+    });
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
     } else {
