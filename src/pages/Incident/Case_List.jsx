@@ -24,6 +24,7 @@ import { getActiveServiceDetails } from "../../services/drc/Drc";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
+import { Create_Task_for_Download_Case_List } from "../../services/task/taskService";
 import Pending_Assign_Agent_Approval from "/src/assets/images/distribution/Pending_Assign_Agent_Approval.png";
 import Open_Assign_Agent from "/src/assets/images/distribution/Open_Assign_Agent.png";
 import Open_With_Agent from "/src/assets/images/distribution/Open_With_Agent.png";
@@ -50,6 +51,7 @@ import FTL_LOD_Settle_Open_Pending from "/src/assets/images/LOD/FTL_LOD_Settle_O
 import FTL_LOD_Settle_Active from "/src/assets/images/LOD/FTL_LOD_Settle_Active.png";
 import LIT_Prescribed from "/src/assets/images/LOD/LIT_Prescribed.png";
 
+
 const Case_List = () => {
   // State Variables
   const [rtomList, setRtomList] = useState([]);
@@ -74,6 +76,7 @@ const Case_List = () => {
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
   const rowsPerPage = 10;
   const hasMounted = useRef(false);
   const navigate = useNavigate();
@@ -596,9 +599,60 @@ const Case_List = () => {
     }
   };
 
-  const handleCreateTask = () => {
-    console.log("Create task button clicked");
-  };
+  // Function to handle the creation of tasks for downloading case list
+    const HandleCreateTaskDownloadCaseList = async () => {
+  
+      if (!fromDate || !toDate) {
+        Swal.fire({
+          title: "Warning",
+          text: "Please select From Date and To Date.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
+        });
+        return;
+      }
+
+      const filter = {
+        from_date: fromDate,
+        to_date: toDate,
+        rtom: rtom,
+        drc: selectedDRC,
+        arrears_band: selectedBand,
+        service_type: selectedServiceType,
+        case_status: selectedCaseStatus
+      };
+  
+      setIsCreatingTask(true);
+      try {
+        const response = await Create_Task_for_Download_Case_List(filter);
+        if (response === "success") {
+          Swal.fire({
+            title: response,
+            text: `Task created successfully!`,
+            icon: "success",
+            confirmButtonColor: "#28a745"
+          });
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: "Failed to create task.",
+            icon: "error",
+            confirmButtonColor: "#d33"
+          });
+        }
+      } catch (error) {
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Failed to create task.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+      } finally {
+        setIsCreatingTask(false);
+      }
+    };
 
   // Function to navigate to the case ID page
   const naviCaseID = (caseId) => {
@@ -869,16 +923,15 @@ const Case_List = () => {
       <div className="flex justify-end mt-6">
         {["admin", "superadmin", "slt"].includes(userRole) && filteredData.length !== 0 && (
           <button
-            // onClick={HandleCreateTaskDownloadSettlementList}
-            // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-            // disabled={isCreatingTask}
-            className={GlobalStyle.buttonPrimary}
+            onClick={HandleCreateTaskDownloadCaseList}
+            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+            disabled={isCreatingTask}
+            // className={GlobalStyle.buttonPrimary}
             style={{ display: 'flex', alignItems: 'center' }}
           >
-            {/* {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
-            <FaDownload style={{ marginRight: '8px' }} />
-            Create Task and let me know
+            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+            {/* <FaDownload style={{ marginRight: '8px' }} /> */}
           </button>
         )}
       </div>
