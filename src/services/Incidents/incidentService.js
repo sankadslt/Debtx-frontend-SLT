@@ -130,7 +130,7 @@ export const getDirectLODIncidentsCount = async () => {
 
 export const Create_Case_for_incident = async (requestData) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/Create_Case_for_incident`, requestData);
+    const response = await axios.post(`http://172.20.20.4:7174/Create_Cases_From_Incident`, requestData);
     return response.data; // Returns the created cases
   } catch (error) {
     console.error("Error in Create_Case_for_incident service:", error.message);
