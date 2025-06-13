@@ -68,14 +68,15 @@ const Incident_Register_Bulk_Upload = () => {
         if (!file) return;
     
         // Allowed file types: CSV and Excel
-        const allowedExtensions = [".csv", ".xls", ".xlsx"];
+        // const allowedExtensions = [".csv", ".xls", ".xlsx"];
+        const allowedExtensions = [".csv"];
         const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
     
         if (!allowedExtensions.includes(fileExtension)) {
             Swal.fire({
                 icon: "error",
                 title: "Invalid File Type",
-                text: "Only CSV and Excel files are allowed.",
+                text: "Only CSV files are allowed.",
                 confirmButtonColor: "#d33",
             });
             setSelectedFile(null);

@@ -718,7 +718,7 @@ export default function AssignDRCsLOG() {
     <h1 className={`${GlobalStyle.headingMedium} mb-5`}>DRC : TCM</h1>
 
        {/* Filter Section */}
-       <div className= {`${GlobalStyle.cardContainer}  w-full mt-6 flex justify-center gap-5 mb-7 flex-wrap `}>
+       <div className= {`${GlobalStyle.cardContainer}  w-full mt-6 flex justify-end gap-5 mb-7 flex-wrap `}>
               <div className="flex flex-nowrap gap-2">
                   
                 {/* Filter Dropdown (Account No or Case ID) */}

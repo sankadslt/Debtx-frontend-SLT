@@ -22,10 +22,10 @@ import { useNavigate } from "react-router-dom";
 
 const UserInfo = () => {
   const location = useLocation();
-  // const user_id = location.state?.userId;
+  const user_id = location.state?.userId;
 
   //For testing
-  const user_id ="test@gmail.com";
+  // const user_id ="test@gmail.com";
 
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
