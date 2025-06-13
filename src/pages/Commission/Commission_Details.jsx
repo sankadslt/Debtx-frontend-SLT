@@ -51,7 +51,8 @@ const CommissionPreview = () => {
                 text: "Error fetching payment details",
                 icon: "error",
                 allowOutsideClick: false,
-                allowEscapeKey: false
+                allowEscapeKey: false,
+                confirmBuuttonCoolor: "#d33"
             });
             setCommissionData([]);
         } finally {
@@ -253,7 +254,7 @@ const CommissionPreview = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={handleBackButton}
                 >
                     <FaArrowLeft />

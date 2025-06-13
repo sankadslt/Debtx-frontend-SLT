@@ -47,7 +47,8 @@ const PaymentPreview = () => {
                 text: "Error fetching payment details",
                 icon: "error",
                 allowOutsideClick: false,
-                allowEscapeKey: false
+                allowEscapeKey: false,
+                confirmButtonColor: "#d33"
             });
             setPaymentData([]);
         } finally {
@@ -179,7 +180,7 @@ const PaymentPreview = () => {
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Money transaction Reference</th>
                             <th className={GlobalStyle.tableHeader}>Money Transaction Reference Type</th>
-                            <th className={GlobalStyle.tableHeader}>Money Transaction Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Money Transaction Amount (LKR)</th>
                             <th className={GlobalStyle.tableHeader}>Money Transaction Date</th>
                             <th className={GlobalStyle.tableHeader}>Money Transaction Type</th>
                         </tr>
@@ -196,14 +197,7 @@ const PaymentPreview = () => {
                                 >
                                     <td className={GlobalStyle.tableData}>{log.money_transaction_ref}</td>
                                     <td className={GlobalStyle.tableData}>{log.money_transaction_reference_type}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.money_transaction_amount &&
-                                            log.money_transaction_amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
-                                    </td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.money_transaction_amount}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log?.money_transaction_date &&
                                             new Date(log.money_transaction_date).toLocaleString("en-GB", {
@@ -230,17 +224,19 @@ const PaymentPreview = () => {
                 </table>
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPagePaymentDetails} disabled={currentPagePaymentDetails === 0}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPagePaymentDetails + 1} of {pagesPaymentDetails}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPagePaymentDetails} disabled={currentPagePaymentDetails === pagesPaymentDetails - 1}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {dataInPagePaymentDetails.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPagePaymentDetails} disabled={currentPagePaymentDetails === 0}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPagePaymentDetails + 1} of {pagesPaymentDetails}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPagePaymentDetails} disabled={currentPagePaymentDetails === pagesPaymentDetails - 1}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
 
             {/* Commission Details Card */}
             <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Commission Details</b></h2>
@@ -300,7 +296,7 @@ const PaymentPreview = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={handleBackButton}
                 >
                     <FaArrowLeft />

@@ -566,8 +566,10 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
 };
 
 export const Assign_DRC_To_Case = async (payload) => {
+
   try {
-    const response = await axios.post(`${URL}/Assign_DRC_To_Case`, payload);
+
+    const response = await axios.post(`${URL}/Assign_DRC_To_Case`,payload);
     return response.data;
   } catch (error) {
     console.error(
@@ -700,6 +702,81 @@ export const fetchCaseDetails = async (caseId) => {
   }
 };
  
+export const GetFilteredCaseLists = async ({
+  case_current_status,
+  From_DAT,
+  TO_DAT,
+  RTOM,
+  DRC,
+  arrears_band:selectedBand,
+  service_type,
+  pages
+}) => {
+  try {
+    const payload = {
+      case_current_status,
+      From_DAT,
+      TO_DAT,
+      RTOM,
+      DRC,
+      arrears_band: selectedBand,
+      service_type,
+      pages
+    };
+
+    
+
+    const response = await axios.post(`${URL}/List_All_Cases`, payload);
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+  
+
+    return {
+      status: "success",
+      data: response.data.data.map(item => ({
+        caseid: item.case_id,
+        casecurrentstatus: item.status,
+        accountno: item.account_no,
+        amount: item.current_arrears_amount,
+        servicetype: item.service_type,
+        Agent:item.drc_name,
+        // drccommisionrule: item.service_type,
+        // currentarrearsamount: item.current_arrears_amount,
+        rtom: item.rtom,
+        area: item.area,
+        Created_On: item.date,
+        Lastpaymentdate: item.last_payment_date  
+      }))
+    };
+  } catch (error) {
+    console.error("Case list error:", error);
+    if (error.response?.status === 404) {
+      return { data: [] };
+    }
+    throw error;
+  }
+};
+
+export const getCaseStatusList = async () => {
+  try {
+    const response = await axios.get(`${URL}/CaseStatus`);  
+    
+    if (response.data.status === "success") {
+      
+      return response.data.data.map((status) => ({
+        key: status._id,
+        value: status.case_status  
+      }));
+    }
+    throw new Error(response.data.message || "Failed to fetch case statuses");
+  } catch (error) {
+    console.error("Error fetching case statuses:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export const fetchUserTasks = async (token, delegate_user_id) => {
   try {
     const { data } = await axios.post(
@@ -731,55 +808,7 @@ export const fetchUserTasks = async (token, delegate_user_id) => {
   }
 };
  
+
  
- export const getCaseStatusList = async () => {
-  try {
-    const response = await axios.get(`${URL}/CaseStatus`);  
-    
-    if (response.data.status === "success") {
-      
-      return response.data.data.map((status) => ({
-        key: status._id,
-        value: status.case_status  
-      }));
-    }
-    throw new Error(response.data.message || "Failed to fetch case statuses");
-  } catch (error) {
-    console.error("Error fetching case statuses:", error.response?.data || error.message);
-    throw error;
-  }
-};
-
-export const GetFilteredCaseLists = async (payload) => {
-  try {
-  const response = await axios.post(`${URL}/List_All_Cases`,payload);
-
-    if (response.data.status === "error") {
-      throw new Error(response.data.message);
-    }
+ 
   
-
-    return {
-      status: "success",
-      data: response.data.data.map(item => ({
-        caseid: item.case_id,
-        casecurrentstatus: item.status,
-        accountno: item.account_no,
-        amount: item.current_arrears_amount,
-        servicetype: item.service_type,
-        Agent:item.drc_name,
-        // drccommisionrule: item.service_type,
-        // currentarrearsamount: item.current_arrears_amount,
-        rtom: item.rtom,
-        Created_On: item.date,
-        Lastpaymentdate: item.last_payment_date  
-      }))
-    };
-  } catch (error) {
-    console.error("Case list error:", error);
-    if (error.response?.status === 404) {
-      return { data: [] };
-    }
-    throw error;
-  }
-};

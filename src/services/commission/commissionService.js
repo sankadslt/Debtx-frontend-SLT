@@ -45,6 +45,7 @@ export const commission_type_cases_count = async () => {
 };
 
 export const Create_task_for_Download_Commision_Case_List = async (Created_By, DRC_ID, Commission_Type, from_date, to_date, Case_ID, Account_Number) => {
+ 
   try {
     const response = await axios.post(`${URL}/Create_task_for_Download_Commision_Case_List`, {
       Created_By: Created_By,
@@ -80,5 +81,24 @@ export const Commission_Details_By_Commission_ID = async (commission_id) => {
   } catch (error) {
     console.error("Error fetching case details:", error);
     throw error.response?.data?.message || "Failed to fetch case details";
+  }
+};
+
+export const ForwardToApprovals = async (DRC_ID,Created_By) => {
+ 
+ 
+  try {
+ 
+    const response = await axios.post(
+      `${URL}/forward-to-approvals`,
+      { 
+     
+        drcId:DRC_ID, 
+        Created_By: Created_By
+      }
+    );
+    return response.data.status;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to forward cases");
   }
 };
