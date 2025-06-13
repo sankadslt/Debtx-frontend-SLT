@@ -104,3 +104,18 @@ export const Create_Task_For_Downloard_Settlement_Details_By_Case_ID = async (cr
     throw error.response?.data || error;
   }
 };
+
+// The python API endpoint for creating a settlement plan
+export const Create_Settlement_Plan = async (payload) => {
+  try {
+    const response = await axios.post("http://124.43.177.52:6000/app3/api/v1/Create_Settlement_Plan", payload);
+    console.log("Response from Create_Settlement_Plan:", response);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating settlement plan:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}

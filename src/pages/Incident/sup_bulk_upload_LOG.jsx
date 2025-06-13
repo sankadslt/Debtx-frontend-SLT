@@ -370,9 +370,10 @@ const SupBulkUploadLog = () => {
                         <thead className={GlobalStyle.thead}>
                             <tr>
                                 <th className={GlobalStyle.tableHeader}>Status</th>
-                                <th className={GlobalStyle.tableHeader}>Uploaded By</th>
+                                
                                 <th className={GlobalStyle.tableHeader}>File Name</th>
                                 <th className={GlobalStyle.tableHeader}>Type</th>
+                                <th className={GlobalStyle.tableHeader}>Uploaded By</th>
                                 <th className={GlobalStyle.tableHeader}>Date & Time</th>
                             </tr>
                         </thead>
@@ -391,9 +392,10 @@ const SupBulkUploadLog = () => {
                                             </div>
                                         </td>
                                        
-                                        <td className={GlobalStyle.tableData}>{row.uploadedBy}</td>
+                                        
                                         <td className={GlobalStyle.tableData}>{row.fileName}</td>
                                         <td className={GlobalStyle.tableData}>{row.type}</td>
+                                        <td className={GlobalStyle.tableData}>{row.uploadedBy}</td>
                                         <td className={GlobalStyle.tableData}> {new Date(row.dateTime).toLocaleDateString("en-GB", {
                                             day: "2-digit",
                                             month: "2-digit",

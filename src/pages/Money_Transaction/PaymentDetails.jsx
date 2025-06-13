@@ -397,13 +397,13 @@ const PaymentDetails = () => {
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full`}>
-            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
+            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full gap-3">
 
-              <div className="flex items-center">
+              <div className="flex flex-wrap items-center">
                 <select
                   value={searchBy}
                   onChange={(e) => setSearchBy(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
+                  className={`${GlobalStyle.selectBox}  w-full`}
                   style={{ color: searchBy === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select</option>
@@ -426,11 +426,11 @@ const PaymentDetails = () => {
                 />
               </div>
 
-              <div className="flex items-center">
+              <div className="flex flex-wrap items-center">
                 <select
                   value={phase}
                   onChange={(e) => setPhase(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
+                  className={`${GlobalStyle.selectBox}   `}
                   style={{ color: phase === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select Phase</option>
