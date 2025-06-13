@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+ import { Link, useLocation } from "react-router-dom";
 import { MdSpaceDashboard , MdFormatListBulletedAdd , MdDoneOutline } from "react-icons/md";
 import { IoIosListBox } from "react-icons/io";
 import { MdSpeakerNotes } from "react-icons/md";
@@ -61,7 +61,7 @@ const Sidebar = ({ onHoverChange }) => {
 
         { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"]},
         // {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]}
-
+ { icon: CgEditFade, label: "RO List", link: "/pages/ro/ro-list", roles: ["superadmin", "admin"] },
       ],
     },
 
@@ -173,6 +173,7 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
+    
 
     {icon: MdDownload, label: "Download", link: "/incident/Incident_File_Download", roles: ["superadmin", "admin", "user"]},
     // {
