@@ -8,16 +8,17 @@ Notes: The following page contains the codes */
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import "react-datepicker/dist/react-datepicker.css";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+
 import Swal from "sweetalert2";
 import Edit from "../../assets/images/edit-info.svg";
 import {
   getDebtCompanyByDRCID,
   terminateCompanyByDRCID,
 } from "../../services/drc/Drc";
-import Complete from "../../assets/images/complete.png";
-import DatePicker from "react-datepicker";
+import {  FaArrowLeft } from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
 import { getLoggedUserId } from "../../services/auth/authService";
 
@@ -26,16 +27,16 @@ const DRCInfo = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  // Check for drcId in location state first, then fallback to search params
   const drcId = location.state?.drcId || searchParams.get("drcid") || "";
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
   const [showEndFields, setShowEndFields] = useState(false);
   const [endDate, setEndDate] = useState(new Date());
   const [remark, setRemark] = useState("");
   const [remarkError, setRemarkError] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [companyData, setCompanyData] = useState({
     drc_id: "",
     create_on: "",
@@ -59,7 +60,6 @@ const DRCInfo = () => {
         const data = await getDebtCompanyByDRCID(drcIdToUse);
 
         if (data) {
-          // Format the data according to the model structure
           setCompanyData(data);
         }
         setLoading(false);
@@ -79,13 +79,16 @@ const DRCInfo = () => {
     fetchCompanyData();
   }, [drcId]);
 
-  // Replace the existing handleNavigateToEdit function with this:
   const handleNavigateToEdit = () => {
     const drcIdToUse = drcId || companyData.drc_id;
     navigate(`/pages/DRC/DRCInfoEdit`, {
       state: { drcId: drcIdToUse },
     });
   };
+
+   const goBack = () => {
+        navigate(-1); 
+    };
 
   // get system user
   const loadUser = async () => {
@@ -98,14 +101,13 @@ const DRCInfo = () => {
     loadUser();
   }, []);
 
-  // Replace the handleEndSubmit function with this improved version
   const handleEndSubmit = async () => {
     try {
       let remarkBy = userData
         ? userData.id || userData.userId || userData
         : "system";
 
-      // Format the date as needed by the API
+      
       const formattedDate =
         endDate instanceof Date ? endDate : new Date(endDate);
 
@@ -118,10 +120,8 @@ const DRCInfo = () => {
         });
       }
 
-      // Reset error state
       setRemarkError(false);
 
-      // Show loading indicator
       Swal.fire({
         title: "Processing...",
         text: "Please wait while terminating the DRC",
@@ -131,7 +131,6 @@ const DRCInfo = () => {
         },
       });
 
-      // Call the API to terminate the company
       const response = await terminateCompanyByDRCID(
         companyData.drc_id,
         remark,
@@ -139,10 +138,9 @@ const DRCInfo = () => {
         formattedDate
       );
 
-      // Close loading indicator
       Swal.close();
 
-      // Success message with more details
+      // Success message 
       Swal.fire({
         icon: "success",
         title: "Termination Successful",
@@ -153,11 +151,9 @@ const DRCInfo = () => {
         allowOutsideClick: false,
       }).then((result) => {
         if (result.isConfirmed) {
-          // Reset the form fields
           setRemark("");
           setShowEndFields(false);
 
-          // Navigate to refresh the data
           navigate(-1);
         }
       });
@@ -187,7 +183,6 @@ const DRCInfo = () => {
     );
   }
 
-  // Get the current active coordinator (assuming the last one in the array is current)
   const currentCoordinator =
     companyData.slt_coordinator && companyData.slt_coordinator.length > 0
       ? companyData.slt_coordinator[companyData.slt_coordinator.length - 1]
@@ -217,7 +212,6 @@ const DRCInfo = () => {
             />
           </div>
 
-          {/* Company Details Section */}
           <h2
             className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}
           >
@@ -298,7 +292,7 @@ const DRCInfo = () => {
             </tbody>
           </table>
 
-          {/* SLT Coordinator Section */}
+         
           <h2
             className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
           >
@@ -356,7 +350,7 @@ const DRCInfo = () => {
             </div>
           )}
 
-          {/* Services Section */}
+         
           <h2
             className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
           >
@@ -382,7 +376,7 @@ const DRCInfo = () => {
                   ></th>
                 </tr>
               </thead>
-              <tbody>
+                  <tbody>
                 {companyData.services &&
                   companyData.services.map((service, index) => (
                     <tr
@@ -393,37 +387,29 @@ const DRCInfo = () => {
                           : "bg-gray-50 bg-opacity-50"
                       } border-b`}
                     >
-                      <td
-                        className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
-                      >
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                         {service.service_type}
                       </td>
-                      <td
-                        className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}
-                      >
+                      <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
                         {service.status_update_dtm
-                          ? new Date(
-                              service.status_update_dtm
-                            ).toLocaleDateString()
+                          ? new Date(service.status_update_dtm).toLocaleDateString()
                           : "Not specified"}
                       </td>
-                      <td className={`${GlobalStyle.tableData} text-center`}>
-                        {service.service_status === "Active" ? (
-                          <img
-                            src={Complete}
-                            alt="Active"
-                            className="inline-block h-6 w-6"
+                      <td className={`${GlobalStyle.tableData} text-left`}>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={service.service_status === "Active"}
+                            readOnly
                           />
-                        ) : (
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold text-gray-800 bg-gray-100">
-                            {service.service_status}
-                          </span>
-                        )}
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                          after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
                       </td>
                     </tr>
                   ))}
-                {(!companyData.services ||
-                  companyData.services.length === 0) && (
+                {(!companyData.services || companyData.services.length === 0) && (
                   <tr>
                     <td colSpan="3" className="text-center py-4 text-gray-500">
                       No services available
@@ -460,62 +446,58 @@ const DRCInfo = () => {
                   ></th>
                 </tr>
               </thead>
-              <tbody>
-                {companyData.rtom &&
-                  companyData.rtom.map((rtom, index) => (
-                    <tr
-                      key={index}
-                      className={`${
-                        index % 2 === 0
-                          ? "bg-white bg-opacity-75"
-                          : "bg-gray-50 bg-opacity-50"
-                      } border-b`}
-                    >
-                      <td
-                        className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
-                      >
-                        {rtom.rtom_id}
-                      </td>
-                      <td
-                        className={`${GlobalStyle.tableData} whitespace-normal text-left`}
-                      >
-                        {rtom.status_update_dtm
-                          ? new Date(
-                              rtom.status_update_dtm
-                            ).toLocaleDateString()
-                          : "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} text-center`}>
-                        {rtom.rtom_status === "Active" ? (
-                          <img
-                            src={Complete}
-                            alt="Active"
-                            className="inline-block h-6 w-6"
-                          />
-                        ) : (
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold text-gray-800 bg-gray-100">
-                            {rtom.rtom_status}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                {(!companyData.rtom || companyData.rtom.length === 0) && (
-                  <tr>
-                    <td colSpan="3" className="text-center py-4 text-gray-500">
-                      No RTOM information available
+                
+                <tbody>
+              {companyData.rtom &&
+                companyData.rtom.map((rtom, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0
+                        ? "bg-white bg-opacity-75"
+                        : "bg-gray-50 bg-opacity-50"
+                    } border-b`}
+                  >
+                    <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                      {rtom.rtom_id}
+                    </td>
+                    <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
+                      {rtom.status_update_dtm
+                        ? new Date(rtom.status_update_dtm).toLocaleDateString()
+                        : "Not specified"}
+                    </td>
+                    <td className={`${GlobalStyle.tableData} text-left`}>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer" 
+                          checked={rtom.rtom_status === "Active"}
+                          readOnly
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full 
+                        peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
+                        after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      </label>
                     </td>
                   </tr>
-                )}
-              </tbody>
+                ))}
+              {(!companyData.rtom || companyData.rtom.length === 0) && (
+                <tr>
+                  <td colSpan="3" className="text-center py-4 text-gray-500">
+                    No RTOM information available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+
             </table>
           </div>
 
-          {/* Card Container ends here */}
+         
         </div>
       </div>
 
-      {/* Termination Section in its own card */}
+     
       {showEndFields && (
         <div className="w-full flex justify-center mt-6">
           <div
@@ -539,9 +521,9 @@ const DRCInfo = () => {
                         onChange={(date) => setEndDate(date)}
                         dateFormat="dd/MM/yyyy"
                         className={`${GlobalStyle.inputText} w-full text-left`}
-                        maxDate={new Date()} // Only allow current date or earlier
-                        minDate={new Date()} // Only allow current date or later
-                        // This combination effectively restricts to current date only
+                        maxDate={new Date()} 
+                        minDate={new Date()} 
+                      
                       />
                     </div>
                   </td>
@@ -593,16 +575,25 @@ const DRCInfo = () => {
         </div>
       )}
 
-      {/* End button */}
       {!showEndFields && (
-        <div className="flex justify-end mt-4 max-w-4xl mx-auto">
-          <button
-            onClick={() => setShowEndFields(true)}
-            className={GlobalStyle.buttonPrimary}
-          >
-            End
-          </button>
-        </div>
+      <div className="flex justify-between mt-4 w-full px-8">
+       <button
+                          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                          onClick={goBack}
+                        >
+                          <FaArrowLeft />
+                          <span>Back</span>
+                        </button>
+
+        <button
+          onClick={() => setShowEndFields(true)}
+          className={GlobalStyle.buttonPrimary}
+        >
+          End
+        </button>
+      </div>
+
+        
       )}
     </div>
   );

@@ -261,7 +261,8 @@ export default function ReAssignDRC() {
       <h1 className={`${GlobalStyle.headingLarge} mb-5`}>Re-Assign DRC</h1>
 
       {/* card box*/}
-      <div className={`${GlobalStyle.cardContainer}`}>
+      <div className=" flex items-center justify-center ">
+      <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
         <table>
 
           <colgroup>
@@ -327,6 +328,7 @@ export default function ReAssignDRC() {
           <strong>Last Payment Date: </strong>{new Date(caseDetails.last_payment_date).toLocaleDateString()}
         </p> */}
       </div>
+      </div>
 
       <div className=" mb -6">
         <h2 className={`${GlobalStyle.headingMedium} mb-5`}>RO Details : </h2>
@@ -344,7 +346,7 @@ export default function ReAssignDRC() {
             </div>
           </div>
 
-          <div className={GlobalStyle.tableContainer}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -432,7 +434,7 @@ export default function ReAssignDRC() {
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
           </div>
-          <div className={GlobalStyle.tableContainer}>
+           <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>

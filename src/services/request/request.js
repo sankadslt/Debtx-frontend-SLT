@@ -117,15 +117,23 @@ export const Withdraw_Mediation_Board_Acceptance = async (payload) => {
     );
     throw error;
   }
-};
+}; 
 
 export const List_Request_Response_log = async (payload) => {
   try {
     const response = await axios.post(
       `${URL}/List_Request_Response_log`,
-      payload
+      {
+        case_current_status: payload.case_current_status,
+        date_from: payload.date_from,
+        date_to: payload.date_to
+      }
+     
     );
+    console.log("Payload for List_Request_Response_log:", response);
+    console.log("Response from List_Request_Response_log:", response.data);
     return response.data;
+    
   } catch (error) {
     console.error(
       "Error fetching request response log:",
