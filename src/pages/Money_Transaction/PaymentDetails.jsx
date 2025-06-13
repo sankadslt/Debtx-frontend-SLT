@@ -165,23 +165,7 @@ const PaymentDetails = () => {
       console.log("Payload sent to API: ", payload);
 
       setIsLoading(true); // Set loading state to true
-      const response = await List_All_Payment_Cases(payload).catch((error) => {
-        if (error.response && error.response.status === 404) {
-          Swal.fire({
-            title: "No Results",
-            text: "No matching data found for the selected filters.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonColor: "#f1c40f"
-          });
-          setFilteredData([]);
-          return null;
-        } else {
-          throw error;
-        }
-      });
-      setIsLoading(false); // Set loading state to false
+      const response = await List_All_Payment_Cases(payload);
 
       // Updated response handling
       if (response && response.data) {
@@ -200,6 +184,8 @@ const PaymentDetails = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f"
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -397,13 +383,13 @@ const PaymentDetails = () => {
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full`}>
-            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
+            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full gap-3">
 
-              <div className="flex items-center">
+              <div className="flex flex-wrap items-center">
                 <select
                   value={searchBy}
                   onChange={(e) => setSearchBy(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
+                  className={`${GlobalStyle.selectBox}  w-full`}
                   style={{ color: searchBy === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select</option>
@@ -426,11 +412,11 @@ const PaymentDetails = () => {
                 />
               </div>
 
-              <div className="flex items-center">
+              <div className="flex flex-wrap items-center">
                 <select
                   value={phase}
                   onChange={(e) => setPhase(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
+                  className={`${GlobalStyle.selectBox}   `}
                   style={{ color: phase === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select Phase</option>

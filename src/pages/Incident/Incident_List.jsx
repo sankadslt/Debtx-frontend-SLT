@@ -364,31 +364,39 @@ const Incident_List = () => {
             </div>
             {/*Filter section */}
             <div className= {`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
-                <div className="flex flex-wrap  md:flex-nowrap  items-center justify-end w-full  space-x-6">
+                <div className="flex flex-wrap    items-center justify-end w-full gap-0.5  ">
+
+                    <div className="min-w-[150px] w-full sm:w-auto mt-2 mb-2 ">
                     <select value={status1} onChange={(e) => setStatus1(e.target.value)} style={{ color: status1 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden >Action Type</option>
                         <option value="collect arrears" style={{ color: "black" }}>collect arrears</option>
                         <option value="collect arrears and CPE" style={{ color: "black" }}>collect arrears and CPE</option>
                         <option value="collect CPE" style={{ color: "black" }}>collect CPE</option>
                     </select>
+                    </div>
 
+                    <div className="min-w-[150px] w-full sm:w-auto mt-2 mb-2">
                     <select value={status2} onChange={(e) => setStatus2(e.target.value)} style={{ color: status2 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Status</option>
                         <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
                         <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
                     </select>
+                    </div>
 
+                    <div className="min-w-[150px] w-full sm:w-auto mt-2 mb-2">
                     <select value={status3} onChange={(e) => setStatus3(e.target.value)} style={{ color: status3 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox} >
                         <option value="" hidden>Source Type</option>
                         <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>
                         <option value="Product Terminate"style={{ color: "black" }}>Product Terminate</option>
                         <option value="Special" style={{ color: "black" }}>Special</option>
                     </select>
+                    </div>
                     
-                    <label className={GlobalStyle.dataPickerDate}>Date:</label>
-                    <DatePicker selected={fromDate} onChange={handleFromDateChange} dateFormat="dd/MM/yyyy" placeholderText="From "  className={`${GlobalStyle.inputText} w-full sm:w-auto`} />
-                    <DatePicker selected={toDate} onChange={handleToDateChange} dateFormat="dd/MM/yyyy" placeholderText="To "  className={`${GlobalStyle.inputText} w-full sm:w-auto`} />
                    
+                    <label >Date:</label>
+                    <DatePicker selected={fromDate} onChange={handleFromDateChange} dateFormat="dd/MM/yyyy" placeholderText="From "  className={`${GlobalStyle.inputText} w-full sm:w-auto min-w-[180px] mt-2 mb-2`} />
+                    <DatePicker selected={toDate} onChange={handleToDateChange} dateFormat="dd/MM/yyyy" placeholderText="To "  className={`${GlobalStyle.inputText} w-full sm:w-auto min-w-[180px] mt-2 mb-2`} />
+
                     {/* <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button> */}
                     <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (

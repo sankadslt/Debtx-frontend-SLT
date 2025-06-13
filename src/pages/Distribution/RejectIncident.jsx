@@ -74,6 +74,7 @@ export default function RejectIncident() {
           FromDate:fromDate,
           ToDate:toDate
         }
+        //console.log("Filters:", filters);
         const response = await List_F1_filtered_incidents(filters);
         const formattedData = response?.data.map((item) => {
           
@@ -87,8 +88,8 @@ export default function RejectIncident() {
             account_no: item.Account_Num || "N/A",
             filtered_reason: item.Filtered_Reason || "N/A",
             source_type: item?.Source_Type || "N/A",
-            rejected_on: isNaN(rejectedDate) ? "N/A" : rejectedDate.toLocaleString() || "N/A",
-            created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A"
+            rejected_on: rejectedDate instanceof Date && !isNaN(rejectedDate) ? rejectedDate.toLocaleString() : "N/A",
+            created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? createdDate.toLocaleString() : "N/A"
           };
         });
         setTableData(formattedData);
@@ -677,7 +678,7 @@ export default function RejectIncident() {
                 />
               </div>
             {/* </div> */}
-            {error && <span className={GlobalStyle.errorText}>{error}</span>}
+            {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
           </div>
 
           {/* Filter Button */}
