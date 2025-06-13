@@ -503,9 +503,9 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
       
 
       {/* Filter Section */}
-      <div className={`${GlobalStyle.cardContainer} w-full mt-6 `}>
-        <div className= "flex justify-end gap-10 ">
-            <div className="flex flex-wrap  gap-10">
+      <div className={`${GlobalStyle.cardContainer} w-full mt-4 `}>
+        <div className= "flex flex-wrap justify-end items-center justify-end w-full gap-8 ">
+            {/* <div className="flex   gap-8"> */}
               {" "}
               <div className="flex gap-4 h-[35px] ">
                 <select
@@ -594,7 +594,7 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     )}
                 </div>          
 
-            </div>
+            {/* </div> */}
           </div>
       </div>
 

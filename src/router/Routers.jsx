@@ -109,7 +109,9 @@ import RtomInfoEdit from "../pages/Rtom/RtomInfoEdit";
 import RtomInfoEnd from "../pages/Rtom/RtomInfoEnd";
 import ListofServicetype from "../pages/Rtom/ListofServicetype";
 
-Route
+//USER  
+import UserList from "../pages/User/UserList";
+import UserInfo  from "../pages/User/UserInfo";
 
 
 
@@ -711,6 +713,13 @@ const Routers = () => {
     <Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/DRC/DRCInfo" element={<ProtectedRoute element={<DRCInfo />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} /> */}
+
+    {/* User */}
+      <Route path="/pages/User/UserList" element={<ProtectedRoute element={<UserList />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
+      
+      {/* RTOM */}
+
     </Routes>
 
     

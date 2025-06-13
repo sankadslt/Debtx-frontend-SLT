@@ -392,7 +392,7 @@ const AssignDRC = () => {
 
                 <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                      <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5  w-full sm:w-auto `} onClick={handlepiechart1}>
+                      <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5  mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
                       Pie Chart 1
                   </button>
                     )}
@@ -406,7 +406,7 @@ const AssignDRC = () => {
                 </button> */}
                 <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
-                      <button className={`${GlobalStyle.buttonPrimary} h-10   w-full sm:w-auto`} onClick={handlepiechart2}>
+                      <button className={`${GlobalStyle.buttonPrimary} h-10  mt-2  w-full sm:w-auto`} onClick={handlepiechart2}>
                       Pie Chart 2
                   </button>
                     )}
