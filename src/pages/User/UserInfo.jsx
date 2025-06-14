@@ -36,16 +36,16 @@ const UserInfo = () => {
   const [loading, setLoading] =useState(false);
   const [error, setError] =useState("");
   const [userInfo, setUserInfo] =useState({
-    user_name: "",
+    username: "",
     user_type: "",
-    user_mail: "",
+    email: "",
     login_method: "",
-    user_roles: [],
-    created_dtm: "",
-    created_by: "",
-    approved_dtm: "",
-    approved_by: "",
-    remark: []
+    role: "",
+    Created_ON: "",
+    Created_BY: "",
+    Approved_On: "",
+    Approved_By: "",
+    Remark: []
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -169,7 +169,7 @@ const UserInfo = () => {
   return (
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
       <div className={`${GlobalStyle.headingLarge} mb-6 sm:mb-8`}>
-        <span>{user_id} - {userInfo.user_name}</span>
+        <span>{user_id} - {userInfo.username}</span>
       </div>
 
       {/* Card box */}
@@ -227,7 +227,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.user_mail || "N/A"}
+                          {userInfo.email || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -283,33 +283,19 @@ const UserInfo = () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {userInfo.user_roles.length > 0 ? (
-                                  userInfo.user_roles.map((role, index) => (
+                                {userInfo.role ?
                                     <tr
-                                      key={index}
                                       className={`${
-                                        index % 2 === 0
-                                          ? GlobalStyle.tableRowEven
-                                          : GlobalStyle.tableRowOdd
+                                        GlobalStyle.tableRowOdd
                                       } border-b`}
                                     >
                                       <td
                                         className={`${GlobalStyle.tableData} flex justify-center items-center`}
                                       >
-                                        <span>{role.user_role}</span>
+                                        <span>{userInfo.role}</span>
                                       </td>
                                       <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center items-center">
-                                          {/* <label className="inline-flex relative items-center cursor-pointer">
-                                            <input
-                                              type="checkbox"
-                                              className="sr-only peer"
-                                              checked={role.status}
-                                              readOnly
-                                              disabled
-                                            />
-                                            <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                                          </label> */}
                                           <img 
                                             src={completeIcon} 
                                             alt="Active" 
@@ -318,8 +304,8 @@ const UserInfo = () => {
                                         </div>
                                       </td>
                                     </tr>
-                                  ))
-                                ) : (
+                                  
+                                : 
                                   <tr>
                                     <td
                                       colSpan="2"
@@ -328,7 +314,7 @@ const UserInfo = () => {
                                       No results found
                                     </td>
                                   </tr>
-                                )}
+                                }
                               </tbody>
                             </table>
                           </div>
@@ -348,7 +334,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formatDate(userInfo.created_dtm) || "N/A"}
+                          {formatDate(userInfo.Created_ON) || "N/A"}
                         </label>
                       </td>
                     </tr>                   
@@ -365,7 +351,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.created_by || "N/A"}
+                          {userInfo.Created_BY || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -382,7 +368,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {formatDate(userInfo.approved_dtm) || "N/A"}
+                          {formatDate(userInfo.Approved_On) || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -399,7 +385,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.approved_by || "N/A"}
+                          {userInfo.Approved_By || "N/A"}
                         </label>
                       </td>
                     </tr>
@@ -527,8 +513,8 @@ const UserInfo = () => {
                 </thead>
 
                 <tbody>
-                  {userInfo.remark?.length > 0 ? (
-                    userInfo.remark?.map((log, index) => (
+                  {userInfo.Remark?.length > 0 ? (
+                    userInfo.Remark?.map((log, index) => (
                       <tr
                         key={index}
                         className={`${

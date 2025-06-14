@@ -4,11 +4,11 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 import editImg from "../../assets/images/more.svg";
-import ListImg from "../../assets/images/ConfigurationImg/list.png";  
-import activeIcon from "../../assets/images/ConfigurationImg/Active.png"; 
+import ListImg from "../../assets/images/ConfigurationImg/list.png";
+import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
-import { listAllDRCDetails } from "../../services/drc/Drc";  
+import { listAllDRCDetails } from "../../services/drc/Drc";
 
 const DRCList = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -145,7 +145,6 @@ const DRCList = () => {
         }
     };
 
- 
 
     const handleFilter = () => {
         setFiltersApplied(true);
