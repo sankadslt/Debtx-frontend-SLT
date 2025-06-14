@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { List_All_RO_and_DRCuser_Details_to_SLT } from "../../services/Ro/RO.js";
+import { List_All_RO_and_DRCuser_Details_to_SLT } from "../../services/RO/RO.js";
 import Swal from 'sweetalert2';
 
 import RO_Active from "../../assets/images/status/RO_DRC_Status_Icons/RO_Active.svg";

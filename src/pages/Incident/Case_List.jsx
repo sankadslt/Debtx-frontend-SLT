@@ -24,6 +24,7 @@ import { getActiveServiceDetails } from "../../services/drc/Drc";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
+import { Create_Task_for_Download_Case_List } from "../../services/task/taskService";
 import Pending_Assign_Agent_Approval from "/src/assets/images/distribution/Pending_Assign_Agent_Approval.png";
 import Open_Assign_Agent from "/src/assets/images/distribution/Open_Assign_Agent.png";
 import Open_With_Agent from "/src/assets/images/distribution/Open_With_Agent.png";
@@ -50,6 +51,7 @@ import FTL_LOD_Settle_Open_Pending from "/src/assets/images/LOD/FTL_LOD_Settle_O
 import FTL_LOD_Settle_Active from "/src/assets/images/LOD/FTL_LOD_Settle_Active.png";
 import LIT_Prescribed from "/src/assets/images/LOD/LIT_Prescribed.png";
 
+
 const Case_List = () => {
   // State Variables
   const [rtomList, setRtomList] = useState([]);
@@ -74,6 +76,7 @@ const Case_List = () => {
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
   const rowsPerPage = 10;
   const hasMounted = useRef(false);
   const navigate = useNavigate();
@@ -196,7 +199,7 @@ const Case_List = () => {
 
   //render status icon with tooltip
   const renderStatusIcon = (status, index) => {
-    console.log("Status received:", status);
+    // console.log("Status received:", status);
     const iconPath = getStatusIcon(status);
 
     if (!iconPath) {
@@ -229,7 +232,8 @@ const Case_List = () => {
         const rtom = await List_All_Active_RTOMs();
         setRtomList(rtom);
       } catch (error) {
-        console.error("Error fetching rtom:", error);
+        // console.error("Error fetching rtom:", error);
+        setRtomList([]);
       }
     };
 
@@ -239,7 +243,8 @@ const Case_List = () => {
         const drcs = await Active_DRC_Details();
         setActiveDRC(drcs);
       } catch (error) {
-        console.error("Error fetching drcs:", error);
+        // console.error("Error fetching drcs:", error);
+        setActiveDRC([]);
       }
     };
 
@@ -249,7 +254,8 @@ const Case_List = () => {
         const bands = await fetchAllArrearsBands();
         setArrearsBand(bands);
       } catch (error) {
-        console.error("Error fetching arrears bands:", error);
+        // console.error("Error fetching arrears bands:", error);
+        setArrearsBand([]);
       }
     };
 
@@ -259,7 +265,8 @@ const Case_List = () => {
         const statuses = await getCaseStatusList();
         setCaseStatusList(statuses);
       } catch (error) {
-        console.error("Error fetching case statuses:", error);
+        // console.error("Error fetching case statuses:", error);
+        setCaseStatusList([]);
       }
     };
 
@@ -273,9 +280,10 @@ const Case_List = () => {
           value: service.service_type  // using service_type as the display value
         }));
         setServiceTypes(transformedServices);
-        console.log("Transformed services:", transformedServices); // For debugging
+        // console.log("Transformed services:", transformedServices); // For debugging
       } catch (error) {
-        console.error("Error fetching service types:", error);
+        // console.error("Error fetching service types:", error);
+        setServiceTypes([]);
       }
     };
 
@@ -302,7 +310,7 @@ const Case_List = () => {
         setUserRole(decoded.role);
       }
     } catch (error) {
-      console.error("Invalid token:", error);
+      // console.error("Invalid token:", error);
     }
   }, []);
 
@@ -596,8 +604,59 @@ const Case_List = () => {
     }
   };
 
-  const handleCreateTask = () => {
-    console.log("Create task button clicked");
+  // Function to handle the creation of tasks for downloading case list
+  const HandleCreateTaskDownloadCaseList = async () => {
+
+    if (!fromDate || !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select From Date and To Date.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
+
+    const filter = {
+      from_date: fromDate,
+      to_date: toDate,
+      rtom: rtom,
+      drc: selectedDRC,
+      arrears_band: selectedBand,
+      service_type: selectedServiceType,
+      case_status: selectedCaseStatus
+    };
+
+    setIsCreatingTask(true);
+    try {
+      const response = await Create_Task_for_Download_Case_List(filter);
+      if (response === "success") {
+        Swal.fire({
+          title: response,
+          text: `Task created successfully!`,
+          icon: "success",
+          confirmButtonColor: "#28a745"
+        });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Failed to create task.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Failed to create task.",
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
+    } finally {
+      setIsCreatingTask(false);
+    }
   };
 
   // Function to navigate to the case ID page
@@ -629,11 +688,15 @@ const Case_List = () => {
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
               <option value="" hidden>RTOM</option>
-              {rtomList.map((rtom) => (
-                <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
-                  {rtom.rtom}
-                </option>
-              ))}
+              {rtomList.length > 0 ? (
+                rtomList.map((rtom) => (
+                  <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
+                    {rtom.rtom}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No RTOM available</option>
+              )}
             </select>
 
             <select
@@ -643,11 +706,13 @@ const Case_List = () => {
               style={{ color: selectedDRC === "" ? "gray" : "black" }}
             >
               <option value="" hidden>DRC</option>
-              {activeDRC.map((drc) => (
+              {activeDRC.length > 0 ? (activeDRC.map((drc) => (
                 <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
                   {drc.value}
                 </option>
-              ))}
+              ))) : (
+                <option disabled>No DRC available</option>
+              )}
             </select>
 
             <select
@@ -657,11 +722,13 @@ const Case_List = () => {
               style={{ color: selectedBand === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Arrears Band</option>
-              {arrearsBand.map(({ key, value }) => (
+              {arrearsBand.length < 0 ? (arrearsBand.map(({ key, value }) => (
                 <option key={key} value={key} style={{ color: "black" }}>
                   {value}
                 </option>
-              ))}
+              ))) : (
+                <option disabled>No Arrears Band available</option>
+              )}
             </select>
 
             <select
@@ -671,11 +738,13 @@ const Case_List = () => {
               style={{ color: selectedCaseStatus === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Case Status</option>
-              {caseStatusList.map(({ key, value }) => (
+              {caseStatusList.length < 0 ? (caseStatusList.map(({ key, value }) => (
                 <option key={key} value={value} style={{ color: "black" }}>
                   {value}
                 </option>
-              ))}
+              ))) : (
+                <option disabled>No Case Status available</option>
+              )}
             </select>
 
             <select
@@ -685,11 +754,12 @@ const Case_List = () => {
               style={{ color: selectedServiceType === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Service Type</option>
-              {serviceTypes.map((service) => (
+              {serviceTypes.length < 0 ? (serviceTypes.map((service) => (
                 <option key={service.id} value={service.id} style={{ color: "black" }}>
                   {service.value}
                 </option>
-              ))}
+              ))) : (
+                <option disabled>No Service Type available</option>)}
             </select>
 
             {/* <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2"> */}
@@ -869,16 +939,15 @@ const Case_List = () => {
       <div className="flex justify-end mt-6">
         {["admin", "superadmin", "slt"].includes(userRole) && filteredData.length !== 0 && (
           <button
-            // onClick={HandleCreateTaskDownloadSettlementList}
-            // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-            // disabled={isCreatingTask}
-            className={GlobalStyle.buttonPrimary}
+            onClick={HandleCreateTaskDownloadCaseList}
+            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+            disabled={isCreatingTask}
+            // className={GlobalStyle.buttonPrimary}
             style={{ display: 'flex', alignItems: 'center' }}
           >
-            {/* {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
-            <FaDownload style={{ marginRight: '8px' }} />
-            Create Task and let me know
+            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+            {/* <FaDownload style={{ marginRight: '8px' }} /> */}
           </button>
         )}
       </div>
