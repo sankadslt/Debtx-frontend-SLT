@@ -7,18 +7,16 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the User Info Screen */
 
-
 import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/edit-info.svg";
-// import add from "../../assets/images/add.svg";
+import add from "../../assets/images/add.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import { getUserDetailsById } from "../../services/user/user_services";
 import completeIcon from "../../assets/images/complete.png";
-
 
 const UserInfo = () => {
   const location = useLocation();
@@ -33,9 +31,9 @@ const UserInfo = () => {
   const [isActive, setIsActive] = useState(true);
   const [emailError, setEmailError] = useState("");
 
-  const [loading, setLoading] =useState(false);
-  const [error, setError] =useState("");
-  const [userInfo, setUserInfo] =useState({
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [userInfo, setUserInfo] = useState({
     username: "",
     user_type: "",
     email: "",
@@ -48,24 +46,61 @@ const UserInfo = () => {
     Remark: []
   });
 
+  const [formData, setFormData] = useState({
+    userType: "",
+    userMail: "",
+    loginMethod: "",
+    userRoles: [],
+    createdOn: "",
+    createdBy: "",
+    approvedOn: "",
+    approvedBy: "",
+  });
+
   const [isEditing, setIsEditing] = useState(false);
   const [showEndSection, setShowEndSection] = useState(false);
   const [showLogHistory, setShowLogHistory] = useState(false);
 
+  // User roles data for editing
+  const [userRolesData, setUserRolesData] = useState([]);
+  
+  // Available roles dropdown
+  const availableRoles = [
+    { role_name: "GM" },
+    { role_name: "DGM" },
+    { role_name: "Legal Officer" },
+    { role_name: "Manager" },
+    { role_name: "Assistant Manager" },
+    { role_name: "Officer" },
+    { role_name: "Executive" },
+    { role_name: "Senior Executive" },
+  ];
 
   useEffect(() => {
     const fetchUserInfoById = async () => {
       try {
         setLoading(true);
         const fetchedData = await getUserDetailsById(user_id);
-        // console.log("Fetched User Info: ", fetchedData);
 
         if (fetchedData) {
           setUserInfo(fetchedData.data);
+          // Set formData for editing
+          setFormData({
+            userType: fetchedData.data.user_type || "",
+            userMail: fetchedData.data.email || "",
+            loginMethod: fetchedData.data.login_method || "",
+            userRoles: fetchedData.data.role ? [{ name: fetchedData.data.role, status: true }] : [],
+            createdOn: fetchedData.data.Created_ON || "",
+            createdBy: fetchedData.data.Created_BY || "",
+            approvedOn: fetchedData.data.Approved_On || "",
+            approvedBy: fetchedData.data.Approved_By || "",
+          });
+          // Set userRolesData for editing
+          if (fetchedData.data.role) {
+            setUserRolesData([{ roleName: fetchedData.data.role, active: true }]);
+          }
         }
         setLoading(false);
-        
-    
       } catch (err) {
         console.error("Error fetching User info:", err);
         setError("Failed to load user information. Please try again later.")
@@ -83,26 +118,57 @@ const UserInfo = () => {
   }, [user_id]);
 
   const toggleEdit = () => {
-    // setIsEditing(!isEditing);
-    // setEmailError("");
+    setIsEditing(!isEditing);
+    setEmailError("");
   };
 
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
-  //   if (name === "userMail") {
-  //     setEmailError("");
-  //   }
-  // };
+    if (name === "userMail") {
+      setEmailError("");
+    }
+  };
 
-  // const isValidEmail = (email) => {
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //   return emailRegex.test(email);
-  // };
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleSave = () => {
+    if (!formData.userMail.trim()) {
+      setEmailError("User Mail is required");
+      return;
+    } else if (!isValidEmail(formData.userMail)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+
+    toggleEdit();
+  };
+
+  const addUserRole = () => {
+    if (
+      selectedRole &&
+      !userRolesData.some((item) => item.roleName === selectedRole)
+    ) {
+      setUserRolesData([
+        ...userRolesData,
+        { roleName: selectedRole, active: false },
+      ]);
+      setSelectedRole("");
+    }
+  };
+
+  const toggleUserRole = (index) => {
+    const updatedData = [...userRolesData];
+    updatedData[index].active = !updatedData[index].active;
+    setUserRolesData(updatedData);
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -115,40 +181,10 @@ const UserInfo = () => {
     return `${year}-${month}-${day}`;
   };
 
-  // const handleSave = () => {
-  //   if (!formData.userMail.trim()) {
-  //     setEmailError("User Mail is required");
-  //     return;
-  //   } else if (!isValidEmail(formData.userMail)) {
-  //     setEmailError("Please enter a valid email address");
-  //     return;
-  //   }
-
-  //   toggleEdit();
-  // };
-
-  // const addUserRole = () => {
-  //   if (
-  //     selectedRole &&
-  //     !userRolesData.some((item) => item.roleName === selectedRole)
-  //   ) {
-  //     setUserRolesData([
-  //       ...userRolesData,
-  //       { roleName: selectedRole, active: false },
-  //     ]);
-  //     setSelectedRole("");
-  //   }
-  // };
-
-  // const startIndex = currentPage * rowsPerPage;
-  // const endIndex = startIndex + rowsPerPage;
-  // const paginatedData = userRolesData.slice(startIndex, endIndex);
-
-  // const toggleUserRole = (index) => {
-  //   const updatedData = [...userRolesData];
-  //   updatedData[index].active = !updatedData[index].active;
-  //   setUserRolesData(updatedData);
-  // };
+  // Pagination
+  const startIndex = currentPage * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = userRolesData.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -178,7 +214,265 @@ const UserInfo = () => {
           {/* Edit Mode UI */}
           {isEditing ? (
             <div className="space-y-4">
-             
+              <div className="flex justify-end items-center mb-4">
+                <div className="flex items-center">
+                  {/* Active or Inactive User */}
+                  <label className="inline-flex relative items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={isActive}
+                      onChange={() => setIsActive(!isActive)}
+                    />
+                    <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Edit Table */}
+              <div className="overflow-x-auto">
+                <table className="mb-6 sm:mb-8 w-full">
+                  <tbody>
+                    {/* User type */}
+                    <tr>
+                      <td className="w-1/3 sm:w-auto">
+                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                          User Type
+                        </label>
+                      </td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
+                        <label className={GlobalStyle.headingSmall}>
+                          {formData.userType || "N/A"}
+                        </label>
+                      </td>
+                    </tr>
+
+                    {/* User Mail */}
+                    <tr>
+                      <td className="w-1/3 sm:w-auto">
+                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                          User Mail
+                        </label>
+                      </td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                       <td className="w-2/3 sm:w-auto">
+                        <label className={GlobalStyle.headingSmall}>
+                          {formData.userMail || "N/A"}
+                        </label>
+                      </td>
+                    </tr>
+
+                    {/* Login Method */}
+                    <tr>
+                      <td className="w-1/3 sm:w-auto">
+                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                          Login Method
+                        </label>
+                      </td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
+                        <label className={GlobalStyle.headingSmall}>
+                          {formData.loginMethod || "N/A"}
+                        </label>
+                      </td>
+                    </tr>
+
+                    {/* User Role Dropdown with Add Button */}
+                    <tr>
+                      <td className="w-1/3 sm:w-auto">
+                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                          User Role
+                        </label>
+                      </td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
+                        <div className="flex items-center space-x-2">
+                          <select
+                            className={`${GlobalStyle.selectBox} flex-1`}
+                            value={selectedRole}
+                            onChange={(e) => setSelectedRole(e.target.value)}
+                          >
+                            <option value="">Select User Role</option>
+                            {availableRoles.map((role, index) => (
+                              <option key={index} value={role.role_name}>
+                                {role.role_name}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            className="bg-white rounded-full p-1 border border-gray-300 shrink-0"
+                            onClick={addUserRole}
+                            title="Add User Role"
+                            disabled={!selectedRole}
+                          >
+                            <img src={add} alt="Add" className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* User Roles Table */}
+                    <tr>
+                      <td colSpan="3">
+                        <div className="mb-4">
+                          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                            <table className={GlobalStyle.table}>
+                              <thead className={GlobalStyle.thead}>
+                                <tr>
+                                  <th scope="col" className={GlobalStyle.tableHeader}>
+                                    User Roles
+                                  </th>
+                                  <th scope="col" className={GlobalStyle.tableHeader}></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {paginatedData.length > 0 ? (
+                                  paginatedData.map((row, index) => (
+                                    <tr
+                                      key={index}
+                                      className={`${
+                                        index % 2 === 0
+                                          ? GlobalStyle.tableRowEven
+                                          : GlobalStyle.tableRowOdd
+                                      } border-b`}
+                                    >
+                                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+                                        <span>{row.roleName}</span>
+                                      </td>
+                                      <td className={GlobalStyle.tableData}>
+                                        <div className="flex justify-center items-center">
+                                          <label className="inline-flex relative items-center cursor-pointer">
+                                            <input
+                                              type="checkbox"
+                                              className="sr-only peer"
+                                              checked={row.active}
+                                              onChange={() => toggleUserRole(index)}
+                                            />
+                                            <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                          </label>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))
+                                ) : (
+                                  <tr>
+                                    <td colSpan="2" className="text-center py-4">
+                                      No results found
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <tr className="h-4"></tr>
+
+                    {/* Created On */}
+                    <tr>
+                      <td className="w-1/3 sm:w-auto">
+                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                          Created On
+                        </label>
+                      </td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
+                        <label className={GlobalStyle.headingSmall}>
+                          {formatDate(formData.createdOn) || "N/A"}
+                        </label>
+                      </td>
+                    </tr>
+
+                    {/* Created by */}
+                    <tr>
+                      <td className="w-1/3 sm:w-auto">
+                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                          Created By
+                        </label>
+                      </td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
+                        <label className={GlobalStyle.headingSmall}>
+                          {formData.createdBy || "N/A"}
+                        </label>
+                      </td>
+                    </tr>
+
+                    {/* Approved on */}
+                    <tr>
+                      <td className="w-1/3 sm:w-auto">
+                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                          Approved On
+                        </label>
+                      </td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
+                        <label className={GlobalStyle.headingSmall}>
+                          {formatDate(formData.approvedOn) || "N/A"}
+                        </label>
+                      </td>
+                    </tr>
+
+                    {/* Approved by */}
+                    <tr>
+                      <td className="w-1/3 sm:w-auto">
+                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                          Approved By
+                        </label>
+                      </td>
+                      <td className="text-center align-middle w-4 sm:w-auto">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto">
+                        <label className={GlobalStyle.headingSmall}>
+                          {formData.approvedBy || "N/A"}
+                        </label>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                <label
+                  className={`${GlobalStyle.headingMedium} sm:w-1/4 whitespace-nowrap`}
+                >
+                  Remark
+                </label>
+                <span className="hidden sm:inline-block">:</span>
+                <textarea
+                  className={`${GlobalStyle.inputText} w-full h-40`}
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                />
+              </div>
+
+              {/* Save button in edit mode */}
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={handleSave}
+                  className={GlobalStyle.buttonPrimary}
+                >
+                  Save
+                </button>
+              </div>
             </div>
           ) : (
             <>
@@ -197,7 +491,6 @@ const UserInfo = () => {
               <div className="overflow-x-auto">
                 <table className="mb-6 sm:mb-8 w-full">
                   <tbody>
-
                     {/* User type */}
                     <tr>
                       <td className="w-1/3 sm:w-auto">
@@ -264,57 +557,39 @@ const UserInfo = () => {
                       <td colSpan="3">
                         <div className="mb-4">
                           {/* User Roles Table */}
-                          <div
-                            className={`${GlobalStyle.tableContainer} overflow-x-auto`}
-                          >
+                          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
                             <table className={GlobalStyle.table}>
                               <thead className={GlobalStyle.thead}>
                                 <tr>
-                                  <th
-                                    scope="col"
-                                    className={GlobalStyle.tableHeader}
-                                  >
+                                  <th scope="col" className={GlobalStyle.tableHeader}>
                                     User Roles
                                   </th>
-                                  <th
-                                    scope="col"
-                                    className={GlobalStyle.tableHeader}
-                                  ></th>
+                                  <th scope="col" className={GlobalStyle.tableHeader}></th>
                                 </tr>
                               </thead>
                               <tbody>
-                                {userInfo.role ?
-                                    <tr
-                                      className={`${
-                                        GlobalStyle.tableRowOdd
-                                      } border-b`}
-                                    >
-                                      <td
-                                        className={`${GlobalStyle.tableData} flex justify-center items-center`}
-                                      >
-                                        <span>{userInfo.role}</span>
-                                      </td>
-                                      <td className={GlobalStyle.tableData}>
-                                        <div className="flex justify-center items-center">
-                                          <img 
-                                            src={completeIcon} 
-                                            alt="Active" 
-                                            className="h-5 w-5 lg:h-6 lg:w-6"
-                                          />
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  
-                                : 
+                                {userInfo.role ? (
+                                  <tr className={`${GlobalStyle.tableRowOdd} border-b`}>
+                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+                                      <span>{userInfo.role}</span>
+                                    </td>
+                                    <td className={GlobalStyle.tableData}>
+                                      <div className="flex justify-center items-center">
+                                        <img 
+                                          src={completeIcon} 
+                                          alt="Active" 
+                                          className="h-5 w-5 lg:h-6 lg:w-6"
+                                        />
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ) : (
                                   <tr>
-                                    <td
-                                      colSpan="2"
-                                      className="text-center py-4"
-                                    >
+                                    <td colSpan="2" className="text-center py-4">
                                       No results found
                                     </td>
                                   </tr>
-                                }
+                                )}
                               </tbody>
                             </table>
                           </div>
@@ -337,7 +612,7 @@ const UserInfo = () => {
                           {formatDate(userInfo.Created_ON) || "N/A"}
                         </label>
                       </td>
-                    </tr>                   
+                    </tr>
 
                     {/* Created by */}
                     <tr>
@@ -396,7 +671,6 @@ const UserInfo = () => {
           )}
         </div>
       </div>
-
       {/* End button */}
       <div className="flex justify-end pr-0 sm:pr-40 mt-4">
         {!isEditing && !showEndSection && (
