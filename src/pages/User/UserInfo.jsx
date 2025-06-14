@@ -10,13 +10,14 @@ Notes:The following page conatins the code for the User Info Screen */
 import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/edit-info.svg";
-import add from "../../assets/images/add.svg";
+import add from "../../assets/images/user-add.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import { getUserDetailsById } from "../../services/user/user_services";
 import completeIcon from "../../assets/images/complete.png";
+import remove from "../../assets/images/remove.svg";
 
 const UserInfo = () => {
   const location = useLocation();
@@ -167,6 +168,12 @@ const UserInfo = () => {
   const toggleUserRole = (index) => {
     const updatedData = [...userRolesData];
     updatedData[index].active = !updatedData[index].active;
+    setUserRolesData(updatedData);
+  };
+
+  const removeUserRole = (index) => {
+    const updatedData = [...userRolesData];
+    updatedData.splice(index, 1);
     setUserRolesData(updatedData);
   };
 
@@ -331,7 +338,8 @@ const UserInfo = () => {
                                   <th scope="col" className={GlobalStyle.tableHeader}>
                                     User Roles
                                   </th>
-                                  <th scope="col" className={GlobalStyle.tableHeader}></th>
+                                  <th scope="col" className={GlobalStyle.tableHeader}>  </th>
+                                  
                                 </tr>
                               </thead>
                               <tbody>
@@ -348,24 +356,23 @@ const UserInfo = () => {
                                       <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
                                         <span>{row.roleName}</span>
                                       </td>
+                                    
                                       <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center items-center">
-                                          <label className="inline-flex relative items-center cursor-pointer">
-                                            <input
-                                              type="checkbox"
-                                              className="sr-only peer"
-                                              checked={row.active}
-                                              onChange={() => toggleUserRole(index)}
-                                            />
-                                            <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                                          </label>
+                                          <button
+                                            className="bg-white rounded-full p-1 border border-gray-300"
+                                            onClick={() => removeUserRole(index)}
+                                            title="Remove User Role"
+                                          >
+                                            <img src={remove} alt="Remove" className="w-5 h-5" />
+                                          </button>
                                         </div>
                                       </td>
                                     </tr>
                                   ))
                                 ) : (
                                   <tr>
-                                    <td colSpan="2" className="text-center py-4">
+                                    <td colSpan="3" className="text-center py-4">
                                       No results found
                                     </td>
                                   </tr>
