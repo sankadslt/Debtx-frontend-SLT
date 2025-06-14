@@ -3,7 +3,7 @@ import { getLoggedUserId } from "../auth/authService";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
 const INCIDENT_URL = `${BASE_URL}/incident`;
-const API_BASE = "https://debtx.slt.lk";
+const API_BASE = "https://debtx.slt.lk:6500";
 
 /**
  * Creates a new incident by calling the Create_Incident API.
