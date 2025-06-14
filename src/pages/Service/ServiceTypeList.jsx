@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { FaSearch } from "react-icons/fa";
 import editIcon from "../../assets/images/edit-info.svg";
+import Swal from "sweetalert2";
 import {
 	changeServiceStatus,
 	registerServiceType,
@@ -55,6 +56,17 @@ export default function ServiceTypeList() {
 	};
 
 	const handleFilterButton = () => {
+		if (!currentStatus) {
+			Swal.fire({
+				title: "Warning",
+				text: "No status selected. Please select a status to filter.",
+				icon: "warning",
+				allowOutsideClick: false,
+				allowEscapeKey: false,
+			});
+			return;
+		}
+
 		const filtered = serviceData.filter((item) =>
 			currentStatus ? item.Status === currentStatus : true
 		);
@@ -78,26 +90,40 @@ export default function ServiceTypeList() {
 
 	const handleServiceTypeSubmit = async (e) => {
 		e.preventDefault();
-		if (!serviceType.trim()) return;
+
+		if (!serviceType.trim()) {
+			Swal.fire({
+				title: "Warning",
+				text: "Service type cannot be empty.",
+				icon: "warning",
+				allowOutsideClick: false,
+				allowEscapeKey: false,
+			});
+			return;
+		}
 
 		try {
 			await registerServiceType({ service_type: serviceType });
-			alert("Service type submitted successfully!");
+			Swal.fire({
+				title: "Success",
+				text: "Service type submitted successfully!",
+				icon: "success",
+				timer: 1500,
+				showConfirmButton: false,
+			});
+
 			setServiceType("");
+
 			const response = await getAllServices();
-			if (Array.isArray(response.data)) {
-				setServiceData(response.data);
-				setFilteredData(response.data);
-			} else if (response.data && Array.isArray(response.data.services)) {
-				setServiceData(response.data.services);
-				setFilteredData(response.data.services);
-			} else {
-				setServiceData([]);
-				setFilteredData([]);
-			}
+			setServiceData(response.data);
+			setFilteredData(response.data);
 		} catch (error) {
 			console.error("Error submitting service type:", error);
-			alert("Error submitting service type.");
+			Swal.fire({
+				title: "Error",
+				text: "Failed to submit service type.",
+				icon: "error",
+			});
 		}
 	};
 
