@@ -170,35 +170,44 @@ export default function ROList() {
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>RO List</h2>
 
-            {/* Filter */}
-            <div className={`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
-                <div className="flex gap-4 justify-end">
-                    <select
-                        name="status"
-                        value={selectedStatus}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
-                        className={`${GlobalStyle.selectBox} w-32 md:w-40`}
-                    >
-                        <option value="" disabled>Select Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                        <option value="Terminate">Terminate</option>
-                    </select>
-                    <button onClick={handleFilterButton} className={GlobalStyle.buttonPrimary}>Filter</button>
-                    <button onClick={handleClear} className={GlobalStyle.buttonRemove}>Clear</button>
-                </div>
-            </div>
+            <div className="w-full mb-2 mt-4">
 
-            {/* Search */}
-            <div className="flex justify-start mt-10 mb-4">
-                <div className={GlobalStyle.searchBarContainer}>
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className={GlobalStyle.inputSearch}
-                    />
-                    <FaSearch className={GlobalStyle.searchBarIcon} />
+                <div className="flex justify-between items-center w-full mb-2">
+
+                    {/* Search */}
+                    <div className="flex justify-start mt-10 mb-4">
+                        <div className={GlobalStyle.searchBarContainer}>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={GlobalStyle.inputSearch}
+                            />
+                            <FaSearch className={GlobalStyle.searchBarIcon} />
+                        </div>
+                    </div>
+
+                    {/* Filter */}
+                    <div className={`${GlobalStyle.cardContainer} w-auto`}>
+                        <div className="flex justify-end items-center space-x-4">
+                            <select
+                                name="status"
+                                value={selectedStatus}
+                                onChange={(e) => setSelectedStatus(e.target.value)}
+                                className={`${GlobalStyle.selectBox} w-32 md:w-40`}
+                            >
+                                <option value="" disabled>Select Status</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Terminate">Terminate</option>
+                            </select>
+                            <button onClick={handleFilterButton} className={GlobalStyle.buttonPrimary}>Filter</button>
+                            <button onClick={handleClear} className={GlobalStyle.buttonRemove}>Clear</button>
+                        </div>
+                    </div>
+
+
+
                 </div>
             </div>
 
@@ -228,7 +237,7 @@ export default function ROList() {
                                                 : GlobalStyle.tableRowOdd
                                         }
                                     >
-                                        <td className={`${GlobalStyle.tableData} text-black hover:underline cursor-pointer`}>
+                                        <td className={`${GlobalStyle.tableData}`}>
                                             {item.ro_id || "N/A"}
                                         </td>
                                         <td className={GlobalStyle.tableData}>{item.drc_name || "N/A"}</td>
