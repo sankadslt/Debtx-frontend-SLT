@@ -62,7 +62,7 @@ const UserList = () => {
     try {
       const requestData = {
         page: currentPage + 1, // Backend expects 1-based page numbers
-        ...(appliedFilters.userRole && { user_roles: appliedFilters.userRole}),
+        ...(appliedFilters.userRole && { user_role: appliedFilters.userRole}),
         ...(appliedFilters.userType && { user_type: appliedFilters.userType}),
         ...(appliedFilters.status !== "" && {
         user_status: appliedFilters.status
@@ -70,17 +70,19 @@ const UserList = () => {
       };
 
       const response = await getAllUserDetails(requestData);
+      console.log(response);
       
+
       if (response.status === "success") {
         // Transform backend data to match frontend structure
         const transformedData = response.data.map(user => ({
           user_id: user.user_id,
           status: user.user_status,
           user_type: user.user_type?.toUpperCase() || "",
-          user_role: user.user_roles?.map(r => r.user_role).join(", ") || "",
-          user_name: user.user_name,
-          user_email: user.user_mail,
-          created_on: new Date(user.created_dtm).toLocaleDateString('en-CA')
+          user_role: user.role,
+          user_name: user.username,
+          user_email: user.email,
+          created_on: new Date(user.Created_ON).toLocaleDateString('en-CA')
         }));
         
         setRoData(transformedData);
@@ -278,9 +280,9 @@ const UserList = () => {
                 style={{ color: userType === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>User Type</option>
-                <option value="SLT" style={{ color: "black" }}>SLT</option>
-                <option value="DRC" style={{ color: "black" }}>DRC</option>
-                <option value="RO" style={{ color: "black" }}>RO</option>
+                <option value="Slt" style={{ color: "black" }}>SLT</option>
+                <option value="Drcuser" style={{ color: "black" }}>DRC User</option>
+                <option value="ro" style={{ color: "black" }}>RO</option>
               </select>
             </div>
             
