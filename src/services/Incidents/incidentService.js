@@ -2,7 +2,7 @@ import axios from "axios";
 import { getLoggedUserId } from "../auth/authService";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
-const INCIDENT_URL = `${BASE_URL}/incident`;
+const INCIDENT_URL = `${BASE_URL}`;
 
 /**
  * Creates a new incident by calling the Create_Incident API.
@@ -131,7 +131,7 @@ export const getDirectLODIncidentsCount = async () => {
 export const Create_Case_for_incident = async (requestData) => {
   try {
      console.log("Request Data being sent:", requestData);
-    const response = await axios.post(`${INCIDENT_URL}/Create_Cases_From_Incident`, requestData);
+    const response = await axios.post(`${INCIDENT_URL}/a6/Create_Cases_From_Incident`, requestData);
     return response.data; // Returns the created cases
   } catch (error) {
     console.error("Error in Create_Case_for_incident service:", error.message);
