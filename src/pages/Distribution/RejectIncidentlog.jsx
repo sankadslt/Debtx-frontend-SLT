@@ -105,7 +105,8 @@ export default function RejectIncidentlog() {
             ToDate:toDate
           }
           const response = await List_Reject_Incident(filters);
-          const formattedData = response?.data.map((item) => {
+          console.log("Response from List_Reject_Incident:", response);
+          try {const formattedData = response?.data.map((item) => {
             
             const createdDateStr = typeof item.Created_Dtm === "string" ? item.Created_Dtm.replace(" ", "T") : item.Created_Dtm;
             const rejectedDateStr = typeof item.Rejected_Dtm === "string" ? item.Rejected_Dtm.replace(" ", "T") : item.Rejected_Dtm;
@@ -118,7 +119,7 @@ export default function RejectIncidentlog() {
               filtered_reason: item.Filtered_Reason || "N/A",
               source_type: item?.Source_Type || "N/A",
               reject_by: item.Rejected_By ||"N/A",
-              reject_dtm: isNaN(rejectedDate) ? "N/A" : rejectedDate.toLocaleString("en-GB", {
+              reject_dtm: rejectedDate instanceof Date && !isNaN(rejectedDate) ? rejectedDate.toLocaleString("en-GB", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric", // Ensures two-digit year (YY)
@@ -127,8 +128,8 @@ export default function RejectIncidentlog() {
                 second: "2-digit",
                 hour12: true, // Keeps AM/PM format
 
-              }),
-              created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString("en-GB", {
+              }) : "N/A",
+              created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? createdDate.toLocaleString("en-GB", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric", // Ensures two-digit year (YY)
@@ -136,11 +137,14 @@ export default function RejectIncidentlog() {
                 minute: "2-digit",
                 second: "2-digit",
                 hour12: true, // Keeps AM/PM format
-              }),
+              })  : "N/A",
             };
           });
           setTableData(formattedData);
-          setIsLoading(false);
+          setIsLoading(false);} catch (error) {
+            console.error("Error formatting data:", error);
+            
+          }
       } catch {
           // setError("Failed to fetch DRC details. Please try again later.");
           setIsLoading(false);
