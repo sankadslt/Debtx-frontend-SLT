@@ -218,7 +218,7 @@ const RtomInfo = () => {
                                 <td> : </td>
                                 <td>
                                     <label>
-                                        {rtomDetails.rtom_mobile_no?.[0]?.mobile_number || "N/A"}
+                                        {rtomDetails.rtom_mobile_no || "N/A"}
                                     </label>
                                 </td>
                             </tr>
@@ -231,7 +231,7 @@ const RtomInfo = () => {
                                 <td> : </td>
                                 <td>
                                     <label>
-                                        {rtomDetails.rtom_telephone_no?.[0]?.telephone_number || "N/A"}
+                                        {rtomDetails.rtom_telephone_no || "N/A"}
                                     </label>
                                 </td>
                             </tr>
