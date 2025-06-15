@@ -1,157 +1,118 @@
-//frontend
-/*Purpose:
-Created Date: 2025-05-25
-Created By: Nimesha Kavindhi (nimeshakavindhi4@gmail.com)
-Version: React v18
-ui number : 10.1
-Dependencies: Tailwind CSS
-Related Files: 
-Notes: This template uses Tailwind CSS */
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { fetchRTOMs } from "../../services/RTOM/Rtom_services";
 import Swal from "sweetalert2";
-import editImg from "../../assets/images/more.svg";
-import ListImg from "../../assets/images/ConfigurationImg/list.png";
 
-import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
-import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
-import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
-import { listAllDRCDetails } from "../../services/drc/Drc";
-import { Link } from "react-router-dom";
+import ActiveIcon from "../../assets/images/rtom/ROTM_Active.png";
+import InactiveIcon from "../../assets/images/rtom/ROTM_Inactive.png";
+import TerminateIcon from "../../assets/images/rtom/ROTM_Terminate.png";
+import MoreIcon from "../../assets/images/more.svg";
 
-const DRCList = () => {
-  const [currentPage, setCurrentPage] = useState(0);
+const RtomList = () => {
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const rowsPerPage = 8;
-  const [DRCStatus, setDRCStatus] = useState("");
+  const [tempSearchQuery, setTempSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [appliedStatus, setAppliedStatus] = useState("");
+  const [filtersApplied, setFiltersApplied] = useState(false);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFiltered, setIsFiltered] = useState(false);
-  const navigate = useNavigate();
-
-  // const getStatusIcon = (status) => {
-  //     switch (status?.toLowerCase()) {
-  //         case "incident open":
-  //             return "/src/assets/images/incidents/Incident_Open.png";
-  //         case "incident reject":
-  //             return "/src/assets/images/incidents/Incident_Reject.png";
-  //         case "incident inprogress":
-  //             return "/src/assets/images/incidents/Incident_InProgress.png";
-  //         default:
-  //             return null;
-  //     }
-  // };
-
-  // const renderStatusIcon = (status) => {
-  //     const iconPath = getStatusIcon(status);
-
-  //     if (!iconPath) {
-  //         return <span>{status}</span>;
-  //     }
-
-  //     return (
-  //         <img
-  //             src={iconPath}
-  //             alt={status}
-  //             className="w-6 h-6"
-  //             title={status}
-  //         />
-  //     );
-  // };
+  const rowsPerPage = 10;
 
   const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return activeIcon;
-      case "inactive":
-        return inactiveIcon;
-      case "terminate":
-        return terminatedIcon;
+    switch (status) {
+      case "Active":
+        return ActiveIcon;
+      case "Inactive":
+        return InactiveIcon;
+      case "Terminate":
+        return TerminateIcon;
       default:
-        return null;
-    }
-  };
-
-  const renderStatusIcon = (status) => {
-    const iconPath = getStatusIcon(status);
-
-    if (!iconPath) {
-      return <span>{status}</span>;
-    }
-
-    return (
-      <img src={iconPath} alt={status} className="w-6 h-6" title={status} />
-    );
-  };
-
-  // Updated fetchDRCList function to use dummy data
-  const fetchDRCList = async (filters) => {
-    try {
-      console.log("Sending filters:", filters);
-
-      // Call the actual API endpoint with filters
-      const response = await listAllDRCDetails(filters.Status || "");
-
-      // Map the API response to match your frontend data structure
-      return response.map((drc) => ({
-        DRCID: drc.id,
-        Status: drc.status,
-        BusinessRegNo: drc.business_registration_number,
-        DRCName: drc.drc_name || drc.value,
-        ContactNo: drc.teli_no || drc.tel,
-        ServiceCount: drc.service_count,
-        ROCount: drc.ro_count || drc.roCount || 0,
-        RTOMCount: drc.rtom_count || drc.rtomCount || 0,
-      }));
-    } catch (error) {
-      console.error("Detailed error:", error);
-      throw new Error(
-        error.response?.data?.error || "An error occurred while fetching data"
-      );
-    }
-  };
-
-  const fetchData = async (filters) => {
-    setIsLoading(true);
-    try {
-      const DRCList = await fetchDRCList(filters);
-      setData(DRCList);
-      setIsFiltered(DRCList.length > 0);
-    } catch (error) {
-      setIsFiltered(false);
-      Swal.fire(
-        "Error",
-        error.message || "No DRC is matching the criteria.",
-        "error"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleFilter = async () => {
-    try {
-      const filters = {
-        Status: DRCStatus,
-      };
-      await fetchData(filters);
-    } catch (error) {
-      Swal.fire(
-        "Error",
-        error.message || "No DRS is matching the criteria",
-        "error"
-      );
+        return ActiveIcon;
     }
   };
 
   useEffect(() => {
-    fetchData({});
-  }, []);
+    const loadRTOMs = async () => {
+      setIsLoading(true);
+      try {
+        const rtoms = await fetchRTOMs({
+          rtom_status: filtersApplied ? appliedStatus : "",
+          pages: currentPage,
+        });
+        setData(rtoms);
+      } catch (error) {
+        Swal.fire("Error", error.message || "Failed to load RTOMs", "error");
+        setData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const HandleAddDRC = () => navigate("/pages/DRC/Add_DRC");
+    loadRTOMs();
+  }, [currentPage, appliedStatus, filtersApplied]);
+
+  const handleFilter = () => {
+    setFiltersApplied(true);
+    setAppliedStatus(statusFilter);
+    setSearchQuery(tempSearchQuery);
+    setCurrentPage(1);
+  };
+
+  const handleClear = () => {
+    setFiltersApplied(false);
+    setAppliedStatus("");
+    setStatusFilter("");
+    setSearchQuery("");
+    setTempSearchQuery("");
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setTempSearchQuery(value);
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleAdd = () => {
+    navigate("/pages/Rtom/AddRtom");
+  };
+
+  const handleRowClick = (rtomId) => {
+    navigate(`/pages/Rtom/RtomInfo/${rtomId}`);
+  };
+
+  const filteredData = data.filter((row) => {
+    const matchesSearch =
+      searchQuery === "" ||
+      Object.values(row)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      !filtersApplied ||
+      appliedStatus === "" ||
+      row.rtom_status === appliedStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const pages = Math.ceil(filteredData.length / rowsPerPage);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1);
+  };
 
   if (isLoading) {
     return (
@@ -161,179 +122,163 @@ const DRCList = () => {
     );
   }
 
-  const filteredData = data.filter(
-    (row) =>
-      String(row.DRCID).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.Status).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.BusinessRegNo)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      String(row.DRCName).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.ContactNo).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.ServiceCount)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      String(row.ROCount).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.RTOMCount).toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-
-  const handlePrevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < pages - 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  // Add this function to handle image click
-  const handleEditClick = (drcId) => {
-    navigate(`/pages/DRC/DRCInfo`, {
-      state: { drcId: drcId },
-    });
-  };
-
   return (
     <div className={GlobalStyle.fontPoppins}>
-      <h2 className={GlobalStyle.headingLarge}>DRC List</h2>
-
-      <div className="flex justify-end mt-6">
-        <button className={GlobalStyle.buttonPrimary} onClick={HandleAddDRC}>
+      <h2 className={GlobalStyle.headingLarge}> RTOM List </h2>
+      <div className="flex justify-end mt-2">
+        <button onClick={handleAdd} className={GlobalStyle.buttonPrimary}>
           Add
         </button>
       </div>
 
-      <div className="flex items-center justify-between w-full mb-8 mt-8">
-        <div className={GlobalStyle.searchBarContainer}>
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={GlobalStyle.inputSearch}
-          />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
-        </div>
-        <div className="flex items-center space-x-6">
-          <select
-            value={DRCStatus}
-            onChange={(e) => setDRCStatus(e.target.value)}
-            className={GlobalStyle.selectBox}
-          >
-            <option value="" disabled hidden>
-              Select Status
-            </option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-            <option value="Ended">Terminated</option>
-          </select>
+      <div className="w-full mb-2 mt-4">
+        <div className="flex flex-wrap justify-between items-center w-full space-y-4 md:space-y-0">
+          <div className={`${GlobalStyle.searchBarContainer} md:w-auto `}>
+            <div className="flex items-center md:w-auto">
+              <input
+                type="text"
+                placeholder=" "
+                value={tempSearchQuery}
+                onChange={handleSearchChange}
+                className={`w-full md:w-auto${GlobalStyle.inputSearch}`}
+              />
+              <FaSearch className={GlobalStyle.searchBarIcon} />
+            </div>
+          </div>
 
-          <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>
-            Filter
-          </button>
+          <div className={`${GlobalStyle.cardContainer} w-full md:w-auto`}>
+            <div className="flex flex-wrap justify-end items-center space-x-4 md:space-x-4 w-full ">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className={`${GlobalStyle.selectBox} w-full md:w-auto`}
+              >
+                <option value="" disabled hidden>
+                  All Status
+                </option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Terminate">Terminate</option>
+              </select>
+
+              <button
+                onClick={handleFilter}
+                className={GlobalStyle.buttonPrimary}
+              >
+                Filter
+              </button>
+
+              <button
+                className={GlobalStyle.buttonRemove}
+                onClick={handleClear}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className={GlobalStyle.tableContainer}>
-        <table className={GlobalStyle.table}>
-          <thead className={GlobalStyle.thead}>
-            <tr>
-              <th className={GlobalStyle.tableHeader}>DRC ID</th>
-              <th className={GlobalStyle.tableHeader}>Status</th>
-              <th className={GlobalStyle.tableHeader}>Bussiness Reg. No.</th>
-              <th className={GlobalStyle.tableHeader}>DRC Name</th>
-              <th className={GlobalStyle.tableHeader}>Conatact No.</th>
-              <th className={GlobalStyle.tableHeader}>Service Count</th>
-              <th className={GlobalStyle.tableHeader}>RO Count</th>
-              <th className={GlobalStyle.tableHeader}>RTOM Count</th>
-              <th className={GlobalStyle.tableHeader}></th>
-            </tr>
-          </thead>
-         <tbody>
-             {paginatedData.length > 0 ? (
-              paginatedData.map((log, index) => (
-             <tr
-                 key={index}
-                 className={`${
-                 index % 2 === 0
-                     ? "bg-white bg-opacity-75"
-                     : "bg-gray-50 bg-opacity-50"
+      <div className="flex flex-col">
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+          <table className={GlobalStyle.table}>
+            <thead className={GlobalStyle.thead}>
+              <tr>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  RTOM Id
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Status
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Billing Center Code
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Name
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Telephone No
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((rtom, index) => (
+                <tr
+                  key={index}
+                  className={`${
+                    index % 2 === 0
+                      ? "bg-white bg-opacity-75"
+                      : "bg-gray-50 bg-opacity-50"
                   } border-b`}
-             >
+                >
+                  <td className={GlobalStyle.tableData}>{rtom.rtom_id}</td>
+                  <td
+                    className={`${GlobalStyle.tableData} flex justify-center items-center`}
+                  >
+                    <div className="relative group">
+                      <img
+                        src={getStatusIcon(rtom.rtom_status)}
+                        alt={rtom.rtom_status}
+                        className="w-6 h-6"
+                      />
+                      {/* Tooltip */}
+                      <div className="absolute top-full right-0 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                        {rtom.rtom_status}
+                        {/* Tooltip arrow */}
+                        <div className="absolute bottom-full right-2 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-800"></div>
+                      </div>
+                    </div>
+                  </td>
 
-        <td className={GlobalStyle.tableData}>{log.DRCID}</td>
-        <td className={GlobalStyle.tableData}>
-          {renderStatusIcon(log.Status)}
-        </td>
-        <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
-        <td className={GlobalStyle.tableData}>{log.DRCName}</td>
-        <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
-        <td className={GlobalStyle.tableData}>
-          <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}`}>
-            {log.ServiceCount}
-          </Link>
-        </td>
-        <td className={GlobalStyle.tableData}>
-          <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}`}>
-            {log.ROCount}
-          </Link>
-        </td>
-        <td className={GlobalStyle.tableData}>
-          <Link to={`/pages/DRC/DRCDetails?drcid=${log.DRCID}`}>
-            {log.RTOMCount}
-          </Link>
-        </td>
-        <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
-          <img
-            src={editImg}
-            alt="Edit"
-            title="Edit"
-            className="w-6 h-6 cursor-pointer"
-            onClick={() => handleEditClick(log.DRCID)}
-          />
-          <img
-            src={ListImg}
-            alt="List"
-            title="List"
-            className="w-6 h-6"
-          />
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="9" className="text-center py-4">
-        No data matching the criteria.
-      </td>
-    </tr>
-  )}
-</tbody>
-        </table>
+                  <td className={GlobalStyle.tableData}>
+                    {rtom.billing_center_code}
+                  </td>
+                  <td className={GlobalStyle.tableData}>{rtom.rtom_name}</td>
+                  <td className={GlobalStyle.tableData}>
+                    {rtom.rtom_mobile_no}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                    <button
+                      onClick={() => handleRowClick(rtom.rtom_id)}
+                      className="w-6 h-6 cursor-pointer"
+                    >
+                      <img
+                        src={MoreIcon}
+                        alt="View Details"
+                        className="w-full h-full"
+                      />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filteredData.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="text-center py-4">
+                    No records found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className={GlobalStyle.navButtonContainer}>
         <button
-          className={GlobalStyle.navButton}
+          className={`${GlobalStyle.navButton} flex items-center justify-center w-10 h-10 rounded-full`}
           onClick={handlePrevPage}
-          disabled={currentPage === 0}
+          disabled={currentPage === 1}
         >
           <FaArrowLeft />
         </button>
-        <span className="text-gray-700">
-          Page {currentPage + 1} of {pages}
-        </span>
+        <span>Page {currentPage}</span>
         <button
-          className={GlobalStyle.navButton}
+          className={`${GlobalStyle.navButton} flex items-center justify-center w-10 h-10 rounded-full`}
           onClick={handleNextPage}
-          disabled={currentPage === pages - 1}
+          disabled={filteredData.length < rowsPerPage}
         >
           <FaArrowRight />
         </button>
@@ -342,5 +287,4 @@ const DRCList = () => {
   );
 };
 
-export default DRCList;
-
+export default RtomList;

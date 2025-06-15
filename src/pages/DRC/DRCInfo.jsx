@@ -55,15 +55,16 @@ const DRCInfo = () => {
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
-        setLoading(true);
-        const drcIdToUse = drcId;
-        const data = await getDebtCompanyByDRCID(drcIdToUse);
+          setLoading(true);
+      const drcIdToUse = drcId;
+      const data = await getDebtCompanyByDRCID(drcIdToUse);
 
-        if (data) {
-          setCompanyData(data);
-        }
-        setLoading(false);
-      } catch (err) {
+      if (data) {
+        setCompanyData(data);
+        console.log("Current DRC Status:", data.drc_status); // Check status
+      }
+      setLoading(false);
+    } catch (err) {
         console.error("Failed to fetch DRC data:", err);
         setError("Failed to load DRC information. Please try again later.");
         setLoading(false);
@@ -574,29 +575,38 @@ const DRCInfo = () => {
           </div>
         </div>
       )}
+      
 
-      {!showEndFields && (
-      <div className="flex justify-between mt-4 w-full px-8">
-       <button
-                          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
-                          onClick={goBack}
-                        >
-                          <FaArrowLeft />
-                          <span>Back</span>
-                        </button>
+        {!showEndFields && (
+          <div className="flex justify-between mt-4 w-full px-8">
+              <button
+                className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                onClick={goBack}
+              >
+                <FaArrowLeft />
+                <span>Back</span>
+              </button>
 
-        <button
-          onClick={() => setShowEndFields(true)}
-          className={GlobalStyle.buttonPrimary}
-        >
-          End
-        </button>
+    
+           <button
+                    onClick={() => {
+                      if (companyData.drc_status !== "Terminate") {
+                        setShowEndFields(true);
+                    }
+                }}
+                className={`${GlobalStyle.buttonPrimary}  ${
+                      companyData.drc_status === "Terminate" 
+                    ? "opacity-50 cursor-not-allowed " 
+                    : ""
+                }`}
+                    disabled={companyData.drc_status === "Terminate"}
+              >
+                End
+         </button>
       </div>
-
-        
-      )}
-    </div>
-  );
+  )}
+      </div>
+    );
 };
 
 export default DRCInfo;
