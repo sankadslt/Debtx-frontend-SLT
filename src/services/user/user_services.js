@@ -36,3 +36,17 @@ export const getAllUserDetails = async (requestData = {}) => {
   }
 };
 
+export const updateUserDetails = async (requestData = {}) => {
+  try {
+    const response = await axios.patch(`${USER_URL}/Update_User_Details`, requestData);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all user details:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to fetch all user details",
+      }
+    );
+  }
+};
