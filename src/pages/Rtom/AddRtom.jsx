@@ -39,8 +39,18 @@ const AddRtom = () => {
   const isSmallMobile = useMediaQuery("(max-width: 480px)");
 
   const loadUser = async () => {
-    const user = await getLoggedUserId();
-    setUserData(user);
+    try {
+      const user = await getLoggedUserId();
+      console.log("Loaded user:", user); // Debug logging
+      setUserData(user);
+    } catch (error) {
+      console.error("Error loading user:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Authentication Error",
+        text: "Failed to load user information. Please login again.",
+      });
+    }
   };
 
   useEffect(() => {
@@ -78,12 +88,17 @@ const AddRtom = () => {
       newErrors.telephone = "Telephone number must be exactly 10 digits";
     }
 
+    if (!userData) {
+      newErrors.general = "User authentication required. Please refresh and try again.";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!validateForm()) {
       return;
     }
@@ -92,30 +107,35 @@ const AddRtom = () => {
     
     try {
       const rtomData = {
-        billingCenterCode: formData.billingCenterCode,
-        name: formData.name,
-        areaCode: formData.areaCode,
-        email: formData.email,
-        mobile: formData.mobile,
-        telephone: formData.telephone,
+        billingCenterCode: formData.billingCenterCode.trim(),
+        name: formData.name.trim(),
+        areaCode: formData.areaCode.trim(),
+        email: formData.email.trim(),
+        mobile: formData.mobile.trim(),
+        telephone: formData.telephone.trim(),
         createdBy: userData
       };
 
+      console.log("Submitting RTOM data:", rtomData); 
+
       const response = await createRTOM(rtomData);
+      
+      console.log("RTOM created successfully:", response); 
       
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "RTOM created successfully!",
+        title: "Successfully Created",
+        text: `RTOM registered successfully!`,
       }).then(() => {
         navigate("/pages/Rtom/RtomList");
       });
       
     } catch (error) {
+      console.error("Error in form submission:", error);
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: error.message || "Failed to create RTOM",
+        title: "Registration Failed",
+        text: error.message || "Failed to create RTOM. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -128,6 +148,14 @@ const AddRtom = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Clear specific field error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
   };
 
   const goBack = () => {
@@ -139,6 +167,12 @@ const AddRtom = () => {
       <h1 className={GlobalStyle.headingLarge} style={{ textAlign: isMobile ? "center" : "left" }}>
         Register new RTOM Area
       </h1>
+      
+      {errors.general && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {errors.general}
+        </div>
+      )}
       
       <div className="flex justify-center">
         <div 
@@ -172,7 +206,7 @@ const AddRtom = () => {
               { 
                 label: "Email", 
                 name: "email", 
-                type: "text", 
+                type: "email", 
                 validation: errors.email 
               }
             ].map((field) => (
@@ -198,10 +232,11 @@ const AddRtom = () => {
                     type={field.type}
                     value={formData[field.name]}
                     onChange={handleInputChange}
-                    className={GlobalStyle.inputText}
+                    className={`${GlobalStyle.inputText} ${field.validation ? 'border-red-500' : ''}`}
                     style={{
                       width: isMobile ? "100%" : "calc(100% - 13rem)"
                     }}
+                    required
                   />
                 </div>
                 {field.validation && (
@@ -265,12 +300,13 @@ const AddRtom = () => {
                     value={formData[field.name]}
                     onChange={handleInputChange}
                     onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
-                    className={GlobalStyle.inputText}
+                    className={`${GlobalStyle.inputText} ${field.validation ? 'border-red-500' : ''}`}
                     maxLength="10"
                     style={{
                       width: isMobile ? "100%" : "calc(100% - 13rem)"
                     }}
                     pattern={field.pattern}
+                    required
                   />
                 </div>
                 {field.validation && (
@@ -294,7 +330,7 @@ const AddRtom = () => {
             >
               <button 
                 type="submit" 
-                className={GlobalStyle.buttonPrimary}
+                className={`${GlobalStyle.buttonPrimary} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 style={{
                   padding: isSmallMobile ? "0.5rem 1rem" : "0.75rem 1.5rem"
                 }}
@@ -319,6 +355,7 @@ const AddRtom = () => {
           style={{ 
             padding: isSmallMobile ? "0.5rem" : "0.75rem 1rem" 
           }}
+          disabled={isSubmitting}
         >
           <FaArrowLeft /> Back
         </button>
@@ -328,11 +365,6 @@ const AddRtom = () => {
 };
 
 export default AddRtom;
-
-
-
-
-
 
 
 
