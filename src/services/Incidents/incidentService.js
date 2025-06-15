@@ -131,7 +131,7 @@ export const getDirectLODIncidentsCount = async () => {
 export const Create_Case_for_incident = async (requestData) => {
   try {
      console.log("Request Data being sent:", requestData);
-    const response = await axios.post(`https://124.43.177.52:7174/Create_Cases_From_Incident`, requestData);
+    const response = await axios.post(`https://debtx.slt.lk/Create_Cases_From_Incident`, requestData);
     return response.data; // Returns the created cases
   } catch (error) {
     console.error("Error in Create_Case_for_incident service:", error.message);
@@ -143,16 +143,34 @@ export const Create_Case_for_incident = async (requestData) => {
 export const Forward_CPE_Collect = async (Incident_Id) => {
   try {
      const user_id = await getLoggedUserId();
+    // const response = await axios.post(`https://124.43.177.52:7174/Create_Cases_From_Incident`, requestData);
 
-    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`,  { 
+
+     const response = await axios.post(`https://debtx.slt.lk:6500/Create_Cases_From_Incident`,  { 
       Incident_Id, 
-      Proceed_By : user_id,
+      // Proceed_By : user_id,
     });
+    
+    // const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`,  { 
+    //   Incident_Id, 
+    //   Proceed_By : user_id,
+    // });
     return response; 
-  } catch (error) {
-    console.error("Error forwarding CPE Collect incidents:", error.response?.data || error.message);
-    throw error.response?.data || error; 
+    } catch (error) {
+  console.error("Network/Request error:", error);
+  if (error.response) {
+    console.log("Response:", error.response.data);
+  } else if (error.request) {
+    console.log("Request:", error.request);
+  } else {
+    console.log("Error Message:", error.message);
   }
+}
+
+  // } catch (error) {
+  //   console.error("Error forwarding CPE Collect incidents:", error.response?.data || error.message);
+  //   throw error.response?.data || error; 
+  // }
 };
 export const getOpenTaskCountforCPECollect = async () => {
   try {
