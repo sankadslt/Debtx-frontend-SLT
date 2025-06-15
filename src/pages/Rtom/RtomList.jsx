@@ -1,20 +1,9 @@
-//frontend
-/*Purpose:
-Created Date: 2025-05-25
-Created By: Nimesha Kavindhi (nimeshakavindhi4@gmail.com)
-Version: React v18
-ui number : 10.1
-Dependencies: Tailwind CSS
-Related Files: 
-Notes: This template uses Tailwind CSS */
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { fetchRTOMs } from "../../services/RTOM/Rtom_services";
 import Swal from "sweetalert2";
-import editImg from "../../assets/images/more.svg";
-import ListImg from "../../assets/images/ConfigurationImg/list.png";
 
 import ActiveIcon from "../../assets/images/rtom/ROTM_Active.png";
 import InactiveIcon from "../../assets/images/rtom/ROTM_Inactive.png";
@@ -299,4 +288,3 @@ const RtomList = () => {
 };
 
 export default RtomList;
-
