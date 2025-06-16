@@ -45,6 +45,7 @@ export default function RejectIncident() {
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
   const clearTriggeredRef = useRef(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false); //for creating task state
+  const [isRejecting, setIsRejecting] = useState(false); //for rejecting state
 
   // Role-Based Buttons
   useEffect(() => {
@@ -80,6 +81,17 @@ export default function RejectIncident() {
       //console.log("Filters:", filters);
       setIsLoading(true);
       const response = await List_F1_filtered_incidents(filters);
+      if (response.data.length === 0) {
+        Swal.fire({
+          title: "No Data Found",
+          text: "There are no Reject Pending incidents for the selected filters.",
+          icon: "warning",
+          confirmButtonColor: "#f1c40f"
+        });
+        setTableData([]);
+        setIsLoading(false);
+        return;
+      }
       const formattedData = response?.data.map((item) => {
 
         const createdDateStr = typeof item.Created_Dtm === "string" ? item.Created_Dtm.replace(" ", "T") : item.Created_Dtm;
@@ -348,6 +360,7 @@ export default function RejectIncident() {
           FromDate: fromDate,
           ToDate: toDate
         }
+        setIsCreatingTask(true); // Set creating task state to true
         const response = await Create_Task_Download_Pending_Reject(filteredParams);
         if (response.status === 201) {
           Swal.fire({
@@ -366,6 +379,8 @@ export default function RejectIncident() {
           confirmButtonText: 'OK',
           confirmButtonColor: "#d33"
         });
+      } finally {
+        setIsCreatingTask(false); // Reset creating task state
       }
     }
   };
@@ -384,8 +399,10 @@ export default function RejectIncident() {
     }
 
     try {
-      const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
-      if (openTaskCount > 0) {
+      setIsRejecting(true); // Set rejecting state to true
+      const openTaskCountReject = await Open_Task_Count_Reject_F1_Filtered();
+      const openTaskCountForward = await Open_Task_Count_Forward_F1_Filtered();
+      if (openTaskCountReject > 0 || openTaskCountForward > 0) {
         Swal.fire({
           title: "Action Blocked",
           text: "A task is already in progress.",
@@ -415,6 +432,8 @@ export default function RejectIncident() {
         confirmButtonText: 'OK',
         confirmButtonColor: "#d33"
       });
+    } finally {
+      setIsRejecting(false); // Reset rejecting state
     }
   }
 
@@ -422,6 +441,7 @@ export default function RejectIncident() {
   const handleRejectAll = async () => {
 
     try {
+      setIsRejecting(true); // Set rejecting state to true
       if (selectedRows.length === 0) {
         Swal.fire({
           title: "Warning",
@@ -445,8 +465,9 @@ export default function RejectIncident() {
 
       if (result.isConfirmed) {
 
-        const openTaskCount = await Open_Task_Count_Reject_F1_Filtered();
-        if (openTaskCount > 0) {
+        const openTaskCountReject = await Open_Task_Count_Reject_F1_Filtered();
+        const openTaskCountForward = await Open_Task_Count_Forward_F1_Filtered();
+        if (openTaskCountReject > 0 || openTaskCountForward > 0) {
           Swal.fire({
             title: "Action Blocked",
             text: "A task is already in progress.",
@@ -456,6 +477,16 @@ export default function RejectIncident() {
           });
           return;
         }
+        // if (openTaskCount > 0) {
+        //   Swal.fire({
+        //     title: "Action Blocked",
+        //     text: "A task is already in progress.",
+        //     icon: "warning",
+        //     confirmButtonText: "OK",
+        //     confirmButtonColor: "#f1c40f"
+        //   });
+        //   return;
+        // }
         if (selectedRows.length > 5) { // okkoma silect karala reject all dunnoth hari  // sweet alert add // add the date to the parameaters //condition change
           const confirmTask = await Swal.fire({
             title: "Info",
@@ -515,12 +546,15 @@ export default function RejectIncident() {
         confirmButtonText: 'OK',
         confirmButtonColor: "#d33"
       });
+    } finally {
+      setIsRejecting(false); // Reset rejecting state
     }
   }
 
   // Handle move forward function
   const handleMoveForward = async () => {
     try {
+      setIsRejecting(true); // Set rejecting state to true
       if (selectedRows.length === 0) {
         Swal.fire({
           title: "Warning",
@@ -545,8 +579,9 @@ export default function RejectIncident() {
 
       if (result.isConfirmed) {
 
-        const openTaskCount = await Open_Task_Count_Forward_F1_Filtered();
-        if (openTaskCount > 0) {
+        const openTaskCountReject = await Open_Task_Count_Reject_F1_Filtered();
+        const openTaskCountForward = await Open_Task_Count_Forward_F1_Filtered();
+        if (openTaskCountReject > 0 || openTaskCountForward > 0) {
           Swal.fire({
             title: "Action Blocked",
             text: "A task is already in progress.",
@@ -615,6 +650,8 @@ export default function RejectIncident() {
         confirmButtonText: 'OK',
         confirmButtonColor: "#d33"
       });
+    } finally {
+      setIsRejecting(false); // Reset rejecting state
     }
   }
 
@@ -645,7 +682,7 @@ export default function RejectIncident() {
           <div className="flex justify-end items-center mb-4">
             {paginatedData.length > 0 && (
               <button
-                className={`${GlobalStyle.buttonPrimary} flex items-center`}
+                className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
                 onClick={() => {
                   handleCreateTaskForDownload({
                     source_type: selectedSource,
@@ -653,9 +690,10 @@ export default function RejectIncident() {
                     toDate: toDate
                   })
                 }}
+                disabled={isCreatingTask}
               >
-                <FaDownload className="mr-2" />
-                Create task and let me know
+                {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+                {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
               </button>
             )}
           </div>
@@ -828,8 +866,9 @@ export default function RejectIncident() {
                         <div>
                           {["admin", "superadmin", "slt"].includes(userRole) && (
                             <button
-                              className={`${GlobalStyle.buttonPrimary} mx-auto`}
+                              className={`${GlobalStyle.buttonPrimary} mx-auto ${isRejecting ? 'opacity-50' : ''}`}
                               onClick={() => { handleReject(row.id) }}
+                              disabled={isRejecting}
                             >
                               Reject
                             </button>
@@ -902,8 +941,9 @@ export default function RejectIncident() {
               <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button
-                    className={`${GlobalStyle.buttonPrimary} ml-4 w-full sm:w-auto`}
+                    className={`${GlobalStyle.buttonPrimary} ml-4 w-full sm:w-auto ${isRejecting ? 'opacity-50' : ''}`}
                     onClick={handleMoveForward}
+                    disable={isRejecting} 
                   >
                     Move Forward
                   </button>
@@ -918,8 +958,9 @@ export default function RejectIncident() {
               <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button
-                    className={`${GlobalStyle.buttonRemove} ml-4 w-full sm:w-auto`}
+                    className={`${GlobalStyle.buttonRemove} ml-4 w-full sm:w-auto ${isRejecting ? 'opacity-50' : ''}`}
                     onClick={handleRejectAll}
+                    disabled={isRejecting}
                   >
                     Reject All
                   </button>
