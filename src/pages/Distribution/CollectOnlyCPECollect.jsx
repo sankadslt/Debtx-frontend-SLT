@@ -46,6 +46,7 @@ export default function CollectOnlyCPECollect() {
   const [filteredData, setFilteredData] = useState(tableData); // Usestate for Filtered Data
   const rowsPerPage = 7; // Number of rows per page
   const navigate = useNavigate();
+  const [isCreatingTask, setIsCreatingTask] = useState(false); // Usestate for Creating Task
 
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
@@ -188,6 +189,7 @@ export default function CollectOnlyCPECollect() {
         ToDate: toDate,
       };
 
+      setIsCreatingTask(true);
       const response = await Create_Task(filteredParams);
 
       if (response.status === 201) {
@@ -207,12 +209,14 @@ export default function CollectOnlyCPECollect() {
         confirmButtonText: "OK",
         confirmButtonColor: "#d33",
       });
+    } finally {
+      setIsCreatingTask(false);
     }
   };
 
   // Function to handle the proceed button click
   const handleProceed = async (Incident_Id) => {
-    if (!selectedRows.includes(Incident_Id)) {
+    if (!selectedRows.includes(Incident_Id) && !Incident_Id) {
       Swal.fire({
         title: "Warning",
         text: "Row not selected",
@@ -297,7 +301,7 @@ export default function CollectOnlyCPECollect() {
         return;
       }
 
-      if (selectedRows.length > 1) {
+      if (selectedRows.length > 5) {
 
         const confirmCreateTask = await Swal.fire({
           title: "Create Task?",
@@ -563,7 +567,7 @@ export default function CollectOnlyCPECollect() {
           return;
         }
       }
-
+      setCurrentPage(0);
       setSearchQuery("");
       fetchData();
     }
@@ -577,7 +581,7 @@ export default function CollectOnlyCPECollect() {
     setSearchQuery("");
     setSelectAllData(false);
     setSelectedRows([]);
-
+    setCurrentPage(0);
   }
 
   useEffect(() => {
@@ -629,7 +633,8 @@ export default function CollectOnlyCPECollect() {
                 {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button
 
-                    className={`${GlobalStyle.buttonPrimary} flex items-center`}
+                    className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
+                    disabled={isCreatingTask}
                     onClick={() => {
                       handleCreateTaskForDownload({
                         source_type: selectedSource,
@@ -638,8 +643,8 @@ export default function CollectOnlyCPECollect() {
                       });
                     }}
                   >
-                    <FaDownload className="mr-2" />
-                    Create task and let me know
+                    {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+                    {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
                   </button>
                 )}
               </div>

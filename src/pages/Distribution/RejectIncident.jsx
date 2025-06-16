@@ -293,6 +293,7 @@ export default function RejectIncident() {
           return;
         }
       }
+      setCurrentPage(0); // Reset to first page
       fetchData();
       setSearchQuery("")
     }
@@ -300,6 +301,7 @@ export default function RejectIncident() {
 
   // Clear filter function
   const handleclearFilter = () => {
+    setCurrentPage(0); // Reset to first page
     setFromDate(null);
     setToDate(null);
     setSelectedSource("");
