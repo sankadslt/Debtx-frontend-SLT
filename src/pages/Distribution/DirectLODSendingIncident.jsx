@@ -562,6 +562,7 @@ export default function DirectLODSendingIncident() {
           return;
         }
       }
+      setCurrentPage(0); // Reset to the first page
       fetchData();
       setSearchQuery("")
     }
@@ -575,6 +576,7 @@ export default function DirectLODSendingIncident() {
     setSelectAllData(false);
     setSearchQuery("");
     setSelectedSource("");
+    setCurrentPage(0); // Reset to the first page
   };
 
   // This useEffect will automatically reload the initial data when filters are cleared
