@@ -91,6 +91,7 @@ const fetchData = async () => {
   try {
     const response = await List_Distribution_Ready_Incidents();
     setData(response.data);
+    console.log("Fetched Data:", response.data);
 
     const distributionResponse = await distribution_ready_incidents_group_by_arrears_band();
     setDistributionData(distributionResponse);
@@ -107,6 +108,8 @@ const fetchData = async () => {
 
   // Function to handle task creation
   const handleCreateTask = async () => {
+
+  
     
 
     try {
@@ -210,7 +213,7 @@ const fetchData = async () => {
       };
 
       const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-      console.log("Response from Create_Task:", response);
+      // console.log("Response from Create_Task:", response);
       Swal.fire({
         title: "Task Created Successfully!",
         text: `Task created to handle incidents.`,
@@ -222,11 +225,14 @@ const fetchData = async () => {
       
       
 
-      const response = await Create_Case_for_incident({
-        Incident_Ids: selectedRows,
-        Proceed_By: user,
-       // Proceed_Dtm: new Date().toISOString().split("T")[0],
-      });
+      // const response = await Create_Case_for_incident({
+      //   Incident_Ids: selectedRows,
+      //   Proceed_By: user,
+      //  // Proceed_Dtm: new Date().toISOString().split("T")[0],
+      // });
+      for (const row of selectedRows) {
+        await Create_Case_for_incident(row);
+      }
 
       Swal.fire({
         title: "Cases Created Successfully!",
@@ -239,7 +245,7 @@ const fetchData = async () => {
 
     setSelectedRows([]);
   } catch (error) {
-    console.error("Error in handleCaseforIncident:", error);
+    // console.error("Error in handleCaseforIncident:", error);
     Swal.fire({
       title: "Error",
       text:  error.message || "Action failed: Another set in progress.",
@@ -421,7 +427,7 @@ const fetchData = async () => {
         </div>
 
        {/* Table Section */}
-        <div className={GlobalStyle.tableContainer}>
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
@@ -430,7 +436,7 @@ const fetchData = async () => {
                 <th className={GlobalStyle.tableHeader}>Status</th>
                 <th className={GlobalStyle.tableHeader}>Account No</th>
                 <th className={GlobalStyle.tableHeader}>Action</th>
-                <th className={GlobalStyle.tableHeader}>Amount</th>
+                <th className={GlobalStyle.tableHeader}>Amount (LKR)</th>
                 <th className={GlobalStyle.tableHeader}>Source Type</th>
               </tr>
             </thead>
@@ -514,7 +520,7 @@ const fetchData = async () => {
             </button>
           </div>
         )}
-      <div className="flex justify-start items-center w-full  ">
+      <div className="flex justify-start items-center w-full mt-4 mb-4">
             <button
               className={`${GlobalStyle.buttonPrimary} `} 
               onClick={ handlebacknavigate}

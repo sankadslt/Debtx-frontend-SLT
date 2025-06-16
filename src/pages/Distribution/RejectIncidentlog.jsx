@@ -105,7 +105,8 @@ export default function RejectIncidentlog() {
             ToDate:toDate
           }
           const response = await List_Reject_Incident(filters);
-          const formattedData = response?.data.map((item) => {
+          console.log("Response from List_Reject_Incident:", response);
+          try {const formattedData = response?.data.map((item) => {
             
             const createdDateStr = typeof item.Created_Dtm === "string" ? item.Created_Dtm.replace(" ", "T") : item.Created_Dtm;
             const rejectedDateStr = typeof item.Rejected_Dtm === "string" ? item.Rejected_Dtm.replace(" ", "T") : item.Rejected_Dtm;
@@ -118,7 +119,7 @@ export default function RejectIncidentlog() {
               filtered_reason: item.Filtered_Reason || "N/A",
               source_type: item?.Source_Type || "N/A",
               reject_by: item.Rejected_By ||"N/A",
-              reject_dtm: isNaN(rejectedDate) ? "N/A" : rejectedDate.toLocaleString("en-GB", {
+              reject_dtm: rejectedDate instanceof Date && !isNaN(rejectedDate) ? rejectedDate.toLocaleString("en-GB", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric", // Ensures two-digit year (YY)
@@ -127,8 +128,8 @@ export default function RejectIncidentlog() {
                 second: "2-digit",
                 hour12: true, // Keeps AM/PM format
 
-              }),
-              created_dtm: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString("en-GB", {
+              }) : "N/A",
+              created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? createdDate.toLocaleString("en-GB", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric", // Ensures two-digit year (YY)
@@ -136,13 +137,16 @@ export default function RejectIncidentlog() {
                 minute: "2-digit",
                 second: "2-digit",
                 hour12: true, // Keeps AM/PM format
-              }),
+              })  : "N/A",
             };
           });
           setTableData(formattedData);
-          setIsLoading(false);
+          setIsLoading(false);} catch (error) {
+            console.error("Error formatting data:", error);
+            
+          }
       } catch {
-          setError("Failed to fetch DRC details. Please try again later.");
+          // setError("Failed to fetch DRC details. Please try again later.");
           setIsLoading(false);
       }
     };
@@ -405,12 +409,12 @@ export default function RejectIncidentlog() {
 
       {/* Filter Section */}
       <div  className="flex justify-end">
-          <div className={`${GlobalStyle.cardContainer}  items-center w-[70vw] mb-8 mt-8`}>
-            <div className="flex items-center gap-4 justify-end">
+          <div className={`${GlobalStyle.cardContainer}  w-full md:w-[73vw] mb-8 mt-8`}>
+            <div className="flex flex-wrap gap-4 justify-end">
                 {/* Source Dropdown */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 sm:w-auto  sm:flex-row sm:items-center">
                   <select
-                    className={GlobalStyle.inputText}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                     value={selectedAction}
                     onChange={(e) => setSelectedAction(e.target.value)}
                     style={{ color: selectedAction === "" ? "gray" : "black" }}
@@ -423,24 +427,24 @@ export default function RejectIncidentlog() {
                 </div>
 
                 {/* Date Picker Section */}
-                <div className="flex items-center gap-4">
-                  <label>Date:</label>
+                {/* <div className="flex flex-wrap items-center gap-4 sm:w-auto sm:flex-row sm:items-center"> */}
+                  <label className="mt-1">Date:</label>
                   <DatePicker
                     selected={fromDate}
                     onChange={handleFromDateChange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="From"
-                    className={GlobalStyle.inputText}
+                   className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
                   <DatePicker
                     selected={toDate}
                     onChange={handleToDateChange}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="To"
-                    className={GlobalStyle.inputText}
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   />
-                  {error && <span className={GlobalStyle.errorText}>{error}</span>}
-                </div>
+                  {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
+                {/* </div> */}
 
                 {/* Filter Button */}
                 {/* <button
@@ -452,7 +456,7 @@ export default function RejectIncidentlog() {
                 <div>
                         {["admin", "superadmin", "slt"].includes(userRole) && (
                           <button
-                          className={`${GlobalStyle.buttonPrimary} h-[35px]`}
+                          className={`${GlobalStyle.buttonPrimary} w-full h-[35px] sm:w-auto`}
                           onClick={handleFilterClick}
                         >
                           Filter
@@ -465,7 +469,9 @@ export default function RejectIncidentlog() {
                             </button> */}
                             <div>
                         {["admin", "superadmin", "slt"].includes(userRole) && (
-                          <button className={GlobalStyle.buttonRemove} onClick={handleclearFilter}>
+                          <button 
+                           className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
+                           onClick={handleclearFilter}>
                           Clear
                            </button>
                         )}
@@ -489,8 +495,8 @@ export default function RejectIncidentlog() {
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
         </div>
-        <div className={GlobalStyle.tableContainer}>
-          <table className={GlobalStyle.table}>
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
+          <table className={`${GlobalStyle.table} min-w-full`}>
             <thead className={GlobalStyle.thead}>
               <tr>
                 {/* <th scope="col" className={GlobalStyle.tableHeader}></th> */}

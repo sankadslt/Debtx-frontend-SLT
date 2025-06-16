@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import { fetchRTOMDetails, updateRTOMDetails } from "../../services/rtom/RtomService";
+import { fetchRTOMDetails, updateRTOMDetails } from "../../services/RTOM/RtomService";
 import Swal from "sweetalert2";
 import { getLoggedUserId } from "../../services/auth/authService";
 
@@ -278,9 +278,8 @@ const RtomInfoEdit = () => {
             <strong className="block pt-4 underline">Contact Details</strong>
 
             <div className="flex gap-8 items-center ml-16">
-              <select className={GlobalStyle.selectBox}>
-                <option value="mobile">Mobile</option>
-              </select>
+              <h1 className="w-48">Mobile</h1>
+              <span>:</span>
               <input
                 name="mobile"
                 type="tel"
@@ -294,9 +293,8 @@ const RtomInfoEdit = () => {
             </div>
 
             <div className="flex gap-8 items-center ml-16">
-              <select className={GlobalStyle.selectBox}>
-                <option value="telephone">Telephone</option>
-              </select>
+              <h1 className="w-48">Telephone</h1>
+              <span>:</span>
               <input
                 name="telephone"
                 type="tel"

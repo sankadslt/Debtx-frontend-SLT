@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+ import { Link, useLocation } from "react-router-dom";
 import { MdSpaceDashboard , MdFormatListBulletedAdd , MdDoneOutline } from "react-icons/md";
 import { IoIosListBox } from "react-icons/io";
 import { MdSpeakerNotes } from "react-icons/md";
@@ -57,10 +57,13 @@ const Sidebar = ({ onHoverChange }) => {
       label: "User List",
       roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: CgEditFade, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"], subItems: [
-          {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]},
-        ] },
+        // { icon: CgEditFade, label: "SLT Staff", link: "/dashboard", roles: ["superadmin", "admin"] },
+
+        { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"]},
+        // {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]}
+        { icon: CgEditFade, label: "RO List", link: "/pages/ro/ro-list", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "User List", link: "/pages/User/UserList", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin", "admin"] },
       ],
     },
 
@@ -71,7 +74,7 @@ const Sidebar = ({ onHoverChange }) => {
         { icon: CgEditFade, label: " Register Accounts",  roles: ["superadmin", "admin"], subItems: [
           {icon:CgEditFade, label:"Bulk", link:"/incident/upload-log", roles:["superadmin", "admin"]},
           {icon:CgEditFade, label:"Individual", link:"/Incident/Incident_List", roles:["superadmin", "admin"]}, ] },
-        { icon: CgEditFade, label: "New Reg Incidents", link: "", roles: ["superadmin", "admin"] },
+        // { icon: CgEditFade, label: "New Reg Incidents", link: "", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Filtered Incidents", link: "/Distribution/filtered-incident", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Bulk Upload History", link: "/incident/upload-log", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "Rejected log", link: "/Distribution/reject-incident-log", roles: ["superadmin", "admin"] },
@@ -89,13 +92,15 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         // { icon: CgEditFade, label: "Case List", link: "/Incident/Case_List", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, 
-          label: "DRC Assigned Case List", 
-          roles: ["superadmin", "admin"], 
-          subItems: [
-            {icon:CgEditFade, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
-          ],
-        },
+        // { icon: CgEditFade, 
+        //   label: "DRC Assigned Case List", 
+        //   roles: ["superadmin", "admin"], 
+        //   subItems: [
+        //     {icon:CgEditFade, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
+        //   ],
+        // },
+        { icon: CgEditFade, label: "Case List", roles: ["superadmin", "admin"], link: "/Incident/Case_List"},
+        { icon: CgEditFade, label: "DRC - Mediation Board List", roles: ["superadmin", "admin"], link: "/MediationBoard/MediationBoardCaseList"},
         // { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },
@@ -128,7 +133,19 @@ const Sidebar = ({ onHoverChange }) => {
         },
       ],
     },
-    {icon: MdFormatListBulletedAdd, label: "Request List", link: "/dashboard", roles: ["superadmin", "admin", "user"]},
+
+    {icon: MdFormatListBulletedAdd, 
+      label: "Request",
+       roles: ["superadmin", "admin", "user"],
+      subItems: [
+        { icon: CgEditFade, label: "Request List", link: "/additional_request_log", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "Request Log", link: "/drs/logs/reuest-response-logs", roles: ["superadmin", "admin"] },
+       
+      ],
+    },
+
+
+
     {
       icon: MdDoneOutline, 
       label: "Approvals", 
@@ -144,8 +161,8 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Configuration", 
       roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: CgEditFade, label: "RTOM List", link: "/dashboard", roles: ["superadmin"] },
-        { icon: CgEditFade, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
+        { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin"] },
+       // { icon: CgEditFade, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Filter Option", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Arrears Bands and Respective Initial Amounts", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Settlement Plans", link: "/dashboard", roles: ["superadmin"] },
@@ -158,6 +175,7 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
+    
 
     {icon: MdDownload, label: "Download", link: "/incident/Incident_File_Download", roles: ["superadmin", "admin", "user"]},
     // {
@@ -169,10 +187,10 @@ const Sidebar = ({ onHoverChange }) => {
     //       label: "Dummy",
     //       subItems: [
     //         { icon: CgEditFade, label: "Distribute Dummy", link: "/pages/Distribute/DistributeDummy", roles: ["superadmin", "admin"] },
-    //         { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
+    //         // { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin", "user"] },
     //       ],
     //     },
-    //     { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
+    //     // { icon: CgEditFade, label: "Dummy", link: "/dashboard", roles: ["superadmin", "admin"] },
     //   ],
     // },
   ];

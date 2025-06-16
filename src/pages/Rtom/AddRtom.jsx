@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
-import { createRTOM } from "../../services/rtom/RtomService";
+import { createRTOM } from "../../services/RTOM/Rtom_services";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getLoggedUserId } from "../../services/auth/authService";
@@ -19,7 +19,7 @@ const AddRtom = () => {
   
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-    const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState(null);
 
    // get system user 
   const loadUser = async () => {
@@ -75,6 +75,9 @@ const AddRtom = () => {
     }
 
     setIsSubmitting(true);
+
+    // console.log(userData);
+    // console.log(userData.user_id);
     
     try {
       const rtomData = {
@@ -84,7 +87,8 @@ const AddRtom = () => {
         email: formData.email,
         mobile: formData.mobile,
         telephone: formData.telephone,
-        createdBy: userData?.user_id
+        // createdBy: userData?.user_id
+        createdBy: userData
       };
 
       const response = await createRTOM(rtomData);

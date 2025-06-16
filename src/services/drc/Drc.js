@@ -28,42 +28,62 @@ export const Active_DRC_Details = async () => {
   }
 };
 
-export const List_All_DRC_Details = async (status, pages = 1) => {
+// export const listAllDRCDetails = async (status, page = 1) => {
+//   try {
+//     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
+//       status,
+//       page,
+//     });
+
+//     console.log("Full DRC API response:", response.data);
+
+//     const drcArray = response.data;
+
+//     if (!Array.isArray(drcArray)) {
+//       throw new Error("Invalid DRC data format received");
+//     }
+
+//     const formattedDRCs = drcArray.map((drc) => ({
+//       key: drc.drc_id,
+//       value: drc.drc_name,
+//       id: drc.drc_id,
+//       email: drc.drc_email,
+//       tel: drc.drc_contact_no,
+//       status: drc.drc_status,
+//       roCount: drc.ro_count,
+//       rtomCount: drc.rtom_count,
+//       business_registration_number: drc.drc_business_registration_number,
+//       service_count: drc.service_count,
+//     }));
+
+//     return formattedDRCs;
+//   } catch (error) {
+//     console.error(
+//       "Error fetching DRCs by status:",
+//       error.response?.data || error.message
+//     );
+//     throw error;
+//   }
+// };
+
+export const listAllDRCDetails = async (filter) => {
   try {
     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
-      status,
-      pages,
+      status: filter.status || "", // Default to 'active' if not provided
+      page: filter.page || 1, // Default to page 1 if not provided
     });
 
-    // Extract from response structure
-    const drcArray = response.data?.data?.drcDetails;
-
-    if (!Array.isArray(drcArray)) {
-      throw new Error("Invalid DRC data format received");
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
     }
 
-    const formattedDRCs = drcArray.map((drc) => ({
-      key: drc.drc_id,
-      value: drc.drc_name,
-      id: drc.drc_id,
-      email: drc.drc_email,
-      tel: drc.teli_no,
-      status: drc.drc_status,
-      roCount: drc.ro_count,
-      rtomCount: drc.rtom_count,
-      business_registration_number: drc.drc_business_registration_number,
-      service_count: drc.service_count,
-    }));
-
-    return formattedDRCs;
+    return response.data; // Return the full response data as-is
   } catch (error) {
-    console.error(
-      "Error fetching DRCs by status:",
-      error.response?.data || error.message
-    );
+    console.error("Error retrieving List_All_DRC:", error.response?.data || error.message);
     throw error;
   }
 };
+
 
 export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
   try {
@@ -270,11 +290,8 @@ export const getActiveRTOMDetails = async () => {
 // getActiveServiceDetails
 export const getActiveServiceDetails = async () => {
   try {
-    const response = await axios.get(
-      `${BASE_URL}/service/Active_Service_Details`
-    );
-    console.log("Active service details data:", response.data.data);
-    return response.data;
+      const response = await axios.get(`${BASE_URL}/service/Active_Service_Details`);
+      return response.data.data; // Make sure this returns an array of {id, value} objects
   } catch (error) {
     console.error(
       "Error fetching active services:",

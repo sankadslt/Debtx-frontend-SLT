@@ -151,3 +151,102 @@ export const Task_for_Download_Incidents = async (incidentData) => {
         throw error.response?.data || error; 
       }
   }
+
+  export const fetchUserTasks = async (token, delegate_user_id) => {
+ 
+  try {
+    const response = await axios.post(
+      `${TASK_URL}/List_All_Open_Requests_For_To_Do_List`,
+      { delegate_user_id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.data) {
+      const tasks = response.data.data.map(task => {
+        const showParamsNotEmpty = Array.isArray(task.showParameters) && task.showParameters.length > 0;
+        return {
+          ...task,
+          Case_ID: showParamsNotEmpty && task.parameters?.case_id !== undefined
+            ? task.parameters.case_id
+            : undefined,
+        };
+      });
+      return tasks;
+    } else {
+      const tasks = [];
+      return tasks;
+    }
+
+  } catch (error) {
+    console.error("Error fetching user tasks:", error.message);
+    throw error;
+  }
+};
+
+export const Handle_Interaction_Acknowledgement = async (delegate_user_id, task_id) => {
+ 
+  try {
+    const response = await axios.post(
+      `${TASK_URL}/Handle_Interaction_Acknowledgement`,
+      {
+        delegate_user_id,
+        Interaction_Log_ID: task_id
+      },
+      // {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      // }
+    );
+
+    
+    // const tasks = response.data.data.map(task => {
+    //   const showParamsNotEmpty = Array.isArray(task.showParameters) && task.showParameters.length > 0;
+    //   return {
+    //     ...task,
+    //     Case_ID: showParamsNotEmpty && task.parameters?.case_id !== undefined
+    //       ? task.parameters.case_id
+    //       : undefined,
+    //   };
+    // });
+
+    // return tasks;
+
+    if (response.status === 200) {
+      return response;
+    } else {
+      throw error;
+    }
+
+  } catch (error) {
+    console.error("Error fetching user tasks:", error.message);
+    throw error;
+  }
+};
+
+export const Create_Task_for_Download_Case_List = async (filteredParams) => {
+    try {
+    const user_id = await getLoggedUserId();
+      const taskData = {
+        Template_Task_Id: 10,
+        task_type: "List Case Details",
+        Created_By: user_id,  
+        task_status: "open",
+        ...filteredParams,
+      };
+  
+      const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+      if (response.status === 201) {
+        return "success"; // Return the data if the request was successful
+      } else {
+        throw new Error("Failed to create task, status code: " + response.status);
+      }
+    } catch (error) {
+      console.error("Error creating task:", error.message || error);
+      throw error.response?.data || error;
+    }
+  };

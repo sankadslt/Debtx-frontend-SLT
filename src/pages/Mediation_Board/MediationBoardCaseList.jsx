@@ -9,7 +9,7 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the Mediation Board case list Screen */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -20,7 +20,10 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { List_All_DRCs_Mediation_Board_Cases } from "../../services/case/CaseServices";
 import { RTOM_Details } from "../../services/RTOM/Rtom";
+import { List_All_Active_RTOMs } from "../../services/RTOM/Rtom";
 import { Tooltip } from "react-tooltip";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
 import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
 import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Request Customer-Info.png";
@@ -37,17 +40,25 @@ const MediationBoardCaseList = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [drcNames, setDrcNames] = useState([]);
   const [selectedDrcId, setSelectedDrcId] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [caseId, setCaseId] = useState("");
   const [searchBy, setSearchBy] = useState("case_id");
   const [isLoading, setIsLoading] = useState(false);
   const [caseStatus, setCaseStatus] = useState("");
   const [rtom, setRtom] = useState("");
   const [rtomList, setRtomList] = useState([]);
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const hasMounted = useRef(false);
+  const [committedFilters, setCommittedFilters] = useState({
+    selectedDrcId: "",
+    rtom: "",
+    caseStatus: "",
+    fromDate: null,
+    toDate: null
+  });
 
   const rowsPerPage = 10;
 
@@ -101,25 +112,47 @@ const MediationBoardCaseList = () => {
 
   // initial data fetch
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+
     // Fetch DRC names
     const fetchDrcNames = async () => {
       try {
-        const names = await Active_DRC_Details(); 
+        const names = await Active_DRC_Details();
 
         setDrcNames(names);
       } catch (error) {
-        console.error("Error fetching DRC names:", error);
+        setDrcNames([]);
+        // console.error("Error fetching DRC names:", error);
       }
     };
 
     // Fetch RTOM
     const fetchRTOM = async () => {
       try {
-        const rtom = await RTOM_Details();
+        const rtom = await List_All_Active_RTOMs();
 
         setRtomList(rtom);
       } catch (error) {
-        console.error("Error fetching DRC names:", error);
+        setRtomList([]);
+        // console.error("Error fetching DRC names:", error);
       }
     };
 
@@ -128,49 +161,55 @@ const MediationBoardCaseList = () => {
     fetchRTOM();
   }, []);
 
-  // Fetch data from API
-  const fetchData = async () => {
-    try {
+  // validate the filter variables
+  const filterValidations = () => {
+    if (!caseStatus && !rtom && !selectedDrcId && !fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "No filter is selected. Please, select a filter.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
 
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Both From Date and To Date must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    return true;
+  }
+
+  // Call API to fetch data based on filters
+  const CallAPI = async (filter) => {
+    try {
       const formatDate = (date) => {
         if (!date) return null;
         const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
         return offsetDate.toISOString().split('T')[0];
       };
 
-      if (!caseStatus && !rtom && !selectedDrcId && !fromDate && !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "No filter is selected. Please, select a filter.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      if ((fromDate && !toDate) || (!fromDate && toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "Both From Date and To Date must be selected.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
       const filters = {
-        case_status: caseStatus,
-        From_DAT: formatDate(fromDate),
-        TO_DAT: formatDate(toDate),
-        RTOM: rtom,
-        DRC_ID: selectedDrcId,
-        pages: currentPage,
+        case_status: filter.caseStatus,
+        From_DAT: formatDate(filter.fromDate),
+        TO_DAT: formatDate(filter.toDate),
+        RTOM: filter.rtom,
+        DRC: filter.selectedDrcId,
+        pages: filter.page,
       };
       // console.log("Filters sent to api:", filters);
 
@@ -190,8 +229,11 @@ const MediationBoardCaseList = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no results found on page 2
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -203,17 +245,18 @@ const MediationBoardCaseList = () => {
         Swal.fire({
           title: "Error",
           text: "No valid Settlement data found in response.",
-          icon: "error"
+          icon: "error",
+          confirmButtonColor: "#d33"
         });
         setFilteredData([]);
       }
-
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: error.message || "Failed to fetch data.",
+        text: "Failed to fetch data.",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#d33"
       });
     } finally {
       setIsLoading(false);
@@ -230,6 +273,7 @@ const MediationBoardCaseList = () => {
     validateDates(fromDate, date);
   };
 
+  // validate dates
   const validateDates = (from, to) => {
     if (from && to) {
 
@@ -239,22 +283,7 @@ const MediationBoardCaseList = () => {
           text: "From date must be before to date",
           icon: "warning",
           confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
-        });
-        setFromDate(null);
-        setToDate(null);
-        return false;
-      }
-      const oneMonthLater = new Date(from);
-      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
-
-      if (to > oneMonthLater) {
-        Swal.fire({
-          title: "Warning",
-          text: "Date range cannot exceed one month",
-          icon: "warning",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#f1c40f",
         });
         setFromDate(null);
         setToDate(null);
@@ -274,6 +303,7 @@ const MediationBoardCaseList = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
       setCaseId(""); // Clear the invalid input
       return;
@@ -285,23 +315,51 @@ const MediationBoardCaseList = () => {
   }, [caseId]);
 
   useEffect(() => {
-    if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      fetchData(); // Call the function whenever currentPage changes
+      // CallAPI(); // Call the function whenever currentPage changes
+      CallAPI({
+        ...committedFilters,
+        page: currentPage,
+      })
     }
   }, [currentPage]);
 
   // Handle filter button click
   const handleFilterButton = () => {
-    setFilteredData([]); // Clear previous results
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
-    if (currentPage === 1) {
-      fetchData();
+    setTotalPages(0); // Reset total pages
+    const isValid = filterValidations();
+    if (!isValid) {
+      return; // If validation fails, do not proceed
     } else {
-      setCurrentPage(1);
+      setCommittedFilters({
+        selectedDrcId,
+        rtom,
+        caseStatus,
+        fromDate,
+        toDate
+      })
+      setFilteredData([]); // Clear previous filtered data
+      if (currentPage === 1) {
+        CallAPI({
+          selectedDrcId,
+          rtom,
+          caseStatus,
+          fromDate,
+          toDate,
+          page: 1
+        });
+      } else {
+        setCurrentPage(1);
+      }
     }
-    setIsFilterApplied(true); // Set filter applied state to true
   }
 
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -346,17 +404,30 @@ const MediationBoardCaseList = () => {
     setToDate(null);
     setSelectedDrcId("");
     setSearchQuery("");
-    setCurrentPage(0); // Reset to the first page
-    setIsFilterApplied(false); // Reset filter applied state
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setCommittedFilters({
+      selectedDrcId: "",
+      rtom: "",
+      caseStatus: "",
+      fromDate: null,
+      toDate: null
+    })
+    setMaxCurrentPage(0); // Reset max current page
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   };
 
   const navigate = useNavigate();
 
   // Navigate to the case ID page
   const naviCaseID = (caseId) => {
-    navigate("", { state: { caseId } });
+    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
   }
 
   // Navigate to the preview page
@@ -378,95 +449,109 @@ const MediationBoardCaseList = () => {
       <h1 className={GlobalStyle.headingLarge + " mb-6"}>Mediation Board Case List</h1>
 
       <div className={`${GlobalStyle.cardContainer} w-full`}>
-        <div className="flex items-center justify-end w-full space-x-3">
+        <div className="flex  flex-wrap xl:flex-nowrap items-center justify-end w-full gap-3">
 
-          <div className="flex items-center">
+          <div className="flex  flex-wrap items-center">
             <select
               value={caseStatus}
               onChange={(e) => setCaseStatus(e.target.value)}
-              className={GlobalStyle.selectBox}
+              className={`${GlobalStyle.selectBox} `}
               style={{ color: caseStatus === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Status</option>
-              <option value="Forward to Mediation Board">Forward to Mediation Board</option>
-              <option value="MB Negotiation">MB Negotiation</option>
-              <option value="MB Request Customer-Info">MB Request Customer-Info</option>
-              <option value="MB Handover Customer-Info">MB Handover Customer-Info</option>
-              <option value="MB Settle Pending">MB Settle Pending</option>
-              <option value="MB Settle Open-Pending">MB Settle Open-Pending</option>
-              <option value="MB Fail with Pending Non-Settlement">MB Fail with Pending Non-Settlement</option>
+              <option value="Forward to Mediation Board" style={{ color: "black" }}>Forward to Mediation Board</option>
+              <option value="MB Negotiation" style={{ color: "black" }}>MB Negotiation</option>
+              <option value="MB Request Customer-Info" style={{ color: "black" }}>MB Request Customer-Info</option>
+              <option value="MB Handover Customer-Info" style={{ color: "black" }}>MB Handover Customer-Info</option>
+              <option value="MB Settle Pending" style={{ color: "black" }}>MB Settle Pending</option>
+              <option value="MB Settle Open-Pending" style={{ color: "black" }}>MB Settle Open-Pending</option>
+              <option value="MB Fail with Pending Non-Settlement" style={{ color: "black" }}>MB Fail with Pending Non-Settlement</option>
             </select>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex flex-wrap items-center">
             <select
               value={selectedDrcId}
               onChange={(e) => setSelectedDrcId(e.target.value)}
-              className={GlobalStyle.selectBox}
+              className={`${GlobalStyle.selectBox} `}
               style={{ color: selectedDrcId === "" ? "gray" : "black" }}
             >
               <option value="" hidden>DRC</option>
-              {drcNames.map((drc) => (
-                <option key={drc.key} value={drc.id.toString()}>
+              {drcNames.length > 0 ? (drcNames.map((drc) => (
+                <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
                   {drc.value}
                 </option>
-              ))}
+              ))
+              ) : (
+                <option value="" disabled style={{ color: "gray" }}>
+                  No DRCs available
+                </option>
+              )}
             </select>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex flex-wrap  items-center">
             <select
               value={rtom}
               onChange={(e) => setRtom(e.target.value)}
-              className={GlobalStyle.selectBox}
+              className={`${GlobalStyle.selectBox}`}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
               <option value="" hidden>RTOM</option>
-              {Object.values(rtomList).map((rtom) => (
-                <option key={rtom.rtom_id} value={rtom.rtom}>
+              {rtomList.length > 0 ? (Object.values(rtomList).map((rtom) => (
+                <option key={rtom.rtom_id} value={rtom.rtom_id} style={{ color: "black" }}>
                   {rtom.rtom}
                 </option>
-              ))}
+              ))
+              ) : (
+                <option value="" disabled style={{ color: "gray" }}>
+                  No RTOMs available
+                </option>
+              )}
             </select>
           </div>
 
-          <div className="flex items-center">
-            <label className={GlobalStyle.dataPickerDate}>Date</label>
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center">
-                <DatePicker
-                  selected={fromDate}
-                  onChange={handleFromDateChange}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="From"
-                  className={GlobalStyle.inputText}
-                />
-              </div>
+          {/* <div className="flex items-center"> */}
+          <label className={GlobalStyle.dataPickerDate}>Date:</label>
+          {/* <div className="flex items-center space-x-2"> */}
+          {/* <div className="flex items-center"> */}
+          <DatePicker
+            selected={fromDate}
+            onChange={handleFromDateChange}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="From"
+            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+          />
+          {/* </div> */}
 
-              <div className="flex items-center">
-                <DatePicker
-                  selected={toDate}
-                  onChange={handleToDateChange}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="To"
-                  className={GlobalStyle.inputText}
-                />
-              </div>
-            </div>
-          </div>
+          {/* <div className="flex items-center"> */}
+          <DatePicker
+            selected={toDate}
+            onChange={handleToDateChange}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="To"
+            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+          />
+          {/* </div> */}
+          {/* </div> */}
+          {/* </div> */}
 
-          <button
-            className={GlobalStyle.buttonPrimary}
-            onClick={handleFilterButton}
-          >
-            Filter
-          </button>
-          <button
-            className={GlobalStyle.buttonRemove}
-            onClick={handleClear}
-          >
-            Clear
-          </button>
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+              onClick={handleFilterButton}
+            >
+              Filter
+            </button>
+          )}
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+              onClick={handleClear}
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
@@ -482,7 +567,7 @@ const MediationBoardCaseList = () => {
         </div>
       </div>
 
-      <div className={GlobalStyle.tableContainer}>
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -510,16 +595,16 @@ const MediationBoardCaseList = () => {
                 >
                   <td
                     className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
-                    onClick={() => naviCaseID(item.case_id)}
+                    onClick={() => naviCaseID(row.case_id)}
                   >
                     {row.case_id}
                   </td>
                   <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
                     {renderStatusIcon(row.status, index)}
-                    </td>
+                  </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{row.ro_name}</td>
-                  <td className={GlobalStyle.tableData}>{row.rtom}</td>
+                  <td className={GlobalStyle.tableData}>{row.area}</td>
                   <td className={GlobalStyle.tableData}>{row.calling_round}</td>
                   <td className={GlobalStyle.tableData}>
                     {row.date &&
@@ -549,15 +634,19 @@ const MediationBoardCaseList = () => {
                     <button
                       className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center"
                       onClick={() => naviPreview(row.case_id, row.drc_id)}
+                      data-tooltip-id={`tooltip-${row.case_id}`}
                     >
                       !
                     </button>
+                    <Tooltip id={`tooltip-${row.case_id}`} place="bottom" effect="solid">
+                      <span>More Info</span>
+                    </Tooltip>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="text-center py-2">
+                <td colSpan="8" className={GlobalStyle.tableData + " text-center"}>
                   No records found
                 </td>
               </tr>
