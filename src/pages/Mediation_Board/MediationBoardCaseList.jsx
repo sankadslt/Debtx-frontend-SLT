@@ -52,6 +52,13 @@ const MediationBoardCaseList = () => {
   const [rtomList, setRtomList] = useState([]);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
   const hasMounted = useRef(false);
+  const [committedFilters, setCommittedFilters] = useState({
+    selectedDrcId: "",
+    rtom: "",
+    caseStatus: "",
+    fromDate: null,
+    toDate: null
+  });
 
   const rowsPerPage = 10;
 
@@ -132,7 +139,8 @@ const MediationBoardCaseList = () => {
 
         setDrcNames(names);
       } catch (error) {
-        console.error("Error fetching DRC names:", error);
+        setDrcNames([]);
+        // console.error("Error fetching DRC names:", error);
       }
     };
 
@@ -143,7 +151,8 @@ const MediationBoardCaseList = () => {
 
         setRtomList(rtom);
       } catch (error) {
-        console.error("Error fetching DRC names:", error);
+        setRtomList([]);
+        // console.error("Error fetching DRC names:", error);
       }
     };
 
@@ -186,7 +195,7 @@ const MediationBoardCaseList = () => {
   }
 
   // Call API to fetch data based on filters
-  const CallAPI = async () => {
+  const CallAPI = async (filter) => {
     try {
       const formatDate = (date) => {
         if (!date) return null;
@@ -195,12 +204,12 @@ const MediationBoardCaseList = () => {
       };
 
       const filters = {
-        case_status: caseStatus,
-        From_DAT: formatDate(fromDate),
-        TO_DAT: formatDate(toDate),
-        RTOM: rtom,
-        DRC: selectedDrcId,
-        pages: currentPage,
+        case_status: filter.caseStatus,
+        From_DAT: formatDate(filter.fromDate),
+        TO_DAT: formatDate(filter.toDate),
+        RTOM: filter.rtom,
+        DRC: filter.selectedDrcId,
+        pages: filter.page,
       };
       // console.log("Filters sent to api:", filters);
 
@@ -313,7 +322,11 @@ const MediationBoardCaseList = () => {
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      CallAPI(); // Call the function whenever currentPage changes
+      // CallAPI(); // Call the function whenever currentPage changes
+      CallAPI({
+        ...committedFilters,
+        page: currentPage,
+      })
     }
   }, [currentPage]);
 
@@ -326,9 +339,23 @@ const MediationBoardCaseList = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setCommittedFilters({
+        selectedDrcId,
+        rtom,
+        caseStatus,
+        fromDate,
+        toDate
+      })
       setFilteredData([]); // Clear previous filtered data
       if (currentPage === 1) {
-        CallAPI();
+        CallAPI({
+          selectedDrcId,
+          rtom,
+          caseStatus,
+          fromDate,
+          toDate,
+          page: 1
+        });
       } else {
         setCurrentPage(1);
       }
@@ -380,6 +407,13 @@ const MediationBoardCaseList = () => {
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
     setIsMoreDataAvailable(true); // Reset more data available state
+    setCommittedFilters({
+      selectedDrcId: "",
+      rtom: "",
+      caseStatus: "",
+      fromDate: null,
+      toDate: null
+    })
     setMaxCurrentPage(0); // Reset max current page
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
@@ -443,11 +477,16 @@ const MediationBoardCaseList = () => {
               style={{ color: selectedDrcId === "" ? "gray" : "black" }}
             >
               <option value="" hidden>DRC</option>
-              {drcNames.map((drc) => (
+              {drcNames.length > 0 ? (drcNames.map((drc) => (
                 <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
                   {drc.value}
                 </option>
-              ))}
+              ))
+              ) : (
+                <option value="" disabled style={{ color: "gray" }}>
+                  No DRCs available
+                </option>
+              )}
             </select>
           </div>
 
@@ -459,11 +498,16 @@ const MediationBoardCaseList = () => {
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
               <option value="" hidden>RTOM</option>
-              {Object.values(rtomList).map((rtom) => (
+              {rtomList.length > 0 ? (Object.values(rtomList).map((rtom) => (
                 <option key={rtom.rtom_id} value={rtom.rtom_id} style={{ color: "black" }}>
                   {rtom.rtom}
                 </option>
-              ))}
+              ))
+              ) : (
+                <option value="" disabled style={{ color: "gray" }}>
+                  No RTOMs available
+                </option>
+              )}
             </select>
           </div>
 
