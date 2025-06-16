@@ -319,7 +319,7 @@ export default function CollectOnlyCPECollect() {
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
 
-        if (response.status === 201) {
+        if (response.status === 200) {
           Swal.fire({
             title: "Success",
             text: "Task successfully created for forwarding Collect CPE Only incidents.",
@@ -328,6 +328,7 @@ export default function CollectOnlyCPECollect() {
             confirmButtonColor: "#28a745",
           });
         }
+        fetchData();
       } else {
 
         const confirmProceed = await Swal.fire({
