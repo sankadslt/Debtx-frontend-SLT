@@ -220,7 +220,7 @@ const DRCList = () => {
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>DRC List</h2>
 
-            <div className="flex justify-end mt-2">
+            <div className="flex justify-end mt-2 sm:mt-0">
                 <button 
                     className={GlobalStyle.buttonPrimary} 
                     onClick={handleAddDRC}
@@ -243,7 +243,7 @@ const DRCList = () => {
                     </div>
 
                     <div className={`${GlobalStyle.cardContainer} w-auto`}>
-                        <div className="flex justify-end items-center space-x-4">
+                        <div className="flex flex-col md:flex-row justify-end items-end md:items-center space-y-2 md:space-y-0 md:space-x-4 relative">
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -255,85 +255,103 @@ const DRCList = () => {
                                 <option value="Terminate">Terminated</option>
                             </select>
 
-                            <button
-                                onClick={handleFilterButton}
-                                className={GlobalStyle.buttonPrimary}
-                            >
-                                Filter
-                            </button>
+                            <div className="hidden md:flex space-x-4">
+                                <button
+                                    onClick={handleFilterButton}
+                                    className={GlobalStyle.buttonPrimary}
+                                >
+                                    Filter
+                                </button>
 
-                            <button
-                                className={GlobalStyle.buttonRemove}
-                                onClick={handleClear}
-                            >
-                                Clear
-                            </button>
+                                <button
+                                    className={GlobalStyle.buttonRemove}
+                                    onClick={handleClear}
+                                >
+                                    Clear
+                                </button>
+                            </div>
+
+                            <div className="md:hidden w-full bg-white shadow-md rounded-md mt-1 py-2 px-3 space-y-2">
+                                <button
+                                    onClick={handleFilterButton}
+                                    className={`${GlobalStyle.buttonPrimary} w-full`}
+                                >
+                                    Filter
+                                </button>
+
+                                <button
+                                    className={`${GlobalStyle.buttonRemove} w-full`}
+                                    onClick={handleClear}
+                                >
+                                    Clear
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className={GlobalStyle.tableContainer}>
-                <table className={GlobalStyle.table}>
-                    <thead className={GlobalStyle.thead}>
-                        <tr>
-                            <th className={GlobalStyle.tableHeader}>DRC ID</th>
-                            <th className={GlobalStyle.tableHeader}>Status</th>
-                            <th className={GlobalStyle.tableHeader}>Bussiness Reg. No.</th>
-                            <th className={GlobalStyle.tableHeader}>DRC Name</th>
-                            <th className={GlobalStyle.tableHeader}>Contact No.</th>
-                            <th className={GlobalStyle.tableHeader}>Service Count</th>
-                            <th className={GlobalStyle.tableHeader}>RO Count</th>
-                            <th className={GlobalStyle.tableHeader}>RTOM Count</th>
-                            <th className={GlobalStyle.tableHeader}></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredDataBySearch.length > 0 ? (
-                            filteredDataBySearch.slice(startIndex, endIndex).map((log, index) => (
-                                <tr
-                                    key={index}
-                                    className={`${index % 2 === 0
-                                        ? "bg-white bg-opacity-75"
-                                        : "bg-gray-50 bg-opacity-50"
-                                        } border-b`}
-                                >
-                                    <td className={GlobalStyle.tableData}>{log.DRCID}</td>
-                                    <td className={GlobalStyle.tableData}>{renderStatusIcon(log.Status)}</td>
-                                    <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
-                                    <td className={GlobalStyle.tableData}>{log.DRCName}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ServiceCount}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ROCount}</td>
-                                    <td className={GlobalStyle.tableData}>{log.RTOMCount}</td>
-                                    <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
-                                        <button 
-                                            onClick={() => navigateToEdit(log.DRCID)}
-                                            className="p-1 hover:bg-gray-100 rounded"
-                                        >
-                                            <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
-                                        </button>
-                                        <button 
-                                            onClick={() => navigateToDetails(log.DRCID)}
-                                            className="p-1 hover:bg-gray-100 rounded"
-                                        >
-                                            <img src={ListImg} alt="Details" title="Details" className="w-6 h-6" />
-                                        </button>
-                                    </td> 
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="9" className="text-center py-4">
-                                    {statusFilter || searchQuery 
-                                        ? "No matching DRCs found" 
-                                        : "No DRCs available"}
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+           <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+    <table className={`${GlobalStyle.table} w-full`}>
+        <thead className={`${GlobalStyle.thead} sticky top-0`}>
+            <tr>
+                <th className={GlobalStyle.tableHeader}>DRC ID</th>
+                <th className={GlobalStyle.tableHeader}>Status</th>
+                <th className={GlobalStyle.tableHeader}>Bussiness Reg. No.</th>
+                <th className={GlobalStyle.tableHeader}>DRC Name</th>
+                <th className={GlobalStyle.tableHeader}>Contact No.</th>
+                <th className={GlobalStyle.tableHeader}>Service Count</th>
+                <th className={GlobalStyle.tableHeader}>RO Count</th>
+                <th className={GlobalStyle.tableHeader}>RTOM Count</th>
+                <th className={GlobalStyle.tableHeader}></th>
+            </tr>
+        </thead>
+        <tbody>
+            {filteredDataBySearch.length > 0 ? (
+                filteredDataBySearch.slice(startIndex, endIndex).map((log, index) => (
+                    <tr
+                        key={index}
+                        className={`${index % 2 === 0
+                            ? "bg-white bg-opacity-75"
+                            : "bg-gray-50 bg-opacity-50"
+                            } border-b`}
+                    >
+                        <td className={GlobalStyle.tableData}>{log.DRCID}</td>
+                        <td className={GlobalStyle.tableData}>{renderStatusIcon(log.Status)}</td>
+                        <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
+                        <td className={GlobalStyle.tableData}>{log.DRCName}</td>
+                        <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
+                        <td className={GlobalStyle.tableData}>{log.ServiceCount}</td>
+                        <td className={GlobalStyle.tableData}>{log.ROCount}</td>
+                        <td className={GlobalStyle.tableData}>{log.RTOMCount}</td>
+                        <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
+                            <button 
+                                onClick={() => navigateToEdit(log.DRCID)}
+                                className="p-1 hover:bg-gray-100 rounded"
+                            >
+                                <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
+                            </button>
+                            <button 
+                                onClick={() => navigateToDetails(log.DRCID)}
+                                className="p-1 hover:bg-gray-100 rounded"
+                            >
+                                <img src={ListImg} alt="Details" title="Details" className="w-6 h-6" />
+                            </button>
+                        </td> 
+                    </tr>
+                ))
+            ) : (
+                <tr>
+                    <td colSpan="9" className="text-center py-4">
+                        {statusFilter || searchQuery 
+                            ? "No matching DRCs found" 
+                            : "No DRCs available"}
+                    </td>
+                </tr>
+            )}
+        </tbody>
+    </table>
+</div>
 
             {filteredDataBySearch.length > 0 && (
                 <div className={GlobalStyle.navButtonContainer}>
