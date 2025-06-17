@@ -129,14 +129,14 @@ export const getDirectLODIncidentsCount = async () => {
   return response.data?.data?.Distribution_ready_total;
 };
 
-export const Create_Case_for_incident = async (requestData) => {
+export const Create_Case_for_incident = async (Incident_Id) => {
   try {
 
     const user_id = await getLoggedUserId();
-    console.log("Request Data being sent:", requestData);
+    console.log("Request Data being sent:", Incident_Id);
 
     const response = await axios.post(`https://debtx.slt.lk:6500/Create_Cases_From_Incident`, {
-      requestData,
+      Incident_Id,
       // Proceed_By : user_id,
     });
     
