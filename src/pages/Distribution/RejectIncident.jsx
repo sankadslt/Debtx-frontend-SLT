@@ -23,6 +23,7 @@ import { Create_Task_Download_Pending_Reject, Create_Task_Forward_F1_Filtered, C
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 import { useRef } from "react";
+import { getLoggedUserId } from "../../services/auth/authService";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
@@ -422,9 +423,18 @@ export default function RejectIncident() {
           text: response.data.message,
           icon: 'success',
           confirmButtonText: 'OK',
-          confirmButtonColor: "#28a745"
+          confirmButtonColor: "#28a745",
+          allowOutsideClick: false,  // Prevent closing by clicking outside
+          allowEscapeKey: false,     // Disable closing with the Escape key
+          allowEnterKey: false       // Disable dismissing with Enter
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setCurrentPage(0); // Reset to first page
+            setSelectedRows([]); // Clear selected rows after rejection
+            setSelectAllData(false); // Clear select all checkbox
+            fetchData();
+          }
         });
-        fetchData();
       }
     } catch (error) {
       Swal.fire({
@@ -506,10 +516,13 @@ export default function RejectIncident() {
           // const today = new Date().toISOString().split("T")[0];
           // Proceed_Dtm: new Date().toISOString(),
 
+
+          const user = await getLoggedUserId();
+
           const parameters = {
             Status: "Reject Pending",
-            Reject_Date: new Date(),
-
+            Proceed_Dtm: new Date(),
+            Proceed_By: user
           }
           const response = await Create_Task_Reject_F1_Filtered(parameters);
           if (response.status === 201) {
@@ -533,11 +546,18 @@ export default function RejectIncident() {
             text: "Successfully rejected selected records",
             icon: 'success',
             confirmButtonText: 'OK',
-            confirmButtonColor: "#28a745"
+            confirmButtonColor: "#28a745",
+            allowOutsideClick: false,  // Prevent closing by clicking outside
+            allowEscapeKey: false,     // Disable closing with the Escape key
+            allowEnterKey: false       // Disable dismissing with Enter
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setCurrentPage(0); // Reset to first page
+              fetchData();
+              setSelectedRows([]); // Clear selected rows after rejection
+              setSelectAllData(false); // Clear select all checkbox
+            }
           });
-          fetchData();
-          setSelectedRows([]); // Clear selected rows after rejection
-          setSelectAllData(false); // Clear select all checkbox
         }
       }
     } catch (error) {
@@ -611,9 +631,12 @@ export default function RejectIncident() {
           // const today1 = new Date().toISOString().split("T")[0];
           // Proceed_Dtm: new Date().toISOString(),
 
+          const user = await getLoggedUserId();
+
           const parameters = {
             Status: "Reject Pending",
-            Forward_Date: new Date(),
+            Incident_Forwarded_By: user,
+            Incident_Forwarded_On: new Date(),
           }
           const response = await Create_Task_Forward_F1_Filtered(parameters);
           if (response.status === 201) {
@@ -636,12 +659,18 @@ export default function RejectIncident() {
             text: "Successfully forwarded selected records",
             icon: 'success',
             confirmButtonText: 'OK',
-            confirmButtonColor: "#28a745"
+            confirmButtonColor: "#28a745",
+            allowOutsideClick: false,  // Prevent closing by clicking outside
+            allowEscapeKey: false,     // Disable closing with the Escape key
+            allowEnterKey: false       // Disable dismissing with Enter
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setCurrentPage(0); // Reset to first page
+              fetchData();
+              setSelectedRows([]); // Clear selected rows after move forward
+              setSelectAllData(false); // Clear select all checkbox
+            }
           });
-          fetchData();
-          setSelectedRows([]); // Clear selected rows after move forward
-          setSelectAllData(false); // Clear select all checkbox
-
         }
       }
     } catch (error) {
@@ -847,12 +876,15 @@ export default function RejectIncident() {
                         className={`${GlobalStyle.tableData} flex items-center justify-center`}
                       >
                         {row.status === "Reject Pending4" && (
-                          <img
-                            src={Reject_Pending}
-                            alt="Reject Pending"
-                            className="w-5 h-5"
-                          />
+                          <div data-tooltip-id="incident-tooltip">
+                            <img
+                              src={Reject_Pending}
+                              alt="Reject Pending"
+                              className="w-5 h-5"
+                            />
+                          </div>
                         )}
+                        <Tooltip id="incident-tooltip" place="bottom" content="Open No Agent" />
                       </td>
 
                       <td className={GlobalStyle.tableData}>{row.account_no}</td>
@@ -945,7 +977,7 @@ export default function RejectIncident() {
                   <button
                     className={`${GlobalStyle.buttonPrimary} ml-4 w-full sm:w-auto ${isRejecting ? 'opacity-50' : ''}`}
                     onClick={handleMoveForward}
-                    disable={isRejecting} 
+                    disable={isRejecting}
                   >
                     Move Forward
                   </button>
