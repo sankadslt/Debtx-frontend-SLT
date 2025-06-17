@@ -3,6 +3,7 @@ import { getLoggedUserId } from "../auth/authService";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
 const INCIDENT_URL = `${BASE_URL}/incident`;
+const API_BASE = "https://debtx.slt.lk:6500";
 
 /**
  * Creates a new incident by calling the Create_Incident API.
@@ -130,6 +131,7 @@ export const getDirectLODIncidentsCount = async () => {
 
 export const Create_Case_for_incident = async (requestData) => {
   try {
+
     const user_id = await getLoggedUserId();
     console.log("Request Data being sent:", requestData);
 
@@ -137,6 +139,7 @@ export const Create_Case_for_incident = async (requestData) => {
       requestData,
       // Proceed_By : user_id,
     });
+    
     return response.data; // Returns the created cases
   } catch (error) {
     console.error("Error in Create_Case_for_incident service:", error.message);
