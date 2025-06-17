@@ -10,7 +10,7 @@ Notes:The following page conatins the code for the Service Type List Screen */
 
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import editIcon from "../../assets/images/edit-info.svg";
 import Swal from "sweetalert2";
 import {
@@ -18,6 +18,9 @@ import {
 	registerServiceType,
 	getAllServices,
 } from "../../services/Service/service.js";
+import { getLoggedUserId } from "../../services/auth/authService.js";
+import activeIcon from "../../assets/images/Service/Active.png";
+import inactiveIcon from "../../assets/images/Service/Inactive.png";
 
 export default function ServiceTypeList() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -28,14 +31,20 @@ export default function ServiceTypeList() {
 	const [editableRowId, setEditableRowId] = useState(null);
 	const [editedStatus, setEditedStatus] = useState("");
 
+	// Pagination State
+	const [currentPage, setCurrentPage] = useState(0);
+	const rowsPerPage = 10;
+	const pages = Math.ceil(filteredData.length / rowsPerPage);
+	const startIndex = currentPage * rowsPerPage;
+	const endIndex = startIndex + rowsPerPage;
+	const paginatedData = filteredData.slice(startIndex, endIndex);
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				const response = await getAllServices();
-				// Access the array inside the correct key (here 'mongo')
 				const services = response.data.mongo || [];
 
-				// Map data to your UI-friendly format if you want, or just set directly
 				const formattedServices = services.map((item) => ({
 					Service_id: item.service_id,
 					Status: item.service_status,
@@ -50,6 +59,10 @@ export default function ServiceTypeList() {
 		};
 		fetchData();
 	}, []);
+
+	useEffect(() => {
+		setCurrentPage(0); // reset to first page when data changes
+	}, [filteredData]);
 
 	const handleStatusChange = (e) => {
 		setCurrentStatus(e.target.value);
@@ -66,7 +79,6 @@ export default function ServiceTypeList() {
 			});
 			return;
 		}
-
 		const filtered = serviceData.filter((item) =>
 			currentStatus ? item.Status === currentStatus : true
 		);
@@ -79,18 +91,19 @@ export default function ServiceTypeList() {
 		setFilteredData(serviceData);
 	};
 
+	// Searching
 	useEffect(() => {
-		const filtered = serviceData.filter((item) =>
-			item.Service_id?.toString()
-				.toLowerCase()
-				.includes(searchQuery.toLowerCase())
-		);
+		const query = searchQuery.toLowerCase();
+		const filtered = serviceData.filter((item) => {
+			const idMatch = item.Service_id?.toString().toLowerCase().includes(query);
+			const typeMatch = item.Service_type?.toLowerCase().includes(query);
+			return idMatch || typeMatch;
+		});
 		setFilteredData(filtered);
 	}, [searchQuery, serviceData]);
 
 	const handleServiceTypeSubmit = async (e) => {
 		e.preventDefault();
-
 		if (!serviceType.trim()) {
 			Swal.fire({
 				title: "Warning",
@@ -103,7 +116,11 @@ export default function ServiceTypeList() {
 		}
 
 		try {
-			await registerServiceType({ service_type: serviceType });
+			const userPayload = await getLoggedUserId();
+			const created_by = userPayload?.name || "Unknown";
+
+			await registerServiceType({ service_type: serviceType, created_by });
+
 			Swal.fire({
 				title: "Success",
 				text: "Service type submitted successfully!",
@@ -111,12 +128,19 @@ export default function ServiceTypeList() {
 				timer: 1500,
 				showConfirmButton: false,
 			});
-
 			setServiceType("");
 
 			const response = await getAllServices();
-			setServiceData(response.data);
-			setFilteredData(response.data);
+			const services = response.data.mongo || [];
+
+			const formattedServices = services.map((item) => ({
+				Service_id: item.service_id,
+				Status: item.service_status,
+				Service_type: item.service_type,
+			}));
+
+			setServiceData(formattedServices);
+			setFilteredData(formattedServices);
 		} catch (error) {
 			console.error("Error submitting service type:", error);
 			Swal.fire({
@@ -138,7 +162,6 @@ export default function ServiceTypeList() {
 				service_id: editableRowId,
 				service_status: editedStatus,
 			});
-			// Update state locally
 			const updated = serviceData.map((item) =>
 				item.Service_id === editableRowId
 					? { ...item, Status: editedStatus }
@@ -160,8 +183,8 @@ export default function ServiceTypeList() {
 				Service Type List
 			</h2>
 
+			{/* Search and Filter */}
 			<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-8 w-full">
-				{/* Search */}
 				<div className="mt-4 sm:mt-0 w-fit sm:max-w-md">
 					<div className={GlobalStyle.searchBarContainer}>
 						<input
@@ -169,13 +192,12 @@ export default function ServiceTypeList() {
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							className={GlobalStyle.inputSearch}
-							placeholder="Search"
+							placeholder="Search by Service ID or Type"
 						/>
 						<FaSearch className={GlobalStyle.searchBarIcon} />
 					</div>
 				</div>
 
-				{/* Filter Section */}
 				<div
 					className={`${GlobalStyle.cardContainer} flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-end items-stretch`}
 				>
@@ -188,7 +210,6 @@ export default function ServiceTypeList() {
 						<option value="">Select Status</option>
 						<option value="Active">Active</option>
 						<option value="Inactive">Inactive</option>
-						<option value="Terminate">Terminate</option>
 					</select>
 
 					<button
@@ -216,8 +237,8 @@ export default function ServiceTypeList() {
 							</tr>
 						</thead>
 						<tbody>
-							{Array.isArray(filteredData) && filteredData.length > 0 ? (
-								filteredData.map((item) => (
+							{paginatedData.length > 0 ? (
+								paginatedData.map((item) => (
 									<tr
 										key={item.Service_id}
 										className={GlobalStyle.tableRowEven}
@@ -232,10 +253,24 @@ export default function ServiceTypeList() {
 												>
 													<option value="Active">Active</option>
 													<option value="Inactive">Inactive</option>
-													<option value="Terminate">Terminate</option>
 												</select>
 											) : (
-												item.Status
+												<div className="flex items-center gap-2">
+													{item.Status === "Active" && (
+														<img
+															src={activeIcon}
+															alt="Active"
+															className="w-5 h-5"
+														/>
+													)}
+													{item.Status === "Inactive" && (
+														<img
+															src={inactiveIcon}
+															alt="Inactive"
+															className="w-5 h-5"
+														/>
+													)}
+												</div>
 											)}
 										</td>
 										<td className={GlobalStyle.tableData}>
@@ -275,11 +310,36 @@ export default function ServiceTypeList() {
 				</div>
 			</div>
 
+			{/* Pagination */}
+			{pages > 1 && (
+				<div className="flex justify-center items-center gap-4 mt-6">
+					<button
+						onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+						disabled={currentPage === 0}
+						className={`${GlobalStyle.navButton} disabled:opacity-50`}
+					>
+						<FaArrowLeft />
+					</button>
+					<span className="text-sm">
+						Page {currentPage + 1} of {pages}
+					</span>
+					<button
+						onClick={() =>
+							setCurrentPage((prev) => Math.min(prev + 1, pages - 1))
+						}
+						disabled={currentPage === pages - 1}
+						className={`${GlobalStyle.navButton} disabled:opacity-50`}
+					>
+						<FaArrowRight />
+					</button>
+				</div>
+			)}
+
 			{/* Service Type Submission Form */}
 			<div className="mt-10 px-4 md:px-0">
 				<form
 					onSubmit={handleServiceTypeSubmit}
-					className="flex flex-wrap items-center gap-4 max-w-5xl mx-auto"
+					className="flex flex-wrap items-center gap-4 max-w-lg w-full mx-auto"
 				>
 					<label htmlFor="serviceType" className="font-medium">
 						Service Type :
@@ -290,7 +350,7 @@ export default function ServiceTypeList() {
 						value={serviceType}
 						onChange={(e) => setServiceType(e.target.value)}
 						className={`${GlobalStyle.inputText} flex-1 min-w-[200px]`}
-						placeholder="Enter service type"
+						placeholder="Enter Service Type"
 					/>
 					<button type="submit" className={GlobalStyle.buttonPrimary}>
 						Submit
