@@ -236,7 +236,7 @@ export default function OpenIncident() {
 
         Swal.fire({
           title: "Cases Created Successfully!",
-          text: `Successfully created ${response.cases.length} cases.`,
+          text: `Successfully created ${selectedRows.length} cases.`,
           icon: "success",
           confirmButtonText: "OK",
           confirmButtonColor: "#28a745",
