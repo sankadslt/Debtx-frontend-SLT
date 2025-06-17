@@ -33,7 +33,6 @@ const PaymentDetails = () => {
   const [toDate, setToDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [caseId, setCaseId] = useState("");
-  const [status, setStatus] = useState("");
   const [phase, setPhase] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [searchBy, setSearchBy] = useState("case_id"); // Default search by case ID
@@ -48,6 +47,13 @@ const PaymentDetails = () => {
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const rowsPerPage = 10; // Number of rows per page
+  const [committedFilters, setCommittedFilters] = useState({
+    caseId: "",
+    accountNo: "",
+    phase: "",
+    fromDate: null,
+    toDate: null
+  });
 
   // variables need for table
   // const maxPages = Math.ceil(filteredDataBySearch.length / rowsPerPage);
@@ -114,7 +120,7 @@ const PaymentDetails = () => {
   );
 
   const filterValidations = () => {
-    if (!caseId && !phase && !status && !fromDate && !toDate && !accountNo) {
+    if (!caseId && !phase && !fromDate && !toDate && !accountNo) {
       Swal.fire({
         title: "Warning",
         text: "No filter is selected. Please, select a filter.",
@@ -145,7 +151,7 @@ const PaymentDetails = () => {
     return true; // All validations passed
   }
 
-  const CallAPI = async () => {
+  const CallAPI = async (filters) => {
     try {
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
@@ -155,12 +161,12 @@ const PaymentDetails = () => {
       };
 
       const payload = {
-        case_id: caseId,
-        account_num: accountNo,
-        settlement_phase: phase,
-        from_date: formatDate(fromDate),
-        to_date: formatDate(toDate),
-        pages: currentPage,
+        case_id: filters.caseId,
+        account_num: filters.accountNo,
+        settlement_phase: filters.phase,
+        from_date: formatDate(filters.fromDate),
+        to_date: formatDate(filters.toDate),
+        pages: filters.page,
       };
       console.log("Payload sent to API: ", payload);
 
@@ -247,7 +253,11 @@ const PaymentDetails = () => {
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      CallAPI(); // Call the function whenever currentPage changes
+      // CallAPI(); // Call the function whenever currentPage changes
+      CallAPI({
+        ...committedFilters,
+        page: currentPage,
+      })
     }
   }, [currentPage]);
 
@@ -281,9 +291,23 @@ const PaymentDetails = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setCommittedFilters({
+        caseId,
+        accountNo,
+        phase,
+        fromDate,
+        toDate
+      });
       setFilteredData([]); // Clear previous results
       if (currentPage === 1) {
-        CallAPI();
+        CallAPI({
+          caseId,
+          accountNo,
+          phase,
+          fromDate,
+          toDate,
+          page: 1
+        });
       } else {
         setCurrentPage(1);
       }
@@ -301,6 +325,13 @@ const PaymentDetails = () => {
     setFilteredData([]); // Clear filtered data
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
+    setCommittedFilters({
+      caseId: "",
+      accountNo: "",
+      phase: "",
+      fromDate: null,
+      toDate: null
+    })
     // setTotalAPIPages(1); // Reset total API pages
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
