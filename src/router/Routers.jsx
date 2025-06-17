@@ -697,7 +697,7 @@ const Routers = () => {
 
       {/* RTOM      */}
       <Route path="/pages/Rtom/RtomList" element={<ProtectedRoute element={<RtomList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfo/:rtomId" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Rtom/RtomInfo" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/RtomInfoEnd/:rtomId" element={<ProtectedRoute element={<RtomInfoEnd />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/ListofServiceType" element={<ProtectedRoute element={<ListofServicetype />} allowedRoles={['superadmin']} />} />
