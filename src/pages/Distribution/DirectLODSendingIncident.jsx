@@ -25,6 +25,7 @@ import { Tooltip } from "react-tooltip";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import { getLoggedUserId } from "../../services/auth/authService.js";
 
 export default function DirectLODSendingIncident() {
   // Table data exactly matching the image
@@ -279,8 +280,15 @@ export default function DirectLODSendingIncident() {
             icon: "success",
             confirmButtonText: "OK",
             confirmButtonColor: "#28a745"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setCurrentPage(0); // Reset to the first page
+              setSelectedRows([]); // Clear selected rows 
+              setSelectAllData(false); // Uncheck the select all checkbox
+              fetchData();
+            }
           });
-          fetchData();
+
         }
       }
     } catch (error) {
@@ -344,11 +352,13 @@ export default function DirectLODSendingIncident() {
 
           if (!confirmTask.isConfirmed) return;
 
+          const user_id = await getLoggedUserId();
 
           const parameters = {
             Status: "Direct LOD",
             // Inncident_Ids: selectedRows,
-            Created_Date: new Date().toISOString().split("T")[0],
+            Proceed_Dtm: new Date().toISOString().split("T")[0],
+            Proceed_By: user_id,
 
           };
 
@@ -374,9 +384,14 @@ export default function DirectLODSendingIncident() {
             icon: "success",
             confirmButtonText: "OK",
             confirmButtonColor: "#28a745"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setCurrentPage(0); // Reset to the first page
+              setSelectedRows([]); // Clear selected rows
+              setSelectAllData(false); // Uncheck the select all checkbox
+              fetchData();
+            }
           });
-
-          fetchData();
         }
       }
 
@@ -900,7 +915,7 @@ export default function DirectLODSendingIncident() {
                   className={`${GlobalStyle.buttonPrimary} ml-4`}
                   onClick={handleCreate}
                 >
-                  Create
+                  Proceed
                 </button>
               )}
             </div>

@@ -67,7 +67,6 @@ export const Task_for_Download_Incidents = async (incidentData) => {
         Created_By: user_id,  
         task_status: "open",
         Incident_Status: "Open No Agent",
-        proceed_Dtm: "null",
         ...filteredParams,
       };
   
