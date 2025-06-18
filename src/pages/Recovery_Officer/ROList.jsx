@@ -212,7 +212,7 @@ export default function ROList() {
                 </button>
             </div>
 
-            <button onClick={() => navigate(-1)} className={GlobalStyle.buttonPrimary}>
+              <button onClick={() => navigate(-1)} className={GlobalStyle.buttonPrimary}>
                 <FaArrowLeft />
             </button>
         </div>
