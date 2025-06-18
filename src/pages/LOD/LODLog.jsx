@@ -21,7 +21,7 @@ import Swal from "sweetalert2";
 import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
 
 const LOD_Log = () => {
-    const [currentPage, setCurrentPage] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
@@ -39,9 +39,19 @@ const LOD_Log = () => {
     // validation for date
     const handleFromDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'Date Type' must be selected before choosing a date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else if (toDate && date > toDate) {
-            Swal.fire("Invalid Input", "'From' date cannot be later than the 'To' date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'From' date cannot be later than the 'To' date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else {
             setFromDate(date);
         }
@@ -51,9 +61,19 @@ const LOD_Log = () => {
     // validation for date
     const handleToDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'Date Type' must be selected before choosing a date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else if (fromDate && date < fromDate) {
-            Swal.fire("Invalid Input", "The 'To' date cannot be earlier than the 'From' date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "The 'To' date cannot be earlier than the 'From' date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else {
             setToDate(date);
         }
@@ -61,21 +81,68 @@ const LOD_Log = () => {
 
     // Handle filter button
     const handleFilter = () => {
-        if (!LODStatus && !DateType && !fromDate && !toDate) {
-            Swal.fire("Invalid Input", "Please select at least one filter.", "warning");
-            return;
-        }
+        // if (!LODStatus && !DateType && !fromDate && !toDate) {
+        //     Swal.fire({
+        //         title: "Invalid Input",
+        //         text: "Please select at least one filter.",
+        //         icon: "warning",
+        //         confirmButtonColor: "#f1c40f"
+        //     });
+        //     return;
+        // }
         // fetchData();
         setLODData([]); // Reset LOD data before fetching new data
         setIsMoreDataAvailable(true); // Reset more data available state
         setMaxCurrentPage(0); // Reset max current page
         // setTotalAPIPages(1); // Reset total API pages
-        if (currentPage === 1) {
-            fetchData();
+        const isValid = filterValidate();
+        if (!isValid) {
+            return; // If validation fails, do not proceed
         } else {
-            setCurrentPage(1);
+            setLODData([]); // Reset LOD data before fetching new data
+            setIsMoreDataAvailable(true); // Reset more data available state
+            setMaxCurrentPage(0); // Reset max current page
+            if (currentPage === 1) {
+                fetchData();
+            } else {
+                setCurrentPage(1);
+            }
+            setIsFilterApplied(true); // Set filter applied state to true
         }
-        setIsFilterApplied(true); // Set filter applied state to true
+    }
+
+    const filterValidate = () => {
+        if (!LODStatus && !DateType && !fromDate && !toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select at least one filter.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        if (DateType && !fromDate && !toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select a date range when 'Date Type' is selected.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        if (fromDate && !toDate || !fromDate && toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select both 'From' and 'To' dates.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        return true;
     }
 
     // Fetch list of LOD cases
@@ -93,7 +160,8 @@ const LOD_Log = () => {
                         text: "No matching data found for the selected filters.",
                         icon: "warning",
                         allowOutsideClick: false,
-                        allowEscapeKey: false
+                        allowEscapeKey: false,
+                        confirmButtonColor: "#f1c40f"
                     });
                 }
             } else {
@@ -104,7 +172,12 @@ const LOD_Log = () => {
             }
         } catch (error) {
             // console.error("Error fetching LOD data:", error);
-            Swal.fire("No Results", "Error fetching data.", "error");
+            Swal.fire({
+                title: "No Results",
+                text: "Error fetching data.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
             setLODData([]);
         } finally {
             setIsLoading(false);
@@ -113,7 +186,7 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+        if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage); // Update max current page
             fetchData(); // Call the function whenever currentPage changes
         }
@@ -205,6 +278,10 @@ const LOD_Log = () => {
         navigate("/pages/LOD/CustomerResponseReview", { state: { caseId } });
     };
 
+    // Function to navigate to the case ID page
+    const naviCaseID = (caseId) => {
+        navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
+    }
 
     return (
         <div className={GlobalStyle.fontPoppins}>
@@ -217,17 +294,17 @@ const LOD_Log = () => {
                 <div className="flex items-center justify-end w-full space-x-6">
                     <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Status</option>
-                        <option value="Initial LOD">Initial LOD</option>
-                        <option value="LOD Settle Pending">LOD Settle Pending</option>
-                        <option value="LOD Settle Open-Pending">LOD Settle Open-Pending</option>
-                        <option value="LOD Settle Active">LOD Settle Active</option>
+                        <option value="Initial LOD" style={{ color: "Black" }}>Initial LOD</option>
+                        <option value="LOD Settle Pending" style={{ color: "Black" }}>LOD Settle Pending</option>
+                        <option value="LOD Settle Open-Pending" style={{ color: "Black" }}>LOD Settle Open-Pending</option>
+                        <option value="LOD Settle Active" style={{ color: "Black" }}>LOD Settle Active</option>
                     </select>
 
                     <select value={DateType} onChange={(e) => setDateType(e.target.value)} style={{ color: DateType === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Date Type</option>
-                        <option value="created_date">Created Date</option>
-                        <option value="expire_date">Expire Date</option>
-                        <option value="last_response_date">Last Response Date</option>
+                        <option value="created_date" style={{ color: "Black" }}>Created Date</option>
+                        <option value="expire_date" style={{ color: "Black" }}>Expire Date</option>
+                        <option value="last_response_date" style={{ color: "Black" }}>Last Response Date</option>
                     </select>
 
                     <label className={GlobalStyle.dataPickerDate}>Date</label>
@@ -293,7 +370,12 @@ const LOD_Log = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.LODID}</td>
+                                    <td
+                                        className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                                        onClick={() => naviCaseID(log.LODID)}
+                                    >
+                                        {log.LODID.toString().padStart(3, '0')}
+                                    </td>
                                     <td className={GlobalStyle.tableData}>{log.Status}</td>
                                     <td className={GlobalStyle.tableData}>{log.LODBatchNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.NotificationCount}</td>
