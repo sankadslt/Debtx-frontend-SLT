@@ -6,11 +6,10 @@ import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import edit_info from "../../assets/images/edit-info.svg";
 import { fetchRTOMDetails } from "../../services/RTOM/RtomService";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 const RtomInfo = () => {
-    const { rtomId } = useParams();
     const [showPopup, setShowPopup] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
@@ -23,7 +22,9 @@ const RtomInfo = () => {
     const navigate = useNavigate();
      const [logHistory, setLogHistory] = useState([]);
 
+const location = useLocation();
 
+  const rtomId = location.state?.rtomId;
 
     
 
@@ -52,10 +53,6 @@ const RtomInfo = () => {
         }
     }, [rtomId]);
 
-
-   
-
-    
 
     const filteredLogHistory = logHistory.filter((row) =>
         Object.values(row)
