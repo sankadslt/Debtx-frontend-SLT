@@ -31,6 +31,7 @@ import { Tooltip } from "react-tooltip";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import { getLoggedUserId } from "../../services/auth/authService.js";
 
 export default function CollectOnlyCPECollect() {
   const [fromDate, setFromDate] = useState(null); // Usestate for From Date
@@ -254,15 +255,25 @@ export default function CollectOnlyCPECollect() {
         return;
       }
       const response = await Forward_CPE_Collect(Incident_Id);
-      if (response.status === 201) {
+      if (response.status === 200) {
         Swal.fire({
           title: "Success",
           text: response.data.message,
           icon: "success",
           confirmButtonText: "OK",
           confirmButtonColor: "#28a745",
+          allowOutsideClick: false,  // Prevent closing by clicking outside
+          allowEscapeKey: false,     // Disable closing with the Escape key
+          allowEnterKey: false       // Disable dismissing with Enter
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setCurrentPage(0); // Reset to the first page
+            setSelectedRows([]); // Clear selected rows
+            setSelectAllData(false); // Reset select all state
+            fetchData();
+          }
         });
-        fetchData();
+
       }
     } catch (error) {
       Swal.fire({
@@ -316,14 +327,16 @@ export default function CollectOnlyCPECollect() {
 
         if (!confirmCreateTask.isConfirmed) return;
 
+        const userId = await getLoggedUserId();
+
         const parameters = {
-          Status: "Open CPE Collect",
           //Incident_Ids: selectedRows,
-          Proceed_Date: new Date(),
+          Proceed_Dtm: new Date(),
+          Proceed_By: userId
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
 
-        if (response.status === 200) {
+        if (response.status === 201) {
           Swal.fire({
             title: "Success",
             text: "Task successfully created for forwarding Collect CPE Only incidents.",
@@ -332,7 +345,8 @@ export default function CollectOnlyCPECollect() {
             confirmButtonColor: "#28a745",
           });
         }
-        fetchData();
+        setSelectedRows([]); // Clear selected rows
+        setSelectAllData(false); // Reset select all state
       } else {
 
         const confirmProceed = await Swal.fire({
@@ -358,9 +372,17 @@ export default function CollectOnlyCPECollect() {
           icon: "success",
           confirmButtonText: "OK",
           confirmButtonColor: "#28a745",
+          allowOutsideClick: false,  // Prevent closing by clicking outside
+          allowEscapeKey: false,     // Disable closing with the Escape key
+          allowEnterKey: false       // Disable dismissing with Enter
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setCurrentPage(0); // Reset to the first page
+            setSelectedRows([]); // Clear selected rows
+            setSelectAllData(false); // Reset select all state
+            fetchData();
+          }
         });
-
-        fetchData();
       }
     } catch (error) {
       Swal.fire({
