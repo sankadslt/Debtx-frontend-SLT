@@ -18,6 +18,7 @@ import {
 	registerServiceType,
 	getAllServices,
 } from "../../services/Service/service.js";
+import { jwtDecode } from "jwt-decode";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import activeIcon from "../../assets/images/Service/Active.png";
 import inactiveIcon from "../../assets/images/Service/Inactive.png";
@@ -116,10 +117,19 @@ export default function ServiceTypeList() {
 		}
 
 		try {
-			const userPayload = await getLoggedUserId();
-			const created_by = userPayload?.name || "Unknown";
+			const token = localStorage.getItem("accessToken");
+			const decoded = jwtDecode(token);
+			const created_by = decoded?.name || decoded?.username || "Unknown";
 
-			await registerServiceType({ service_type: serviceType, created_by });
+			console.log("Submitting:", {
+				service_type: serviceType,
+				create_by: created_by,
+			});
+
+			await registerServiceType({
+				service_type: serviceType,
+				create_by: created_by,
+			});
 
 			Swal.fire({
 				title: "Success",
