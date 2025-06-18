@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
-import { createRTOM } from "../../services/RTOM/Rtom_services";
+import { createRTOM } from "../../services/RTOM/Rtom";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getLoggedUserId } from "../../services/auth/authService";
+ 
 
 const AddRtom = () => {
   const navigate = useNavigate();
@@ -23,14 +24,16 @@ const AddRtom = () => {
 
    // get system user 
   const loadUser = async () => {
-    const user = await getLoggedUserId();
-    setUserData(user);
-    console.log("User data:", user);
-  };
+  const user = await getLoggedUserId();
+  console.log("Loaded user from getLoggedUserId():", user);
+  setUserData(user);
+};
 
-  useEffect(() => {
-    loadUser();
-  }, []);
+useEffect(() => {
+  loadUser();
+}, []);
+
+
 
 
   const validateForm = () => {
@@ -69,57 +72,62 @@ const AddRtom = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    // console.log(userData);
-    // console.log(userData.user_id);
-    
-    try {
-      const rtomData = {
-        billingCenterCode: formData.billingCenterCode,
-        name: formData.name,
-        areaCode: formData.areaCode,
-        email: formData.email,
-        mobile: formData.mobile,
-        telephone: formData.telephone,
-        // createdBy: userData?.user_id
-        createdBy: userData
-      };
+  if (!userData) {
+    Swal.fire({ icon: "error", title: "Error", text: "User data not loaded properly." });
+    setIsSubmitting(false);
+    return;
+  }
 
-      const response = await createRTOM(rtomData);
-      console.log("RTOM created successfully:", response);
-      
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "RTOM created successfully!",
-      }).then(() => {
-        navigate("/pages/Rtom/RtomList");
-      });
-      
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "Failed to create RTOM",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  try {
+    const rtomData = {
+  billingCenterCode: formData.billingCenterCode,
+  name: formData.name,
+  areaCode: formData.areaCode,
+  email: formData.email || "rtom@gmail.com",
+  mobile: formData.mobile ? [Number(formData.mobile)] : [],
+  telephone: formData.telephone ? [Number(formData.telephone)] : [],
+};
+
+const response = await createRTOM(rtomData);
+
+
+    Swal.fire({
+      icon: "success",
+      title: "Success",
+      text: "RTOM created successfully!",
+    }).then(() => navigate("/pages/Rtom/RtomList"));
+
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.response?.data?.message || error.message || "Failed to create RTOM",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const { name, value } = e.target;
+  let newValue = value;
+
+  if (name === "mobile" || name === "telephone") {
+    newValue = value.replace(/\D/g, '');  // digits only
+  }
+
+  setFormData(prev => ({
+    ...prev,
+    [name]: newValue
+  }));
+};
+
 
   const goBack = () => {
     navigate(-1);
