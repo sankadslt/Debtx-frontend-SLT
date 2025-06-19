@@ -291,10 +291,10 @@ const Digital_Signature_LOD = () => {
     const HandleCreateLODList = async () => {
         if (LODCount <= 0) {
             Swal.fire({
-                title: "Error",
+                title: "Warning",
                 text: "Please enter LOD Count",
-                icon: "error",
-                confirmButtonColor: "#d33"
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
             });
             return;
         }

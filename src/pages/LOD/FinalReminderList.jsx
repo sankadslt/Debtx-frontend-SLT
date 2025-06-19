@@ -312,7 +312,7 @@ const LOD_Log = () => {
             {/* filters */}
             <div className={`${GlobalStyle.cardContainer} w-full`}>
 
-                <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
+                <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3 gap-3">
                     <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Status</option>
                         <option value="Final Reminder" style={{ color: "black" }}>Final Reminder</option>
@@ -474,17 +474,19 @@ const LOD_Log = () => {
             </div>
 
             {/* Page nevigation buttons */}
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage <= 1}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPage}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === totalPages}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {filteredData.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage <= 1}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPage}
+                    </span>
+                    <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === totalPages}>
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
         </div>
     );
 

@@ -12,7 +12,7 @@ Related Files:
 Notes: This template uses Tailwind CSS */
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/fa";
@@ -35,6 +35,13 @@ const LOD_Log = () => {
     const [isFilterApplied, setIsFilterApplied] = useState(false); // Track if filter is applied
     const rowsPerPage = 10; // Number of rows per page
     const navigate = useNavigate();
+    const [committedFilters, setCommittedFilters] = useState({
+        LODStatus: "",
+        DateType: "",
+        fromDate: null,
+        toDate: null,
+    });
+    const hasMounted = useRef(false); // Track if the component has mounted
 
     // validation for date
     const handleFromDateChange = (date) => {
@@ -81,19 +88,6 @@ const LOD_Log = () => {
 
     // Handle filter button
     const handleFilter = () => {
-        // if (!LODStatus && !DateType && !fromDate && !toDate) {
-        //     Swal.fire({
-        //         title: "Invalid Input",
-        //         text: "Please select at least one filter.",
-        //         icon: "warning",
-        //         confirmButtonColor: "#f1c40f"
-        //     });
-        //     return;
-        // }
-        // fetchData();
-        setLODData([]); // Reset LOD data before fetching new data
-        setIsMoreDataAvailable(true); // Reset more data available state
-        setMaxCurrentPage(0); // Reset max current page
         // setTotalAPIPages(1); // Reset total API pages
         const isValid = filterValidate();
         if (!isValid) {
@@ -102,8 +96,20 @@ const LOD_Log = () => {
             setLODData([]); // Reset LOD data before fetching new data
             setIsMoreDataAvailable(true); // Reset more data available state
             setMaxCurrentPage(0); // Reset max current page
+            setCommittedFilters({
+                LODStatus: LODStatus,
+                DateType: DateType,
+                fromDate: fromDate,
+                toDate: toDate,
+            });
             if (currentPage === 1) {
-                fetchData();
+                fetchData({
+                    LODStatus: LODStatus,
+                    DateType: DateType,
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    currentPage: 1,
+                });
             } else {
                 setCurrentPage(1);
             }
@@ -146,10 +152,10 @@ const LOD_Log = () => {
     }
 
     // Fetch list of LOD cases
-    const fetchData = async () => {
+    const fetchData = async (filters) => {
         setIsLoading(true);
         try {
-            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage);
+            const LOD = await List_Final_Reminder_Lod_Cases(filters.LODStatus, filters.DateType, filters.fromDate, filters.toDate, "LOD", filters.currentPage);
             console.log("LOD data:", LOD);
             setLODData((prevData) => [...prevData, ...LOD]);
             if (LOD.length === 0) {
@@ -163,6 +169,8 @@ const LOD_Log = () => {
                         allowEscapeKey: false,
                         confirmButtonColor: "#f1c40f"
                     });
+                } else if (currentPage === 2) {
+                    setCurrentPage(1); // Reset to page 1 if no data found on page 2
                 }
             } else {
                 const maxData = currentPage === 1 ? 10 : 30;
@@ -186,9 +194,17 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
+        if (!hasMounted.current) {
+            hasMounted.current = true;
+            return;
+        }
+
         if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage); // Update max current page
-            fetchData(); // Call the function whenever currentPage changes
+            fetchData({
+                ...committedFilters,
+                currentPage: currentPage,
+            }); // Call the function whenever currentPage changes
         }
     }, [currentPage]);
 
@@ -203,8 +219,18 @@ const LOD_Log = () => {
         setLODData([]);
         setTotalPages(0);
         setIsMoreDataAvailable(true);
-        setCurrentPage(0);
-        filteredData([]);
+        setCommittedFilters({
+            LODStatus: "",
+            DateType: "",
+            fromDate: null,
+            toDate: null,
+        })
+        if (currentPage != 1) {
+            setCurrentPage(1); // Reset to page 1
+        } else {
+            setCurrentPage(0); // Temp set to 0
+            setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+        }
     };
 
     // display loading animation when data is loading
@@ -291,7 +317,7 @@ const LOD_Log = () => {
             {/* filters */}
             <div className={`${GlobalStyle.cardContainer} w-full`}>
 
-                <div className="flex items-center justify-end w-full space-x-6">
+                <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3 gap-3">
                     <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Status</option>
                         <option value="Initial LOD" style={{ color: "Black" }}>Initial LOD</option>
@@ -308,7 +334,6 @@ const LOD_Log = () => {
                     </select>
 
                     <label className={GlobalStyle.dataPickerDate}>Date</label>
-                    <div className={GlobalStyle.datePickerContainer}>
                         <DatePicker
                             selected={fromDate}
                             onChange={handleFromDateChange}
@@ -323,7 +348,6 @@ const LOD_Log = () => {
                             placeholderText="To Date"
                             className={GlobalStyle.inputText}
                         />
-                    </div>
 
                     <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
                     <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
@@ -346,7 +370,7 @@ const LOD_Log = () => {
             </div>
 
             {/* table */}
-            <div className={GlobalStyle.tableContainer}>
+            <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
