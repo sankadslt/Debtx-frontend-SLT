@@ -365,61 +365,60 @@ const UserInfo = () => {
                 <table className="mb-6 sm:mb-8 w-full">
                   <tbody>
                     {/* User type */}
-                    <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                    <tr className="align-middle">
+                      <td className="w-1/3 sm:w-auto align-middle">
+                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
                           User Type
-                        </label>
+                        </p>
                       </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
+                      <td className="text-center w-4 sm:w-auto align-middle">
                         :
                       </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
+                      <td className="w-2/3 sm:w-auto align-middle">
+                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
                           {formData.userType || "N/A"}
                         </label>
                       </td>
                     </tr>
 
                     {/* User Mail */}
-                    <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                    <tr className="align-middle">
+                      <td className="w-1/3 sm:w-auto align-middle">
+                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
                           User Mail
-                        </label>
+                        </p>
                       </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
+                      <td className="text-center w-4 sm:w-auto align-middle">
                         :
                       </td>
-                       <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
+                      <td className="w-2/3 sm:w-auto align-middle">
+                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
                           {formData.userMail || "N/A"}
                         </label>
                       </td>
                     </tr>
 
                     {/* Login Method */}
-                    <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                    <tr className="align-middle">
+                      <td className="w-1/3 sm:w-auto align-middle">
+                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
                           Login Method
-                        </label>
+                        </p>
                       </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
+                      <td className="text-center w-4 sm:w-auto align-middle">
                         :
                       </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
+                      <td className="w-2/3 sm:w-auto align-middle">
+                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
                           {formData.loginMethod || "N/A"}
                         </label>
                       </td>
                     </tr>
 
-                    {/* User Role Dropdown with Add Button - Only show if no role exists */}
-                    {userRolesData.length === 0 && (
-                      <tr>
-                        <td className="w-1/3 sm:w-auto">
-                          <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                    {/* User Role */}
+                    <tr className="align-middle">
+                        <td className="w-1/3 sm:w-auto align-middle">
+                          <label className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
                             User Role
                           </label>
                         </td>
@@ -427,7 +426,7 @@ const UserInfo = () => {
                           :
                         </td>
                         <td className="w-2/3 sm:w-auto">
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 my-2">
                             <select
                               className={`${GlobalStyle.selectBox} flex-1`}
                               value={selectedRole}
@@ -450,8 +449,7 @@ const UserInfo = () => {
                             </button>
                           </div>
                         </td>
-                      </tr>
-                    )}
+                    </tr>
 
                     {/* User Roles Table */}
                     <tr>
@@ -515,12 +513,12 @@ const UserInfo = () => {
                       </td>
                     </tr>
 
-                    <tr className="h-4"></tr>
+                    <tr className="h-2"></tr>
 
                     {/* Created On */}
                     <tr>
                       <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                        <label className={`${GlobalStyle.paragraph} mb-2`}>
                           Created On
                         </label>
                       </td>
@@ -534,10 +532,12 @@ const UserInfo = () => {
                       </td>
                     </tr>
 
+                    <tr className="h-2"></tr>
+
                     {/* Created by */}
                     <tr>
                       <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                        <label className={`${GlobalStyle.paragraph} mb-2`}>
                           Created By
                         </label>
                       </td>
@@ -551,10 +551,12 @@ const UserInfo = () => {
                       </td>
                     </tr>
 
+                    <tr className="h-2"></tr>
+
                     {/* Approved on */}
                     <tr>
                       <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                        <label className={`${GlobalStyle.paragraph} mb-2`}>
                           Approved On
                         </label>
                       </td>
@@ -567,11 +569,13 @@ const UserInfo = () => {
                         </label>
                       </td>
                     </tr>
+                    
+                    <tr className="h-2"></tr>
 
                     {/* Approved by */}
                     <tr>
                       <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.headingMedium} mb-2`}>
+                        <label className={`${GlobalStyle.paragraph}`}>
                           Approved By
                         </label>
                       </td>
@@ -586,21 +590,22 @@ const UserInfo = () => {
                     </tr>
                   </tbody>
                 </table>
-              </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-                <label
-                  className={`${GlobalStyle.headingMedium} sm:w-1/4 whitespace-nowrap`}
-                >
-                  Remark
-                </label>
-                <span className="hidden sm:inline-block">:</span>
-                <textarea
-                  className={`${GlobalStyle.inputText} w-full h-40`}
-                  value={remark}
-                  onChange={(e) => setRemark(e.target.value)}
-                  placeholder="Enter remark for this update..."
-                />
+                {/* Remark */}
+                <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                  <label
+                    className={`${GlobalStyle.paragraph} sm:w-1/4 whitespace-nowrap`}
+                  >
+                    Remark
+                  </label>
+                  <span className="hidden sm:inline-block">:</span>
+                  <textarea
+                    className={`${GlobalStyle.inputText} w-full h-40`}
+                    value={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                    placeholder="Enter remark for this update..."
+                  />
+                </div>
               </div>
 
               {/* Save button in edit mode */}
