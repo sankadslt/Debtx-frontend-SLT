@@ -231,7 +231,7 @@ const Commission_List = () => {
   const validateDates = (from, to) => {
     if (from && to) {
 
-      if (from >= to) {
+      if (from > to) {
         Swal.fire({
           title: "Warning",
           text: "From date must be before to date",
