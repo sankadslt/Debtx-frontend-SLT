@@ -33,7 +33,6 @@ const PaymentDetails = () => {
   const [toDate, setToDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [caseId, setCaseId] = useState("");
-  const [status, setStatus] = useState("");
   const [phase, setPhase] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [searchBy, setSearchBy] = useState("case_id"); // Default search by case ID
@@ -48,6 +47,13 @@ const PaymentDetails = () => {
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const rowsPerPage = 10; // Number of rows per page
+  const [committedFilters, setCommittedFilters] = useState({
+    caseId: "",
+    accountNo: "",
+    phase: "",
+    fromDate: null,
+    toDate: null
+  });
 
   // variables need for table
   // const maxPages = Math.ceil(filteredDataBySearch.length / rowsPerPage);
@@ -114,7 +120,7 @@ const PaymentDetails = () => {
   );
 
   const filterValidations = () => {
-    if (!caseId && !phase && !status && !fromDate && !toDate && !accountNo) {
+    if (!caseId && !phase && !fromDate && !toDate && !accountNo) {
       Swal.fire({
         title: "Warning",
         text: "No filter is selected. Please, select a filter.",
@@ -145,7 +151,7 @@ const PaymentDetails = () => {
     return true; // All validations passed
   }
 
-  const CallAPI = async () => {
+  const CallAPI = async (filters) => {
     try {
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
@@ -155,33 +161,17 @@ const PaymentDetails = () => {
       };
 
       const payload = {
-        case_id: caseId,
-        account_num: accountNo,
-        settlement_phase: phase,
-        from_date: formatDate(fromDate),
-        to_date: formatDate(toDate),
-        pages: currentPage,
+        case_id: filters.caseId,
+        account_num: filters.accountNo,
+        settlement_phase: filters.phase,
+        from_date: formatDate(filters.fromDate),
+        to_date: formatDate(filters.toDate),
+        pages: filters.page,
       };
       console.log("Payload sent to API: ", payload);
 
       setIsLoading(true); // Set loading state to true
-      const response = await List_All_Payment_Cases(payload).catch((error) => {
-        if (error.response && error.response.status === 404) {
-          Swal.fire({
-            title: "No Results",
-            text: "No matching data found for the selected filters.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonColor: "#f1c40f"
-          });
-          setFilteredData([]);
-          return null;
-        } else {
-          throw error;
-        }
-      });
-      setIsLoading(false); // Set loading state to false
+      const response = await List_All_Payment_Cases(payload);
 
       // Updated response handling
       if (response && response.data) {
@@ -200,6 +190,8 @@ const PaymentDetails = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f"
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -261,7 +253,11 @@ const PaymentDetails = () => {
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      CallAPI(); // Call the function whenever currentPage changes
+      // CallAPI(); // Call the function whenever currentPage changes
+      CallAPI({
+        ...committedFilters,
+        page: currentPage,
+      })
     }
   }, [currentPage]);
 
@@ -295,9 +291,23 @@ const PaymentDetails = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setCommittedFilters({
+        caseId,
+        accountNo,
+        phase,
+        fromDate,
+        toDate
+      });
       setFilteredData([]); // Clear previous results
       if (currentPage === 1) {
-        CallAPI();
+        CallAPI({
+          caseId,
+          accountNo,
+          phase,
+          fromDate,
+          toDate,
+          page: 1
+        });
       } else {
         setCurrentPage(1);
       }
@@ -315,6 +325,13 @@ const PaymentDetails = () => {
     setFilteredData([]); // Clear filtered data
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
+    setCommittedFilters({
+      caseId: "",
+      accountNo: "",
+      phase: "",
+      fromDate: null,
+      toDate: null
+    })
     // setTotalAPIPages(1); // Reset total API pages
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
@@ -397,13 +414,13 @@ const PaymentDetails = () => {
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full`}>
-            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
+            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full gap-3">
 
-              <div className="flex items-center">
+              <div className="flex flex-wrap items-center">
                 <select
                   value={searchBy}
                   onChange={(e) => setSearchBy(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
+                  className={`${GlobalStyle.selectBox}  w-full`}
                   style={{ color: searchBy === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select</option>
@@ -426,11 +443,11 @@ const PaymentDetails = () => {
                 />
               </div>
 
-              <div className="flex items-center">
+              <div className="flex flex-wrap items-center">
                 <select
                   value={phase}
                   onChange={(e) => setPhase(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
+                  className={`${GlobalStyle.selectBox}   `}
                   style={{ color: phase === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select Phase</option>

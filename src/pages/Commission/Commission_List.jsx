@@ -957,9 +957,18 @@ const Commission_List = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isForwarding, setIsForwarding] = useState(false);
   const hasMounted = useRef(false);
+  const [committedFilters, setCommittedFilters] = useState({
+    caseId: "",
+    accountNo: "",
+    commissionType: "",
+    selectedDrcId: "",
+    fromDate: null,
+    toDate: null
+  });
 
   const rowsPerPage = 10;
-   
+
+  // Role-Based Buttons
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
@@ -987,7 +996,8 @@ const Commission_List = () => {
 
         setDrcNames(names);
       } catch (error) {
-        console.error("Error fetching DRC names:", error);
+        // console.error("Error fetching DRC names:", error);
+        setDrcNames([]);
       }
     };
     // fetchData();
@@ -996,6 +1006,7 @@ const Commission_List = () => {
     fetchCommissionCounts();
   }, []);
 
+  // Fetch commission counts on component mount
   const fetchCommissionCounts = async () => {
     try {
       const response = await commission_type_cases_count({});
@@ -1010,6 +1021,7 @@ const Commission_List = () => {
     }
   };
 
+  // Function to validate filters before API call
   const filterValidations = () => {
     if (!caseId && !accountNo && !commissionType && !selectedDrcId && !fromDate && !toDate) {
       Swal.fire({
@@ -1042,7 +1054,8 @@ const Commission_List = () => {
     return true;
   }
 
-  const CallAPI = async () => {
+  // Function to call the API with the selected filters
+  const CallAPI = async (filter) => {
     try {
       const formatDate = (date) => {
         if (!date) return null;
@@ -1051,13 +1064,13 @@ const Commission_List = () => {
       };
 
       const filters = {
-        case_id: caseId,
-        From_DAT: formatDate(fromDate),
-        TO_DAT: formatDate(toDate),
-        Account_Num: accountNo,
-        DRC_ID: selectedDrcId,
-        Commission_Type: commissionType,
-        pages: currentPage,
+        case_id: filter.caseId,
+        From_DAT: formatDate(filter.fromDate),
+        TO_DAT: formatDate(filter.toDate),
+        Account_Num: filter.accountNo,
+        DRC_ID: filter.selectedDrcId,
+        Commission_Type: filter.commissionType,
+        pages: filter.page,
       };
       console.log("Filters sent to api:", filters);
 
@@ -1066,8 +1079,6 @@ const Commission_List = () => {
 
       if (response && response.data && response.status === "success") {
         console.log("Valid data received:", response.data);
-     
-        // Append the new data to the existing data
         setFilteredData((prevData) => [...prevData, ...response.data]);
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
@@ -1080,6 +1091,8 @@ const Commission_List = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f",
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -1087,8 +1100,6 @@ const Commission_List = () => {
             setIsMoreDataAvailable(false); // More data available
           }
         }
-
-        // setFilteredData(response.data.data);
       } else {
         Swal.fire({
           title: "Error",
@@ -1123,7 +1134,8 @@ const Commission_List = () => {
 
   const validateDates = (from, to) => {
     if (from && to) {
-      if (from >= to) {
+
+      if (from > to) {
         Swal.fire({
           title: "Warning",
           text: "From date must be before to date",
@@ -1166,10 +1178,15 @@ const Commission_List = () => {
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      CallAPI(); // Call the function whenever currentPage changes
+      // CallAPI(); // Call the function whenever currentPage changes
+      CallAPI({
+        ...committedFilters,
+        page: currentPage,
+      })
     }
   }, [currentPage]);
 
+  // Handle filter button click
   const handleFilterButton = () => { // Reset to the first page
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
@@ -1179,18 +1196,35 @@ const Commission_List = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setCommittedFilters({
+        caseId,
+        accountNo,
+        commissionType,
+        selectedDrcId,
+        fromDate,
+        toDate
+      })
       setFilteredData([]); // Clear previous results
       if (currentPage === 1) {
-        CallAPI();
+        CallAPI({
+          caseId,
+          accountNo,
+          commissionType,
+          selectedDrcId,
+          fromDate,
+          toDate,
+          page: 1
+        });
       } else {
         setCurrentPage(1);
       }
     }
   }
+
   const startIndex = (currentPage - 1) * rowsPerPage;
- 
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
+  // Search Section
   const filteredDataBySearch = paginatedData.filter((row) =>
     Object.values(row)
       .join(" ")
@@ -1217,6 +1251,7 @@ const Commission_List = () => {
     }
   };
 
+  // Clear all filters and reset state
   const handleClear = () => {
     setCaseId("");
     setAccountNo("");
@@ -1228,6 +1263,15 @@ const Commission_List = () => {
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
     setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
+    setCommittedFilters({
+      caseId: "",
+      accountNo: "",
+      commissionType: "",
+      selectedDrcId: "",
+      fromDate: null,
+      toDate: null
+    })
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
     } else {
@@ -1236,6 +1280,7 @@ const Commission_List = () => {
     }
   };
 
+  // Handle task creation for downloading commission case list
   const HandleCreateTaskDownloadCommissiontList = async () => {
     const userData = await getLoggedUserId(); // Assign user ID
 
@@ -1462,11 +1507,14 @@ const Commission_List = () => {
               style={{ color: selectedDrcId === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Select DRC</option>
-              {drcNames.map((drc) => (
+              {drcNames.length > 0 ? (drcNames.map((drc) => (
                 <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
                   {drc.value}
                 </option>
-              ))}
+              ))
+              ) : (
+                <option value="" disabled style={{ color: "gray" }}>No DRCs available</option>
+              )}
             </select>
 
             <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2">

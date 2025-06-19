@@ -74,6 +74,14 @@ const Monitor_settlement = () => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
   const hasMounted = useRef(false);
+  const [committedFilters, setCommittedFilters] = useState({
+    caseId: "",
+    accountNo: "",
+    phase: "",
+    status: "",
+    fromDate: null,
+    toDate: null
+  });
 
   // Role-Based Buttons
   useEffect(() => {
@@ -311,7 +319,7 @@ const Monitor_settlement = () => {
   };
 
   // Function to call the API and fetch filtered data
-  const callAPI = async () => {
+  const callAPI = async (filters) => {
     try {
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
@@ -322,34 +330,28 @@ const Monitor_settlement = () => {
 
       console.log(currentPage);
 
+      // const payload = {
+      //   case_id: caseId,
+      //   account_no: accountNo,
+      //   settlement_phase: phase,
+      //   settlement_status: status,
+      //   from_date: formatDate(fromDate),
+      //   to_date: formatDate(toDate),
+      //   pages: currentPage,
+      // };
       const payload = {
-        case_id: caseId,
-        account_no: accountNo,
-        settlement_phase: phase,
-        settlement_status: status,
-        from_date: formatDate(fromDate),
-        to_date: formatDate(toDate),
-        pages: currentPage,
+        case_id: filters.caseId,
+        account_no: filters.accountNo,
+        settlement_phase: filters.phase,
+        settlement_status: filters.status,
+        from_date: formatDate(filters.fromDate),
+        to_date: formatDate(filters.toDate),
+        pages: filters.page,
       };
       console.log("Payload sent to API: ", payload);
 
       setIsLoading(true); // Set loading state to true
-      const response = await listAllSettlementCases(payload).catch((error) => {
-        if (error.response && error.response.status === 404) {
-          Swal.fire({
-            title: "No Results",
-            text: "No matching data found for the selected filters.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonColor: "#f1c40f"
-          });
-          setFilteredData([]);
-          return null;
-        } else {
-          throw error;
-        }
-      });
+      const response = await listAllSettlementCases(payload);
       setIsLoading(false); // Set loading state to false
 
       // Updated response handling
@@ -369,6 +371,8 @@ const Monitor_settlement = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f"
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -407,7 +411,11 @@ const Monitor_settlement = () => {
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      callAPI(); // Call the function whenever currentPage changes
+      // callAPI(); // Call the function whenever currentPage changes
+      callAPI({
+        ...committedFilters,
+        page: currentPage
+      });
     }
   }, [currentPage]);
 
@@ -439,9 +447,26 @@ const Monitor_settlement = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setCommittedFilters({
+        caseId,
+        accountNo,
+        phase,
+        status,
+        fromDate,
+        toDate
+      });
       setFilteredData([]); // Clear previous results
       if (currentPage === 1) {
-        callAPI();
+        // callAPI();
+        callAPI({
+          caseId,
+          accountNo,
+          phase,
+          status,
+          fromDate,
+          toDate,
+          page: 1
+        });
       } else {
         setCurrentPage(1);
       }
@@ -461,6 +486,15 @@ const Monitor_settlement = () => {
     setFilteredData([]); // Clear filtered data
     setMaxCurrentPage(0); // Reset max current page
     setIsMoreDataAvailable(true); // Reset more data available state
+    // Clear committed filters
+    setCommittedFilters({
+      caseId: "",
+      accountNo: "",
+      phase: "",
+      status: "",
+      fromDate: null,
+      toDate: null
+    });
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
     } else {

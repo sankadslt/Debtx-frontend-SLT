@@ -32,7 +32,7 @@ import { getActiveServiceDetails } from "../../services/drc/Drc";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
-import Pending_Assign_Agent from "/src/assets/images/distribution/Pending_Assign_Agent.png";
+import { Create_Task_for_Download_Case_List } from "../../services/task/taskService";
 import Pending_Assign_Agent_Approval from "/src/assets/images/distribution/Pending_Assign_Agent_Approval.png";
 import Open_Assign_Agent from "/src/assets/images/distribution/Open_Assign_Agent.png";
 import Open_With_Agent from "/src/assets/images/distribution/Open_With_Agent.png";
@@ -59,42 +59,6 @@ import FTL_LOD_Settle_Pending from "/src/assets/images/LOD/FTL_LOD_Settle_Pendin
 import FTL_LOD_Settle_Open_Pending from "/src/assets/images/LOD/FTL_LOD_Settle_Open_Pending.png";
 import FTL_LOD_Settle_Active from "/src/assets/images/LOD/FTL_LOD_Settle_Active.png";
 import LIT_Prescribed from "/src/assets/images/LOD/LIT_Prescribed.png";
-import LOD_Settle_Open_Pending from "/src/assets/images/LOD/LOD_Settle_Open_Pending.png";
-import LOD_Settle_Pending from "/src/assets/images/LOD/LOD_Settle_Pending.png";
-import LOD_Settle_Active from "/src/assets/images/LOD/LOD_Settle_Active.png";
-import Final_Reminder_Settle_Open_Pending from "/src/assets/images/LOD/Final_Reminder_Settle_Open_Pending.png";
-import Final_Reminder_Settle_Pending from "/src/assets/images/LOD/Final_Reminder_Settle_Pending.png";
-import Final_Reminder_Settle_Active from "/src/assets/images/LOD/Final_Reminder_Settle_Active.png";
-import Litigation_Settle_Pending from "/src/assets/images/litigation/status/Litigation_Settle_Pending.png";
-import Litigation_Settle_Open_Pending from "/src/assets/images/litigation/status/Litigation_Settle_Open_Pending.png";
-import Litigation_Settle_Active from "/src/assets/images/litigation/status/Litigation_Settle_Active.png";
-import Write_Off from "/src/assets/images/stop/Write-Off.png";
-import Pending_Write_Off  from "/src/assets/images/stop/Pending Write-Off.png";
-import Case_Close from "/src/assets/images/stop/Case Closed.png";
-import Withdraw from "/src/assets/images/Abnormal/Withdraw.png";
-import Abandoned from "/src/assets/images/Abnormal/Abandoned.png";
-import WRIT_Settle_Active from "/src/assets/images/WRIT/WRIT_Settle_Active.png";
-import WRIT_Settle_Open_Pending from "/src/assets/images/WRIT/WRIT_Settle_Open-Pending.png";
-import WRIT_Settle_Pending from "/src/assets/images/WRIT/WRIT_Settle_Pending.png";
-import Re_WRIT from "/src/assets/images/WRIT/RE-WRIT.png";
-import Forward_to_Re_WRIT from "/src/assets/images/WRIT/Forward_To_RE-WRIT.png";
-import WRIT from "/src/assets/images/WRIT/WRIT.png";
-import Dispute_Settle_Active from "/src/assets/images/Dispute/Dispute_Settle_Active.png";
-import Dispute_Settle_Open_Pending from "/src/assets/images/Dispute/Dispute_Settle_Open_Pending.png";
-import Dispute_Settle_Pending from "/src/assets/images/Dispute/Dispute_Settle_Pending.png";
-import Forward_LOD_Dispute from "/src/assets/images/Dispute/Forward_LOD_Dispute.png";
-import Fail_Legal_Action from "/src/assets/images/litigation/status/FLA.png";
-import Fail_from_Legal_Unit from "/src/assets/images/litigation/status/FLU.png";
-import Initial_Litigation from "/src/assets/images/litigation/status/Initial_Litigation.png";
-import LOD_Monitoring_Expire from "/src/assets/images/LOD/LOD_Monitoring_Expire.png";
-import Initial_LOD from "/src/assets/images/LOD/Initial_LOD.png";
-import Final_Reminder from "/src/assets/images/LOD/Final_Reminder.png";
-
-import Incident_Done from "/src/assets/images/Register/Incident_Done.png";
-import Reject_Pending from "/src/assets/images/Register/Reject_Pending.png";
-import Incident_Reject from "/src/assets/images/Register/Incident_Reject.png";
-import Only_CPE_Collect from "/src/assets/images/Register/Only_CPE_Collect.png";
-import Direct_LOD from "/src/assets/images/Direct_LOD.png";
 
 
 const Case_List = () => {
@@ -121,6 +85,7 @@ const Case_List = () => {
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
   const rowsPerPage = 10;
   const hasMounted = useRef(false);
   const navigate = useNavigate();
@@ -284,7 +249,7 @@ const Case_List = () => {
 
   //render status icon with tooltip
   const renderStatusIcon = (status, index) => {
-    console.log("Status received:", status);
+    // console.log("Status received:", status);
     const iconPath = getStatusIcon(status);
 
     if (!iconPath) {
@@ -317,7 +282,8 @@ const Case_List = () => {
         const rtom = await List_All_Active_RTOMs();
         setRtomList(rtom);
       } catch (error) {
-        console.error("Error fetching rtom:", error);
+        // console.error("Error fetching rtom:", error);
+        setRtomList([]);
       }
     };
 
@@ -327,7 +293,8 @@ const Case_List = () => {
         const drcs = await Active_DRC_Details();
         setActiveDRC(drcs);
       } catch (error) {
-        console.error("Error fetching drcs:", error);
+        // console.error("Error fetching drcs:", error);
+        setActiveDRC([]);
       }
     };
 
@@ -337,7 +304,8 @@ const Case_List = () => {
         const bands = await fetchAllArrearsBands();
         setArrearsBand(bands);
       } catch (error) {
-        console.error("Error fetching arrears bands:", error);
+        // console.error("Error fetching arrears bands:", error);
+        setArrearsBand([]);
       }
     };
 
@@ -347,7 +315,8 @@ const Case_List = () => {
         const statuses = await getCaseStatusList();
         setCaseStatusList(statuses);
       } catch (error) {
-        console.error("Error fetching case statuses:", error);
+        // console.error("Error fetching case statuses:", error);
+        setCaseStatusList([]);
       }
     };
 
@@ -361,9 +330,10 @@ const Case_List = () => {
           value: service.service_type, // using service_type as the display value
         }));
         setServiceTypes(transformedServices);
-        console.log("Transformed services:", transformedServices); // For debugging
+        // console.log("Transformed services:", transformedServices); // For debugging
       } catch (error) {
-        console.error("Error fetching service types:", error);
+        // console.error("Error fetching service types:", error);
+        setServiceTypes([]);
       }
     };
 
@@ -390,7 +360,7 @@ const Case_List = () => {
         setUserRole(decoded.role);
       }
     } catch (error) {
-      console.error("Invalid token:", error);
+      // console.error("Invalid token:", error);
     }
   }, []);
 
@@ -527,8 +497,8 @@ const Case_List = () => {
     try {
       const payload = {
         case_current_status: selectedCaseStatus,
-        From_DAT: fromDate ? fromDate.toISOString().split("T")[0] : null,
-        TO_DAT: toDate ? toDate.toISOString().split("T")[0] : null,
+        From_DAT: fromDate,
+        TO_DAT: toDate,
         RTOM: rtom,
         DRC: selectedDRC,
         arrears_band: selectedBand,
@@ -594,7 +564,7 @@ const Case_List = () => {
 
   const validateDates = (from, to) => {
     if (from && to) {
-      if (from >= to) {
+      if (from > to) {
         Swal.fire({
           title: "Warning",
           text: "From date must be before to date",
@@ -624,7 +594,6 @@ const Case_List = () => {
 
   // Handle filter button click
   const handleFilterButton = () => {
-    setFilteredData([]);
     setIsMoreDataAvailable(true);
     setTotalPages(0); // Reset total pages
     setMaxCurrentPage(0);
@@ -632,6 +601,7 @@ const Case_List = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setFilteredData([]);
       if (currentPage === 1) {
         CallAPI();
       } else {
@@ -691,8 +661,59 @@ const Case_List = () => {
     }
   };
 
-  const handleCreateTask = () => {
-    console.log("Create task button clicked");
+  // Function to handle the creation of tasks for downloading case list
+  const HandleCreateTaskDownloadCaseList = async () => {
+
+    if (!fromDate || !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select From Date and To Date.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
+
+    const filter = {
+      from_date: fromDate,
+      to_date: toDate,
+      rtom: rtom,
+      drc: selectedDRC,
+      arrears_band: selectedBand,
+      service_type: selectedServiceType,
+      case_status: selectedCaseStatus
+    };
+
+    setIsCreatingTask(true);
+    try {
+      const response = await Create_Task_for_Download_Case_List(filter);
+      if (response === "success") {
+        Swal.fire({
+          title: response,
+          text: `Task created successfully!`,
+          icon: "success",
+          confirmButtonColor: "#28a745"
+        });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Failed to create task.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Failed to create task.",
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
+    } finally {
+      setIsCreatingTask(false);
+    }
   };
 
   // Function to navigate to the case ID page
@@ -722,18 +743,16 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>
-                RTOM
-              </option>
-              {rtomList.map((rtom) => (
-                <option
-                  key={rtom.rtom_id}
-                  value={rtom.rtom}
-                  style={{ color: "black" }}
-                >
-                  {rtom.rtom}
-                </option>
-              ))}
+              <option value="" hidden>RTOM</option>
+              {rtomList.length > 0 ? (
+                rtomList.map((rtom) => (
+                  <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
+                    {rtom.rtom}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No RTOM available</option>
+              )}
             </select>
 
             <select
@@ -742,18 +761,14 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedDRC === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>
-                DRC
-              </option>
-              {activeDRC.map((drc) => (
-                <option
-                  key={drc.key}
-                  value={drc.id.toString()}
-                  style={{ color: "black" }}
-                >
+              <option value="" hidden>DRC</option>
+              {activeDRC.length > 0 ? (activeDRC.map((drc) => (
+                <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
                   {drc.value}
                 </option>
-              ))}
+              ))) : (
+                <option disabled>No DRC available</option>
+              )}
             </select>
 
             <select
@@ -762,14 +777,14 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedBand === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>
-                Arrears Band
-              </option>
-              {arrearsBand.map(({ key, value }) => (
+              <option value="" hidden>Arrears Band</option>
+              {arrearsBand.length < 0 ? (arrearsBand.map(({ key, value }) => (
                 <option key={key} value={key} style={{ color: "black" }}>
                   {value}
                 </option>
-              ))}
+              ))) : (
+                <option disabled>No Arrears Band available</option>
+              )}
             </select>
 
             <select
@@ -778,14 +793,14 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedCaseStatus === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>
-                Case Status
-              </option>
-              {caseStatusList.map(({ key, value }) => (
+              <option value="" hidden>Case Status</option>
+              {caseStatusList.length < 0 ? (caseStatusList.map(({ key, value }) => (
                 <option key={key} value={value} style={{ color: "black" }}>
                   {value}
                 </option>
-              ))}
+              ))) : (
+                <option disabled>No Case Status available</option>
+              )}
             </select>
 
             <select
@@ -794,18 +809,13 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: selectedServiceType === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>
-                Service Type
-              </option>
-              {serviceTypes.map((service) => (
-                <option
-                  key={service.id}
-                  value={service.id}
-                  style={{ color: "black" }}
-                >
+              <option value="" hidden>Service Type</option>
+              {serviceTypes.length < 0 ? (serviceTypes.map((service) => (
+                <option key={service.id} value={service.id} style={{ color: "black" }}>
                   {service.value}
                 </option>
-              ))}
+              ))) : (
+                <option disabled>No Service Type available</option>)}
             </select>
 
             {/* <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2"> */}
@@ -1005,21 +1015,19 @@ const Case_List = () => {
       )}
 
       <div className="flex justify-end mt-6">
-        {["admin", "superadmin", "slt"].includes(userRole) &&
-          filteredData.length !== 0 && (
-            <button
-              // onClick={HandleCreateTaskDownloadSettlementList}
-              // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-              // disabled={isCreatingTask}
-              className={GlobalStyle.buttonPrimary}
-              style={{ display: "flex", alignItems: "center" }}
-            >
-              {/* {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'} */}
-              <FaDownload style={{ marginRight: "8px" }} />
-              Create Task and let me know
-            </button>
-          )}
+        {["admin", "superadmin", "slt"].includes(userRole) && filteredData.length !== 0 && (
+          <button
+            onClick={HandleCreateTaskDownloadCaseList}
+            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+            disabled={isCreatingTask}
+            // className={GlobalStyle.buttonPrimary}
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+            {/* <FaDownload style={{ marginRight: '8px' }} /> */}
+          </button>
+        )}
       </div>
     </div>
   );
