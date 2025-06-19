@@ -261,7 +261,8 @@ export default function ReAssignDRC() {
       <h1 className={`${GlobalStyle.headingLarge} mb-5`}>Re-Assign DRC</h1>
 
       {/* card box*/}
-      <div className={`${GlobalStyle.cardContainer}`}>
+      <div className=" flex items-center justify-center ">
+      <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
         <table>
 
           <colgroup>
@@ -326,6 +327,7 @@ export default function ReAssignDRC() {
         <p className="mb-2">
           <strong>Last Payment Date: </strong>{new Date(caseDetails.last_payment_date).toLocaleDateString()}
         </p> */}
+      </div>
       </div>
 
       <div className=" mb -6">
