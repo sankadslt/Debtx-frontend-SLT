@@ -11,8 +11,6 @@ Notes: This template uses Tailwind CSS */
 
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import {
   FaSearch,
@@ -49,12 +47,11 @@ import Forward_To_Mediation_Board from "/src/assets/images/Mediation_Board/Forwa
 import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
 
 import MB_Handover_Customer_Info from "/src/assets/images/Mediation_Board/MB Handover Customer-Info.png";
-import MB_Request_Customer_Info from "src/assets/images/Mediation_Board/MB Request Customer-Info.png";
+import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Request Customer-Info.png";
 import MB_Settle_Pending from "/src/assets/images/Mediation_Board/MB Settle Pending.png";
 import MB_Settle_Open_Pending from "/src/assets/images/Mediation_Board/MB Settle Open Pending.png";
 import MB_Settle_Active from "/src/assets/images/Mediation_Board/MB Settle Active.png";
 import MB_Fail_with_Pending_Non_Settlement from "/src/assets/images/Mediation_Board/MB Fail with Pending Non Settlement.png";
-import MB_Fail_with_non_settlement from "/src/assets/images/Mediation_Board/MB Fail with non settlement.png";
 import MB_Fail_with_non_settlement from "/src/assets/images/Mediation_Board/MB Fail with non settlement.png";
 import Pending_FTL_LOD from "/src/assets/images/LOD/Pending_FTL_LOD.png";
 import Initial_FTL_LOD from "/src/assets/images/LOD/Initial_FTL_LOD.png";
@@ -63,38 +60,41 @@ import FTL_LOD_Settle_Open_Pending from "/src/assets/images/LOD/FTL_LOD_Settle_O
 import FTL_LOD_Settle_Active from "/src/assets/images/LOD/FTL_LOD_Settle_Active.png";
 import LIT_Prescribed from "/src/assets/images/LOD/LIT_Prescribed.png";
 import LOD_Settle_Open_Pending from "/src/assets/images/LOD/LOD_Settle_Open_Pending.png";
-import LOD_Settle_Pending from "src/assets/images/LOD/LOD_Settle_Pending.png";
-import LOD_Settle_Active from "src/assets/images/LOD/LOD_Settle_Active.png";
-import Final_Reminder_Settle_Open_Pending from "src/assets/images/LOD/Final_Reminder_Settle_Open_Pending.png";
-import Final_Reminder_Settle_Pending from "src/assets/images/LOD/Final_Reminder_Settle_Pending.png";
-import Final_Reminder_Settle_Active from "src/assets/images/LOD/Final_Reminder_Settle_Active.png";
-import Litigation_Settle_Pending from "src/assets/images/litigation/status/Litigation_Settle_Pending.png";
-import Litigation_Settle_Open_Pending from "src/assets/images/litigation/status/Litigation_Settle_Open_Pending.png";
-import Litigation_Settle_Active from "src/assets/images/litigation/status/Litigation_Settle_Active.png";
-import Write_Off from "src/assets/images/stop/Write-Off.png";
-import Pending_Write_Off  from "src/assets/images/stop/Pending Write-Off.png";
-import Case_Close from "src/assets/images/stop/Case Closed.png";
-import Withdraw from "src/assets/images/Abnormal/Withdraw.png";
-import Abandoned from "src/assets/images/Abnormal/Abandoned.png";
-import WRIT_Settle_Active from "src/assets/images/WRIT/WRIT_Settle_Active.png";
-import WRIT_Settle_Open_Pending from "src/assets/images/WRIT/WRIT_Settle_Open-Pending.png";
-import WRIT_Settle_Pending from "src/assets/images/WRIT/WRIT_Settle_Pending.png";
-import Re_WRIT from "src/assets/images/WRIT/RE-WRIT.png";
-import Forward_to_Re_WRIT from "src/assets/images/WRIT/Forward_To_RE-WRIT.png";
-import WRIT from "src/assets/images/WRIT/WRIT.png";
-import Dispute_Settle_Active from "src/assets/images/Dispute/Dispute_Settle_Active.png";
-import Dispute_Settle_Open_Pending from "src/assets/images/Dispute/Dispute_Settle_Open_Pending.png";
-import Dispute_Settle_Pending from "src/assets/images/Dispute/Dispute_Settle_Pending.png";
-import Forward_LOD_Dispute from "src/assets/images/Dispute/Forward_LOD_Dispute.png";
-import Litigation_Settle_Active from "src/assets/images/litigation/status/Litigation_Settle_Active.png";
-import Fail_Legal_Action from "src/assets/images/litigation/status/FLA.png";
-import Fail_from_Legal_Unit from "src/assets/images/litigation/status/FLU.png";
-import Initial_Litigation from "src/assets/images/litigation/status/Initial_Litigation.png";
-import LOD_Monitoring_Expire from "src/assets/images/LOD/LOD_Monitoring_Expire.png";
-import Initial_LOD from "src/assets/images/LOD/Initial_LOD.png";
-import Final_Reminder from "src/assets/images/LOD/Final_Reminder.png";
+import LOD_Settle_Pending from "/src/assets/images/LOD/LOD_Settle_Pending.png";
+import LOD_Settle_Active from "/src/assets/images/LOD/LOD_Settle_Active.png";
+import Final_Reminder_Settle_Open_Pending from "/src/assets/images/LOD/Final_Reminder_Settle_Open_Pending.png";
+import Final_Reminder_Settle_Pending from "/src/assets/images/LOD/Final_Reminder_Settle_Pending.png";
+import Final_Reminder_Settle_Active from "/src/assets/images/LOD/Final_Reminder_Settle_Active.png";
+import Litigation_Settle_Pending from "/src/assets/images/litigation/status/Litigation_Settle_Pending.png";
+import Litigation_Settle_Open_Pending from "/src/assets/images/litigation/status/Litigation_Settle_Open_Pending.png";
+import Litigation_Settle_Active from "/src/assets/images/litigation/status/Litigation_Settle_Active.png";
+import Write_Off from "/src/assets/images/stop/Write-Off.png";
+import Pending_Write_Off  from "/src/assets/images/stop/Pending Write-Off.png";
+import Case_Close from "/src/assets/images/stop/Case Closed.png";
+import Withdraw from "/src/assets/images/Abnormal/Withdraw.png";
+import Abandoned from "/src/assets/images/Abnormal/Abandoned.png";
+import WRIT_Settle_Active from "/src/assets/images/WRIT/WRIT_Settle_Active.png";
+import WRIT_Settle_Open_Pending from "/src/assets/images/WRIT/WRIT_Settle_Open-Pending.png";
+import WRIT_Settle_Pending from "/src/assets/images/WRIT/WRIT_Settle_Pending.png";
+import Re_WRIT from "/src/assets/images/WRIT/RE-WRIT.png";
+import Forward_to_Re_WRIT from "/src/assets/images/WRIT/Forward_To_RE-WRIT.png";
+import WRIT from "/src/assets/images/WRIT/WRIT.png";
+import Dispute_Settle_Active from "/src/assets/images/Dispute/Dispute_Settle_Active.png";
+import Dispute_Settle_Open_Pending from "/src/assets/images/Dispute/Dispute_Settle_Open_Pending.png";
+import Dispute_Settle_Pending from "/src/assets/images/Dispute/Dispute_Settle_Pending.png";
+import Forward_LOD_Dispute from "/src/assets/images/Dispute/Forward_LOD_Dispute.png";
+import Fail_Legal_Action from "/src/assets/images/litigation/status/FLA.png";
+import Fail_from_Legal_Unit from "/src/assets/images/litigation/status/FLU.png";
+import Initial_Litigation from "/src/assets/images/litigation/status/Initial_Litigation.png";
+import LOD_Monitoring_Expire from "/src/assets/images/LOD/LOD_Monitoring_Expire.png";
+import Initial_LOD from "/src/assets/images/LOD/Initial_LOD.png";
+import Final_Reminder from "/src/assets/images/LOD/Final_Reminder.png";
 
-
+import Incident_Done from "/src/assets/images/Register/Incident_Done.png";
+import Reject_Pending from "/src/assets/images/Register/Reject_Pending.png";
+import Incident_Reject from "/src/assets/images/Register/Incident_Reject.png";
+import Only_CPE_Collect from "/src/assets/images/Register/Only_CPE_Collect.png";
+import Direct_LOD from "/src/assets/images/Direct_LOD.png";
 
 
 const Case_List = () => {
@@ -221,8 +221,6 @@ const Case_List = () => {
         return Litigation_Settle_Open_Pending;
       case "Litigation Settle Active":
         return Litigation_Settle_Active;
-      case "LOD Monitoring Expire":
-        return LOD_Monitoring_Expire;
       case "Forward LOD Dispute":
         return Forward_LOD_Dispute;
       case "Dispute Settle Pending":
@@ -269,6 +267,18 @@ const Case_List = () => {
         return Pending_Write_Off;
       case "Write-Off":
         return Write_Off;
+      case "Incident Done":
+        return Incident_Done;
+      case "Reject Pending":
+        return Reject_Pending;
+      case "Incident Reject":
+        return Incident_Reject;
+      // case "Open No Agent":
+      //   return Reject_Pending;
+      case "Only CPE Collect":
+        return Only_CPE_Collect;
+      case "Direct LOD":
+        return Direct_LOD;
     }
   };
 
