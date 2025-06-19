@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
@@ -18,8 +18,10 @@ const RtomList = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [appliedStatus, setAppliedStatus] = useState("");
   const [filtersApplied, setFiltersApplied] = useState(false);
-  const [data, setData] = useState([]);
+  const [allData, setAllData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastFetchedBackendPage, setLastFetchedBackendPage] = useState(1);
+  const hasMoreData = useRef(true);
   const rowsPerPage = 10;
 
   const getStatusIcon = (status) => {
@@ -35,46 +37,64 @@ const RtomList = () => {
     }
   };
 
-  useEffect(() => {
-    const loadRTOMs = async () => {
-      setIsLoading(true);
-      try {
-        const rtoms = await fetchRTOMs({
-          rtom_status: filtersApplied ? appliedStatus : "",
-          pages: currentPage,
+  // Fetch RTOMs from the backend
+  const callRTOMAPI = async (pageNo) => {
+    setIsLoading(true);
+    try {
+      const rtoms = await fetchRTOMs({
+        rtom_status: filtersApplied ? appliedStatus : "",
+        pages: pageNo,
+      });
+
+      if (rtoms.length === 0) {
+        hasMoreData.current = false;
+      } else {
+        setAllData((prev) => {
+          const newData = rtoms.filter(
+            (item) => !prev.some((p) => p.rtom_id === item.rtom_id)
+          );
+          return [...prev, ...newData];
         });
-        setData(rtoms);
-      } catch (error) {
-        Swal.fire("Error", error.message || "Failed to load RTOMs", "error");
-        setData([]);
-      } finally {
-        setIsLoading(false);
+        setLastFetchedBackendPage(pageNo);
       }
-    };
-
-    loadRTOMs();
-  }, [currentPage, appliedStatus, filtersApplied]);
-
-  const handleFilter = () => {
-    setFiltersApplied(true);
-    setAppliedStatus(statusFilter);
-    setSearchQuery(tempSearchQuery);
-    setCurrentPage(1);
+    } catch (err) {
+      Swal.fire("Error", err.message || "Failed to fetch RTOMs", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  useEffect(() => {
+    setAllData([]);
+    setCurrentPage(1);
+    hasMoreData.current = true;
+    callRTOMAPI(1);
+  }, [filtersApplied, appliedStatus]);
+
+  // handle filter
+  const handleFilter = () => {
+    setAppliedStatus(statusFilter);
+    setFiltersApplied(true);
+  };
+
+  // handle clear
   const handleClear = () => {
-    setFiltersApplied(false);
-    setAppliedStatus("");
-    setStatusFilter("");
     setSearchQuery("");
     setTempSearchQuery("");
+    setStatusFilter("");
+    setAppliedStatus("");
+    setFiltersApplied(false);
     setCurrentPage(1);
+    hasMoreData.current = true;
+    setAllData([]);
+    callRTOMAPI(1);
   };
 
+  // handle search change
   const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setTempSearchQuery(value);
-    setSearchQuery(value);
+    const val = e.target.value;
+    setTempSearchQuery(val);
+    setSearchQuery(val);
     setCurrentPage(1);
   };
 
@@ -83,38 +103,51 @@ const RtomList = () => {
   };
 
   const handleRowClick = (rtomId) => {
-    navigate(`/pages/Rtom/RtomInfo/${rtomId}`);
+    navigate("/pages/Rtom/RtomInfo", { state: { rtomId } });
   };
 
-  const filteredData = data.filter((row) => {
+  // Filter data based on search query and status filter
+  const filteredData = allData.filter((row) => {
     const matchesSearch =
       searchQuery === "" ||
       Object.values(row)
         .join(" ")
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
-
     const matchesStatus =
       !filtersApplied ||
       appliedStatus === "" ||
       row.rtom_status === appliedStatus;
-
     return matchesSearch && matchesStatus;
   });
 
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const currentRows = filteredData.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
+  // Handle previous page
   const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  // Handle next page
+  const handleNextPage = () => {
+    const nextPage = currentPage + 1;
+
+    const needMoreData = nextPage > totalPages && hasMoreData.current;
+    if (needMoreData) {
+      callRTOMAPI(lastFetchedBackendPage + 1);
+    }
+
+    if (nextPage <= totalPages || hasMoreData.current) {
+      setCurrentPage(nextPage);
     }
   };
 
-  const handleNextPage = () => {
-    setCurrentPage(currentPage + 1);
-  };
-
-  if (isLoading) {
+  if (isLoading && allData.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -205,7 +238,7 @@ const RtomList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((rtom, index) => (
+              {currentRows.map((rtom, index) => (
                 <tr
                   key={index}
                   className={`${
@@ -254,7 +287,7 @@ const RtomList = () => {
                   </td>
                 </tr>
               ))}
-              {filteredData.length === 0 && (
+              {currentRows.length === 0 && (
                 <tr>
                   <td colSpan="6" className="text-center py-4">
                     No records found
@@ -266,23 +299,37 @@ const RtomList = () => {
         </div>
       </div>
 
-      <div className={GlobalStyle.navButtonContainer}>
-        <button
-          className={`${GlobalStyle.navButton} flex items-center justify-center w-10 h-10 rounded-full`}
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-        >
-          <FaArrowLeft />
-        </button>
-        <span>Page {currentPage}</span>
-        <button
-          className={`${GlobalStyle.navButton} flex items-center justify-center w-10 h-10 rounded-full`}
-          onClick={handleNextPage}
-          disabled={filteredData.length < rowsPerPage}
-        >
-          <FaArrowRight />
-        </button>
-      </div>
+      {filteredData.length > 0 && (
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            className={`${GlobalStyle.navButton} ${
+              currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+          >
+            <FaArrowLeft />
+          </button>
+
+          <span>Page {currentPage}</span>
+
+          <button
+            className={`${GlobalStyle.navButton} ${
+              (!hasMoreData.current && currentPage === totalPages) ||
+              currentRows.length < rowsPerPage
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            }`}
+            onClick={handleNextPage}
+            disabled={
+              (!hasMoreData.current && currentPage === totalPages) ||
+              currentRows.length < rowsPerPage
+            }
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
