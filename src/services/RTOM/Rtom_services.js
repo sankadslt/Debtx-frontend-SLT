@@ -7,11 +7,11 @@ export const fetchRTOMs = async (filters = {}) => {
   try {
     const response = await axios.post(`${RTOM_URL}/List_All_RTOM_Details`, {
       rtom_status: filters.rtom_status,
-      pages: filters.pages || 1
+      pages: filters.pages || 1,
     });
-    
+
     if (response.data.status === "success") {
-      return response.data.data.map(rtom => ({
+      return response.data.data.map((rtom) => ({
         rtom_id: rtom.rtom_id,
         rtom_status: rtom.rtom_status,
         billing_center_code: rtom.billing_center_code,
@@ -20,7 +20,6 @@ export const fetchRTOMs = async (filters = {}) => {
         rtom_email: rtom.rtom_email,
         rtom_telephone_no: rtom.rtom_telephone_no,
         area_code: rtom.area_code,
-        
       }));
     } else {
       throw new Error(response.data.message || "Failed to fetch RTOMs");
@@ -31,18 +30,26 @@ export const fetchRTOMs = async (filters = {}) => {
       response: error.response?.data,
       status: error.response?.status,
     });
-    throw error.response?.data?.message || "An error occurred while fetching RTOMs";
+
+    if (error.response?.status === 404) {
+      return [];
+    }
+
+    throw (
+      error.response?.data?.message || "An error occurred while fetching RTOMs"
+    );
   }
 };
 
-
-
 export const fetchRTOMDetails = async (rtomId) => {
   try {
-    const response = await axios.post(`${RTOM_URL}/List_RTOM_Details_By_RTOM_ID`, {
-      rtom_id: rtomId
-    });
-    
+    const response = await axios.post(
+      `${RTOM_URL}/List_RTOM_Details_By_RTOM_ID`,
+      {
+        rtom_id: rtomId,
+      }
+    );
+
     if (response.data.status === "success") {
       return response.data.data;
     } else {
@@ -54,11 +61,12 @@ export const fetchRTOMDetails = async (rtomId) => {
       response: error.response?.data,
       status: error.response?.status,
     });
-    throw error.response?.data?.message || "An error occurred while fetching RTOM details";
+    throw (
+      error.response?.data?.message ||
+      "An error occurred while fetching RTOM details"
+    );
   }
 };
-
-
 
 export const createRTOM = async (rtomData) => {
   try {
@@ -69,9 +77,9 @@ export const createRTOM = async (rtomData) => {
       rtom_email: rtomData.email,
       rtom_mobile_no: rtomData.mobile,
       rtom_telephone_no: rtomData.telephone,
-      created_by: rtomData.createdBy 
+      created_by: rtomData.createdBy,
     });
-    
+
     if (response.data.status === "success") {
       return response.data;
     } else {
@@ -83,16 +91,19 @@ export const createRTOM = async (rtomData) => {
       response: error.response?.data,
       status: error.response?.status,
     });
-    throw error.response?.data?.message || "An error occurred while creating RTOM";
+    throw (
+      error.response?.data?.message || "An error occurred while creating RTOM"
+    );
   }
 };
 
-
-
 export const updateRTOMDetails = async (rtomData) => {
   try {
-    const response = await axios.post(`${RTOM_URL}/Update_RTOM_Details`, rtomData);
-    
+    const response = await axios.post(
+      `${RTOM_URL}/Update_RTOM_Details`,
+      rtomData
+    );
+
     if (response.data.status === "success") {
       return response.data;
     } else {
@@ -104,6 +115,9 @@ export const updateRTOMDetails = async (rtomData) => {
       response: error.response?.data,
       status: error.response?.status,
     });
-    throw error.response?.data?.message || "An error occurred while updating RTOM details";
+    throw (
+      error.response?.data?.message ||
+      "An error occurred while updating RTOM details"
+    );
   }
 };
