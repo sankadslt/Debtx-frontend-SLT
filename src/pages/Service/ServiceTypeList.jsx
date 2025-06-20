@@ -31,6 +31,7 @@ export default function ServiceTypeList() {
 	const [serviceType, setServiceType] = useState("");
 	const [editableRowId, setEditableRowId] = useState(null);
 	const [editedStatus, setEditedStatus] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
 
 	// Pagination State
 	const [currentPage, setCurrentPage] = useState(0);
@@ -348,7 +349,7 @@ export default function ServiceTypeList() {
 			{/* Service Type Submission Form */}
 			<div className="mt-10 px-4 md:px-0">
 				<form
-					onSubmit={handleServiceTypeSubmit}
+					// onSubmit={handleServiceTypeSubmit}
 					className="flex flex-wrap items-center gap-4 max-w-lg w-full mx-auto"
 				>
 					<label htmlFor="serviceType" className="font-medium">
@@ -362,7 +363,11 @@ export default function ServiceTypeList() {
 						className={`${GlobalStyle.inputText} flex-1 min-w-[200px]`}
 						placeholder="Enter Service Type"
 					/>
-					<button type="submit" className={GlobalStyle.buttonPrimary}>
+					<button
+						type="submit"
+						onClick={handleServiceTypeSubmit}
+						className={GlobalStyle.buttonPrimary}
+					>
 						Submit
 					</button>
 				</form>

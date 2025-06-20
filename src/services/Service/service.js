@@ -4,9 +4,9 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/Service`;
 
 //Register a new service type
-export const registerServiceType = async (formData) => {
+export const registerServiceType = async (payload) => {
 	try {
-		const response = await axios.post(`${URL}/Register_Service_Type`, formData);
+		const response = await axios.post(`${URL}/Register_Service_Type`, payload);
 		return response.data;
 	} catch (error) {
 		console.error("Error registering service type:", error);
