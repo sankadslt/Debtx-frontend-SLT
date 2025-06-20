@@ -117,10 +117,9 @@ export default function ServiceTypeList() {
 		}
 
 		try {
-			const token = localStorage.getItem("accessToken");
-			const decoded = jwtDecode(token);
-			const created_by = decoded?.name || decoded?.username || "Unknown";
 
+           const created_by = await getLoggedUserId();
+		   
 			console.log("Submitting:", {
 				service_type: serviceType,
 				create_by: created_by,
