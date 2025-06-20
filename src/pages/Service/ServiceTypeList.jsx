@@ -19,7 +19,6 @@ import {
 	getAllServices,
 } from "../../services/Service/service.js";
 import { jwtDecode } from "jwt-decode";
-import { getLoggedUserId } from "../../services/auth/authService.js";
 import activeIcon from "../../assets/images/Service/Active.png";
 import inactiveIcon from "../../assets/images/Service/Inactive.png";
 
