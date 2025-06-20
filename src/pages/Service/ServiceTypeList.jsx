@@ -203,7 +203,7 @@ export default function ServiceTypeList() {
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							className={GlobalStyle.inputSearch}
-							placeholder="Search by Service ID or Type"
+							placeholder="Search"
 						/>
 						<FaSearch className={GlobalStyle.searchBarIcon} />
 					</div>
