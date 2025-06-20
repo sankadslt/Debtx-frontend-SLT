@@ -19,6 +19,7 @@ import {
   fetchAllArrearsBands,
   count_cases_rulebase_and_arrears_band,
   Case_Distribution_Among_Agents,
+  List_Rejected_Batch_Summary_Case_Distribution_Batch_Id
 } from "/src/services/case/CaseServices.js";
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
@@ -55,9 +56,10 @@ const AssignDRCReject = () => {
     casesAmount: "",
     drcNames: "",
   });
-
+  const [rejectedDRCData, setRejectedDRCData] = useState(null); // Usestate for rejected DRC data
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  const case_distribution_batch_id = 26; // Hardcoded case distribution batch ID for testing
 
   // Role-Based Buttons
   useEffect(() => {
@@ -80,7 +82,30 @@ const AssignDRCReject = () => {
     } catch (error) {
       console.error("Invalid token:", error);
     }
+    fetchRejectedBatchSummary(); // Fetch rejected batch summary on component mount
   }, []);
+
+  useEffect(() => {
+    setSelectedBand(rejectedDRCData?.current_arrears_band || "");
+    setArrearsbandTotal(rejectedDRCData?.rulebase_count || 0); // Set the arrears band total from the rejected DRC data
+  }, [rejectedDRCData])
+
+  console.log("Arrears Band:", selectedBand); // Log the user role for debugging
+  console.log("Arrears Band Total:", arrearsbandTotal); // Log the arrears band total for debugging
+  // Fetch rejected batch summary data
+  const fetchRejectedBatchSummary = async () => {
+    try {
+      const response = await List_Rejected_Batch_Summary_Case_Distribution_Batch_Id(case_distribution_batch_id);
+      if (response) {
+        setRejectedDRCData(response);
+        console.log("Rejected DRC Data:", response);
+      } else {
+        console.error("No data found for the given batch ID.");
+      }
+    } catch (error) {
+      console.error("Error fetching rejected batch summary:", error);
+    }
+  }
 
   //fetch all arrears bands
   useEffect(() => {
@@ -100,6 +125,7 @@ const AssignDRCReject = () => {
     const fetchDRCNames = async () => {
       try {
         const Names = await Active_DRC_Details();
+        console.log("DRC Names:", Names);
         setDrcNames(Names);
 
       } catch (error) {
@@ -107,9 +133,7 @@ const AssignDRCReject = () => {
       }
     };
     fetchDRCNames();
-  });
-
-
+  }, []);
 
   //fetch count cases rulebase and arrears band
   useEffect(() => {
@@ -277,11 +301,11 @@ const AssignDRCReject = () => {
         <h1 className={`${GlobalStyle.headingLarge}`}>Assign DRC</h1>
 
         <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
-          Rejected Batch ID: {serviceType}
+          Rejected Batch ID: {case_distribution_batch_id}
         </h3>
 
         <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
-          DRC Commission Rule: {serviceType}
+          DRC Commission Rule: {rejectedDRCData?.drc_commision_rule || "N/A"}
         </h3>
 
         {/* Rejected DRC Table */}
@@ -317,41 +341,37 @@ const AssignDRCReject = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSearchData.length > 0 ? (
-                    filteredSearchData.map((drc, index) => (
+                  {rejectedDRCData?.rejected_drc_summary.length > 0 ? (
+                    rejectedDRCData.rejected_drc_summary.map((drc, index) => (
                       <tr
-                        key={drc.id}
+                        key={drc.drc_id}
                         className={
                           index % 2 === 0
                             ? GlobalStyle.tableRowEven
                             : GlobalStyle.tableRowOdd
                         }
-                        aria-rowindex={drc.id}
+                        aria-rowindex={drc.drc_id}
                       >
-                        <td className={GlobalStyle.tableData}>{drc.name}</td>
-                        <td className={GlobalStyle.tableData}>
-                          {drc.amount}
-                        </td>
                         <td className="px-6 py-4 text-center">
-                          {/* <button onClick={() => handleRemove(drc.name)}>
-                              
-                              <img src={Minus} width={20} height={15} alt="Delete" data-tooltip-id="delete" />
-                            </button> */}
                           <div>
-                            {["admin", "superadmin", "slt"].includes(userRole) && (
-                              <button onClick={() => handleRemove(drc.name)}>
-
-                                <img src={Minus} width={20} height={15} alt="Delete" data-tooltip-id="delete" />
-                              </button>
-                            )}
+                            <span
+                              style={{ cursor: "default", color: "red", fontSize: "1.2rem" }}
+                              data-tooltip-id="reject"
+                            >
+                              ❌
+                            </span>
                           </div>
-                          <Tooltip id="delete" place="bottom" content="Remove" />
+                          <Tooltip id="reject" place="bottom" content="Rejected" />
+                        </td>
+                        <td className={GlobalStyle.tableData}>{drc.drc}</td>
+                        <td className={GlobalStyle.tableData}>
+                          {drc.rulebase_count}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="3" className="py-6 text-center">
+                      <td colSpan="3" className={`${GlobalStyle.tableData} text-center`}>
                         No data available.
                       </td>
                     </tr>
@@ -362,35 +382,10 @@ const AssignDRCReject = () => {
           </div>
         </div>
 
-        {/* Pending Cases */}
-        {/* <div className={`${GlobalStyle.caseCountBar}`}>
-          <div className="flex">
-            <span className={GlobalStyle.countBarTopic}>Pending Cases</span>
-          </div>
-          <div className={GlobalStyle.countBarSubTopicContainer}>
-            <div className={GlobalStyle.countBarMainBox}>
-              <span>Total:</span>
-              <p className={GlobalStyle.countBarMainTopic}>{total}</p>
-            </div> */}
-        {/* Dynamically render bands and counts */}
-        {/* {Object.entries(bandsAndCounts).map(([band, count]) => (
-              <div key={band} className={GlobalStyle.countBarSubBox}>
-                <span>{band}</span>
-                <p className={GlobalStyle.countBarSubTopic}>{count}</p>
-              </div>
-            ))}
-          </div>
-        </div> */}
-
-        {/* Service Type and Table */}
+        {/* First Row */}
         <div className="relative">
           <div className="flex justify-between items-center my-8 space-x-4 gap-4 flex-col sm:flex-row sm:items-center">
-            {/* Arrears Band Dropdown */}
             <div>
-              {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
-                  Pie Chart 1
-                </button> */}
-
               <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button className={`${GlobalStyle.buttonPrimary} h-10 mr-5 mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
@@ -405,7 +400,7 @@ const AssignDRCReject = () => {
                 className={`${GlobalStyle.countBarMainBox} flex items-center`}
                 style={{ width: "160px", textAlign: "center" }}
               >
-                Total Count: {arrearsbandTotal}
+                Total Count: {rejectedDRCData?.rulebase_count || 0}
               </div>
               <div
                 className={`${GlobalStyle.countBarMainBox}flex items-center`}
@@ -424,13 +419,13 @@ const AssignDRCReject = () => {
                 className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
                 value={selectedBand}
                 onChange={handleArrearsBandChange}
-                disabled={totalDistributedAmount > 0}
+                disabled={selectedBand}
               >
                 <option value="" hidden>
                   Arrears Band
                 </option>
                 {arrearsBands.map(({ key, value }) => (
-                  <option key={key} value={value}>
+                  <option key={key} value={key}>
                     {value}
                   </option>
                 ))}
@@ -471,13 +466,6 @@ const AssignDRCReject = () => {
               />
 
               {/* Add Button */}
-
-              {/* <button
-                  className={`${GlobalStyle.buttonPrimary} w-[135px]`}
-                  onClick={handleAdd}
-                >
-                  Add
-                </button> */}
               <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button
@@ -489,50 +477,7 @@ const AssignDRCReject = () => {
                 )}
               </div>
             </div>
-
-            {/* <div className="flex justify-end items-center sm:items-center flex-col sm:flex-row   space-x-4">
-              <div> */}
-            {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
-                  Pie Chart 1
-                </button> */}
-
-            {/* <div>
-                  {["admin", "superadmin", "slt"].includes(userRole) && (
-                    <button className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5  mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
-                      Pie Chart 1
-                    </button>
-                  )}
-                </div>
-                <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
-              </div>
-              <div> */}
-
-            {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
-                  Pie Chart 2
-                </button> */}
-            {/* <div>
-                  {["admin", "superadmin", "slt"].includes(userRole) && (
-                    <button className={`${GlobalStyle.buttonPrimary} h-10  mt-2  w-full sm:w-auto`} onClick={handlepiechart2}>
-                      Pie Chart 2
-                    </button>
-                  )}
-                </div>
-                <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
-              </div>
-            </div> */}
-
           </div>
-
-
-          {/* <div
-            className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
-            style={{ width: "160px", textAlign: "center" }}
-          >
-            Selected Count: {totalDistributedAmount}
-
-          </div> */}
-
-
 
           <div className="flex">
             {/* Table */}
@@ -580,10 +525,6 @@ const AssignDRCReject = () => {
                             {drc.amount}
                           </td>
                           <td className="px-6 py-4 text-center">
-                            {/* <button onClick={() => handleRemove(drc.name)}>
-                              
-                              <img src={Minus} width={20} height={15} alt="Delete" data-tooltip-id="delete" />
-                            </button> */}
                             <div>
                               {["admin", "superadmin", "slt"].includes(userRole) && (
                                 <button onClick={() => handleRemove(drc.name)}>
@@ -607,48 +548,10 @@ const AssignDRCReject = () => {
                 </table>
               </div>
             </div>
-
-            {/* Pie Chart Buttons */}
-            {/* <div> */}
-              {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
-               Pie Chart 1
-            </button> */}
-
-              {/* <div>
-                {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
-                  Pie Chart 1
-               </button>
-                )}
-            </div>
-             <Chart showPopup={showPopup} setShowPopup={setShowPopup} /> */}
-            {/* </div> */}
-            {/* <div> */}
-
-              {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
-               Pie Chart 2
-            </button> */}
-              {/* <div>
-                {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
-                  Pie Chart 2
-               </button>
-                )}
-            </div>
-            <Chart showPopup={showPopup} setShowPopup={setShowPopup} /> */}
-            {/* </div> */}
-
           </div>
 
           {/* Proceed Button */}
           <div className="text-right">
-            {/* <button
-              onClick={handleProceed}
-              className={`${GlobalStyle.buttonPrimary}`}
-              disabled={totalDistributedAmount !== arrearsbandTotal}
-            >
-              Proceed
-            </button> */}
             <div>
               {["admin", "superadmin", "slt"].includes(userRole) && (
                 <button
