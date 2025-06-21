@@ -252,12 +252,7 @@ const UserList = () => {
                 className={`${GlobalStyle.selectBox} w-full text-sm`}
                 style={{ color: userRole === "" ? "gray" : "black" }}
               >
-                {/* <option value="" hidden>User Role</option>
-                <option value="user" style={{ color: "black" }}>User</option>
-                <option value="admin" style={{ color: "black" }}>Admin</option>
-                <option value="superadmin" style={{ color: "black" }}>Super Admin</option>
-                <option value="drc_admin" style={{ color: "black" }}>DRC Admin</option>
-                <option value="drc_user" style={{ color: "black" }}>DRC User</option> */}
+                
                 {userRoles.map((role) => (
                   <option
                     key={role.value}
@@ -487,6 +482,9 @@ const UserList = () => {
 };
 
 export default UserList;
+
+
+
 
 
 
