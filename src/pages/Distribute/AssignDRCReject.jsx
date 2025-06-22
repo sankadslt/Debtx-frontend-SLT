@@ -90,8 +90,6 @@ const AssignDRCReject = () => {
     setArrearsbandTotal(rejectedDRCData?.rulebase_count || 0); // Set the arrears band total from the rejected DRC data
   }, [rejectedDRCData])
 
-  console.log("Arrears Band:", selectedBand); // Log the user role for debugging
-  console.log("Arrears Band Total:", arrearsbandTotal); // Log the arrears band total for debugging
   // Fetch rejected batch summary data
   const fetchRejectedBatchSummary = async () => {
     try {
@@ -136,27 +134,27 @@ const AssignDRCReject = () => {
   }, []);
 
   //fetch count cases rulebase and arrears band
-  useEffect(() => {
-    const displayData = async () => {
-      const effectiveServiceType = serviceType; // Use "PEO TV" as default
-      //  console.log("Service Type:", serviceType);
-      //   console.log("Effective Service Type:", effectiveServiceType);
-      try {
-        const drcDetails = await count_cases_rulebase_and_arrears_band(
-          effectiveServiceType
-        );
-        const { total, bandsAndCounts } = drcDetails;
+  // useEffect(() => {
+  //   const displayData = async () => {
+  //     const effectiveServiceType = serviceType; // Use "PEO TV" as default
+  //     //  console.log("Service Type:", serviceType);
+  //     //   console.log("Effective Service Type:", effectiveServiceType);
+  //     try {
+  //       const drcDetails = await count_cases_rulebase_and_arrears_band(
+  //         effectiveServiceType
+  //       );
+  //       const { total, bandsAndCounts } = drcDetails;
 
-        setTotal(total);
-        setBandsAndCounts(bandsAndCounts);
-        //  console.log("bandsAndCounts:", bandsAndCounts);
-      } catch (error) {
-        console.error("Failed to fetch and display data:", error);
-      }
-    };
+  //       setTotal(total);
+  //       setBandsAndCounts(bandsAndCounts);
+  //       //  console.log("bandsAndCounts:", bandsAndCounts);
+  //     } catch (error) {
+  //       console.error("Failed to fetch and display data:", error);
+  //     }
+  //   };
 
-    displayData();
-  }, [serviceType]);
+  //   displayData();
+  // }, [serviceType]);
 
   //search fuction
   const filteredSearchData = drcData.filter((row) =>
