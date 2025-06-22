@@ -1,3 +1,14 @@
+/*Purpose:
+Created Date: 2025-06-20
+Created By: U.H.Nandali Linara (nadalilinara5@gmail.com)
+Last Modified Date: 2025-06-22
+Modified By: U.H.Nandali Linara (nadalilinara5@gmail.com)
+Version: React v18
+ui number : 10.2
+Dependencies: Tailwind CSS
+Related Files:
+Notes: This template uses Tailwind CSS */
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
