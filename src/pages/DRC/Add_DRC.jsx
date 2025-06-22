@@ -549,99 +549,106 @@ const Add_DRC = () => {
               </tbody>
             </table>
 
-            <h2
-              className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}
-            >
-              <span className="underline">SLT Coordinator Details</span>
-            </h2>
-            <table className="w-full">
-              <tbody>
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center">
-                    Service No :
-                  </td>
-                  <td className="w-2/3 pb-2">
-                    <select
-                      value={ServiceNo}
-                      onChange={handleServiceNoChange}
-                      className={`${GlobalStyle.selectBox} w-full`}
-                    >
-                      <option value="">Select Service No</option>
-                      {coordinatorLoading ? (
-                        <option disabled>Loading...</option>
-                      ) : (
-                        coordinators.map((coordinator, index) => (
-                          <option key={index} value={coordinator.user_id}>
-                            {coordinator.user_id}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                    {errors.ServiceNo && (
-                      <p className="text-red-500">{errors.ServiceNo}</p>
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center">Name :</td>
-                  <td className="w-2/3 pb-2">
-                    <input
-                      type="text"
-                      value={C_Name}
-                      readOnly
-                      className={`${GlobalStyle.inputText} w-full bg-gray-100`}
-                    />
-                    {errors.C_Name && (
-                      <p className="text-red-500">{errors.C_Name}</p>
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center">
-                    Email :
-                  </td>
-                  <td className="w-2/3">
-                    <input
-                      type="text"
-                      value={C_Email}
-                      readOnly
-                      className={`${GlobalStyle.inputText} w-full bg-gray-100 `}
-                    />
-                    {errors.C_Email && (
-                      <p className="text-red-500">{errors.C_Email}</p>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
 
-            <h2
-              className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}
-            >
-              <span className="underline">Service Types</span>
+            <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
+               <span className="underline">SLT Coordinator Details</span>
             </h2>
+                <table className="w-full">
+                  <tbody>
+                  
+                    <tr className="block md:table-row">
+                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-2">
+                        Service No :
+                      </td>
+                      <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+                        <select
+                          value={ServiceNo}
+                          onChange={handleServiceNoChange}
+                          className={`${GlobalStyle.selectBox} w-full`}
+                        >
+                          <option value="">Select Service No</option>
+                          {coordinatorLoading ? (
+                            <option disabled>Loading...</option>
+                          ) : (
+                            coordinators.map((coordinator, index) => (
+                              <option key={index} value={coordinator.user_id}>
+                                {coordinator.user_id}
+                              </option>
+                            ))
+                          )}
+                        </select>
+                        {errors.ServiceNo && (
+                          <p className="text-red-500">{errors.ServiceNo}</p>
+                        )}
+                      </td>
+                    </tr>
+
+                    
+                    <tr className="block md:table-row">
+                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-2">
+                        Name :
+                      </td>
+                      <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+                        <input
+                          type="text"
+                          value={C_Name}
+                          readOnly
+                          className={`${GlobalStyle.inputText} w-full bg-gray-100`}
+                        />
+                        {errors.C_Name && (
+                          <p className="text-red-500">{errors.C_Name}</p>
+                        )}
+                      </td>
+                    </tr>
+
+                  
+                    <tr className="block md:table-row">
+                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-0">
+                        Email :
+                      </td>
+                      <td className="block md:table-cell w-full md:w-2/3">
+                        <input
+                          type="text"
+                          value={C_Email}
+                          readOnly
+                          className={`${GlobalStyle.inputText} w-full bg-gray-100`}
+                        />
+                        {errors.C_Email && (
+                          <p className="text-red-500">{errors.C_Email}</p>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                
+         <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
+              <span className="underline">Service Types</span>
+         </h2>
             <table className="w-full">
               <tbody>
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center">
+                <tr className="block md:table-row">
+                  <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-2 md:pb-0 font-semibold md:font-normal">
                     Service Type :
                   </td>
-                  <td className="w-2/3">
-                    <div className="flex">
+                  <td className="block md:table-cell w-full md:w-2/3">
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-0">
                       <select
                         onClick={handleDropdownClick}
                         value={selectedServiceType}
                         onChange={(e) => setSelectedServiceType(e.target.value)}
-                        className={`${GlobalStyle.selectBox} flex-grow mr-2`}
+                        className={`${GlobalStyle.selectBox} w-full md:flex-grow md:mr-2`}
                       >
                         <option value="">Select Service Type</option>
                         {loading ? (
                           <option disabled>Loading...</option>
+                        ) : serviceTypes.length === 0 ? (
+                          <option disabled>No service types available</option>
                         ) : (
                           serviceTypes
                             .filter((service) => !service.selected)
                             .map((service) => (
-                              <option key={service.id} value={service.name}>
+                              <option key={service.id} value={service.code}>
                                 {service.name}
                               </option>
                             ))
@@ -650,7 +657,8 @@ const Add_DRC = () => {
                       <button
                         type="button"
                         onClick={handleAddServiceType}
-                        className={`${GlobalStyle.buttonCircle} ml-2`}
+                        className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
+                        disabled={!selectedServiceType}
                       >
                         <img
                           src={addIcon}
@@ -680,7 +688,6 @@ const Add_DRC = () => {
                     <th className={GlobalStyle.tableHeader}></th>
                   </tr>
                 </thead>
-
                 <tbody>
                   {serviceTypes.filter((type) => type.selected).length > 0 ? (
                     serviceTypes
@@ -698,7 +705,7 @@ const Add_DRC = () => {
                           >
                             <button
                               type="button"
-                              onClick={() => handleRemoveServiceType(type.name)}
+                              onClick={() => handleRemoveServiceType(type.code)}
                               className={`${GlobalStyle.buttonCircle} ml-2`}
                             >
                               <img
@@ -724,65 +731,63 @@ const Add_DRC = () => {
               </table>
             </div>
 
-            <h2
-              className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}
-            >
-              <span className="underline">RTOM Areas</span>
-            </h2>
-            <table className="w-full">
-              <tbody>
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center">
-                    RTOM Area :
-                  </td>
-                  <td className="w-2/3">
-                    <div className="flex">
-                      <select
-                        onClick={handleRtomDropdownClick}
-                        value={selectedRTOM}
-                        onChange={(e) => setSelectedRTOM(e.target.value)}
-                        className={`${GlobalStyle.selectBox} flex-grow mr-2`}
-                      >
-                        <option value="">Select RTOM Area</option>
-                        {rtomLoading ? (
-                          <option disabled>Loading...</option>
-                        ) : rtomAreas.length === 0 ? (
-                          <option disabled>No RTOM areas available</option>
-                        ) : (
-                          rtomAreas
-                            .filter((area) => !area.selected)
-                            .map((area) => (
-                              <option key={area.id} value={area.code}>
-                                {area.name}
-                              </option>
-                            ))
-                        )}
-                      </select>
-                      <button
-                        type="button"
-                        onClick={handleAddRTOM}
-                        className={`${GlobalStyle.buttonCircle} ml-2`}
-                        disabled={!selectedRTOM}
-                      >
-                        <img
-                          src={addIcon}
-                          alt="Add"
-                          style={{ width: 20, height: 20 }}
-                        />
-                      </button>
-                    </div>
-                    {rtomLoading && (
-                      <p className="text-gray-500 mt-1">
-                        Loading RTOM areas...
-                      </p>
-                    )}
-                    {errors.rtomAreas && (
-                      <p className="text-red-500">{errors.rtomAreas}</p>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+           <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
+            <span className="underline">RTOM Areas</span>
+          </h2>
+          <table className="w-full">
+            <tbody>
+              <tr className="block md:table-row">
+                <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-2 md:pb-0 font-semibold md:font-normal">
+                  RTOM Area :
+                </td>
+                <td className="block md:table-cell w-full md:w-2/3">
+                  <div className="flex flex-col md:flex-row gap-2 md:gap-0">
+                    <select
+                      onClick={handleRtomDropdownClick}
+                      value={selectedRTOM}
+                      onChange={(e) => setSelectedRTOM(e.target.value)}
+                      className={`${GlobalStyle.selectBox} w-full md:flex-grow md:mr-2`}
+                    >
+                      <option value="">Select RTOM Area</option>
+                      {rtomLoading ? (
+                        <option disabled>Loading...</option>
+                      ) : rtomAreas.length === 0 ? (
+                        <option disabled>No RTOM areas available</option>
+                      ) : (
+                        rtomAreas
+                          .filter((area) => !area.selected)
+                          .map((area) => (
+                            <option key={area.id} value={area.code}>
+                              {area.name}
+                            </option>
+                          ))
+                      )}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleAddRTOM}
+                      className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
+                      disabled={!selectedRTOM}
+                    >
+                      <img
+                        src={addIcon}
+                        alt="Add"
+                        style={{ width: 20, height: 20 }}
+                      />
+                    </button>
+                  </div>
+                  {rtomLoading && (
+                    <p className="text-gray-500 mt-1">
+                      Loading RTOM areas...
+                    </p>
+                  )}
+                  {errors.rtomAreas && (
+                    <p className="text-red-500">{errors.rtomAreas}</p>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
             <div className="mt-4">
               <table className={`${GlobalStyle.tableContainer} w-full`}>
@@ -835,11 +840,14 @@ const Add_DRC = () => {
               </table>
             </div>
 
-            <div className="flex justify-end mt-6">
-              <button type="submit" className={GlobalStyle.buttonPrimary}>
+           <div className="flex justify-end mt-6 w-full px-4 md:px-0">
+              <button type="submit" 
+                className={`${GlobalStyle.buttonPrimary} w-full md:w-auto`}
+              >
                 Submit
               </button>
-            </div>
+          </div>
+          
           </div>
         </form>
       </div>
