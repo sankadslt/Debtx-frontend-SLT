@@ -82,7 +82,7 @@ const UserList = () => {
           user_role: user.role,
           user_name: user.username,
           user_email: user.email,
-          created_on: new Date(user.Created_ON).toLocaleDateString('en-CA')
+          created_on: new Date(user.Created_DTM).toLocaleDateString('en-CA')
         }));
         
         setRoData(transformedData);
