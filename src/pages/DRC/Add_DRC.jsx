@@ -51,6 +51,7 @@ const Add_DRC = () => {
   const [rtomAreas, setRtomAreas] = useState([]);
   const [rtomLoading, setRtomLoading] = useState(true);
   const [rtomDropdownClicked, setRtomDropdownClicked] = useState(false);
+  const [selectedABCD, setSelectedABCD] = useState("");
 
   const [errors, setErrors] = useState({});
 
@@ -305,17 +306,27 @@ const Add_DRC = () => {
   };
 
   const handleAddRTOM = () => {
-    if (
-      selectedRTOM &&
-      !rtomAreas.some((a) => a.code === selectedRTOM && a.selected)
-    ) {
-      const updatedAreas = rtomAreas.map((item) =>
-        item.code === selectedRTOM ? { ...item, selected: true } : item
-      );
-      setRtomAreas(updatedAreas);
-      setSelectedRTOM("");
-    }
-  };
+  if (!selectedRTOM || !selectedABCD) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Selection Required',
+      text: 'Please select both RTOM Area and ABCD Type before adding.',
+    });
+    return;
+  }
+
+  const areaToAdd = rtomAreas.find(area => area.code === selectedRTOM);
+  if (areaToAdd) {
+    const updatedAreas = rtomAreas.map(area => 
+      area.code === selectedRTOM 
+        ? { ...area, selected: true, abcdType: selectedABCD }
+        : area
+    );
+    setRtomAreas(updatedAreas);
+    setSelectedRTOM("");
+    setSelectedABCD("");
+  }
+};
 
   const handleRemoveServiceType = (type) => {
     const updatedTypes = serviceTypes.map((item) =>
@@ -453,9 +464,11 @@ const Add_DRC = () => {
           Register Debt Recovery Company
         </h1>
         <form onSubmit={handleSubmit} className="w-full mt-6">
-<div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[650px] lg:w-[550px]`}>            <h2
-              className={`${GlobalStyle.headingMedium} mb-4 text-center font-bold`}
-            >
+           <div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[650px] lg:w-[550px]`}>          
+            <h2 className={`${GlobalStyle.headingMedium} mb-4 text-center font-bold`}  >
+
+   {/*Company Section */}      
+
               <span className="underline">Company Details</span>
             </h2>
            <table className="w-full">
@@ -548,6 +561,7 @@ const Add_DRC = () => {
               </tbody>
             </table>
 
+{/* Coordinator section*/}
 
             <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
                <span className="underline">SLT Coordinator Details</span>
@@ -620,6 +634,7 @@ const Add_DRC = () => {
                   </tbody>
                 </table>
 
+{/*Service section */}
                 
          <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
               <span className="underline">Service Types</span>
@@ -676,6 +691,7 @@ const Add_DRC = () => {
                     )}
                   </td>
                 </tr>
+                
               </tbody>
             </table>
 
@@ -730,52 +746,76 @@ const Add_DRC = () => {
               </table>
             </div>
 
+  {/* Rtom section*/}
+
            <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
-            <span className="underline">RTOM Areas</span>
+                <span className="underline">RTOM Areas</span>
           </h2>
-          <table className="w-full">
-            <tbody>
-              <tr className="block md:table-row">
-                <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-2 md:pb-0 font-semibold md:font-normal">
-                  RTOM Area :
-                </td>
-                <td className="block md:table-cell w-full md:w-2/3">
-                  <div className="flex flex-col md:flex-row gap-2 md:gap-0">
-                    <select
-                      onClick={handleRtomDropdownClick}
-                      value={selectedRTOM}
-                      onChange={(e) => setSelectedRTOM(e.target.value)}
-                      className={`${GlobalStyle.selectBox} w-full md:flex-grow md:mr-2`}
-                    >
-                      <option value="">Select RTOM Area</option>
-                      {rtomLoading ? (
-                        <option disabled>Loading...</option>
-                      ) : rtomAreas.length === 0 ? (
-                        <option disabled>No RTOM areas available</option>
-                      ) : (
-                        rtomAreas
-                          .filter((area) => !area.selected)
-                          .map((area) => (
-                            <option key={area.id} value={area.code}>
-                              {area.name}
-                            </option>
-                          ))
-                      )}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={handleAddRTOM}
-                      className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
-                      disabled={!selectedRTOM}
-                    >
-                      <img
-                        src={addIcon}
-                        alt="Add"
-                        style={{ width: 20, height: 20 }}
-                      />
-                    </button>
-                  </div>
-                  {rtomLoading && (
+              <table className="w-full">
+                  <tbody>
+
+                    <tr className="block md:table-row">
+                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-2 md:pb-0 font-semibold md:font-normal">
+                        RTOM Area :
+                      </td>
+                      <td className="block md:table-cell w-full md:w-2/3 pb-2">
+                        <select
+                          value={selectedRTOM}
+                          onChange={(e) => setSelectedRTOM(e.target.value)}
+                          className={`${GlobalStyle.selectBox} w-full`}
+                        >
+                          <option value="">Select RTOM Area</option>
+                          {rtomLoading ? (
+                            <option disabled>Loading...</option>
+                          ) : rtomAreas.length === 0 ? (
+                            <option disabled>No RTOM areas available</option>
+                          ) : (
+                            rtomAreas
+                              .filter((area) => !area.selected)
+                              .map((area) => (
+                                <option key={area.id} value={area.code}>
+                                  {area.name}
+                                </option>
+                              ))
+                          )}
+                        </select>
+                      </td>
+                    </tr>
+
+
+                    <tr className="block md:table-row mt-4">
+                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-2 md:pb-0 font-semibold md:font-normal">
+                        ABCD :
+                      </td>
+                      <td className="block md:table-cell w-full md:w-2/3">
+                        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                          <select
+                            value={selectedABCD}
+                            onChange={(e) => setSelectedABCD(e.target.value)}
+                            className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
+                          >
+                            <option value="">Select ABCD Type</option>
+                            <option value="CPE">CPE</option>
+                            <option value="Arrears">Arrears</option>
+                            <option value="All Type">All Type</option>
+                          </select>
+                          
+                          <div className="flex justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">
+                            <button
+                              type="button"
+                              onClick={handleAddRTOM}
+                              className={`${GlobalStyle.buttonCircle} self-end sm:self-auto`}
+                            
+                            >
+                              <img
+                                src={addIcon}
+                                alt="Add"
+                                style={{ width: 20, height: 20 }}
+                              />
+                            </button>
+                          </div>
+                        </div>
+                        {rtomLoading && (
                     <p className="text-gray-500 mt-1">
                       Loading RTOM areas...
                     </p>
@@ -783,16 +823,18 @@ const Add_DRC = () => {
                   {errors.rtomAreas && (
                     <p className="text-red-500">{errors.rtomAreas}</p>
                   )}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
 
             <div className="mt-4">
               <table className={`${GlobalStyle.tableContainer} w-full`}>
                 <thead className={GlobalStyle.thead}>
                   <tr>
                     <th className={GlobalStyle.tableHeader}>RTOM Name</th>
+                    <th className={GlobalStyle.tableHeader}>ABCD Type</th>
                     <th className={GlobalStyle.tableHeader}></th>
                   </tr>
                 </thead>
@@ -808,6 +850,7 @@ const Add_DRC = () => {
                           }
                         >
                           <td className={GlobalStyle.tableData}>{area.name}</td>
+                          <td className={GlobalStyle.tableData}>{area.abcdType}</td>
                           <td
                             className={`${GlobalStyle.tableData} text-center flex justify-center`}
                           >
