@@ -560,8 +560,8 @@ const AssignDRC = () => {
               {["admin", "superadmin", "slt"].includes(userRole) && (
                 <button
                   onClick={handleProceed}
-                  className={`${GlobalStyle.buttonPrimary} mt-5`}
-                  disabled={totalDistributedAmount !== arrearsbandTotal}
+                  className={`${GlobalStyle.buttonPrimary} mt-5 ${totalDistributedAmount !== arrearsbandTotal || selectedBand === "" ? "cursor-not-allowed" : ""}`}
+                  disabled={totalDistributedAmount !== arrearsbandTotal || selectedBand === ""}
                 >
                   Proceed
                 </button>

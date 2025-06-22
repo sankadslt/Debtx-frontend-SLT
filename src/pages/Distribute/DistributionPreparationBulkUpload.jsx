@@ -12,7 +12,9 @@ Notes:  This page includes Total and Reject count and a table*/
 import { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { List_count_by_drc_commision_rule } from '/src/services/case/CaseServices.js';
+import { List_count_by_drc_commision_rule,
+  List_DRC_Distribution_Rejected_Batches
+ } from '/src/services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { Tooltip } from "react-tooltip";
 import File_Icon from "../../assets/images/fileicon.png";
@@ -24,15 +26,23 @@ const DistributionPreparationBulkUpload = () => {
   const navigate = useNavigate(); // usestate for routing
   const [services, setServices] = useState([]); // usestate for services
   const [currentPage, setCurrentPage] = useState(1); // usestate for current page
+  const [currentRejectedPage, setCurrentRejectedPage] = useState(1); // usestate for current rejected page
   const [searchQuery, setSearchQuery] = useState(""); // usestate for search query
   const [totalRules, setTotalRules] = useState(0) // usestate for total rules
   const recordsPerPage = 4; // Number of records per page
-  const indexOfLastRecord = currentPage * recordsPerPage; // Index of last record
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage; // Index of first record
   const [rejectedBatches, setRejectedBatches] = useState(false); // usestate for rejected batches
+  const [rejectedBatchDetails, setRejectedBatchDetails] = useState([]); // usestate for rejected batch details
+  const [totalRejectedBatches, setTotalRejectedBatches] = useState(0); // usestate for total rejected batches
 
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  // Calculate indices for pagination of services table
+  const indexOfLastRecord = currentPage * recordsPerPage; // Index of last record
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage; // Index of first record
+
+  // Calculate indices for pagination of rejected batches table
+  const indexOfLastRejectedBatch = currentRejectedPage * recordsPerPage; // Index of last
+  const indexOfFirstRejectedBatch = indexOfLastRejectedBatch - recordsPerPage; // Index of first rejected batch
 
   // Role-Based Buttons
   useEffect(() => {
@@ -75,6 +85,23 @@ const DistributionPreparationBulkUpload = () => {
         );
       }
     };
+
+    const fetchRejectedBatches = async () => {
+      try {
+        const response = await List_DRC_Distribution_Rejected_Batches();
+        setTotalRejectedBatches(response.count);
+        setRejectedBatchDetails(response.data || []); // Extract the "data" array from the
+      } catch (error) {
+        setTotalRejectedBatches(0);
+        setRejectedBatchDetails([]);
+        console.error(
+          "Error fetching rejected batches:",
+          error.response?.data || error.message
+        );
+      }
+    };
+
+    fetchRejectedBatches();
     fetchData();
   }, []);
 
@@ -107,6 +134,27 @@ const DistributionPreparationBulkUpload = () => {
     });
   };
 
+  //Table for Rejected Batches
+  const rejectedTableData = rejectedBatchDetails.slice(
+    indexOfFirstRejectedBatch,
+    indexOfLastRejectedBatch
+  );
+  const totalRejectedBatchPages = Math.ceil(rejectedBatchDetails.length / recordsPerPage);
+
+  const handleRejectedPrevNext = (direction) => {
+    if (direction === "prev" && currentRejectedPage > 1) {
+      setCurrentRejectedPage(currentRejectedPage - 1);
+    } else if (direction === "next" && currentRejectedPage < totalRejectedBatchPages) {
+      setCurrentRejectedPage(currentRejectedPage + 1);
+    }
+  };
+
+  const handleRejectedIconClick = (case_distribution_batch_id) => {
+    navigate("/pages/Distribute/AssignDRCReject", {
+      state: { case_distribution_batch_id: case_distribution_batch_id },
+    });
+  };
+
   //main
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -134,9 +182,10 @@ const DistributionPreparationBulkUpload = () => {
                 onClick={() => setRejectedBatches(true)}
                 className={`${GlobalStyle.miniCountBarMainBox}`}
                 style={{ height: 'fit-content', width: 'fit-content', backgroundColor: '#d33' }}
+                disabled={totalRejectedBatches === 0}
               >
                 <span>Rejected Batch Count :</span>
-                <p className={GlobalStyle.miniCountBarMainTopic}>{totalRules}</p>
+                <p className={GlobalStyle.miniCountBarMainTopic}>{totalRejectedBatches}</p>
               </button>
             </div>
           </div>
@@ -258,10 +307,12 @@ const DistributionPreparationBulkUpload = () => {
               </div>
             </div>
           )}
+
+          {/* Rejected Batches Table Section */}
           {rejectedBatches && (
             <div>
               <div className="flex items-center justify-center min-h-full ">
-                <div className={`${GlobalStyle.cardContainer} w-full max-w-lg`}>
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
                   <div className="overflow-x-auto w-full">
                     <table className={GlobalStyle.table}>
                       <thead className={GlobalStyle.thead}>
@@ -279,7 +330,7 @@ const DistributionPreparationBulkUpload = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {currentServices.map((service, index) => (
+                        {rejectedTableData.map((item, index) => (
                           <tr
                             key={index}
                             className={
@@ -291,17 +342,17 @@ const DistributionPreparationBulkUpload = () => {
                             <td
                               className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
                             >
-                              {service.drc_commision_rule}
+                              {item.case_distribution_batch_id}
                             </td>
                             <td
                               className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
                             >
-                              {service.drc_commision_rule}
+                              {item.drc_commision_rule}
                             </td>
                             <td
                               className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
                             >
-                              {service.case_count}
+                              {item.rulebase_count}
                             </td>
                             <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                               {/* <button
@@ -317,7 +368,7 @@ const DistributionPreparationBulkUpload = () => {
                               <div>
                                 {["admin", "superadmin", "slt"].includes(userRole) && (
                                   <button
-                                    onClick={() => handleIconClick(service)}
+                                    onClick={() => handleRejectedIconClick(item.case_distribution_batch_id)}
                                     className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                                   >
                                     <img src={File_Icon}
@@ -347,20 +398,20 @@ const DistributionPreparationBulkUpload = () => {
               {/* Pagination */}
               <div className={GlobalStyle.navButtonContainer}>
                 <button
-                  onClick={() => handlePrevNext("prev")}
-                  disabled={currentPage === 1}
-                  className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+                  onClick={() => handleRejectedPrevNext("prev")}
+                  disabled={currentRejectedPage === 1}
+                  className={`${GlobalStyle.navButton} ${currentRejectedPage === 1 ? "cursor-not-allowed" : ""
                     }`}
                 >
                   <FaArrowLeft />
                 </button>
                 <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-                  Page {currentPage} of {totalPages}
+                  Page {currentRejectedPage} of {totalRejectedBatchPages}
                 </span>
                 <button
-                  onClick={() => handlePrevNext("next")}
-                  disabled={currentPage === totalPages}
-                  className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+                  onClick={() => handleRejectedPrevNext("next")}
+                  disabled={currentRejectedPage === totalRejectedBatchPages}
+                  className={`${GlobalStyle.navButton} ${currentRejectedPage === totalRejectedBatchPages ? "cursor-not-allowed" : ""
                     }`}
                 >
                   <FaArrowRight />

@@ -59,7 +59,8 @@ const AssignDRCReject = () => {
   const [rejectedDRCData, setRejectedDRCData] = useState(null); // Usestate for rejected DRC data
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
-  const case_distribution_batch_id = 26; // Hardcoded case distribution batch ID for testing
+  // const case_distribution_batch_id = 26; // Hardcoded case distribution batch ID for testing
+  const case_distribution_batch_id = location.state?.case_distribution_batch_id // Get the batch ID from the state or use a default value
 
   // Role-Based Buttons
   useEffect(() => {
@@ -240,10 +241,11 @@ const AssignDRCReject = () => {
     }));
 
     const requestData = {
-      drc_commision_rule: serviceType,
-      current_arrears_band: selectedBandKey,
+      drc_commision_rule: rejectedDRCData?.drc_commision_rule || "N/A",
+      current_arrears_band: rejectedDRCData?.current_arrears_band || "N/A",
       drc_list: drcList,
       created_by: userId,
+      batch_id: case_distribution_batch_id,
     };
 
     // console.log("Request Data:", requestData);
@@ -267,12 +269,22 @@ const AssignDRCReject = () => {
         error?.message ||
         "An error occurred. Please try again.";
 
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: errorMessage,
-        confirmButtonColor: "#d33",
-      });
+      if (error.response && error.response.status === 409) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: errorMessage,
+          confirmButtonColor: "#ffc107",
+        });
+      } else {
+
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+        });
+      }
     }
   };
 
@@ -554,7 +566,7 @@ const AssignDRCReject = () => {
               {["admin", "superadmin", "slt"].includes(userRole) && (
                 <button
                   onClick={handleProceed}
-                  className={`${GlobalStyle.buttonPrimary} mt-5`}
+                  className={`${GlobalStyle.buttonPrimary} mt-5 ${totalDistributedAmount !== arrearsbandTotal ? "cursor-not-allowed" : ""}`}
                   disabled={totalDistributedAmount !== arrearsbandTotal}
                 >
                   Proceed

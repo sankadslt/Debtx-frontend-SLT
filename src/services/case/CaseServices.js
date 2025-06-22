@@ -733,3 +733,18 @@ export const List_Rejected_Batch_Summary_Case_Distribution_Batch_Id = async (cas
   }
 };
 
+export const List_DRC_Distribution_Rejected_Batches = async () => {
+  try {
+    const response = await axios.get(`${URL}/List_DRC_Distribution_Rejected_Batches`);
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to retriecve rejected batch details");
+    }
+  } catch (error) {
+    console.error("Failed to retriecve rejected batch details:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
