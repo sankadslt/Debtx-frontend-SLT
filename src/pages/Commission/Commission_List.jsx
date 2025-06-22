@@ -53,6 +53,14 @@ const Commission_List = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
   const hasMounted = useRef(false);
+  const [committedFilters, setCommittedFilters] = useState({
+    caseId: "",
+    accountNo: "",
+    commissionType: "",
+    selectedDrcId: "",
+    fromDate: null,
+    toDate: null
+  });
 
   const rowsPerPage = 10;
 
@@ -84,7 +92,8 @@ const Commission_List = () => {
 
         setDrcNames(names);
       } catch (error) {
-        console.error("Error fetching DRC names:", error);
+        // console.error("Error fetching DRC names:", error);
+        setDrcNames([]);
       }
     };
     // fetchData();
@@ -142,7 +151,7 @@ const Commission_List = () => {
   }
 
   // Function to call the API with the selected filters
-  const CallAPI = async () => {
+  const CallAPI = async (filter) => {
     try {
       const formatDate = (date) => {
         if (!date) return null;
@@ -151,13 +160,13 @@ const Commission_List = () => {
       };
 
       const filters = {
-        case_id: caseId,
-        From_DAT: formatDate(fromDate),
-        TO_DAT: formatDate(toDate),
-        Account_Num: accountNo,
-        DRC_ID: selectedDrcId,
-        Commission_Type: commissionType,
-        pages: currentPage,
+        case_id: filter.caseId,
+        From_DAT: formatDate(filter.fromDate),
+        TO_DAT: formatDate(filter.toDate),
+        Account_Num: filter.accountNo,
+        DRC_ID: filter.selectedDrcId,
+        Commission_Type: filter.commissionType,
+        pages: filter.page,
       };
       console.log("Filters sent to api:", filters);
 
@@ -222,7 +231,7 @@ const Commission_List = () => {
   const validateDates = (from, to) => {
     if (from && to) {
 
-      if (from >= to) {
+      if (from > to) {
         Swal.fire({
           title: "Warning",
           text: "From date must be before to date",
@@ -266,7 +275,11 @@ const Commission_List = () => {
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      CallAPI(); // Call the function whenever currentPage changes
+      // CallAPI(); // Call the function whenever currentPage changes
+      CallAPI({
+        ...committedFilters,
+        page: currentPage,
+      })
     }
   }, [currentPage]);
 
@@ -280,9 +293,25 @@ const Commission_List = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setCommittedFilters({
+        caseId,
+        accountNo,
+        commissionType,
+        selectedDrcId,
+        fromDate,
+        toDate
+      })
       setFilteredData([]); // Clear previous results
       if (currentPage === 1) {
-        CallAPI();
+        CallAPI({
+          caseId,
+          accountNo,
+          commissionType,
+          selectedDrcId,
+          fromDate,
+          toDate,
+          page: 1
+        });
       } else {
         setCurrentPage(1);
       }
@@ -331,6 +360,14 @@ const Commission_List = () => {
     setFilteredData([]); // Clear filtered data
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
+    setCommittedFilters({
+      caseId: "",
+      accountNo: "",
+      commissionType: "",
+      selectedDrcId: "",
+      fromDate: null,
+      toDate: null
+    })
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
     } else {
@@ -476,11 +513,14 @@ const Commission_List = () => {
               style={{ color: selectedDrcId === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Select DRC</option>
-              {drcNames.map((drc) => (
+              {drcNames.length > 0 ? (drcNames.map((drc) => (
                 <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
                   {drc.value}
                 </option>
-              ))}
+              ))
+              ) : (
+                <option value="" disabled style={{ color: "gray" }}>No DRCs available</option>
+              )}
             </select>
 
             <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2">

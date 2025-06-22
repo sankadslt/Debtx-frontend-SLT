@@ -116,6 +116,7 @@ import UserInfo from "../pages/User/UserInfo";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
+import ServiceTypeList from "../pages/Service/ServiceTypeList";
 
 
 const Routers = () => {
@@ -698,7 +699,7 @@ const Routers = () => {
 
       {/* RTOM      */}
       <Route path="/pages/Rtom/RtomList" element={<ProtectedRoute element={<RtomList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfo/:rtomId" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Rtom/RtomInfo" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/RtomInfoEnd/:rtomId" element={<ProtectedRoute element={<RtomInfoEnd />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/ListofServiceType" element={<ProtectedRoute element={<ListofServicetype />} allowedRoles={['superadmin']} />} />
@@ -723,9 +724,11 @@ const Routers = () => {
       <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
 
       {/* RO */}
-
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
     
+
+      {/* Service */}
+      <Route path="/pages/Service/ServiceTypeList" element={<ProtectedRoute element={<ServiceTypeList />} allowedRoles={['superadmin']} />} />
 
     </Routes>
 

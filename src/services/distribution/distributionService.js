@@ -60,10 +60,10 @@ export const List_F1_filtered_incidents = async (filters) => {
 
 export const Forward_Direct_LOD = async (Incident_Id) => {
   try {
-    const user= await getLoggedUserId();
-    const response = await axios.post(`${URL}/Forward_Direct_LOD`, {
+    // const user= await getLoggedUserId();
+    const response = await axios.post(`https://debtx.slt.lk:6500/Create_Cases_From_Incident`, {
       Incident_Id,
-      user
+      // user
     });
     return response;
   } catch (error) {

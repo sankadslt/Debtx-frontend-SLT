@@ -61,7 +61,9 @@ const Sidebar = ({ onHoverChange }) => {
 
         { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"]},
         // {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]}
- { icon: CgEditFade, label: "RO List", link: "/pages/ro/ro-list", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "RO List", link: "/pages/ro/ro-list", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "User List", link: "/pages/User/UserList", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin", "admin"] },
       ],
     },
 

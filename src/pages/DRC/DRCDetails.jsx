@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { List_RO_Details_Owen_By_DRC_ID, List_RTOM_Details_Owen_By_DRC_ID, List_Service_Details_Owen_By_DRC_ID } from "../../services/drc/Drc";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams , useLocation ,useNavigate  } from "react-router-dom";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
@@ -25,7 +25,11 @@ const DRCDetails = () => {
   const [serviceFilter, setServiceFilter] = useState("");
   const [appliedFilters, setAppliedFilters] = useState({ status: "", rtom: "", service: "" });
   const [searchParams] = useSearchParams();
-  const drcId = searchParams.get("drcid");
+  const navigate = useNavigate();
+
+const location = useLocation();
+const { state } = location;
+const drcId = state?.drcId;
 
   const rowsPerPage = 7;
   const statuses = ["Active", "Inactive"];
@@ -67,6 +71,10 @@ const DRCDetails = () => {
               />
           );
       };
+
+      const goBack = () => {
+        navigate(-1); 
+    };
 
   const fetchROList = async () => {
     const res = await List_RO_Details_Owen_By_DRC_ID(drcId);
@@ -367,6 +375,9 @@ const DRCDetails = () => {
             ))}
           </tbody>
         </table>
+
+        
+        
       </div>
 
       {/* Pagination */}
@@ -389,8 +400,19 @@ const DRCDetails = () => {
           >
             <FaArrowRight />
           </button>
+           
+
         </div>
+        
+        
       )}
+      <button
+              className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2 mt-8`}
+                 onClick={goBack}
+                   >
+             <FaArrowLeft />
+              <span>Back</span>
+       </button>
     </div>
   );
 };
