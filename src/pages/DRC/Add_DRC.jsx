@@ -453,8 +453,7 @@ const Add_DRC = () => {
           Register Debt Recovery Company
         </h1>
         <form onSubmit={handleSubmit} className="w-full mt-6">
-          <div className={`${GlobalStyle.cardContainer} mx-auto`}>
-            <h2
+<div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[650px] lg:w-[550px]`}>            <h2
               className={`${GlobalStyle.headingMedium} mb-4 text-center font-bold`}
             >
               <span className="underline">Company Details</span>
