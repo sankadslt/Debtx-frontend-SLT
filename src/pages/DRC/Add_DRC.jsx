@@ -459,13 +459,13 @@ const Add_DRC = () => {
             >
               <span className="underline">Company Details</span>
             </h2>
-            <table className="w-full">
-              <tbody>
-                <tr className="mb-2">
-                  <td className="w-1/3 text-right pr-2 align-center pb-2">
+           <table className="w-full">
+              <tbody className="block md:table-row-group">
+                <tr className="block md:table-row mb-2">
+                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center pb-2">
                     DRC Name :
                   </td>
-                  <td className="w-2/3 pb-2">
+                  <td className="block md:table-cell md:w-2/3 pb-2">
                     <input
                       type="text"
                       value={DRCName}
@@ -477,11 +477,11 @@ const Add_DRC = () => {
                     )}
                   </td>
                 </tr>
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center mt-5">
+                <tr className="block md:table-row">
+                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
                     Business Registration No :
                   </td>
-                  <td className="w-2/3 pb-2">
+                  <td className="block md:table-cell md:w-2/3 pb-2">
                     <input
                       type="text"
                       value={BusinessRegistrationNo}
@@ -497,11 +497,11 @@ const Add_DRC = () => {
                     )}
                   </td>
                 </tr>
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center mt-5">
+                <tr className="block md:table-row">
+                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
                     Contact Number :
                   </td>
-                  <td className="w-2/3 pb-2">
+                  <td className="block md:table-cell md:w-2/3 pb-2">
                     <input
                       type="tel"
                       value={ContactNo}
@@ -514,12 +514,11 @@ const Add_DRC = () => {
                     )}
                   </td>
                 </tr>
-
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center mt-5">
+                <tr className="block md:table-row">
+                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
                     Address :
                   </td>
-                  <td className="w-2/3 pb-2">
+                  <td className="block md:table-cell md:w-2/3 pb-2">
                     <input
                       type="text"
                       value={Address}
@@ -531,11 +530,11 @@ const Add_DRC = () => {
                     )}
                   </td>
                 </tr>
-                <tr>
-                  <td className="w-1/3 text-right pr-2 align-center mt-5">
+                <tr className="block md:table-row">
+                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
                     Email :
                   </td>
-                  <td className="w-2/3">
+                  <td className="block md:table-cell md:w-2/3">
                     <input
                       type="text"
                       value={Email}
