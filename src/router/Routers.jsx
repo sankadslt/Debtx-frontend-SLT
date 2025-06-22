@@ -115,6 +115,7 @@ import UserInfo from "../pages/User/UserInfo";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
+import ServiceTypeList from "../pages/Service/ServiceTypeList";
 
 
 const Routers = () => {
@@ -721,8 +722,10 @@ const Routers = () => {
       <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
 
       {/* RO */}
-
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
+
+      {/* Service */}
+      <Route path="/pages/Service/ServiceTypeList" element={<ProtectedRoute element={<ServiceTypeList />} allowedRoles={['superadmin']} />} />
 
     </Routes>
 
