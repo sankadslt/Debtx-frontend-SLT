@@ -343,7 +343,7 @@ const UserInfo = () => {
   }
 
   return (
-    <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
+    <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8  `}>
       <div className={`${GlobalStyle.headingLarge} mb-6 sm:mb-8`}>
         <span>{user_id} - {userInfo.username}</span>
       </div>
