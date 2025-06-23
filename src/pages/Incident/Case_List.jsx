@@ -439,8 +439,8 @@ const Case_List = () => {
     try {
       const payload = {
         case_current_status: selectedCaseStatus,
-        From_DAT: fromDate ? fromDate.toISOString().split('T')[0] : null,
-        TO_DAT: toDate ? toDate.toISOString().split('T')[0] : null,
+        From_DAT: fromDate,
+        TO_DAT: toDate,
         RTOM: rtom,
         DRC: selectedDRC,
         arrears_band: selectedBand,
@@ -507,7 +507,7 @@ const Case_List = () => {
 
   const validateDates = (from, to) => {
     if (from && to) {
-      if (from >= to) {
+      if (from > to) {
         Swal.fire({
           title: "Warning",
           text: "From date must be before to date",
@@ -537,7 +537,6 @@ const Case_List = () => {
 
   // Handle filter button click
   const handleFilterButton = () => {
-    setFilteredData([]);
     setIsMoreDataAvailable(true);
     setTotalPages(0); // Reset total pages
     setMaxCurrentPage(0);
@@ -545,6 +544,7 @@ const Case_List = () => {
     if (!isValid) {
       return; // If validation fails, do not proceed
     } else {
+      setFilteredData([]);
       if (currentPage === 1) {
         CallAPI();
       } else {

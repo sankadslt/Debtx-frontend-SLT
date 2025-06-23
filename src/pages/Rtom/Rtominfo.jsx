@@ -5,7 +5,7 @@ import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import edit_info from "../../assets/images/edit-info.svg";
 import { fetchRTOMDetails } from "../../services/RTOM/RtomService";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const useMediaQuery = (query) => {
   const [matches, setMatches] = useState(false);
@@ -22,7 +22,6 @@ const useMediaQuery = (query) => {
 };
 
 const RtomInfo = () => {
-    const { rtomId } = useParams();
     const [showPopup, setShowPopup] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
@@ -33,7 +32,13 @@ const RtomInfo = () => {
     const [rtomDetails, setRtomDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
-    const [logHistory, setLogHistory] = useState([]);
+     const [logHistory, setLogHistory] = useState([]);
+
+const location = useLocation();
+
+  const rtomId = location.state?.rtomId;
+
+    
 
     const isMobile = useMediaQuery("(max-width: 768px)");
     const isSmallMobile = useMediaQuery("(max-width: 480px)");
@@ -134,169 +139,119 @@ const RtomInfo = () => {
 
                     <table className="mb-8 w-full">
                         <tbody>
-                            {isMobile ? (
-                                <>
-                                    <tr style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium}`}>Added Date</label>
-                                            <div>
-                                                {rtomDetails.created_on ? new Date(rtomDetails.created_on).toLocaleDateString('en-US') : "N/A"}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium}`}>Billing Center Code</label>
-                                            <div>{rtomDetails.billing_center_code}</div>
-                                        </td>
-                                    </tr>
-                                    <tr style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium}`}>RTOM Name</label>
-                                            <div>{rtomDetails.rtom_name}</div>
-                                        </td>
-                                    </tr>
-                                    <tr style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium}`}>Area Code</label>
-                                            <div>{rtomDetails.area_code}</div>
-                                        </td>
-                                    </tr>
-                                    <tr style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium}`}>Email</label>
-                                            <div>{rtomDetails.rtom_email || "N/A"}</div>
-                                        </td>
-                                    </tr>
-                                    <tr style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium} border-b-2 border-black font-bold`}>
-                                                Contact Details
-                                            </label>
-                                        </td>
-                                    </tr>
-                                    <tr style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium}`}>Mobile</label>
-                                            <div>{rtomDetails.rtom_mobile_no || "N/A"}</div>
-                                        </td>
-                                    </tr>
-                                    <tr style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium}`}>Telephone</label>
-                                            <div>{rtomDetails.rtom_telephone_no || "N/A"}</div>
-                                        </td>
-                                    </tr>
-                                </>
-                            ) : (
-                                <>
-                                    <tr>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
-                                                Added Date
-                                            </label>
-                                        </td>
-                                        <td> : </td>
-                                        <td>
-                                            <label>
-                                                {rtomDetails.created_on ? new Date(rtomDetails.created_on).toLocaleDateString('en-US') : "N/A"}
-                                            </label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
-                                                Billing Center Code
-                                            </label>
-                                        </td>
-                                        <td> : </td>
-                                        <td>
-                                            <label>{rtomDetails.billing_center_code}</label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
-                                                RTOM Name
-                                            </label>
-                                        </td>
-                                        <td> : </td>
-                                        <td>
-                                            <label>{rtomDetails.rtom_name}</label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
-                                                Area Code
-                                            </label>
-                                        </td>
-                                        <td> : </td>
-                                        <td>
-                                            <label>{rtomDetails.area_code}</label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium} pl-16`}>
-                                                Email
-                                            </label>
-                                        </td>
-                                        <td> : </td>
-                                        <td>
-                                            <label>{rtomDetails.rtom_email || "N/A"}</label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td colSpan="3" className="py-2"></td>
-                                    </tr>
-                                    <tr>
-                                        <td colSpan="3">
-                                            <label className={`${GlobalStyle.headingMedium} border-b-2 border-black font-bold inline-block ml-10`}>
-                                                Contact Details
-                                            </label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colSpan="3" className="py-2"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
-                                                Mobile
-                                            </label>
-                                        </td>
-                                        <td> : </td>
-                                        <td>
-                                            <label>
-                                                {rtomDetails.rtom_mobile_no || "N/A"}
-                                            </label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label className={`${GlobalStyle.headingMedium} pl-16`}>
-                                                Telephone
-                                            </label>
-                                        </td>
-                                        <td> : </td>
-                                        <td>
-                                            <label>
-                                                {rtomDetails.rtom_telephone_no || "N/A"}
-                                            </label>
-                                        </td>
-                                    </tr>
-                                </>
-                            )}
+                            <tr>
+                                <td>
+                                    <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
+                                        Added Date
+                                    </label>
+                                </td>
+                                <td> : </td>
+                                <td>
+                                   <label>
+                                    {rtomDetails.created_on ? new Date(rtomDetails.created_on).toLocaleDateString('en-US') : "N/A"}
+                                    </label>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block `}>
+                                        Billing Center Code
+                                    </label>
+                                </td>
+                                <td> : </td>
+                                <td>
+                                    <label>{rtomDetails.billing_center_code}</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block `}>
+                                        RTOM Name
+                                    </label>
+                                </td>
+                                <td> : </td>
+                                <td>
+                                    <label>{rtomDetails.rtom_name}</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block `}>
+                                        Area Code
+                                    </label>
+                                </td>
+                                <td> : </td>
+                                <td>
+                                    <label>{rtomDetails.area_code}</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label className={`${GlobalStyle.headingMedium} pl-16 `}>
+                                        Email
+                                    </label>
+                                </td>
+                                <td> : </td>
+                                <td>
+                                    <label>{rtomDetails.rtom_email || "N/A"}</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <td colSpan="3" className="py-2"></td>
+                            </tr>
+
+                            <tr>
+                             <td colSpan="3">
+                                <label className={`${GlobalStyle.headingMedium} border-b-2 border-black font-bold inline-block ml-10`}>
+                                    Contact Details
+                                </label>
+                            </td>
+
+                            </tr>
+
+                            <tr>
+                                <td colSpan="3" className="py-2"></td>
+                            </tr>
+                        
+
+                            <tr>
+                                <td>
+                                    <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block `}>
+                                        Mobile
+                                    </label>
+                                </td>
+                                <td> : </td>
+                                <td>
+                                    <label>
+                                        {rtomDetails.rtom_mobile_no || "N/A"}
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label className={`${GlobalStyle.headingMedium} pl-16 `}>
+                                        Telephone
+                                    </label>
+                                </td>
+                                <td> : </td>
+                                <td>
+                                    <label>
+                                        {rtomDetails.rtom_telephone_no || "N/A"}
+                                    </label>
+                                </td>
+                            </tr>
+                            
                         </tbody>
                     </table>
                 </div>
