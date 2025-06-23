@@ -231,61 +231,53 @@ const DRCInfo = () => {
             Company Details
           </h2>
 
-          <table className={`${GlobalStyle.table} min-w-full text-left`}>
-            <tbody>
-              <tr>
-                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                  Added Date
-                </td>
-                <td className="w-4 text-left">:</td>
-                <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
-                  {companyData.create_on
-                    ? new Date(companyData.create_on).toLocaleDateString()
-                    : "Not specified"}
-                </td>
-              </tr>
-
-              <tr>
-                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                  Business Reg No
-                </td>
-                <td className="w-4 text-left">:</td>
-                <td className={`${GlobalStyle.tableData} text-gray-500 text-left`}>
-                  {companyData.drc_business_registration_number || "Not specified"}
-                </td>
-              </tr>
-              
-              <tr>
-                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                  Contact Number
-                </td>
-                <td className="w-4 text-left">:</td>
-                <td className={`${GlobalStyle.tableData} text-gray-500 text-left`}>
-                  {companyData.drc_contact_no || "Not specified"}
-                </td>
-              </tr>
-              
-              <tr>
-                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                  Address
-                </td>
-                <td className="w-4 text-left">:</td>
-                <td className={`${GlobalStyle.tableData} text-gray-500 text-left`}>
-                  {companyData.drc_address || "Not specified"}
-                </td>
-              </tr>
-              
-              <tr>
-                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                  Email
-                </td>
-                <td className="w-4 text-left">:</td>
-                <td className={`${GlobalStyle.tableData} text-gray-500 text-left`}>
-                  {companyData.drc_email || "Not specified"}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <table className={`${GlobalStyle.table} w-full text-left`}>
+              <tbody className="space-y-2 sm:space-y-0">
+                {[
+                  { 
+                    label: "Added Date", 
+                    value: companyData.create_on 
+                      ? new Date(companyData.create_on).toLocaleDateString() 
+                      : "Not specified" 
+                  },
+                  { 
+                    label: "Business Reg No", 
+                    value: companyData.drc_business_registration_number || "Not specified" 
+                  },
+                  { 
+                    label: "Contact Number", 
+                    value: companyData.drc_contact_no || "Not specified" 
+                  },
+                  { 
+                    label: "Address", 
+                    value: companyData.drc_address || "Not specified" 
+                  },
+                  { 
+                    label: "Email", 
+                    value: companyData.drc_email || "Not specified" 
+                  }
+                ].map((item, index) => (
+                  <tr key={index} className="block sm:table-row">
+                   
+                    <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                      {item.label}:
+                    </td>
+                    <td className={`${GlobalStyle.tableData} text-gray-500 block sm:hidden pl-4`}>
+                      {item.value}
+                    </td>
+                    
+                   
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
+                      {item.label}
+                    </td>
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-gray-500 hidden sm:table-cell`}>
+                      {item.value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
           {/* SLT Coordinator Section */}
           <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
@@ -460,72 +452,120 @@ const DRCInfo = () => {
       </div>
 
       {/* Termination Form  */}
-      {showEndFields && (
-        <div className="w-full flex justify-center mt-6">
-          <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
-            <table className={`${GlobalStyle.table} min-w-full text-left`}>
-              <tbody>
-                <tr>
-                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                    End Date
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
-                    <div className="flex justify-start w-full">
-                      <DatePicker
-                        selected={endDate}
-                        onChange={(date) => setEndDate(date)}
-                        dateFormat="dd/MM/yyyy"
-                        className={`${GlobalStyle.inputText} w-full text-left`}
-                        maxDate={new Date()} 
-                        minDate={new Date()} 
-                      />
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}>
-                    Remark
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
-                    <textarea
-                      value={remark}
-                      onChange={(e) => {
-                        setRemark(e.target.value);
-                        if (e.target.value.trim() && remarkError) {
-                          setRemarkError(false);
-                        }
-                      }}
-                      rows="4"
-                      className={`${GlobalStyle.inputText} w-full text-left ${
-                        remarkError ? "border-red-500" : ""
-                      }`}
-                      placeholder="Enter reason for ending DRC relationship"
-                      required
-                    />
-                    {remarkError && (
-                      <p className="text-red-500 text-sm mt-1 text-left">
-                        Remark is required
-                      </p>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+     {showEndFields && (
+       <div className="w-full flex justify-center mt-6">
+           <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl px-4 sm:px-6`}>
+                  <table className={`${GlobalStyle.table} w-full text-left`}>
+                    <tbody className="space-y-4 sm:space-y-0">
+                      {/* End Date Row */}
+                      <tr className="block sm:table-row">
+                      
+                        <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                          End Date:
+                        </td>
+                        <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
+                          <div className="w-full">
+                            <DatePicker
+                              selected={endDate}
+                              onChange={(date) => setEndDate(date)}
+                              dateFormat="dd/MM/yyyy"
+                              className={`${GlobalStyle.inputText} w-full text-left`}
+                              maxDate={new Date()}
+                              minDate={new Date()}
+                            />
+                          </div>
+                        </td>
+                        
+                      
+                        <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
+                          End Date
+                        </td>
+                        <td className="w-4 text-left hidden sm:table-cell">:</td>
+                        <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
+                          <div className="flex justify-start w-full">
+                            <DatePicker
+                              selected={endDate}
+                              onChange={(date) => setEndDate(date)}
+                              dateFormat="dd/MM/yyyy"
+                              className={`${GlobalStyle.inputText} w-full text-left`}
+                              maxDate={new Date()}
+                              minDate={new Date()}
+                            />
+                          </div>
+                        </td>
+                      </tr>
 
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={handleEndSubmit}
-                className={GlobalStyle.buttonPrimary}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                      {/* Remark Row */}
+                      <tr className="block sm:table-row">
+                       
+                        <td className={`${GlobalStyle.tableData} font-semibold block sm:hidden`}>
+                          Remark:
+                        </td>
+                        <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
+                          <textarea
+                            value={remark}
+                            onChange={(e) => {
+                              setRemark(e.target.value);
+                              if (e.target.value.trim() && remarkError) {
+                                setRemarkError(false);
+                              }
+                            }}
+                            rows="4"
+                            className={`${GlobalStyle.inputText} w-full text-left ${
+                              remarkError ? "border-red-500" : ""
+                            }`}
+                            placeholder="Enter reason for ending DRC relationship"
+                            required
+                          />
+                          {remarkError && (
+                            <p className="text-red-500 text-sm mt-1 text-left">
+                              Remark is required
+                            </p>
+                          )}
+                        </td>
+                        
+                        
+                        <td className={`${GlobalStyle.tableData} font-semibold whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
+                          Remark
+                        </td>
+                        <td className="w-4 text-left hidden sm:table-cell">:</td>
+                        <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
+                          <textarea
+                            value={remark}
+                            onChange={(e) => {
+                              setRemark(e.target.value);
+                              if (e.target.value.trim() && remarkError) {
+                                setRemarkError(false);
+                              }
+                            }}
+                            rows="4"
+                            className={`${GlobalStyle.inputText} w-full text-left ${
+                              remarkError ? "border-red-500" : ""
+                            }`}
+                            placeholder="Enter reason for ending DRC relationship"
+                            required
+                          />
+                          {remarkError && (
+                            <p className="text-red-500 text-sm mt-1 text-left">
+                              Remark is required
+                            </p>
+                          )}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={handleEndSubmit}
+                      className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
       {!showEndFields && (
         <div className="flex justify-between mt-4 w-full px-8">
           <button
