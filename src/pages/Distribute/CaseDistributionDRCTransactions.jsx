@@ -237,11 +237,14 @@ const applyFilters = async () => {
 
     try {
       // Send the filtered data to the backend
-
+      console.log("Request Data:", requestdata);
       const response = await List_Case_Distribution_DRC_Summary(requestdata);
       
-      if (Array.isArray(response)) {
-        setFilteredData1(response); // Store the fetched data into state
+      // console.log("API Response:", response);
+
+      if (Array.isArray(response.data)) {
+        setFilteredData1(response.data); // Store the fetched data into state
+        console.log("Filtered Data:", response.data);
       }
     } catch (error) {
       console.error("API Fetch Error:", error);
@@ -626,9 +629,9 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
               <th className={GlobalStyle.tableHeader} style={{ width: "120px", fontSize : "10px" }}>DRC Commission Rule</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "120px",fontSize : "10px" }}>Arrears Band (Selection Rule)</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Case Count (RuleBase count)</th>
-              {/* <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}>Total Arrears </th> */}
+              <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px"}}> Captured Count </th>
               
-              <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Approval</th>
+              {/* <th className={GlobalStyle.tableHeader} style={{ width: "100px",fontSize : "10px" }}>Approval</th> */}
               <th className={GlobalStyle.tableHeader} style={{ width: "90px", fontSize : "10px" }}>Created dtm</th>
               <th className={GlobalStyle.tableHeader} style={{ width: "80px",fontSize : "10px" }}> </th>
             </tr>
@@ -644,45 +647,45 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   GlobalStyle.tableRowOdd}>
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.status?.[0]?.crd_distribution_status === "Open" && (
+                    {item.current_batch_distribution_status === "open" && (
                       <>
-                      <img data-tooltip-id={`tooltip-open-${index}`} data-tooltip-content="Open" src= {open} width={20} height={15} alt="Open"  />
+                      <img data-tooltip-id={`tooltip-open-${index}`} data-tooltip-content={`Open - ${new Date(item.create_dtm).toLocaleDateString('en-GB')}`}  src= {open} width={20} height={15} alt="Open"  />
                       <Tooltip id={`tooltip-open-${index}`} place="bottom"/>
                       </>
                     )}
-                    {item.status?.[0]?.crd_distribution_status === "Complete" && (
+                    {item.current_batch_distribution_status === "batch_distributed" && (
                       <>
-                      <img data-tooltip-id={`tooltip-complete-${index}`} data-tooltip-content="Complete" src={Complete} width={20} height={15} alt="Complete" />
+                      <img data-tooltip-id={`tooltip-complete-${index}`} data-tooltip-content="Batch Distributed" src={Complete} width={20} height={15} alt="Batch Distributed" />
                       <Tooltip id={`tooltip-complete-${index}`} place="bottom"/>
                       </>
                     )}
-                    {item.status?.[0]?.crd_distribution_status === "Error" && (
+                    {item.current_batch_distribution_status === "batch_rejected" && (
                       <>
-                      <img data-tooltip-id={`tooltip-error-${index}`} data-tooltip-content="Error" src={Error} width={20} height={15} alt="Error" />
+                      <img data-tooltip-id={`tooltip-error-${index}`} data-tooltip-content={`Batch Rejected `} src={Error} width={20} height={15} alt="Batch Rejected" />
                       <Tooltip id={`tooltip-error-${index}`} place="bottom"/>
                       </>
                     )}
-                    {item.status?.[0]?.crd_distribution_status === "Inprogress" && (
+                    {item.current_batch_distribution_status === "batch_forward_approval" && (
                       <>
-                      <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content="InProgress" src={Inprogress} width={20} height={15} alt="InProgress" />
+                      <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content={`Open - ${new Date(item.Forward_For_Approvals_On).toLocaleDateString('en-GB')}`} src={Inprogress} width={20} height={15} alt="Batch Forward Approval" />
                       <Tooltip id={`tooltip-progress-${index}`} place="bottom"/>
                       </>
                     )}
                     </div>
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "80px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {item.case_distribution_batch_id}
+                    {item.case_distribution_id}
                   </td>
                   
                   <td className={GlobalStyle.tableData} style={{ width: "75px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
-                    {item.batch_seq_details?.[0]?.action_type === "distribution" && (
+                    {item.action_type === "distribution" && (
                       <>
-                      <img  data-tooltip-id={`tooltip-distribute-${index}`} data-tooltip-content="Distributed" src={Distributed} width={20} height={15} alt="Distributed" />
+                      <img  data-tooltip-id={`tooltip-distribute-${index}`} data-tooltip-content="Distribution" src={Distributed} width={20} height={15} alt="Distributed" />
                       <Tooltip id={`tooltip-distribute-${index}`} place="bottom"/>
                       </>
                     )}
-                    {item.batch_seq_details?.[0]?.action_type === "amend" && (
+                    {item.action_type === "Amend" && (
                       <>
                       <img  data-tooltip-id={`tooltip-amend-${index}`} data-tooltip-content="Amend" src= {Ammend} width={20} height={15} alt="Amend" />
                       <Tooltip id={`tooltip-amend-${index}`} place="bottom"/>
@@ -698,13 +701,13 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     {item.current_arrears_band}
                   </td>
                   <td className={GlobalStyle.tableData} style={{ width: "90px", textAlign: "center" }}>
-                    {item.rulebase_count}
+                    {item.inspected_count}
                   </td>
-                  {/* <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
-                    {item.rulebase_arrears_sum}
-                  </td> */}
-                  
                   <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
+                    {item.captured_count}
+                  </td>
+                  
+                  {/* <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" } }>
                     {item.forward_for_approvals_on && !item.approved_on && !item.proceed_on && (
                       <>
@@ -731,9 +734,9 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                       </>
                     )}
                     </div>
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData} style={{ width: "90px", whiteSpace: "nowrap" }}>
-                    {new Date(item.created_dtm).toLocaleString('en-GB', {
+                    {new Date(item.create_dtm).toLocaleString('en-GB', {
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric", // Ensures two-digit year (YY)
@@ -754,21 +757,21 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                     <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary"/>
 
 
-                    <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_batch_id)} disabled= {!!item.forward_for_approvals_on }>
+                    <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_batch_id)} disabled= {item.current_batch_distribution_status !== "open"} >
                     {/* <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} /> */}
                     <RiExchangeLine size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-exchange-${index}`} place="bottom" content="Exchange case count"/>
 
 
-                    <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_batch_id)} >
+                    <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_batch_id)} disabled={item.current_batch_distribution_status === "open"} >
                     {/* <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} /> */}
                     <IoListCircleOutline size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary"/>
 
 
-                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_batch_id)} disabled={!!item.forward_for_approvals_on}>
+                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_batch_id)} disabled={item.current_batch_distribution_status !== "open"} >
                     {/* <img
                       src={four}
                       width={15}
