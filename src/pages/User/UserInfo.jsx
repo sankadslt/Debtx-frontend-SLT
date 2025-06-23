@@ -13,19 +13,25 @@ import edit from "../../assets/images/edit-info.svg";
 import add from "../../assets/images/user-add.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import { endUser, getUserDetailsById, updateUserDetails } from "../../services/user/user_services";
 import completeIcon from "../../assets/images/complete.png";
 import remove from "../../assets/images/remove.svg";
+import { useLocation, useNavigate } from "react-router-dom";
+import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const UserInfo = () => {
   const location = useLocation();
   const user_id = location.state?.user_id;
 
+  const goBack = () => {
+        navigate(-1); 
+        };
+
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
 
+   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
   const [endDate, setEndDate] = useState(null);
   const [remark, setRemark] = useState("");
@@ -892,6 +898,12 @@ const UserInfo = () => {
         >
           Log History
         </button>
+      </div>
+
+      <div style={{ marginTop: '12px' }}>
+          <button className={GlobalStyle.navButton} onClick={goBack}>
+          <FaArrowLeft />  Back
+          </button>
       </div>
 
       {/* Log History Section - Updated as Popup */}
