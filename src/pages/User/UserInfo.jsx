@@ -135,6 +135,7 @@ const UserInfo = () => {
 
   const toggleEdit = () => {
     setIsEditing(!isEditing);
+    setShowEndSection(false);
     setEmailError("");
   };
 
@@ -155,7 +156,78 @@ const UserInfo = () => {
   //   return emailRegex.test(email);
   // };
 
+  // const handleSave = async () => {
+  //   if (!remark.trim()) {
+  //     Swal.fire({
+  //       title: "Warning",
+  //       text: "Remark is required",
+  //       icon: "warning",
+  //       allowOutsideClick: false,
+  //       allowEscapeKey: false,
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     setLoading(true);
+      
+  //     // Get the current active role from userRolesData
+  //     const activeRole = userRolesData.find(role => role.active);
+      
+  //     const updateData = {
+  //       user_id: user_id,
+  //       updated_by: userInfo.email || "current_user", // Use user email for remark_by
+  //       role: activeRole ? activeRole.roleName : null,
+  //       user_roles: userRolesData, // Save all user roles
+  //       user_status: isActive ? "true" : "false",
+  //       remark: remark
+  //     };
+
+  //     const response = await updateUserDetails(updateData);
+      
+  //     if (response.status === "success") {
+  //       // Refresh user data
+  //       const fetchedData = await getUserDetailsById(user_id);
+  //       if (fetchedData) {
+  //         setUserInfo(fetchedData.data);
+  //       }
+        
+  //       setRemark("");
+  //       toggleEdit();
+        
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "Success",
+  //         text: "User details updated successfully",
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.error("Error updating user:", err);
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: err.message || "Failed to update user details",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSave = async () => {
+    // Get the current active role from userRolesData
+    const activeRole = userRolesData.find(role => role.active);
+
+    if (!activeRole) {
+      Swal.fire({
+        title: "Warning",
+        text: "At least one active role must be selected",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
     if (!remark.trim()) {
       Swal.fire({
         title: "Warning",
@@ -169,31 +241,27 @@ const UserInfo = () => {
 
     try {
       setLoading(true);
-      
-      // Get the current active role from userRolesData
-      const activeRole = userRolesData.find(role => role.active);
-      
+
       const updateData = {
         user_id: user_id,
-        updated_by: userInfo.email || "current_user", // Use user email for remark_by
-        role: activeRole ? activeRole.roleName : null,
-        user_roles: userRolesData, // Save all user roles
+        updated_by: userInfo.email || "current_user",
+        role: activeRole.roleName,
+        user_roles: userRolesData,
         user_status: isActive ? "true" : "false",
         remark: remark
       };
 
       const response = await updateUserDetails(updateData);
-      
+
       if (response.status === "success") {
-        // Refresh user data
         const fetchedData = await getUserDetailsById(user_id);
         if (fetchedData) {
           setUserInfo(fetchedData.data);
         }
-        
+
         setRemark("");
         toggleEdit();
-        
+
         Swal.fire({
           icon: "success",
           title: "Success",
