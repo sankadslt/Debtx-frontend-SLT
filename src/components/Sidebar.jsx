@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+ import { Link, useLocation } from "react-router-dom";
 import { MdSpaceDashboard , MdFormatListBulletedAdd , MdDoneOutline } from "react-icons/md";
 import { IoIosListBox } from "react-icons/io";
 import { MdSpeakerNotes } from "react-icons/md";
@@ -61,7 +61,9 @@ const Sidebar = ({ onHoverChange }) => {
 
         { icon: CgEditFade, label: "DRC List", link: "/pages/DRC/DRCList", roles: ["superadmin", "admin"]},
         // {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]}
-
+        { icon: CgEditFade, label: "RO List", link: "/pages/ro/ro-list", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "User List", link: "/pages/User/UserList", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin", "admin"] },
       ],
     },
 
@@ -90,13 +92,15 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         // { icon: CgEditFade, label: "Case List", link: "/Incident/Case_List", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, 
-          label: "DRC Assigned Case List", 
-          roles: ["superadmin", "admin"], 
-          subItems: [
-            {icon:CgEditFade, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
-          ],
-        },
+        // { icon: CgEditFade, 
+        //   label: "DRC Assigned Case List", 
+        //   roles: ["superadmin", "admin"], 
+        //   subItems: [
+        //     {icon:CgEditFade, label:"Medeation Board List", link:"/MediationBoard/MediationBoardCaseList", roles:["superadmin", "admin"]},
+        //   ],
+        // },
+        { icon: CgEditFade, label: "Case List", roles: ["superadmin", "admin"], link: "/Incident/Case_List"},
+        { icon: CgEditFade, label: "DRC - Mediation Board List", roles: ["superadmin", "admin"], link: "/MediationBoard/MediationBoardCaseList"},
         // { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },
@@ -171,6 +175,7 @@ const Sidebar = ({ onHoverChange }) => {
       ],
     },
 
+    
 
     {icon: MdDownload, label: "Download", link: "/incident/Incident_File_Download", roles: ["superadmin", "admin", "user"]},
     // {

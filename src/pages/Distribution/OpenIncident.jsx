@@ -12,22 +12,22 @@ Related Files:
 Notes:  
 */
 
-import { useState,useEffect } from "react"; 
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useNavigate } from "react-router-dom";
 import { getUserData } from "../../services/auth/authService";
 import { getLoggedUserId } from "../../services/auth/authService";
-import { FaSearch, FaArrowLeft, FaArrowRight , FaDownload } from "react-icons/fa";
-import {List_Distribution_Ready_Incidents,distribution_ready_incidents_group_by_arrears_band,Create_Case_for_incident} from "../../services/Incidents/incidentService";
+import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
+import { List_Distribution_Ready_Incidents, distribution_ready_incidents_group_by_arrears_band, Create_Case_for_incident } from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/incidents/Open_No_Agent.png";
-import { Create_Task_for_OpenNoAgent,Create_Task_for_Create_CaseFromIncident , Open_Task_Count_Incident_To_Case} from "../../services/task/taskService";
+import { Create_Task_for_OpenNoAgent, Create_Task_for_Create_CaseFromIncident, Open_Task_Count_Incident_To_Case } from "../../services/task/taskService";
 import Swal from "sweetalert2";
-import  { Tooltip } from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
- 
- 
+
+
 
 export default function OpenIncident() {
   const [searchQuery, setSearchQuery] = useState("");  //  usestate for the Search bar
@@ -35,14 +35,14 @@ export default function OpenIncident() {
   const [data, setData] = useState([]); // usestate for the data
   const [total, setTotal] = useState(0);  // usestate for the total number of incidents
   const [distributionData, setDistributionData] = useState({}); // usestate for the distribution data
-  const [ setError] = useState(null); // usestate for the error message
+  const [setError] = useState(null); // usestate for the error message
   const [currentPage, setCurrentPage] = useState(0); // usestate for the current page
   const [selectedRows, setSelectedRows] = useState([]); // usestate for the selected rows
-  const [isProcessing,setIsProcessing] = useState(false); // usestate for the processing state
-const [user, setUser] = useState(null); // usestate for the user data
+  const [isProcessing, setIsProcessing] = useState(false); // usestate for the processing state
+  const [user, setUser] = useState(null); // usestate for the user data
 
-const [userRole, setUserRole] = useState(null); // Role-Based Buttons
-const navigate = useNavigate();
+  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const navigate = useNavigate();
 
   const rowsPerPage = 7;
 
@@ -76,7 +76,7 @@ const navigate = useNavigate();
         const user_id = await getLoggedUserId();
         setUser(user_id);
         //console.log("User ID:", user_id);
-        
+
       } catch (err) {
         console.error("Failed to fetch user data", err);
       }
@@ -87,39 +87,39 @@ const navigate = useNavigate();
   }, []);
 
   // Function to fetch data
-const fetchData = async () => {
-  try {
-    const response = await List_Distribution_Ready_Incidents();
-    setData(response.data);
-    console.log("Fetched Data:", response.data);
+  const fetchData = async () => {
+    try {
+      const response = await List_Distribution_Ready_Incidents();
+      setData(response.data);
+      console.log("Fetched Data:", response.data);
 
-    const distributionResponse = await distribution_ready_incidents_group_by_arrears_band();
-    setDistributionData(distributionResponse);
-    
-    const totalCount = Object.values(distributionResponse).reduce(
-      (sum, count) => sum + count,
-      0
-    );
-    setTotal(totalCount);
-  } catch (error) {
-    setError(error.message || "Failed to fetch data.");
-  }
-};
+      const distributionResponse = await distribution_ready_incidents_group_by_arrears_band();
+      setDistributionData(distributionResponse);
+
+      const totalCount = Object.values(distributionResponse).reduce(
+        (sum, count) => sum + count,
+        0
+      );
+      setTotal(totalCount);
+    } catch (error) {
+      setError(error.message || "Failed to fetch data.");
+    }
+  };
 
   // Function to handle task creation
   const handleCreateTask = async () => {
 
-  
-    
+
+
 
     try {
       const taskParams = {
-       
+
       };
-  
-    
+
+
       const response = await Create_Task_for_OpenNoAgent(taskParams);
-  
+
       Swal.fire({
         title: "Task Created Successfully!",
         text: `Task ID: ${response.Task_Id}`,
@@ -127,8 +127,8 @@ const fetchData = async () => {
         confirmButtonText: "OK",
         confirmButtonColor: "#28a745"
       });
-  
-     
+
+
       setSelectedRows([]);
       const updatedResponse = await List_Distribution_Ready_Incidents();
       setData(updatedResponse.data);
@@ -142,119 +142,129 @@ const fetchData = async () => {
       });
     }
   };
-  
+
   // Function to handle case creation for incidents
- const handleCaseforIncident = async () => {
-  if (selectedRows.length === 0) {
-    Swal.fire({
-      title: "Warning",
-      text: "Please select at least one incident.",
-      icon: "warning",
-      confirmButtonText: "OK",
-       confirmButtonColor: "#f1c40f"
-    });
-    return;
-  }
-
-  const confirmResult = await Swal.fire({
-    title: "Confirmation",
-    text: `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes, Proceed",
-    confirmButtonColor: "#28a745",
-    cancelButtonColor: "#d33",
-    cancelButtonText: "No",
-  });
-
-  if (!confirmResult.isConfirmed) {
-    return;
-  }
-
-  setIsProcessing(true);
-
-  try {
-    const openTaskCount = await Open_Task_Count_Incident_To_Case();
-    if (openTaskCount > 0) {
+  const handleCaseforIncident = async () => {
+    if (selectedRows.length === 0) {
       Swal.fire({
-        title: "Action Blocked",
-        text: "There are existing open tasks. Please resolve them before proceeding.",
+        title: "Warning",
+        text: "Please select at least one incident.",
         icon: "warning",
         confirmButtonText: "OK",
         confirmButtonColor: "#f1c40f"
       });
-      setIsProcessing(false);
       return;
     }
 
-    if (selectedRows.length > 5) {
-     
-      const taskConfirmResult = await Swal.fire({
-        title: "Create Task Confirmation",
-        text: `You have selected more than 5 incidents. Do you want to create a task to handle all of them?`,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, Create Task",
-        cancelButtonText: "No, Cancel",
-        confirmButtonColor: "#28a745",
-        cancelButtonColor: "#d33",
-      });
+    const confirmResult = await Swal.fire({
+      title: "Confirmation",
+      text: `Are you sure you want to proceed with ${selectedRows.length} selected cases?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Proceed",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
+      cancelButtonText: "No",
+    });
 
-      if (!taskConfirmResult.isConfirmed) {
-        setIsProcessing(false);
-        return;  
-      }
-
-      
-      const taskParams = {
-        //Incident_Status: "Open No Agent",
-        Proceed_By: user,
-        Proceed_Dtm: new Date(),
-      };
-
-      const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-      console.log("Response from Create_Task:", response);
-      Swal.fire({
-        title: "Task Created Successfully!",
-        text: `Task created to handle incidents.`,
-        icon: "success",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#28a745",
-      });
-    } else {
-      
-      
-
-      const response = await Create_Case_for_incident({
-        Incident_Ids: selectedRows,
-        Proceed_By: user,
-       // Proceed_Dtm: new Date().toISOString().split("T")[0],
-      });
-
-      Swal.fire({
-        title: "Cases Created Successfully!",
-        text: `Successfully created ${response.cases.length} cases.`,
-        icon: "success",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#28a745",
-      });
+    if (!confirmResult.isConfirmed) {
+      return;
     }
 
-    setSelectedRows([]);
-  } catch (error) {
-    console.error("Error in handleCaseforIncident:", error);
-    Swal.fire({
-      title: "Error",
-      text:  error.message || "Action failed: Another set in progress.",
-      icon: "error",
-      confirmButtonText: "OK",
-      confirmButtonColor: "#d33",
-    });
-  } finally {
-    setIsProcessing(false);
-    await fetchData();
-  }
-};
+    setIsProcessing(true);
+
+    try {
+      const openTaskCount = await Open_Task_Count_Incident_To_Case();
+      if (openTaskCount > 0) {
+        Swal.fire({
+          title: "Action Blocked",
+          text: "There are existing open tasks. Please resolve them before proceeding.",
+          icon: "warning",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#f1c40f"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      if (selectedRows.length > 5) {
+
+        const taskConfirmResult = await Swal.fire({
+          title: "Create Task Confirmation",
+          text: `You have selected more than 5 incidents. Do you want to create a task to handle all of them?`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Yes, Create Task",
+          cancelButtonText: "No, Cancel",
+          confirmButtonColor: "#28a745",
+          cancelButtonColor: "#d33",
+        });
+
+        if (!taskConfirmResult.isConfirmed) {
+          setIsProcessing(false);
+          return;
+        }
+
+
+        const taskParams = {
+          Incident_Status: "Open No Agent",
+          Proceed_By: user,
+          Proceed_Dtm: new Date(),
+        };
+
+        const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
+        // console.log("Response from Create_Task:", response);
+        Swal.fire({
+          title: "Task Created Successfully!",
+          text: `Task created to handle incidents.`,
+          icon: "success",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#28a745",
+        });
+      } else {
+
+
+
+        // const response = await Create_Case_for_incident({
+        //   Incident_Ids: selectedRows,
+        //   Proceed_By: user,
+        //  // Proceed_Dtm: new Date().toISOString().split("T")[0],
+        // });
+        for (const row of selectedRows) {
+          await Create_Case_for_incident(row);
+        }
+
+        Swal.fire({
+          title: "Cases Created Successfully!",
+          text: `Successfully created ${selectedRows.length} cases.`,
+          icon: "success",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#28a745",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setCurrentPage(0); // Reset to the first page after successful creation
+            setSelectAllData(false); // Reset select all checkbox
+            setSelectedRows([]); // Clear selected rows
+            fetchData();
+          }
+        });
+      }
+
+      setSelectedRows([]);
+    } catch (error) {
+      // console.error("Error in handleCaseforIncident:", error);
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Action failed",
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#d33",
+      });
+    } finally {
+      setIsProcessing(false);
+      await fetchData();
+    }
+  };
 
 
   const filteredData = data.filter((row) =>
@@ -286,14 +296,14 @@ const fetchData = async () => {
 
   // Function to handle checkbox change for individual rows
   const handleRowCheckboxChange = (Incident_Id) => {
-     
+
     if (selectedRows.includes(Incident_Id)) {
       setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
     } else {
       setSelectedRows([...selectedRows, Incident_Id]);
     }
   };
-  
+
   // Function to handle select all checkbox change
   const handleSelectAllDataChange = () => {
     if (selectAllData) {
@@ -315,11 +325,11 @@ const fetchData = async () => {
           <h1 className={`${GlobalStyle.headingLarge} m-0 mb-4`}>
             Incidents Open for Distribution
           </h1>
-          
+
         </div>
 
         <div className="flex justify-end items-center mb-4">
-        {/* <button
+          {/* <button
           className={`${GlobalStyle.buttonPrimary}   pr-4 flex items-center mb-4`}
          onClick={handleCreateTask}
        
@@ -327,23 +337,23 @@ const fetchData = async () => {
         <FaDownload className="mr-1" />
           Create task and let me know
         </button> */}
-        { paginatedData.length > 0 && (
-        <div>
-            {["admin", "superadmin", "slt"].includes(userRole) && (
-               <button
-               className={`${GlobalStyle.buttonPrimary}   pr-4 flex items-center mb-4`}
-              onClick={handleCreateTask}
-            
-             >
-             <FaDownload className="mr-1" />
-               Create task and let me know
-             </button>
-            )}
-        </div>
-        )}
+          {paginatedData.length > 0 && (
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonPrimary}   pr-4 flex items-center mb-4`}
+                  onClick={handleCreateTask}
+
+                >
+                  <FaDownload className="mr-1" />
+                  Create task and let me know
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
-    
+
         <div className={`${GlobalStyle.caseCountBar}`}>
           <div className="flex mb-2">
             {" "}
@@ -409,7 +419,7 @@ const fetchData = async () => {
       </div>
 
       <div className="flex flex-col">
-        
+
         <div className="mb-4 flex justify-start">
           <div className={GlobalStyle.searchBarContainer}>
             <input
@@ -423,8 +433,8 @@ const fetchData = async () => {
           </div>
         </div>
 
-       {/* Table Section */}
-      <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
+        {/* Table Section */}
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
@@ -441,13 +451,12 @@ const fetchData = async () => {
               {paginatedData.map((row, index) => (
                 <tr
                   key={index}
-                  className={`${
-                    index % 2 === 0
-                      ? "bg-white bg-opacity-75"
-                      : "bg-gray-50 bg-opacity-50"
-                  } border-b`}
+                  className={`${index % 2 === 0
+                    ? "bg-white bg-opacity-75"
+                    : "bg-gray-50 bg-opacity-50"
+                    } border-b`}
                 >
-                  <td className={GlobalStyle.tableData}  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <input
                       type="checkbox"
                       className="rounded-lg"
@@ -467,7 +476,7 @@ const fetchData = async () => {
                           <img
                             src={Open_No_Agent}
                             alt="open no agent"
-                            
+
                             className="w-5 h-5"
                           />
                         </div>
@@ -495,7 +504,7 @@ const fetchData = async () => {
           </table>
         </div>
 
-       {/* Pagnation section */}
+        {/* Pagnation section */}
         {filteredData.length > rowsPerPage && (
           <div className={GlobalStyle.navButtonContainer}>
             <button
@@ -517,17 +526,17 @@ const fetchData = async () => {
             </button>
           </div>
         )}
-      <div className="flex justify-start items-center w-full  ">
-            <button
-              className={`${GlobalStyle.buttonPrimary} `} 
-              onClick={ handlebacknavigate}
-            >
-              <FaArrowLeft className="mr-1" />
-            
-            </button>
-          </div>
+        <div className="flex justify-start items-center w-full mt-4 mb-4">
+          <button
+            className={`${GlobalStyle.buttonPrimary} `}
+            onClick={handlebacknavigate}
+          >
+            <FaArrowLeft className="mr-1" />
+
+          </button>
+        </div>
         <div className="flex justify-end items-center w-full ">
-          
+
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -546,19 +555,19 @@ const fetchData = async () => {
               >
                 Proceed
         </button> */}
-        <div>
+          <div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
-               <button
-                    className={`${GlobalStyle.buttonPrimary} ml-4`}
-                    onClick={handleCaseforIncident}
-                    disabled={isProcessing}
-                    
+              <button
+                className={`${GlobalStyle.buttonPrimary} ml-4`}
+                onClick={handleCaseforIncident}
+                disabled={isProcessing}
 
-                  >
-                    Proceed
-                </button>
+
+              >
+                Proceed
+              </button>
             )}
-        </div>
+          </div>
 
         </div>
       </div>

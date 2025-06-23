@@ -8,34 +8,39 @@ Notes: The following page contains the codes */
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import "react-datepicker/dist/react-datepicker.css";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import Edit from "../../assets/images/edit-info.svg";
 import {
   getDebtCompanyByDRCID,
   terminateCompanyByDRCID,
 } from "../../services/drc/Drc";
-import Complete from "../../assets/images/complete.png";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { FaArrowLeft } from "react-icons/fa";
 import { getLoggedUserId } from "../../services/auth/authService";
 
 const DRCInfo = () => {
+  // Navigation 
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  // Check for drcId in location state first, then fallback to search params
+  // Get DRC ID 
   const drcId = location.state?.drcId || searchParams.get("drcid") || "";
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // State for termination form
   const [showEndFields, setShowEndFields] = useState(false);
   const [endDate, setEndDate] = useState(new Date());
   const [remark, setRemark] = useState("");
   const [remarkError, setRemarkError] = useState(false);
+
+  // User and data state
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // DRC company data 
   const [companyData, setCompanyData] = useState({
     drc_id: "",
     create_on: "",
@@ -51,6 +56,7 @@ const DRCInfo = () => {
     remark: [],
   });
 
+  // Fetch DRC data 
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
@@ -59,8 +65,8 @@ const DRCInfo = () => {
         const data = await getDebtCompanyByDRCID(drcIdToUse);
 
         if (data) {
-          // Format the data according to the model structure
           setCompanyData(data);
+          console.log("Current DRC Status:", data.drc_status);
         }
         setLoading(false);
       } catch (err) {
@@ -79,7 +85,8 @@ const DRCInfo = () => {
     fetchCompanyData();
   }, [drcId]);
 
-  // Replace the existing handleNavigateToEdit function with this:
+
+  // Navigation handler 
   const handleNavigateToEdit = () => {
     const drcIdToUse = drcId || companyData.drc_id;
     navigate(`/pages/DRC/DRCInfoEdit`, {
@@ -87,41 +94,50 @@ const DRCInfo = () => {
     });
   };
 
-  // get system user
+
+  // Navigation (Back btn)
+  const goBack = () => {
+    navigate(-1); 
+  };
+
+
+  // Load current user data
   const loadUser = async () => {
     const user = await getLoggedUserId();
     setUserData(user);
     console.log("User data:", user);
   };
 
+  
   useEffect(() => {
     loadUser();
   }, []);
 
-  // Replace the handleEndSubmit function with this improved version
+
+  // Handle DRC End
   const handleEndSubmit = async () => {
     try {
+
+      //  (current user or system)
       let remarkBy = userData
         ? userData.id || userData.userId || userData
         : "system";
 
-      // Format the date as needed by the API
       const formattedDate =
         endDate instanceof Date ? endDate : new Date(endDate);
 
+      // Validate remark field
       if (!remark.trim()) {
         setRemarkError(true);
         return Swal.fire({
           icon: "error",
-          title: "Error",
+          title: "Remark Required",
           text: "Please enter a remark",
         });
       }
 
-      // Reset error state
       setRemarkError(false);
 
-      // Show loading indicator
       Swal.fire({
         title: "Processing...",
         text: "Please wait while terminating the DRC",
@@ -131,7 +147,7 @@ const DRCInfo = () => {
         },
       });
 
-      // Call the API to terminate the company
+      // Call termination API
       const response = await terminateCompanyByDRCID(
         companyData.drc_id,
         remark,
@@ -139,10 +155,9 @@ const DRCInfo = () => {
         formattedDate
       );
 
-      // Close loading indicator
       Swal.close();
 
-      // Success message with more details
+      // success message
       Swal.fire({
         icon: "success",
         title: "Termination Successful",
@@ -153,11 +168,8 @@ const DRCInfo = () => {
         allowOutsideClick: false,
       }).then((result) => {
         if (result.isConfirmed) {
-          // Reset the form fields
           setRemark("");
           setShowEndFields(false);
-
-          // Navigate to refresh the data
           navigate(-1);
         }
       });
@@ -171,6 +183,13 @@ const DRCInfo = () => {
     }
   };
 
+  // Get current coordinator (last one in array)
+  const currentCoordinator =
+    companyData.slt_coordinator && companyData.slt_coordinator.length > 0
+      ? companyData.slt_coordinator[companyData.slt_coordinator.length - 1]
+      : null;
+
+  // Loading state
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -178,6 +197,7 @@ const DRCInfo = () => {
       </div>
     );
   }
+
 
   if (error) {
     return (
@@ -187,27 +207,16 @@ const DRCInfo = () => {
     );
   }
 
-  // Get the current active coordinator (assuming the last one in the array is current)
-  const currentCoordinator =
-    companyData.slt_coordinator && companyData.slt_coordinator.length > 0
-      ? companyData.slt_coordinator[companyData.slt_coordinator.length - 1]
-      : null;
-
   return (
-    <div
-      className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 md:px-8 max-w-7xl mx-auto`}
-    >
-      <h2
-        className={`${GlobalStyle.headingLarge} text-center sm:text-left mb-4 sm:mb-6`}
-      >
+    <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 md:px-8 max-w-7xl mx-auto`}>
+      <h2 className={`${GlobalStyle.headingLarge} text-center sm:text-left mb-4 sm:mb-6`}>
         {companyData.drc_id} - {companyData.drc_name}
       </h2>
 
+      {/* Main Content Card */}
       <div className="w-full flex justify-center">
-        <div
-          className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}
-        >
-          {/* Edit button */}
+        <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
+          
           <div className="absolute top-4 right-4">
             <img
               src={Edit}
@@ -218,24 +227,18 @@ const DRCInfo = () => {
           </div>
 
           {/* Company Details Section */}
-          <h2
-            className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}
-          >
+          <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
             Company Details
           </h2>
 
           <table className={`${GlobalStyle.table} min-w-full text-left`}>
             <tbody>
               <tr>
-                <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                >
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                   Added Date
                 </td>
                 <td className="w-4 text-left">:</td>
-                <td
-                  className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
-                >
+                <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
                   {companyData.create_on
                     ? new Date(companyData.create_on).toLocaleDateString()
                     : "Not specified"}
@@ -243,55 +246,41 @@ const DRCInfo = () => {
               </tr>
 
               <tr>
-                <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                >
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                   Business Reg No
                 </td>
                 <td className="w-4 text-left">:</td>
-                <td
-                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
-                >
-                  {companyData.drc_business_registration_number ||
-                    "Not specified"}
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left`}>
+                  {companyData.drc_business_registration_number || "Not specified"}
                 </td>
               </tr>
+              
               <tr>
-                <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                >
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                   Contact Number
                 </td>
                 <td className="w-4 text-left">:</td>
-                <td
-                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
-                >
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left`}>
                   {companyData.drc_contact_no || "Not specified"}
                 </td>
               </tr>
+              
               <tr>
-                <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                >
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                   Address
                 </td>
                 <td className="w-4 text-left">:</td>
-                <td
-                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
-                >
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left`}>
                   {companyData.drc_address || "Not specified"}
                 </td>
               </tr>
+              
               <tr>
-                <td
-                  className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                >
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                   Email
                 </td>
                 <td className="w-4 text-left">:</td>
-                <td
-                  className={`${GlobalStyle.tableData} text-gray-500 text-left`}
-                >
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left`}>
                   {companyData.drc_email || "Not specified"}
                 </td>
               </tr>
@@ -299,9 +288,7 @@ const DRCInfo = () => {
           </table>
 
           {/* SLT Coordinator Section */}
-          <h2
-            className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
-          >
+          <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
             SLT Coordinator Details
           </h2>
 
@@ -309,43 +296,30 @@ const DRCInfo = () => {
             <table className={`${GlobalStyle.table} min-w-full text-left`}>
               <tbody>
                 <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                     Service No
                   </td>
                   <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
-                  >
+                  <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
                     {currentCoordinator.service_no || "Not specified"}
                   </td>
                 </tr>
                 <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                     Name
                   </td>
                   <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
-                  >
+                  <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
                     {currentCoordinator.slt_coordinator_name || "Not specified"}
                   </td>
                 </tr>
                 <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                     Email
                   </td>
                   <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
-                  >
-                    {currentCoordinator.slt_coordinator_email ||
-                      "Not specified"}
+                  <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                    {currentCoordinator.slt_coordinator_email || "Not specified"}
                   </td>
                 </tr>
               </tbody>
@@ -357,9 +331,7 @@ const DRCInfo = () => {
           )}
 
           {/* Services Section */}
-          <h2
-            className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
-          >
+          <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
             Services
           </h2>
 
@@ -367,63 +339,50 @@ const DRCInfo = () => {
             <table className={`${GlobalStyle.table} min-w-full`}>
               <thead className={GlobalStyle.thead}>
                 <tr>
-                  <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
-                  >
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                     Service Type
                   </th>
-                  <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
-                  >
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                     Changed On
                   </th>
-                  <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
-                  ></th>
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {companyData.services &&
-                  companyData.services.map((service, index) => (
-                    <tr
-                      key={index}
-                      className={`${
-                        index % 2 === 0
-                          ? "bg-white bg-opacity-75"
-                          : "bg-gray-50 bg-opacity-50"
-                      } border-b`}
-                    >
-                      <td
-                        className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
-                      >
-                        {service.service_type}
-                      </td>
-                      <td
-                        className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}
-                      >
-                        {service.status_update_dtm
-                          ? new Date(
-                              service.status_update_dtm
-                            ).toLocaleDateString()
-                          : "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} text-center`}>
-                        {service.service_status === "Active" ? (
-                          <img
-                            src={Complete}
-                            alt="Active"
-                            className="inline-block h-6 w-6"
-                          />
-                        ) : (
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold text-gray-800 bg-gray-100">
-                            {service.service_status}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                {(!companyData.services ||
-                  companyData.services.length === 0) && (
+                {companyData.services && companyData.services.map((service, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0
+                        ? "bg-white bg-opacity-75"
+                        : "bg-gray-50 bg-opacity-50"
+                    } border-b`}
+                  >
+                    <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                      {service.service_type}
+                    </td>
+                    <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
+                      {service.status_update_dtm
+                        ? new Date(service.status_update_dtm).toLocaleDateString()
+                        : "Not specified"}
+                    </td>
+                    <td className={`${GlobalStyle.tableData} text-left`}>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer" 
+                          checked={service.service_status === "Active"}
+                          readOnly
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                        after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      </label>
+                    </td>
+                  </tr>
+                ))}
+                {(!companyData.services || companyData.services.length === 0) && (
                   <tr>
                     <td colSpan="3" className="text-center py-4 text-gray-500">
                       No services available
@@ -434,10 +393,8 @@ const DRCInfo = () => {
             </table>
           </div>
 
-          {/* RTOM Section */}
-          <h2
-            className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
-          >
+          {/* RTOM Areas Section */}
+          <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
             RTOM Areas
           </h2>
 
@@ -445,61 +402,50 @@ const DRCInfo = () => {
             <table className={`${GlobalStyle.table} min-w-full`}>
               <thead className={GlobalStyle.thead}>
                 <tr>
-                  <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
-                  >
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                     RTOM ID
                   </th>
-                  <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
-                  >
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                     Changed On
                   </th>
-                  <th
-                    className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
-                  ></th>
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {companyData.rtom &&
-                  companyData.rtom.map((rtom, index) => (
-                    <tr
-                      key={index}
-                      className={`${
-                        index % 2 === 0
-                          ? "bg-white bg-opacity-75"
-                          : "bg-gray-50 bg-opacity-50"
-                      } border-b`}
-                    >
-                      <td
-                        className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
-                      >
-                        {rtom.rtom_id}
-                      </td>
-                      <td
-                        className={`${GlobalStyle.tableData} whitespace-normal text-left`}
-                      >
-                        {rtom.status_update_dtm
-                          ? new Date(
-                              rtom.status_update_dtm
-                            ).toLocaleDateString()
-                          : "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} text-center`}>
-                        {rtom.rtom_status === "Active" ? (
-                          <img
-                            src={Complete}
-                            alt="Active"
-                            className="inline-block h-6 w-6"
-                          />
-                        ) : (
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold text-gray-800 bg-gray-100">
-                            {rtom.rtom_status}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                {companyData.rtom && companyData.rtom.map((rtom, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0
+                        ? "bg-white bg-opacity-75"
+                        : "bg-gray-50 bg-opacity-50"
+                    } border-b`}
+                  >
+                    <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                      {rtom.rtom_id}
+                    </td>
+                    <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
+                      {rtom.status_update_dtm
+                        ? new Date(rtom.status_update_dtm).toLocaleDateString()
+                        : "Not specified"}
+                    </td>
+                    <td className={`${GlobalStyle.tableData} text-left`}>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer" 
+                          checked={rtom.rtom_status === "Active"}
+                          readOnly
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full 
+                        peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
+                        after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      </label>
+                    </td>
+                  </tr>
+                ))}
                 {(!companyData.rtom || companyData.rtom.length === 0) && (
                   <tr>
                     <td colSpan="3" className="text-center py-4 text-gray-500">
@@ -510,52 +456,39 @@ const DRCInfo = () => {
               </tbody>
             </table>
           </div>
-
-          {/* Card Container ends here */}
         </div>
       </div>
 
-      {/* Termination Section in its own card */}
+      {/* Termination Form  */}
       {showEndFields && (
         <div className="w-full flex justify-center mt-6">
-          <div
-            className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}
-          >
+          <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
             <table className={`${GlobalStyle.table} min-w-full text-left`}>
               <tbody>
                 <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
                     End Date
                   </td>
                   <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
-                  >
+                  <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
                     <div className="flex justify-start w-full">
                       <DatePicker
                         selected={endDate}
                         onChange={(date) => setEndDate(date)}
                         dateFormat="dd/MM/yyyy"
                         className={`${GlobalStyle.inputText} w-full text-left`}
-                        maxDate={new Date()} // Only allow current date or earlier
-                        minDate={new Date()} // Only allow current date or later
-                        // This combination effectively restricts to current date only
+                        maxDate={new Date()} 
+                        minDate={new Date()} 
                       />
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
-                  >
+                  <td className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}>
                     Remark
                   </td>
                   <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
-                  >
+                  <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
                     <textarea
                       value={remark}
                       onChange={(e) => {
@@ -593,12 +526,29 @@ const DRCInfo = () => {
         </div>
       )}
 
-      {/* End button */}
       {!showEndFields && (
-        <div className="flex justify-end mt-4 max-w-4xl mx-auto">
+        <div className="flex justify-between mt-4 w-full px-8">
           <button
-            onClick={() => setShowEndFields(true)}
-            className={GlobalStyle.buttonPrimary}
+            className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+            onClick={goBack}
+          >
+            <FaArrowLeft />
+            <span>Back</span>
+          </button>
+
+          {/* End Button (Opacity-50) */}
+          <button
+            onClick={() => {
+              if (companyData.drc_status !== "Terminate") {
+                setShowEndFields(true);
+              }
+            }}
+            className={`${GlobalStyle.buttonPrimary} ${
+              companyData.drc_status === "Terminate" 
+                ? "opacity-50 cursor-not-allowed" 
+                : ""
+            }`}
+            disabled={companyData.drc_status === "Terminate"}
           >
             End
           </button>

@@ -67,7 +67,6 @@ export const Task_for_Download_Incidents = async (incidentData) => {
         Created_By: user_id,  
         task_status: "open",
         Incident_Status: "Open No Agent",
-        proceed_Dtm: "null",
         ...filteredParams,
       };
   
@@ -165,18 +164,21 @@ export const Task_for_Download_Incidents = async (incidentData) => {
       }
     );
 
-    
-    const tasks = response.data.data.map(task => {
-      const showParamsNotEmpty = Array.isArray(task.showParameters) && task.showParameters.length > 0;
-      return {
-        ...task,
-        Case_ID: showParamsNotEmpty && task.parameters?.case_id !== undefined
-          ? task.parameters.case_id
-          : undefined,
-      };
-    });
-
-    return tasks;
+    if (response.data.data) {
+      const tasks = response.data.data.map(task => {
+        const showParamsNotEmpty = Array.isArray(task.showParameters) && task.showParameters.length > 0;
+        return {
+          ...task,
+          Case_ID: showParamsNotEmpty && task.parameters?.case_id !== undefined
+            ? task.parameters.case_id
+            : undefined,
+        };
+      });
+      return tasks;
+    } else {
+      const tasks = [];
+      return tasks;
+    }
 
   } catch (error) {
     console.error("Error fetching user tasks:", error.message);
@@ -224,3 +226,26 @@ export const Handle_Interaction_Acknowledgement = async (delegate_user_id, task_
     throw error;
   }
 };
+
+export const Create_Task_for_Download_Case_List = async (filteredParams) => {
+    try {
+    const user_id = await getLoggedUserId();
+      const taskData = {
+        Template_Task_Id: 10,
+        task_type: "List Case Details",
+        Created_By: user_id,  
+        task_status: "open",
+        ...filteredParams,
+      };
+  
+      const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+      if (response.status === 201) {
+        return "success"; // Return the data if the request was successful
+      } else {
+        throw new Error("Failed to create task, status code: " + response.status);
+      }
+    } catch (error) {
+      console.error("Error creating task:", error.message || error);
+      throw error.response?.data || error;
+    }
+  };
