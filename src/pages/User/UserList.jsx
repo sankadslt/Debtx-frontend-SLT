@@ -54,27 +54,96 @@ const UserList = () => {
     { value: "rtom", label: "RTOM" }
   ];
 
-  // Fetch users from backend
+  // // Fetch users from backend
+  // const fetchUsers = async () => {
+  //   setIsLoading(true);
+  //   setError(null);
+    
+  //   try {
+  //     const requestData = {
+  //       page: currentPage + 1, // Backend expects 1-based page numbers
+  //       ...(appliedFilters.userRole && { user_role: appliedFilters.userRole}),
+  //       ...(appliedFilters.userType && { user_type: appliedFilters.userType}),
+  //       ...(appliedFilters.status !== "" && {
+  //       user_status: appliedFilters.status
+  //     }),
+  //     };
+
+  //     const response = await getAllUserDetails(requestData);
+  //     console.log(response);
+      
+
+  //     if (response.status === "success") {
+  //       // Transform backend data to match frontend structure
+  //       const transformedData = response.data.map(user => ({
+  //         user_id: user.user_id,
+  //         status: user.user_status,
+  //         user_type: user.user_type?.toUpperCase() || "",
+  //         user_role: user.role,
+  //         user_name: user.username,
+  //         user_email: user.email,
+  //         created_on: new Date(user.Created_DTM).toLocaleDateString('en-CA')
+  //       }));
+        
+  //       setRoData(transformedData);
+  //       setPaginationInfo(response.pagination || {
+  //         total: transformedData.length,
+  //         page: currentPage + 1,
+  //         perPage: 10,
+  //         totalPages: Math.ceil(transformedData.length / 10)
+  //       });
+  //     } else  {
+  //       setRoData([]);
+  //       setPaginationInfo({
+  //         total: 0,
+  //         page: 1,
+  //         perPage: 10,
+  //         totalPages: 1
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //     if(appliedFilters){
+  //       Swal.fire({
+  //         title: "Warning",
+  //         text: "No matching users found fo the selected filters.",
+  //         icon: "warning",
+  //         allowOutsideClick: false,
+  //         allowEscapeKey: false
+  //       });
+  //     }else {
+  //       setError(error.message || "Failed to fetch users");
+  //     }
+  //     setRoData([]);
+  //     setPaginationInfo({
+  //       total: 0,
+  //       page: 1,
+  //       perPage: 10,
+  //       totalPages: 1
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const fetchUsers = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const requestData = {
-        page: currentPage + 1, // Backend expects 1-based page numbers
-        ...(appliedFilters.userRole && { user_role: appliedFilters.userRole}),
-        ...(appliedFilters.userType && { user_type: appliedFilters.userType}),
+        page: currentPage + 1,
+        ...(appliedFilters.userRole && { user_role: appliedFilters.userRole }),
+        ...(appliedFilters.userType && { user_type: appliedFilters.userType }),
         ...(appliedFilters.status !== "" && {
-        user_status: appliedFilters.status
-      }),
+          user_status: appliedFilters.status
+        }),
       };
 
       const response = await getAllUserDetails(requestData);
       console.log(response);
-      
 
       if (response.status === "success") {
-        // Transform backend data to match frontend structure
         const transformedData = response.data.map(user => ({
           user_id: user.user_id,
           status: user.user_status,
@@ -84,7 +153,7 @@ const UserList = () => {
           user_email: user.email,
           created_on: new Date(user.Created_DTM).toLocaleDateString('en-CA')
         }));
-        
+
         setRoData(transformedData);
         setPaginationInfo(response.pagination || {
           total: transformedData.length,
@@ -92,7 +161,16 @@ const UserList = () => {
           perPage: 10,
           totalPages: Math.ceil(transformedData.length / 10)
         });
-      } else {
+
+      } else if (response.status === "error" && Array.isArray(response.data) && response.data.length === 0) {
+        Swal.fire({
+          title: "Warning",
+          text: response.message || "No matching users found for the selected filters.",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+
         setRoData([]);
         setPaginationInfo({
           total: 0,
@@ -101,19 +179,11 @@ const UserList = () => {
           totalPages: 1
         });
       }
+
     } catch (error) {
       console.error("Error fetching users:", error);
-      if(appliedFilters){
-        Swal.fire({
-          title: "Warning",
-          text: "No matching users found fo the selected filters.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-      }else {
-        setError(error.message || "Failed to fetch users");
-      }
+      setError(error.message || "Failed to fetch users");
+
       setRoData([]);
       setPaginationInfo({
         total: 0,
