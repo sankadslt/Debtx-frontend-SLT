@@ -31,7 +31,7 @@ const UserInfo = () => {
   const [remark, setRemark] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [emailError, setEmailError] = useState("");
-
+  const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [userInfo, setUserInfo] = useState({
@@ -343,8 +343,8 @@ const UserInfo = () => {
       </div>
 
       {/* Card box */}
-      <div className={GlobalStyle.flexCenter}>
-        <div className={`${GlobalStyle.cardContainer} p-4`}>
+      <div className="w-full flex justify-center">
+        <div className={`${GlobalStyle.cardContainer} relative  w-full max-w-xl`}>
           {/* Edit Mode UI */}
           {isEditing ? (
             <div className="space-y-4">
@@ -458,7 +458,7 @@ const UserInfo = () => {
                     <tr>
                       <td colSpan="3">
                         <div className="mb-4">
-                          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                          <div className={`${GlobalStyle.cardContainer} p-2 sm:p-4 md:p-6 lg:p-8 w-full max-w-full overflow-hidden`}>
                             <table className={GlobalStyle.table}>
                               <thead className={GlobalStyle.thead}>
                                 <tr>
@@ -625,11 +625,11 @@ const UserInfo = () => {
           ) : (
             <>
               {/* View Mode UI */}
-              <div className="flex justify-end">
+              <div className="flex justify-end mb-4">
                 <img
                   src={edit}
                   alt="Edit"
-                  className="w-6 h-6 sm:w-8 sm:h-8 mb-4 cursor-pointer"
+                  className="px-3 py-1 sm:px-4 sm:py-2 rounded-lg cursor-pointer w-10 sm:w-14"
                   onClick={toggleEdit}
                   title="Edit"
                 />
@@ -836,8 +836,8 @@ const UserInfo = () => {
 
       {/* End Date and Remark Section */}
       {showEndSection && (
-        <div className={GlobalStyle.flexCenter}>
-          <div className={`${GlobalStyle.cardContainer}`}>
+      <div className={`${GlobalStyle.flexCenter} px-2 sm:px-4 lg:px-8`}>
+        <div className={`${GlobalStyle.cardContainer} p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-full sm:max-w-2xl md:max-w-4xl mx-auto`}>
             <div className="space-y-4">
               {/* End Date Picker */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -884,62 +884,80 @@ const UserInfo = () => {
         </div>
       )}
 
-
-      {/* Log History button */}
+{/* Log History button */}
       <div className="flex gap-4 pl-0 sm:pl-20 my-4">
         <button
-          className={GlobalStyle.buttonPrimary}
-          onClick={() => setShowLogHistory(!showLogHistory)}
+          className={`${GlobalStyle.buttonPrimary}`}
+          onClick={() => setShowPopup(true)}
         >
           Log History
         </button>
       </div>
 
-      {/* Log History Section */}
-      {showLogHistory && (
-        <div className={GlobalStyle.flexCenter}>
-          <div className={`${GlobalStyle.cardContainer} p-4 w-full max-w-4xl`}>
-            <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-              <table className={GlobalStyle.table}>
-                <thead className={GlobalStyle.thead}>
-                  <tr>
-                    <th scope="col" className={GlobalStyle.tableHeader}>
-                      Date
-                    </th>
-                    <th scope="col" className={GlobalStyle.tableHeader}>
-                      Action
-                    </th>
-                    <th scope="col" className={GlobalStyle.tableHeader}>
-                      Edited By
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {userInfo.Remark?.length > 0 ? (
-                    userInfo.Remark?.map((log, index) => (
-                      <tr
-                        key={index}
-                        className={`${
-                          index % 2 === 0
-                            ? GlobalStyle.tableRowEven
-                            : GlobalStyle.tableRowOdd
-                        } border-b`}
-                      >
-                        <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{formatDate(log.remark_dtm) || "N/A"}</td>
-                        <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{log.remark  || "N/A"}</td>
-                        <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{log.remark_by  || "N/A"}</td>
-                      </tr>
-                    ))
-                  ) : (
+      {/* Log History Section - Updated as Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-md shadow-lg w-3/4 max-h-[80vh] overflow-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">Log History</h2>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl font-semibold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                  title="Close"
+                >
+                ×
+              </button>
+        </div>
+            {/* Modal Body */}
+            <div className="p-6 overflow-auto max-h-[70vh]">
+              <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                <table className={GlobalStyle.table}>
+                  <thead className={GlobalStyle.thead}>
                     <tr>
-                      <td colSpan="3" className="text-center py-4">
-                        No results found
-                      </td>
+                      <th scope="col" className={GlobalStyle.tableHeader}>
+                        Date
+                      </th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>
+                        Action
+                      </th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>
+                        Edited By
+                      </th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {userInfo.Remark?.length > 0 ? (
+                      userInfo.Remark?.map((log, index) => (
+                        <tr
+                          key={index}
+                          className={`${
+                            index % 2 === 0
+                              ? GlobalStyle.tableRowEven
+                              : GlobalStyle.tableRowOdd
+                          } border-b`}
+                        >
+                          <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
+                            {formatDate(log.remark_dtm) || "N/A"}
+                          </td>
+                          <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
+                            {log.remark || "N/A"}
+                          </td>
+                          <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
+                            {log.remark_by || "N/A"}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="3" className="text-center py-4">
+                          No results found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
