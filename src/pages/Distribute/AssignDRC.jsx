@@ -232,8 +232,8 @@ const AssignDRC = () => {
 
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Data sent successfully.",
+        title: "Task Created Successfully",
+        text: "Tast ID: " + response.Task_Id,
         confirmButtonColor: "#28a745",
       }).then(() => {
         navigate("/pages/Distribute/AssignedDRCSummary");

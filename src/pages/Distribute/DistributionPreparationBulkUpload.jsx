@@ -352,7 +352,7 @@ const DistributionPreparationBulkUpload = () => {
                             <td
                               className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
                             >
-                              {item.rulebase_count}
+                              {item.bulk_Details?.inspected_count}
                             </td>
                             <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                               {/* <button

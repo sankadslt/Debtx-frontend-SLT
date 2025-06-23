@@ -256,8 +256,8 @@ const AssignDRCReject = () => {
 
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Data sent successfully.",
+        title: "Task Created Successfully",
+        text: "Tast ID: " + response.Task_Id,
         confirmButtonColor: "#28a745",
       }).then(() => {
         navigate("/pages/Distribute/AssignedDRCSummary");
@@ -310,12 +310,20 @@ const AssignDRCReject = () => {
         {/* Assign DRC Heading */}
         <h1 className={`${GlobalStyle.headingLarge}`}>Assign DRC</h1>
 
-        <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
+        <h3 className={`${GlobalStyle.headingMedium} mb-5`} style={{ color: 'red' }}>
           Rejected Batch ID: {case_distribution_batch_id}
         </h3>
 
         <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
           DRC Commission Rule: {rejectedDRCData?.drc_commision_rule || "N/A"}
+        </h3>
+
+        <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
+          Inspected Count: {rejectedDRCData?.rulebase_count || "N/A"}
+        </h3>
+
+        <h3 className={`${GlobalStyle.headingMedium} mb-5`}>
+          Captured Count: {rejectedDRCData?.captured_count || "N/A"}
         </h3>
 
         {/* Rejected DRC Table */}
