@@ -53,11 +53,11 @@ export const List_All_Active_RTOMs = async () => {
 export const createRTOM = async (rtomData) => {
   try {
     console.log("RTOM passed:")
-    const response = await axios.post(`${URL}/Create_Active_RTOM`, rtomData);
+    const response = await axios.post(`${URL}/createRTOM`, rtomData);
     console.log("RTOM creation response:", response);
 
     if (response.status === 201) {
-      return response.data; // created RTOM data
+      return response.data;  
     } else {
       throw new Error("Failed to create RTOM");
     }

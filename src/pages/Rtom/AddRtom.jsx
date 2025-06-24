@@ -84,15 +84,17 @@ useEffect(() => {
   }
 
   try {
-    const rtomData = {
-      billing_center_code: formData.billingCenterCode,
-      rtom_name: formData.name,
-      area_code: formData.areaCode,
-      rtom_email: formData.email,
-      rtom_mobile_no: formData.mobile ? [Number(formData.mobile)] : [],
-      rtom_telephone_no: formData.telephone ? [Number(formData.telephone)] : [],
-      created_by: "mama", // Assuming userData contains user_id
-    };
+   const rtomData = {
+  billingCenterCode: formData.billingCenterCode,
+  name: formData.name,
+  areaCode: formData.areaCode,
+  email: formData.email,
+  mobile: formData.mobile ? [formData.mobile] : [],
+  telephone: formData.telephone ? [formData.telephone] : [],
+  created_by: userData?.user_id || "defaultUserId", // use logged in user id here
+
+};
+
 
     console.log("RTOM Data to be sent:", rtomData);
 
