@@ -319,7 +319,7 @@ const UserList = () => {
               <select
                 value={userRole}
                 onChange={handleUserRoleChange}
-                className={`${GlobalStyle.selectBox} w-full text-sm`}
+                className={`${GlobalStyle.selectBox} w-full`}
                 style={{ color: userRole === "" ? "gray" : "black" }}
               >
                 
@@ -341,7 +341,7 @@ const UserList = () => {
               <select
                 value={userType}
                 onChange={handleUserTypeChange}
-                className={`${GlobalStyle.selectBox} w-full text-sm`}
+                className={`${GlobalStyle.selectBox} w-full`}
                 style={{ color: userType === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>User Type</option>
@@ -356,7 +356,7 @@ const UserList = () => {
               <select
                 value={status}
                 onChange={handleStatusChange}
-                className={`${GlobalStyle.selectBox} w-full text-sm`}
+                className={`${GlobalStyle.selectBox} w-full`}
                 style={{ color: status === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>Status</option>
@@ -368,7 +368,7 @@ const UserList = () => {
             {/* Filter Button */}
             <button
               onClick={handleFilter}
-              className={`${GlobalStyle.buttonPrimary} w-full text-sm`}
+              className={`${GlobalStyle.buttonPrimary} w-full`}
             >
               Filter
             </button>
@@ -376,7 +376,7 @@ const UserList = () => {
             {/* Clear Button */}
             <button
               onClick={handleClear}
-              className={`${GlobalStyle.buttonRemove} w-full text-sm`}
+              className={`${GlobalStyle.buttonRemove} w-full`}
             >
               Clear
             </button>
@@ -410,8 +410,8 @@ const UserList = () => {
                       : GlobalStyle.tableRowOdd
                   }`}
                 >
-                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_id}</td>
-                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_id}</td>
+                  <td className={`${GlobalStyle.tableData}`}>
                     <div className="relative flex items-center justify-center">
                       {user.status === "true" ? (
                         <div className="relative">
@@ -446,12 +446,12 @@ const UserList = () => {
                       )}
                     </div>
                   </td>
-                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_type}</td>
-                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_role}</td>
-                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_name}</td>
-                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm break-all`}>{user.user_email}</td>
-                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.created_on}</td>
-                  <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_type}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_role}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_name}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_email}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.created_on}</td>
+                  <td className={`${GlobalStyle.tableData}`}>
                     <div className="flex justify-center">
                       <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
                         <img src={more_info} alt="More Info" className="h-5 w-5 lg:h-6 lg:w-6" />
