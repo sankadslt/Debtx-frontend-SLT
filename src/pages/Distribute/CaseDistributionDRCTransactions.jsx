@@ -237,14 +237,14 @@ const applyFilters = async () => {
 
     try {
       // Send the filtered data to the backend
-      console.log("Request Data:", requestdata);
+     // console.log("Request Data:", requestdata);
       const response = await List_Case_Distribution_DRC_Summary(requestdata);
       
       // console.log("API Response:", response);
 
       if (Array.isArray(response.data)) {
         setFilteredData1(response.data); // Store the fetched data into state
-        console.log("Filtered Data:", response.data);
+       // console.log("Filtered Data:", response.data);
       }
     } catch (error) {
       console.error("API Fetch Error:", error);
@@ -376,13 +376,14 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
    // console.log("Create Task Payload:", payload);
    try {
       const response = await Create_Task_For_case_distribution(payload);
-     // console.log("Create Task Response:", response);
+      console.log("Create Task Response:", response);
 
       if (response.status = "success") {
         Swal.fire({
           icon: "success",
           title: "Success",
-          text: "Task created successfully.",
+           text: `Task created successfully! `, 
+            // text: `Task created successfully! Task ID: ${response.ResponseData.data.Task_Id}`,
           confirmButtonColor: "#28a745",
         });
       }
@@ -750,28 +751,28 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
                   </td>
 
                   <td className={GlobalStyle.tableData} style={{ width: "60px", textAlign: "center" }}>
-                    <button data-tooltip-id= {`tooltip-summary-${index}`} onClick={() => handleonsummaryclick(item.case_distribution_batch_id)} >
+                    <button data-tooltip-id= {`tooltip-summary-${index}`} onClick={() => handleonsummaryclick(item.case_distribution_id)} >
                     {/* <img src={one} width={15} height={15} alt="Summary" style={{ position: "relative", top: "4px" , right: "4px"}} /> */}
                     <HiDotsCircleHorizontal size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary"/>
 
 
-                    <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_batch_id)} disabled= {item.current_batch_distribution_status !== "open"} >
+                    <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_id)} disabled= {item.current_batch_distribution_status !== "open"} >
                     {/* <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} /> */}
                     <RiExchangeLine size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-exchange-${index}`} place="bottom" content="Exchange case count"/>
 
 
-                    <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_batch_id)} disabled={item.current_batch_distribution_status === "open"} >
+                    <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status === "open"} >
                     {/* <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} /> */}
                     <IoListCircleOutline size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                     </button>
                     <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary"/>
 
 
-                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_batch_id)} disabled={item.current_batch_distribution_status !== "open"} >
+                    <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status !== "open"} >
                     {/* <img
                       src={four}
                       width={15}
