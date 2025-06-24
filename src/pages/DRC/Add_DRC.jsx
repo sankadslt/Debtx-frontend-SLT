@@ -23,6 +23,8 @@ import {
 
 import addIcon from "../../assets/images/add.svg";
 import iconImg from "../../assets/images/minorc.png";
+import { FaArrowLeft } from "react-icons/fa";
+
 
 const Add_DRC = () => {
   const navigate = useNavigate();
@@ -221,6 +223,11 @@ const Add_DRC = () => {
       fetchActiveServices();
       setDropdownClicked(true);
     }
+  };
+
+   // Navigation (Back btn)
+  const goBack = () => {
+    navigate(-1); 
   };
 
   const handleRtomDropdownClick = () => {
@@ -892,7 +899,16 @@ const Add_DRC = () => {
           
           </div>
         </form>
+        <button
+                  className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                  onClick={goBack}
+                >
+                  <FaArrowLeft />
+                  <span>Back</span>
+                </button>
       </div>
+    
+                
     </div>
   );
 };
