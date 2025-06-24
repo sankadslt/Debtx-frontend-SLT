@@ -85,15 +85,18 @@ useEffect(() => {
 
   try {
     const rtomData = {
-  billingCenterCode: formData.billingCenterCode,
-  name: formData.name,
-  areaCode: formData.areaCode,
-  email: formData.email || "rtom@gmail.com",
-  mobile: formData.mobile ? [Number(formData.mobile)] : [],
-  telephone: formData.telephone ? [Number(formData.telephone)] : [],
-};
+      billing_center_code: formData.billingCenterCode,
+      rtom_name: formData.name,
+      area_code: formData.areaCode,
+      rtom_email: formData.email,
+      rtom_mobile_no: formData.mobile ? [Number(formData.mobile)] : [],
+      rtom_telephone_no: formData.telephone ? [Number(formData.telephone)] : [],
+      created_by: "mama", // Assuming userData contains user_id
+    };
 
-const response = await createRTOM(rtomData);
+    console.log("RTOM Data to be sent:", rtomData);
+
+    const response = await createRTOM(rtomData);
 
 
     Swal.fire({
