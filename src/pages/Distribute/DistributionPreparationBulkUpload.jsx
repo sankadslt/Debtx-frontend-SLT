@@ -12,9 +12,11 @@ Notes:  This page includes Total and Reject count and a table*/
 import { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { List_count_by_drc_commision_rule } from '/src/services/case/CaseServices.js';
+import { List_count_by_drc_commision_rule,
+  List_DRC_Distribution_Rejected_Batches
+ } from '/src/services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import  { Tooltip } from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 import File_Icon from "../../assets/images/fileicon.png";
 
 import { jwtDecode } from "jwt-decode";
@@ -24,49 +26,58 @@ const DistributionPreparationBulkUpload = () => {
   const navigate = useNavigate(); // usestate for routing
   const [services, setServices] = useState([]); // usestate for services
   const [currentPage, setCurrentPage] = useState(1); // usestate for current page
+  const [currentRejectedPage, setCurrentRejectedPage] = useState(1); // usestate for current rejected page
   const [searchQuery, setSearchQuery] = useState(""); // usestate for search query
   const [totalRules, setTotalRules] = useState(0) // usestate for total rules
   const recordsPerPage = 4; // Number of records per page
-  const indexOfLastRecord = currentPage * recordsPerPage; // Index of last record
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage; // Index of first record
+  const [rejectedBatches, setRejectedBatches] = useState(false); // usestate for rejected batches
+  const [rejectedBatchDetails, setRejectedBatchDetails] = useState([]); // usestate for rejected batch details
+  const [totalRejectedBatches, setTotalRejectedBatches] = useState(0); // usestate for total rejected batches
 
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
-  
-     // Role-Based Buttons
-     useEffect(() => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) return;
-  
-      try {
-        let decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
-  
-        if (decoded.exp < currentTime) {
-          refreshAccessToken().then((newToken) => {
-            if (!newToken) return;
-            const newDecoded = jwtDecode(newToken);
-            setUserRole(newDecoded.role);
-          });
-        } else {
-          setUserRole(decoded.role);
-        }
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
-    }, []);
+  // Calculate indices for pagination of services table
+  const indexOfLastRecord = currentPage * recordsPerPage; // Index of last record
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage; // Index of first record
 
-    // UseEffect to fetch data from the API
+  // Calculate indices for pagination of rejected batches table
+  const indexOfLastRejectedBatch = currentRejectedPage * recordsPerPage; // Index of last
+  const indexOfFirstRejectedBatch = indexOfLastRejectedBatch - recordsPerPage; // Index of first rejected batch
+
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
+
+  // UseEffect to fetch data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await List_count_by_drc_commision_rule();
-        
+
         const data = response.data || []; // Extract the "data" array from the response
-        setServices(data); 
+        setServices(data);
         const totalCount = data.reduce((sum, item) => sum + item.case_count, 0);
         setTotalRules(totalCount);
-        
+
       } catch (error) {
         console.error(
           "Error fetching case count by DRC commission rule:",
@@ -74,6 +85,23 @@ const DistributionPreparationBulkUpload = () => {
         );
       }
     };
+
+    const fetchRejectedBatches = async () => {
+      try {
+        const response = await List_DRC_Distribution_Rejected_Batches();
+        setTotalRejectedBatches(response.count);
+        setRejectedBatchDetails(response.data || []); // Extract the "data" array from the
+      } catch (error) {
+        setTotalRejectedBatches(0);
+        setRejectedBatchDetails([]);
+        console.error(
+          "Error fetching rejected batches:",
+          error.response?.data || error.message
+        );
+      }
+    };
+
+    fetchRejectedBatches();
     fetchData();
   }, []);
 
@@ -106,6 +134,27 @@ const DistributionPreparationBulkUpload = () => {
     });
   };
 
+  //Table for Rejected Batches
+  const rejectedTableData = rejectedBatchDetails.slice(
+    indexOfFirstRejectedBatch,
+    indexOfLastRejectedBatch
+  );
+  const totalRejectedBatchPages = Math.ceil(rejectedBatchDetails.length / recordsPerPage);
+
+  const handleRejectedPrevNext = (direction) => {
+    if (direction === "prev" && currentRejectedPage > 1) {
+      setCurrentRejectedPage(currentRejectedPage - 1);
+    } else if (direction === "next" && currentRejectedPage < totalRejectedBatchPages) {
+      setCurrentRejectedPage(currentRejectedPage + 1);
+    }
+  };
+
+  const handleRejectedIconClick = (case_distribution_batch_id) => {
+    navigate("/pages/Distribute/AssignDRCReject", {
+      state: { case_distribution_batch_id: case_distribution_batch_id },
+    });
+  };
+
   //main
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -115,17 +164,31 @@ const DistributionPreparationBulkUpload = () => {
             <h1 className={GlobalStyle.headingLarge}>Open Pending Cases</h1>
           </div>
 
-                  {/* Mini Case Count Bar */}
-              <div className="flex items-center justify-center mt-10 mb-5">
-                  {/* Summary Cards Container */}
-             <div className={GlobalStyle.miniCountBarSubTopicContainer}>
-                  {/* Total Count */}
-                <h2 className={GlobalStyle.headingMedium}>Total Case Count :</h2>
-             <div className= {`${GlobalStyle.miniCountBarMainBox} ` } style={{ height: 'fit-content', width: 'fit-content'   }}>
-                    <p className={GlobalStyle.miniCountBarMainTopic}>{totalRules}</p>
-             </div>
-               </div>
-              </div>
+          {/* Mini Case Count Bar */}
+          <div className="flex items-center justify-center mt-10 mb-5">
+            {/* Summary Cards Container */}
+            <div className={GlobalStyle.miniCountBarSubTopicContainer}>
+              {/* Total Count */}
+              {/* <h2 className={GlobalStyle.headingMedium}>Total Case Count :</h2> */}
+              <button
+                onClick={() => setRejectedBatches(false)}
+                className={`${GlobalStyle.miniCountBarMainBox} `}
+                style={{ height: 'fit-content', width: 'fit-content' }}
+              >
+                <span>Total Case Count :</span>
+                <p className={GlobalStyle.miniCountBarMainTopic}>{totalRules}</p>
+              </button>
+              <button
+                onClick={() => setRejectedBatches(true)}
+                className={`${GlobalStyle.miniCountBarMainBox}`}
+                style={{ height: 'fit-content', width: 'fit-content', backgroundColor: '#d33' }}
+                disabled={totalRejectedBatches === 0}
+              >
+                <span>Rejected Batch Count :</span>
+                <p className={GlobalStyle.miniCountBarMainTopic}>{totalRejectedBatches}</p>
+              </button>
+            </div>
+          </div>
 
           {/* Search Bar */}
           {/* <div className="mb-4 flex justify-start">
@@ -142,43 +205,45 @@ const DistributionPreparationBulkUpload = () => {
         </div> */}
 
           {/* Table Section */}
-          <div className="flex items-center justify-center min-h-full ">
-           <div className= {`${GlobalStyle.cardContainer} w-full max-w-lg`}>
-            <div className="overflow-x-auto w-full">
-            <table className={GlobalStyle.table}>
-              <thead className={GlobalStyle.thead}>
-                <tr>
-                  <th scope="col" className={GlobalStyle.tableHeader}>
-                    Rule Base
-                  </th>
-                  <th scope="col" className={GlobalStyle.tableHeader}>
-                    No of count
-                  </th>
-                  <th scope="col" className={GlobalStyle.tableHeader}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentServices.map((service, index) => (
-                  <tr
-                    key={index}
-                    className={
-                      index % 2 === 0
-                        ? GlobalStyle.tableRowEven
-                        : GlobalStyle.tableRowOdd
-                    }
-                  >
-                    <td
-                      className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
-                    >
-                      {service.drc_commision_rule}
-                    </td>
-                    <td
-                      className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
-                    >
-                      {service.case_count}
-                    </td>
-                    <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      {/* <button
+          {!rejectedBatches && (
+            <div>
+              <div className="flex items-center justify-center min-h-full ">
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-lg`}>
+                  <div className="overflow-x-auto w-full">
+                    <table className={GlobalStyle.table}>
+                      <thead className={GlobalStyle.thead}>
+                        <tr>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            Rule Base
+                          </th>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            No of count
+                          </th>
+                          <th scope="col" className={GlobalStyle.tableHeader}></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentServices.map((service, index) => (
+                          <tr
+                            key={index}
+                            className={
+                              index % 2 === 0
+                                ? GlobalStyle.tableRowEven
+                                : GlobalStyle.tableRowOdd
+                            }
+                          >
+                            <td
+                              className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
+                            >
+                              {service.drc_commision_rule}
+                            </td>
+                            <td
+                              className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
+                            >
+                              {service.case_count}
+                            </td>
+                            <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                              {/* <button
                         onClick={() => handleIconClick(service)}
                         className={`${GlobalStyle.bold} text-2xl text-blue-500`}
                       >
@@ -188,60 +253,172 @@ const DistributionPreparationBulkUpload = () => {
                                 className="w-5 h-5"  />
                       </button> */}
 
-                      <div>
-                        {["admin", "superadmin", "slt"].includes(userRole) && (
-                          <button
-                          onClick={() => handleIconClick(service)}
-                          className={`${GlobalStyle.bold} text-2xl text-blue-500`}
-                        >
-                          <img src={File_Icon}
-                                  alt="file icon" 
-                                  data-tooltip-id="filter-tooltip"
-                                  className="w-5 h-5"  />
-                        </button>
+                              <div>
+                                {["admin", "superadmin", "slt"].includes(userRole) && (
+                                  <button
+                                    onClick={() => handleIconClick(service)}
+                                    className={`${GlobalStyle.bold} text-2xl text-blue-500`}
+                                  >
+                                    <img src={File_Icon}
+                                      alt="file icon"
+                                      data-tooltip-id="filter-tooltip"
+                                      className="w-5 h-5" />
+                                  </button>
+                                )}
+                              </div>
+                              <Tooltip id="filter-tooltip" place="bottom" content="Open" />
+                            </td>
+                          </tr>
+                        ))}
+                        {currentServices.length === 0 && (
+                          <tr>
+                            <td colSpan="3" className="py-4 text-center">
+                              No results found
+                            </td>
+                          </tr>
                         )}
-                      </div>
-                      <Tooltip id="filter-tooltip" place="bottom" content="Open" />
-                    </td>
-                  </tr>
-                ))}
-                {currentServices.length === 0 && (
-                  <tr>
-                    <td colSpan="3" className="py-4 text-center">
-                      No results found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            </div>
-          </div>
-          </div>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
 
-          {/* Pagination */}
-          <div className={GlobalStyle.navButtonContainer}>
-           <button
-               onClick={() => handlePrevNext("prev")}
-               disabled={currentPage === 1}
-               className={`${GlobalStyle.navButton} ${
-               currentPage === 1 ? "cursor-not-allowed" : ""
-            }`}
-             >
-          <FaArrowLeft />
-          </button>
-          <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-           onClick={() => handlePrevNext("next")}
-           disabled={currentPage === totalPages}
-           className={`${GlobalStyle.navButton} ${
-           currentPage === totalPages ? "cursor-not-allowed" : ""
-           }`}
-           >
-        <FaArrowRight />
-         </button>
-          </div>
+              {/* Pagination */}
+              <div className={GlobalStyle.navButtonContainer}>
+                <button
+                  onClick={() => handlePrevNext("prev")}
+                  disabled={currentPage === 1}
+                  className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+                    }`}
+                >
+                  <FaArrowLeft />
+                </button>
+                <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => handlePrevNext("next")}
+                  disabled={currentPage === totalPages}
+                  className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+                    }`}
+                >
+                  <FaArrowRight />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Rejected Batches Table Section */}
+          {rejectedBatches && (
+            <div>
+              <div className="flex items-center justify-center min-h-full ">
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
+                  <div className="overflow-x-auto w-full">
+                    <table className={GlobalStyle.table}>
+                      <thead className={GlobalStyle.thead}>
+                        <tr>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            Batch ID
+                          </th>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            Rule Base
+                          </th>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            No of count
+                          </th>
+                          <th scope="col" className={GlobalStyle.tableHeader}></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rejectedTableData.map((item, index) => (
+                          <tr
+                            key={index}
+                            className={
+                              index % 2 === 0
+                                ? GlobalStyle.tableRowEven
+                                : GlobalStyle.tableRowOdd
+                            }
+                          >
+                            <td
+                              className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
+                            >
+                              {item.case_distribution_batch_id}
+                            </td>
+                            <td
+                              className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
+                            >
+                              {item.drc_commision_rule}
+                            </td>
+                            <td
+                              className={`${GlobalStyle.tableData} ${GlobalStyle.paragraph}`}
+                            >
+                              {item.bulk_Details?.inspected_count}
+                            </td>
+                            <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                              {/* <button
+                        onClick={() => handleIconClick(service)}
+                        className={`${GlobalStyle.bold} text-2xl text-blue-500`}
+                      >
+                        <img src="/src/assets/images/fileicon.png" 
+                                alt="file icon" 
+                                data-tooltip-id="filter-tooltip"
+                                className="w-5 h-5"  />
+                      </button> */}
+
+                              <div>
+                                {["admin", "superadmin", "slt"].includes(userRole) && (
+                                  <button
+                                    onClick={() => handleRejectedIconClick(item.case_distribution_batch_id)}
+                                    className={`${GlobalStyle.bold} text-2xl text-blue-500`}
+                                  >
+                                    <img src={File_Icon}
+                                      alt="file icon"
+                                      data-tooltip-id="filter-tooltip"
+                                      className="w-5 h-5" />
+                                  </button>
+                                )}
+                              </div>
+                              <Tooltip id="filter-tooltip" place="bottom" content="Open" />
+                            </td>
+                          </tr>
+                        ))}
+                        {currentServices.length === 0 && (
+                          <tr>
+                            <td colSpan="3" className="py-4 text-center">
+                              No results found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pagination */}
+              <div className={GlobalStyle.navButtonContainer}>
+                <button
+                  onClick={() => handleRejectedPrevNext("prev")}
+                  disabled={currentRejectedPage === 1}
+                  className={`${GlobalStyle.navButton} ${currentRejectedPage === 1 ? "cursor-not-allowed" : ""
+                    }`}
+                >
+                  <FaArrowLeft />
+                </button>
+                <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+                  Page {currentRejectedPage} of {totalRejectedBatchPages}
+                </span>
+                <button
+                  onClick={() => handleRejectedPrevNext("next")}
+                  disabled={currentRejectedPage === totalRejectedBatchPages}
+                  className={`${GlobalStyle.navButton} ${currentRejectedPage === totalRejectedBatchPages ? "cursor-not-allowed" : ""
+                    }`}
+                >
+                  <FaArrowRight />
+                </button>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
