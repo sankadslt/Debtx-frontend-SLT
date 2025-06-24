@@ -417,23 +417,24 @@ export default function DRCAssignManagerApproval2() {
         <div>
           {["admin", "superadmin", "slt"].includes(userRole) && (
             <button
-              onClick={() => onapprovebuttonclick("Reject")}
-              className={GlobalStyle.buttonRemove}
-            //   disabled={selectedRows.size === 0} // Disable if no rows are selected
-            >
-              Reject
-            </button>
-
-          )}
-        </div>
-        <div>
-          {["admin", "superadmin", "slt"].includes(userRole) && (
-            <button
               onClick={() => onapprovebuttonclick("Approve")}
               className={GlobalStyle.buttonPrimary}
             //   disabled={selectedRows.size === 0} // Disable if no rows are selected
             >
               Approve
+            </button>
+
+          )}
+        </div>
+
+        <div>
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
+              onClick={() => onapprovebuttonclick("Reject")}
+              className={GlobalStyle.buttonRemove}
+            //   disabled={selectedRows.size === 0} // Disable if no rows are selected
+            >
+              Reject
             </button>
 
           )}
