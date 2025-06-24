@@ -147,7 +147,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
     });
   };
 
-  const batchSeqDetails = transaction[0]?.batch_seq_details || [];
+  const batchSeqDetails = transaction[0]?.batch_details || [];
 
   //search function
   const filteredData = batchSeqDetails.filter((row) =>
@@ -194,7 +194,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
               <tr>
                 <td className="py-2"><strong>Case Count </strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2">  {transaction[0]?.rulebase_count || "N/A"}</td>
+                <td className="py-2">  {transaction[0]?.inspected_count || "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Captured Count </strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2">  {transaction[0]?.captured_count || "N/A"}</td>
               </tr>
             </tbody>
           </table>
@@ -246,13 +251,13 @@ export default function CaseDistributionDRCTransactions1Batch() {
                   
                   <td className={GlobalStyle.tableData}>{item.action_type}</td>
                   <td className={GlobalStyle.tableData}>
-                    {item.batch_seq_rulebase_count}
+                    {item.batch_case_count}
                   </td>
                   {/* <td className={GlobalStyle.tableData}>
                     {item.batch_seq_rulebase_arrears_sum}
                   </td> */}
                   <td className={GlobalStyle.tableData}>
-                    {new Date(item.created_dtm).toLocaleString('en-GB', {
+                    {new Date(item.created_on).toLocaleString('en-GB', {
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric", // Ensures two-digit year (YY)
