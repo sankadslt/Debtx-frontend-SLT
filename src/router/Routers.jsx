@@ -40,6 +40,7 @@ import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
   /* Distribute Imports */
 }
 import AssignDRC from "../pages/Distribute/AssignDRC";
+import AssignDRCReject from "../pages/Distribute/AssignDRCReject";
 import AssignDRCForCollectCPE from "../pages/Distribute/AssignDRCForCollectCPE";
 import AssignedDRCSummary from "../pages/Distribute/CaseDistributionDRCTransactions";
 import AssignedDRCSummaryCollectCPE from "../pages/Distribute/AssignedDRCSummaryCollectCPE";
@@ -115,6 +116,7 @@ import UserInfo from "../pages/User/UserInfo";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
+import ServiceTypeList from "../pages/Service/ServiceTypeList";
 
 
 const Routers = () => {
@@ -238,6 +240,15 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<AssignDRC />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignDRCReject"
+        element={
+          <ProtectedRoute
+            element={<AssignDRCReject />}
             allowedRoles={["superadmin"]}
           />
         }
@@ -721,8 +732,10 @@ const Routers = () => {
       <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
 
       {/* RO */}
-
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
+
+      {/* Service */}
+      <Route path="/pages/Service/ServiceTypeList" element={<ProtectedRoute element={<ServiceTypeList />} allowedRoles={['superadmin']} />} />
 
     </Routes>
 
