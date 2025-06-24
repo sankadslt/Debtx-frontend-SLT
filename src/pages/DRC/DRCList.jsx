@@ -180,7 +180,6 @@ const DRCList = () => {
     // Navigation 
     const handleAddDRC = () => navigate("/pages/DRC/Add_DRC");
     const navigateToEdit = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
-    const navigateToDetails = (drcId) => navigate('/pages/DRC/DRCDetails', { state: { drcId } });
 
     // Effect for API calls
     useEffect(() => {
@@ -332,7 +331,6 @@ const DRCList = () => {
                                             <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
                                         </button>
                                         <button 
-                                            onClick={() => navigateToDetails(log.DRCID)}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
                                             <img src={ListImg} alt="Details" title="Details" className="w-6 h-6" />
