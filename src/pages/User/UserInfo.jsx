@@ -566,7 +566,7 @@ const UserInfo = () => {
                                       <td className={GlobalStyle.tableData}>
                                         <div className="flex justify-center items-center">
                                           <button
-                                            className="bg-white rounded-full p-1 border border-gray-300"
+                                            className="bg-white rounded-full p-1"
                                             onClick={() => removeUserRole(index)}
                                             title="Remove User Role"
                                           >
