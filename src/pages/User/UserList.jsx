@@ -424,7 +424,7 @@ const UserList = () => {
                           />
                           {tooltipVisible === `status-${user.user_id}` && (
                             <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-                              Active Status
+                              Active 
                             </div>
                           )}
                         </div>
@@ -439,7 +439,7 @@ const UserList = () => {
                           />
                           {tooltipVisible === `status-${user.user_id}` && (
                             <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-                              Inactive Status
+                              Inactive 
                             </div>
                           )}
                         </div>
