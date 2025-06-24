@@ -19,6 +19,7 @@ import completeIcon from "../../assets/images/complete.png";
 import remove from "../../assets/images/remove.svg";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { getLoggedUserId } from "../../services/auth/authService";
 
 const UserInfo = () => {
   const location = useLocation();
@@ -31,7 +32,9 @@ const UserInfo = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
 
-   const navigate = useNavigate();
+  const [loggedUserData, setLoggedUserData] =useState("");
+
+  const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
   const [endDate, setEndDate] = useState(null);
   const [remark, setRemark] = useState("");
@@ -84,6 +87,13 @@ const UserInfo = () => {
     { role_name: "rtom" },
   ];
 
+  // get system user
+  const loadUser = async () => {
+    const user = await getLoggedUserId();
+    setLoggedUserData(user);
+    console.log("User data:", user);
+  };
+
   useEffect(() => {
     const fetchUserInfoById = async () => {
       try {
@@ -130,6 +140,7 @@ const UserInfo = () => {
       }
     };
 
+    loadUser();
     fetchUserInfoById();
   }, [user_id]);
 
@@ -244,7 +255,7 @@ const UserInfo = () => {
 
       const updateData = {
         user_id: user_id,
-        updated_by: userInfo.email || "current_user",
+        updated_by: loggedUserData,
         role: activeRole.roleName,
         user_roles: userRolesData,
         user_status: isActive ? "true" : "false",
@@ -353,7 +364,7 @@ const UserInfo = () => {
 
       const payload = {
         user_id,
-        end_by: userInfo.email || "current_user",
+        end_by: loggedUserData,
         end_dtm: endDate.toISOString(),
         remark,
       };
