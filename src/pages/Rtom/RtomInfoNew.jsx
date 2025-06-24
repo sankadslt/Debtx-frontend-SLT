@@ -658,4 +658,4 @@ const RtomInfoNew = () => {
     );
 };
 
-export default RtomInfoNew;
+export default RtomInfoNew; 

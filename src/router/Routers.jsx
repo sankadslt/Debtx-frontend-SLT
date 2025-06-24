@@ -113,6 +113,7 @@ import RtomInfoNew from "../pages/Rtom/RtomInfoNew";
 //USER  
 import UserList from "../pages/User/UserList";
 import UserInfo from "../pages/User/UserInfo";
+import SignUpPage from "../pages/User/SignUpPage";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
@@ -722,6 +723,7 @@ const Routers = () => {
       {/* User */}
       <Route path="/pages/User/UserList" element={<ProtectedRoute element={<UserList />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/User/SignUpPage" element={<ProtectedRoute element={<SignUpPage />} allowedRoles={['superadmin']} />} />
 
       {/* RO */}
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
