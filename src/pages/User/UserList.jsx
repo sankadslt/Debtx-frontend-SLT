@@ -7,7 +7,6 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the User list Screen */
 
-
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
@@ -74,10 +73,10 @@ const UserList = () => {
         user_status: filters.status
       }
       
-      console.log("Payload sent to API: ", requestData);
+      // console.log("Payload sent to API: ", requestData);
 
       const response = await getAllUserDetails(requestData);
-      console.log("API Response:", response);
+      // console.log("API Response:", response);
 
       if (response && response.status === "success" && Array.isArray(response.data)) {
         if (response.data.length === 0) {
@@ -214,28 +213,6 @@ const UserList = () => {
     }
 
   }
-
-  // const handleFilter = async () => {
-  //   // Check if at least one filter is selected
-  //   if (!status && !userRole && !userType) {
-  //     Swal.fire({
-  //       title: "Warning",
-  //       text: "No filter is selected. Please, select a filter.",
-  //       icon: "warning",
-  //       allowOutsideClick: false,
-  //       allowEscapeKey: false
-  //     });
-  //     return;
-  //   }
-
-  //   // Update appliedFilters and reset to first page
-  //   setAppliedFilters({ 
-  //     status, 
-  //     userRole, 
-  //     userType 
-  //   });
-  //   setCurrentPage(0);
-  // };
 
   const handleClear = () => {
     // Clear both the form fields and applied filters
@@ -487,83 +464,31 @@ const UserList = () => {
               )}
             </tbody>
           </table>
-
-          {/* Mobile Card View
-          <div className="md:hidden space-y-4">
-            {paginatedData.map((user) => (
-              <div key={user.user_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-900">#{user.user_id}</span> 
-                    <div className="flex items-center">
-                      {user.status === "Active" ? (
-                        <img src={activeIcon} alt="Active" className="h-5 w-5" />
-                      ) : (
-                        <img src={deactiveIcon} alt="Inactive" className="h-5 w-5" />
-                      )}
-                      <span className="ml-1 text-xs text-gray-600">{user.status}</span>
-                    </div>
-                  </div>
-                   <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
-                    <img src={more_info} alt="More Info" className="h-5 w-5" />
-                  </Link>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Name:</span>
-                    <span className="text-sm font-medium text-gray-900">{user.user_name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Email:</span>
-                    <span className="text-sm text-gray-700 break-all">{user.user_email}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Type:</span>
-                    <span className="text-sm text-gray-700">{user.user_type}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Role:</span>
-                    <span className="text-sm text-gray-700">{user.user_role}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Created:</span>
-                    <span className="text-sm text-gray-700">{user.created_on}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {paginatedData.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                No results found
-              </div>
-            )}
-          </div>
-          */}
         </div>
       </div> 
 
       {/* Pagination Section */}
-      {filteredDataBySearch.length > 0 && (<div className={GlobalStyle.navButtonContainer}>
-        <button
-          onClick={() => handlePrevNext("prev")}
-          disabled={currentPage <= 1}
-          className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
-        >
-          <FaArrowLeft />
-        </button>
-        <span className={`${GlobalStyle.pageIndicator} mx-4 my-auto`}>
-          Page {currentPage}
-        </span>
-        <button
-          onClick={() => handlePrevNext("next")}
-          disabled={currentPage === totalPages}
-          className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
-        >
-          <FaArrowRight />
-        </button>
-      </div>)}
+      {filteredDataBySearch.length > 0 && (
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            onClick={() => handlePrevNext("prev")}
+            disabled={currentPage <= 1}
+            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+          >
+            <FaArrowLeft />
+          </button>
+          <span className={`${GlobalStyle.pageIndicator} mx-4 my-auto`}>
+            Page {currentPage}
+          </span>
+          <button
+            onClick={() => handlePrevNext("next")}
+            disabled={currentPage === totalPages}
+            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+      )}
 
     </div>
   );
