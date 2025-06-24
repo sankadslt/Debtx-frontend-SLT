@@ -320,9 +320,25 @@ const DRCList = () => {
                                     <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ServiceCount}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ROCount}</td>
-                                    <td className={GlobalStyle.tableData}>{log.RTOMCount}</td>
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer text-center `} 
+                                     onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" } })}>
+                                                {log.ServiceCount}
+                                    </td>
+
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RO" } })}>
+                                               {log.ROCount}
+                                    </td>
+
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RTOM" } })}>
+                                                 {log.RTOMCount}
+                                    </td>
+
+
                                     <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
                                         <button 
                                             onClick={() => navigateToEdit(log.DRCID)}
