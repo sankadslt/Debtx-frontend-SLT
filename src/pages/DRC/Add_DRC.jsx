@@ -53,7 +53,7 @@ const Add_DRC = () => {
   const [rtomAreas, setRtomAreas] = useState([]);
   const [rtomLoading, setRtomLoading] = useState(true);
   const [rtomDropdownClicked, setRtomDropdownClicked] = useState(false);
-  const [selectedABCD, setSelectedABCD] = useState("");
+  const [selectedhandlingtype, Setselectedhandlingtype] = useState("");
 
   const [errors, setErrors] = useState({});
 
@@ -313,11 +313,11 @@ const Add_DRC = () => {
   };
 
   const handleAddRTOM = () => {
-  if (!selectedRTOM || !selectedABCD) {
+  if (!selectedRTOM || !selectedhandlingtype) {
     Swal.fire({
       icon: 'error',
       title: 'Selection Required',
-      text: 'Please select both RTOM Area and ABCD Type before adding.',
+      text: 'Please select both RTOM Area and Handling Type before adding.',
     });
     return;
   }
@@ -326,12 +326,12 @@ const Add_DRC = () => {
   if (areaToAdd) {
     const updatedAreas = rtomAreas.map(area => 
       area.code === selectedRTOM 
-        ? { ...area, selected: true, abcdType: selectedABCD }
+        ? { ...area, selected: true, handlingtype: selectedhandlingtype }
         : area
     );
     setRtomAreas(updatedAreas);
     setSelectedRTOM("");
-    setSelectedABCD("");
+    Setselectedhandlingtype("");
   }
 };
 
@@ -792,16 +792,16 @@ const Add_DRC = () => {
 
                     <tr className="block md:table-row mt-4">
                       <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-2 md:pb-0 font-semibold md:font-normal">
-                        ABCD :
+                        Handling Type :
                       </td>
                       <td className="block md:table-cell w-full md:w-2/3">
                         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
                           <select
-                            value={selectedABCD}
-                            onChange={(e) => setSelectedABCD(e.target.value)}
+                            value={selectedhandlingtype}
+                            onChange={(e) => Setselectedhandlingtype(e.target.value)}
                             className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
                           >
-                            <option value="">Select ABCD Type</option>
+                            <option value="">Select Handling Type</option>
                             <option value="CPE">CPE</option>
                             <option value="Arrears">Arrears</option>
                             <option value="All Type">All Type</option>
@@ -841,7 +841,7 @@ const Add_DRC = () => {
                 <thead className={GlobalStyle.thead}>
                   <tr>
                     <th className={GlobalStyle.tableHeader}>RTOM Name</th>
-                    <th className={GlobalStyle.tableHeader}>ABCD Type</th>
+                    <th className={GlobalStyle.tableHeader}>Handling Type</th>
                     <th className={GlobalStyle.tableHeader}></th>
                   </tr>
                 </thead>
@@ -857,7 +857,7 @@ const Add_DRC = () => {
                           }
                         >
                           <td className={GlobalStyle.tableData}>{area.name}</td>
-                          <td className={GlobalStyle.tableData}>{area.abcdType}</td>
+                          <td className={GlobalStyle.tableData}>{area.handlingtype}</td>
                           <td
                             className={`${GlobalStyle.tableData} text-center flex justify-center`}
                           >
