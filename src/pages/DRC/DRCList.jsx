@@ -59,7 +59,7 @@ const DRCList = () => {
             <img
                 src={iconPath}
                 alt={status}
-                className="w-6 h-6"
+                className="w-6 h-6 mx-auto"
                 title={status}
             />
         );
