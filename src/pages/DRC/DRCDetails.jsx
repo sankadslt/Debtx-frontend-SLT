@@ -422,7 +422,6 @@ const DRCDetails = () => {
                  onClick={goBack}
                    >
              <FaArrowLeft />
-              <span>Back</span>
        </button>
     </div>
   );

@@ -573,7 +573,7 @@ const DRCInfo = () => {
             onClick={goBack}
           >
             <FaArrowLeft />
-            <span>Back</span>
+            
           </button>
 
           {/* End Button (Opacity-50) */}

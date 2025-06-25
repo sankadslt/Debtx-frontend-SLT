@@ -220,7 +220,7 @@ const Add_DRC = () => {
     // fetchSLTCoordinators();
   }, []);
 
-  
+
   const handleDropdownClick = () => {
     if (!dropdownClicked) {
       fetchActiveServices();
@@ -889,12 +889,12 @@ const Add_DRC = () => {
           
           </div>
         </form>
-        <button
+           <button
                   className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
                   onClick={goBack}
                 >
                   <FaArrowLeft />
-                  <span>Back</span>
+                  
                 </button>
       </div>
     
