@@ -124,7 +124,7 @@ export default function DRCAssignManagerApproval3() {
       // console.log("Request Payload:", payload);
       try {
         const response = await List_DRC_Assign_Manager_Approval(payload);
-        //  console.log("Response:", response);
+         console.log("Response:", response);
         setFilteredData(response);
       } catch (error) {
         console.error("Error fetching DRC assign manager approval:", error);
@@ -212,6 +212,7 @@ export default function DRCAssignManagerApproval3() {
 
   // Filter data based on selected filters
   const applyFilters = async () => {
+    setCurrentPage(1); // Reset to the first page
     const payload = {};
     if (drcFilter) {
       payload.approver_type = drcFilter;
@@ -242,8 +243,22 @@ export default function DRCAssignManagerApproval3() {
 
     try {
       const response = await List_DRC_Assign_Manager_Approval(payload);
+      console.log("Filtered Response Data:", response);
+
+      if (response.length > 0) {
+        setFilteredData(response);
+      } else {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data available for the selected filters.",
+          confirmButtonColor: "#f1c40f",
+        });
+        setFilteredData([]); // Clear the filtered data if no data is found
+        return;
+      }
       // console.log("Filtered Response Data:", response);
-      setFilteredData(response);
+
     } catch (error) {
       console.error("Error fetching DRC assign manager approval:", error);
     }
@@ -256,6 +271,7 @@ export default function DRCAssignManagerApproval3() {
     setEndDate(null);
     setApproverStatus("");
     setSelectedRows(new Set());
+    setCurrentPage(1); // Reset to the first page
 
     const filterclear = async () => {
       const userId = await getLoggedUserId();
@@ -266,7 +282,17 @@ export default function DRCAssignManagerApproval3() {
       try {
         const response = await List_DRC_Assign_Manager_Approval(payload);
         //  console.log("Response:", response);
-        setFilteredData(response);
+        if (response.length > 0) {
+          setFilteredData(response);
+        } else {
+          Swal.fire({
+            icon: "warning",
+            title: "No Data Found",
+            text: "There is no data available for the selected filters.",
+            confirmButtonColor: "#f1c40f",
+          });
+          setFilteredData([]); // Clear the filtered data if no data is found
+        }
       } catch (error) {
         console.error("Error fetching DRC assign manager approval:", error);
       }
@@ -520,7 +546,7 @@ export default function DRCAssignManagerApproval3() {
     }
 
     const payload = {
-      approver_references: batchIds,
+      approver_reference: batchIds,
       approved_by: userId,
     };
     //console.log("Approve payload:", payload);
