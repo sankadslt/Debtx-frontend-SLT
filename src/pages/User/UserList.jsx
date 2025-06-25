@@ -271,6 +271,63 @@ const UserList = () => {
     setTooltipVisible(null);
   };
 
+  // Function to render status icon with tooltip
+  const renderStatusIcon = (user) => {
+    if (user.status === "true") {
+      return (
+        <div className="relative">
+          <img 
+            src={activeIcon} 
+            alt="Active" 
+            className="h-5 w-5 lg:h-6 lg:w-6"
+            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+            onMouseLeave={hideTooltip}
+          />
+          {tooltipVisible === `status-${user.user_id}` && (
+            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
+              Active 
+            </div>
+          )}
+        </div>
+      );
+    } else if (user.status === "false") {
+      return (
+        <div className="relative">
+          <img 
+            src={deactiveIcon} 
+            alt="Inactive" 
+            className="h-5 w-5 lg:h-6 lg:w-6"
+            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+            onMouseLeave={hideTooltip}
+          />
+          {tooltipVisible === `status-${user.user_id}` && (
+            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
+              Inactive 
+            </div>
+          )}
+        </div>
+      );
+    } else if (user.status === "terminate") {
+      return (
+        <div className="relative">
+          <img 
+            src={terminateIcon} 
+            alt="Terminate" 
+            className="h-5 w-5 lg:h-6 lg:w-6"
+            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+            onMouseLeave={hideTooltip}
+          />
+          {tooltipVisible === `status-${user.user_id}` && (
+            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
+              Terminate 
+            </div>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -317,7 +374,6 @@ const UserList = () => {
                 className={`${GlobalStyle.selectBox} w-full`}
                 style={{ color: userRole === "" ? "gray" : "black" }}
               >
-                
                 {userRoles.map((role) => (
                   <option
                     key={role.value}
@@ -464,6 +520,71 @@ const UserList = () => {
               )}
             </tbody>
           </table>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {paginatedData.map((user) => (
+              <div key={user.user_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-gray-900">#{user.user_id}</span> 
+                    <div className="flex items-center">
+                      {user.status === "true" && (
+                        <>
+                          <img src={activeIcon} alt="Active" className="h-5 w-5" />
+                          <span className="ml-1 text-xs text-gray-600">Active</span>
+                        </>
+                      )}
+                      {user.status === "false" && (
+                        <>
+                          <img src={deactiveIcon} alt="Inactive" className="h-5 w-5" />
+                          <span className="ml-1 text-xs text-gray-600">Inactive</span>
+                        </>
+                      )}
+                      {user.status === "terminated" && (
+                        <>
+                          <img src={terminateIcon} alt="Terminated" className="h-5 w-5" />
+                          <span className="ml-1 text-xs text-gray-600">Terminate</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                   <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
+                    <img src={more_info} alt="More Info" className="h-5 w-5" />
+                  </Link>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-500">Name:</span>
+                    <span className="text-sm font-medium text-gray-900">{user.user_name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-500">Email:</span>
+                    <span className="text-sm text-gray-700 break-all">{user.user_email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-500">Type:</span>
+                    <span className="text-sm text-gray-700">{user.user_type}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-500">Role:</span>
+                    <span className="text-sm text-gray-700">{user.user_role}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-500">Created:</span>
+                    <span className="text-sm text-gray-700">{user.created_on}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {paginatedData.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No results found
+              </div>
+            )}
+          </div>
         </div>
       </div> 
 
