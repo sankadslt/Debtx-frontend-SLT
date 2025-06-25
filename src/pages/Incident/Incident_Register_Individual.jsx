@@ -130,10 +130,11 @@ const handleSubmit = async (e) => {
     };
 
     const response = await createIncident(incidentData);
+    console.log("Incident created successfully:", response.data);
     Swal.fire({
       icon: "success",
       title: "Incident Created",
-      text: `Incident ID: ${response.data.Incident_Id} created successfully.`,
+      text: `Incident Log ID: ${response.data.Incident_Log_Id} created successfully.`,
       confirmButtonColor: "#28a745",
     });
 
