@@ -780,47 +780,49 @@ const DRCInfo = () => {
             </table>
 
             {/* SLT Coordinator Section */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
-              SLT Coordinator Details
-            </h2>
+          
+          <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+            SLT Coordinator Details
+          </h2>
 
-            {currentCoordinator ? (
-              <table className={`${GlobalStyle.table} min-w-full text-left`}>
-                <tbody>
-                  <tr>
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                      Service No
-                    </td>
-                    <td className="w-4 text-left">:</td>
-                    <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+            <table className={`${GlobalStyle.table} min-w-full`}>
+              <thead className={GlobalStyle.thead}>
+                <tr>
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                    Service No
+                  </th>
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                    Name
+                  </th>
+                  <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                    Email
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentCoordinator ? (
+                  <tr className="bg-white bg-opacity-75 border-b">
+                    <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                       {currentCoordinator.service_no || "Not specified"}
                     </td>
-                  </tr>
-                  <tr>
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                      Name
-                    </td>
-                    <td className="w-4 text-left">:</td>
-                    <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                    <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                       {currentCoordinator.slt_coordinator_name || "Not specified"}
                     </td>
-                  </tr>
-                  <tr>
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
-                      Email
-                    </td>
-                    <td className="w-4 text-left">:</td>
-                    <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                    <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                       {currentCoordinator.slt_coordinator_email || "Not specified"}
                     </td>
                   </tr>
-                </tbody>
-              </table>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                No coordinator assigned
-              </div>
-            )}
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="text-center py-4 text-gray-500">
+                      No coordinator assigned
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
             {/* Services Section */}
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
