@@ -31,7 +31,7 @@ import { refreshAccessToken } from "../../services/auth/authService";
 export default function AmendAssignedDRC() {
   const navigate = useNavigate(); // Initialize navigate for routing
   const location = useLocation(); // Get the location object from react-router
-  const { BatchID } = location.state || {}; // Get the BatchID from the location state
+  // const { BatchID } = location.state || {}; // Get the BatchID from the location state
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [cpeData, setCpeData] = useState([]); // State for table data
   const [transaction, setTransaction] = useState([]); // State for transaction data
@@ -46,6 +46,7 @@ export default function AmendAssignedDRC() {
   }); // State for new entry
   //console.log("BatchID", BatchID);
 const [drcData, setdrcData] = useState([]); // State for DRC data
+const BatchID = 26;
 
       // Role-Based Buttons
       useEffect(() => {
