@@ -7,17 +7,17 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the User list Screen */
 
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import activeIcon from "../../assets/images/User/User_Active.png";
 import deactiveIcon from "../../assets/images/User/User_Inactive.png";
-// import terminateIcon from "../../assets/images/User/User_Terminate.png";
+import terminateIcon from "../../assets/images/User/User_Terminate.png";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
 import { getAllUserDetails } from "../../services/user/user_services"; 
+
 const UserList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -53,78 +53,6 @@ const UserList = () => {
     { value: "recovery_staff", label: "Recovery Staff" },
     { value: "rtom", label: "RTOM" }
   ];
-
-  // // Fetch users from backend
-  // const fetchUsers = async () => {
-  //   setIsLoading(true);
-  //   setError(null);
-    
-  //   try {
-  //     const requestData = {
-  //       page: currentPage + 1, // Backend expects 1-based page numbers
-  //       ...(appliedFilters.userRole && { user_role: appliedFilters.userRole}),
-  //       ...(appliedFilters.userType && { user_type: appliedFilters.userType}),
-  //       ...(appliedFilters.status !== "" && {
-  //       user_status: appliedFilters.status
-  //     }),
-  //     };
-
-  //     const response = await getAllUserDetails(requestData);
-  //     console.log(response);
-      
-
-  //     if (response.status === "success") {
-  //       // Transform backend data to match frontend structure
-  //       const transformedData = response.data.map(user => ({
-  //         user_id: user.user_id,
-  //         status: user.user_status,
-  //         user_type: user.user_type?.toUpperCase() || "",
-  //         user_role: user.role,
-  //         user_name: user.username,
-  //         user_email: user.email,
-  //         created_on: new Date(user.Created_DTM).toLocaleDateString('en-CA')
-  //       }));
-        
-  //       setRoData(transformedData);
-  //       setPaginationInfo(response.pagination || {
-  //         total: transformedData.length,
-  //         page: currentPage + 1,
-  //         perPage: 10,
-  //         totalPages: Math.ceil(transformedData.length / 10)
-  //       });
-  //     } else  {
-  //       setRoData([]);
-  //       setPaginationInfo({
-  //         total: 0,
-  //         page: 1,
-  //         perPage: 10,
-  //         totalPages: 1
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching users:", error);
-  //     if(appliedFilters){
-  //       Swal.fire({
-  //         title: "Warning",
-  //         text: "No matching users found fo the selected filters.",
-  //         icon: "warning",
-  //         allowOutsideClick: false,
-  //         allowEscapeKey: false
-  //       });
-  //     }else {
-  //       setError(error.message || "Failed to fetch users");
-  //     }
-  //     setRoData([]);
-  //     setPaginationInfo({
-  //       total: 0,
-  //       page: 1,
-  //       perPage: 10,
-  //       totalPages: 1
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -276,6 +204,63 @@ const UserList = () => {
     setTooltipVisible(null);
   };
 
+  // Function to render status icon with tooltip
+  const renderStatusIcon = (user) => {
+    if (user.status === "true") {
+      return (
+        <div className="relative">
+          <img 
+            src={activeIcon} 
+            alt="Active" 
+            className="h-5 w-5 lg:h-6 lg:w-6"
+            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+            onMouseLeave={hideTooltip}
+          />
+          {tooltipVisible === `status-${user.user_id}` && (
+            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
+              Active 
+            </div>
+          )}
+        </div>
+      );
+    } else if (user.status === "false") {
+      return (
+        <div className="relative">
+          <img 
+            src={deactiveIcon} 
+            alt="Inactive" 
+            className="h-5 w-5 lg:h-6 lg:w-6"
+            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+            onMouseLeave={hideTooltip}
+          />
+          {tooltipVisible === `status-${user.user_id}` && (
+            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
+              Inactive 
+            </div>
+          )}
+        </div>
+      );
+    } else if (user.status === "terminate") {
+      return (
+        <div className="relative">
+          <img 
+            src={terminateIcon} 
+            alt="Terminate" 
+            className="h-5 w-5 lg:h-6 lg:w-6"
+            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+            onMouseLeave={hideTooltip}
+          />
+          {tooltipVisible === `status-${user.user_id}` && (
+            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
+              Terminate 
+            </div>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -322,7 +307,6 @@ const UserList = () => {
                 className={`${GlobalStyle.selectBox} w-full text-sm`}
                 style={{ color: userRole === "" ? "gray" : "black" }}
               >
-                
                 {userRoles.map((role) => (
                   <option
                     key={role.value}
@@ -362,6 +346,7 @@ const UserList = () => {
                 <option value="" hidden>Status</option>
                 <option value="true" style={{ color: "black" }}>Active</option>
                 <option value="false" style={{ color: "black" }}>Inactive</option>
+                <option value="terminated" style={{ color: "black" }}>Terminated</option>
               </select>
             </div>
             
@@ -413,37 +398,7 @@ const UserList = () => {
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_id}</td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
                     <div className="relative flex items-center justify-center">
-                      {user.status === "true" ? (
-                        <div className="relative">
-                          <img 
-                            src={activeIcon} 
-                            alt="Active" 
-                            className="h-5 w-5 lg:h-6 lg:w-6"
-                            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
-                            onMouseLeave={hideTooltip}
-                          />
-                          {tooltipVisible === `status-${user.user_id}` && (
-                            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-                              Active 
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="relative">
-                          <img 
-                            src={deactiveIcon} 
-                            alt="Inactive" 
-                            className="h-5 w-5 lg:h-6 lg:w-6"
-                            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
-                            onMouseLeave={hideTooltip}
-                          />
-                          {tooltipVisible === `status-${user.user_id}` && (
-                            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-                              Inactive 
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      {renderStatusIcon(user)}
                     </div>
                   </td>
                   <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>{user.user_type}</td>
@@ -478,12 +433,24 @@ const UserList = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-gray-900">#{user.user_id}</span> 
                     <div className="flex items-center">
-                      {user.status === "Active" ? (
-                        <img src={activeIcon} alt="Active" className="h-5 w-5" />
-                      ) : (
-                        <img src={deactiveIcon} alt="Inactive" className="h-5 w-5" />
+                      {user.status === "true" && (
+                        <>
+                          <img src={activeIcon} alt="Active" className="h-5 w-5" />
+                          <span className="ml-1 text-xs text-gray-600">Active</span>
+                        </>
                       )}
-                      <span className="ml-1 text-xs text-gray-600">{user.status}</span>
+                      {user.status === "false" && (
+                        <>
+                          <img src={deactiveIcon} alt="Inactive" className="h-5 w-5" />
+                          <span className="ml-1 text-xs text-gray-600">Inactive</span>
+                        </>
+                      )}
+                      {user.status === "terminated" && (
+                        <>
+                          <img src={terminateIcon} alt="Terminated" className="h-5 w-5" />
+                          <span className="ml-1 text-xs text-gray-600">Terminate</span>
+                        </>
+                      )}
                     </div>
                   </div>
                    <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
@@ -552,6 +519,7 @@ const UserList = () => {
 };
 
 export default UserList;
+
 
 
 
