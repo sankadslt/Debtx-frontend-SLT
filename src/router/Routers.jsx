@@ -68,7 +68,7 @@ import PaymentDetails from "../pages/Money_Transaction/PaymentDetails";
 import CommissionCaseList from "../pages/Commission/Commission_List";
 //Settlement
 import MonitorSettlement from "../pages/Settlement/MonitorSettlement";
-import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
+// import MoneyTransactions from "../pages/Settlement/MoneyTransaction";
 
 //Litigation
 import { Litigation_List } from "../pages/Litigation/Litigation_List";
@@ -115,6 +115,7 @@ import UserInfo from "../pages/User/UserInfo";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
+import ServiceTypeList from "../pages/Service/ServiceTypeList";
 
 
 const Routers = () => {
@@ -617,7 +618,7 @@ const Routers = () => {
       {/* //SETTLEMENT */}
       <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
       <Route path="/lod/ftl-log/preview" element={<ProtectedRoute element={<SettlementPreview />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} />
+      {/* <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} /> */}
       {/* //Create SETTLEMENT */}
       <Route
         path="/pages/CreateSettlement/CreateSettlementPlan"
@@ -697,7 +698,7 @@ const Routers = () => {
 
       {/* RTOM      */}
       <Route path="/pages/Rtom/RtomList" element={<ProtectedRoute element={<RtomList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfo/:rtomId" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Rtom/RtomInfo" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/RtomInfoEnd/:rtomId" element={<ProtectedRoute element={<RtomInfoEnd />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/ListofServiceType" element={<ProtectedRoute element={<ListofServicetype />} allowedRoles={['superadmin']} />} />
@@ -721,8 +722,10 @@ const Routers = () => {
       <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
 
       {/* RO */}
-
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
+
+      {/* Service */}
+      <Route path="/pages/Service/ServiceTypeList" element={<ProtectedRoute element={<ServiceTypeList />} allowedRoles={['superadmin']} />} />
 
     </Routes>
 

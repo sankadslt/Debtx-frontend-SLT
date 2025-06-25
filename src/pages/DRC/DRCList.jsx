@@ -1,27 +1,40 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import editImg from "../../assets/images/more.svg";
-import ListImg from "../../assets/images/ConfigurationImg/list.png";  
-import activeIcon from "../../assets/images/ConfigurationImg/Active.png"; 
+import ListImg from "../../assets/images/ConfigurationImg/list.png";
+import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
-import { listAllDRCDetails } from "../../services/drc/Drc";  
+import { listAllDRCDetails } from "../../services/drc/Drc";
 
 const DRCList = () => {
-    const [currentPage, setCurrentPage] = useState(1);
+    // State Variables
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
-    const [appliedStatus, setAppliedStatus] = useState("");
     const [allData, setAllData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [filtersApplied, setFiltersApplied] = useState(false);
     const [hasMoreData, setHasMoreData] = useState(true);
     const navigate = useNavigate();
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [maxCurrentPage, setMaxCurrentPage] = useState(0);
+    const rowsPerPage = 10;
+
+    // Variables for table
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+    const hasMounted = useRef(false);
+    const [committedFilters, setCommittedFilters] = useState({
+        status: ""
+    });
+
+    // Status icons 
     const getStatusIcon = (status) => {
         switch (status?.toLowerCase()) {
             case "active":
@@ -46,134 +59,80 @@ const DRCList = () => {
             <img
                 src={iconPath}
                 alt={status}
-                className="w-6 h-6"
+                className="w-6 h-6 mx-auto"
                 title={status}
             />
         );
     };
 
-    
-
-    const fetchDRCList = async (filters) => {
+    // API call 
+    const callAPI = useCallback(async (filters) => {
         try {
+            setIsLoading(true);
             const response = await listAllDRCDetails({
                 status: filters.status || "",
                 page: filters.page || 1
             });
             
-            // Check if response has the expected structure
-            if (!response || !response.data || !Array.isArray(response.data)) {
-                console.error("Invalid response structure:", response);
-                throw new Error("Invalid response format from server");
+            if (response && response.data) {
+                const drcData = response.data.map(drc => ({
+                    DRCID: drc.drc_id,
+                    Status: drc.drc_status,
+                    BusinessRegNo: drc.drc_business_registration_number,
+                    DRCName: drc.drc_name,
+                    ContactNo: drc.drc_contact_no,
+                    ServiceCount: drc.service_count,
+                    ROCount: drc.ro_count,
+                    RTOMCount: drc.rtom_count
+                }));
+
+                if (filters.page === 1) {
+                    setAllData(drcData);
+                    setFilteredData(drcData);
+                } else {
+                    setFilteredData(prev => [...prev, ...drcData]);
+                }
+
+                //  more data
+                const hasMore = response.pagination 
+                    ? response.pagination.page < response.pagination.totalPages
+                    : response.data.length === rowsPerPage;
+                
+                setHasMoreData(hasMore);
+
+                if (response.data.length === 0 && filters.page === 1) {
+                    Swal.fire({
+                        title: "No Results",
+                        text: "No matching data found for the selected filters.",
+                        icon: "warning",
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        confirmButtonColor: "#f1c40f"
+                    });
+                }
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: "No valid DRC data found in response.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+                setFilteredData([]);
             }
-            
-            const drcData = response.data;
-            
-            // Determine if there's more data based on pagination info or data length
-            const hasMore = response.pagination 
-                ? response.pagination.page < response.pagination.totalPages
-                : drcData.length === 10; // Fallback to length check
-            
-            setHasMoreData(hasMore);
-            
-            return drcData.map(drc => ({
-                DRCID: drc.drc_id,
-                Status: drc.drc_status,
-                BusinessRegNo: drc.drc_business_registration_number,
-                DRCName: drc.drc_name,
-                ContactNo: drc.drc_contact_no,
-                ServiceCount: drc.service_count,
-                ROCount: drc.ro_count,
-                RTOMCount: drc.rtom_count
-            }));
-            
         } catch (error) {
             console.error("Error fetching DRC list:", error);
-            throw new Error("DRC data not found");
-        }
-    };
-
-    const applyFilters = useCallback((data) => {
-        let result = [...data];
-        
-        // Apply status filter 
-        if (appliedStatus) {
-            result = result.filter(item => 
-                item.Status.toLowerCase() === appliedStatus.toLowerCase()
-            );
-        }
-        
-        // Apply search filter
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            result = result.filter(item =>{
-                const drcName=item.DRCName?.toLowerCase() || '';
-                const businessRegNo=item.BusinessRegNo?.toLowerCase() || '';
-                const contactNo=item.ContactNo?.toLowerCase() || '';
-
-                return (
-                drcName.includes(query) ||
-                businessRegNo.includes(query) ||
-                contactNo.includes(query)
-            );
-        });
-        }
-        
-        return result;
-    }, [appliedStatus, searchQuery]);
-
-    const fetchData = async () => {
-        setIsLoading(true);
-        try {
-            const DRCList = await fetchDRCList({
-                status: filtersApplied ? appliedStatus : "",
-                page: currentPage
+            Swal.fire({
+                title: "Error",
+                text: "Failed to fetch DRC data. Please try again.",
+                icon: "error",
+                confirmButtonColor: "#d33"
             });
-            
-            setAllData(DRCList);
-            
-            const filtered = applyFilters(DRCList);
-            setFilteredData(filtered);
-            
-        } catch (error) {
-            Swal.fire("Error", error.message || "Failed to load DRCs", "error");
-            setAllData([]);
-            setFilteredData([]);
-            setHasMoreData(false);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
- 
-
-    const handleFilter = () => {
-        setFiltersApplied(true);
-        setAppliedStatus(statusFilter);
-        setCurrentPage(1);
-        
-        const filtered = applyFilters(allData);
-        setFilteredData(filtered);
-    };
-
-    const handleClear = () => {
-        setFiltersApplied(false);
-        setAppliedStatus("");
-        setStatusFilter("");
-        setSearchQuery("");
-        setCurrentPage(1);
-        setHasMoreData(true);
-        setFilteredData(allData); 
-    };
-
-    const handleSearchChange = (e) => {
-        const value = e.target.value;
-        setSearchQuery(value);
-        
-        const filtered = applyFilters(allData);
-        setFilteredData(filtered);
-    };
-
+    // Handle pagination
     const handlePrevPage = () => {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
@@ -181,22 +140,73 @@ const DRCList = () => {
     };
 
     const handleNextPage = () => {
-        if (hasMoreData) {
+        if (hasMoreData || currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
             setCurrentPage(currentPage + 1);
         }
     };
-    
+
+    // Handle filter button 
+    const handleFilterButton = () => {
+        setHasMoreData(true);
+        setMaxCurrentPage(0);
+        setCommittedFilters({ status: statusFilter });
+        setFilteredData([]);
+        
+        if (currentPage === 1) {
+            callAPI({ 
+                status: statusFilter, 
+                page: 1 
+            });
+        } else {
+            setCurrentPage(1);
+        }
+    };
+
+    // Handle clear 
+    const handleClear = () => {
+        setStatusFilter("");
+        setSearchQuery("");
+        setMaxCurrentPage(0);
+        setCommittedFilters({ status: "" });
+        setFilteredData([]);
+        
+        if (currentPage !== 1) {
+            setCurrentPage(1);
+        } else {
+            callAPI({ status: "", page: 1 });
+        }
+    };
+
+    // Navigation 
+    const handleAddDRC = () => navigate("/pages/DRC/Add_DRC");
+    const navigateToEdit = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
+
+    // Effect for API calls
     useEffect(() => {
-        fetchData();
-    }, [currentPage, appliedStatus, filtersApplied]);
+        if (!hasMounted.current) {
+            hasMounted.current = true;
+            callAPI({ status: "", page: 1 });
+            return;
+        }
 
-    useEffect(() => {
-        const filtered = applyFilters(allData);
-        setFilteredData(filtered);
-    }, [searchQuery, allData, applyFilters]);
+        if (hasMoreData && currentPage > maxCurrentPage) {
+            setMaxCurrentPage(currentPage);
+            callAPI({
+                ...committedFilters,
+                page: currentPage
+            });
+        }
+    }, [currentPage, committedFilters, callAPI, hasMoreData, maxCurrentPage]);
 
-    const HandleAddDRC = () => navigate("/pages/DRC/Add_DRC");
+    // Filter data (search query) 
+    const filteredDataBySearch = filteredData.filter((row) =>
+        Object.values(row)
+            .join(" ")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+    );
 
+    // Loading state
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -209,10 +219,10 @@ const DRCList = () => {
         <div className={GlobalStyle.fontPoppins}>
             <h2 className={GlobalStyle.headingLarge}>DRC List</h2>
 
-            <div className="flex justify-end mt-2">
+            <div className="flex justify-end mt-2 sm:mt-0">
                 <button 
                     className={GlobalStyle.buttonPrimary} 
-                    onClick={HandleAddDRC}
+                    onClick={handleAddDRC}
                 >
                     Add
                 </button>
@@ -225,14 +235,14 @@ const DRCList = () => {
                             type="text"
                             placeholder=" "
                             value={searchQuery}
-                            onChange={handleSearchChange}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className={GlobalStyle.inputSearch}
                         />
                         <FaSearch className={GlobalStyle.searchBarIcon} />
                     </div>
 
                     <div className={`${GlobalStyle.cardContainer} w-auto`}>
-                        <div className="flex justify-end items-center space-x-4">
+                        <div className="flex flex-col md:flex-row justify-end items-end md:items-center space-y-2 md:space-y-0 md:space-x-4 relative">
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -244,27 +254,45 @@ const DRCList = () => {
                                 <option value="Terminate">Terminated</option>
                             </select>
 
-                            <button
-                                onClick={handleFilter}
-                                className={GlobalStyle.buttonPrimary}
-                            >
-                                Filter
-                            </button>
+                            <div className="hidden md:flex space-x-4">
+                                <button
+                                    onClick={handleFilterButton}
+                                    className={GlobalStyle.buttonPrimary}
+                                >
+                                    Filter
+                                </button>
 
-                            <button
-                                className={GlobalStyle.buttonRemove}
-                                onClick={handleClear}
-                            >
-                                Clear
-                            </button>
+                                <button
+                                    className={GlobalStyle.buttonRemove}
+                                    onClick={handleClear}
+                                >
+                                    Clear
+                                </button>
+                            </div>
+
+                            <div className="md:hidden w-full bg-white shadow-md rounded-md mt-1 py-2 px-3 space-y-2">
+                                <button
+                                    onClick={handleFilterButton}
+                                    className={`${GlobalStyle.buttonPrimary} w-full`}
+                                >
+                                    Filter
+                                </button>
+
+                                <button
+                                    className={`${GlobalStyle.buttonRemove} w-full`}
+                                    onClick={handleClear}
+                                >
+                                    Clear
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className={GlobalStyle.tableContainer}>
-                <table className={GlobalStyle.table}>
-                    <thead className={GlobalStyle.thead}>
+           <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                <table className={`${GlobalStyle.table} w-full`}>
+                    <thead className={`${GlobalStyle.thead} sticky top-0`}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>DRC ID</th>
                             <th className={GlobalStyle.tableHeader}>Status</th>
@@ -278,8 +306,8 @@ const DRCList = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
+                        {filteredDataBySearch.length > 0 ? (
+                            filteredDataBySearch.slice(startIndex, endIndex).map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
@@ -292,20 +320,33 @@ const DRCList = () => {
                                     <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ServiceCount}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ROCount}</td>
-                                    <td className={GlobalStyle.tableData}>{log.RTOMCount}</td>
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer text-center `} 
+                                     onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" } })}>
+                                                {log.ServiceCount}
+                                    </td>
+
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RO" } })}>
+                                               {log.ROCount}
+                                    </td>
+
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RTOM" } })}>
+                                                 {log.RTOMCount}
+                                    </td>
+
+
                                     <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
                                         <button 
-                                            onClick={() => navigate(`/pages/DRC/DRCInfo`, { state: { drcId: log.DRCID } })}
+                                            onClick={() => navigateToEdit(log.DRCID)}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
                                             <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
                                         </button>
-                                       <button 
-                                            onClick={() => navigate(`/pages/DRC/DRCDetails`, { 
-                                                state: { drcId: log.DRCID } 
-                                            })}
+                                        <button 
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
                                             <img src={ListImg} alt="Details" title="Details" className="w-6 h-6" />
@@ -316,7 +357,7 @@ const DRCList = () => {
                         ) : (
                             <tr>
                                 <td colSpan="9" className="text-center py-4">
-                                    {filtersApplied || searchQuery 
+                                    {statusFilter || searchQuery 
                                         ? "No matching DRCs found" 
                                         : "No DRCs available"}
                                 </td>
@@ -326,30 +367,33 @@ const DRCList = () => {
                 </table>
             </div>
 
-            <div className={GlobalStyle.navButtonContainer}>
-                <div className="navbatn ">
-                <button
-                        className={`${GlobalStyle.navButton} ${currentPage === 1 ? 'hover:opacity-50 cursor-not-allowed' : ''}`}
-                            onClick={handlePrevPage}
-                 disabled={currentPage === 1}
-                >
-                  <FaArrowLeft />
-                </button>
-            </div>
-
-                <span>Page {currentPage}</span>
-
-                {hasMoreData && filteredData.length > 0 && (
+            {filteredDataBySearch.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
                     <button
-                        className={GlobalStyle.navButton}
+                        className={`${GlobalStyle.navButton} ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 1}
+                    >
+                        <FaArrowLeft />
+                    </button>
+
+                    <span>Page {currentPage}</span>
+
+                    <button
+                        className={`${GlobalStyle.navButton} ${
+                            !hasMoreData && currentPage >= Math.ceil(filteredData.length / rowsPerPage) 
+                                ? 'opacity-50 cursor-not-allowed' 
+                                : ''
+                        }`}
                         onClick={handleNextPage}
+                        disabled={!hasMoreData && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
                     >
                         <FaArrowRight />
                     </button>
-                )}
-            </div>
+                </div>
+            )}
         </div>
-    );     
+    );
 };
 
 export default DRCList;
