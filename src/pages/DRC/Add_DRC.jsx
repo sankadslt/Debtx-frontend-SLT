@@ -39,8 +39,9 @@ const Add_DRC = () => {
   const [ServiceNo, setServiceNo] = useState("");
   const [C_Name, setCName] = useState("");
   const [C_Email, setCEmail] = useState("");
-  const [coordinators, setCoordinators] = useState([]);
-  const [coordinatorLoading, setCoordinatorLoading] = useState(true);
+
+  // const [coordinators, setCoordinators] = useState([]);
+  // const [coordinatorLoading, setCoordinatorLoading] = useState(true);
 
   // Service Types
   const [selectedServiceType, setSelectedServiceType] = useState("");
@@ -184,40 +185,42 @@ const Add_DRC = () => {
     }
   };
 
-  // Fetch SLT Coordinators
-  const fetchSLTCoordinators = async () => {
-    try {
-      setCoordinatorLoading(true);
-      const response = await getSLTCoordinators();
-      console.log("SLT Coordinators Response:", response);
+  // // Fetch SLT Coordinators
+  // const fetchSLTCoordinators = async () => {
+  //   try {
+  //     setCoordinatorLoading(true);
+  //     const response = await getSLTCoordinators();
+  //     console.log("SLT Coordinators Response:", response);
 
-      if (response.status === "success" && response.data) {
-        setCoordinators(response.data);
-      } else {
-        console.error(
-          "Failed to fetch SLT Coordinators:",
-          response.message || "Unknown error"
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching SLT Coordinators:", error.message);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load SLT Coordinators.",
-      });
-    } finally {
-      setCoordinatorLoading(false);
-    }
-  };
+  //     if (response.status === "success" && response.data) {
+  //       setCoordinators(response.data);
+  //     } else {
+  //       console.error(
+  //         "Failed to fetch SLT Coordinators:",
+  //         response.message || "Unknown error"
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching SLT Coordinators:", error.message);
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: "Failed to load SLT Coordinators.",
+  //     });
+  //   } finally {
+  //     setCoordinatorLoading(false);
+  //   }
+  // };
+
 
   // Call it once when the component mounts
   useEffect(() => {
     fetchActiveServices();
     fetchRTOMData();
-    fetchSLTCoordinators();
+    // fetchSLTCoordinators();
   }, []);
 
+  
   const handleDropdownClick = () => {
     if (!dropdownClicked) {
       fetchActiveServices();
@@ -570,76 +573,63 @@ const Add_DRC = () => {
 
 {/* Coordinator section*/}
 
-            <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
-               <span className="underline">SLT Coordinator Details</span>
-            </h2>
-                <table className="w-full">
-                  <tbody>
-                  
-                    <tr className="block md:table-row">
-                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-2">
-                        Service No :
-                      </td>
-                      <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
-                        <select
-                          value={ServiceNo}
-                          onChange={handleServiceNoChange}
-                          className={`${GlobalStyle.selectBox} w-full`}
-                        >
-                          <option value="">Select Service No</option>
-                          {coordinatorLoading ? (
-                            <option disabled>Loading...</option>
-                          ) : (
-                            coordinators.map((coordinator, index) => (
-                              <option key={index} value={coordinator.user_id}>
-                                {coordinator.user_id}
-                              </option>
-                            ))
-                          )}
-                        </select>
-                        {errors.ServiceNo && (
-                          <p className="text-red-500">{errors.ServiceNo}</p>
-                        )}
-                      </td>
-                    </tr>
+        <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
+          <span className="underline">SLT Coordinator Details</span>
+        </h2>
+        <table className="w-full">
+          <tbody>
+            <tr className="block md:table-row">
+              <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-2">
+                Service No :
+              </td>
+              <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+                <input
+                  type="text"
+                  value={ServiceNo}
+                  onChange={(e) => setServiceNo(e.target.value)}
+                  className={`${GlobalStyle.inputText} w-full`}
+                />
+                {errors.ServiceNo && (
+                  <p className="text-red-500">{errors.ServiceNo}</p>
+                )}
+              </td>
+            </tr>
 
-                    
-                    <tr className="block md:table-row">
-                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-2">
-                        Name :
-                      </td>
-                      <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
-                        <input
-                          type="text"
-                          value={C_Name}
-                          readOnly
-                          className={`${GlobalStyle.inputText} w-full bg-gray-100`}
-                        />
-                        {errors.C_Name && (
-                          <p className="text-red-500">{errors.C_Name}</p>
-                        )}
-                      </td>
-                    </tr>
+            <tr className="block md:table-row">
+              <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-2">
+                Name :
+              </td>
+              <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+                <input
+                  type="text"
+                  value={C_Name}
+                  onChange={(e) => setCName(e.target.value)}
+                  className={`${GlobalStyle.inputText} w-full`}
+                />
+                {errors.C_Name && (
+                  <p className="text-red-500">{errors.C_Name}</p>
+                )}
+              </td>
+            </tr>
 
-                  
-                    <tr className="block md:table-row">
-                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-0">
-                        Email :
-                      </td>
-                      <td className="block md:table-cell w-full md:w-2/3">
-                        <input
-                          type="text"
-                          value={C_Email}
-                          readOnly
-                          className={`${GlobalStyle.inputText} w-full bg-gray-100`}
-                        />
-                        {errors.C_Email && (
-                          <p className="text-red-500">{errors.C_Email}</p>
-                        )}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+            <tr className="block md:table-row">
+              <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-0">
+                Email :
+              </td>
+              <td className="block md:table-cell w-full md:w-2/3">
+                <input
+                  type="text"
+                  value={C_Email}
+                  onChange={(e) => setCEmail(e.target.value)}
+                  className={`${GlobalStyle.inputText} w-full`}
+                />
+                {errors.C_Email && (
+                  <p className="text-red-500">{errors.C_Email}</p>
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
 {/*Service section */}
                 
