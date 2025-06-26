@@ -349,15 +349,11 @@ const AddRtom = () => {
           marginTop: "1rem"
         }}
       >
-        <button 
-          className={GlobalStyle.navButton} 
+        <button
+          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
           onClick={goBack}
-          style={{ 
-            padding: isSmallMobile ? "0.5rem" : "0.75rem 1rem" 
-          }}
-          disabled={isSubmitting}
         >
-          <FaArrowLeft /> Back
+          <FaArrowLeft />
         </button>
       </div>
     </div>
