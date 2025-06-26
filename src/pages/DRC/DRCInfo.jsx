@@ -14,7 +14,7 @@ import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import Edit from "../../assets/images/edit-info.svg";
 import addIcon from "../../assets/images/add.svg";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft , FaSearch ,FaArrowRight } from "react-icons/fa";
 import {
   getDebtCompanyByDRCID,
   terminateCompanyByDRCID,
@@ -87,6 +87,35 @@ const DRCInfo = () => {
   const [editingRtomIds, setEditingRtomIds] = useState([]);
   const [remark, setRemark] = useState("");
   const [remarkHistory, setRemarkHistory] = useState([]);
+
+//loghistory
+  const [showPopup, setShowPopup] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const rowsPerPage = 5;
+
+//loghistory function
+const filteredLogHistory = remarkHistory
+  .filter((log) => 
+    (log.remark || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (log.remark_by || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+const pages = Math.ceil(filteredLogHistory.length / rowsPerPage);
+const paginatedLogHistory = filteredLogHistory.slice(
+  currentPage * rowsPerPage,
+  (currentPage + 1) * rowsPerPage
+);
+
+//prev page
+const handlePrevPage = () => {
+  setCurrentPage((prev) => Math.max(prev - 1, 0));
+};
+
+//next page
+const handleNextPage = () => {
+  setCurrentPage((prev) => Math.min(prev + 1, pages - 1));
+};
 
   // Fetch DRC data 
   useEffect(() => {
@@ -1681,85 +1710,119 @@ return (
         </div>
 
         {/* Log history button - Existing code */}
-       <div className="justify-start flex items-center gap-4">
-            <button
-              className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
-              onClick={goBack}
-            >
-              <FaArrowLeft />
-            </button>
-            
-            <button
-              onClick={toggleLogHistory}
-              className={`${GlobalStyle.buttonPrimary} flex items-center gap-2 px-4 py-2`}
-            >
-              {showLogHistory ? "Close Log History" : "Log History"}
-            </button>
-        </div>
+        <div className="flex flex-col items-start mt-8 ">
+                    <button
+                        className={`${GlobalStyle.buttonPrimary}`}
+                        onClick={() => setShowPopup(true)}
+                    >
+                        Log History
+                    </button>
+
+                    <div style={{ marginTop: '15px' }}>
+                        <button
+                          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                          onClick={goBack}
+                        >
+                          <FaArrowLeft />
+                         
+                        </button>
+
+                    </div>
+                </div>
 
         {/* Log History Modal */}
-        {showLogHistory && (
-          <div className="my-4 bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-hidden">
-            <div className="p-6">
-              <div className="mb-4">
-                <h3 className={`${GlobalStyle.headingMedium}`}>
-                  Remark History
-                </h3>
+          {showPopup && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-md shadow-lg w-3/4 max-h-[80vh] overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Log History</h2>
+                <button
+                  className="text-red-500 text-lg font-bold"
+                  onClick={() => setShowPopup(false)}
+                >
+                  ×
+                </button>
               </div>
-
-              <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-                <table className={`${GlobalStyle.table} min-w-full`}>
-                  <thead className={GlobalStyle.thead}>
-                    <tr>
-                      <th className={`${GlobalStyle.tableHeader} text-left`}>
-                        Edited On
-                      </th>
-                      <th className={`${GlobalStyle.tableHeader} text-left`}>
-                        Action
-                      </th>
-                      <th className={`${GlobalStyle.tableHeader} text-left`}>
-                        Edited By
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {remarkHistory && remarkHistory.length > 0 ? (
-                      remarkHistory.map((log, index) => (
-                        <tr
-                          key={index}
-                          className={`${
-                            index % 2 === 0
-                              ? "bg-white bg-opacity-75"
-                              : "bg-gray-50 bg-opacity-50"
-                          } border-b`}
-                        >
-                          <td
-                            className={`${GlobalStyle.tableData} whitespace-nowrap`}
+              <div>
+                <div className="mb-4 flex justify-start">
+                  <div className={GlobalStyle.searchBarContainer}>
+                    <input
+                      type="text"
+                      placeholder="  "
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(0); 
+                      }}
+                      className={GlobalStyle.inputSearch}
+                    />
+                    <FaSearch className={GlobalStyle.searchBarIcon} />
+                  </div>
+                </div>
+                <div className={GlobalStyle.tableContainer}>
+                  <table className={GlobalStyle.table}>
+                    <thead className={GlobalStyle.thead}>
+                      <tr>
+                        <th className={GlobalStyle.tableHeader}>Edited On</th>
+                        <th className={GlobalStyle.tableHeader}>Action</th>
+                        <th className={GlobalStyle.tableHeader}>Edited By</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLogHistory.length > 0 ? (
+                        paginatedLogHistory.map((log, index) => (
+                          <tr
+                            key={index}
+                            className={`${
+                              index % 2 === 0
+                                ? "bg-white bg-opacity-75"
+                                : "bg-gray-50 bg-opacity-50"
+                            } border-b`}
                           >
-                            {new Date(log.remark_dtm).toLocaleString()}
-                          </td>
-                          <td className={`${GlobalStyle.tableData}`}>
-                            {log.remark_by || "System User"}
-                          </td>
-                          <td
-                            className={`${GlobalStyle.tableData} whitespace-normal break-words`}
-                          >
-                            {log.remark || "No remark provided"}
+                            <td className={`${GlobalStyle.tableData} whitespace-nowrap`}>
+                              {log.remark_dtm
+                                ? new Date(log.remark_dtm).toLocaleDateString('en-GB')
+                                : "N/A"}
+                            </td>
+                            <td className={GlobalStyle.tableData}>
+                              {log.remark || "No remark provided"}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words`}>
+                              {log.remark_by || "System User"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="3" className="text-center py-4 text-gray-500">
+                            {searchQuery ? "No matching results found" : "No Log history available"}
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="3"
-                          className="text-center py-4 text-gray-500"
-                        >
-                          No remark history available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                {filteredLogHistory.length > rowsPerPage && (
+                    <div className={GlobalStyle.navButtonContainer}>
+                      <button
+                        className={`${GlobalStyle.navButton} ${currentPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 0}
+                      >
+                        <FaArrowLeft />
+                      </button>
+                      
+                      <span>Page {currentPage + 1} of {pages}</span>
+                      
+                      <button
+                        className={`${GlobalStyle.navButton} ${currentPage === pages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handleNextPage}
+                        disabled={currentPage === pages - 1}
+                      >
+                        <FaArrowRight />
+                      </button>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
