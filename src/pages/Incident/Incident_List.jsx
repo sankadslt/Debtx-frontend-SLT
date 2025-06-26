@@ -30,6 +30,7 @@ import { refreshAccessToken } from "../../services/auth/authService";
 import opeanincident from  "/src/assets/images/incidents/Incident_Open.png"
 import rejectincident from  "/src/assets/images/incidents/Incident_Reject.png"
 import inprogressincident from  "/src/assets/images/incidents/Incident_InProgress.png"
+import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
 import errorincident from "/src/assets/images/incidents/Incident_Error.png"
 import error from "/src/assets/images/incidents/Reject.png"
 
@@ -85,10 +86,12 @@ const Incident_List = () => {
                 return inprogressincident;
             case "incident error":
                 return errorincident;
-            case "reject" :
-                return error;
-            case "incident reject":
-                return rejectincident;
+            // case "reject" :
+            //     return error;
+            // case "incident reject":
+            //     return rejectincident;
+            case "complete":
+                return incidentDone;
             default:
                 return null;
         }
