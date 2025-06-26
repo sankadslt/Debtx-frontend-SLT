@@ -12,8 +12,8 @@ import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
-import { List_All_Commission_Cases } from "../../services/commission/commissionService";
+import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload,FaTimes } from "react-icons/fa";
+import { List_All_Commission_Cases,ForwardToApprovals } from "../../services/commission/commissionService";
 import { commission_type_cases_count } from "../../services/commission/commissionService";
 import { Active_DRC_Details } from "../../services/drc/Drc";
 import { Create_task_for_Download_Commision_Case_List } from "../../services/commission/commissionService";
@@ -23,6 +23,101 @@ import { useNavigate } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+
+
+const ForwardApprovalsModal = ({ isOpen, onClose, summaryData, onConfirm, isLoading }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className={GlobalStyle.popupBoxContainer}>
+      <div className={`${GlobalStyle.popupBoxBody} max-h-[80vh] max-w-[90vh] overflow-hidden`}>
+        {/* Header */}
+        <div className={GlobalStyle.popupBox}>
+          <button
+            onClick={onClose}
+            className={GlobalStyle.popupBoxCloseButton}
+          >
+            <FaTimes size={20} />
+          </button>
+        </div>
+  
+        {/* Content */}
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+          <table className={GlobalStyle.table}>
+            <thead className={GlobalStyle.thead}>
+              <tr>
+                <th className={GlobalStyle.tableHeader}>
+                  
+                </th>
+                <th className={GlobalStyle.tableHeader}>DRC</th>
+                <th className={GlobalStyle.tableHeader}>Case Count</th>
+                <th className={GlobalStyle.tableHeader}>Total Commission Amount</th>
+                <th className={GlobalStyle.tableHeader}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summaryData.map((item, index) => (
+                <tr
+                  key={index}
+                  className={
+                    index % 2 === 0
+                      ? GlobalStyle.tableRowEven
+                      : GlobalStyle.tableRowOdd
+                  }
+                >
+                  <td className={GlobalStyle.tableData}>
+                  <input type="checkbox" className="ml-2" />
+                  </td>
+                  <td className={GlobalStyle.tableData}>{item.drcName}</td>
+                  <td className={`${GlobalStyle.tableData} text-center`}>
+                    {item.caseCount}
+                  </td>
+                  <td className={GlobalStyle.tableCurrency}>
+                    {item.totalAmount.toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td className={GlobalStyle.tableData}>
+                  {summaryData.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No data available for forwarding
+          </div>
+        ) : (
+          <div className={`${GlobalStyle.flexCenter} `}>
+            <button
+              onClick={onConfirm}
+              disabled={isLoading || summaryData.length === 0}
+              className={`${GlobalStyle.buttonPrimary} ${
+                isLoading || summaryData.length === 0
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              }`}
+            >
+              {isLoading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                  Processing...
+                </div>
+              ) : (
+                'Approve'
+              )}
+            </button>
+          </div>
+        )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+  
+        
+      </div>
+    </div>
+  );
+  
+};
 
 const Commission_List = () => {
   const [selectValue, setSelectValue] = useState("Account No");
@@ -52,7 +147,12 @@ const Commission_List = () => {
   const [searchBy, setSearchBy] = useState("case_id");
   const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [forwardSummary, setForwardSummary] = useState([]);  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isForwarding, setIsForwarding] = useState(false);
   const hasMounted = useRef(false);
+  
+  
   const [committedFilters, setCommittedFilters] = useState({
     caseId: "",
     accountNo: "",
@@ -416,6 +516,91 @@ const Commission_List = () => {
     }
   };
 
+  const HandleForwardToApprovals = async () => {
+    if (!selectedDrcId) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select a DRC.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    if (!fromDate || !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select Date period.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    // Calculate summary data from filteredData
+    const summaryData = [];
+    
+    // Group by DRC
+    const drcGroups = {};
+    filteredData.forEach(item => {
+      if (!drcGroups[item.DRC_Name]) {
+        drcGroups[item.DRC_Name] = {
+          drcName: item.DRC_Name,
+          caseCount: 0,
+          totalAmount: 0
+        };
+      }
+      // Count only unresolved cases
+      if (item.Commission_Type === "Unresolved Commission") {
+        drcGroups[item.DRC_Name].caseCount++;
+        drcGroups[item.DRC_Name].totalAmount += parseFloat(item.Commission_Amount) || 0;
+      }
+      // Sum all commission amounts
+     
+    });
+
+    // Convert to array
+    for (const drcName in drcGroups) {
+      summaryData.push(drcGroups[drcName]);
+    }
+
+    setForwardSummary(summaryData);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmForward = async () => {
+    const userData = await getLoggedUserId();
+    setIsForwarding(true);
+    try {
+       
+    const response =  await ForwardToApprovals(selectedDrcId,userData);
+
+      
+      setIsModalOpen(false);
+      if(response === "success")
+      Swal.fire({
+        title: response,
+        text: "Cases have been forwarded for approvals successfully!",
+        icon: "success",
+        confirmButtonColor: "#28a745",
+      });
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Failed to forward cases for approval",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    } finally {
+      setIsForwarding(false);
+    }
+  };
+
+
   const navigate = useNavigate();
 
   const naviCaseID = (caseId) => {
@@ -694,6 +879,7 @@ const Commission_List = () => {
 
         {["admin", "superadmin", "slt"].includes(userRole) && (
           <button
+          onClick={HandleForwardToApprovals}
             // onClick={HandleCreateTaskDownloadCommissiontList}
             // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
             className={GlobalStyle.buttonPrimary}
@@ -706,7 +892,16 @@ const Commission_List = () => {
           </button>
         )}
       </div>
-    </div >
+  
+     {/* Forward Approvals Modal */}
+     <ForwardApprovalsModal
+     isOpen={isModalOpen}
+     onClose={() => setIsModalOpen(false)}
+     summaryData={forwardSummary}
+     onConfirm={handleConfirmForward}
+     isLoading={isForwarding}
+   />
+ </div>
   );
 };
 

@@ -59,7 +59,7 @@ const DRCList = () => {
             <img
                 src={iconPath}
                 alt={status}
-                className="w-6 h-6"
+                className="w-6 h-6 mx-auto"
                 title={status}
             />
         );
@@ -180,7 +180,6 @@ const DRCList = () => {
     // Navigation 
     const handleAddDRC = () => navigate("/pages/DRC/Add_DRC");
     const navigateToEdit = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
-    const navigateToDetails = (drcId) => navigate('/pages/DRC/DRCDetails', { state: { drcId } });
 
     // Effect for API calls
     useEffect(() => {
@@ -321,9 +320,25 @@ const DRCList = () => {
                                     <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ServiceCount}</td>
-                                    <td className={GlobalStyle.tableData}>{log.ROCount}</td>
-                                    <td className={GlobalStyle.tableData}>{log.RTOMCount}</td>
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer text-center `} 
+                                     onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" } })}>
+                                                {log.ServiceCount}
+                                    </td>
+
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RO" } })}>
+                                               {log.ROCount}
+                                    </td>
+
+
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RTOM" } })}>
+                                                 {log.RTOMCount}
+                                    </td>
+
+
                                     <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
                                         <button 
                                             onClick={() => navigateToEdit(log.DRCID)}
@@ -332,7 +347,6 @@ const DRCList = () => {
                                             <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
                                         </button>
                                         <button 
-                                            onClick={() => navigateToDetails(log.DRCID)}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
                                             <img src={ListImg} alt="Details" title="Details" className="w-6 h-6" />
