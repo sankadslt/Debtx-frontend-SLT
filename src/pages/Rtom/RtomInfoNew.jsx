@@ -564,10 +564,9 @@ const RtomInfoNew = () => {
 
                     <strong className="block pt-4 underline">Contact Details</strong>
 
-                    <div className="flex gap-8 items-center ml-16">
-                        <select className={GlobalStyle.selectBox}>
-                            <option value="mobile">Mobile</option>
-                        </select>
+                    <div className="flex gap-8 items-center">
+                        <h1 className="w-48">Mobile</h1>
+                        <span>:</span>
                         <input
                             name="mobile"
                             type="tel"
@@ -580,10 +579,9 @@ const RtomInfoNew = () => {
                         />
                     </div>
 
-                    <div className="flex gap-8 items-center ml-16">
-                        <select className={GlobalStyle.selectBox}>
-                            <option value="telephone">Telephone</option>
-                        </select>
+                    <div className="flex gap-8 items-center">
+                        <h1 className="w-48">Telephone</h1>
+                        <span>:</span>
                         <input
                             name="telephone"
                             type="tel"
@@ -744,8 +742,11 @@ const RtomInfoNew = () => {
                 </button>
 
                 <div style={{ marginTop: '12px' }}>
-                    <button className={GlobalStyle.navButton} onClick={goBack}>
-                        <FaArrowLeft /> Back
+                     <button
+                        className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                        onClick={goBack}
+                    >
+                        <FaArrowLeft />
                     </button>
                 </div>
             </div>
