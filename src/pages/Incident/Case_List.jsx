@@ -86,7 +86,6 @@ const Case_List = () => {
     selectedBand: "",
     selectedServiceType: "",
     selectedCaseStatus: "",
-    selectedServiceType: "",
     fromDate: null,
     toDate: null
   });
