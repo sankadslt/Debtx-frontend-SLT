@@ -10,7 +10,7 @@
 // Notes: This template uses Tailwind CSS */
 
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import edit_info from "../../assets/images/edit-info.svg";
@@ -26,7 +26,8 @@ import { getLoggedUserId } from "../../services/auth/authService";
 
 const RtomInfoNew = () => {
   const navigate = useNavigate();
-  const { rtomId } = useParams();
+  const location = useLocation();
+  const { rtomId } = location.state || {};
 
   // Component state
   const [mode, setMode] = useState("view");
