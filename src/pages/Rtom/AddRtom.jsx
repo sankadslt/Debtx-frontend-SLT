@@ -287,7 +287,10 @@ useEffect(() => {
         </div>
       </div>
       <div style={{ marginLeft: '70px' }}>
-        <button className={GlobalStyle.navButton} onClick={goBack}>
+        <button
+          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+          onClick={goBack}
+        >
           <FaArrowLeft />
         </button>
       </div>
