@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
-import { createRTOM } from "../../services/RTOM/Rtom_services";
+import { createRTOM } from "../../services/RTOM/Rtom";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getLoggedUserId } from "../../services/auth/authService";
+ 
 
 const useMediaQuery = (query) => {
   const [matches, setMatches] = useState(false);
@@ -39,23 +40,16 @@ const AddRtom = () => {
   const isSmallMobile = useMediaQuery("(max-width: 480px)");
 
   const loadUser = async () => {
-    try {
-      const user = await getLoggedUserId();
-      console.log("Loaded user:", user); // Debug logging
-      setUserData(user);
-    } catch (error) {
-      console.error("Error loading user:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Authentication Error",
-        text: "Failed to load user information. Please login again.",
-      });
-    }
-  };
+  const user = await getLoggedUserId();
+  console.log("Loaded user from getLoggedUserId():", user);
+  setUserData(user);
+};
 
-  useEffect(() => {
-    loadUser();
-  }, []);
+useEffect(() => {
+  loadUser();
+}, []);
+
+
 
   const validateForm = () => {
     const newErrors = {};
@@ -178,7 +172,7 @@ const AddRtom = () => {
         <div 
           className={`${GlobalStyle.cardContainer} mt-4 w-full`}
           style={{
-            maxWidth: isMobile ? "100%" : "800px",
+            maxWidth: isMobile ? "100%" : "700px",
             padding: isMobile ? "1rem" : "2rem"
           }}
         >
@@ -342,22 +336,12 @@ const AddRtom = () => {
           </form>
         </div>
       </div>
-      
-      <div 
-        style={{ 
-          marginLeft: isMobile ? "1rem" : "4.5rem",
-          marginTop: "1rem"
-        }}
-      >
-        <button 
-          className={GlobalStyle.navButton} 
+      <div style={{ marginLeft: '70px' }}>
+        <button
+          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
           onClick={goBack}
-          style={{ 
-            padding: isSmallMobile ? "0.5rem" : "0.75rem 1rem" 
-          }}
-          disabled={isSubmitting}
         >
-          <FaArrowLeft /> Back
+          <FaArrowLeft />
         </button>
       </div>
     </div>
