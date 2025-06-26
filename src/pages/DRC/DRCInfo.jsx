@@ -1190,207 +1190,179 @@ return (
           </div>
 
           {/* Company Details Section */}
-          <h2
-            className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}
-          >
-            Company Details
-          </h2>
-
-          <div className={` overflow-x-auto`}>
-            <table className={`${GlobalStyle.table} min-w-full text-left`}>
-              <tbody>
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Added Date
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
-                  >
-                    {companyData.create_on
-                      ? new Date(companyData.create_on).toLocaleDateString()
-                      : "Not specified"}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Business Reg No
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 text-left`}
-                  >
-                    {companyData.drc_business_registration_number ||
-                      "Not specified"}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Address
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 text-left`}
-                  >
-                    {companyData.drc_address || "Not specified"}
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Contact Number
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td className={`${GlobalStyle.tableData} text-left`}>
-                    <input
-                      type="text"
-                      value={contactNo}
-                      onChange={(e) => setContactNo(e.target.value)}
-                      className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Email
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td className={`${GlobalStyle.tableData} text-left`}>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* SLT Coordinator Section */}
-          <div className="flex justify-between items-center">
-            <h2
-              className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
-            >
-              SLT Coordinator Details
+          <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
+              Company Details
             </h2>
-            <button
-              onClick={() => setEditingCoordinator(!editingCoordinator)}
-              className={` ${GlobalStyle.buttonPrimary}px-3 py-1 `}
-            >
-              {editingCoordinator ? "Cancel Change" : "Change"}
-            </button>
-          </div>
 
-          <div className={` overflow-x-auto`}>
-            {currentCoordinator || editingCoordinator ? (
+            <div className={`overflow-x-auto`}>
               <table className={`${GlobalStyle.table} min-w-full text-left`}>
                 <tbody>
-                  <tr>
-                    <td
-                      className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                    >
-                      Service No
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Added Date<span className="sm:hidden">:</span>
                     </td>
-                    <td className="w-4 text-left">:</td>
-                    <td
-                      className={`${GlobalStyle.tableData} break-words text-left`}
-                    >
-                      {editingCoordinator ? (
-                        <select
-                          name="service_no"
-                          value={coordinatorFields.service_no}
-                          onChange={handleServiceSelection}
-                          className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs "
-                        >
-                          <option value="">Select a service</option>
-                          {serviceOptions.map((option, idx) => (
-                            <option key={idx} value={option.service_no}>
-                              {option.service_no}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.service_no || "Not specified"}
-                        </span>
-                      )}
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left block sm:table-cell`}>
+                      {companyData.create_on
+                        ? new Date(companyData.create_on).toLocaleDateString()
+                        : "Not specified"}
                     </td>
                   </tr>
-                  <tr>
-                    <td
-                      className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                    >
-                      Name
+
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Business Reg No<span className="sm:hidden">:</span>
                     </td>
-                    <td className="w-4 text-left">:</td>
-                    <td
-                      className={`${GlobalStyle.tableData} break-words text-left`}
-                    >
-                      {editingCoordinator ? (
-                        <input
-                          type="text"
-                          name="slt_coordinator_name"
-                          value={coordinatorFields.slt_coordinator_name}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
-                        />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_name ||
-                            "Not specified"}
-                        </span>
-                      )}
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                      {companyData.drc_business_registration_number ||
+                        "Not specified"}
                     </td>
                   </tr>
-                  <tr>
-                    <td
-                      className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                    >
-                      Email
+
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Address<span className="sm:hidden">:</span>
                     </td>
-                    <td className="w-4 text-left">:</td>
-                    <td
-                      className={`${GlobalStyle.tableData} break-words text-left`}
-                    >
-                      {editingCoordinator ? (
-                        <input
-                          type="email"
-                          name="slt_coordinator_email"
-                          value={coordinatorFields.slt_coordinator_email}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
-                        />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_email ||
-                            "Not specified"}
-                        </span>
-                      )}
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                      {companyData.drc_address || "Not specified"}
+                    </td>
+                  </tr>
+
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Contact Number<span className="sm:hidden">:</span>
+                    </td>
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                      <input
+                        type="text"
+                        value={contactNo}
+                        onChange={(e) => setContactNo(e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
+                      />
+                    </td>
+                  </tr>
+
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Email<span className="sm:hidden">:</span>
+                    </td>
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
+                      />
                     </td>
                   </tr>
                 </tbody>
               </table>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                No coordinator assigned
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* Services Section - With dropdown below the heading, aligned left */}
+            
+          {/* SLT Coordinator Section */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
+                  SLT Coordinator Details
+                </h2>
+                <div className="w-full flex justify-end sm:block sm:w-auto">
+                  <button
+                    onClick={() => setEditingCoordinator(!editingCoordinator)}
+                    className={`${GlobalStyle.buttonPrimary} px-3 py-1 mb-4 sm:mb-0`}
+                  >
+                    {editingCoordinator ? "Cancel" : "Change"}
+                  </button>
+                </div>
+            </div>
+
+              <div className={`overflow-x-auto`}>
+                {currentCoordinator || editingCoordinator ? (
+                  <table className={`${GlobalStyle.table} min-w-full text-left`}>
+                    <tbody>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Service No<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <select
+                        name="service_no"
+                        value={coordinatorFields.service_no}
+                        onChange={handleServiceSelection}
+                        className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
+                      >
+                        <option value="">Select a service</option>
+                        {serviceOptions.map((option, idx) => (
+                          <option key={idx} value={option.service_no}>
+                            {option.service_no}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator.service_no || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Name<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="text"
+                        name="slt_coordinator_name"
+                        value={coordinatorFields.slt_coordinator_name}
+                        readOnly
+                        className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator.slt_coordinator_name || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Email<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="email"
+                        name="slt_coordinator_email"
+                        value={coordinatorFields.slt_coordinator_email}
+                        readOnly
+                        className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator.slt_coordinator_email || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No coordinator assigned
+                  </div>
+                )}
+              </div>
+
+          {/* Services Section  */}
+
           <div>
             <h2
               className={`${GlobalStyle.headingMedium} mt-6 mb-2 sm:mt-8 sm:mb-4 underline text-left font-semibold`}
@@ -1698,15 +1670,15 @@ return (
             </tbody>
           </table>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4 mt-8">
-            <button
-              onClick={handleSave}
-              className={`${GlobalStyle.buttonPrimary} px-6 py-2 `}
-            >
-              Save
-            </button>
-          </div>
+          
+          <div className="flex justify-end gap-4 mt-8 flex-wrap">
+          <button
+            onClick={handleSave}
+            className={`${GlobalStyle.buttonPrimary} px-4 sm:px-6 py-2 w-full sm:w-auto`}
+          >
+            Save
+          </button>
+        </div>
         </div>
 
         {/* Log history button - Existing code */}
@@ -1759,13 +1731,13 @@ return (
                     <FaSearch className={GlobalStyle.searchBarIcon} />
                   </div>
                 </div>
-                <div className={GlobalStyle.tableContainer}>
-                  <table className={GlobalStyle.table}>
+                <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                  <table className={`${GlobalStyle.table} w-full`}>
                     <thead className={GlobalStyle.thead}>
                       <tr>
-                        <th className={GlobalStyle.tableHeader}>Edited On</th>
-                        <th className={GlobalStyle.tableHeader}>Action</th>
-                        <th className={GlobalStyle.tableHeader}>Edited By</th>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[120px]`}>Edited On</th>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[150px]`}>Action</th>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[150px]`}>Edited By</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1802,6 +1774,7 @@ return (
                     </tbody>
                   </table>
                 </div>
+
                 {filteredLogHistory.length > rowsPerPage && (
                     <div className={GlobalStyle.navButtonContainer}>
                       <button
