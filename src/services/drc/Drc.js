@@ -231,7 +231,7 @@ export const updateDRCInfo = async (
   remark_dtm,
   drc_contact_no,
   drc_email,
-  drc_status // Add DRC status parameter
+  drc_status 
 ) => {
   try {
     const response = await axios.patch(
