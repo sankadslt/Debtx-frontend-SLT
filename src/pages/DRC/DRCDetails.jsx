@@ -59,23 +59,23 @@ const DRCDetails = () => {
           }
       };
   
-  
+   
       const renderStatusIcon = (status) => {
-          const iconPath = getStatusIcon(status);
-  
-          if (!iconPath) {
-              return <span>{status}</span>;
-          }
-  
-          return (
-              <img
-                  src={iconPath}
-                  alt={status}
-                  className="w-6 h-6"
-                  title={status}
-              />
-          );
-      };
+        const iconPath = getStatusIcon(status);
+    
+        if (!iconPath) {
+            return <span className="capitalize">{status}</span>;
+        }
+    
+        return (
+            <img
+                src={iconPath}
+                alt={status}
+                className="w-6 h-6 mx-auto"
+                title={status}
+            />
+        );
+    };
 
       const goBack = () => {
         navigate(-1); 
