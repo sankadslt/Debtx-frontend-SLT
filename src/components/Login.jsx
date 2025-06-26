@@ -92,6 +92,7 @@ import logo from "../assets/images/logo.png";
 import backgroundImage from "../assets/images/loginbg.jpg";
 import { loginUser } from "../services/auth/authService";
 import { useMsal } from "@azure/msal-react";
+import axios from "axios";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
