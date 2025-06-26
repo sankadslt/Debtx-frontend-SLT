@@ -117,34 +117,37 @@ const Add_DRC = () => {
 
   // Fetch active service types from the API
   const fetchActiveServices = async () => {
-    try {
-      setLoading(true);
-      const response = await getActiveServiceDetails();
-      console.log("API Response:", response);
+  try {
+    setLoading(true);
+    const response = await getActiveServiceDetails();
+    console.log("API Response:", response);
 
-      if (response && response.data) {
-        const filtered = response.data.filter(
-          (service) => service.service_status === "Active"
-        );
-        const formatted = filtered.map((service) => ({
-          id: service.service_id,
-          name: service.service_type,
-          selected: false,
-        }));
+    if (response && Array.isArray(response)) { 
+      const formatted = response.map((service) => ({
+        id: service.service_id,
+        code: service.service_id.toString(), 
+        name: service.service_type,
+        selected: false,
+      }));
 
-        setServiceTypes(formatted);
-      }
-    } catch (error) {
-      console.error("Error loading service types:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load active service types.",
-      });
-    } finally {
-      setLoading(false);
+      setServiceTypes(formatted);
+    } else {
+      console.error("Unexpected API response format:", response);
+      setServiceTypes([]);
     }
-  };
+  } catch (error) {
+    console.error("Error loading service types:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to load active service types.",
+    });
+    setServiceTypes([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const fetchRTOMData = async () => {
     try {
@@ -302,18 +305,21 @@ const Add_DRC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddServiceType = () => {
-    if (
-      selectedServiceType &&
-      !serviceTypes.some((t) => t.name === selectedServiceType && t.selected)
-    ) {
-      const updatedTypes = serviceTypes.map((item) =>
-        item.name === selectedServiceType ? { ...item, selected: true } : item
+      const handleAddServiceType = () => {
+      if (!selectedServiceType) return; 
+
+      const serviceToAdd = serviceTypes.find(
+        (service) => service.code === selectedServiceType
       );
-      setServiceTypes(updatedTypes);
-      setSelectedServiceType("");
-    }
-  };
+
+      if (serviceToAdd && !serviceToAdd.selected) {
+        const updatedTypes = serviceTypes.map((item) =>
+          item.code === selectedServiceType ? { ...item, selected: true } : item
+        );
+        setServiceTypes(updatedTypes);
+        setSelectedServiceType(""); 
+      }
+    };
 
   const handleAddRTOM = () => {
   if (!selectedRTOM || !selectedhandlingtype) {
@@ -338,9 +344,9 @@ const Add_DRC = () => {
   }
 };
 
-  const handleRemoveServiceType = (type) => {
+  const handleRemoveServiceType = (code) => {
     const updatedTypes = serviceTypes.map((item) =>
-      item.name === type ? { ...item, selected: false } : item
+      item.code === code ? { ...item, selected: false } : item
     );
     setServiceTypes(updatedTypes);
   };
