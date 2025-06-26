@@ -40,6 +40,7 @@ import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
   /* Distribute Imports */
 }
 import AssignDRC from "../pages/Distribute/AssignDRC";
+import AssignDRCReject from "../pages/Distribute/AssignDRCReject";
 import AssignDRCForCollectCPE from "../pages/Distribute/AssignDRCForCollectCPE";
 import AssignedDRCSummary from "../pages/Distribute/CaseDistributionDRCTransactions";
 import AssignedDRCSummaryCollectCPE from "../pages/Distribute/AssignedDRCSummaryCollectCPE";
@@ -239,6 +240,15 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<AssignDRC />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignDRCReject"
+        element={
+          <ProtectedRoute
+            element={<AssignDRCReject />}
             allowedRoles={["superadmin"]}
           />
         }
