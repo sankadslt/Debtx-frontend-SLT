@@ -288,7 +288,7 @@ useEffect(() => {
       </div>
       <div style={{ marginLeft: '70px' }}>
         <button className={GlobalStyle.navButton} onClick={goBack}>
-          <FaArrowLeft />  Back
+          <FaArrowLeft />
         </button>
       </div>
     </div>
