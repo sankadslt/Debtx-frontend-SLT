@@ -18,7 +18,7 @@ import {
   getActiveServiceDetails,
   getActiveRTOMDetails,
   getSLTCoordinators,
-  registerDRC,
+  Create_DRC_With_Services_and_SLT_Coordinator,
 } from "../../services/drc/Drc.js";
 
 import addIcon from "../../assets/images/add.svg";
@@ -409,7 +409,7 @@ const Add_DRC = () => {
       coordinator_create_by: user_id,
     };
 
-    // Prepare the complete DRC data
+    
     const drcData = {
       drc_name: DRCName,
       drc_business_registration_number: BusinessRegistrationNo,
@@ -426,7 +426,7 @@ const Add_DRC = () => {
     console.log("Submitting DRC data:", JSON.stringify(drcData, null, 2));
 
     // Call the API to register the DRC
-    const response = await registerDRC(drcData);
+    const response = await Create_DRC_With_Services_and_SLT_Coordinator(drcData);
 
     if (response.status === "success") {
       Swal.fire({
@@ -453,6 +453,7 @@ const Add_DRC = () => {
     });
   }
 };
+
   return (
     <div className="min-h-screen p-6 flex items-center justify-center">
       <div className={`${GlobalStyle.fontPoppins} w-full max-w-5xl`}>
