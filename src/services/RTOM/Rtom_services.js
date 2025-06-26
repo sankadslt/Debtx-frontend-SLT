@@ -37,7 +37,7 @@ export const fetchRTOMs = async (filters = {}) => {
 
 
 
-export const fetchRTOMDetails = async (rtomId) => {
+export const fetchRTOMDetailsById = async (rtomId) => {
   try {
     const response = await axios.post(`${RTOM_URL}/List_RTOM_Details_By_RTOM_ID`, {
       rtom_id: rtomId
@@ -105,5 +105,17 @@ export const updateRTOMDetails = async (rtomData) => {
       status: error.response?.status,
     });
     throw error.response?.data?.message || "An error occurred while updating RTOM details";
+  }
+};
+
+
+// Terminate RTOM
+export const terminateRTOM = async (terminateData) => {
+  try {
+    const response = await axios.patch(`${RTOM_URL}/Terminate_RTOM`, terminateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error terminating RTOM:', error);
+    throw new Error(error.response?.data?.message || 'Failed to terminate RTOM');
   }
 };

@@ -12,7 +12,7 @@ Related Files:
 Notes: This template uses Tailwind CSS */
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/fa";
@@ -21,7 +21,7 @@ import Swal from "sweetalert2";
 import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
 
 const LOD_Log = () => {
-    const [currentPage, setCurrentPage] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
@@ -35,13 +35,30 @@ const LOD_Log = () => {
     const [isFilterApplied, setIsFilterApplied] = useState(false); // Track if filter is applied
     const rowsPerPage = 10; // Number of rows per page
     const navigate = useNavigate();
+    const [committedFilters, setCommittedFilters] = useState({
+        LODStatus: "",
+        DateType: "",
+        fromDate: null,
+        toDate: null,
+    });
+    const hasMounted = useRef(false); // Track if the component has mounted
 
     // validation for date
     const handleFromDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'Date Type' must be selected before choosing a date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else if (toDate && date > toDate) {
-            Swal.fire("Invalid Input", "'From' date cannot be later than the 'To' date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'From' date cannot be later than the 'To' date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else {
             setFromDate(date);
         }
@@ -51,9 +68,19 @@ const LOD_Log = () => {
     // validation for date
     const handleToDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'Date Type' must be selected before choosing a date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else if (fromDate && date < fromDate) {
-            Swal.fire("Invalid Input", "The 'To' date cannot be earlier than the 'From' date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "The 'To' date cannot be earlier than the 'From' date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else {
             setToDate(date);
         }
@@ -61,28 +88,74 @@ const LOD_Log = () => {
 
     // Handle filter button
     const handleFilter = () => {
-        if (!LODStatus && !DateType && !fromDate && !toDate) {
-            Swal.fire("Invalid Input", "Please select at least one filter.", "warning");
-            return;
-        }
-        // fetchData();
-        setLODData([]); // Reset LOD data before fetching new data
-        setIsMoreDataAvailable(true); // Reset more data available state
-        setMaxCurrentPage(0); // Reset max current page
         // setTotalAPIPages(1); // Reset total API pages
-        if (currentPage === 1) {
-            fetchData();
+        const isValid = filterValidate();
+        if (!isValid) {
+            return; // If validation fails, do not proceed
         } else {
-            setCurrentPage(1);
+            setLODData([]); // Reset LOD data before fetching new data
+            setIsMoreDataAvailable(true); // Reset more data available state
+            setMaxCurrentPage(0); // Reset max current page
+            setCommittedFilters({
+                LODStatus: LODStatus,
+                DateType: DateType,
+                fromDate: fromDate,
+                toDate: toDate,
+            });
+            if (currentPage === 1) {
+                fetchData({
+                    LODStatus: LODStatus,
+                    DateType: DateType,
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    currentPage: 1,
+                });
+            } else {
+                setCurrentPage(1);
+            }
+            setIsFilterApplied(true); // Set filter applied state to true
         }
-        setIsFilterApplied(true); // Set filter applied state to true
+    }
+
+    const filterValidate = () => {
+        if (!LODStatus && !DateType && !fromDate && !toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select at least one filter.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        if (DateType && !fromDate && !toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select a date range when 'Date Type' is selected.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        if (fromDate && !toDate || !fromDate && toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select both 'From' and 'To' dates.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        return true;
     }
 
     // Fetch list of LOD cases
-    const fetchData = async () => {
+    const fetchData = async (filters) => {
         setIsLoading(true);
         try {
-            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "LOD", currentPage);
+            const LOD = await List_Final_Reminder_Lod_Cases(filters.LODStatus, filters.DateType, filters.fromDate, filters.toDate, "LOD", filters.currentPage);
             console.log("LOD data:", LOD);
             setLODData((prevData) => [...prevData, ...LOD]);
             if (LOD.length === 0) {
@@ -93,8 +166,11 @@ const LOD_Log = () => {
                         text: "No matching data found for the selected filters.",
                         icon: "warning",
                         allowOutsideClick: false,
-                        allowEscapeKey: false
+                        allowEscapeKey: false,
+                        confirmButtonColor: "#f1c40f"
                     });
+                } else if (currentPage === 2) {
+                    setCurrentPage(1); // Reset to page 1 if no data found on page 2
                 }
             } else {
                 const maxData = currentPage === 1 ? 10 : 30;
@@ -104,7 +180,12 @@ const LOD_Log = () => {
             }
         } catch (error) {
             // console.error("Error fetching LOD data:", error);
-            Swal.fire("No Results", "Error fetching data.", "error");
+            Swal.fire({
+                title: "No Results",
+                text: "Error fetching data.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
             setLODData([]);
         } finally {
             setIsLoading(false);
@@ -113,9 +194,17 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+        if (!hasMounted.current) {
+            hasMounted.current = true;
+            return;
+        }
+
+        if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage); // Update max current page
-            fetchData(); // Call the function whenever currentPage changes
+            fetchData({
+                ...committedFilters,
+                currentPage: currentPage,
+            }); // Call the function whenever currentPage changes
         }
     }, [currentPage]);
 
@@ -130,8 +219,18 @@ const LOD_Log = () => {
         setLODData([]);
         setTotalPages(0);
         setIsMoreDataAvailable(true);
-        setCurrentPage(0);
-        filteredData([]);
+        setCommittedFilters({
+            LODStatus: "",
+            DateType: "",
+            fromDate: null,
+            toDate: null,
+        })
+        if (currentPage != 1) {
+            setCurrentPage(1); // Reset to page 1
+        } else {
+            setCurrentPage(0); // Temp set to 0
+            setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+        }
     };
 
     // display loading animation when data is loading
@@ -205,6 +304,10 @@ const LOD_Log = () => {
         navigate("/pages/LOD/CustomerResponseReview", { state: { caseId } });
     };
 
+    // Function to navigate to the case ID page
+    const naviCaseID = (caseId) => {
+        navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
+    }
 
     return (
         <div className={GlobalStyle.fontPoppins}>
@@ -214,24 +317,23 @@ const LOD_Log = () => {
             {/* filters */}
             <div className={`${GlobalStyle.cardContainer} w-full`}>
 
-                <div className="flex items-center justify-end w-full space-x-6">
+                <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3 gap-3">
                     <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Status</option>
-                        <option value="Initial LOD">Initial LOD</option>
-                        <option value="LOD Settle Pending">LOD Settle Pending</option>
-                        <option value="LOD Settle Open-Pending">LOD Settle Open-Pending</option>
-                        <option value="LOD Settle Active">LOD Settle Active</option>
+                        <option value="Initial LOD" style={{ color: "Black" }}>Initial LOD</option>
+                        <option value="LOD Settle Pending" style={{ color: "Black" }}>LOD Settle Pending</option>
+                        <option value="LOD Settle Open-Pending" style={{ color: "Black" }}>LOD Settle Open-Pending</option>
+                        <option value="LOD Settle Active" style={{ color: "Black" }}>LOD Settle Active</option>
                     </select>
 
                     <select value={DateType} onChange={(e) => setDateType(e.target.value)} style={{ color: DateType === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Date Type</option>
-                        <option value="created_date">Created Date</option>
-                        <option value="expire_date">Expire Date</option>
-                        <option value="last_response_date">Last Response Date</option>
+                        <option value="created_date" style={{ color: "Black" }}>Created Date</option>
+                        <option value="expire_date" style={{ color: "Black" }}>Expire Date</option>
+                        <option value="last_response_date" style={{ color: "Black" }}>Last Response Date</option>
                     </select>
 
                     <label className={GlobalStyle.dataPickerDate}>Date</label>
-                    <div className={GlobalStyle.datePickerContainer}>
                         <DatePicker
                             selected={fromDate}
                             onChange={handleFromDateChange}
@@ -246,7 +348,6 @@ const LOD_Log = () => {
                             placeholderText="To Date"
                             className={GlobalStyle.inputText}
                         />
-                    </div>
 
                     <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
                     <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
@@ -269,7 +370,7 @@ const LOD_Log = () => {
             </div>
 
             {/* table */}
-            <div className={GlobalStyle.tableContainer}>
+            <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -293,7 +394,12 @@ const LOD_Log = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.LODID}</td>
+                                    <td
+                                        className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                                        onClick={() => naviCaseID(log.LODID)}
+                                    >
+                                        {log.LODID.toString().padStart(3, '0')}
+                                    </td>
                                     <td className={GlobalStyle.tableData}>{log.Status}</td>
                                     <td className={GlobalStyle.tableData}>{log.LODBatchNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.NotificationCount}</td>

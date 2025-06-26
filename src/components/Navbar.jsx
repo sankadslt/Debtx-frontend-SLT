@@ -524,12 +524,12 @@ const Navbar = () => {
           {isTaskListOpen && (
             <div
               ref={taskListRef}
-              className="absolute top-12 right-0 w-[550px]  bg-[#1E2659] bg-opacity-100 backdrop-blur-sm   text-[#E1E4F5] rounded-xl shadow-2xl p-5"
+              className="absolute top-12 right-0 w-[550px] border-2 border-[#00256A] bg-white bg-opacity-40 backdrop-blur-sm   text-[#E1E4F5] rounded-xl shadow-2xl p-5"
             >
               <div className="flex items-center justify-center mb-5">
                 <div className="flex items-center gap-2">
 
-                  <h3 className="text-xl font-bold text-[#00256A]">Task List</h3>
+                  <h3 className="text-xl font-bold text-black">Task List</h3>
                 </div>
               </div>
 
@@ -542,7 +542,7 @@ const Navbar = () => {
 
                     <div
                       key={task._id}
-                      className="group relative bg-white bg-opacity-60 border border-[#b1c4e] rounded-lg p-4 transition-all duration-300 hover:bg-[#00256A]
+                      className="group relative bg-white bg-opacity-60 border-2 border-[#b1c4e] rounded-lg p-4 transition-all duration-300 hover:bg-[#00256A]
  hover:border-blue-100 hover:shadow-md"
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -568,7 +568,7 @@ const Navbar = () => {
                           }
                         </div>
 
-                        <div className="absolute top-2 right-3 text-xs text-gray-500">
+                        <div className="absolute top-2 right-3 text-xs text-gray-500 group-hover:text-white ">
                           {new Date(task.CreateDTM).toLocaleDateString("en-GB")}
                         </div>
 
@@ -580,7 +580,7 @@ const Navbar = () => {
 
                           <button
                             onClick={() => handleTaskClick(task.Interaction_Log_ID, task.url)}
-                            className={`px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex-shrink-0 w-auto ${task.completed
+                            className={`px-3 py-1.5 text-xs font-semibold rounded-full border border-[#fffff] transition-all duration-200 flex-shrink-0 w-auto ${task.completed
                               ? "bg-green-200 text-green-900 hover:bg-green-300"
                               // : "bg-[#00256A] text-white group-hover:text-blue hover:bg-white"
                               : "bg-[#00256A] text-white hover:text-[#00256A] hover:bg-white"

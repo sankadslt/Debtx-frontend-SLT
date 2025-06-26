@@ -49,3 +49,21 @@ export const List_All_Active_RTOMs = async () => {
         throw error;
     }
 };
+
+export const createRTOM = async (rtomData) => {
+  try {
+    console.log("RTOM passed:")
+    const response = await axios.post(`${URL}/createRTOM`, rtomData);
+    console.log("RTOM creation response:", response);
+
+    if (response.status === 201) {
+      return response.data;  
+    } else {
+      throw new Error("Failed to create RTOM");
+    }
+  } catch (error) {
+    console.error("Error creating RTOM:", error.response?.data || error.message);
+    throw error;
+  }
+};
+

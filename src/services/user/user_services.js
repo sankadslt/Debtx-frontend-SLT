@@ -50,3 +50,20 @@ export const updateUserDetails = async (requestData = {}) => {
     );
   }
 };
+
+export const endUser = async (requestData ={}) => {
+  try {
+    const response = await axios.patch(`${USER_URL}/End_User`, requestData);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to terminate user:', error);
+    const message =error.response?.data?.message || 'Something went wrong.';
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: message,
+      }
+    );
+  }
+};
+

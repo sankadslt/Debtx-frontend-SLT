@@ -162,6 +162,7 @@ const Sidebar = ({ onHoverChange }) => {
       roles: ["superadmin", "admin", "user"],
       subItems: [
         { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin"] },
+        { icon: CgEditFade, label: "Service List", link: "/pages/Service/ServiceTypeList", roles: ["superadmin"] },
        // { icon: CgEditFade, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Filter Option", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Arrears Bands and Respective Initial Amounts", link: "/dashboard", roles: ["superadmin"] },

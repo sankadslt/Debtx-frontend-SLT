@@ -194,23 +194,25 @@ export default function ROList() {
             </div>
 
             {/* Pagination */}
-            <div className={GlobalStyle.navButtonContainer}>
-                <button
-                    onClick={() => handlePrevNext("prev")}
-                    disabled={currentPage === 1}
-                    className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""}`}
-                >
-                    <FaArrowLeft />
-                </button>
-                <span>Page {currentPage} of {totalPages}</span>
-                <button
-                    onClick={() => handlePrevNext("next")}
-                    disabled={currentPage === totalPages}
-                    className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
-                >
-                    <FaArrowRight />
-                </button>
-            </div>
+			{totalPages > 1 && (
+				<div className={GlobalStyle.navButtonContainer}>
+					<button
+						onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+						disabled={currentPage === 1}
+						className={`${GlobalStyle.navButton} ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+					>
+						<FaArrowLeft />
+					</button>
+					<span>Page {currentPage} </span>
+					<button
+						onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+						disabled={currentPage === totalPages}
+						className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
+					>
+						<FaArrowRight />
+					</button>
+				</div>
+			)}
 
             <button onClick={() => navigate(-1)} className={GlobalStyle.buttonPrimary}>
                 <FaArrowLeft />

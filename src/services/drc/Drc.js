@@ -328,7 +328,7 @@ export const getSLTCoordinators = async () => {
 
 export const registerDRC = async (drcData) => {
   try {
-    const response = await axios.post(`${URL}/Register_DRC`, drcData);
+    const response = await axios.post(`${URL}/Create_DRC_With_Services_and_SLT_Coordinator`, drcData);
     console.log("DRC registration response:", response.data);
     return response.data;
   } catch (error) {

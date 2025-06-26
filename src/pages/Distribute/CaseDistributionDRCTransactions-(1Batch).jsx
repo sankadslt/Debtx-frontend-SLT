@@ -138,9 +138,9 @@ export default function CaseDistributionDRCTransactions1Batch() {
     });
   };
 
-  const batchSeqDetails = transactions[0]?.batch_seq_details || [];
+  const batchSeqDetails = transactions[0]?.batch_details || [];
   const allDistributions = batchSeqDetails.flatMap(
-    (batch) => batch.array_of_distributions || []
+    (batch) => batch.distribution_details || []
   );
 
   //console.log("allDistributions", allDistributions);
@@ -188,7 +188,12 @@ export default function CaseDistributionDRCTransactions1Batch() {
               <tr>
                   <td className="py-2"><strong>Case Count</strong></td>
                   <td className="py-2"> <strong> : </strong> </td>
-                  <td className="py-2"> {transactions[0]?.rulebase_count || "N/A"}</td>
+                  <td className="py-2"> {transactions[0]?.inspected_count || "N/A"}</td>
+              </tr>
+               <tr>
+                  <td className="py-2"><strong>Captured Count</strong></td>
+                  <td className="py-2"> <strong> : </strong> </td>
+                  <td className="py-2"> {transactions[0]?.captured_count || "N/A"}</td>
               </tr>
 
             </tbody>  
@@ -306,7 +311,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
                         DRC
                       </th>
                       <th scope="col" className={GlobalStyle.tableHeader}>
-                        Distribution Amount
+                        Distribution Count
                       </th>
                     </tr>
                   </thead>

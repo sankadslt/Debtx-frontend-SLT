@@ -549,13 +549,13 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
       throw new Error("case_id is required");
     }
 
-  
-    const user_id = await getLoggedUserId();
-    const recieved_by = user_id || "Unknown User"; 
 
-    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {  
-      case_id, 
-      recieved_by 
+    const user_id = await getLoggedUserId();
+    const recieved_by = user_id || "Unknown User";
+
+    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {
+      case_id,
+      recieved_by
     });
 
     return response.status;
@@ -631,8 +631,8 @@ export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
 export const fetchCaseDetails = async (caseId) => {
   try {
     const response = await axios.get(`${URL}/listdownCaseDetailsByCaseId/${caseId}`, {
-      },);
-  
+    },);
+
     return response.data;
   } catch (error) {
     console.error('Error fetching case details:', error);
@@ -646,7 +646,7 @@ export const GetFilteredCaseLists = async ({
   TO_DAT,
   RTOM,
   DRC,
-  arrears_band:selectedBand,
+  arrears_band: selectedBand,
   service_type,
   pages
 }) => {
@@ -662,7 +662,7 @@ export const GetFilteredCaseLists = async ({
       pages
     };
 
-    
+
 
     const response = await axios.post(`${URL}/List_All_Cases`, payload);
 
@@ -678,13 +678,13 @@ export const GetFilteredCaseLists = async ({
         accountno: item.account_no,
         amount: item.current_arrears_amount,
         servicetype: item.service_type,
-        Agent:item.drc_name,
+        Agent: item.drc_name,
         drccommisionrule: item.service_type,
         currentarrearsamount: item.current_arrears_amount,
         rtom: item.rtom,
         area: item.area,
         Created_On: item.date,
-        Lastpaymentdate: item.last_payment_date  
+        Lastpaymentdate: item.last_payment_date
       }))
     };
   } catch (error) {
@@ -698,18 +698,52 @@ export const GetFilteredCaseLists = async ({
 
 export const getCaseStatusList = async () => {
   try {
-    const response = await axios.get(`${URL}/CaseStatus`);  
-    
+    const response = await axios.get(`${URL}/CaseStatus`);
+
     if (response.data.status === "success") {
-      
+
       return response.data.data.map((status) => ({
         key: status._id,
-        value: status.case_status  
+        value: status.case_status
       }));
     }
     throw new Error(response.data.message || "Failed to fetch case statuses");
   } catch (error) {
     console.error("Error fetching case statuses:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const List_Rejected_Batch_Summary_Case_Distribution_Batch_Id = async (case_distribution_batch_id) => {
+  try {
+    const response = await axios.post(`${URL}/List_Rejected_Batch_Summary_Case_Distribution_Batch_Id`, 
+      {
+        case_distribution_batch_id: case_distribution_batch_id
+      }
+    );
+
+    if (response.status === 200) {
+      return response.data.data;
+    } else {
+      throw new Error(response.data.message || "Failed to retriecve rejected batch summary");
+    }
+  } catch (error) {
+    console.error("Error fetching rejected batch summary:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const List_DRC_Distribution_Rejected_Batches = async () => {
+  try {
+    const response = await axios.get(`${URL}/List_DRC_Distribution_Rejected_Batches`);
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to retriecve rejected batch details");
+    }
+  } catch (error) {
+    console.error("Failed to retriecve rejected batch details:", error.response?.data || error.message);
     throw error;
   }
 };

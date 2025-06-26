@@ -722,7 +722,7 @@ const Case_List = () => {
               style={{ color: selectedBand === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Arrears Band</option>
-              {arrearsBand.length < 0 ? (arrearsBand.map(({ key, value }) => (
+              {arrearsBand.length > 0 ? (arrearsBand.map(({ key, value }) => (
                 <option key={key} value={key} style={{ color: "black" }}>
                   {value}
                 </option>
@@ -738,7 +738,7 @@ const Case_List = () => {
               style={{ color: selectedCaseStatus === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Case Status</option>
-              {caseStatusList.length < 0 ? (caseStatusList.map(({ key, value }) => (
+              {caseStatusList.length > 0 ? (caseStatusList.map(({ key, value }) => (
                 <option key={key} value={value} style={{ color: "black" }}>
                   {value}
                 </option>
@@ -754,7 +754,7 @@ const Case_List = () => {
               style={{ color: selectedServiceType === "" ? "gray" : "black" }}
             >
               <option value="" hidden>Service Type</option>
-              {serviceTypes.length < 0 ? (serviceTypes.map((service) => (
+              {serviceTypes.length > 0 ? (serviceTypes.map((service) => (
                 <option key={service.id} value={service.id} style={{ color: "black" }}>
                   {service.value}
                 </option>

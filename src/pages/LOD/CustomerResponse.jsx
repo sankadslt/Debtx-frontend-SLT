@@ -191,9 +191,9 @@ const CustomerResponse = () => {
                             style={{ color: ResponseType === "" ? "gray" : "black" }}
                         >
                             <option value="" hidden>Customer Response</option>
-                            <option value="Agree to Settle">Agree to Settle</option>
-                            <option value="Customer Dispute">Customer Dispute</option>
-                            <option value="Request More Information">Request More Information</option>
+                            <option value="Agree to Settle" style={{ color: "black" }}>Agree to Settle</option>
+                            <option value="Customer Dispute" style={{ color: "black" }}>Customer Dispute</option>
+                            <option value="Request More Information" style={{ color: "black" }}>Request More Information</option>
                         </select>
                     </div>
 
