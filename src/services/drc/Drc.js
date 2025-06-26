@@ -328,21 +328,38 @@ export const getSLTCoordinators = async () => {
 
 export const registerDRC = async (drcData) => {
   try {
-    const response = await axios.post(`${URL}/Register_DRC`, drcData);
+    const response = await axios.post(`${URL}/Register_DRC`, drcData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
     console.log("DRC registration response:", response.data);
+    
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to register DRC");
+    }
+    
     return response.data;
   } catch (error) {
     console.error("Error registering DRC:", error);
+    
+    let errorMessage = "Failed to register DRC";
     if (error.response) {
       console.error("Server error details:", error.response.data);
-      throw new Error(
-        error.response.data.message || "Server error: " + error.response.status
-      );
+      errorMessage = error.response.data.message || errorMessage;
+      
+      if (error.response.data.errors) {
+        errorMessage += ": " + JSON.stringify(error.response.data.errors);
+      }
     } else if (error.request) {
-      throw new Error("No response received from server");
+      console.error("No response received:", error.request);
+      errorMessage = "No response received from server";
     } else {
-      throw new Error(error.message || "Failed to register DRC");
+      console.error("Request setup error:", error.message);
     }
+    
+    throw new Error(errorMessage);
   }
 };
 
