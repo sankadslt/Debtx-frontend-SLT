@@ -1,13 +1,3 @@
-/* Purpose: This template is used for the 12.1 & 12.2 - Service Type List .
-Created Date: 2025-06-11
-Created By: Sehan (ravishanhenadeera@gmail.com)
-Edited By: Lishan (lishanweerasuriya@gmail.com)
-Version: node 20
-UI number :12.1 & 12.2
-Dependencies: tailwind css
-Related Files: (routes and service.js)
-Notes:The following page conatins the code for the Service Type List Screen */
-
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
@@ -30,17 +20,19 @@ export default function ServiceTypeList() {
 	const [serviceType, setServiceType] = useState("");
 	const [editableRowId, setEditableRowId] = useState(null);
 	const [editedStatus, setEditedStatus] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
 
 	// Pagination State
-	const [currentPage, setCurrentPage] = useState(0);
+	const [currentPage, setCurrentPage] = useState(1);
 	const rowsPerPage = 10;
-	const pages = Math.ceil(filteredData.length / rowsPerPage);
-	const startIndex = currentPage * rowsPerPage;
+	const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+	const startIndex = (currentPage - 1) * rowsPerPage;
 	const endIndex = startIndex + rowsPerPage;
 	const paginatedData = filteredData.slice(startIndex, endIndex);
 
 	useEffect(() => {
 		const fetchData = async () => {
+			setIsLoading(true);
 			try {
 				const response = await getAllServices();
 				const services = response.data.mongo || [];
@@ -55,13 +47,20 @@ export default function ServiceTypeList() {
 				setFilteredData(formattedServices);
 			} catch (error) {
 				console.error("Error fetching services:", error);
+				Swal.fire({
+					title: "Error",
+					text: "Failed to fetch services.",
+					icon: "error",
+				});
+			} finally {
+				setIsLoading(false);
 			}
 		};
 		fetchData();
 	}, []);
 
 	useEffect(() => {
-		setCurrentPage(0); // reset to first page when data changes
+		setCurrentPage(1); // Reset to first page when data changes
 	}, [filteredData]);
 
 	const handleStatusChange = (e) => {
@@ -181,17 +180,37 @@ export default function ServiceTypeList() {
 			setServiceData(updated);
 			setFilteredData(updated);
 			setEditableRowId(null);
+			Swal.fire({
+				title: "Success",
+				text: "Status updated successfully!",
+				icon: "success",
+				timer: 1500,
+				showConfirmButton: false,
+			});
 		} catch (error) {
 			console.error("Error updating status:", error);
+			Swal.fire({
+				title: "Error",
+				text: "Failed to update status.",
+				icon: "error",
+			});
 		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="flex justify-center items-center h-64">
+				<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+			</div>
+		);
+	}
 
 	return (
 		<div className={GlobalStyle.fontPoppins}>
 			<h2
 				className={`${GlobalStyle.headingLarge} text-xl sm:text-2xl lg:text-3xl mt-8`}
 			>
-				Service Type List
+				Service List
 			</h2>
 
 			{/* Search and Filter */}
@@ -203,7 +222,7 @@ export default function ServiceTypeList() {
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							className={GlobalStyle.inputSearch}
-							placeholder="Search"
+							
 						/>
 						<FaSearch className={GlobalStyle.searchBarIcon} />
 					</div>
@@ -236,110 +255,99 @@ export default function ServiceTypeList() {
 			</div>
 
 			{/* Table */}
-			<div>
-				<div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
-					<table className={GlobalStyle.table}>
-						<thead className={GlobalStyle.thead}>
-							<tr>
-								<th className={GlobalStyle.tableHeader}>Service ID</th>
-								<th className={GlobalStyle.tableHeader}>Status</th>
-								<th className={GlobalStyle.tableHeader}>Service Type</th>
-								<th className={GlobalStyle.tableHeader}></th>
-							</tr>
-						</thead>
-						<tbody>
-							{paginatedData.length > 0 ? (
-								paginatedData.map((item) => (
-									<tr
-										key={item.Service_id}
-										className={GlobalStyle.tableRowEven}
-									>
-										<td className={GlobalStyle.tableData}>{item.Service_id}</td>
-										<td className={GlobalStyle.tableData}>
-											{editableRowId === item.Service_id ? (
-												<select
-													value={editedStatus}
-													onChange={(e) => setEditedStatus(e.target.value)}
-													className={GlobalStyle.selectBox}
-												>
-													<option value="Active">Active</option>
-													<option value="Inactive">Inactive</option>
-												</select>
-											) : (
-												<div className="flex items-center gap-2">
-													{item.Status === "Active" && (
-														<img
-															src={activeIcon}
-															alt="Active"
-															className="w-5 h-5"
-														/>
-													)}
-													{item.Status === "Inactive" && (
-														<img
-															src={inactiveIcon}
-															alt="Inactive"
-															className="w-5 h-5"
-														/>
-													)}
-												</div>
-											)}
-										</td>
-										<td className={GlobalStyle.tableData}>
-											{item.Service_type}
-										</td>
-										<td
-											className={`${GlobalStyle.tableData} flex justify-center`}
-										>
-											{editableRowId === item.Service_id ? (
-												<button
-													onClick={handleSaveClick}
-													className={GlobalStyle.buttonPrimary}
-												>
-													Save
-												</button>
-											) : (
+			<div className={`${GlobalStyle.tableContainer} overflow-x-auto`} style={{ maxWidth: '80%', margin: '0 auto', height: 'auto' }}>
+				<table className={`${GlobalStyle.table} table-auto w-full`} style={{ fontSize: '0.875rem', height: 'auto' }}>
+					<thead className={GlobalStyle.thead}>
+						<tr>
+							<th className={GlobalStyle.tableHeader} style={{  width: '20%' }}>Service ID</th>
+							<th className={GlobalStyle.tableHeader} style={{  width: '20%' }}>Status</th>
+							<th className={GlobalStyle.tableHeader} style={{  width: '40%' }}>Service Type</th>
+							<th className={GlobalStyle.tableHeader} style={{  width: '20%' }}></th>
+						</tr>
+					</thead>
+					<tbody>
+						{paginatedData.length > 0 ? (
+							paginatedData.map((item, index) => (
+								<tr
+									key={item.Service_id}
+									className={`${
+										index % 2 === 0 ? "bg-white bg-opacity-75" : "bg-gray-50 bg-opacity-50"
+									} border-b`}
+								>
+									<td className={GlobalStyle.tableData}>{item.Service_id}</td>
+									<td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+										{editableRowId === item.Service_id ? (
+											<select
+												value={editedStatus}
+												onChange={(e) => setEditedStatus(e.target.value)}
+												className={`${GlobalStyle.selectBox} w-24`}
+											>
+												<option value="Active">Active</option>
+												<option value="Inactive">Inactive</option>
+											</select>
+										) : (
+											<div className="relative group">
 												<img
-													src={editIcon}
-													alt="edit info"
-													title="Edit"
-													className="w-6 h-6 cursor-pointer"
-													onClick={() => handleEditClick(item)}
+													src={item.Status === "Active" ? activeIcon : inactiveIcon}
+													alt={item.Status}
+													className="w-6 h-6"
 												/>
-											)}
-										</td>
-									</tr>
-								))
-							) : (
-								<tr>
-									<td colSpan="4" className="text-center py-4">
-										No data found.
+												<div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+													{item.Status}
+													<div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-800"></div>
+												</div>
+											</div>
+										)}
+									</td>
+									<td className={GlobalStyle.tableData}>
+										{item.Service_type}
+									</td>
+									<td className={`${GlobalStyle.tableData} flex justify-center`}>
+										{editableRowId === item.Service_id ? (
+											<button
+												onClick={handleSaveClick}
+												className={`${GlobalStyle.buttonPrimary} text-sm px-3 py-1`}
+											>
+												Save
+											</button>
+										) : (
+											<img
+												src={editIcon}
+												alt="edit info"
+												title="Edit"
+												className="w-6 h-6 cursor-pointer"
+												onClick={() => handleEditClick(item)}
+											/>
+										)}
 									</td>
 								</tr>
-							)}
-						</tbody>
-					</table>
-				</div>
+							))
+						) : (
+							<tr>
+								<td colSpan="4" className="text-center py-4">
+									No data found.
+								</td>
+							</tr>
+						)}
+					</tbody>
+				</table>
 			</div>
 
 			{/* Pagination */}
-			{pages > 1 && (
-				<div className="flex justify-center items-center gap-4 mt-6">
+			{totalPages > 1 && (
+				<div className={GlobalStyle.navButtonContainer}>
 					<button
-						onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
-						disabled={currentPage === 0}
-						className={`${GlobalStyle.navButton} disabled:opacity-50`}
+						onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+						disabled={currentPage === 1}
+						className={`${GlobalStyle.navButton} ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
 					>
 						<FaArrowLeft />
 					</button>
-					<span className="text-sm">
-						Page {currentPage + 1} of {pages}
-					</span>
+					<span>Page {currentPage} </span>
 					<button
-						onClick={() =>
-							setCurrentPage((prev) => Math.min(prev + 1, pages - 1))
-						}
-						disabled={currentPage === pages - 1}
-						className={`${GlobalStyle.navButton} disabled:opacity-50`}
+						onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+						disabled={currentPage === totalPages}
+						className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
 					>
 						<FaArrowRight />
 					</button>
@@ -349,7 +357,6 @@ export default function ServiceTypeList() {
 			{/* Service Type Submission Form */}
 			<div className="mt-10 px-4 md:px-0">
 				<form
-					// onSubmit={handleServiceTypeSubmit}
 					className="flex flex-wrap items-center gap-4 max-w-lg w-full mx-auto"
 				>
 					<label htmlFor="serviceType" className="font-medium">
@@ -361,7 +368,7 @@ export default function ServiceTypeList() {
 						value={serviceType}
 						onChange={(e) => setServiceType(e.target.value)}
 						className={`${GlobalStyle.inputText} flex-1 min-w-[200px]`}
-						placeholder="Enter Service Type"
+						
 					/>
 					<button
 						type="submit"
