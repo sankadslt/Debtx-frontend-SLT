@@ -825,7 +825,7 @@ const UserApproval = () => {
 			)}
 
 			{/* Create Task Button */}
-			<div className="flex justify-end mt-6">
+			<div className="flex justify mt-4">
 				{filteredDataBySearch.length > 0 && (
 					<div>
 						<button
