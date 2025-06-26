@@ -44,6 +44,10 @@ const Final_Reminder_LOD_Hold_List = () => {
   const [isCreatingTask, setIsCreatingTask] = useState(false); // State to track task creation status
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
+  const [activeWithdrawPopupLODID, setActiveWithdrawPopupLODID] =
+    useState(null);
+  const [WithdrawRemark, setWithdrawRemark] = useState("");
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
@@ -438,6 +442,33 @@ const Final_Reminder_LOD_Hold_List = () => {
     );
   }
 
+  const handleWithdrawPopup = (LODID) => {
+    setActiveWithdrawPopupLODID(LODID);
+    setWithdrawRemark("");
+  };
+
+  const closeWithdrawPopup = () => {
+    setActiveWithdrawPopupLODID(null);
+  };
+
+  const handleWithdraw = () => {
+    if (!WithdrawRemark.trim()) {
+      Swal.fire("Error", "Please enter a remark for the withdraw.", "error");
+      return;
+    }
+
+    closeWithdrawPopup();
+  };
+
+  const WithdrawFinalReminderLOD = async () => {
+    if (!activeWithdrawPopupLODID) {
+      Swal.fire("Error", "Please select a LOD or Final Reminder.", "error");
+      return;
+    }
+
+    const userData = await getLoggedUserId(); // Assign user ID
+  };
+
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
@@ -581,7 +612,7 @@ const Final_Reminder_LOD_Hold_List = () => {
                             </button>
                             <button
                               className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-                              // onClick={}
+                              onClick={() => handleWithdrawPopup(item.case_id)}
                             >
                               Withdraw
                             </button>
@@ -603,6 +634,41 @@ const Final_Reminder_LOD_Hold_List = () => {
               </tbody>
             </table>
           </div>
+
+          {activeWithdrawPopupLODID && (
+            <div className={GlobalStyle.popupBoxContainer}>
+              <div className={GlobalStyle.popupBoxBody}>
+                <div className={GlobalStyle.popupBox}>
+                  <h2 className={GlobalStyle.popupBoxTitle}>Withdraw Case</h2>
+                  <button
+                    className={GlobalStyle.popupBoxCloseButton}
+                    onClick={() => closeWithdrawPopup()}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div>
+                  <div className="mb-6">
+                    <label className={GlobalStyle.remarkTopic}>Remark</label>
+                    <textarea
+                      value={WithdrawRemark}
+                      onChange={(e) => setWithdrawRemark(e.target.value)}
+                      className={`${GlobalStyle.remark} w-full`}
+                      rows="5"
+                    ></textarea>
+                  </div>
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={handleWithdraw}
+                      className={`${GlobalStyle.buttonPrimary} mr-4`}
+                    >
+                      Withdraw
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Pagination Section */}
           {filteredDataBySearch.length > 0 && (
