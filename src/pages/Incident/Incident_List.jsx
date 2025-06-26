@@ -367,7 +367,7 @@ const Incident_List = () => {
             </div>
             {/*Filter section */}
             <div className= {`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
-                <div className="flex flex-wrap    items-center justify-end w-full gap-0.5  ">
+                <div className="flex flex-wrap    items-center justify-end w-full gap-3  ">
 
                     <div className="min-w-[150px] w-full sm:w-auto mt-2 mb-2 ">
                     <select value={status1} onChange={(e) => setStatus1(e.target.value)} style={{ color: status1 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
