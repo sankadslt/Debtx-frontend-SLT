@@ -330,7 +330,12 @@ export default function AmendAssignedDRC() {
               <tr>
                 <td className="py-2"><strong>Case Count  </strong></td>
                 <td className="py-2"> : </td>
-                <td className="py-2"> {transaction[0]?.rulebase_count || "N/A"}</td>
+                <td className="py-2"> {transaction[0]?.inspected_count || "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Captured Count  </strong></td>
+                <td className="py-2"> : </td>
+                <td className="py-2"> {transaction[0]?.captured_count || "N/A"}</td>
               </tr>
 
             </tbody>
@@ -543,7 +548,7 @@ export default function AmendAssignedDRC() {
                     <td className={GlobalStyle.tableData}>{item.DRC2}</td>
                     <td className={GlobalStyle.tableData}>{item.DRC2Count}</td>
                     <td className={GlobalStyle.tableData}>
-                      <div>
+                      <div className="flex justify-center items-center">
                         {["admin", "superadmin", "slt"].includes(userRole) && (
                           <button
                             onClick={() =>
