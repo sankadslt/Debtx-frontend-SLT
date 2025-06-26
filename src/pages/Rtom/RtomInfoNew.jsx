@@ -1,24 +1,32 @@
 /*Purpose:
 Created Date: 2025-06-20
 Created By: U.H.Nandali Linara (nadalilinara5@gmail.com)
-Last Modified Date: 2025-06-22
-Modified By: U.H.Nandali Linara (nadalilinara5@gmail.com)
+Last Modified Date: 2025-06-26
+Modified By: Buthmi Mithara Abeysena (buthmimithara1234@gmail.com)
 Version: React v18
 ui number : 10.2
 Dependencies: Tailwind CSS
 Related Files:
 Notes: This template uses Tailwind CSS */
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import edit_info from "../../assets/images/edit-info.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
+import { 
+  fetchRTOMDetailsById, 
+  updateRTOMDetails, 
+  terminateRTOM 
+} from "../../services/RTOM/Rtom_services";
 
 const RtomInfoNew = () => {
     const navigate = useNavigate();
+    const { rtomId } = useParams();
     
     // Component state
     const [mode, setMode] = useState('view'); 
@@ -31,40 +39,163 @@ const RtomInfoNew = () => {
     const [logHistory, setLogHistory] = useState([]);
     const [isEnabled, setIsEnabled] = useState(true);
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Mock data
+    // Store original data for comparison
+    const [originalData, setOriginalData] = useState({});
+
+    // RTOM data from API
     const [rtomData, setRtomData] = useState({
-        billing_center_code: "BC001",
-        rtom_name: "Sample RTOM",
-        created_on: new Date().toISOString(),
-        area_code: "AREA001",
-        rtom_email: "rtom@example.com",
-        rtom_mobile_no: "1234567890",
-        rtom_telephone_no: "9876543210",
-        status: "Active"
+        rtom_id: '',
+        billing_center_code: '',
+        rtom_name: '',
+        created_on: '',
+        area_code: '',
+        rtom_email: '',
+        rtom_mobile_no: '',
+        rtom_telephone_no: '',
+        rtom_status: '',
+        rtom_remarks: [],
+        updated_rtom: []
     });
 
     // Form data for edit mode
     const [formData, setFormData] = useState({
-        billingCenterCode: rtomData.billing_center_code,
-        name: rtomData.rtom_name,
-        areaCode: rtomData.area_code,
-        email: rtomData.rtom_email,
-        mobile: rtomData.rtom_mobile_no,
-        telephone: rtomData.rtom_telephone_no,
-        status: rtomData.status
+        billingCenterCode: '',
+        name: '',
+        areaCode: '',
+        email: '',
+        mobile: '',
+        telephone: '',
+        status: ''
     });
+
+    // Fetch RTOM details on component mount
+    useEffect(() => {
+        if (rtomId) {
+            fetchRTOMData();
+        } else {
+            Swal.fire('Error', 'RTOM ID not provided', 'error');
+            navigate('/pages/Rtom/RtomList');
+        }
+    }, [rtomId]);
+
+    // Update form data when rtomData changes
+    useEffect(() => {
+        const newFormData = {
+            billingCenterCode: rtomData.billing_center_code || '',
+            name: rtomData.rtom_name || '',
+            areaCode: rtomData.area_code || '',
+            email: rtomData.rtom_email || '',
+            mobile: rtomData.rtom_mobile_no || '',
+            telephone: rtomData.rtom_telephone_no || '',
+            status: rtomData.rtom_status || ''
+        };
+        
+        setFormData(newFormData);
+        setOriginalData(newFormData);
+        setIsEnabled(rtomData.rtom_status === 'Active');
+        setIsEndButtonVisible(rtomData.rtom_status !== 'Terminate');
+        
+        // Process log history from backend data
+        processLogHistory(rtomData);
+    }, [rtomData]);
+
+    const fetchRTOMData = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetchRTOMDetailsById(parseInt(rtomId));
+            setRtomData(response);
+        } catch (error) {
+            console.error('Error fetching RTOM data:', error);
+            Swal.fire('Error', error.message || 'Failed to fetch RTOM details', 'error');
+            navigate('/pages/Rtom/RtomList');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Process log history from backend data
+    const processLogHistory = (data) => {
+        const history = [];
+        
+        // Add remarks history
+        if (data.rtom_remarks && Array.isArray(data.rtom_remarks)) {
+            data.rtom_remarks.forEach(remarkItem => {
+                history.push({
+                    editOn: remarkItem.remark_date || new Date().toISOString(),
+                    action: `Remark added: ${remarkItem.remark}`,
+                    editBy: remarkItem.remark_by || 'Unknown'
+                });
+            });
+        }
+        
+        // Add update history
+        if (data.updated_rtom && Array.isArray(data.updated_rtom)) {
+            data.updated_rtom.forEach(updateItem => {
+                history.push({
+                    editOn: updateItem.updated_dtm || new Date().toISOString(),
+                    action: 'RTOM details updated',
+                    editBy: updateItem.updated_by || 'Unknown'
+                });
+            });
+        }
+        
+        // Sort by date (newest first)
+        history.sort((a, b) => new Date(b.editOn) - new Date(a.editOn));
+        
+        setLogHistory(history);
+    };
+
+    // Add log entry function
+    const addLogEntry = (action, editBy = "current_user") => {
+        const newLogEntry = {
+            editOn: new Date().toISOString(),
+            action: action,
+            editBy: editBy
+        };
+        
+        setLogHistory(prev => [newLogEntry, ...prev]);
+    };
+
+    // Generate change description
+    const generateChangeDescription = (original, updated) => {
+        const changes = [];
+        
+        if (original.billingCenterCode !== updated.billingCenterCode) {
+            changes.push(`Billing Center Code: ${original.billingCenterCode} → ${updated.billingCenterCode}`);
+        }
+        if (original.name !== updated.name) {
+            changes.push(`Name: ${original.name} → ${updated.name}`);
+        }
+        if (original.areaCode !== updated.areaCode) {
+            changes.push(`Area Code: ${original.areaCode} → ${updated.areaCode}`);
+        }
+        if (original.email !== updated.email) {
+            changes.push(`Email: ${original.email} → ${updated.email}`);
+        }
+        if (original.mobile !== updated.mobile) {
+            changes.push(`Mobile: ${original.mobile} → ${updated.mobile}`);
+        }
+        if (original.telephone !== updated.telephone) {
+            changes.push(`Telephone: ${original.telephone} → ${updated.telephone}`);
+        }
+        if (original.status !== updated.status) {
+            changes.push(`Status: ${original.status} → ${updated.status}`);
+        }
+        
+        return changes.length > 0 ? `Updated: ${changes.join(', ')}` : 'RTOM details updated';
+    };
 
     // Navigation
     const goBack = () => {
-       
         if (window.history.length > 1) {
             navigate(-1);
         } else {
-            
-            navigate('/rtom-list'); 
+            navigate('/pages/Rtom/RtomList'); 
         }
     };
+
     const switchToEditMode = () => setMode('edit');
     const switchToViewMode = () => setMode('view');
     const switchToEndMode = () => {
@@ -95,7 +226,7 @@ const RtomInfoNew = () => {
         }));
     };
 
-    const handleSaveEnd = () => {
+    const handleSaveEnd = async () => {
         if (!endDate) {
             setError("Please select an end date");
             return;
@@ -105,33 +236,84 @@ const RtomInfoNew = () => {
             return;
         }
         
-        // Update the RTOM status to inactive
-        const updatedData = {
-            ...rtomData,
-            status: "Inactive"
-        };
-        
-        setRtomData(updatedData);
-        alert("RTOM ended successfully!");
-        switchToViewMode();
+        setIsLoading(true);
+        try {
+            const terminateData = {
+                rtom_id: parseInt(rtomData.rtom_id),
+                rtom_end_date: endDate.toISOString(),
+                rtom_end_by: "current_user",
+                rtom_remarks: [{
+                    remark: remark,
+                    remark_date: new Date().toISOString(),
+                    remark_by: "current_user"
+                }]
+            };
+
+            const response = await terminateRTOM(terminateData);
+            
+            if (response.message === 'RTOM terminated successfully') {
+                // Add log entry for termination
+                addLogEntry(`RTOM terminated. End Date: ${formatDate(endDate)}. Remark: ${remark}`);
+                
+                Swal.fire('Success', 'RTOM terminated successfully!', 'success');
+                await fetchRTOMData();
+                switchToViewMode();
+                setIsEndButtonVisible(false);
+                setRemark("");
+                setEndDate(null);
+            } else {
+                throw new Error(response.message || 'Failed to terminate RTOM');
+            }
+        } catch (error) {
+            Swal.fire('Error', error.message, 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const updatedData = {
-            ...rtomData,
-            billing_center_code: formData.billingCenterCode,
-            rtom_name: formData.name,
-            area_code: formData.areaCode,
-            rtom_email: formData.email,
-            rtom_mobile_no: formData.mobile,
-            rtom_telephone_no: formData.telephone,
-            status: formData.status
-        };
+        setIsLoading(true);
         
-        setRtomData(updatedData);
-        alert("Changes saved successfully!");
-        switchToViewMode();
+        try {
+            const updateData = {
+                rtom_id: parseInt(rtomData.rtom_id),
+                billing_center_code: formData.billingCenterCode,
+                rtom_name: formData.name,
+                area_code: formData.areaCode,
+                rtom_email: formData.email,
+                rtom_mobile_no: formData.mobile,
+                rtom_telephone_no: formData.telephone,
+                rtom_status: formData.status,
+                remark: remark,
+                updated_by: "current_user"
+            };
+
+            const response = await updateRTOMDetails(updateData);
+            
+            if (response.status === 'success') {
+                // Generate change description and add log entry
+                const changeDescription = generateChangeDescription(originalData, formData);
+                let logAction = changeDescription;
+                
+                if (remark) {
+                    logAction += `. Remark: ${remark}`;
+                }
+                
+                addLogEntry(logAction);
+                
+                Swal.fire('Success', 'RTOM updated successfully!', 'success');
+                await fetchRTOMData();
+                switchToViewMode();
+                setRemark("");
+            } else {
+                throw new Error(response.message || 'Failed to update RTOM');
+            }
+        } catch (error) {
+            Swal.fire('Error', error.message, 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Log history pagination
@@ -165,12 +347,24 @@ const RtomInfoNew = () => {
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             const year = date.getFullYear();
-            return `${month}/${day}/${year}`;
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${month}/${day}/${year} ${hours}:${minutes}`;
         } catch (e) {
             console.error("Error formatting date:", e);
             return "N/A";
         }
     };
+
+    // Loading state
+    if (isLoading && !rtomData.rtom_id) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
 
     // Render View Mode
     const renderViewMode = () => (
@@ -408,7 +602,7 @@ const RtomInfoNew = () => {
                             onChange={(e) => setRemark(e.target.value)}
                             className={`${GlobalStyle.remark} w-[467px] ml-10`}
                             rows="5"
-                            placeholder=" "
+                            placeholder="Enter reason for changes..."
                         ></textarea>
                     </div>
 
@@ -417,14 +611,16 @@ const RtomInfoNew = () => {
                             type="button" 
                             className={`${GlobalStyle.buttonSecondary} px-8 py-2`}
                             onClick={switchToViewMode}
+                            disabled={isLoading}
                         >
                             Cancel
                         </button>
                         <button 
                             type="submit" 
                             className={`${GlobalStyle.buttonPrimary} px-8 py-2`}
+                            disabled={isLoading}
                         >
-                            Save
+                            {isLoading ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </form>
@@ -432,7 +628,7 @@ const RtomInfoNew = () => {
         </div>
     );
 
-    // Render End Mode - Updated version
+    // Render End Mode
     const renderEndMode = () => (
         <div className="flex justify-center">
             <div className={`${GlobalStyle.cardContainer} p-4`}>
@@ -492,10 +688,10 @@ const RtomInfoNew = () => {
                             dateFormat="dd/MM/yyyy"
                             placeholderText="dd/MM/yyyy"
                             className={GlobalStyle.inputText}
+                            minDate={new Date()}
                         />
                     </div>
 
-                    {/* Updated Remark section */}
                     <div className="w-full mt-4 pl-16">
                         <label className={`${GlobalStyle.headingMedium} block mb-2`}>Remark</label>
                         <textarea
@@ -503,6 +699,8 @@ const RtomInfoNew = () => {
                             onChange={(e) => setRemark(e.target.value)}
                             className={`${GlobalStyle.remark} w-full`}
                             rows="5"
+                            placeholder="Enter reason for termination..."
+                            required
                         ></textarea> 
                     </div>
 
@@ -512,8 +710,9 @@ const RtomInfoNew = () => {
                         <button 
                             className={`${GlobalStyle.buttonPrimary} px-8 py-2`}
                             onClick={handleSaveEnd}
+                            disabled={isLoading}
                         >
-                            Confirm End
+                            {isLoading ? 'Processing...' : 'Save'}
                         </button>
                     </div>
                 </div>
@@ -524,7 +723,7 @@ const RtomInfoNew = () => {
     // Common UI Elements
     const renderCommonUI = () => (
         <div className="flex flex-col">
-            {isEndButtonVisible && mode === 'view' && (
+            {isEndButtonVisible && mode === 'view' && rtomData.rtom_status !== 'Terminate' && (
                 <div className="flex justify-end mb-4">
                     <button
                         className={`${GlobalStyle.buttonPrimary}`}
@@ -556,7 +755,7 @@ const RtomInfoNew = () => {
     // Log History Popup
     const renderLogHistoryPopup = () => (
         showPopup && (
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
                 <div className="bg-white p-6 rounded-md shadow-lg w-3/4 max-h-[80vh] overflow-auto">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">Log History</h2>
@@ -572,7 +771,7 @@ const RtomInfoNew = () => {
                             <div className={GlobalStyle.searchBarContainer}>
                                 <input
                                     type="text"
-                                    placeholder="Search"
+                                    placeholder=""
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className={GlobalStyle.inputSearch}
@@ -600,7 +799,9 @@ const RtomInfoNew = () => {
                                                     } border-b`}
                                             >
                                                 <td className={GlobalStyle.tableData}>{formatDate(row.editOn)}</td>
-                                                <td className={GlobalStyle.tableData}>{row.action}</td>
+                                                <td className={GlobalStyle.tableData} title={row.action}>
+                                                    {row.action.length > 50 ? `${row.action.substring(0, 50)}...` : row.action}
+                                                </td>
                                                 <td className={GlobalStyle.tableData}>{row.editBy}</td>
                                             </tr>
                                         ))
@@ -659,3 +860,9 @@ const RtomInfoNew = () => {
 };
 
 export default RtomInfoNew;
+
+
+
+
+
+
