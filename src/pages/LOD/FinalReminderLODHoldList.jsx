@@ -94,35 +94,35 @@ const Final_Reminder_LOD_Hold_List = () => {
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
-    if (toDate) checkdatediffrence(date, toDate); /////
+    // if (toDate) checkdatediffrence(date, toDate); /////
   };
 
   const handleenddatechange = (date) => {
     setToDate(date);
-    if (fromDate) checkdatediffrence(fromDate, date); /////
+    // if (fromDate) checkdatediffrence(fromDate, date); /////
   };
 
   // Check the difference between two dates
   // If the difference is more than 1 month, show a warning
-  const checkdatediffrence = (startDate, endDate) => {
-    const start = new Date(startDate).getTime();
-    const end = new Date(endDate).getTime();
-    const diffInMs = end - start;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-    const diffInMonths = diffInDays / 30;
+  //   const checkdatediffrence = (startDate, endDate) => {
+  //     const start = new Date(startDate).getTime();
+  //     const end = new Date(endDate).getTime();
+  //     const diffInMs = end - start;
+  //     const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  //     const diffInMonths = diffInDays / 30;
 
-    if (diffInMonths > 1) {
-      Swal.fire({
-        title: "Date Range Exceeded",
-        text: "The selected dates shouldn't have more than a 1-month gap.",
-        icon: "warning",
-        confirmButtonColor: "#f1c40f",
-      });
-      setToDate(null);
-      setFromDate(null);
-      return;
-    }
-  };
+  //     if (diffInMonths > 1) {
+  //       Swal.fire({
+  //         title: "Date Range Exceeded",
+  //         text: "The selected dates shouldn't have more than a 1-month gap.",
+  //         icon: "warning",
+  //         confirmButtonColor: "#f1c40f",
+  //       });
+  //       setToDate(null);
+  //       setFromDate(null);
+  //       return;
+  //     }
+  //   };
 
   // Check if toDate is greater than fromDate
   useEffect(() => {
@@ -142,34 +142,42 @@ const Final_Reminder_LOD_Hold_List = () => {
   }, [fromDate, toDate]);
 
   // Search Section
-  const filteredDataBySearch = paginatedData.filter(
-    (row) =>
-      String(row.case_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.lod_type).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.hold_by).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(row.date).toLowerCase().includes(searchQuery.toLowerCase())
+  //   const filteredDataBySearch = paginatedData.filter(
+  //     (row) =>
+  //       String(row.case_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       String(row.status).toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       String(row.lod_type).toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       String(row.hold_by).toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       String(row.date).toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
+
+  // handle search
+  const filteredDataBySearch = paginatedData.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
   );
 
-  // Validate case ID input preventing non-numeric characters
-  const validateCaseId = () => {
-    if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-      Swal.fire({
-        title: "Warning",
-        text: "Invalid input. Only numbers are allowed for Case ID.",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        confirmButtonColor: "#f1c40f",
-      });
-      setCaseId(""); // Clear the invalid input
-      return;
-    }
-  };
+  //   // Validate case ID input preventing non-numeric characters
+  //   const validateCaseId = () => {
+  //     if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
+  //       Swal.fire({
+  //         title: "Warning",
+  //         text: "Invalid input. Only numbers are allowed for Case ID.",
+  //         icon: "warning",
+  //         allowOutsideClick: false,
+  //         allowEscapeKey: false,
+  //         confirmButtonColor: "#f1c40f",
+  //       });
+  //       setCaseId(""); // Clear the invalid input
+  //       return;
+  //     }
+  //   };
 
-  useEffect(() => {
-    validateCaseId(); // Validate case ID input
-  }, [caseId]);
+  //   useEffect(() => {
+  //     validateCaseId(); // Validate case ID input
+  //   }, [caseId]);
 
   // Validate filters before calling the API
   const filterValidations = () => {
@@ -205,7 +213,7 @@ const Final_Reminder_LOD_Hold_List = () => {
   };
 
   // Function to call the API and fetch filtered data
-  const callAPI = async () => {
+  const callAPI = async (filters) => {
     try {
       // Format the date to 'YYYY-MM-DD' format
       const formatDate = (date) => {
@@ -219,30 +227,15 @@ const Final_Reminder_LOD_Hold_List = () => {
       console.log(currentPage);
 
       const payload = {
-        LODtype: lodtype,
-        from_date: formatDate(fromDate),
-        to_date: formatDate(toDate),
-        pages: currentPage,
+        LODtype: filters.lodtype,
+        from_date: formatDate(filters.fromDate),
+        to_date: formatDate(filters.toDate),
+        pages: filters.currentPage,
       };
       console.log("Payload sent to API: ", payload);
 
       setIsLoading(true); // Set loading state to true
-      const response = await listAllLODHoldlist(payload).catch((error) => {
-        if (error.response && error.response.status === 404) {
-          Swal.fire({
-            title: "No Results",
-            text: "No matching data found for the selected filters.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonColor: "#f1c40f",
-          });
-          setFilteredData([]);
-          return null;
-        } else {
-          throw error;
-        }
-      });
+      const response = await listAllLODHoldlist(payload);
       setIsLoading(false); // Set loading state to false
 
       // Updated response handling
@@ -262,6 +255,8 @@ const Final_Reminder_LOD_Hold_List = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f",
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1);
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -272,7 +267,7 @@ const Final_Reminder_LOD_Hold_List = () => {
       } else {
         Swal.fire({
           title: "Error",
-          text: "No valid Settlement data found in response.",
+          text: "No valid LD Holdlist data found in response.",
           icon: "error",
           confirmButtonColor: "#d33",
         });
@@ -302,7 +297,7 @@ const Final_Reminder_LOD_Hold_List = () => {
       // callAPI(); // Call the function whenever currentPage changes
       callAPI({
         ...committedFilters,
-        page: currentPage,
+        currentPage: currentPage,
       });
     }
   }, [currentPage]);
@@ -343,7 +338,12 @@ const Final_Reminder_LOD_Hold_List = () => {
       });
       setFilteredData([]);
       if (currentPage === 1) {
-        callAPI();
+        callAPI({
+          lodtype,
+          fromDate,
+          toDate,
+          currentPage: 1,
+        });
       } else {
         setCurrentPage(1);
       }
@@ -373,10 +373,10 @@ const Final_Reminder_LOD_Hold_List = () => {
     }
   };
 
-  // Function to navigate to the settlement details page
-  const naviPreview = (caseId, settlementID) => {
-    navigate("/lod/ftl-log/preview", { state: { caseId, settlementID } });
-  };
+  //   // Function to navigate to the settlement details page
+  //   const naviPreview = (caseId, settlementID) => {
+  //     navigate("/lod/ftl-log/preview", { state: { caseId, settlementID } });
+  //   };
 
   // Function to navigate to the case ID page
   const naviCaseID = (caseId) => {
@@ -384,54 +384,50 @@ const Final_Reminder_LOD_Hold_List = () => {
   };
 
   // Function to handle the creation of tasks for downloading settlement list
-  const HandleCreateTaskDownloadSettlementList = async () => {
-    const userData = await getLoggedUserId(); // Assign user ID
+  //   const HandleCreateTaskDownloadSettlementList = async () => {
+  //     const userData = await getLoggedUserId(); // Assign user ID
 
-    if (!fromDate || !toDate) {
-      Swal.fire({
-        title: "Warning",
-        text: "Please select From Date and To Date.",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        confirmButtonColor: "#f1c40f",
-      });
-      return;
-    }
+  //     if (!fromDate || !toDate) {
+  //       Swal.fire({
+  //         title: "Warning",
+  //         text: "Please select From Date and To Date.",
+  //         icon: "warning",
+  //         allowOutsideClick: false,
+  //         allowEscapeKey: false,
+  //         confirmButtonColor: "#f1c40f",
+  //       });
+  //       return;
+  //     }
 
-    setIsCreatingTask(true);
-    // setStatus("MB Negotiaion");
-    try {
-      const response = await Create_Task_For_Downloard_Settlement_List(
-        userData,
-        fromDate,
-        lodtype,
-        toDate,
-        caseId
-      );
-      if (response === "success") {
-        Swal.fire({
-          title: response,
-          text: `Task created successfully!`,
-          icon: "success",
-          confirmButtonColor: "#28a745",
-        });
-      }
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.message || "Failed to create task.",
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-    } finally {
-      setIsCreatingTask(false);
-    }
-  };
-
-  useEffect(() => {
-    setCaseId("");
-  }, [searchBy]);
+  //     setIsCreatingTask(true);
+  //     // setStatus("MB Negotiaion");
+  //     try {
+  //       const response = await Create_Task_For_Downloard_Settlement_List(
+  //         userData,
+  //         fromDate,
+  //         lodtype,
+  //         toDate,
+  //         caseId
+  //       );
+  //       if (response === "success") {
+  //         Swal.fire({
+  //           title: response,
+  //           text: `Task created successfully!`,
+  //           icon: "success",
+  //           confirmButtonColor: "#28a745",
+  //         });
+  //       }
+  //     } catch (error) {
+  //       Swal.fire({
+  //         title: "Error",
+  //         text: error.message || "Failed to create task.",
+  //         icon: "error",
+  //         confirmButtonColor: "#d33",
+  //       });
+  //     } finally {
+  //       setIsCreatingTask(false);
+  //     }
+  //   };
 
   // display loading animation when data is loading
   if (isLoading) {
@@ -700,7 +696,7 @@ const Final_Reminder_LOD_Hold_List = () => {
           {["admin", "superadmin", "slt"].includes(userRole) &&
             filteredDataBySearch.length > 0 && (
               <button
-                onClick={HandleCreateTaskDownloadSettlementList}
+                // onClick={HandleCreateTaskDownloadSettlementList}
                 className={`${GlobalStyle.buttonPrimary} ${
                   isCreatingTask ? "opacity-50" : ""
                 }`}

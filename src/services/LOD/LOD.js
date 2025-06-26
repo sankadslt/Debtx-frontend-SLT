@@ -319,7 +319,7 @@ export const listAllLODHoldlist = async (payload) => {
     return response.data;
   } catch (error) {
     console.error(
-      "Error withdrawing Case Details:",
+      "Error withdrawing LD Hold list Details:",
       error.response?.data || error.message
     );
     throw error;
