@@ -900,8 +900,8 @@ const RtomInfoNew = () => {
         <div className={GlobalStyle.fontPoppins}>
             <div className={`${GlobalStyle.headingLarge} mb-8`}>
                 <span>{rtomData.billing_center_code} - {rtomData.rtom_name} RTOM Area</span>
-                {mode === 'edit' && <span>(Edit Mode)</span>}
-                {mode === 'end' && <span> (End Mode)</span>}
+                {mode === 'edit' && <span></span>}
+                {mode === 'end' && <span></span>}
                 {isRtomTerminated() && <span className="text-red-600"></span>}
             </div>
 
