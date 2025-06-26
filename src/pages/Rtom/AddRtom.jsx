@@ -172,7 +172,7 @@ useEffect(() => {
         <div 
           className={`${GlobalStyle.cardContainer} mt-4 w-full`}
           style={{
-            maxWidth: isMobile ? "100%" : "800px",
+            maxWidth: isMobile ? "100%" : "700px",
             padding: isMobile ? "1rem" : "2rem"
           }}
         >
