@@ -152,7 +152,6 @@ const Login = () => {
         <div className="w-1/2 hidden md:flex items-center justify-center bg-white/10 backdrop-blur-sm">
           <img
             src={logo}
-            alt="App illustration"
             className="w-[50%] h-[50%] object-contain rounded-lg drop-shadow-[0_0_12px_#ffffff]"
           />
         </div>
