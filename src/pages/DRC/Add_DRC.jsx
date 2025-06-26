@@ -370,6 +370,7 @@ const Add_DRC = () => {
       const selectedServices = serviceTypes
         .filter((s) => s.selected)
         .map((s) => ({
+          service_id: s.id, // Use the ID from the serviceTypes array
           service_type: s.name,
           service_status: "Active",
           create_by: user_id,
@@ -473,32 +474,14 @@ const Add_DRC = () => {
         <h1 className={GlobalStyle.headingLarge}>
           Register Debt Recovery Company
         </h1>
+        {/*Company Section */}   
         <form onSubmit={handleSubmit} className="w-full mt-6">
-           <div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[650px] lg:w-[550px]`}>          
+           <div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[750px] lg:w-[750px]`}>          
             <h2 className={`${GlobalStyle.headingMedium} mb-4 text-center font-bold`}  >
-
-   {/*Company Section */}      
-
               <span className="underline">Company Details</span>
             </h2>
            <table className="w-full">
               <tbody className="block md:table-row-group">
-                <tr className="block md:table-row mb-2">
-                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center pb-2">
-                    DRC Name :
-                  </td>
-                  <td className="block md:table-cell md:w-2/3 pb-2">
-                    <input
-                      type="text"
-                      value={DRCName}
-                      onChange={(e) => setDRCName(e.target.value)}
-                      className={`${GlobalStyle.inputText} w-full`}
-                    />
-                    {errors.DRCName && (
-                      <p className="text-red-500">{errors.DRCName}</p>
-                    )}
-                  </td>
-                </tr>
                 <tr className="block md:table-row">
                   <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
                     Business Registration No :
@@ -519,9 +502,26 @@ const Add_DRC = () => {
                     )}
                   </td>
                 </tr>
+                <tr className="block md:table-row mb-2">
+                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center pb-2">
+                    Company Name :
+                  </td>
+                  <td className="block md:table-cell md:w-2/3 pb-2">
+                    <input
+                      type="text"
+                      value={DRCName}
+                      onChange={(e) => setDRCName(e.target.value)}
+                      className={`${GlobalStyle.inputText} w-full`}
+                    />
+                    {errors.DRCName && (
+                      <p className="text-red-500">{errors.DRCName}</p>
+                    )}
+                  </td>
+                </tr>
+                
                 <tr className="block md:table-row">
                   <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
-                    Contact Number :
+                    Contact No :
                   </td>
                   <td className="block md:table-cell md:w-2/3 pb-2">
                     <input
@@ -631,8 +631,7 @@ const Add_DRC = () => {
           </tbody>
         </table>
 
-{/*Service section */}
-                
+    {/*Service section */}            
          <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
               <span className="underline">Service Types</span>
          </h2>
@@ -743,19 +742,14 @@ const Add_DRC = () => {
               </table>
             </div>
 
-  {/* Rtom section*/}
-
+        {/* Rtom section*/}
            <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
                 <span className="underline">RTOM Areas</span>
           </h2>
               <table className="w-full">
                   <tbody>
-
-                    <tr className="block md:table-row">
-                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-2 md:pb-0 font-semibold md:font-normal">
-                        RTOM Area :
-                      </td>
-                      <td className="block md:table-cell w-full md:w-2/3 pb-2">
+                    <tr className="block md:table-row mt-4">
+                      <td className="block md:table-cell w-full md:w-1/2 pb-2">
                         <select
                           value={selectedRTOM}
                           onChange={(e) => setSelectedRTOM(e.target.value)}
@@ -777,14 +771,7 @@ const Add_DRC = () => {
                           )}
                         </select>
                       </td>
-                    </tr>
-
-
-                    <tr className="block md:table-row mt-4">
-                      <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-2 md:pb-0 font-semibold md:font-normal">
-                        Handling Type :
-                      </td>
-                      <td className="block md:table-cell w-full md:w-2/3">
+                      <td className="block md:table-cell w-full md:w-1/2 pb-2">
                         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
                           <select
                             value={selectedhandlingtype}
@@ -802,7 +789,6 @@ const Add_DRC = () => {
                               type="button"
                               onClick={handleAddRTOM}
                               className={`${GlobalStyle.buttonCircle} self-end sm:self-auto`}
-                            
                             >
                               <img
                                 src={addIcon}
@@ -890,15 +876,12 @@ const Add_DRC = () => {
           </div>
         </form>
            <button
-                  className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
-                  onClick={goBack}
-                >
-                  <FaArrowLeft />
-                  
-                </button>
+            className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+            onClick={goBack}
+          >
+            <FaArrowLeft />
+          </button>
       </div>
-    
-                
     </div>
   );
 };
