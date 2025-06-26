@@ -23,6 +23,7 @@ import {
   updateRTOMDetails, 
   terminateRTOM 
 } from "../../services/RTOM/Rtom_services";
+import { getLoggedUserId } from "../../services/auth/authService"; 
 
 const RtomInfoNew = () => {
     const navigate = useNavigate();
@@ -40,6 +41,7 @@ const RtomInfoNew = () => {
     const [isEnabled, setIsEnabled] = useState(true);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [currentUser, setCurrentUser] = useState(""); 
 
     // Store original data for comparison
     const [originalData, setOriginalData] = useState({});
@@ -70,9 +72,23 @@ const RtomInfoNew = () => {
         status: ''
     });
 
+    // Get current logged user
+    const getCurrentUser = async () => {
+        try {
+            const userId = await getLoggedUserId();
+            setCurrentUser(userId || "Unknown User");
+            return userId || "Unknown User";
+        } catch (error) {
+            console.error("Error getting logged user:", error);
+            setCurrentUser("Unknown User");
+            return "Unknown User";
+        }
+    };
+
     // Fetch RTOM details on component mount
     useEffect(() => {
         if (rtomId) {
+            getCurrentUser(); // Get current user
             fetchRTOMData();
         } else {
             Swal.fire('Error', 'RTOM ID not provided', 'error');
@@ -147,12 +163,13 @@ const RtomInfoNew = () => {
         setLogHistory(history);
     };
 
-    // Add log entry function
-    const addLogEntry = (action, editBy = "current_user") => {
+    // Add log entry function with proper user tracking
+    const addLogEntry = async (action, editBy = null) => {
+        const user = editBy || currentUser || await getCurrentUser();
         const newLogEntry = {
             editOn: new Date().toISOString(),
             action: action,
-            editBy: editBy
+            editBy: user
         };
         
         setLogHistory(prev => [newLogEntry, ...prev]);
@@ -267,22 +284,24 @@ const RtomInfoNew = () => {
         
         setIsLoading(true);
         try {
+            const user = await getCurrentUser(); // Get current user for termination
+            
             const terminateData = {
                 rtom_id: parseInt(rtomData.rtom_id),
                 rtom_end_date: endDate.toISOString(),
-                rtom_end_by: "current_user",
+                rtom_end_by: user,
                 rtom_remarks: [{
                     remark: remark,
                     remark_date: new Date().toISOString(),
-                    remark_by: "current_user"
+                    remark_by: user
                 }]
             };
 
             const response = await terminateRTOM(terminateData);
             
             if (response.message === 'RTOM terminated successfully') {
-                // Add log entry for termination
-                addLogEntry(`RTOM terminated. End Date: ${formatDate(endDate)}. Remark: ${remark}`);
+                // Add log entry for termination with current user
+                await addLogEntry(`RTOM terminated. End Date: ${formatDate(endDate)}. Remark: ${remark}`, user);
                 
                 Swal.fire('Success', 'RTOM terminated successfully!', 'success').then(() => {
                     // After user clicks OK, refresh data and update UI
@@ -320,6 +339,8 @@ const RtomInfoNew = () => {
         setIsLoading(true);
         
         try {
+            const user = await getCurrentUser(); // Get current user for update
+            
             const updateData = {
                 rtom_id: parseInt(rtomData.rtom_id),
                 billing_center_code: formData.billingCenterCode,
@@ -330,13 +351,13 @@ const RtomInfoNew = () => {
                 rtom_telephone_no: formData.telephone,
                 rtom_status: formData.status,
                 remark: remark,
-                updated_by: "current_user"
+                updated_by: user
             };
 
             const response = await updateRTOMDetails(updateData);
             
             if (response.status === 'success') {
-                // Generate change description and add log entry
+                // Generate change description and add log entry with current user
                 const changeDescription = generateChangeDescription(originalData, formData);
                 let logAction = changeDescription;
                 
@@ -344,7 +365,7 @@ const RtomInfoNew = () => {
                     logAction += `. Remark: ${remark}`;
                 }
                 
-                addLogEntry(logAction);
+                await addLogEntry(logAction, user);
                 
                 Swal.fire('Success', 'RTOM updated successfully!', 'success');
                 await fetchRTOMData();
@@ -928,6 +949,3 @@ const RtomInfoNew = () => {
 };
 
 export default RtomInfoNew;
-
-
-
