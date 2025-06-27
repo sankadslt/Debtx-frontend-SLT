@@ -144,6 +144,8 @@ export default function AmendAssignedDRC() {
       case_distribution_batch_id: BatchID,
       drc_list: drc_list,
       created_by: user_id,
+      drc_commision_rule : transaction[0]?.drc_commision_rule , 
+      current_arrears_band: transaction[0]?.current_arrears_band ,
     };
     //console.log("Payload", payload);
 
