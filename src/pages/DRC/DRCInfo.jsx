@@ -1745,24 +1745,24 @@ return (
 
         {/* Log history button - Existing code */}
         <div className="flex flex-col items-start mt-8 ">
-                    <button
-                        className={`${GlobalStyle.buttonPrimary}`}
-                        onClick={() => setShowPopup(true)}
-                    >
-                        Log History
-                    </button>
+          <button
+              className={`${GlobalStyle.buttonPrimary}`}
+              onClick={() => setShowPopup(true)}
+          >
+              Log History
+          </button>
 
-                    <div style={{ marginTop: '15px' }}>
-                        <button
-                          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
-                          onClick={goBack}
-                        >
-                          <FaArrowLeft />
-                         
-                        </button>
+          <div style={{ marginTop: '15px' }}>
+              <button
+                className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                onClick={goBack}
+              >
+                <FaArrowLeft />
+                
+              </button>
 
-                    </div>
-                </div>
+          </div>
+      </div>
 
         {/* Log History Modal */}
           {showPopup && (
