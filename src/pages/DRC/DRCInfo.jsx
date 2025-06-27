@@ -1137,34 +1137,64 @@ const handleNextPage = () => {
                   </div>
                 </div>
               )}
-        {!showEndFields && (
-          <div className="flex justify-between mt-4 w-full px-8">
+       {showEndFields ? (
+  <div className="flex justify-between mt-4 w-full px-8">
+    <div className="flex flex-col items-start">
+      <button
+        className={`${GlobalStyle.buttonPrimary}`}
+        onClick={() => setShowPopup(true)}
+      >
+        Log History
+      </button>
+      <div style={{ marginTop: '15px' }}>
+        <button
+          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+          onClick={goBack}
+        >
+          <FaArrowLeft />
+        </button>
+      </div>
+    </div>
+    
+    
+  </div>
+) : (
+      <div className="flex justify-between mt-4 w-full px-8">
+        <div className="flex flex-col items-start">
+          <button
+            className={`${GlobalStyle.buttonPrimary}`}
+            onClick={() => setShowPopup(true)}
+          >
+            Log History
+          </button>
+          <div style={{ marginTop: '15px' }}>
             <button
               className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
               onClick={goBack}
             >
               <FaArrowLeft />
-              
-            </button>
-
-            {/* End Button (Opacity-50) */}
-            <button
-              onClick={() => {
-                if (companyData.drc_status !== "Terminate") {
-                  setShowEndFields(true);
-                }
-              }}
-              className={`${GlobalStyle.buttonPrimary} ${
-                companyData.drc_status === "Terminate" 
-                  ? "opacity-50 cursor-not-allowed" 
-                  : ""
-              }`}
-              disabled={companyData.drc_status === "Terminate"}
-            >
-              End
             </button>
           </div>
-           )}
+        </div>
+      <div>
+        <button
+          onClick={() => {
+            if (companyData.drc_status !== "Terminate") {
+              setShowEndFields(true);
+            }
+          }}
+          className={`${GlobalStyle.buttonPrimary} ${
+            companyData.drc_status === "Terminate" 
+              ? "opacity-50 cursor-not-allowed" 
+              : ""
+          }`}
+          disabled={companyData.drc_status === "Terminate"}
+        >
+          End
+        </button>
+      </div>
+  </div>
+      )}
     </div>
   );
 };
