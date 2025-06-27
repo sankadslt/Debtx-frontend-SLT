@@ -1224,17 +1224,7 @@ return (
                   drc_status: newStatus,
                 });
 
-                // Show a toast notification
-                Swal.fire({
-                  icon: "info",
-                  title: "Status Updated",
-                  text: `DRC status set to ${newStatus}`,
-                  toast: true,
-                  position: "top-end",
-                  showConfirmButton: false,
-                  timer: 3000,
-                  timerProgressBar: true,
-                });
+                
               }}
               className="relative inline-flex items-center cursor-pointer"
               aria-label={
