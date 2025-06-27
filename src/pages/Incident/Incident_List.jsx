@@ -30,6 +30,7 @@ import { refreshAccessToken } from "../../services/auth/authService";
 import opeanincident from  "/src/assets/images/incidents/Incident_Open.png"
 import rejectincident from  "/src/assets/images/incidents/Incident_Reject.png"
 import inprogressincident from  "/src/assets/images/incidents/Incident_InProgress.png"
+import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
 import errorincident from "/src/assets/images/incidents/Incident_Error.png"
 import error from "/src/assets/images/incidents/Reject.png"
 
@@ -85,10 +86,12 @@ const Incident_List = () => {
                 return inprogressincident;
             case "incident error":
                 return errorincident;
-            case "reject" :
-                return error;
-            case "incident reject":
-                return rejectincident;
+            // case "reject" :
+            //     return error;
+            // case "incident reject":
+            //     return rejectincident;
+            case "complete":
+                return incidentDone;
             default:
                 return null;
         }
@@ -364,7 +367,7 @@ const Incident_List = () => {
             </div>
             {/*Filter section */}
             <div className= {`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
-                <div className="flex flex-wrap    items-center justify-end w-full gap-0.5  ">
+                <div className="flex flex-wrap    items-center justify-end w-full gap-3  ">
 
                     <div className="min-w-[150px] w-full sm:w-auto mt-2 mb-2 ">
                     <select value={status1} onChange={(e) => setStatus1(e.target.value)} style={{ color: status1 === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>

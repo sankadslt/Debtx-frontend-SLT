@@ -67,10 +67,25 @@ export default function DRCAssignManagerApproval2() {
     // console.log("Payload:", payload);
     try {
       const response = await List_All_Batch_Details(payload);
-      setFilteredData(response);
+      if (response.length > 0) {
+        setFilteredData(response);
+      } else {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There are no batch details available for approval.",
+          confirmButtonColor: "#f1c40f",
+        })
+      }
       // console.log("All batch details:", response);
     } catch (error) {
       //console.error("Error fetching all batch details:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An error occurred while fetching batch details.",
+        confirmButtonColor: "#d33",
+      })
     }
   };
 
@@ -156,19 +171,20 @@ export default function DRCAssignManagerApproval2() {
   //console.log("Selected rows:", selectedRows);
 
   // Function to handle the approve button click
-  const onapprovebuttonclick = async (IsApproved) => {
+  const onapprovebuttonclick = async (IsApproved, currentRow) => {
     const userId = await getLoggedUserId();
-    const batchIds = Array.from(selectedRows);
+    // const batchIds = Array.from(selectedRows);
+    const batchIds = currentRow;
     // console.log("Selected batch IDs:", batchIds);
-    if (batchIds.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please select at least one record to approve.",
-        confirmButtonColor: "#f1c40f",
-      });
-      return;
-    }
+    // if (batchIds.length === 0) {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Warning",
+    //     text: "Please select at least one record to approve.",
+    //     confirmButtonColor: "#f1c40f",
+    //   });
+    //   return;
+    // }
 
     // Show confirmation alert before calling API
     const result = await Swal.fire({
@@ -316,15 +332,16 @@ export default function DRCAssignManagerApproval2() {
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
-              <th className={GlobalStyle.tableHeader}>
+              {/* <th className={GlobalStyle.tableHeader}>
 
-              </th>
+              </th> */}
               <th className={GlobalStyle.tableHeader}>Batch ID</th>
 
               <th className={GlobalStyle.tableHeader}>DRC Commission rule</th>
               <th className={GlobalStyle.tableHeader}>Case count</th>
               {/* <th className={GlobalStyle.tableHeader}>Total Arrears</th> */}
               <th className={GlobalStyle.tableHeader}>Created Date</th>
+              <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
           <tbody>
@@ -339,7 +356,7 @@ export default function DRCAssignManagerApproval2() {
                       : GlobalStyle.tableRowOdd
                   }
                 >
-                  <td className="text-center">
+                  {/* <td className="text-center">
                     <input
 
                       type="checkbox"
@@ -347,13 +364,37 @@ export default function DRCAssignManagerApproval2() {
                       onChange={() => handleRowSelect(item.case_distribution_details?.case_distribution_batch_id || "N/A")}
                       className="mx-auto"
                     />
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData}>{item.case_distribution_details?.case_distribution_batch_id || "N/A"}</td>
 
                   <td className={GlobalStyle.tableData}> {item.case_distribution_details?.drc_commision_rule || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.case_distribution_details?.rulebase_count || "N/A"}</td>
                   {/* <td className={GlobalStyle.tableData}>{item.totalArrears}</td> */}
                   <td className={GlobalStyle.tableData}>{new Date(item.created_on).toLocaleDateString("en-GB")}</td>
+                  <td className="text-center">
+                    <div className="flex justify-center gap-2">
+                      {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                          onClick={() => onapprovebuttonclick("Approve", item.case_distribution_details?.case_distribution_batch_id)}
+                          className={GlobalStyle.buttonPrimary}
+                        //   disabled={selectedRows.size === 0} // Disable if no rows are selected
+                        >
+                          Approve
+                        </button>
+
+                      )}
+
+                      {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                          onClick={() => onapprovebuttonclick("Reject", item.case_distribution_details?.case_distribution_batch_id)}
+                          className={GlobalStyle.buttonRemove}
+                        //   disabled={selectedRows.size === 0} // Disable if no rows are selected
+                        >
+                          Reject
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))
             ) : (
@@ -414,7 +455,7 @@ export default function DRCAssignManagerApproval2() {
         >
           Approve
         </button> */}
-        <div>
+        {/* <div>
           {["admin", "superadmin", "slt"].includes(userRole) && (
             <button
               onClick={() => onapprovebuttonclick("Approve")}
@@ -425,9 +466,9 @@ export default function DRCAssignManagerApproval2() {
             </button>
 
           )}
-        </div>
+        </div> */}
 
-        <div>
+        {/* <div>
           {["admin", "superadmin", "slt"].includes(userRole) && (
             <button
               onClick={() => onapprovebuttonclick("Reject")}
@@ -438,7 +479,7 @@ export default function DRCAssignManagerApproval2() {
             </button>
 
           )}
-        </div>
+        </div> */}
       </div>
       <div>
         {currentData.length > 0 && (
