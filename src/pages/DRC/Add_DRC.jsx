@@ -18,7 +18,7 @@ import {
   getActiveServiceDetails,
   getActiveRTOMDetails,
   getSLTCoordinators,
-  registerDRC,
+  Create_DRC_With_Services_and_SLT_Coordinator,
 } from "../../services/drc/Drc.js";
 
 import addIcon from "../../assets/images/add.svg";
@@ -117,34 +117,37 @@ const Add_DRC = () => {
 
   // Fetch active service types from the API
   const fetchActiveServices = async () => {
-    try {
-      setLoading(true);
-      const response = await getActiveServiceDetails();
-      console.log("API Response:", response);
+  try {
+    setLoading(true);
+    const response = await getActiveServiceDetails();
+    console.log("API Response:", response);
 
-      if (response && response.data) {
-        const filtered = response.data.filter(
-          (service) => service.service_status === "Active"
-        );
-        const formatted = filtered.map((service) => ({
-          id: service.service_id,
-          name: service.service_type,
-          selected: false,
-        }));
+    if (response && Array.isArray(response)) { 
+      const formatted = response.map((service) => ({
+        id: service.service_id,
+        code: service.service_id.toString(), 
+        name: service.service_type,
+        selected: false,
+      }));
 
-        setServiceTypes(formatted);
-      }
-    } catch (error) {
-      console.error("Error loading service types:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load active service types.",
-      });
-    } finally {
-      setLoading(false);
+      setServiceTypes(formatted);
+    } else {
+      console.error("Unexpected API response format:", response);
+      setServiceTypes([]);
     }
-  };
+  } catch (error) {
+    console.error("Error loading service types:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to load active service types.",
+    });
+    setServiceTypes([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const fetchRTOMData = async () => {
     try {
@@ -302,18 +305,21 @@ const Add_DRC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddServiceType = () => {
-    if (
-      selectedServiceType &&
-      !serviceTypes.some((t) => t.name === selectedServiceType && t.selected)
-    ) {
-      const updatedTypes = serviceTypes.map((item) =>
-        item.name === selectedServiceType ? { ...item, selected: true } : item
+      const handleAddServiceType = () => {
+      if (!selectedServiceType) return; 
+
+      const serviceToAdd = serviceTypes.find(
+        (service) => service.code === selectedServiceType
       );
-      setServiceTypes(updatedTypes);
-      setSelectedServiceType("");
-    }
-  };
+
+      if (serviceToAdd && !serviceToAdd.selected) {
+        const updatedTypes = serviceTypes.map((item) =>
+          item.code === selectedServiceType ? { ...item, selected: true } : item
+        );
+        setServiceTypes(updatedTypes);
+        setSelectedServiceType(""); 
+      }
+    };
 
   const handleAddRTOM = () => {
   if (!selectedRTOM || !selectedhandlingtype) {
@@ -338,9 +344,9 @@ const Add_DRC = () => {
   }
 };
 
-  const handleRemoveServiceType = (type) => {
+  const handleRemoveServiceType = (code) => {
     const updatedTypes = serviceTypes.map((item) =>
-      item.name === type ? { ...item, selected: false } : item
+      item.code === code ? { ...item, selected: false } : item
     );
     setServiceTypes(updatedTypes);
   };
@@ -353,119 +359,100 @@ const Add_DRC = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      Swal.fire({
-        icon: "error",
-        title: "Validation Error",
-        text: "Please fill in all required fields and ensure valid input.",
-      });
-      return;
-    }
+  e.preventDefault();
+  if (!validateForm()) {
+    Swal.fire({
+      icon: "error",
+      title: "Validation Error",
+      text: "Please fill in all required fields and ensure valid input.",
+    });
+    return;
+  }
 
-    try {
-      const user_id = await getLoggedUserId();
+  try {
+    const user_id = await getLoggedUserId();
 
-      // Format the selected services according to the API requirements
-      const selectedServices = serviceTypes
-        .filter((s) => s.selected)
-        .map((s) => ({
-          service_id: s.id, // Use the ID from the serviceTypes array
-          service_type: s.name,
-          service_status: "Active",
-          create_by: user_id,
-          create_on:
-            new Date().toISOString().split("T")[0] +
-            " " +
-            new Date().toTimeString().split(" ")[0],
-          status_update_dtm: new Date().toISOString(),
-          status_update_by: user_id,
-        }));
-
-      // Format the selected RTOMs according to the API requirements
-      const selectedRTOMs = rtomAreas
-        .filter((r) => r.selected)
-        .map((r) => ({
-          rtom_id: parseInt(r.id),
-          rtom_name: r.name,
-          rtom_status: "Active",
-          rtom_billing_center_code: "DEFAULT", // Add a default value as required by API
-          create_by: user_id,
-          create_dtm: new Date().toISOString(),
-          status_update_by: user_id,
-          status_update_dtm: new Date().toISOString(),
-        }));
-
-      // Create the coordinator object according to the API requirements
-      const coordinatorData = [
-        {
-          service_no: ServiceNo, // Make sure this is a string as per your schema
-          slt_coordinator_name: C_Name,
-          slt_coordinator_email: C_Email,
-          coordinator_create_dtm: new Date().toISOString(),
-          coordinator_create_by: user_id,
-        },
-      ];
-
-      // Format the data according to the API requirements
-      const drcData = {
-        drc_name: DRCName,
-        drc_business_registration_number: BusinessRegistrationNo,
-        drc_address: Address,
-        drc_contact_no: ContactNo,
-        drc_email: Email,
+    // Format the selected services
+    const selectedServices = serviceTypes
+      .filter((s) => s.selected)
+      .map((s) => ({
+        service_id: s.id.toString(),
+        service_type: s.name,
+        service_status: "Active",
         create_by: user_id,
-        create_on: new Date().toISOString(), // Add this field which is required in your schema
-        slt_coordinator: coordinatorData,
-        services: selectedServices,
-        rtom: selectedRTOMs,
-      };
+        create_on: new Date().toISOString(),
+        status_update_dtm: new Date().toISOString(),
+        status_update_by: user_id,
+      }));
 
-      console.log("Submitting DRC data:", JSON.stringify(drcData, null, 2));
+    // Format the selected RTOMs
+    const selectedRTOMs = rtomAreas
+      .filter((r) => r.selected)
+      .map((r) => ({
+        rtom_id: parseInt(r.id),
+        rtom_name: r.name,
+        rtom_status: "Active",
+        rtom_billing_center_code: "DEFAULT",
+        handling_type: r.handlingtype,
+        create_by: user_id,
+        create_dtm: new Date().toISOString(),
+        status_update_by: user_id,
+        status_update_dtm: new Date().toISOString(),
+      }));
 
-      // Call the API to register the DRC
-      const response = await registerDRC(drcData);
+    // Format the coordinator data
+    const coordinatorData = {
+      service_no: ServiceNo,
+      slt_coordinator_name: C_Name,
+      slt_coordinator_email: C_Email,
+      coordinator_create_dtm: new Date().toISOString(),
+      coordinator_create_by: user_id,
+    };
 
-      console.log("API Response:", response);
+    
+    const drcData = {
+      drc_name: DRCName,
+      drc_business_registration_number: BusinessRegistrationNo,
+      drc_address: Address,
+      drc_contact_no: ContactNo,
+      drc_email: Email,
+      create_by: user_id,
+      create_on: new Date().toISOString(),
+      slt_coordinator: [coordinatorData],
+      services: selectedServices,
+      rtom: selectedRTOMs,
+    };
 
+    console.log("Submitting DRC data:", JSON.stringify(drcData, null, 2));
+
+    // Call the API to register the DRC
+    const response = await Create_DRC_With_Services_and_SLT_Coordinator(drcData);
+
+    if (response.status === "success") {
       Swal.fire({
         icon: "success",
         title: "DRC Created Successfully!",
-        text: `The Debt Recovery Company has been registered successfully. `,
+        text: `The Debt Recovery Company has been registered successfully.`,
         showConfirmButton: true,
         confirmButtonText: "OK"
       }).then((result) => {
         if (result.isConfirmed) {
-          // Navigate to DRC list page
           navigate('/pages/DRC/DRCList'); 
         }
       });
-
-      // Reset form
-      setDRCName("");
-      setBusinessRegistrationNo("");
-      setContactNo("");
-      setAddress("");
-      setEmail("");
-      setServiceNo("");
-      setCName("");
-      setCEmail("");
-      setSelectedServiceType("");
-      setSelectedRTOM("");
-      setServiceTypes(
-        serviceTypes.map((item) => ({ ...item, selected: false }))
-      );
-      setRtomAreas(rtomAreas.map((item) => ({ ...item, selected: false })));
-      setErrors({});
-    } catch (error) {
-      console.error("Error registering DRC:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "Failed to register DRC.",
-      });
+    } else {
+      throw new Error(response.message || "Failed to register DRC");
     }
-  };
+
+  } catch (error) {
+    console.error("Error registering DRC:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.message || "Failed to register DRC. Please check the data and try again.",
+    });
+  }
+};
 
   return (
     <div className="min-h-screen p-6 flex items-center justify-center">
@@ -781,7 +768,7 @@ const Add_DRC = () => {
                             <option value="">Select Handling Type</option>
                             <option value="CPE">CPE</option>
                             <option value="Arrears">Arrears</option>
-                            <option value="All Type">All Type</option>
+                            <option value="All-Type">All Type</option>
                           </select>
                           
                           <div className="flex justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">
