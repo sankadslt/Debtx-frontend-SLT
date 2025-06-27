@@ -240,7 +240,10 @@ export const updateDRCInfo = async (
         drc_id: drcId,
         coordinator,
         services,
-        rtom,
+       rtom: rtom.map(rtomItem => ({
+          ...rtomItem,
+          handling_type:  rtomItem.handling_type
+        })),
         remark,
         updated_by,
         remark_dtm,

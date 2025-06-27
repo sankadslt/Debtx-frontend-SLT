@@ -160,17 +160,13 @@ const handleNextPage = () => {
             });
           }
 
-          // Fix for remark - ensure it's treated as a string
-          if (typeof data.remark === "string") {
-            setRemark(data.remark);
-          } else if (Array.isArray(data.remark)) {
-            const remarkText =
-              data.remark.length > 0 && typeof data.remark[0] === "string"
-                ? data.remark[0]
-                : "";
-            setRemark(remarkText);
+          if (Array.isArray(data.remark)) {
+            const validRemarks = data.remark.filter(r => r && (r.remark || r.remark_by || r.remark_dtm));
+            setRemarkHistory(validRemarks);
+          } else if (data.remark && typeof data.remark === 'object') {
+            setRemarkHistory([data.remark]);
           } else {
-            setRemark("");
+            setRemarkHistory([]);
           }
 
           // Set remark history if available
@@ -286,12 +282,14 @@ const handleNextPage = () => {
           const isAlreadySelected = companyData.rtom.some(
             (r) => r.rtom_id === rtom.rtom_id
           );
+          
 
           return {
             id: rtom.rtom_id || rtom._id,
             code: rtom.rtom_id?.toString() || "",
             name: rtom.rtom_name || "",
             selected: isAlreadySelected,
+
           };
         });
 
@@ -439,37 +437,40 @@ const handleNextPage = () => {
     }
   };
 
-  const handleAddRTOM = () => {
-    if (
-      selectedRTOM &&
-      !rtomAreas.some((a) => a.code === selectedRTOM && a.selected)
-    ) {
-      const updatedAreas = rtomAreas.map((item) =>
-        item.code === selectedRTOM ? { ...item, selected: true } : item
-      );
-      setRtomAreas(updatedAreas);
+ const handleAddRTOM = () => {
+  if (
+    selectedRTOM &&
+    !rtomAreas.some((a) => a.code === selectedRTOM && a.selected)
+  ) {
+    const updatedAreas = rtomAreas.map((item) =>
+      item.code === selectedRTOM ? { ...item, selected: true } : item
+    );
+    setRtomAreas(updatedAreas);
 
-      const selectedRtomItem = rtomAreas.find(
-        (area) => area.code === selectedRTOM
-      );
+    const selectedRtomItem = rtomAreas.find(
+      (area) => area.code === selectedRTOM
+    );
 
-      if (selectedRtomItem) {
-        const newRtom = {
-          rtom_id: selectedRtomItem.id,
-          rtom_name: selectedRtomItem.name,
-          rtom_status: "Active",
-          status_update_dtm: new Date().toISOString(),
-        };
+    if (selectedRtomItem) {
+      const newRtom = {
+        rtom_id: selectedRtomItem.id,
+        rtom_name: selectedRtomItem.name,
+        rtom_status: "Active",
+        handling_type: selectedhandlingtype, // Add handling type here
+        status_update_dtm: new Date().toISOString(),
+      };
 
-        setCompanyData({
-          ...companyData,
-          rtom: [...companyData.rtom, newRtom],
-        });
-      }
-
-      setSelectedRTOM("");
+      setCompanyData({
+        ...companyData,
+        rtom: [...companyData.rtom, newRtom],
+      });
     }
-  };
+
+    setSelectedRTOM("");
+    Setselectedhandlingtype(""); // Reset handling type selection
+  }
+};
+
 
   const handleRemoveServiceType = (type) => {
     const updatedTypes = serviceTypes.map((item) =>
@@ -992,7 +993,7 @@ const handleNextPage = () => {
                           : "Not specified"}
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.handlingtype}
+                       {rtom.handling_type || "Not specified"}
                       </td>
                       <td className={`${GlobalStyle.tableData} text-left`}>
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -1154,6 +1155,7 @@ const handleNextPage = () => {
           <FaArrowLeft />
         </button>
       </div>
+      
     </div>
     
     
@@ -1161,20 +1163,20 @@ const handleNextPage = () => {
 ) : (
       <div className="flex justify-between mt-4 w-full px-8">
         <div className="flex flex-col items-start">
-          <button
-            className={`${GlobalStyle.buttonPrimary}`}
-            onClick={() => setShowPopup(true)}
-          >
-            Log History
-          </button>
-          <div style={{ marginTop: '15px' }}>
-            <button
-              className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
-              onClick={goBack}
-            >
-              <FaArrowLeft />
-            </button>
-          </div>
+                <button
+                  className={`${GlobalStyle.buttonPrimary}`}
+                  onClick={() => setShowPopup(true)}
+                >
+                  Log History
+                </button>
+            <div style={{ marginTop: '15px' }}>
+                  <button
+                    className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                    onClick={goBack}
+                  >
+                    <FaArrowLeft />
+                  </button>
+            </div>
         </div>
       <div>
         <button
@@ -1195,6 +1197,103 @@ const handleNextPage = () => {
       </div>
   </div>
       )}
+         {showPopup && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-md shadow-lg w-3/4 max-h-[80vh] overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Log History</h2>
+                <button
+                  className="text-red-500 text-lg font-bold"
+                  onClick={() => setShowPopup(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div>
+                <div className="mb-4 flex justify-start">
+                  <div className={GlobalStyle.searchBarContainer}>
+                    <input
+                      type="text"
+                      placeholder="  "
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(0); 
+                      }}
+                      className={GlobalStyle.inputSearch}
+                    />
+                    <FaSearch className={GlobalStyle.searchBarIcon} />
+                  </div>
+                </div>
+                <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                  <table className={`${GlobalStyle.table} w-full`}>
+                    <thead className={GlobalStyle.thead}>
+                      <tr>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[120px]`}>Edited On</th>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[150px]`}>Action</th>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[150px]`}>Edited By</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLogHistory.length > 0 ? (
+                        paginatedLogHistory.map((log, index) => (
+                          <tr
+                            key={index}
+                            className={`${
+                              index % 2 === 0
+                                ? "bg-white bg-opacity-75"
+                                : "bg-gray-50 bg-opacity-50"
+                            } border-b`}
+                          >
+                            <td className={`${GlobalStyle.tableData} whitespace-nowrap`}>
+                              {log.remark_dtm
+                                ? new Date(log.remark_dtm).toLocaleDateString('en-GB')
+                                : "N/A"}
+                            </td>
+                            <td className={GlobalStyle.tableData}>
+                              {log.remark || "No remark provided"}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words`}>
+                              {log.remark_by || "System User"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="3" className="text-center py-4 text-gray-500">
+                            {searchQuery ? "No matching results found" : "No Log history available"}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredLogHistory.length > rowsPerPage && (
+                    <div className={GlobalStyle.navButtonContainer}>
+                      <button
+                        className={`${GlobalStyle.navButton} ${currentPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 0}
+                      >
+                        <FaArrowLeft />
+                      </button>
+                      
+                      <span>Page {currentPage + 1} of {pages}</span>
+                      
+                      <button
+                        className={`${GlobalStyle.navButton} ${currentPage === pages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handleNextPage}
+                        disabled={currentPage === pages - 1}
+                      >
+                        <FaArrowRight />
+                      </button>
+                    </div>
+                  )}
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 };
@@ -1573,48 +1672,47 @@ return (
               RTOM Areas
             </h2>
 
-            <div className="flex items-center mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <select
-                onClick={handleRtomDropdownClick}
-                value={selectedRTOM}
-                onChange={(e) => setSelectedRTOM(e.target.value)}
-                className={`${GlobalStyle.selectBox} mr-2`}
-              >
-                <option value="">Select RTOM Area</option>
-                {rtomLoading ? (
-                  <option disabled>Loading...</option>
-                ) : (
-                  rtomAreas
-                    .filter((area) => !area.selected)
-                    .map((area) => (
-                      <option key={area.id} value={area.code}>
-                        {area.name}
-                      </option>
-                    ))
-                )}
-              </select>
-              <select
-                value={selectedhandlingtype}
-                onChange={(e) => Setselectedhandlingtype(e.target.value)}
-                className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
-              >
-                <option value="">Select Handling Type</option>
-                <option value="CPE">CPE</option>
-                <option value="Arrears">Arrears</option>
-                <option value="All-Type">All Type</option>
-              </select>
-              <div className="flex justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">
-                <button
-                  type="button"
-                  onClick={handleAddRTOM}
-                  className={`${GlobalStyle.buttonCircle}`}
-                  disabled={!selectedRTOM}
+                  onClick={handleRtomDropdownClick}
+                  value={selectedRTOM}
+                  onChange={(e) => setSelectedRTOM(e.target.value)}
+                  className={`${GlobalStyle.selectBox} flex-1`}
                 >
-                  <img
-                    src={addIcon}
-                    alt="Add"
-                    style={{ width: 20, height: 20 }}
-                  />
+                  <option value="">Select RTOM Area</option>
+                  {rtomLoading ? (
+                    <option disabled>Loading...</option>
+                  ) : (
+                    rtomAreas
+                      .filter((area) => !area.selected)
+                      .map((area) => (
+                        <option key={area.id} value={area.code}>
+                          {area.name}
+                        </option>
+                      ))
+                  )}
+                </select>
+             <select
+                  value={selectedhandlingtype}
+                  onChange={(e) => Setselectedhandlingtype(e.target.value)}
+                 className={`${GlobalStyle.selectBox} flex-1`}
+                 disabled={!selectedRTOM}
+              >
+                    <option value="">Select Handling Type</option>
+                    <option value="CPE">CPE</option>
+                    <option value="Arrears">Arrears</option>
+                    <option value="All-Type">All Type</option>
+                  </select>
+
+
+              <div className="flex justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">
+                 <button
+                      type="button"
+                      onClick={handleAddRTOM}
+                      className={`${GlobalStyle.buttonCircle}`}
+                      disabled={!selectedRTOM || !selectedhandlingtype}
+                    >
+                      <img src={addIcon} alt="Add" style={{ width: 20, height: 20 }} />
                 </button>
               </div>  
             </div>
@@ -1674,10 +1772,8 @@ return (
                               ).toLocaleDateString()
                             : "Not specified"}
                         </td>
-                        <td
-                          className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
-                        >
-                          { rtom.selectedhandlingtype}
+                       <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {rtom.handling_type || "Not specified"}
                         </td>
                         <td className={`${GlobalStyle.tableData} text-center`}>
                           <button
