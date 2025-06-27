@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import edit_info from "../../assets/images/edit-info.svg";
+import edit_info from "../../assets/images/edit-info.svg"; 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -227,7 +227,7 @@ const RtomInfoEnd = () => {
                         onChange={(e) => setRemark(e.target.value)}
                         className={GlobalStyle.remark}
                         rows="5"
-                        ></textarea>
+                        ></textarea> 
                     </div>
                     </div>
 

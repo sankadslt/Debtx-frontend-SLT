@@ -40,6 +40,7 @@ import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
   /* Distribute Imports */
 }
 import AssignDRC from "../pages/Distribute/AssignDRC";
+import AssignDRCReject from "../pages/Distribute/AssignDRCReject";
 import AssignDRCForCollectCPE from "../pages/Distribute/AssignDRCForCollectCPE";
 import AssignedDRCSummary from "../pages/Distribute/CaseDistributionDRCTransactions";
 import AssignedDRCSummaryCollectCPE from "../pages/Distribute/AssignedDRCSummaryCollectCPE";
@@ -108,6 +109,7 @@ import AddRtom from "../pages/Rtom/AddRtom";
 import RtomInfoEdit from "../pages/Rtom/RtomInfoEdit";
 import RtomInfoEnd from "../pages/Rtom/RtomInfoEnd";
 import ListofServicetype from "../pages/Rtom/ListofServicetype";
+import RtomInfoNew from "../pages/Rtom/RtomInfoNew";
 
 //USER  
 import UserList from "../pages/User/UserList";
@@ -239,6 +241,15 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<AssignDRC />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Distribute/AssignDRCReject"
+        element={
+          <ProtectedRoute
+            element={<AssignDRCReject />}
             allowedRoles={["superadmin"]}
           />
         }
@@ -703,6 +714,7 @@ const Routers = () => {
       <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/ListofServiceType" element={<ProtectedRoute element={<ListofServicetype />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/RtomInfoEdit/:rtomId" element={<ProtectedRoute element={<RtomInfoEdit />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Rtom/RtomInfoNew" element={<ProtectedRoute element={<RtomInfoNew />} allowedRoles={['superadmin']} />} />
 
       {/* //MASTER DRC */}
       <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
@@ -723,6 +735,7 @@ const Routers = () => {
 
       {/* RO */}
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
+    
 
       {/* Service */}
       <Route path="/pages/Service/ServiceTypeList" element={<ProtectedRoute element={<ServiceTypeList />} allowedRoles={['superadmin']} />} />

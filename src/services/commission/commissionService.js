@@ -82,3 +82,22 @@ export const Commission_Details_By_Commission_ID = async (commission_id) => {
     throw error.response?.data?.message || "Failed to fetch case details";
   }
 };
+
+export const ForwardToApprovals = async (DRC_ID,Created_By) => {
+ 
+ 
+  try {
+ 
+    const response = await axios.post(
+      `${URL}/forward-to-approvals`,
+      { 
+     
+        drcId:DRC_ID, 
+        Created_By: Created_By
+      }
+    );
+    return response.data.status;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to forward cases");
+  }
+};
