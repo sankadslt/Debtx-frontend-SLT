@@ -107,7 +107,7 @@ const UserInfo = () => {
 
         if (fetchedData) {
           setUserInfo(fetchedData.data);
-          setIsActive(fetchedData.data.user_status === "true");
+          setIsActive(fetchedData.data.user_status === "Active");
           // Set formData for editing
           setFormData({
             userType: fetchedData.data.user_type || "",
@@ -187,7 +187,7 @@ const UserInfo = () => {
         updated_by: loggedUserData,
         role: activeRole.roleName,
         user_roles: userRolesData,
-        user_status: isActive ? "true" : "false",
+        user_status: isActive ? "Active" : "Inactive",
         remark: remark
       };
 
@@ -652,16 +652,16 @@ const UserInfo = () => {
               <div className="flex justify-end mb-4">
                 <button
                   onClick={() => {
-                    if (userInfo.user_status !== "terminate") {
+                    if (userInfo.user_status !== "Terminate") {
                       toggleEdit();
                     }
                   }}
                   className={`${
-                    userInfo.user_status === "terminate" 
+                    userInfo.user_status === "Terminate" 
                       ? "opacity-50 cursor-not-allowed" 
                       : ""
                   }`}
-                  disabled={userInfo.user_status === "terminate"}
+                  disabled={userInfo.user_status === "Terminate"}
                 >
                   <img
                     src={edit}
@@ -864,16 +864,16 @@ const UserInfo = () => {
         {!isEditing && !showEndSection && (
           <button
             onClick={() => {
-              if (userInfo.user_status !== "terminate") {
+              if (userInfo.user_status !== "Terminate") {
                 setShowEndSection(true);
               }
             }}
             className={`${GlobalStyle.buttonPrimary} ${
-              userInfo.user_status === "terminate" 
+              userInfo.user_status === "Terminate" 
                 ? "opacity-50 cursor-not-allowed" 
                 : ""
             }`}
-            disabled={userInfo.user_status === "terminate"}
+            disabled={userInfo.user_status === "Terminate"}
           >
             End
           </button>

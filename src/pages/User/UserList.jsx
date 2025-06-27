@@ -273,7 +273,7 @@ const UserList = () => {
 
   // Function to render status icon with tooltip
   const renderStatusIcon = (user) => {
-    if (user.status === "true") {
+    if (user.status === "Active") {
       return (
         <div className="relative">
           <img 
@@ -290,7 +290,7 @@ const UserList = () => {
           )}
         </div>
       );
-    } else if (user.status === "false") {
+    } else if (user.status === "Inactive") {
       return (
         <div className="relative">
           <img 
@@ -411,9 +411,9 @@ const UserList = () => {
                 style={{ color: status === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>Status</option>
-                <option value="true" style={{ color: "black" }}>Active</option>
-                <option value="false" style={{ color: "black" }}>Inactive</option>
-                <option value="terminate" style={{ color: "black" }}>Terminated</option>
+                <option value="Active" style={{ color: "black" }}>Active</option>
+                <option value="Inactive" style={{ color: "black" }}>Inactive</option>
+                <option value="Terminate" style={{ color: "black" }}>Terminated</option>
               </select>
             </div>
             
@@ -468,16 +468,16 @@ const UserList = () => {
                       <div className="relative">
                         <img 
                           src={
-                            user.status === "true"
+                            user.status === "Active"
                               ? activeIcon
-                              : user.status === "false"
+                              : user.status === "Inactive"
                               ? deactiveIcon
                               : terminateIcon
                           }
                           alt={
-                            user.status === "true"
+                            user.status === "Active"
                               ? "Active"
-                              : user.status === "false"
+                              : user.status === "Inactive"
                               ? "Inactive"
                               : "Terminated"
                           }
@@ -487,9 +487,9 @@ const UserList = () => {
                         />
                         {tooltipVisible === `status-${user.user_id}` && (
                           <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-                            {user.status === "true"
+                            {user.status === "Active"
                               ? "Active"
-                              : user.status === "false"
+                              : user.status === "Inactive"
                               ? "Inactive"
                               : "Terminated"}
                           </div>
@@ -529,19 +529,19 @@ const UserList = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-gray-900">#{user.user_id}</span> 
                     <div className="flex items-center">
-                      {user.status === "true" && (
+                      {user.status === "Active" && (
                         <>
                           <img src={activeIcon} alt="Active" className="h-5 w-5" />
                           <span className="ml-1 text-xs text-gray-600">Active</span>
                         </>
                       )}
-                      {user.status === "false" && (
+                      {user.status === "Inactive" && (
                         <>
                           <img src={deactiveIcon} alt="Inactive" className="h-5 w-5" />
                           <span className="ml-1 text-xs text-gray-600">Inactive</span>
                         </>
                       )}
-                      {user.status === "terminated" && (
+                      {user.status === "Terminate" && (
                         <>
                           <img src={terminateIcon} alt="Terminated" className="h-5 w-5" />
                           <span className="ml-1 text-xs text-gray-600">Terminate</span>
