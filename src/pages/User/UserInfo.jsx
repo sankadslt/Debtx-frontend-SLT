@@ -941,8 +941,8 @@ const UserInfo = () => {
       </div>
 
       <div style={{ marginTop: '12px' }}>
-          <button className={GlobalStyle.navButton} onClick={goBack}>
-          <FaArrowLeft />  Back
+          <button className={GlobalStyle.buttonPrimary} onClick={goBack}>
+          <FaArrowLeft /> 
           </button>
       </div>
 
