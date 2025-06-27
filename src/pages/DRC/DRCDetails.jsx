@@ -59,23 +59,23 @@ const DRCDetails = () => {
           }
       };
   
-  
+   
       const renderStatusIcon = (status) => {
-          const iconPath = getStatusIcon(status);
-  
-          if (!iconPath) {
-              return <span>{status}</span>;
-          }
-  
-          return (
-              <img
-                  src={iconPath}
-                  alt={status}
-                  className="w-6 h-6"
-                  title={status}
-              />
-          );
-      };
+        const iconPath = getStatusIcon(status);
+    
+        if (!iconPath) {
+            return <span className="capitalize">{status}</span>;
+        }
+    
+        return (
+            <img
+                src={iconPath}
+                alt={status}
+                className="w-6 h-6 mx-auto"
+                title={status}
+            />
+        );
+    };
 
       const goBack = () => {
         navigate(-1); 
@@ -95,7 +95,8 @@ const DRCDetails = () => {
     const res = await List_RTOM_Details_Owen_By_DRC_ID(drcId);
     return res.map((rtom) => ({
       name: rtom.area_name,
-      abbreviation: rtom.rtom_abbreviation,
+      billing_center_Code: rtom.billing_center_Code,
+      handlingType: rtom.handling_type,
       enableDate: (rtom.created_dtm || "").split("T")[0],
       rtom_contact_number: rtom.rtom_mobile_no
     ?.map(item => item.mobile_number)
@@ -327,17 +328,18 @@ const DRCDetails = () => {
               {activeTab === "RTOM" && (
                 <>
                   <th className={GlobalStyle.tableHeader}>RTOM Name</th>
-                  <th className={GlobalStyle.tableHeader}>Abbreviation</th>
+                  <th className={GlobalStyle.tableHeader}>Billing Center Code</th>
+                  <th className={GlobalStyle.tableHeader}>Handling Type</th>
                   <th className={GlobalStyle.tableHeader}>Enable Date</th>
-                  <th className={GlobalStyle.tableHeader}>Contact</th>
+                  <th className={GlobalStyle.tableHeader}>Contact Number</th>
                   <th className={GlobalStyle.tableHeader}>RO Count</th>
                 </>
               )}
               {activeTab === "Services" && (
                 <>
-                  <th className={GlobalStyle.tableHeader}>SERVICE TYPE</th>
-                  <th className={GlobalStyle.tableHeader}>ENABLE DATE</th>
-                  <th className={GlobalStyle.tableHeader}>STATUS</th>
+                  <th className={GlobalStyle.tableHeader}>Service Type</th>
+                  <th className={GlobalStyle.tableHeader}>Enable Date</th>
+                  <th className={GlobalStyle.tableHeader}>Status</th>
                 </>
               )}
             </tr>
