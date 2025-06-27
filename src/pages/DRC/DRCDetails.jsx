@@ -1,6 +1,7 @@
 /*Purpose:
 Created Date: 2025-05-25
 Created By: Nimesha Kavindhi (nimeshakavindhi4@gmail.com)
+Modified By: Dasindu Dinsara (dinsaradasindu@gmail.com)
 Version: React v18
 ui number : 10.1
 Dependencies: Tailwind CSS
@@ -17,7 +18,6 @@ import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
 
 const DRCDetails = () => {
-  const [activeTab, setActiveTab] = useState("RO");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [status, setStatus] = useState("");
@@ -27,9 +27,12 @@ const DRCDetails = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-const location = useLocation();
-const { state } = location;
-const drcId = state?.drcId;
+  const location = useLocation();
+  const { state } = location;
+  const drcId = state?.drcId;
+  const initialTab = state?.activeTab || "RO"; 
+
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const rowsPerPage = 7;
   const statuses = ["Active", "Inactive"];
@@ -40,6 +43,8 @@ const drcId = state?.drcId;
   const [rtomListData, setRtomListData] = useState([]);
   const [servicesListData, setServicesListData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  
 
      const getStatusIcon = (status) => {
           switch (status?.toLowerCase()) {
@@ -54,23 +59,23 @@ const drcId = state?.drcId;
           }
       };
   
-  
+   
       const renderStatusIcon = (status) => {
-          const iconPath = getStatusIcon(status);
-  
-          if (!iconPath) {
-              return <span>{status}</span>;
-          }
-  
-          return (
-              <img
-                  src={iconPath}
-                  alt={status}
-                  className="w-6 h-6"
-                  title={status}
-              />
-          );
-      };
+        const iconPath = getStatusIcon(status);
+    
+        if (!iconPath) {
+            return <span className="capitalize">{status}</span>;
+        }
+    
+        return (
+            <img
+                src={iconPath}
+                alt={status}
+                className="w-6 h-6 mx-auto"
+                title={status}
+            />
+        );
+    };
 
       const goBack = () => {
         navigate(-1); 
@@ -90,7 +95,8 @@ const drcId = state?.drcId;
     const res = await List_RTOM_Details_Owen_By_DRC_ID(drcId);
     return res.map((rtom) => ({
       name: rtom.area_name,
-      abbreviation: rtom.rtom_abbreviation,
+      billing_center_Code: rtom.billing_center_Code,
+      handlingType: rtom.handling_type,
       enableDate: (rtom.created_dtm || "").split("T")[0],
       rtom_contact_number: rtom.rtom_mobile_no
     ?.map(item => item.mobile_number)
@@ -159,6 +165,12 @@ const drcId = state?.drcId;
     setAppliedFilters({ status, rtom: rtomFilter, service: serviceFilter });
     setCurrentPage(0);
   };
+
+    useEffect(() => {
+    if (state?.activeTab && state.activeTab !== activeTab) {
+      setActiveTab(state.activeTab);
+    }
+  }, [location.state]);
 
   const startIndex = currentPage * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
@@ -316,17 +328,18 @@ const drcId = state?.drcId;
               {activeTab === "RTOM" && (
                 <>
                   <th className={GlobalStyle.tableHeader}>RTOM Name</th>
-                  <th className={GlobalStyle.tableHeader}>Abbreviation</th>
+                  <th className={GlobalStyle.tableHeader}>Billing Center Code</th>
+                  <th className={GlobalStyle.tableHeader}>Handling Type</th>
                   <th className={GlobalStyle.tableHeader}>Enable Date</th>
-                  <th className={GlobalStyle.tableHeader}>Contact</th>
+                  <th className={GlobalStyle.tableHeader}>Contact Number</th>
                   <th className={GlobalStyle.tableHeader}>RO Count</th>
                 </>
               )}
               {activeTab === "Services" && (
                 <>
-                  <th className={GlobalStyle.tableHeader}>SERVICE TYPE</th>
-                  <th className={GlobalStyle.tableHeader}>ENABLE DATE</th>
-                  <th className={GlobalStyle.tableHeader}>STATUS</th>
+                  <th className={GlobalStyle.tableHeader}>Service Type</th>
+                  <th className={GlobalStyle.tableHeader}>Enable Date</th>
+                  <th className={GlobalStyle.tableHeader}>Status</th>
                 </>
               )}
             </tr>
@@ -411,7 +424,6 @@ const drcId = state?.drcId;
                  onClick={goBack}
                    >
              <FaArrowLeft />
-              <span>Back</span>
        </button>
     </div>
   );

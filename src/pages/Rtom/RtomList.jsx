@@ -103,8 +103,8 @@ const RtomList = () => {
   };
 
   const handleRowClick = (rtomId) => {
-    navigate("/pages/Rtom/RtomInfo", { state: { rtomId } });
-  };
+  navigate(`/pages/Rtom/RtomInfoNew/${rtomId}`);
+};
 
   // Filter data based on search query and status filter
   const filteredData = allData.filter((row) => {
