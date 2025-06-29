@@ -85,6 +85,7 @@ const DRCInfo = () => {
   const [serviceOptions, setServiceOptions] = useState([]);
   const [editingServiceIds, setEditingServiceIds] = useState([]);
   const [editingRtomIds, setEditingRtomIds] = useState([]);
+  const [selectedhandlingtype, Setselectedhandlingtype] = useState("");
   const [remark, setRemark] = useState("");
   const [remarkHistory, setRemarkHistory] = useState([]);
 
@@ -204,30 +205,62 @@ const handleNextPage = () => {
     }
   }, [drcId]);
 
-  // Function to fetch active service types
-  const fetchActiveServices = async () => {
+  // // Function to fetch active service types
+  // const fetchActiveServices = async () => {
+  //   try {
+  //     setServiceLoading(true);
+  //     const response = await getActiveServiceDetails();
+
+  //     if (response && response.data) {
+  //       const filtered = response.data.filter(
+  //         (service) => service.service_status === "Active"
+  //       );
+
+  //       const formatted = filtered.map((service) => {
+  //         const isAlreadySelected = companyData.services.some(
+  //           (s) => s.service_type === service.service_type
+  //         );
+
+  //         return {
+  //           id: service.service_id,
+  //           name: service.service_type,
+  //           selected: isAlreadySelected,
+  //         };
+  //       });
+
+  //       setServiceTypes(formatted);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading service types:", error);
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: "Failed to load active service types.",
+  //     });
+  //   } finally {
+  //     setServiceLoading(false);
+  //   }
+  // };
+
+    // Fetch active service types from the API
+    const fetchActiveServices = async () => {
     try {
-      setServiceLoading(true);
+      setLoading(true);
       const response = await getActiveServiceDetails();
-
-      if (response && response.data) {
-        const filtered = response.data.filter(
-          (service) => service.service_status === "Active"
-        );
-
-        const formatted = filtered.map((service) => {
-          const isAlreadySelected = companyData.services.some(
-            (s) => s.service_type === service.service_type
-          );
-
-          return {
-            id: service.service_id,
-            name: service.service_type,
-            selected: isAlreadySelected,
-          };
-        });
-
+      console.log("API Response:", response);
+  
+      if (response && Array.isArray(response)) { 
+        const formatted = response.map((service) => ({
+          id: service.service_id,
+          code: service.service_id.toString(), 
+          name: service.service_type,
+          selected: false,
+        }));
+  
         setServiceTypes(formatted);
+      } else {
+        console.error("Unexpected API response format:", response);
+        setServiceTypes([]);
       }
     } catch (error) {
       console.error("Error loading service types:", error);
@@ -236,8 +269,9 @@ const handleNextPage = () => {
         title: "Error",
         text: "Failed to load active service types.",
       });
+      setServiceTypes([]);
     } finally {
-      setServiceLoading(false);
+      setLoading(false);
     }
   };
 
@@ -926,10 +960,13 @@ const handleNextPage = () => {
                 <thead className={GlobalStyle.thead}>
                   <tr>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      RTOM ID
+                      RTOM Name
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                       Changed On
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Handling Type
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                       Status
@@ -947,12 +984,15 @@ const handleNextPage = () => {
                       } border-b`}
                     >
                       <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.rtom_id}
+                        {rtom.rtom_name}
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
                         {rtom.status_update_dtm
                           ? new Date(rtom.status_update_dtm).toLocaleDateString()
                           : "Not specified"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {rtom.handlingtype}
                       </td>
                       <td className={`${GlobalStyle.tableData} text-left`}>
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -1097,34 +1137,64 @@ const handleNextPage = () => {
                   </div>
                 </div>
               )}
-        {!showEndFields && (
-          <div className="flex justify-between mt-4 w-full px-8">
+       {showEndFields ? (
+  <div className="flex justify-between mt-4 w-full px-8">
+    <div className="flex flex-col items-start">
+      <button
+        className={`${GlobalStyle.buttonPrimary}`}
+        onClick={() => setShowPopup(true)}
+      >
+        Log History
+      </button>
+      <div style={{ marginTop: '15px' }}>
+        <button
+          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+          onClick={goBack}
+        >
+          <FaArrowLeft />
+        </button>
+      </div>
+    </div>
+    
+    
+  </div>
+) : (
+      <div className="flex justify-between mt-4 w-full px-8">
+        <div className="flex flex-col items-start">
+          <button
+            className={`${GlobalStyle.buttonPrimary}`}
+            onClick={() => setShowPopup(true)}
+          >
+            Log History
+          </button>
+          <div style={{ marginTop: '15px' }}>
             <button
               className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
               onClick={goBack}
             >
               <FaArrowLeft />
-              
-            </button>
-
-            {/* End Button (Opacity-50) */}
-            <button
-              onClick={() => {
-                if (companyData.drc_status !== "Terminate") {
-                  setShowEndFields(true);
-                }
-              }}
-              className={`${GlobalStyle.buttonPrimary} ${
-                companyData.drc_status === "Terminate" 
-                  ? "opacity-50 cursor-not-allowed" 
-                  : ""
-              }`}
-              disabled={companyData.drc_status === "Terminate"}
-            >
-              End
             </button>
           </div>
-           )}
+        </div>
+      <div>
+        <button
+          onClick={() => {
+            if (companyData.drc_status !== "Terminate") {
+              setShowEndFields(true);
+            }
+          }}
+          className={`${GlobalStyle.buttonPrimary} ${
+            companyData.drc_status === "Terminate" 
+              ? "opacity-50 cursor-not-allowed" 
+              : ""
+          }`}
+          disabled={companyData.drc_status === "Terminate"}
+        >
+          End
+        </button>
+      </div>
+  </div>
+      )}
     </div>
   );
 };
@@ -1154,17 +1224,7 @@ return (
                   drc_status: newStatus,
                 });
 
-                // Show a toast notification
-                Swal.fire({
-                  icon: "info",
-                  title: "Status Updated",
-                  text: `DRC status set to ${newStatus}`,
-                  toast: true,
-                  position: "top-end",
-                  showConfirmButton: false,
-                  timer: 3000,
-                  timerProgressBar: true,
-                });
+                
               }}
               className="relative inline-flex items-center cursor-pointer"
               aria-label={
@@ -1533,18 +1593,30 @@ return (
                     ))
                 )}
               </select>
-              <button
-                type="button"
-                onClick={handleAddRTOM}
-                className={`${GlobalStyle.buttonCircle}`}
-                disabled={!selectedRTOM}
+              <select
+                value={selectedhandlingtype}
+                onChange={(e) => Setselectedhandlingtype(e.target.value)}
+                className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
               >
-                <img
-                  src={addIcon}
-                  alt="Add"
-                  style={{ width: 20, height: 20 }}
-                />
-              </button>
+                <option value="">Select Handling Type</option>
+                <option value="CPE">CPE</option>
+                <option value="Arrears">Arrears</option>
+                <option value="All-Type">All Type</option>
+              </select>
+              <div className="flex justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">
+                <button
+                  type="button"
+                  onClick={handleAddRTOM}
+                  className={`${GlobalStyle.buttonCircle}`}
+                  disabled={!selectedRTOM}
+                >
+                  <img
+                    src={addIcon}
+                    alt="Add"
+                    style={{ width: 20, height: 20 }}
+                  />
+                </button>
+              </div>  
             </div>
 
             {rtomLoading && (
@@ -1558,12 +1630,17 @@ return (
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      RTOM ID
+                      RTOM Name
                     </th>
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
                       Changed On
+                    </th>
+                    <th
+                      className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
+                    >
+                      Handling Type
                     </th>
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
@@ -1596,6 +1673,11 @@ return (
                                 rtom.status_update_dtm
                               ).toLocaleDateString()
                             : "Not specified"}
+                        </td>
+                        <td
+                          className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
+                        >
+                          { rtom.selectedhandlingtype}
                         </td>
                         <td className={`${GlobalStyle.tableData} text-center`}>
                           <button
@@ -1683,24 +1765,24 @@ return (
 
         {/* Log history button - Existing code */}
         <div className="flex flex-col items-start mt-8 ">
-                    <button
-                        className={`${GlobalStyle.buttonPrimary}`}
-                        onClick={() => setShowPopup(true)}
-                    >
-                        Log History
-                    </button>
+          <button
+              className={`${GlobalStyle.buttonPrimary}`}
+              onClick={() => setShowPopup(true)}
+          >
+              Log History
+          </button>
 
-                    <div style={{ marginTop: '15px' }}>
-                        <button
-                          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
-                          onClick={goBack}
-                        >
-                          <FaArrowLeft />
-                         
-                        </button>
+          <div style={{ marginTop: '15px' }}>
+              <button
+                className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                onClick={goBack}
+              >
+                <FaArrowLeft />
+                
+              </button>
 
-                    </div>
-                </div>
+          </div>
+      </div>
 
         {/* Log History Modal */}
           {showPopup && (
