@@ -103,10 +103,12 @@ const Incident_List = () => {
         return inprogressincident;
       case "incident error":
         return errorincident;
-      case "reject":
-        return error;
-      case "incident reject":
-        return rejectincident;
+      // case "reject":
+      //   return error;
+      // case "incident reject":
+      //   return rejectincident;
+      case "complete":
+        return incidentDone;
       default:
         return null;
     }
