@@ -76,9 +76,9 @@ export const distribution_ready_incidents_group_by_arrears_band= async () => {
   }
 };
 
-export const List_Transaction_Logs_Upload_Files = async (requestBody) => {
+export const List_Transaction_Logs_Upload_Files = async (payload) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/List_Transaction_Logs_Upload_Files`, requestBody);
+    const response = await axios.post(`${INCIDENT_URL}/List_Transaction_Logs_Upload_Files`, payload);
 
     return response.data;
   } catch (error) {
