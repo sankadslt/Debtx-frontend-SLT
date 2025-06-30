@@ -28,6 +28,7 @@ import { refreshAccessToken } from "../../services/auth/authService";
 import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
 import rejectincident from "/src/assets/images/incidents/Incident_Reject.png";
 import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
+import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
 import errorincident from "/src/assets/images/incidents/Incident_Error.png";
 import error from "/src/assets/images/incidents/Reject.png";
 
