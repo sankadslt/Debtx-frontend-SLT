@@ -352,49 +352,7 @@ const SupBulkUploadLog = () => {
         }
     }
 
-    //     const result = await response;
-    //     if (result.status === "success") {
-    //         const transformedData = result.data.map((item) => ({
-    //             dateTime: new Date(item.Uploaded_Dtm).toLocaleDateString(),
-    //             createdTime: new Date(item.Uploaded_Dtm).toLocaleTimeString(),
-    //             uploadedBy: item.Uploaded_By || "N/A",
-    //             fileName: item.File_Name || "N/A",
-    //             type: item.File_Type || "N/A",
-    //             status: item.File_Status || "N/A",
-    //         }));
-    //         setData(transformedData);
-    //     } else {
-    //         setData([]);
-    //     }
-    // } catch (error) {
-    //     console.error("Error fetching data:", error);
-    //     setError(error.message || "Failed to fetch data");
-    //     Swal.fire({
-    //         title: "Error",
-    //         text: "Failed to fetch data. Please try again later.",
-    //         icon: "error",
-    //         confirmButtonColor: "#d33",
-    //         confirmButtonText: "OK"
-    //     });
-    //     setData([]);
-    // } finally {
-    //     setLoading(false);
-    // }
-    //         }, [fromDate, toDate, status]);
-
-    // // Fetch data when the component mounts or when the filters change
-    // useEffect(() => {
-    //     fetchData();
-    // }, [fetchData, fromDate, toDate, status]);
-
-
-
-
-    // const pages = Math.ceil(filteredData.length / rowsPerPage);
-    // const startIndex = currentPage * rowsPerPage;
-    // const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
-    // Function to clear filters and reset the state
+  
     const handleClear = () => {
         setStatus("");
         setFromDate(null);
