@@ -513,7 +513,10 @@ const Incident_List = () => {
                 >
                   <option value="" hidden>Status</option>
                   <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
-                  <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
+                  <option value="Reject" style={{ color: "black" }}>Reject</option>
+                  <option value="Complete" style={{ color: "black" }}>Complete</option>
+                  <option value="Incident Error" style={{ color: "black" }}>Incident Error</option>
+                  <option value="Incident InProgress" style={{ color: "black" }}>Incident InProgress</option>
                 </select>
               </div>
 
