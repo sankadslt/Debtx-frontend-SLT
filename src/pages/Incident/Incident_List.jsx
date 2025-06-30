@@ -33,7 +33,7 @@ import errorincident from "/src/assets/images/incidents/Incident_Error.png";
 import error from "/src/assets/images/incidents/Reject.png";
 
 const Incident_List = () => {
-  // State Variables
+ 
  
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -137,15 +137,15 @@ const Incident_List = () => {
     );
   };
   const navigate = useNavigate();
-  // Date Handlers
+  
   const handlestartdatechange = (date) => {
     setFromDate(date);
-    // if (toDate) checkdatediffrence(date, toDate);
+    
   };
 
   const handleenddatechange = (date) => {
     setToDate(date);
-    // if (fromDate) checkdatediffrence(fromDate, date);
+   
   };
   const CheckDateDifference = (fromDate, toDate) => {
     const start = new Date(fromDate).getTime();
@@ -167,9 +167,9 @@ const Incident_List = () => {
       }).then((result) => {
         if (result.isConfirmed) {
           endDate = toDate;
-          handleApicall(fromDate, toDate); // Proceed with the API call
+          handleApicall(fromDate, toDate);  
         } else {
-          setToDate(null); // Clear the end date if the user chooses not to proceed
+          setToDate(null);  
           console.log("EndDate cleared");
         }
       });
@@ -196,7 +196,7 @@ const Incident_List = () => {
   }, [fromDate, toDate]);
   
   
-    // Search Section
+  
     const filteredDataBySearch = paginatedData.filter((row) =>
       Object.values(row)
         .join(" ")
@@ -234,10 +234,10 @@ const Incident_List = () => {
           return false;
         }
     
-        return true; // All validations passed
+        return true;  
       };
 
-  // API Call Function (renamed from fetchData to callAPI)
+   
   const callAPI = async (filters) => {
     try {
       
@@ -339,7 +339,7 @@ const Incident_List = () => {
     }
   };
 
-  // Handle Filter Button
+ 
  
     const handleFilterButton = () => {
     setIsMoreDataAvailable(true);
@@ -456,10 +456,10 @@ const Incident_List = () => {
 
    
 
-  // Navigation
+  
   const HandleAddIncident = () => navigate("/incident/register");
 
-  // Data Filtering and Pagination
+  
  
 
  
