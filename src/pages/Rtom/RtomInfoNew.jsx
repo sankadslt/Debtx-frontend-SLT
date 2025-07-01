@@ -750,7 +750,7 @@ const RtomInfoNew = () => {
               disabled={isLoading}
             >
               Cancel
-            </button> */}
+            </button>
             <button
               type="submit"
               className={`${GlobalStyle.buttonPrimary} px-4 py-2`}
