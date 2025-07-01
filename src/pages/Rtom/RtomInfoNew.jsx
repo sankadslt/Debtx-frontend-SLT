@@ -22,6 +22,7 @@ import {
   updateRTOMDetails,
   terminateRTOM,
 } from "../../services/RTOM/Rtom_services";
+import { Tooltip } from "react-tooltip";
 import { getLoggedUserId } from "../../services/auth/authService";
 
 const RtomInfoNew = () => {
@@ -274,9 +275,26 @@ const RtomInfoNew = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+
+    
+    let processedValue = value;
+
+  if (name === "billingCenterCode") {
+    processedValue = value.replace(/[^a-zA-Z]/g, '');
+  }
+ 
+
+  if (name === "areaCode") {
+    processedValue = value.replace(/[^a-zA-Z]/g, '');
+  }
+  if (name === "email") {
+    // Allow only valid email characters
+    processedValue = value.replace(/[^a-zA-Z0-9@._-]/g, '');
+  }
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
 
@@ -464,17 +482,21 @@ const RtomInfoNew = () => {
               opacity: isRtomTerminated() ? 0.5 : 1,
               cursor: isRtomTerminated() ? "not-allowed" : "pointer",
             }}
-            title={
-              isRtomTerminated() ? "Cannot edit - RTOM is terminated" : "Edit"
-            }
+            // title={
+            //   isRtomTerminated() ? "Cannot edit - RTOM is terminated" : "Edit"
+            // }
           >
             <img
               src={edit_info}
               className="w-6 h-6"
+              data-tooltip-id="edit-tooltip"
               style={{
                 filter: isRtomTerminated() ? "grayscale(100%)" : "none",
               }}
             />
+            <Tooltip id="edit-tooltip" place="bottom" effect="solid">
+              {isRtomTerminated() ? "Cannot edit - RTOM is terminated" : "Edit"}
+            </Tooltip>
           </button>
         </div>
 
@@ -719,17 +741,17 @@ const RtomInfoNew = () => {
           </div>
 
           <div className="flex justify-end mt-4 gap-4">
-            <button
+            {/* <button
               type="button"
               className={`${GlobalStyle.buttonSecondary} px-8 py-2`}
               onClick={switchToViewMode}
               disabled={isLoading}
             >
               Cancel
-            </button>
+            </button> */}
             <button
               type="submit"
-              className={`${GlobalStyle.buttonPrimary} px-8 py-2`}
+              className={`${GlobalStyle.buttonPrimary} px-4 py-2`}
               disabled={isLoading}
             >
               {isLoading ? "Saving..." : "Save"}
@@ -858,18 +880,24 @@ const RtomInfoNew = () => {
             className={`${GlobalStyle.buttonPrimary}`}
             onClick={switchToEndMode}
             disabled={isRtomTerminated()}
+            data-tooltip-id="end-tooltip"
             style={{
               zIndex: 1,
               opacity: isRtomTerminated() ? 0.5 : 1,
               cursor: isRtomTerminated() ? "not-allowed" : "pointer",
             }}
-            title={
-              isRtomTerminated()
-                ? "Cannot end - RTOM is already terminated"
-                : "End RTOM"
-            }
+            // title={
+            //   isRtomTerminated()
+            //     ? "Cannot end - RTOM is already terminated"
+            //     : "End RTOM"
+            // }
           >
             End
+            <Tooltip id="end-tooltip" place="bottom" effect="solid">
+              {isRtomTerminated()
+                ? "Cannot end - RTOM is already terminated"
+                : ""}
+            </Tooltip>
           </button>
         </div>
       )}
