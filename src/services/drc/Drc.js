@@ -231,7 +231,7 @@ export const updateDRCInfo = async (
   remark_dtm,
   drc_contact_no,
   drc_email,
-  drc_status // Add DRC status parameter
+  drc_status 
 ) => {
   try {
     const response = await axios.patch(
@@ -326,26 +326,89 @@ export const getSLTCoordinators = async () => {
   }
 };
 
-export const registerDRC = async (drcData) => {
+// export const registerDRC = async (drcData) => {
+//   try {
+//     const response = await axios.post(`${URL}/Register_DRC`, drcData, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
+    
+//     console.log("DRC registration response:", response.data);
+    
+//     if (response.data.status === "error") {
+//       throw new Error(response.data.message || "Failed to register DRC");
+//     }
+    
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error registering DRC:", error);
+    
+//     let errorMessage = "Failed to register DRC";
+//     if (error.response) {
+//       console.error("Server error details:", error.response.data);
+//       errorMessage = error.response.data.message || errorMessage;
+      
+//       if (error.response.data.errors) {
+//         errorMessage += ": " + JSON.stringify(error.response.data.errors);
+//       }
+//     } else if (error.request) {
+//       console.error("No response received:", error.request);
+//       errorMessage = "No response received from server";
+//     } else {
+//       console.error("Request setup error:", error.message);
+//     }
+    
+//     throw new Error(errorMessage);
+//   }
+// };
+
+
+export const Create_DRC_With_Services_and_SLT_Coordinator = async (drcData) => {
   try {
-    const response = await axios.post(`${URL}/Create_DRC_With_Services_and_SLT_Coordinator`, drcData);
+    const response = await axios.post(
+      `${URL}/Create_DRC_With_Services_and_SLT_Coordinator`,
+      drcData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
     console.log("DRC registration response:", response.data);
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to register DRC");
+    }
+
     return response.data;
   } catch (error) {
     console.error("Error registering DRC:", error);
+
+    let errorMessage = "Failed to register DRC";
     if (error.response) {
       console.error("Server error details:", error.response.data);
-      throw new Error(
-        error.response.data.message || "Server error: " + error.response.status
-      );
+      errorMessage = error.response.data.message || errorMessage;
+
+      if (error.response.data.errors) {
+
+        const fieldErrors = Object.entries(error.response.data.errors)
+          .map(([field, message]) => `${field}: ${message}`)
+          .join(', ');
+        errorMessage += ` (${fieldErrors})`;
+      }
+      
     } else if (error.request) {
-      throw new Error("No response received from server");
+      console.error("No response received:", error.request);
+      errorMessage = "No response received from server";
     } else {
-      throw new Error(error.message || "Failed to register DRC");
+      console.error("Request setup error:", error.message);
     }
+
+    throw new Error(errorMessage);
   }
 };
-
 
 
 

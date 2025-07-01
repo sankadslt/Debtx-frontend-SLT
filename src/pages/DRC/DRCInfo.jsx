@@ -14,7 +14,7 @@ import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import Edit from "../../assets/images/edit-info.svg";
 import addIcon from "../../assets/images/add.svg";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft , FaSearch ,FaArrowRight } from "react-icons/fa";
 import {
   getDebtCompanyByDRCID,
   terminateCompanyByDRCID,
@@ -85,8 +85,38 @@ const DRCInfo = () => {
   const [serviceOptions, setServiceOptions] = useState([]);
   const [editingServiceIds, setEditingServiceIds] = useState([]);
   const [editingRtomIds, setEditingRtomIds] = useState([]);
+  const [selectedhandlingtype, Setselectedhandlingtype] = useState("");
   const [remark, setRemark] = useState("");
   const [remarkHistory, setRemarkHistory] = useState([]);
+
+//loghistory
+  const [showPopup, setShowPopup] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const rowsPerPage = 5;
+
+//loghistory function
+const filteredLogHistory = remarkHistory
+  .filter((log) => 
+    (log.remark || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (log.remark_by || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+const pages = Math.ceil(filteredLogHistory.length / rowsPerPage);
+const paginatedLogHistory = filteredLogHistory.slice(
+  currentPage * rowsPerPage,
+  (currentPage + 1) * rowsPerPage
+);
+
+//prev page
+const handlePrevPage = () => {
+  setCurrentPage((prev) => Math.max(prev - 1, 0));
+};
+
+//next page
+const handleNextPage = () => {
+  setCurrentPage((prev) => Math.min(prev + 1, pages - 1));
+};
 
   // Fetch DRC data 
   useEffect(() => {
@@ -175,30 +205,62 @@ const DRCInfo = () => {
     }
   }, [drcId]);
 
-  // Function to fetch active service types
-  const fetchActiveServices = async () => {
+  // // Function to fetch active service types
+  // const fetchActiveServices = async () => {
+  //   try {
+  //     setServiceLoading(true);
+  //     const response = await getActiveServiceDetails();
+
+  //     if (response && response.data) {
+  //       const filtered = response.data.filter(
+  //         (service) => service.service_status === "Active"
+  //       );
+
+  //       const formatted = filtered.map((service) => {
+  //         const isAlreadySelected = companyData.services.some(
+  //           (s) => s.service_type === service.service_type
+  //         );
+
+  //         return {
+  //           id: service.service_id,
+  //           name: service.service_type,
+  //           selected: isAlreadySelected,
+  //         };
+  //       });
+
+  //       setServiceTypes(formatted);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading service types:", error);
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: "Failed to load active service types.",
+  //     });
+  //   } finally {
+  //     setServiceLoading(false);
+  //   }
+  // };
+
+    // Fetch active service types from the API
+    const fetchActiveServices = async () => {
     try {
-      setServiceLoading(true);
+      setLoading(true);
       const response = await getActiveServiceDetails();
-
-      if (response && response.data) {
-        const filtered = response.data.filter(
-          (service) => service.service_status === "Active"
-        );
-
-        const formatted = filtered.map((service) => {
-          const isAlreadySelected = companyData.services.some(
-            (s) => s.service_type === service.service_type
-          );
-
-          return {
-            id: service.service_id,
-            name: service.service_type,
-            selected: isAlreadySelected,
-          };
-        });
-
+      console.log("API Response:", response);
+  
+      if (response && Array.isArray(response)) { 
+        const formatted = response.map((service) => ({
+          id: service.service_id,
+          code: service.service_id.toString(), 
+          name: service.service_type,
+          selected: false,
+        }));
+  
         setServiceTypes(formatted);
+      } else {
+        console.error("Unexpected API response format:", response);
+        setServiceTypes([]);
       }
     } catch (error) {
       console.error("Error loading service types:", error);
@@ -207,8 +269,9 @@ const DRCInfo = () => {
         title: "Error",
         text: "Failed to load active service types.",
       });
+      setServiceTypes([]);
     } finally {
-      setServiceLoading(false);
+      setLoading(false);
     }
   };
 
@@ -897,10 +960,13 @@ const DRCInfo = () => {
                 <thead className={GlobalStyle.thead}>
                   <tr>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      RTOM ID
+                      RTOM Name
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                       Changed On
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Handling Type
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                       Status
@@ -918,12 +984,15 @@ const DRCInfo = () => {
                       } border-b`}
                     >
                       <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.rtom_id}
+                        {rtom.rtom_name}
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
                         {rtom.status_update_dtm
                           ? new Date(rtom.status_update_dtm).toLocaleDateString()
                           : "Not specified"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {rtom.handlingtype}
                       </td>
                       <td className={`${GlobalStyle.tableData} text-left`}>
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -1068,34 +1137,64 @@ const DRCInfo = () => {
                   </div>
                 </div>
               )}
-        {!showEndFields && (
-          <div className="flex justify-between mt-4 w-full px-8">
+       {showEndFields ? (
+  <div className="flex justify-between mt-4 w-full px-8">
+    <div className="flex flex-col items-start">
+      <button
+        className={`${GlobalStyle.buttonPrimary}`}
+        onClick={() => setShowPopup(true)}
+      >
+        Log History
+      </button>
+      <div style={{ marginTop: '15px' }}>
+        <button
+          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+          onClick={goBack}
+        >
+          <FaArrowLeft />
+        </button>
+      </div>
+    </div>
+    
+    
+  </div>
+) : (
+      <div className="flex justify-between mt-4 w-full px-8">
+        <div className="flex flex-col items-start">
+          <button
+            className={`${GlobalStyle.buttonPrimary}`}
+            onClick={() => setShowPopup(true)}
+          >
+            Log History
+          </button>
+          <div style={{ marginTop: '15px' }}>
             <button
               className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
               onClick={goBack}
             >
               <FaArrowLeft />
-              
-            </button>
-
-            {/* End Button (Opacity-50) */}
-            <button
-              onClick={() => {
-                if (companyData.drc_status !== "Terminate") {
-                  setShowEndFields(true);
-                }
-              }}
-              className={`${GlobalStyle.buttonPrimary} ${
-                companyData.drc_status === "Terminate" 
-                  ? "opacity-50 cursor-not-allowed" 
-                  : ""
-              }`}
-              disabled={companyData.drc_status === "Terminate"}
-            >
-              End
             </button>
           </div>
-           )}
+        </div>
+      <div>
+        <button
+          onClick={() => {
+            if (companyData.drc_status !== "Terminate") {
+              setShowEndFields(true);
+            }
+          }}
+          className={`${GlobalStyle.buttonPrimary} ${
+            companyData.drc_status === "Terminate" 
+              ? "opacity-50 cursor-not-allowed" 
+              : ""
+          }`}
+          disabled={companyData.drc_status === "Terminate"}
+        >
+          End
+        </button>
+      </div>
+  </div>
+      )}
     </div>
   );
 };
@@ -1125,17 +1224,7 @@ return (
                   drc_status: newStatus,
                 });
 
-                // Show a toast notification
-                Swal.fire({
-                  icon: "info",
-                  title: "Status Updated",
-                  text: `DRC status set to ${newStatus}`,
-                  toast: true,
-                  position: "top-end",
-                  showConfirmButton: false,
-                  timer: 3000,
-                  timerProgressBar: true,
-                });
+                
               }}
               className="relative inline-flex items-center cursor-pointer"
               aria-label={
@@ -1161,207 +1250,179 @@ return (
           </div>
 
           {/* Company Details Section */}
-          <h2
-            className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}
-          >
-            Company Details
-          </h2>
-
-          <div className={` overflow-x-auto`}>
-            <table className={`${GlobalStyle.table} min-w-full text-left`}>
-              <tbody>
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Added Date
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}
-                  >
-                    {companyData.create_on
-                      ? new Date(companyData.create_on).toLocaleDateString()
-                      : "Not specified"}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Business Reg No
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 text-left`}
-                  >
-                    {companyData.drc_business_registration_number ||
-                      "Not specified"}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Address
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td
-                    className={`${GlobalStyle.tableData} text-gray-500 text-left`}
-                  >
-                    {companyData.drc_address || "Not specified"}
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Contact Number
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td className={`${GlobalStyle.tableData} text-left`}>
-                    <input
-                      type="text"
-                      value={contactNo}
-                      onChange={(e) => setContactNo(e.target.value)}
-                      className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                  >
-                    Email
-                  </td>
-                  <td className="w-4 text-left">:</td>
-                  <td className={`${GlobalStyle.tableData} text-left`}>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* SLT Coordinator Section */}
-          <div className="flex justify-between items-center">
-            <h2
-              className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}
-            >
-              SLT Coordinator Details
+          <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
+              Company Details
             </h2>
-            <button
-              onClick={() => setEditingCoordinator(!editingCoordinator)}
-              className={` ${GlobalStyle.buttonPrimary}px-3 py-1 `}
-            >
-              {editingCoordinator ? "Cancel Change" : "Change"}
-            </button>
-          </div>
 
-          <div className={` overflow-x-auto`}>
-            {currentCoordinator || editingCoordinator ? (
+            <div className={`overflow-x-auto`}>
               <table className={`${GlobalStyle.table} min-w-full text-left`}>
                 <tbody>
-                  <tr>
-                    <td
-                      className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                    >
-                      Service No
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Added Date<span className="sm:hidden">:</span>
                     </td>
-                    <td className="w-4 text-left">:</td>
-                    <td
-                      className={`${GlobalStyle.tableData} break-words text-left`}
-                    >
-                      {editingCoordinator ? (
-                        <select
-                          name="service_no"
-                          value={coordinatorFields.service_no}
-                          onChange={handleServiceSelection}
-                          className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs "
-                        >
-                          <option value="">Select a service</option>
-                          {serviceOptions.map((option, idx) => (
-                            <option key={idx} value={option.service_no}>
-                              {option.service_no}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.service_no || "Not specified"}
-                        </span>
-                      )}
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left block sm:table-cell`}>
+                      {companyData.create_on
+                        ? new Date(companyData.create_on).toLocaleDateString()
+                        : "Not specified"}
                     </td>
                   </tr>
-                  <tr>
-                    <td
-                      className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                    >
-                      Name
+
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Business Reg No<span className="sm:hidden">:</span>
                     </td>
-                    <td className="w-4 text-left">:</td>
-                    <td
-                      className={`${GlobalStyle.tableData} break-words text-left`}
-                    >
-                      {editingCoordinator ? (
-                        <input
-                          type="text"
-                          name="slt_coordinator_name"
-                          value={coordinatorFields.slt_coordinator_name}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
-                        />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_name ||
-                            "Not specified"}
-                        </span>
-                      )}
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                      {companyData.drc_business_registration_number ||
+                        "Not specified"}
                     </td>
                   </tr>
-                  <tr>
-                    <td
-                      className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}
-                    >
-                      Email
+
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Address<span className="sm:hidden">:</span>
                     </td>
-                    <td className="w-4 text-left">:</td>
-                    <td
-                      className={`${GlobalStyle.tableData} break-words text-left`}
-                    >
-                      {editingCoordinator ? (
-                        <input
-                          type="email"
-                          name="slt_coordinator_email"
-                          value={coordinatorFields.slt_coordinator_email}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
-                        />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_email ||
-                            "Not specified"}
-                        </span>
-                      )}
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                      {companyData.drc_address || "Not specified"}
+                    </td>
+                  </tr>
+
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Contact Number<span className="sm:hidden">:</span>
+                    </td>
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                      <input
+                        type="text"
+                        value={contactNo}
+                        onChange={(e) => setContactNo(e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
+                      />
+                    </td>
+                  </tr>
+
+                  <tr className="block sm:table-row">
+                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                      Email<span className="sm:hidden">:</span>
+                    </td>
+                    <td className="w-4 text-left hidden sm:table-cell">:</td>
+                    <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
+                      />
                     </td>
                   </tr>
                 </tbody>
               </table>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                No coordinator assigned
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* Services Section - With dropdown below the heading, aligned left */}
+            
+          {/* SLT Coordinator Section */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
+                  SLT Coordinator Details
+                </h2>
+                <div className="w-full flex justify-end sm:block sm:w-auto">
+                  <button
+                    onClick={() => setEditingCoordinator(!editingCoordinator)}
+                    className={`${GlobalStyle.buttonPrimary} px-3 py-1 mb-4 sm:mb-0`}
+                  >
+                    {editingCoordinator ? "Cancel" : "Change"}
+                  </button>
+                </div>
+            </div>
+
+              <div className={`overflow-x-auto`}>
+                {currentCoordinator || editingCoordinator ? (
+                  <table className={`${GlobalStyle.table} min-w-full text-left`}>
+                    <tbody>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Service No<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <select
+                        name="service_no"
+                        value={coordinatorFields.service_no}
+                        onChange={handleServiceSelection}
+                        className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
+                      >
+                        <option value="">Select a service</option>
+                        {serviceOptions.map((option, idx) => (
+                          <option key={idx} value={option.service_no}>
+                            {option.service_no}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator.service_no || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Name<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="text"
+                        name="slt_coordinator_name"
+                        value={coordinatorFields.slt_coordinator_name}
+                        readOnly
+                        className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator.slt_coordinator_name || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Email<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="email"
+                        name="slt_coordinator_email"
+                        value={coordinatorFields.slt_coordinator_email}
+                        readOnly
+                        className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator.slt_coordinator_email || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No coordinator assigned
+                  </div>
+                )}
+              </div>
+
+          {/* Services Section  */}
+
           <div>
             <h2
               className={`${GlobalStyle.headingMedium} mt-6 mb-2 sm:mt-8 sm:mb-4 underline text-left font-semibold`}
@@ -1532,18 +1593,30 @@ return (
                     ))
                 )}
               </select>
-              <button
-                type="button"
-                onClick={handleAddRTOM}
-                className={`${GlobalStyle.buttonCircle}`}
-                disabled={!selectedRTOM}
+              <select
+                value={selectedhandlingtype}
+                onChange={(e) => Setselectedhandlingtype(e.target.value)}
+                className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
               >
-                <img
-                  src={addIcon}
-                  alt="Add"
-                  style={{ width: 20, height: 20 }}
-                />
-              </button>
+                <option value="">Select Handling Type</option>
+                <option value="CPE">CPE</option>
+                <option value="Arrears">Arrears</option>
+                <option value="All-Type">All Type</option>
+              </select>
+              <div className="flex justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">
+                <button
+                  type="button"
+                  onClick={handleAddRTOM}
+                  className={`${GlobalStyle.buttonCircle}`}
+                  disabled={!selectedRTOM}
+                >
+                  <img
+                    src={addIcon}
+                    alt="Add"
+                    style={{ width: 20, height: 20 }}
+                  />
+                </button>
+              </div>  
             </div>
 
             {rtomLoading && (
@@ -1557,12 +1630,17 @@ return (
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      RTOM ID
+                      RTOM Name
                     </th>
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
                       Changed On
+                    </th>
+                    <th
+                      className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
+                    >
+                      Handling Type
                     </th>
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
@@ -1595,6 +1673,11 @@ return (
                                 rtom.status_update_dtm
                               ).toLocaleDateString()
                             : "Not specified"}
+                        </td>
+                        <td
+                          className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
+                        >
+                          { rtom.selectedhandlingtype}
                         </td>
                         <td className={`${GlobalStyle.tableData} text-center`}>
                           <button
@@ -1669,97 +1752,132 @@ return (
             </tbody>
           </table>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4 mt-8">
-            <button
-              onClick={handleSave}
-              className={`${GlobalStyle.buttonPrimary} px-6 py-2 `}
-            >
-              Save
-            </button>
-          </div>
+          
+          <div className="flex justify-end gap-4 mt-8 flex-wrap">
+          <button
+            onClick={handleSave}
+            className={`${GlobalStyle.buttonPrimary} px-4 sm:px-6 py-2 w-full sm:w-auto`}
+          >
+            Save
+          </button>
+        </div>
         </div>
 
         {/* Log history button - Existing code */}
-       <div className="justify-start flex items-center gap-4">
-            <button
-              className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
-              onClick={goBack}
-            >
-              <FaArrowLeft />
-            </button>
-            
-            <button
-              onClick={toggleLogHistory}
-              className={`${GlobalStyle.buttonPrimary} flex items-center gap-2 px-4 py-2`}
-            >
-              {showLogHistory ? "Close Log History" : "Log History"}
-            </button>
-        </div>
+        <div className="flex flex-col items-start mt-8 ">
+          <button
+              className={`${GlobalStyle.buttonPrimary}`}
+              onClick={() => setShowPopup(true)}
+          >
+              Log History
+          </button>
+
+          <div style={{ marginTop: '15px' }}>
+              <button
+                className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+                onClick={goBack}
+              >
+                <FaArrowLeft />
+                
+              </button>
+
+          </div>
+      </div>
 
         {/* Log History Modal */}
-        {showLogHistory && (
-          <div className="my-4 bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-hidden">
-            <div className="p-6">
-              <div className="mb-4">
-                <h3 className={`${GlobalStyle.headingMedium}`}>
-                  Remark History
-                </h3>
+          {showPopup && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-md shadow-lg w-3/4 max-h-[80vh] overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Log History</h2>
+                <button
+                  className="text-red-500 text-lg font-bold"
+                  onClick={() => setShowPopup(false)}
+                >
+                  ×
+                </button>
               </div>
-
-              <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-                <table className={`${GlobalStyle.table} min-w-full`}>
-                  <thead className={GlobalStyle.thead}>
-                    <tr>
-                      <th className={`${GlobalStyle.tableHeader} text-left`}>
-                        Edited On
-                      </th>
-                      <th className={`${GlobalStyle.tableHeader} text-left`}>
-                        Action
-                      </th>
-                      <th className={`${GlobalStyle.tableHeader} text-left`}>
-                        Edited By
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {remarkHistory && remarkHistory.length > 0 ? (
-                      remarkHistory.map((log, index) => (
-                        <tr
-                          key={index}
-                          className={`${
-                            index % 2 === 0
-                              ? "bg-white bg-opacity-75"
-                              : "bg-gray-50 bg-opacity-50"
-                          } border-b`}
-                        >
-                          <td
-                            className={`${GlobalStyle.tableData} whitespace-nowrap`}
+              <div>
+                <div className="mb-4 flex justify-start">
+                  <div className={GlobalStyle.searchBarContainer}>
+                    <input
+                      type="text"
+                      placeholder="  "
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(0); 
+                      }}
+                      className={GlobalStyle.inputSearch}
+                    />
+                    <FaSearch className={GlobalStyle.searchBarIcon} />
+                  </div>
+                </div>
+                <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                  <table className={`${GlobalStyle.table} w-full`}>
+                    <thead className={GlobalStyle.thead}>
+                      <tr>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[120px]`}>Edited On</th>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[150px]`}>Action</th>
+                        <th className={`${GlobalStyle.tableHeader} min-w-[150px]`}>Edited By</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLogHistory.length > 0 ? (
+                        paginatedLogHistory.map((log, index) => (
+                          <tr
+                            key={index}
+                            className={`${
+                              index % 2 === 0
+                                ? "bg-white bg-opacity-75"
+                                : "bg-gray-50 bg-opacity-50"
+                            } border-b`}
                           >
-                            {new Date(log.remark_dtm).toLocaleString()}
-                          </td>
-                          <td className={`${GlobalStyle.tableData}`}>
-                            {log.remark_by || "System User"}
-                          </td>
-                          <td
-                            className={`${GlobalStyle.tableData} whitespace-normal break-words`}
-                          >
-                            {log.remark || "No remark provided"}
+                            <td className={`${GlobalStyle.tableData} whitespace-nowrap`}>
+                              {log.remark_dtm
+                                ? new Date(log.remark_dtm).toLocaleDateString('en-GB')
+                                : "N/A"}
+                            </td>
+                            <td className={GlobalStyle.tableData}>
+                              {log.remark || "No remark provided"}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words`}>
+                              {log.remark_by || "System User"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="3" className="text-center py-4 text-gray-500">
+                            {searchQuery ? "No matching results found" : "No Log history available"}
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="3"
-                          className="text-center py-4 text-gray-500"
-                        >
-                          No remark history available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredLogHistory.length > rowsPerPage && (
+                    <div className={GlobalStyle.navButtonContainer}>
+                      <button
+                        className={`${GlobalStyle.navButton} ${currentPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 0}
+                      >
+                        <FaArrowLeft />
+                      </button>
+                      
+                      <span>Page {currentPage + 1} of {pages}</span>
+                      
+                      <button
+                        className={`${GlobalStyle.navButton} ${currentPage === pages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handleNextPage}
+                        disabled={currentPage === pages - 1}
+                      >
+                        <FaArrowRight />
+                      </button>
+                    </div>
+                  )}
               </div>
             </div>
           </div>

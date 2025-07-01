@@ -79,7 +79,16 @@ const Case_List = () => {
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const rowsPerPage = 10;
   const hasMounted = useRef(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
+  const [committedFilters, setCommittedFilters] = useState({
+    rtom: "",
+    selectedDRC: "",
+    selectedBand: "",
+    selectedServiceType: "",
+    selectedCaseStatus: "",
+    fromDate: null,
+    toDate: null
+  });
 
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
@@ -435,18 +444,19 @@ const Case_List = () => {
     return true;
   }
 
-  const CallAPI = async () => {
+  const CallAPI = async (filters) => {
     try {
       const payload = {
-        case_current_status: selectedCaseStatus,
-        From_DAT: fromDate,
-        TO_DAT: toDate,
-        RTOM: rtom,
-        DRC: selectedDRC,
-        arrears_band: selectedBand,
-        service_type: selectedServiceType,
-        pages: currentPage
+        case_current_status: filters.selectedCaseStatus,
+        From_DAT: filters.fromDate,
+        TO_DAT: filters.toDate,
+        RTOM: filters.rtom,
+        DRC: filters.selectedDRC,
+        arrears_band: filters.selectedBand,
+        service_type: filters.selectedServiceType,
+        pages: filters.currentPage
       };
+      console.log("Payload for API call:", payload); // For debugging
 
       setIsLoading(true);
 
@@ -466,6 +476,8 @@ const Case_List = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f"
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no results found on page 2
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -531,7 +543,10 @@ const Case_List = () => {
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      CallAPI(); // Call the function whenever currentPage changes
+      CallAPI({
+        ...committedFilters,
+        currentPage: currentPage,
+      }); // Call the function whenever currentPage changes
     }
   }, [currentPage]);
 
@@ -545,8 +560,26 @@ const Case_List = () => {
       return; // If validation fails, do not proceed
     } else {
       setFilteredData([]);
+      setCommittedFilters({
+        rtom: rtom,
+        selectedDRC: selectedDRC,
+        selectedBand: selectedBand,
+        selectedServiceType: selectedServiceType,
+        selectedCaseStatus: selectedCaseStatus,
+        fromDate: fromDate,
+        toDate: toDate,
+      });
       if (currentPage === 1) {
-        CallAPI();
+        CallAPI({
+          rtom: rtom,
+          selectedDRC: selectedDRC,
+          selectedBand: selectedBand,
+          selectedServiceType: selectedServiceType,
+          selectedCaseStatus: selectedCaseStatus,
+          fromDate: fromDate,
+          toDate: toDate,
+          currentPage: 1
+        });
       } else {
         setCurrentPage(1);
       }
@@ -596,6 +629,15 @@ const Case_List = () => {
     setMaxCurrentPage(0);
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    setCommittedFilters({
+      rtom: "",
+      selectedDRC: "",
+      selectedBand: "",
+      selectedServiceType: "",
+      selectedCaseStatus: "",
+      fromDate: null,
+      toDate: null
+    })
     if (currentPage != 1) {
       setCurrentPage(1); // Reset to page 1
     } else {
