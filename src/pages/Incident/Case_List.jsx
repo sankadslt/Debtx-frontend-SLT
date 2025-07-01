@@ -624,6 +624,7 @@ const Case_List = () => {
     setSelectedCaseStatus("");
     setFromDate(null);
     setToDate(null);
+    setSearchQuery("");
     setIsFilterApplied(false);
     setIsMoreDataAvailable(true);
     setMaxCurrentPage(0);
