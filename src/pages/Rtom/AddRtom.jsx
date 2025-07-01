@@ -49,6 +49,7 @@ const AddRtom = () => {
         icon: "error",
         title: "Authentication Error",
         text: "Failed to load user information. Please login again.",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -72,11 +73,14 @@ const AddRtom = () => {
       newErrors.areaCode = "Area Code is required";
     } 
     
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
+  if (formData.email.trim()) {
+  if (/\s/.test(formData.email)) {
+    newErrors.email = "Email must not contain spaces";
+  } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) {
+    newErrors.email = "Invalid email format";
+  }
+}
+
 
     const mobileDigits = formData.mobile.replace(/\D/g, '');
     if (!mobileDigits || mobileDigits.length !== 10) {
@@ -126,6 +130,7 @@ const AddRtom = () => {
         icon: "success",
         title: "Successfully Created",
         text: `RTOM registered successfully!`,
+        confirmButtonColor: "#28a745"
       }).then(() => {
         navigate("/pages/Rtom/RtomList");
       });
@@ -136,6 +141,7 @@ const AddRtom = () => {
         icon: "error",
         title: "Registration Failed",
         text: error.message || "Failed to create RTOM. Please try again.",
+        confirmButtonColor: "#d33"
       });
     } finally {
       setIsSubmitting(false);
@@ -144,9 +150,26 @@ const AddRtom = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    let processedValue = value;
+
+  if (name === "billingCenterCode") {
+    processedValue = value.replace(/[^a-zA-Z]/g, '');
+  }
+
+  if (name === "telephone" || name === "mobile") {
+    // Allow only digits
+    processedValue = value.replace(/[^0-9]/g, '');
+  }
+ 
+
+  // if (name === "areaCode") {
+  //   processedValue = value.replace(/[^a-zA-Z]/g, '');
+  // }
+
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: processedValue
     }));
     
     // Clear specific field error when user starts typing
@@ -165,7 +188,7 @@ const AddRtom = () => {
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`} style={{ fontSize: isSmallMobile ? "14px" : "16px" }}>
       <h1 className={GlobalStyle.headingLarge} style={{ textAlign: isMobile ? "center" : "left" }}>
-        Register new RTOM Area
+        Register New Billing Center Area
       </h1>
       
       {errors.general && (
@@ -203,12 +226,12 @@ const AddRtom = () => {
                 type: "text", 
                 validation: errors.areaCode 
               },
-              { 
-                label: "Email", 
-                name: "email", 
-                type: "email", 
-                validation: errors.email 
-              }
+              // { 
+              //   label: "Email", 
+              //   name: "email", 
+              //   type: "text", 
+              //   validation: errors.email 
+              // }
             ].map((field) => (
               <div key={field.name} className="flex flex-col gap-2">
                 <div 
@@ -224,7 +247,9 @@ const AddRtom = () => {
                       width: isMobile ? "100%" : "12rem"
                     }}
                   >
-                    <span>{field.label}</span>
+                     <span>
+                       {field.label} <span className="text-red-500">*</span>
+                    </span>
                     {!isMobile && <span>:</span>}
                   </div>
                   <input
@@ -236,7 +261,8 @@ const AddRtom = () => {
                     style={{
                       width: isMobile ? "100%" : "calc(100% - 13rem)"
                     }}
-                    required
+                    
+                    //required
                   />
                 </div>
                 {field.validation && (
@@ -263,18 +289,26 @@ const AddRtom = () => {
             {/* Contact Number Fields */}
             {[
               { 
+                label: "Email", 
+                name: "email", 
+                type: "text", 
+                validation: errors.email 
+              },
+              { 
                 label: "Mobile", 
                 name: "mobile", 
                 type: "tel", 
+                placeholder: "071XXXXXXX",
                 validation: errors.mobile,
-                pattern: "[0-9]{10}"
+                // pattern: "[0-9]{10}"
               },
               { 
                 label: "Telephone", 
                 name: "telephone", 
                 type: "tel", 
+                placeholder: "011XXXXXXX",
                 validation: errors.telephone,
-                pattern: "[0-9]{10}"
+                //pattern: "[0-9]{10}"
               }
             ].map((field) => (
               <div key={field.name} className="flex flex-col gap-2">
@@ -299,14 +333,15 @@ const AddRtom = () => {
                     type={field.type}
                     value={formData[field.name]}
                     onChange={handleInputChange}
-                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                    placeholder={field.placeholder}
+                    // onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                     className={`${GlobalStyle.inputText} ${field.validation ? 'border-red-500' : ''}`}
                     maxLength="10"
                     style={{
                       width: isMobile ? "100%" : "calc(100% - 13rem)"
                     }}
-                    pattern={field.pattern}
-                    required
+                    //pattern={field.pattern}
+                   // required
                   />
                 </div>
                 {field.validation && (
@@ -332,7 +367,7 @@ const AddRtom = () => {
                 type="submit" 
                 className={`${GlobalStyle.buttonPrimary} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 style={{
-                  padding: isSmallMobile ? "0.5rem 1rem" : "0.75rem 1.5rem"
+                  padding: isSmallMobile ? "0.5rem 1rem" : "0.3rem 0.75rem"
                 }}
                 disabled={isSubmitting}
               >
