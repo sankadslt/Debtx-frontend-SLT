@@ -197,7 +197,7 @@ const Incident_List = () => {
   
   
   
-    const filteredDataBySearch = paginatedData.filter((row) =>
+    const filteredDataBySearch = filteredData.filter((row) =>
       Object.values(row)
         .join(" ")
         .toLowerCase()
@@ -261,7 +261,11 @@ const Incident_List = () => {
       setIsLoading(false);
       
       if (response && response.data ) {
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data);
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
         
        if (response.data.length === 0) {
            setIsMoreDataAvailable(false);  
@@ -308,11 +312,6 @@ const Incident_List = () => {
 
  
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI({
@@ -597,7 +596,7 @@ const Incident_List = () => {
 
               <tbody>
               {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.map((row, index) => (
+                  filteredDataBySearch.slice(startIndex, endIndex).map((row, index) => (
                     <tr
                       key={row.incidentID||index}
                       className={
