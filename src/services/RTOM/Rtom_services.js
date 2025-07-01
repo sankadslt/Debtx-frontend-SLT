@@ -31,6 +31,10 @@ export const fetchRTOMs = async (filters = {}) => {
       response: error.response?.data,
       status: error.response?.status,
     });
+
+    if (error.response?.status === 404) {
+      return [];
+    }
     throw error.response?.data?.message || "An error occurred while fetching RTOMs";
   }
 };

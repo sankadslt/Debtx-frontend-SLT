@@ -22,6 +22,7 @@ import {
   updateRTOMDetails,
   terminateRTOM,
 } from "../../services/RTOM/Rtom_services";
+import { Tooltip } from "react-tooltip";
 import { getLoggedUserId } from "../../services/auth/authService";
 
 const RtomInfoNew = () => {
@@ -274,9 +275,26 @@ const RtomInfoNew = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+
+    
+    let processedValue = value;
+
+  if (name === "billingCenterCode") {
+    processedValue = value.replace(/[^a-zA-Z]/g, '');
+  }
+ 
+
+  if (name === "areaCode") {
+    processedValue = value.replace(/[^a-zA-Z]/g, '');
+  }
+  if (name === "email") {
+    // Allow only valid email characters
+    processedValue = value.replace(/[^a-zA-Z0-9@._-]/g, '');
+  }
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
 
@@ -464,150 +482,156 @@ const RtomInfoNew = () => {
               opacity: isRtomTerminated() ? 0.5 : 1,
               cursor: isRtomTerminated() ? "not-allowed" : "pointer",
             }}
-            title={
-              isRtomTerminated() ? "Cannot edit - RTOM is terminated" : "Edit"
-            }
+            // title={
+            //   isRtomTerminated() ? "Cannot edit - RTOM is terminated" : "Edit"
+            // }
           >
             <img
               src={edit_info}
               className="w-6 h-6"
+              data-tooltip-id="edit-tooltip"
               style={{
                 filter: isRtomTerminated() ? "grayscale(100%)" : "none",
               }}
             />
+            <Tooltip id="edit-tooltip" place="bottom" effect="solid">
+              {isRtomTerminated() ? "Cannot edit - RTOM is terminated" : "Edit"}
+            </Tooltip>
           </button>
         </div>
 
-        <table className="mb-8 w-full">
-          <tbody>
-            <tr>
-              <td>
-                <label
-                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
-                >
-                  Added Date
-                </label>
-              </td>
-              <td> : </td>
-              <td>
-                <label>
-                  {rtomData.created_on
-                    ? formatDate(rtomData.created_on)
-                    : "N/A"}
-                </label>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label
-                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
-                >
-                  Billing Center Code
-                </label>
-              </td>
-              <td> : </td>
-              <td>
-                <label>{rtomData.billing_center_code}</label>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label
-                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
-                >
-                  RTOM Name
-                </label>
-              </td>
-              <td> : </td>
-              <td>
-                <label>{rtomData.rtom_name}</label>
-              </td>
-            </tr>
-            <tr>
-              <td></td>
-            </tr>
-            <tr>
-              <td>
-                <label
-                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
-                >
-                  Area Code
-                </label>
-              </td>
-              <td> : </td>
-              <td>
-                <label>{rtomData.area_code}</label>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label className={`${GlobalStyle.headingMedium} pl-16`}>
-                  Email
-                </label>
-              </td>
-              <td> : </td>
-              <td>
-                <label>{rtomData.rtom_email || "N/A"}</label>
-              </td>
-            </tr>
-            <tr>
-              <td></td>
-            </tr>
-            <tr>
-              <td></td>
-            </tr>
+        <div className="overflow-x-auto">
+          <table className="mb-8 w-full">
+            <tbody>
+              <tr>
+                <td>
+                  <label
+                    className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  >
+                    Added Date
+                  </label>
+                </td>
+                <td> : </td>
+                <td>
+                  <label>
+                    {rtomData.created_on
+                      ? formatDate(rtomData.created_on)
+                      : "N/A"}
+                  </label>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label
+                    className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  >
+                    Billing Center Code
+                  </label>
+                </td>
+                <td> : </td>
+                <td>
+                  <label>{rtomData.billing_center_code}</label>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label
+                    className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  >
+                    RTOM Name
+                  </label>
+                </td>
+                <td> : </td>
+                <td>
+                  <label>{rtomData.rtom_name}</label>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+              </tr>
+              <tr>
+                <td>
+                  <label
+                    className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  >
+                    Area Code
+                  </label>
+                </td>
+                <td> : </td>
+                <td>
+                  <label>{rtomData.area_code}</label>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label className={`${GlobalStyle.headingMedium} pl-16`}>
+                    Email
+                  </label>
+                </td>
+                <td> : </td>
+                <td>
+                  <label>{rtomData.rtom_email || "N/A"}</label>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+              </tr>
+              <tr>
+                <td></td>
+              </tr>
 
-            <tr>
-              <td colSpan="3" className="py-2"></td>
-            </tr>
+              <tr>
+                <td colSpan="3" className="py-2"></td>
+              </tr>
 
-            <tr>
-              <td colSpan="3">
-                <label
-                  className={`${GlobalStyle.headingMedium} border-b-2 border-black font-bold inline-block ml-10`}
-                >
-                  Contact Details
-                </label>
-              </td>
-            </tr>
+              <tr>
+                <td colSpan="3">
+                  <label
+                    className={`${GlobalStyle.headingMedium} border-b-2 border-black font-bold inline-block ml-10`}
+                  >
+                    Contact Details
+                  </label>
+                </td>
+              </tr>
 
-            <tr>
-              <td colSpan="3" className="py-2"></td>
-            </tr>
+              <tr>
+                <td colSpan="3" className="py-2"></td>
+              </tr>
 
-            <tr>
-              <td>
-                <label
-                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
-                >
-                  Mobile
-                </label>
-              </td>
-              <td> : </td>
-              <td>
-                <label>{rtomData.rtom_mobile_no || "N/A"}</label>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label className={`${GlobalStyle.headingMedium} pl-16`}>
-                  Telephone
-                </label>
-              </td>
-              <td> : </td>
-              <td>
-                <label>{rtomData.rtom_telephone_no || "N/A"}</label>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <tr>
+                <td>
+                  <label
+                    className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  >
+                    Mobile
+                  </label>
+                </td>
+                <td> : </td>
+                <td>
+                  <label>{rtomData.rtom_mobile_no || "N/A"}</label>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label className={`${GlobalStyle.headingMedium} pl-16`}>
+                    Telephone
+                  </label>
+                </td>
+                <td> : </td>
+                <td>
+                  <label>{rtomData.rtom_telephone_no || "N/A"}</label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 
   // Render Edit Mode
   const renderEditMode = () => (
-    <div className="flex justify-center">
+    <div className="flex justify-center px-4 sm:px-8">
       <div
         className={`${GlobalStyle.cardContainer} mt-4 w-full max-w-2xl relative`}
       >
@@ -624,52 +648,52 @@ const RtomInfoNew = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4">
-          <div className="flex gap-8 items-center">
+          <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-center">
             <h1 className="w-48">Billing Center Code</h1>
-            <span>:</span>
+            <span className="hidden sm:block">:</span>
             <input
               name="billingCenterCode"
               type="text"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.billingCenterCode}
               onChange={handleInputChange}
               required
             />
           </div>
 
-          <div className="flex gap-8 items-center">
+          <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-center">
             <h1 className="w-48">Name</h1>
-            <span>:</span>
+            <span className="hidden sm:block">:</span>
             <input
               name="name"
               type="text"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.name}
               onChange={handleInputChange}
               required
             />
           </div>
 
-          <div className="flex gap-8 items-center">
+          <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-center">
             <h1 className="w-48">Area Code</h1>
-            <span>:</span>
+            <span className="hidden sm:block">:</span>
             <input
               name="areaCode"
               type="text"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.areaCode}
               onChange={handleInputChange}
               required
             />
           </div>
 
-          <div className="flex gap-8 items-center">
+          <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-center">
             <h1 className="w-48">Email</h1>
-            <span>:</span>
+            <span className="hidden sm:block">:</span>
             <input
               name="email"
               type="email"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.email}
               onChange={handleInputChange}
               required
@@ -678,13 +702,13 @@ const RtomInfoNew = () => {
 
           <strong className="block pt-4 underline">Contact Details</strong>
 
-          <div className="flex gap-8 items-center">
+          <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-center">
             <h1 className="w-48">Mobile</h1>
-            <span>:</span>
+            <span className="hidden sm:block">:</span>
             <input
               name="mobile"
               type="tel"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.mobile}
               onChange={handleInputChange}
               required
@@ -693,13 +717,13 @@ const RtomInfoNew = () => {
             />
           </div>
 
-          <div className="flex gap-8 items-center">
+          <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-center">
             <h1 className="w-48">Telephone</h1>
-            <span>:</span>
+            <span className="hidden sm:block">:</span>
             <input
               name="telephone"
               type="tel"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.telephone}
               onChange={handleInputChange}
               pattern="[0-9]{10}"
@@ -712,13 +736,13 @@ const RtomInfoNew = () => {
             <textarea
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
-              className={`${GlobalStyle.remark} w-[467px] ml-10`}
+              className={`${GlobalStyle.remark} w-full`}
               rows="5"
               placeholder="Enter reason for changes..."
             ></textarea>
           </div>
 
-          <div className="flex justify-end mt-4 gap-4">
+          <div className="flex justify-end mt-4 gap-4 flex-col-reverse sm:flex-row ">
             <button
               type="button"
               className={`${GlobalStyle.buttonSecondary} px-8 py-2`}
@@ -726,10 +750,10 @@ const RtomInfoNew = () => {
               disabled={isLoading}
             >
               Cancel
-            </button>
+            </button> */}
             <button
               type="submit"
-              className={`${GlobalStyle.buttonPrimary} px-8 py-2`}
+              className={`${GlobalStyle.buttonPrimary} px-4 py-2`}
               disabled={isLoading}
             >
               {isLoading ? "Saving..." : "Save"}
@@ -742,20 +766,20 @@ const RtomInfoNew = () => {
 
   // Render End Mode
   const renderEndMode = () => (
-    <div className="flex justify-center">
-      <div className={`${GlobalStyle.cardContainer} p-4`}>
+    <div className="flex justify-center px-4 sm:px-8 md:px-16">
+      <div className={`${GlobalStyle.cardContainer} p-4 w-full max-w-2xl relative`}>
         <div className="flex mb-4 justify-end">
           <button onClick={switchToViewMode}>
             <img src={edit_info} title="Cancel" className="w-6 h-6" />
           </button>
         </div>
 
-        <table className="mb-8 w-full">
+        <table className="mb-8 w-full text-sm sm:text-base">
           <tbody>
             <tr>
               <td>
                 <label
-                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  className={`${GlobalStyle.headingMedium} pl-4 sm:pl-8 lg:pl-16 mb-2 block`}
                 >
                   Added Date
                 </label>
@@ -772,7 +796,7 @@ const RtomInfoNew = () => {
             <tr>
               <td>
                 <label
-                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  className={`${GlobalStyle.headingMedium} pl-4 sm:pl-8 lg:pl-16 mb-2 block`}
                 >
                   Billing Center Code
                 </label>
@@ -785,7 +809,7 @@ const RtomInfoNew = () => {
             <tr>
               <td>
                 <label
-                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  className={`${GlobalStyle.headingMedium} pl-4 sm:pl-8 lg:pl-16 mb-2 block`}
                 >
                   RTOM Name
                 </label>
@@ -799,7 +823,7 @@ const RtomInfoNew = () => {
         </table>
 
         <div className="flex flex-col items-center">
-          <div className={`${GlobalStyle.datePickerContainer} -ml-[205px]`}>
+          <div className={`${GlobalStyle.datePickerContainer} sm:ml-0 lg:-ml-[160px]`}>
             <label className={GlobalStyle.dataPickerDate}>End Date</label>
             <span>:</span>
             <DatePicker
@@ -807,7 +831,7 @@ const RtomInfoNew = () => {
               onChange={handleEndDateChange}
               dateFormat="dd/MM/yyyy"
               placeholderText="dd/MM/yyyy"
-              className={GlobalStyle.inputText}
+              className={`${GlobalStyle.inputText} w-full max-w-xs`}
               minDate={new Date()}
               maxDate={new Date()}
               filterDate={(date) => {
@@ -818,14 +842,14 @@ const RtomInfoNew = () => {
             />
           </div>
 
-          <div className="w-full mt-4 pl-16">
-            <label className={`${GlobalStyle.headingMedium} block mb-2`}>
+          <div className="w-full mt-4 flex-col lg:flex-row lg:items-start sm:pl-8 lg:pl-16">
+            <label className={`${GlobalStyle.headingMedium} block mb-2 lg:mb-0 lg:w-1/4`}>
               Remark
             </label>
             <textarea
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
-              className={`${GlobalStyle.remark} w-full`}
+              className={`${GlobalStyle.remark} w-full max-w-lg px-2 py-1`}
               rows="5"
               placeholder="Enter reason for termination..."
               required
@@ -836,7 +860,7 @@ const RtomInfoNew = () => {
 
           <div className="flex justify-end w-full mt-6">
             <button
-              className={`${GlobalStyle.buttonPrimary} px-8 py-2`}
+              className={`${GlobalStyle.buttonPrimary} px-6 sm:px-8 py-2`}
               onClick={handleSaveEnd}
               disabled={isLoading}
             >
@@ -851,45 +875,48 @@ const RtomInfoNew = () => {
   // Common UI Elements
   const renderCommonUI = () => (
     <div className="flex flex-col">
-      {/* Show End button but make it disabled if RTOM is terminated */}
-      {mode === "view" && (
-        <div className="flex justify-end mb-4">
-          <button
-            className={`${GlobalStyle.buttonPrimary}`}
-            onClick={switchToEndMode}
-            disabled={isRtomTerminated()}
-            style={{
-              zIndex: 1,
-              opacity: isRtomTerminated() ? 0.5 : 1,
-              cursor: isRtomTerminated() ? "not-allowed" : "pointer",
-            }}
-            title={
-              isRtomTerminated()
-                ? "Cannot end - RTOM is already terminated"
-                : "End RTOM"
-            }
-          >
-            End
-          </button>
-        </div>
-      )}
-
-      <div className="flex flex-col items-start -mt-14">
+      <div className="flex flex-col items-start md:flex-row md:justify-between md:items-center mb-4 gap-2 ">
         <button
           className={`${GlobalStyle.buttonPrimary}`}
           onClick={() => setShowPopup(true)}
         >
           Log History
         </button>
-
-        <div style={{ marginTop: "12px" }}>
+        {/* Show End button but make it disabled if RTOM is terminated */}
+        {mode === "view" && (
           <button
-            className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
-            onClick={goBack}
+            className={`${GlobalStyle.buttonPrimary}`}
+            onClick={switchToEndMode}
+            disabled={isRtomTerminated()}
+            data-tooltip-id="end-tooltip"
+            style={{
+              zIndex: 1,
+              opacity: isRtomTerminated() ? 0.5 : 1,
+              cursor: isRtomTerminated() ? "not-allowed" : "pointer",
+            }}
+            // title={
+            //   isRtomTerminated()
+            //     ? "Cannot end - RTOM is already terminated"
+            //     : "End RTOM"
+            // }
           >
-            <FaArrowLeft />
+            End
+            <Tooltip id="end-tooltip" place="bottom" effect="solid">
+              {isRtomTerminated()
+                ? "Cannot end - RTOM is already terminated"
+                : ""}
+            </Tooltip>
           </button>
-        </div>
+        )}
+      </div>
+
+      <div className="flex mt-2 md:mt-0">
+        <button
+          className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2`}
+          onClick={goBack}
+        >
+          <FaArrowLeft />
+        </button>
       </div>
     </div>
   );
