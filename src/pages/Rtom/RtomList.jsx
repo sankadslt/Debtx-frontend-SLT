@@ -122,9 +122,12 @@ const RtomList = () => {
 
   // Filter data based on search query and status filter
   const filteredData = allData.filter((row) => {
+    const searchableFields = { ...row };
+    delete searchableFields.rtom_status; 
+
     const matchesSearch =
       searchQuery === "" ||
-      Object.values(row)
+      Object.values(searchableFields)
         .join(" ")
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
