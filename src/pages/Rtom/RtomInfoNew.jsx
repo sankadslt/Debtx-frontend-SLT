@@ -300,11 +300,37 @@ const RtomInfoNew = () => {
 
   const handleSaveEnd = async () => {
     if (!endDate) {
-      setError("Please select an end date");
+      await Swal.fire({
+        title: "Required Field",
+        text: "Please select an end date.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
       return;
     }
+
     if (!remark) {
-      setError("Please enter remarks");
+      await Swal.fire({
+        title: "Required Field",
+        text: "Please enter remarks.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to terminate this RTOM?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, terminate it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!confirmResult.isConfirmed) {
       return;
     }
 
@@ -358,6 +384,36 @@ const RtomInfoNew = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Custom validation for required fields
+    if (!formData.billingCenterCode) {
+      Swal.fire(
+        "Required Field",
+        "Please enter the Billing Center Code.",
+        "warning"
+      );
+      return;
+    }
+    if (!formData.name) {
+      Swal.fire("Required Field", "Please enter the Name.", "warning");
+      return;
+    }
+    if (!formData.areaCode) {
+      Swal.fire("Required Field", "Please enter the Area Code.", "warning");
+      return;
+    }
+    if (!formData.email) {
+      Swal.fire("Required Field", "Please enter the Email.", "warning");
+      return;
+    }
+    if (!formData.mobile) {
+      Swal.fire("Required Field", "Please enter the Mobile Number.", "warning");
+      return;
+    }
+    if (!remark) {
+      Swal.fire("Required Field", "Please enter a Remark.", "warning");
+      return;
+    }
 
     // Double check if RTOM is terminated before submitting
     if (isRtomTerminated()) {
@@ -588,7 +644,9 @@ const RtomInfoNew = () => {
 
               <tr>
                 <td>
-                  <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
+                  <label
+                    className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                  >
                     Email
                   </label>
                 </td>
@@ -656,7 +714,6 @@ const RtomInfoNew = () => {
               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.billingCenterCode}
               onChange={handleInputChange}
-              required
             />
           </div>
 
@@ -669,7 +726,6 @@ const RtomInfoNew = () => {
               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.name}
               onChange={handleInputChange}
-              required
             />
           </div>
 
@@ -682,7 +738,6 @@ const RtomInfoNew = () => {
               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.areaCode}
               onChange={handleInputChange}
-              required
             />
           </div>
 
@@ -698,7 +753,6 @@ const RtomInfoNew = () => {
               value={formData.email}
               onChange={handleInputChange}
               placeholder="abc@gmail.com"
-              required
             />
           </div>
 
@@ -712,7 +766,6 @@ const RtomInfoNew = () => {
               value={formData.mobile}
               onChange={handleInputChange}
               placeholder="071XXXXXXX"
-              required
               pattern="[0-9]{10}"
               title="10 digit mobile number"
             />
@@ -864,8 +917,10 @@ const RtomInfoNew = () => {
             </tr>
 
             <tr>
-              <td> 
-                <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
+              <td>
+                <label
+                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                >
                   Email
                 </label>
               </td>
@@ -931,7 +986,6 @@ const RtomInfoNew = () => {
               className={`${GlobalStyle.remark} w-full max-w-lg px-2 py-1`}
               rows="5"
               placeholder="Enter reason for termination..."
-              required
             ></textarea>
           </div>
 
