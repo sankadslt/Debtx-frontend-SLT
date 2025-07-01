@@ -807,7 +807,7 @@ const Add_DRC = () => {
                     <th className={GlobalStyle.tableHeader}>Handling Type</th>
                     <th className={GlobalStyle.tableHeader}></th>
                   </tr>
-                </thead>
+                </thead>                    
                 <tbody>
                   {rtomAreas.filter((area) => area.selected).length > 0 ? (
                     rtomAreas

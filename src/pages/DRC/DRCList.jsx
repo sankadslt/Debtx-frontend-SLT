@@ -301,7 +301,7 @@ const DRCList = () => {
                             <th className={GlobalStyle.tableHeader}>Contact No.</th>
                             <th className={GlobalStyle.tableHeader}>Service Count</th>
                             <th className={GlobalStyle.tableHeader}>RO Count</th>
-                            <th className={GlobalStyle.tableHeader}>RTOM Count</th>
+                            <th className={GlobalStyle.tableHeader}>Billing Center Count</th>
                             <th className={GlobalStyle.tableHeader}></th>
                         </tr>
                     </thead>
@@ -333,9 +333,10 @@ const DRCList = () => {
                                     </td>
 
 
-                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`}
-                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RTOM" } })}>
-                                        {log.RTOMCount}
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Billing Center" } })}>
+                                                 {log.RTOMCount}
+
                                     </td>
 
 
