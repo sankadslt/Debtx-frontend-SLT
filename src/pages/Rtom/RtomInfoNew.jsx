@@ -486,15 +486,13 @@ const RtomInfoNew = () => {
                   <label
                     className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
                   >
-                    Added Date
+                    Created Date
                   </label>
                 </td>
                 <td> : </td>
                 <td>
                   <label>
-                    {rtomData.created_on
-                      ? formatDate(rtomData.created_on)
-                      : "N/A"}
+                    {rtomData.created_on && formatDate(rtomData.created_on)}
                   </label>
                 </td>
               </tr>
@@ -540,17 +538,7 @@ const RtomInfoNew = () => {
                   <label>{rtomData.area_code}</label>
                 </td>
               </tr>
-              <tr>
-                <td>
-                  <label className={`${GlobalStyle.headingMedium} pl-16`}>
-                    Email
-                  </label>
-                </td>
-                <td> : </td>
-                <td>
-                  <label>{rtomData.rtom_email || "N/A"}</label>
-                </td>
-              </tr>
+
               <tr>
                 <td></td>
               </tr>
@@ -578,6 +566,17 @@ const RtomInfoNew = () => {
 
               <tr>
                 <td>
+                  <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
+                    Email
+                  </label>
+                </td>
+                <td> : </td>
+                <td>
+                  <label>{rtomData.rtom_email}</label>
+                </td>
+              </tr>
+              <tr>
+                <td>
                   <label
                     className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
                   >
@@ -586,7 +585,7 @@ const RtomInfoNew = () => {
                 </td>
                 <td> : </td>
                 <td>
-                  <label>{rtomData.rtom_mobile_no || "N/A"}</label>
+                  <label>{rtomData.rtom_mobile_no}</label>
                 </td>
               </tr>
               <tr>
@@ -597,7 +596,7 @@ const RtomInfoNew = () => {
                 </td>
                 <td> : </td>
                 <td>
-                  <label>{rtomData.rtom_telephone_no || "N/A"}</label>
+                  <label>{rtomData.rtom_telephone_no}</label>
                 </td>
               </tr>
             </tbody>
@@ -665,6 +664,8 @@ const RtomInfoNew = () => {
             />
           </div>
 
+          <strong className="block pt-4 underline">Contact Details</strong>
+
           <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-center">
             <h1 className="w-48">Email</h1>
             <span className="hidden sm:block">:</span>
@@ -674,11 +675,10 @@ const RtomInfoNew = () => {
               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.email}
               onChange={handleInputChange}
+              placeholder="abc@gmail.com"
               required
             />
           </div>
-
-          <strong className="block pt-4 underline">Contact Details</strong>
 
           <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-center">
             <h1 className="w-48">Mobile</h1>
@@ -689,6 +689,7 @@ const RtomInfoNew = () => {
               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.mobile}
               onChange={handleInputChange}
+              placeholder="071XXXXXXX"
               required
               pattern="[0-9]{10}"
               title="10 digit mobile number"
@@ -704,6 +705,7 @@ const RtomInfoNew = () => {
               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
               value={formData.telephone}
               onChange={handleInputChange}
+              placeholder="011XXXXXXX"
               pattern="[0-9]{10}"
               title="10 digit telephone number"
             />
@@ -745,7 +747,9 @@ const RtomInfoNew = () => {
   // Render End Mode
   const renderEndMode = () => (
     <div className="flex justify-center px-4 sm:px-8 md:px-16">
-      <div className={`${GlobalStyle.cardContainer} p-4 w-full max-w-2xl relative`}>
+      <div
+        className={`${GlobalStyle.cardContainer} p-4 w-full max-w-2xl relative`}
+      >
         <div className="flex mb-4 justify-end">
           <button onClick={switchToViewMode}>
             <img src={edit_info} title="Cancel" className="w-6 h-6" />
@@ -759,15 +763,13 @@ const RtomInfoNew = () => {
                 <label
                   className={`${GlobalStyle.headingMedium} pl-4 sm:pl-8 lg:pl-16 mb-2 block`}
                 >
-                  Added Date
+                  Created Date
                 </label>
               </td>
               <td> : </td>
               <td>
                 <label>
-                  {rtomData.created_on
-                    ? formatDate(rtomData.created_on)
-                    : "N/A"}
+                  {rtomData.created_on && formatDate(rtomData.created_on)}
                 </label>
               </td>
             </tr>
@@ -797,11 +799,90 @@ const RtomInfoNew = () => {
                 <label>{rtomData.rtom_name}</label>
               </td>
             </tr>
+            <tr>
+              <td></td>
+            </tr>
+            <tr>
+              <td>
+                <label
+                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                >
+                  Area Code
+                </label>
+              </td>
+              <td> : </td>
+              <td>
+                <label>{rtomData.area_code}</label>
+              </td>
+            </tr>
+
+            <tr>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td colSpan="3" className="py-2"></td>
+            </tr>
+
+            <tr>
+              <td colSpan="3">
+                <label
+                  className={`${GlobalStyle.headingMedium} border-b-2 border-black font-bold inline-block ml-10`}
+                >
+                  Contact Details
+                </label>
+              </td>
+            </tr>
+
+            <tr>
+              <td colSpan="3" className="py-2"></td>
+            </tr>
+
+            <tr>
+              <td> 
+                <label className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}>
+                  Email
+                </label>
+              </td>
+              <td> : </td>
+              <td>
+                <label>{rtomData.rtom_email}</label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label
+                  className={`${GlobalStyle.headingMedium} pl-16 mb-2 block`}
+                >
+                  Mobile
+                </label>
+              </td>
+              <td> : </td>
+              <td>
+                <label>{rtomData.rtom_mobile_no}</label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label className={`${GlobalStyle.headingMedium} pl-16`}>
+                  Telephone
+                </label>
+              </td>
+              <td> : </td>
+              <td>
+                <label>{rtomData.rtom_telephone_no}</label>
+              </td>
+            </tr>
           </tbody>
         </table>
 
         <div className="flex flex-col items-center">
-          <div className={`${GlobalStyle.datePickerContainer} sm:ml-0 lg:-ml-[160px]`}>
+          <div
+            className={`${GlobalStyle.datePickerContainer} sm:ml-0 lg:-ml-[160px]`}
+          >
             <label className={GlobalStyle.dataPickerDate}>End Date</label>
             <span>:</span>
             <DatePicker
@@ -811,17 +892,15 @@ const RtomInfoNew = () => {
               placeholderText="dd/MM/yyyy"
               className={`${GlobalStyle.inputText} w-full max-w-xs`}
               minDate={new Date()}
-              maxDate={new Date()}
-              filterDate={(date) => {
-                const today = new Date();
-                return date.toDateString() === today.toDateString();
-              }}
+              maxDate={null}
               showDisabledMonthNavigation
             />
           </div>
 
           <div className="w-full mt-4 flex-col lg:flex-row lg:items-start sm:pl-8 lg:pl-16">
-            <label className={`${GlobalStyle.headingMedium} block mb-2 lg:mb-0 lg:w-1/4`}>
+            <label
+              className={`${GlobalStyle.headingMedium} block mb-2 lg:mb-0 lg:w-1/4`}
+            >
               Remark
             </label>
             <textarea
