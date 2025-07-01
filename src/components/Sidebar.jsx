@@ -63,7 +63,7 @@ const Sidebar = ({ onHoverChange }) => {
         // {icon:CgEditFade, label:"RO List", link:"/dashboard", roles:["superadmin", "admin"]}
         { icon: CgEditFade, label: "RO List", link: "/pages/ro/ro-list", roles: ["superadmin", "admin"] },
         { icon: CgEditFade, label: "User List", link: "/pages/User/UserList", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin", "admin"] },
+       // { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin", "admin"] },
       ],
     },
 
@@ -161,7 +161,7 @@ const Sidebar = ({ onHoverChange }) => {
       label: "Configuration", 
       roles: ["superadmin", "admin", "user"],
       subItems: [
-        { icon: CgEditFade, label: "RTOM List", link: "/pages/Rtom/RtomList", roles: ["superadmin"] },
+        { icon: CgEditFade, label: "Billing Center List", link: "/pages/Rtom/RtomList", roles: ["superadmin"] },
         { icon: CgEditFade, label: "Service List", link: "/pages/Service/ServiceTypeList", roles: ["superadmin"] },
        // { icon: CgEditFade, label: "Service Type List", link: "/dashboard", roles: ["superadmin"] },
         // { icon: CgEditFade, label: "Filter Option", link: "/dashboard", roles: ["superadmin"] },
