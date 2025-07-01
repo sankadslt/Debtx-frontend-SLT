@@ -743,14 +743,14 @@ const RtomInfoNew = () => {
           </div>
 
           <div className="flex justify-end mt-4 gap-4 flex-col-reverse sm:flex-row ">
-            <button
+            {/* <button
               type="button"
               className={`${GlobalStyle.buttonSecondary} px-8 py-2`}
               onClick={switchToViewMode}
               disabled={isLoading}
             >
               Cancel
-            </button> */}
+            </button>  */}
             <button
               type="submit"
               className={`${GlobalStyle.buttonPrimary} px-4 py-2`}
