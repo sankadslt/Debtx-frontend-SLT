@@ -49,6 +49,18 @@ const RtomList = () => {
 
       if (rtoms.length === 0) {
         hasMoreData.current = false;
+
+        // status filter warning message
+        if (pageNo === 1) {
+          Swal.fire({
+            icon: filtersApplied ? "info" : "warning",
+            iconColor: filtersApplied ? "#ff6b6b" : "#ff9999",
+            title: filtersApplied ? "No Records Found" : "No Data Available",
+            text: filtersApplied
+              ? "No applicable records available for the selected filter."
+              : "There are currently no RTOM records available.",
+          });
+        }
       } else {
         setAllData((prev) => {
           const newData = rtoms.filter(
@@ -117,9 +129,12 @@ const RtomList = () => {
 
   // Filter data based on search query and status filter
   const filteredData = allData.filter((row) => {
+    const searchableFields = { ...row };
+    delete searchableFields.rtom_status; 
+
     const matchesSearch =
       searchQuery === "" ||
-      Object.values(row)
+      Object.values(searchableFields)
         .join(" ")
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
