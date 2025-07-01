@@ -606,14 +606,21 @@ const Incident_List = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td className={GlobalStyle.tableData}>{row.incidentID || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{row.incidentID || ""}</td>
                       <td className={`${GlobalStyle.tableData} flex justify-center`}>
                         {renderStatusIcon(row.status, index)}
                       </td>
-                      <td className={GlobalStyle.tableData}>{row.accountNo || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{row.action || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{row.sourceType || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleDateString("en-GB") || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.action || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.sourceType || ""}</td>
+                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleString("en-GB", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true
+                      }) || ""}</td>
                      
                     </tr>
                   ))
