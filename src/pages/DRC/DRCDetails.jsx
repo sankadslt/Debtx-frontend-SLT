@@ -34,10 +34,14 @@ const DRCDetails = () => {
   const drcId = state?.drcId;
 
   const initialTab = state?.activeTab || "RO"; 
+//const [currentPage, setCurrentPage] = useState(0);
 
+// Reset page to 0 whenever activeTab changes
+
+  
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  const rowsPerPage = 10;
+  const rowsPerPage = 1;
   const statuses = ["Active", "Inactive"];
   const handlingtype = ["Arrears", "CPE", "All Type"];
   const status1 = ["Active", "Inactive", "Terminated"];
@@ -87,6 +91,7 @@ const DRCDetails = () => {
 
   // Fetching RO, RTOM, and Services data based on DRC ID
 
+  
   useEffect(() => {
 
     const fetchServicesList = async () => {
@@ -290,6 +295,13 @@ const DRCDetails = () => {
       setActiveTab(state.activeTab);
     }
   }, [location.state]);
+
+
+  useEffect(() => {
+  setCurrentPage(0);
+  console.log(currentPage);
+}, [activeTab]);
+
 
   const startIndex = currentPage * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
