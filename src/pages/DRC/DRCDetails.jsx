@@ -19,7 +19,7 @@ import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
 
 const DRCDetails = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [currentPage1, setCurrentPage1] = useState(0);
   const [currentPage2, setCurrentPage2] = useState(1);
   const [status, setStatus] = useState("");
