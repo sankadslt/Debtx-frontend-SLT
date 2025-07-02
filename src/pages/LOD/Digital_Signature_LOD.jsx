@@ -336,7 +336,7 @@ const Digital_Signature_LOD = () => {
     const paginatedData = LODData.slice(startIndex, startIndex + rowsPerPage);
 
     // Handle search bar
-    const filteredData = paginatedData.filter((row) =>
+    const filteredData = LODData.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -489,7 +489,7 @@ const Digital_Signature_LOD = () => {
                     </thead>
                     <tbody>
                         {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
+                            filteredData.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0

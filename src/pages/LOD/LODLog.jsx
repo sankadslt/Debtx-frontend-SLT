@@ -30,7 +30,6 @@ const LOD_Log = () => {
     const [LODdata, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
-    const [totalPages, setTotalPages] = useState(0);
     const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Track the maximum current page
     const [isFilterApplied, setIsFilterApplied] = useState(false); // Track if filter is applied
     const rowsPerPage = 10; // Number of rows per page
@@ -216,7 +215,6 @@ const LOD_Log = () => {
         setFromDate("");
         setToDate("");
         setLODData([]);
-        setTotalPages(0);
         setIsMoreDataAvailable(true);
         setSearchQuery("");
         setCommittedFilters({
@@ -261,15 +259,9 @@ const LOD_Log = () => {
 
     // handle next page
     const handleNextPage = async () => {
-        if (isMoreDataAvailable) {
+        if (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
             setCurrentPage(currentPage + 1);
-        } else {
-            const totalPages = Math.ceil(LODdata.length / rowsPerPage);
-            setTotalPages(totalPages);
-            if (currentPage < totalPages) {
-                setCurrentPage(currentPage + 1);
-            }
-        }
+        } 
         // console.log("Current page:", currentPage);
         // console.log("Total pages:", totalPages);
         // setIsLoading(true);
@@ -484,7 +476,7 @@ const LOD_Log = () => {
                 <span className="text-gray-700">
                     Page {currentPage}
                 </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === totalPages}>
+                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}>
                     <FaArrowRight />
                 </button>
             </div>
