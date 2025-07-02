@@ -267,11 +267,7 @@ const Incident_List = () => {
         } else {
           setFilteredData((prevData) => [...prevData, ...response.data]);
         }
-        if (currentPage === 1) {
-          setFilteredData(response.data);
-        } else {
-          setFilteredData((prevData) => [...prevData, ...response.data]);
-        }
+      
         
        if (response.data.length === 0) {
            setIsMoreDataAvailable(false);  
@@ -596,8 +592,8 @@ const Incident_List = () => {
               </thead>
 
               <tbody>
-              {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.slice(startIndex, endIndex).map((row, index) => (
+              {filteredDataBySearch.length > 0 ? (
+                  filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                     <tr
                       key={row.incidentID||index}
                       className={

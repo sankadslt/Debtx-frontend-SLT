@@ -173,7 +173,7 @@ const SupBulkUploadLog = () => {
     }, [fromDate, toDate]);
 
     // Search Section
-    const filteredDataBySearch = paginatedData.filter((row) =>
+    const filteredDataBySearch = filteredData.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -490,8 +490,8 @@ const SupBulkUploadLog = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                                    filteredDataBySearch.map((row, index) => (
+                                { filteredDataBySearch.length > 0 ? (
+                                    filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                                         <tr
                                             key={index}
                                             className={

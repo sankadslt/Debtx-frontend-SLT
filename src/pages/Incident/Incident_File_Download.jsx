@@ -35,7 +35,7 @@ const Incident_File_Download = () => {
   const paginatedData = filteredData.slice(startIndex, endIndex);
   const hasMounted = useRef(false);
 
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -74,24 +74,13 @@ const Incident_File_Download = () => {
       });
 
       if (response && response.data) {
-        const formattedData = response.data.map((item) => {
-          const createdDate = new Date(item.Created_On?.replace(" ", "T"));
-          const expireDate = new Date(item.File_Remove_On?.replace(" ", "T"));
-          return {
-            TaskID: item.file_download_seq || "",
-            GroupID: item.file_download_seq || "",
-            CreatedDTM: isNaN(createdDate) ? "" : createdDate.toISOString(),
-            ExpireDTM: isNaN(expireDate) ? "" : expireDate.toISOString(),
-            Filepath: item.File_Location || "",
-            CreatedBy: item.Deligate_By || "",
-          };
-        });
+        if (currentPage === 1) {
+          setFilteredData(response.data);
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
 
-        setFilteredData((prevData) => [...prevData, ...formattedData]);
-
-        if (response.data.length === 0) {
-          setIsMoreDataAvailable(false);
-        } else if (response.data.length < rowsPerPage) {
+        if (response.data.length === 0 || response.data.length < rowsPerPage) {
           setIsMoreDataAvailable(false);
         }
       }
@@ -103,7 +92,7 @@ const Incident_File_Download = () => {
   };
 
   useEffect(() => {
-  
+   
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI(currentPage);
@@ -124,8 +113,9 @@ const Incident_File_Download = () => {
     }
   };
 
-  const handleDownload = (filepath) => {
+  const handleDownload = (File_Location) => {
     alert("Need to configure the download with the server");
+     
   };
 
   if (isLoading) {
@@ -166,20 +156,28 @@ const Incident_File_Download = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredDataBySearch.map((log, index) => (
+            {filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
               <tr
-                key={log.TaskID}
+                key={log.file_download_seq}
                 className={index % 2 === 0 ? "bg-white border-b" : "bg-gray-50 border-b"}
               >
-                <td className={GlobalStyle.tableData}>{log.TaskID}</td>
-                <td className={GlobalStyle.tableData}>{log.GroupID}</td>
-                <td className={GlobalStyle.tableData}>{log.CreatedBy}</td>
-                <td className={GlobalStyle.tableData}>{new Date(log.CreatedDTM).toLocaleString("en-GB")}</td>
-                <td className={GlobalStyle.tableData}>{new Date(log.ExpireDTM).toLocaleString("en-GB")}</td>
+                <td className={GlobalStyle.tableData}>{log.file_download_seq}</td>
+                <td className={GlobalStyle.tableData}>{log.file_download_seq}</td>
+                <td className={GlobalStyle.tableData}>{log.Deligate_By}</td>
+                <td className={GlobalStyle.tableData}>
+                  {log.Created_On
+                    ? new Date(log.Created_On.replace(" ", "T")).toLocaleString("en-GB")
+                    : ""}
+                </td>
+                <td className={GlobalStyle.tableData}>
+                  {log.File_Remove_On
+                    ? new Date(log.File_Remove_On.replace(" ", "T")).toLocaleString("en-GB")
+                    : ""}
+                </td>
                 <td className={GlobalStyle.tableData}>
                   {userRole && ["admin", "superadmin", "slt"].includes(userRole) && (
                     <button
-                      onClick={() => handleDownload(log.Filepath)}
+                      onClick={() => handleDownload(log.File_Location)}
                       className="text-blue-600 hover:text-blue-800"
                       data-tooltip-id="download-tooltip"
                     >
@@ -192,7 +190,9 @@ const Incident_File_Download = () => {
             ))}
             {filteredDataBySearch.length === 0 && (
               <tr>
-                <td colSpan="6" className="text-center py-4">No records found</td>
+                <td colSpan="6" className="text-center py-4">
+                  No records found
+                </td>
               </tr>
             )}
           </tbody>
@@ -202,18 +202,21 @@ const Incident_File_Download = () => {
       {filteredDataBySearch.length > 0 && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
-            className={GlobalStyle.navButton}
+         
             onClick={() => handlePrevNext("prev")}
             disabled={currentPage <= 1}
+            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
           >
             <FaArrowLeft />
           </button>
-          <span className="mx-4">Page {currentPage}</span>
-          <button
-            className={GlobalStyle.navButton}
-            onClick={() => handlePrevNext("next")}
-            disabled={currentPage === totalPages}
-          >
+          <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+                            Page {currentPage}
+                        </span>
+                        <button
+                            onClick={() => handlePrevNext("next")}
+                            disabled={currentPage === totalPages}
+                            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+                        >
             <FaArrowRight />
           </button>
         </div>
@@ -223,4 +226,3 @@ const Incident_File_Download = () => {
 };
 
 export default Incident_File_Download;
-
