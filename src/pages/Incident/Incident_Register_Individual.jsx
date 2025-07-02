@@ -245,7 +245,9 @@ const handleSubmit = async (e) => {
                   {/* Account No */}
                   <tr className="align-center">
                     <td className="w-[180px] py-2">
-                      <label htmlFor="accountNo">Account No</label>
+                      <label htmlFor="accountNo">Account No
+                        <span className="text-red-500"> *</span>
+                      </label>
                     </td>
                     <td className="py-2">
                     <div className="flex items-center gap-1">
@@ -283,7 +285,9 @@ const handleSubmit = async (e) => {
                   {/* Action Type */}
                   <tr className="align-center">
                     <td className="py-2">
-                      <label htmlFor="actionType">Action</label>
+                      <label htmlFor="actionType">Action
+                        <span className="text-red-500">*</span>
+                      </label>
                     </td>
                     <td className="py-2">
                     <div className="flex items-center gap-1">
@@ -342,7 +346,10 @@ const handleSubmit = async (e) => {
                   {/* Source Type */}
                   <tr className="align-center">
                     <td className="py-2">
-                      <label htmlFor="sourceType">Source Type</label>
+                      <label htmlFor="sourceType">Source Type
+
+                        <span className="text-red-500"> *</span>
+                      </label>
                     </td>
                     <td className="py-2">
                     <div className="flex items-center gap-1">

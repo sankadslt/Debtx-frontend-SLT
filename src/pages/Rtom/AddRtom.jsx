@@ -28,9 +28,9 @@ const AddRtom = () => {
     areaCode: "",
     email: "",
     mobile: "",
-    telephone: ""
+    telephone: "",
   });
-  
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -49,6 +49,7 @@ const AddRtom = () => {
         icon: "error",
         title: "Authentication Error",
         text: "Failed to load user information. Please login again.",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -59,37 +60,38 @@ const AddRtom = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.billingCenterCode.trim()) {
       newErrors.billingCenterCode = "Billing Center Code is required";
-    } 
-    
+    }
+
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
-    } 
-    
+    }
+
     if (!formData.areaCode.trim()) {
       newErrors.areaCode = "Area Code is required";
-    } 
-    
+    }
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Invalid email format";
     }
 
-    const mobileDigits = formData.mobile.replace(/\D/g, '');
+    const mobileDigits = formData.mobile.replace(/\D/g, "");
     if (!mobileDigits || mobileDigits.length !== 10) {
       newErrors.mobile = "Mobile number must be exactly 10 digits";
     }
 
-    const telephoneDigits = formData.telephone.replace(/\D/g, '');
+    const telephoneDigits = formData.telephone.replace(/\D/g, "");
     if (!telephoneDigits || telephoneDigits.length !== 10) {
       newErrors.telephone = "Telephone number must be exactly 10 digits";
     }
 
     if (!userData) {
-      newErrors.general = "User authentication required. Please refresh and try again.";
+      newErrors.general =
+        "User authentication required. Please refresh and try again.";
     }
 
     setErrors(newErrors);
@@ -98,13 +100,13 @@ const AddRtom = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const rtomData = {
         billingCenterCode: formData.billingCenterCode.trim(),
@@ -113,29 +115,30 @@ const AddRtom = () => {
         email: formData.email.trim(),
         mobile: formData.mobile.trim(),
         telephone: formData.telephone.trim(),
-        createdBy: userData
+        createdBy: userData,
       };
 
-      console.log("Submitting RTOM data:", rtomData); 
+      console.log("Submitting RTOM data:", rtomData);
 
       const response = await createRTOM(rtomData);
-      
-      console.log("RTOM created successfully:", response); 
-      
+
+      console.log("RTOM created successfully:", response);
+
       Swal.fire({
         icon: "success",
         title: "Successfully Created",
         text: `RTOM registered successfully!`,
+        confirmButtonColor: "#28a745"
       }).then(() => {
         navigate("/pages/Rtom/RtomList");
       });
-      
     } catch (error) {
       console.error("Error in form submission:", error);
       Swal.fire({
         icon: "error",
         title: "Registration Failed",
         text: error.message || "Failed to create RTOM. Please try again.",
+        confirmButtonColor: "#d33"
       });
     } finally {
       setIsSubmitting(false);
@@ -144,16 +147,33 @@ const AddRtom = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    let processedValue = value;
+
+  if (name === "billingCenterCode") {
+    processedValue = value.replace(/[^a-zA-Z]/g, '');
+  }
+
+  if (name === "telephone" || name === "mobile") {
+    // Allow only digits
+    processedValue = value.replace(/[^0-9]/g, '');
+  }
+ 
+
+  // if (name === "areaCode") {
+  //   processedValue = value.replace(/[^a-zA-Z]/g, '');
+  // }
+
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: processedValue
     }));
-    
+
     // Clear specific field error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
   };
@@ -163,68 +183,74 @@ const AddRtom = () => {
   };
 
   return (
-    <div className={`p-4 ${GlobalStyle.fontPoppins}`} style={{ fontSize: isSmallMobile ? "14px" : "16px" }}>
-      <h1 className={GlobalStyle.headingLarge} style={{ textAlign: isMobile ? "center" : "left" }}>
+    <div
+      className={`p-4 ${GlobalStyle.fontPoppins}`}
+      style={{ fontSize: isSmallMobile ? "14px" : "16px" }}
+    >
+      <h1
+        className={GlobalStyle.headingLarge}
+        style={{ textAlign: isMobile ? "center" : "left" }}
+      >
         Register new RTOM Area
       </h1>
-      
+
       {errors.general && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {errors.general}
         </div>
       )}
-      
+
       <div className="flex justify-center">
-        <div 
+        <div
           className={`${GlobalStyle.cardContainer} mt-4 w-full`}
           style={{
             maxWidth: isMobile ? "100%" : "700px",
-            padding: isMobile ? "1rem" : "2rem"
+            padding: isMobile ? "1rem" : "2rem",
           }}
         >
-          <form onSubmit={handleSubmit} className="space-y-4" style={{ marginLeft: isMobile ? "0" : "2rem" }}>
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+            style={{ marginLeft: isMobile ? "0" : "2rem" }}
+          >
             {/* Form Fields */}
             {[
-              { 
-                label: "Billing Center Code", 
-                name: "billingCenterCode", 
-                type: "text", 
-                validation: errors.billingCenterCode 
+              {
+                label: "Billing Center Code",
+                name: "billingCenterCode",
+                type: "text",
+                validation: errors.billingCenterCode,
               },
-              { 
-                label: "Name", 
-                name: "name", 
-                type: "text", 
-                validation: errors.name 
+              {
+                label: "Name",
+                name: "name",
+                type: "text",
+                validation: errors.name,
               },
-              { 
-                label: "Area Code", 
-                name: "areaCode", 
-                type: "text", 
-                validation: errors.areaCode 
+              {
+                label: "Area Code",
+                name: "areaCode",
+                type: "text",
+                validation: errors.areaCode,
               },
-              { 
-                label: "Email", 
-                name: "email", 
-                type: "email", 
-                validation: errors.email 
-              }
             ].map((field) => (
               <div key={field.name} className="flex flex-col gap-2">
-                <div 
+                <div
                   className="flex items-center gap-4"
                   style={{
                     flexDirection: isMobile ? "column" : "row",
-                    alignItems: isMobile ? "flex-start" : "center"
+                    alignItems: isMobile ? "flex-start" : "center",
                   }}
                 >
-                  <div 
+                  <div
                     className="flex justify-between font-semibold"
                     style={{
-                      width: isMobile ? "100%" : "12rem"
+                      width: isMobile ? "100%" : "12rem",
                     }}
                   >
-                    <span>{field.label}</span>
+                     <span>
+                       {field.label} <span className="text-red-500">*</span>
+                    </span>
                     {!isMobile && <span>:</span>}
                   </div>
                   <input
@@ -232,18 +258,21 @@ const AddRtom = () => {
                     type={field.type}
                     value={formData[field.name]}
                     onChange={handleInputChange}
-                    className={`${GlobalStyle.inputText} ${field.validation ? 'border-red-500' : ''}`}
+                    className={`${GlobalStyle.inputText} ${
+                      field.validation ? "border-red-500" : ""
+                    }`}
                     style={{
-                      width: isMobile ? "100%" : "calc(100% - 13rem)"
+                      width: isMobile ? "100%" : "calc(100% - 13rem)",
                     }}
-                    required
+                    
+                    //required
                   />
                 </div>
                 {field.validation && (
-                  <p 
+                  <p
                     className="text-red-500 text-sm"
                     style={{
-                      marginLeft: isMobile ? "0" : "12rem"
+                      marginLeft: isMobile ? "0" : "12rem",
                     }}
                   >
                     {field.validation}
@@ -260,35 +289,83 @@ const AddRtom = () => {
               </h2>
             </div>
 
+            {/* Email input - no digit-only restriction */}
+            <div key="email" className="flex flex-col gap-2">
+              <div
+                className="flex items-center gap-4"
+                style={{
+                  flexDirection: isMobile ? "column" : "row",
+                  alignItems: isMobile ? "flex-start" : "center",
+                }}
+              >
+                <div
+                  className="flex justify-between font-semibold"
+                  style={{
+                    width: isMobile ? "100%" : "12rem",
+                  }}
+                >
+                  <span>Email</span>
+                  {!isMobile && <span>:</span>}
+                </div>
+                <input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`${GlobalStyle.inputText} ${
+                    errors.email ? "border-red-500" : ""
+                  }`}
+                  style={{
+                    width: isMobile ? "100%" : "calc(100% - 13rem)",
+                  }}
+
+                  placeholder="abc@gmail.com" 
+                  required
+                />
+              </div>
+              {errors.email && (
+                <p
+                  className="text-red-500 text-sm"
+                  style={{
+                    marginLeft: isMobile ? "0" : "12rem",
+                  }}
+                >
+                  {errors.email}
+                </p>
+              )}
+            </div>
+
             {/* Contact Number Fields */}
             {[
-              { 
-                label: "Mobile", 
-                name: "mobile", 
-                type: "tel", 
+              {
+                label: "Mobile",
+                name: "mobile",
+                type: "tel",
                 validation: errors.mobile,
-                pattern: "[0-9]{10}"
+                pattern: "[0-9]{10}",
+                placeholder: "071XXXXXXX",
               },
-              { 
-                label: "Telephone", 
-                name: "telephone", 
-                type: "tel", 
+              {
+                label: "Telephone",
+                name: "telephone",
+                type: "tel",
                 validation: errors.telephone,
-                pattern: "[0-9]{10}"
-              }
+                pattern: "[0-9]{10}",
+                placeholder: "011XXXXXXX",
+              },
             ].map((field) => (
               <div key={field.name} className="flex flex-col gap-2">
-                <div 
+                <div
                   className="flex items-center gap-4"
                   style={{
                     flexDirection: isMobile ? "column" : "row",
-                    alignItems: isMobile ? "flex-start" : "center"
+                    alignItems: isMobile ? "flex-start" : "center",
                   }}
                 >
-                  <div 
+                  <div
                     className="flex justify-between font-semibold"
                     style={{
-                      width: isMobile ? "100%" : "12rem"
+                      width: isMobile ? "100%" : "12rem",
                     }}
                   >
                     <span>{field.label}</span>
@@ -299,21 +376,26 @@ const AddRtom = () => {
                     type={field.type}
                     value={formData[field.name]}
                     onChange={handleInputChange}
-                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
-                    className={`${GlobalStyle.inputText} ${field.validation ? 'border-red-500' : ''}`}
+                    onInput={(e) =>
+                      (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+                    }
+                    className={`${GlobalStyle.inputText} ${
+                      field.validation ? "border-red-500" : ""
+                    }`}
                     maxLength="10"
                     style={{
-                      width: isMobile ? "100%" : "calc(100% - 13rem)"
+                      width: isMobile ? "100%" : "calc(100% - 13rem)",
                     }}
                     pattern={field.pattern}
+                    placeholder={field.placeholder}
                     required
                   />
                 </div>
                 {field.validation && (
-                  <p 
+                  <p
                     className="text-red-500 text-sm"
                     style={{
-                      marginLeft: isMobile ? "0" : "12rem"
+                      marginLeft: isMobile ? "0" : "12rem",
                     }}
                   >
                     {field.validation}
@@ -322,17 +404,19 @@ const AddRtom = () => {
               </div>
             ))}
 
-            <div 
+            <div
               className="pt-4 flex justify-end"
               style={{
-                paddingRight: isMobile ? "0" : "1rem"
+                paddingRight: isMobile ? "0" : "1rem",
               }}
             >
-              <button 
-                type="submit" 
-                className={`${GlobalStyle.buttonPrimary} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              <button
+                type="submit"
+                className={`${GlobalStyle.buttonPrimary} ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 style={{
-                  padding: isSmallMobile ? "0.5rem 1rem" : "0.75rem 1.5rem"
+                  padding: isSmallMobile ? "0.5rem 1rem" : "0.75rem 1.5rem",
                 }}
                 disabled={isSubmitting}
               >
@@ -342,11 +426,11 @@ const AddRtom = () => {
           </form>
         </div>
       </div>
-      
-      <div 
-        style={{ 
+
+      <div
+        style={{
           marginLeft: isMobile ? "1rem" : "4.5rem",
-          marginTop: "1rem"
+          marginTop: "1rem",
         }}
       >
         <button
@@ -361,9 +445,6 @@ const AddRtom = () => {
 };
 
 export default AddRtom;
-
-
-
 
 // import { useState, useEffect } from "react";
 // import GlobalStyle from "../../assets/prototype/GlobalStyle";
@@ -383,12 +464,12 @@ export default AddRtom;
 //     mobile: "",
 //     telephone: ""
 //   });
-  
+
 //   const [errors, setErrors] = useState({});
 //   const [isSubmitting, setIsSubmitting] = useState(false);
 //   const [userData, setUserData] = useState(null);
 
-//    // get system user 
+//    // get system user
 //   const loadUser = async () => {
 //     const user = await getLoggedUserId();
 //     setUserData(user);
@@ -399,22 +480,21 @@ export default AddRtom;
 //     loadUser();
 //   }, []);
 
-
 //   const validateForm = () => {
 //     const newErrors = {};
-    
+
 //     if (!formData.billingCenterCode.trim()) {
 //       newErrors.billingCenterCode = "Billing Center Code is required";
-//     } 
-    
+//     }
+
 //     if (!formData.name.trim()) {
 //       newErrors.name = "Name is required";
-//     } 
-    
+//     }
+
 //     if (!formData.areaCode.trim()) {
 //       newErrors.areaCode = "Area Code is required";
-//     } 
-    
+//     }
+
 //     if (!formData.email.trim()) {
 //       newErrors.email = "Email is required";
 //     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -445,7 +525,7 @@ export default AddRtom;
 
 //     // console.log(userData);
 //     // console.log(userData.user_id);
-    
+
 //     try {
 //       const rtomData = {
 //         billingCenterCode: formData.billingCenterCode,
@@ -460,7 +540,7 @@ export default AddRtom;
 
 //       const response = await createRTOM(rtomData);
 //       console.log("RTOM created successfully:", response);
-      
+
 //       Swal.fire({
 //         icon: "success",
 //         title: "Success",
@@ -468,7 +548,7 @@ export default AddRtom;
 //       }).then(() => {
 //         navigate("/pages/Rtom/RtomList");
 //       });
-      
+
 //     } catch (error) {
 //       Swal.fire({
 //         icon: "error",
@@ -629,8 +709,8 @@ export default AddRtom;
 //             </div>
 
 //             <div className="pt-4 flex justify-end pr-4">
-//               <button 
-//                 type="submit" 
+//               <button
+//                 type="submit"
 //                 className={`${GlobalStyle.buttonPrimary} px-8 py-2`}
 //                 disabled={isSubmitting}
 //               >

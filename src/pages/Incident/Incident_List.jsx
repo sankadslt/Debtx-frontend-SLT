@@ -197,7 +197,7 @@ const Incident_List = () => {
   
   
   
-    const filteredDataBySearch = paginatedData.filter((row) =>
+    const filteredDataBySearch = filteredData.filter((row) =>
       Object.values(row)
         .join(" ")
         .toLowerCase()
@@ -261,7 +261,11 @@ const Incident_List = () => {
       setIsLoading(false);
       
       if (response && response.data ) {
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data);
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
         
        if (response.data.length === 0) {
            setIsMoreDataAvailable(false);  
@@ -308,11 +312,6 @@ const Incident_List = () => {
 
  
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI({
@@ -513,7 +512,6 @@ const Incident_List = () => {
                 >
                   <option value="" hidden>Status</option>
                   <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
-                  <option value="Reject" style={{ color: "black" }}>Reject</option>
                   <option value="Complete" style={{ color: "black" }}>Complete</option>
                   <option value="Incident Error" style={{ color: "black" }}>Incident Error</option>
                   <option value="Incident InProgress" style={{ color: "black" }}>Incident InProgress</option>
@@ -598,7 +596,7 @@ const Incident_List = () => {
 
               <tbody>
               {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.map((row, index) => (
+                  filteredDataBySearch.slice(startIndex, endIndex).map((row, index) => (
                     <tr
                       key={row.incidentID||index}
                       className={
@@ -607,14 +605,21 @@ const Incident_List = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td className={GlobalStyle.tableData}>{row.incidentID || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{row.incidentID || ""}</td>
                       <td className={`${GlobalStyle.tableData} flex justify-center`}>
                         {renderStatusIcon(row.status, index)}
                       </td>
-                      <td className={GlobalStyle.tableData}>{row.accountNo || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{row.action || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{row.sourceType || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleDateString("en-GB") || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.action || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.sourceType || ""}</td>
+                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleString("en-GB", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true
+                      }) || ""}</td>
                      
                     </tr>
                   ))
