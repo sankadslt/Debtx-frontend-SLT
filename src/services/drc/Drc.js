@@ -4,6 +4,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/DRC`;
 const URL2 = `${BASE_URL}/recovery_officer`;
+const URL3 = `${BASE_URL}/DRC_service`;
 
 export const Active_DRC_Details = async () => {
   try {
@@ -410,6 +411,60 @@ export const Create_DRC_With_Services_and_SLT_Coordinator = async (drcData) => {
   }
 };
 
+export const Service_detais_of_the_DRC  = async (drc_id, pages, service_status) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Service_detais_of_the_DRC`,
+      { drc_id, pages, service_status }
+    );
 
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch service details");
+    }
+
+    
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching service details:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+export const Rtom_detais_of_the_DRC = async (drc_id, pages, rtom_status) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Rtom_detais_of_the_DRC`,
+      { drc_id, pages, rtom_status }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch RTOM details");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching RTOM details:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+export const Ro_detais_of_the_DRC = async (drc_id, pages, ro_status) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Ro_detais_of_the_DRC`,
+      { drc_id, pages, ro_status }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch RO details");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching RO details:", error.response?.data || error.message);
+    throw error;
+  }
+}
 
 
