@@ -100,13 +100,13 @@ export default function RejectIncident() {
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
         const rejectedDate = rejectedDateStr ? new Date(rejectedDateStr) : null;
         return {
-          id: item.Incident_Id || "N/A",
+          id: item.Incident_Id || "",
           status: "Reject Pending4",
-          account_no: item.Account_Num || "N/A",
-          filtered_reason: item.Filtered_Reason || "N/A",
-          source_type: item?.Source_Type || "N/A",
-          rejected_on: rejectedDate instanceof Date && !isNaN(rejectedDate) ? rejectedDate.toLocaleString("en-GB") : "N/A",
-          created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? createdDate.toLocaleString("en-GB") : "N/A"
+          account_no: item.Account_Num || "",
+          filtered_reason: item.Filtered_Reason || "",
+          source_type: item?.Source_Type || "",
+          rejected_on: rejectedDate instanceof Date && !isNaN(rejectedDate) ? rejectedDate.toLocaleString("en-GB") : "",
+          created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? createdDate.toLocaleString("en-GB") : ""
         };
       });
       setTableData(formattedData);
@@ -884,7 +884,7 @@ export default function RejectIncident() {
                             />
                           </div>
                         )}
-                        <Tooltip id="incident-tooltip" place="bottom" content="Open No Agent" />
+                        <Tooltip id="incident-tooltip" place="bottom" content="Reject Pending"/>
                       </td>
 
                       <td className={GlobalStyle.tableData}>{row.account_no}</td>
