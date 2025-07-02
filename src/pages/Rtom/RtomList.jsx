@@ -106,7 +106,13 @@ const RtomList = () => {
     setCurrentPage(1);
     hasMoreData.current = true;
     setAllData([]);
-    callRTOMAPI(1);
+
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      callRTOMAPI({ status: "", page: 1 });
+    }
+    
   };
 
   // handle search change
@@ -130,7 +136,7 @@ const RtomList = () => {
   // Filter data based on search query and status filter
   const filteredData = allData.filter((row) => {
     const searchableFields = { ...row };
-    delete searchableFields.rtom_status; 
+    delete searchableFields.rtom_status;
 
     const matchesSearch =
       searchQuery === "" ||
