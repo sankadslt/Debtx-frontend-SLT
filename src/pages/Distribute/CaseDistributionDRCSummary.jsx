@@ -14,7 +14,7 @@ import { FaSearch, FaArrowLeft, FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import open from "/src/assets/images/distribution/more_info.png";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
-import { List_Case_Distribution_Details, Create_Task_For_case_distribution_drc_summery } from "/src/services/case/CaseServices.js";
+import { List_Case_Distribution_Details, Create_Task_For_case_distribution_drc_summery, Case_Distribution_Details_With_Drc_Rtom_ByBatchId } from "/src/services/case/CaseServices.js";
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
@@ -34,6 +34,7 @@ const CaseDistributionDRCSummary = () => {
   const [drcNames, setDrcNames] = useState([]); // State for DRC names
   const location = useLocation(); // Get the current location
   const navigate = useNavigate(); // Initialize navigate for routing
+  const [date, setdate] = useState(""); // State for date
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
   const batchId = location.state?.BatchID; // Get the batch ID from the location state
@@ -84,28 +85,59 @@ const CaseDistributionDRCSummary = () => {
   );
 
   // useEffect to fetch DRC names
+  // useEffect(() => {
+  //   const fetchDRCNames = async () => {
+  //     try {
+  //       const Names = await Active_DRC_Details();
+  //       setDrcNames(Names);
+  //     } catch (error) {
+  //       console.error("Error fetching drc names:", error);
+  //     }
+  //   };
+  //   fetchDRCNames();
+  // });
+
+
+   // Function to fetch DRC data from the API
   useEffect(() => {
-    const fetchDRCNames = async () => {
+    const fetchDetails = async () => {
       try {
-        const Names = await Active_DRC_Details();
-        setDrcNames(Names);
+        const data = { case_distribution_batch_id: batchId };
+        // console.log("Data", data);
+        const response =
+          await Case_Distribution_Details_With_Drc_Rtom_ByBatchId(data);
+        console.log("Retrival", response);
+        console.log("DRC Data:", response.data);
+
+        if (response.status === "success") {
+          setDrcNames(response.data || []); // Ensure `data` is always an array
+        } else {
+          console.error(
+            "Error in API response:",
+            response.message || "Unknown error"
+          );
+        }
       } catch (error) {
-        console.error("Error fetching drc names:", error);
+        console.error(
+          "Error fetching case distribution DRC summary:",
+          error.response?.data || error.message
+        );
       }
     };
-    fetchDRCNames();
-  });
+    fetchDetails();
+  }, [batchId]);
 
+  
 
   // Modified handleDRCChange to only update state without filtering
   const handleDRCChange = (e) => {
     const selectedValue = e.target.value;
 
     // Find the corresponding key from drcNames
-    const selectedDRCObject = drcNames.find(({ value }) => value === selectedValue);
+    const selectedDRCObject = drcNames.find(({ drc_name  }) => drc_name  === selectedValue);
 
     if (selectedDRCObject) {
-      const selectedKey = selectedDRCObject.id;
+      const selectedKey = selectedDRCObject.drc_id;
 
       // Store both value and key in state (if needed)
       setSelectedDRC(selectedValue);
@@ -123,8 +155,24 @@ const CaseDistributionDRCSummary = () => {
     const fetchFilteredData = async () => {
       try {
         const filteredData = await List_Case_Distribution_Details(payload);
-        setFilteredData(filteredData.data);
-        //console.log("Filtered Data: ", filteredData.data);
+        const batchData = filteredData.data[0]; // get the first batch object
+        setFilteredData(batchData.drc_distribution);
+
+        const date = new Date(batchData.created_dtm).toLocaleString('en-GB', {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric", // Ensures two-digit year (YY)
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                      hour12: true, 
+                    }); // Format the date to 'DD/MM/YYYY HH:MM:SS AM/PM'
+        setdate(date);
+
+        //console.log ("date" , date);
+
+        //setFilteredData(filteredData.data.drc_distribution);
+        console.log("Filtered Data: ", batchData.drc_distribution);
       } catch (error) {
         console.error("Error fetching filtered data:", error);
         setFilteredData([]);
@@ -139,11 +187,12 @@ const CaseDistributionDRCSummary = () => {
       case_distribution_batch_id: batchId,
       drc_id: selectedDRCKey,
     };
-    // console.log("Filter payload: ", payload);
+    console.log("Filter payload: ", payload);
     const fetchFilteredData = async () => {
       try {
         const filteredData = await List_Case_Distribution_Details(payload);
-        setFilteredData(filteredData.data);
+        const batchData = filteredData.data[0]; // get the first batch object
+        setFilteredData(batchData.drc_distribution);
       } catch (error) {
         console.error("Error fetching filtered data:", error);
         setFilteredData([]);
@@ -165,7 +214,8 @@ const CaseDistributionDRCSummary = () => {
     const fetchFilteredData = async () => {
       try {
         const filteredData = await List_Case_Distribution_Details(payload);
-        setFilteredData(filteredData.data);
+        const batchData = filteredData.data[0]; // get the first batch object
+        setFilteredData(batchData.drc_distribution);
       } catch (error) {
         console.error("Error fetching filtered data:", error);
         setFilteredData([]);
@@ -225,7 +275,7 @@ const CaseDistributionDRCSummary = () => {
   // Handle button click to navigate to DRC summary page
   const handleonbuttonclicked = (drc_name, drc_id) => {
     navigate("/pages/Distribute/CaseDistributionDRCSummarywithRTOM", {
-      state: { BatchID: batchId || "2", DRCName: drc_name, DRCID: drc_id },
+      state: { BatchID: batchId , DRCName: drc_name, DRCID: drc_id },
 
     });
     // console.log("Name: ", drc_name);
@@ -253,7 +303,7 @@ const CaseDistributionDRCSummary = () => {
         <div className={`${GlobalStyle.cardContainer}  w-[30vw] flex px-3  sm:w-[30vw] py-2 items-center justify-end  w-full flex-wrap sm:flex-row gap-4 mt-20 mb-4 `}>
           {/* DRC Select Dropdown */}
           <select
-            className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
+            className={`${GlobalStyle.selectBox} w-full sm:min-w-[150px] sm:w-auto`}
             value={selectedDRC}
             onChange={handleDRCChange}
             style={{ color: selectedDRC === "" ? "gray" : "black" }}
@@ -261,9 +311,9 @@ const CaseDistributionDRCSummary = () => {
             <option value="" hidden>
               DRC
             </option>
-            {drcNames.map(({ key, value }) => (
-              <option key={key} value={value} style={{ color: "black" }}>
-                {value}
+            {drcNames.map(({ drc_id, drc_name  }) => (
+              <option key={drc_id} value={drc_name } style={{ color: "black" }}>
+                {drc_name}
               </option>
             ))}
 
@@ -345,19 +395,10 @@ const CaseDistributionDRCSummary = () => {
                   }
                 >
 
-                  <td className={GlobalStyle.tableData}>{item.drc_distribution?.[0]?.drc_name }</td>
-                  <td className={GlobalStyle.tableData}>{item.drc_distribution?.[0]?.total_case_count}</td>
-                  <td className={GlobalStyle.tableCurrency}>{item.drc_distribution?.[0]?.drc_tot_arrease}</td>
-                  <td className={GlobalStyle.tableData}>{item.created_dtm ? new Date(item.created_dtm).toLocaleString('en-GB',
-                    {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric", // Ensures two-digit year (YY)
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      hour12: true, // Keeps AM/PM format
-                    }) : ""}
+                  <td className={GlobalStyle.tableData}>{item.drc_name}</td>
+                  <td className={GlobalStyle.tableData}>{item.total_case_count}</td>
+                  <td className={GlobalStyle.tableCurrency}>{item.drc_tot_arrease}</td>
+                  <td className={GlobalStyle.tableData}>{date }
                   </td>
                   {/* <td className={GlobalStyle.tableData}>
                     {item.proceed_on ? new Date(item.proceed_on).toLocaleDateString('en-GB') : ""}
@@ -365,7 +406,7 @@ const CaseDistributionDRCSummary = () => {
                   <td className="px-6 py-4 text-center">
                     <div>
                       {["admin", "superadmin", "slt"].includes(userRole) && (
-                        <button onClick={() => handleonbuttonclicked(item.drc_distribution?.[0]?.drc_name, item.drc_distribution?.[0]?.drc_id)} data-tooltip-id="my-tooltip" >
+                        <button onClick={() => handleonbuttonclicked(item.drc_name, item.drc_id)} data-tooltip-id="my-tooltip" >
                           {/* <img
                                                 src= {open}
                                                 data-tooltip-id="my-tooltip"

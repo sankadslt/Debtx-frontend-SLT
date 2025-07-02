@@ -197,7 +197,7 @@ const Incident_List = () => {
   
   
   
-    const filteredDataBySearch = paginatedData.filter((row) =>
+    const filteredDataBySearch = filteredData.filter((row) =>
       Object.values(row)
         .join(" ")
         .toLowerCase()
@@ -259,8 +259,14 @@ const Incident_List = () => {
       setIsLoading(true);
       const response = await fetchIncidents(payload);
       setIsLoading(false);
+      console.log("API Response:", response);
       
       if (response && response.data ) {
+        if (currentPage === 1) {
+          setFilteredData(response.data);
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
         if (currentPage === 1) {
           setFilteredData(response.data);
         } else {
@@ -507,7 +513,6 @@ const Incident_List = () => {
                 >
                   <option value="" hidden>Status</option>
                   <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
-                  <option value="Reject" style={{ color: "black" }}>Reject</option>
                   <option value="Complete" style={{ color: "black" }}>Complete</option>
                   <option value="Incident Error" style={{ color: "black" }}>Incident Error</option>
                   <option value="Incident InProgress" style={{ color: "black" }}>Incident InProgress</option>
@@ -592,7 +597,7 @@ const Incident_List = () => {
 
               <tbody>
               {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.map((row, index) => (
+                  filteredDataBySearch.slice(startIndex, endIndex).map((row, index) => (
                     <tr
                       key={row.incidentID||index}
                       className={
@@ -608,16 +613,14 @@ const Incident_List = () => {
                       <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
                       <td className={GlobalStyle.tableData}>{row.action || ""}</td>
                       <td className={GlobalStyle.tableData}>{row.sourceType || ""}</td>
-                      <td className={GlobalStyle.tableData}>
-                      {new Date(row.created_dtm).toLocaleString("en-GB", {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: '2-digit',
-  hour12: true,
-})}
-</td>
+                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleString("en-GB", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true
+                      }) || ""}</td>
                      
                     </tr>
                   ))
