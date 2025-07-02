@@ -245,8 +245,12 @@ const SupBulkUploadLog = () => {
             setIsLoading(false); // Set loading state to false
 
             // Updated response handling
-            if (response && response.data) {
-                setFilteredData((prevData) => [...prevData, ...response.data]);
+            if (response && response.data ) {
+                if (currentPage === 1) {
+                  setFilteredData(response.data);
+                } else {
+                  setFilteredData((prevData) => [...prevData, ...response.data]);
+                }
 
                 if (response.data.length === 0) {
                     setIsMoreDataAvailable(false);
@@ -292,11 +296,7 @@ const SupBulkUploadLog = () => {
     }
 
     useEffect(() => {
-        if (!hasMounted.current) {
-            hasMounted.current = true;
-            return;
-        }
-
+       
         if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage);
             callAPI({
@@ -509,9 +509,9 @@ const SupBulkUploadLog = () => {
                                                 </div>
                                             </td>
 
-                                            <td className={GlobalStyle.tableData}>{row.fileName || "N/A"}</td>
-                                            <td className={GlobalStyle.tableData}>{row.type || "N/A"}</td>
-                                            <td className={GlobalStyle.tableData}>{row.uploadedBy || "N/A"}</td>
+                                            <td className={GlobalStyle.tableData}>{row.fileName || ""}</td>
+                                            <td className={GlobalStyle.tableData}>{row.type || ""}</td>
+                                            <td className={GlobalStyle.tableData}>{row.uploadedBy || ""}</td>
                                             <td className={GlobalStyle.tableData}>{new Date(row.dateTime).toLocaleDateString("en-GB")},{" "}
                                                 {new Date(row.createdTime).toLocaleTimeString("en-GB", {
                                                     hour: "2-digit",

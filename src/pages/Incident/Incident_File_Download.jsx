@@ -78,12 +78,12 @@ const Incident_File_Download = () => {
           const createdDate = new Date(item.Created_On?.replace(" ", "T"));
           const expireDate = new Date(item.File_Remove_On?.replace(" ", "T"));
           return {
-            TaskID: item.file_download_seq || "N/A",
-            GroupID: item.file_download_seq || "N/A",
-            CreatedDTM: isNaN(createdDate) ? "N/A" : createdDate.toISOString(),
-            ExpireDTM: isNaN(expireDate) ? "N/A" : expireDate.toISOString(),
-            Filepath: item.File_Location || "N/A",
-            CreatedBy: item.Deligate_By || "N/A",
+            TaskID: item.file_download_seq || "",
+            GroupID: item.file_download_seq || "",
+            CreatedDTM: isNaN(createdDate) ? "" : createdDate.toISOString(),
+            ExpireDTM: isNaN(expireDate) ? "" : expireDate.toISOString(),
+            Filepath: item.File_Location || "",
+            CreatedBy: item.Deligate_By || "",
           };
         });
 
@@ -103,10 +103,7 @@ const Incident_File_Download = () => {
   };
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
+  
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI(currentPage);

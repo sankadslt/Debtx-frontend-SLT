@@ -30,7 +30,7 @@ import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
 import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
 import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
 import errorincident from "/src/assets/images/incidents/Incident_Error.png";
- 
+//import error from "/src/assets/images/incidents/Reject.png"
 
 const Incident_List = () => {
  
@@ -261,7 +261,11 @@ const Incident_List = () => {
       setIsLoading(false);
       
       if (response && response.data ) {
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data);
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
         
        if (response.data.length === 0) {
            setIsMoreDataAvailable(false);  
@@ -308,10 +312,7 @@ const Incident_List = () => {
 
  
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
+   
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
@@ -600,14 +601,23 @@ const Incident_List = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td className={GlobalStyle.tableData}>{row.incidentID || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{row.incidentID || ""}</td>
                       <td className={`${GlobalStyle.tableData} flex justify-center`}>
                         {renderStatusIcon(row.status, index)}
                       </td>
-                      <td className={GlobalStyle.tableData}>{row.accountNo || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{row.action || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{row.sourceType || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleDateString("en-GB") || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.action || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.sourceType || ""}</td>
+                      <td className={GlobalStyle.tableData}>
+                      {new Date(row.created_dtm).toLocaleString("en-GB", {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+})}
+</td>
                      
                     </tr>
                   ))
