@@ -259,6 +259,7 @@ const Incident_List = () => {
       setIsLoading(true);
       const response = await fetchIncidents(payload);
       setIsLoading(false);
+      console.log("API Response:", response);
       
       if (response && response.data ) {
         if (currentPage === 1) {
