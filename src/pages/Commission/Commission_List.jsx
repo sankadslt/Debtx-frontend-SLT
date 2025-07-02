@@ -12,8 +12,8 @@ import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload,FaTimes } from "react-icons/fa";
-import { List_All_Commission_Cases,ForwardToApprovals } from "../../services/commission/commissionService";
+import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload, FaTimes } from "react-icons/fa";
+import { List_All_Commission_Cases, ForwardToApprovals } from "../../services/commission/commissionService";
 import { commission_type_cases_count } from "../../services/commission/commissionService";
 import { Active_DRC_Details } from "../../services/drc/Drc";
 import { Create_task_for_Download_Commision_Case_List } from "../../services/commission/commissionService";
@@ -40,14 +40,14 @@ const ForwardApprovalsModal = ({ isOpen, onClose, summaryData, onConfirm, isLoad
             <FaTimes size={20} />
           </button>
         </div>
-  
+
         {/* Content */}
         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
                 <th className={GlobalStyle.tableHeader}>
-                  
+
                 </th>
                 <th className={GlobalStyle.tableHeader}>DRC</th>
                 <th className={GlobalStyle.tableHeader}>Case Count</th>
@@ -66,7 +66,7 @@ const ForwardApprovalsModal = ({ isOpen, onClose, summaryData, onConfirm, isLoad
                   }
                 >
                   <td className={GlobalStyle.tableData}>
-                  <input type="checkbox" className="ml-2" />
+                    <input type="checkbox" className="ml-2" />
                   </td>
                   <td className={GlobalStyle.tableData}>{item.drcName}</td>
                   <td className={`${GlobalStyle.tableData} text-center`}>
@@ -79,44 +79,43 @@ const ForwardApprovalsModal = ({ isOpen, onClose, summaryData, onConfirm, isLoad
                     })}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                  {summaryData.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No data available for forwarding
-          </div>
-        ) : (
-          <div className={`${GlobalStyle.flexCenter} `}>
-            <button
-              onClick={onConfirm}
-              disabled={isLoading || summaryData.length === 0}
-              className={`${GlobalStyle.buttonPrimary} ${
-                isLoading || summaryData.length === 0
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                  Processing...
-                </div>
-              ) : (
-                'Approve'
-              )}
-            </button>
-          </div>
-        )}
+                    {summaryData.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No data available for forwarding
+                      </div>
+                    ) : (
+                      <div className={`${GlobalStyle.flexCenter} `}>
+                        <button
+                          onClick={onConfirm}
+                          disabled={isLoading || summaryData.length === 0}
+                          className={`${GlobalStyle.buttonPrimary} ${isLoading || summaryData.length === 0
+                              ? 'opacity-50 cursor-not-allowed'
+                              : ''
+                            }`}
+                        >
+                          {isLoading ? (
+                            <div className="flex items-center">
+                              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                              Processing...
+                            </div>
+                          ) : (
+                            'Approve'
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-  
-        
+
+
       </div>
     </div>
   );
-  
+
 };
 
 const Commission_List = () => {
@@ -147,12 +146,12 @@ const Commission_List = () => {
   const [searchBy, setSearchBy] = useState("case_id");
   const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
-  const [forwardSummary, setForwardSummary] = useState([]);  
+  const [forwardSummary, setForwardSummary] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isForwarding, setIsForwarding] = useState(false);
   const hasMounted = useRef(false);
-  
-  
+
+
   const [committedFilters, setCommittedFilters] = useState({
     caseId: "",
     accountNo: "",
@@ -275,7 +274,13 @@ const Commission_List = () => {
 
       if (response && response.data && response.status === "success") {
         console.log("Valid data received:", response.data);
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+
+        if (currentPage === 1) {
+          setFilteredData(response.data); // Set data for the first page
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
+
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
@@ -368,11 +373,6 @@ const Commission_List = () => {
   }, [caseId]);
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
       // CallAPI(); // Call the function whenever currentPage changes
@@ -422,7 +422,7 @@ const Commission_List = () => {
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
   // Search Section
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -543,7 +543,7 @@ const Commission_List = () => {
 
     // Calculate summary data from filteredData
     const summaryData = [];
-    
+
     // Group by DRC
     const drcGroups = {};
     filteredData.forEach(item => {
@@ -560,7 +560,7 @@ const Commission_List = () => {
         drcGroups[item.DRC_Name].totalAmount += parseFloat(item.Commission_Amount) || 0;
       }
       // Sum all commission amounts
-     
+
     });
 
     // Convert to array
@@ -576,10 +576,10 @@ const Commission_List = () => {
     const userData = await getLoggedUserId();
     setIsForwarding(true);
     try {
-       
-    const response =  await ForwardToApprovals(selectedDrcId,userData);
 
-      
+      const response = await ForwardToApprovals(selectedDrcId, userData);
+
+
       setIsModalOpen(false);
       if(response === "success")
       Swal.fire({
@@ -782,7 +782,7 @@ const Commission_List = () => {
           </thead>
           <tbody>
             {filteredDataBySearch.length > 0 ? (
-              filteredDataBySearch.map((row, index) => (
+              filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                 <tr
                   key={index}
                   className={
@@ -879,7 +879,7 @@ const Commission_List = () => {
 
         {["admin", "superadmin", "slt"].includes(userRole) && (
           <button
-          onClick={HandleForwardToApprovals}
+            onClick={HandleForwardToApprovals}
             // onClick={HandleCreateTaskDownloadCommissiontList}
             // className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
             className={GlobalStyle.buttonPrimary}
@@ -892,16 +892,16 @@ const Commission_List = () => {
           </button>
         )}
       </div>
-  
-     {/* Forward Approvals Modal */}
-     <ForwardApprovalsModal
-     isOpen={isModalOpen}
-     onClose={() => setIsModalOpen(false)}
-     summaryData={forwardSummary}
-     onConfirm={handleConfirmForward}
-     isLoading={isForwarding}
-   />
- </div>
+
+      {/* Forward Approvals Modal */}
+      <ForwardApprovalsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        summaryData={forwardSummary}
+        onConfirm={handleConfirmForward}
+        isLoading={isForwarding}
+      />
+    </div>
   );
 };
 

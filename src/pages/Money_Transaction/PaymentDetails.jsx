@@ -112,7 +112,7 @@ const PaymentDetails = () => {
   }, [fromDate, toDate]);
 
   // Search Section
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -176,8 +176,11 @@ const PaymentDetails = () => {
       // Updated response handling
       if (response && response.data) {
         // console.log("Valid data received:", response.data);
-
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data);
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
 
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
@@ -246,11 +249,6 @@ const PaymentDetails = () => {
 
   // Fetch data when the component mounts
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
       // CallAPI(); // Call the function whenever currentPage changes
@@ -537,7 +535,7 @@ const PaymentDetails = () => {
 
               <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.map((item, index) => (
+                  filteredDataBySearch.slice(startIndex, endIndex).map((item, index) => (
                     <tr
                       key={item.settlement_id || index}
                       className={
