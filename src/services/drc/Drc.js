@@ -449,11 +449,11 @@ export const Rtom_detais_of_the_DRC = async (drc_id, pages, rtom_status) => {
   }
 }
 
-export const Ro_detais_of_the_DRC = async (payload) => {
+export const Ro_detais_of_the_DRC = async (drc_id, pages, rtom_status) => {
   try {
     const response = await axios.post(
       `${URL3}/Ro_detais_of_the_DRC`,
-      payload
+      { drc_id, pages, rtom_status }
     );
 
     if (response.data.status === "error") {
