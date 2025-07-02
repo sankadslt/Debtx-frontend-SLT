@@ -16,22 +16,18 @@ import { useSearchParams , useLocation ,useNavigate  } from "react-router-dom";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
-import { use } from "react";
 
 const DRCDetails = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchQuery1, setSearchQuery1] = useState("");
-  const [searchQuery2, setSearchQuery2] = useState("");
-
+  const [currentPage, setCurrentPage] = useState(1);
   const [currentPage1, setCurrentPage1] = useState(0);
-  const [currentPage2, setCurrentPage2] = useState(0);
+  const [currentPage2, setCurrentPage2] = useState(1);
   const [status, setStatus] = useState("");
   const [rtomFilter, setRtomFilter] = useState("");
   const [serviceFilter, setServiceFilter] = useState("");
   const [appliedFilters, setAppliedFilters] = useState({ status: "", rtom: "", service: "" });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [filteredData, setFilteredData] = useState([]);
 
   const location = useLocation();
   const { state } = location;
@@ -41,7 +37,7 @@ const DRCDetails = () => {
 
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  
+  const rowsPerPage = 10;
   const statuses = ["Active", "Inactive"];
   const handlingtype = ["Arrears", "CPE", "All Type"];
   const status1 = ["Active", "Inactive", "Terminated"];
@@ -51,18 +47,7 @@ const DRCDetails = () => {
   const [servicesListData, setServicesListData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  // const [totalAPIPages, setTotalAPIPages] = useState(1);
-  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // State to track if more data is available
-  const rowsPerPage = 10; // Number of rows per page
-
-  const [committedFilters, setCommittedFilters] = useState({
-    drcId: "",
-    status: "",
-  });
+  
 
      const getStatusIcon = (status) => {
           switch (status?.toLowerCase()) {
@@ -174,20 +159,10 @@ const DRCDetails = () => {
     fetchRtomList();
   }, [drcId]);
 
-  
-const fetchRoList = async (filters) => {
-
-  // Function to fetch RO list based on filters
-      try {       
-        const payload = {
-          drc_id: filters.drcId,
-          status: filters.status || "",
-          page: filters.page,
-        };
-        console.log(currentPage);
-        console.log(maxCurrentPage);
-        console.log("Fetching RO list with payload:", payload);
-        const res = await Ro_detais_of_the_DRC(payload);
+  useEffect(() => {
+    const fetchRoList = async () => {
+      try {
+        const res = await Ro_detais_of_the_DRC(drcId);
         const roEntries = res.data || [];
         console.log("Raw RO Entries:", roEntries);
         const formattedEntries = roEntries.map((ro) => {
@@ -206,15 +181,15 @@ const fetchRoList = async (filters) => {
           };
         });
 
-        setFilteredData(formattedEntries);
+        setRoListData(formattedEntries);
         console.log("Formatted RO Entries:", formattedEntries);
       } catch (error) {
         console.error("Error fetching RO list:", error);
         setRoListData([]); // Set to empty array on error
       }
     };
-    
- 
+    fetchRoList();
+  }, [drcId]);
 
 
 
@@ -280,94 +255,35 @@ const fetchRoList = async (filters) => {
 //     fetchAllLists();
 //   }, []);
 
-  // const filteredData1 =
-  //   activeTab === "RO"
-  //     ? roListData.filter((row) => {
-  //       const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
-  //       const matchesStatus = !appliedFilters.status || row.status === appliedFilters.status;
-  //       return matchesSearchQuery && matchesStatus;
-  //     })
-  //     : activeTab === "Billing Center"
-  //       ? rtomListData.filter((row) => {
-  //         const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
-  //         const matchesRtom = !appliedFilters.rtom || row.name === appliedFilters.rtom;
-  //         return matchesSearchQuery && matchesRtom;
-  //       })
-  //       : activeTab === "Services"
-  //         ? servicesListData.filter((row) => {
-  //           const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
-  //           //const matchesService = !appliedFilters.service || row.type === appliedFilters.service;
-  //           //const matchesStatus = !appliedFilters.status || row.status === appliedFilters.status;
-  //           return matchesSearchQuery ;
-  //         })
-  //         : [];
+  const filteredData =
+    activeTab === "RO"
+      ? roListData.filter((row) => {
+        const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = !appliedFilters.status || row.status === appliedFilters.status;
+        return matchesSearchQuery && matchesStatus;
+      })
+      : activeTab === "Billing Center"
+        ? rtomListData.filter((row) => {
+          const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesRtom = !appliedFilters.rtom || row.name === appliedFilters.rtom;
+          return matchesSearchQuery && matchesRtom;
+        })
+        : activeTab === "Services"
+          ? servicesListData.filter((row) => {
+            const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
+            //const matchesService = !appliedFilters.service || row.type === appliedFilters.service;
+            //const matchesStatus = !appliedFilters.status || row.status === appliedFilters.status;
+            return matchesSearchQuery ;
+          })
+          : [];
 
-  // const pages = Math.ceil(filteredData1.length / rowsPerPage);
-  //const handlePrevPage = () => currentPage > 0 && setCurrentPage(currentPage - 1);
-  //const handleNextPage = () => currentPage < pages - 1 && setCurrentPage(currentPage + 1);
-
-
+  const pages = Math.ceil(filteredData.length / rowsPerPage);
+  const handlePrevPage = () => currentPage > 0 && setCurrentPage(currentPage - 1);
+  const handleNextPage = () => currentPage < pages - 1 && setCurrentPage(currentPage + 1);
   const handleFilter = () => {
-    // setAppliedFilters({ status, rtom: rtomFilter, service: serviceFilter });
-    // setCurrentPage(0);
-
-    // Handle Filter Button click
-  
-    setIsMoreDataAvailable(true); // Reset more data available state
-    setTotalPages(0); // Reset total pages
-    setMaxCurrentPage(0); // Reset max current page
-      
-    setCommittedFilters({
-        drcId: drcId,
-        status: status,
-      });
-    
-      setFilteredData([]); // Clear previous results
-      if (currentPage === 1) {
-        // callAPI();
-        fetchRoList({
-          drcId: drcId,
-          status: serviceFilter,
-          page: 1
-        });
-      } else {
-        setCurrentPage(1);
-      }
-    }
-  
- 
-
-   // Handle Pagination
-  const handlePrevNext = (direction) => {
-    if (direction === "prev" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      // console.log("Current Page:", currentPage);
-    } else if (direction === "next") {
-      if (isMoreDataAvailable) {
-        setCurrentPage(currentPage + 1);
-      } else {
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        setTotalPages(totalPages);
-        if (currentPage < totalPages) {
-          setCurrentPage(currentPage + 1);
-        }
-      }
-      // console.log("Current Page:", currentPage);
-    }
+    setAppliedFilters({ status, rtom: rtomFilter, service: serviceFilter });
+    setCurrentPage(0);
   };
-  
-  useEffect(() => {
-
-    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
-      setMaxCurrentPage(currentPage); // Update max current page
-      // callAPI(); // Call the function whenever currentPage changes
-      fetchRoList({
-        ...committedFilters,
-        page: currentPage
-      });
-    }
-  }, [currentPage]);
-
 
     useEffect(() => {
     if (state?.activeTab && state.activeTab !== activeTab) {
@@ -375,39 +291,9 @@ const fetchRoList = async (filters) => {
     }
   }, [location.state]);
 
-   const startIndex = (currentPage - 1) * rowsPerPage;
+  const startIndex = currentPage * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
-
-  
-
-  
-const filteredDataBySearch = paginatedData.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
-
-  
-
-
-  const startIndex1 = (currentPage - 1) * rowsPerPage;
-  const endIndex1 = startIndex1 + rowsPerPage;
-  const paginatedData1 = rtomListData.slice(startIndex1, endIndex1);
-  const filteredDataBySearch1 = paginatedData1.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
-
-  // const filteredDataBySearch2 = paginatedData2.filter((row) =>
-  //   Object.values(row)
-  //     .join(" ")
-  //     .toLowerCase()
-  //     .includes(searchQuery.toLowerCase())
-  // );
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -517,7 +403,6 @@ const filteredDataBySearch = paginatedData.filter((row) =>
 
 
       {/* Search Section */}
-      { activeTab === "RO" && (
       <div className="mb-4 flex justify-start">
         <div className={GlobalStyle.searchBarContainer}>
           <input
@@ -529,35 +414,6 @@ const filteredDataBySearch = paginatedData.filter((row) =>
           <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
       </div>
-      )}
-
-      { activeTab === "Billing Center" && (
-      <div className="mb-4 flex justify-start">
-        <div className={GlobalStyle.searchBarContainer}>
-          <input
-            type="text"
-            value={searchQuery1}
-            onChange={(e) => setSearchQuery1(e.target.value)}
-            className={GlobalStyle.inputSearch}
-          />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
-        </div>
-      </div>
-      )}
-
-      { activeTab === "Services" && (
-      <div className="mb-4 flex justify-start">
-        <div className={GlobalStyle.searchBarContainer}>
-          <input
-            type="text"
-            value={searchQuery2}
-            onChange={(e) => setSearchQuery2(e.target.value)}
-            className={GlobalStyle.inputSearch}
-          />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
-        </div>
-      </div>
-      )}
 
       {/* Tabs */}
       <div className="flex border-b mb-4">
@@ -576,7 +432,7 @@ const filteredDataBySearch = paginatedData.filter((row) =>
       </div>
 
       {/* Table */}
-      {/* <div className={GlobalStyle.tableContainer}>
+      <div className={GlobalStyle.tableContainer}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -643,7 +499,9 @@ const filteredDataBySearch = paginatedData.filter((row) =>
                     <td className={GlobalStyle.tableData}>{row.enableDate}</td>
                      <td className={GlobalStyle.tableData}>{row.rtom_contact_number}</td> 
                      
-                    
+                    {/* Services Tab Filter <td className={GlobalStyle.tableData}>
+                      {row.rtom_mobile_no?.map((item) => item.contact).join(", ")}
+                    </td> */}
 
                     
                     <td className={GlobalStyle.tableData}>{row.roCount}</td>
@@ -664,145 +522,10 @@ const filteredDataBySearch = paginatedData.filter((row) =>
 
         
         
-      </div> */}
-      {activeTab === "RO" && (
-        <div>
-       <div className={GlobalStyle.tableContainer}>
-        <table className={GlobalStyle.table}>
-          <thead className={GlobalStyle.thead}>
-            <tr>
-              <th className={GlobalStyle.tableHeader}>RO Name</th>
-              <th className={GlobalStyle.tableHeader}>Status</th>
-              <th className={GlobalStyle.tableHeader}>Created Date</th>
-              <th className={GlobalStyle.tableHeader}>Contact Number</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length === 0 ? (
-              <tr>
-                <td colSpan={4} className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
-                  {isLoading ? "Loading..." : "No data found"}
-                </td>
-              </tr>
-            ) : (
-              filteredDataBySearch.map((row, index) => (
-                <tr
-                  key={index}
-                  className={
-                    index % 2 === 0
-                      ? GlobalStyle.tableRowEven
-                      : GlobalStyle.tableRowOdd
-                  }
-                >
-                  <td className={GlobalStyle.tableData}>{row.name}</td>
-                  <td className={GlobalStyle.tableData}>{renderStatusIcon(row.status)}</td>
-                  <td className={GlobalStyle.tableData}>{row.enableDate}</td>
-                  <td className={GlobalStyle.tableData}>{row.contactNumber}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-
-
       </div>
-      {/* Pagination */}
-      <div className={GlobalStyle.navButtonContainer}>
-            <button
-              onClick={() => handlePrevNext("prev")}
-              disabled={currentPage <= 1}
-              className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
-            >
-              <FaArrowLeft />
-            </button>
-            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-              Page {currentPage}
-            </span>
-            <button
-              onClick={() => handlePrevNext("next")}
-              disabled={currentPage === totalPages}
-              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
-      </div>
-      
-        
-
-      )}
-
-      {activeTab === "Billing Center" && (
-        <div>
-        <div className={GlobalStyle.tableContainer}>
-        <table className={GlobalStyle.table}>
-          <thead className={GlobalStyle.thead}>
-            <tr>
-              <th className={GlobalStyle.tableHeader}>Billing Center Name</th>
-              <th className={GlobalStyle.tableHeader}>Billing Center Code</th>
-              <th className={GlobalStyle.tableHeader}>Handling Type</th>
-              <th className={GlobalStyle.tableHeader}>Created Date</th>
-              <th className={GlobalStyle.tableHeader}>Contact Number</th>
-              <th className={GlobalStyle.tableHeader}>RO Count</th>
-            </tr>
-
-          </thead>
-          <tbody>
-            {paginatedData1.length === 0 ? (
-              <tr>
-                <td colSpan={6} className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
-                  {isLoading ? "Loading..." : "No data found"}
-                </td>
-              </tr>
-            ) : (
-              filteredDataBySearch1.map((row, index) => (
-                <tr
-                  key={index}
-                  className={
-                    index % 2 === 0
-                      ? GlobalStyle.tableRowEven
-                      : GlobalStyle.tableRowOdd
-                  }
-                >
-                   <td className={GlobalStyle.tableData}>{row.name}</td>
-                    <td className={GlobalStyle.tableData}>{row.billing_center_Code}</td>
-                    <td className={GlobalStyle.tableData}>{row.handlingType}</td>
-                    <td className={GlobalStyle.tableData}>{row.enableDate}</td>
-                     <td className={GlobalStyle.tableData}>{row.rtom_contact_number}</td> 
-                    <td className={GlobalStyle.tableData}>{row.roCount}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className={GlobalStyle.navButtonContainer}>
-            <button
-              onClick={() => handlePrevNext("prev")}
-              disabled={currentPage1 <= 1}
-              className={`${GlobalStyle.navButton} ${currentPage1 <= 1 ? "cursor-not-allowed" : ""}`}
-            >
-              <FaArrowLeft />
-            </button>
-            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-              Page {currentPage1}
-            </span>
-            <button
-              onClick={() => handlePrevNext("next")}
-              disabled={currentPage1 === totalPages}
-              className={`${GlobalStyle.navButton} ${currentPage1 === totalPages ? "cursor-not-allowed" : ""}`}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
-
-      </div>
-    )}
-
 
       {/* Pagination */}
-      {/* {filteredData.length > rowsPerPage && (
+      {filteredData.length > rowsPerPage && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
             className={GlobalStyle.navButton}
@@ -826,10 +549,7 @@ const filteredDataBySearch = paginatedData.filter((row) =>
         </div>
         
         
-      )} */}
-
-
-
+      )}
       <button
               className={`${GlobalStyle.buttonPrimary} flex items-center space-x-2 mt-8`}
                  onClick={goBack}
