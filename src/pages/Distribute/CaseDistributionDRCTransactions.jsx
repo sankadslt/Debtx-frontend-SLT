@@ -320,7 +320,8 @@ const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
         const response = await List_count_by_drc_commision_rule(); 
         
         const data = response.data || []; // Extract the "data" array from the response
-        setServices(data); 
+        setServices(data);
+        //console.log("Services Data:", data); 
         
       } catch (error) {
         console.error(

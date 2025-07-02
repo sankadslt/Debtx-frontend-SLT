@@ -4,12 +4,14 @@ import { getLoggedUserId } from "../auth/authService";
 const BASE_URL = import.meta.env.VITE_BASE_URL; 
 const FILE_DOWNLOAD_URL = `${BASE_URL}/file`;
 
-export const List_Download_Files_from_Download_Log = async () => {
+export const List_Download_Files_from_Download_Log = async (pages) => {
     try {
       const Deligate_By = await getLoggedUserId();  
       const response = await axios.post(
         `${FILE_DOWNLOAD_URL}/List_Download_Files_from_Download_Log`,
-        {Deligate_By}
+        {Deligate_By,
+        pages
+        }
       );
       return response.data;
       

@@ -50,11 +50,11 @@ const DRCList = () => {
 
     const renderStatusIcon = (status) => {
         const iconPath = getStatusIcon(status);
-    
+
         if (!iconPath) {
             return <span className="capitalize">{status}</span>;
         }
-    
+
         return (
             <img
                 src={iconPath}
@@ -73,7 +73,7 @@ const DRCList = () => {
                 status: filters.status || "",
                 page: filters.page || 1
             });
-            
+
             if (response && response.data) {
                 const drcData = response.data.map(drc => ({
                     DRCID: drc.drc_id,
@@ -94,10 +94,10 @@ const DRCList = () => {
                 }
 
                 //  more data
-                const hasMore = response.pagination 
+                const hasMore = response.pagination
                     ? response.pagination.page < response.pagination.totalPages
                     : response.data.length === rowsPerPage;
-                
+
                 setHasMoreData(hasMore);
 
                 if (response.data.length === 0 && filters.page === 1) {
@@ -151,11 +151,11 @@ const DRCList = () => {
         setMaxCurrentPage(0);
         setCommittedFilters({ status: statusFilter });
         setFilteredData([]);
-        
+
         if (currentPage === 1) {
-            callAPI({ 
-                status: statusFilter, 
-                page: 1 
+            callAPI({
+                status: statusFilter,
+                page: 1
             });
         } else {
             setCurrentPage(1);
@@ -169,7 +169,7 @@ const DRCList = () => {
         setMaxCurrentPage(0);
         setCommittedFilters({ status: "" });
         setFilteredData([]);
-        
+
         if (currentPage !== 1) {
             setCurrentPage(1);
         } else {
@@ -220,8 +220,8 @@ const DRCList = () => {
             <h2 className={GlobalStyle.headingLarge}>DRC List</h2>
 
             <div className="flex justify-end mt-2 sm:mt-0">
-                <button 
-                    className={GlobalStyle.buttonPrimary} 
+                <button
+                    className={GlobalStyle.buttonPrimary}
                     onClick={handleAddDRC}
                 >
                     Add
@@ -290,7 +290,7 @@ const DRCList = () => {
                 </div>
             </div>
 
-           <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+            <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
                 <table className={`${GlobalStyle.table} w-full`}>
                     <thead className={`${GlobalStyle.thead} sticky top-0`}>
                         <tr>
@@ -301,7 +301,7 @@ const DRCList = () => {
                             <th className={GlobalStyle.tableHeader}>Contact No.</th>
                             <th className={GlobalStyle.tableHeader}>Service Count</th>
                             <th className={GlobalStyle.tableHeader}>RO Count</th>
-                            <th className={GlobalStyle.tableHeader}>RTOM Count</th>
+                            <th className={GlobalStyle.tableHeader}>Billing Center Count</th>
                             <th className={GlobalStyle.tableHeader}></th>
                         </tr>
                     </thead>
@@ -321,44 +321,46 @@ const DRCList = () => {
                                     <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
 
-                                    <td className={`${GlobalStyle.tableData} cursor-pointer text-center `} 
-                                     onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" } })}>
-                                                {log.ServiceCount}
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer text-center `}
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" } })}>
+                                        {log.ServiceCount}
                                     </td>
 
 
-                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`}
                                         onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RO" } })}>
-                                               {log.ROCount}
+                                        {log.ROCount}
                                     </td>
 
 
                                     <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
-                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RTOM" } })}>
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Billing Center" } })}>
                                                  {log.RTOMCount}
+
                                     </td>
 
 
                                     <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
-                                        <button 
+                                        <button
                                             onClick={() => navigateToEdit(log.DRCID)}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
-                                            <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
+                                            <img src={editImg} alt="Info" title="Info" className="w-6 h-6" />
                                         </button>
-                                        <button 
+                                        <button
+                                            onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID } })}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
-                                            <img src={ListImg} alt="Details" title="Details" className="w-6 h-6" />
+                                            <img src={ListImg} alt="Case List" title="Case List" className="w-6 h-6" />
                                         </button>
-                                    </td> 
+                                    </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
                                 <td colSpan="9" className="text-center py-4">
-                                    {statusFilter || searchQuery 
-                                        ? "No matching DRCs found" 
+                                    {statusFilter || searchQuery
+                                        ? "No matching DRCs found"
                                         : "No DRCs available"}
                                 </td>
                             </tr>
@@ -380,11 +382,10 @@ const DRCList = () => {
                     <span>Page {currentPage}</span>
 
                     <button
-                        className={`${GlobalStyle.navButton} ${
-                            !hasMoreData && currentPage >= Math.ceil(filteredData.length / rowsPerPage) 
-                                ? 'opacity-50 cursor-not-allowed' 
+                        className={`${GlobalStyle.navButton} ${!hasMoreData && currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+                                ? 'opacity-50 cursor-not-allowed'
                                 : ''
-                        }`}
+                            }`}
                         onClick={handleNextPage}
                         disabled={!hasMoreData && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
                     >

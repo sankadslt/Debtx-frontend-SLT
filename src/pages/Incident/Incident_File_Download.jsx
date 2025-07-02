@@ -8,300 +8,219 @@ ui number : 1.3
 Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
-
-import { useState , useEffect} from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from 'prop-types';
 import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { List_Download_Files_from_Download_Log } from "../../services/file/fileDownloadService";
-import  { Tooltip } from "react-tooltip";
-
-
+import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 
-
 const Incident_File_Download = () => {
-    // State variables
-    const [currentPage, setCurrentPage] = useState(0);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [tableData, setTableData] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
-    const [error, setError] = useState("");
-    const rowsPerPage = 7;
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const rowsPerPage = 10;
+  const hasMounted = useRef(false);
 
+  // Decode token and set userRole and userId
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
 
-    // Role-Based Buttons
-    useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return;
-    
-        try {
-          let decoded = jwtDecode(token);
-          const currentTime = Date.now() / 1000;
-    
-          if (decoded.exp < currentTime) {
-            refreshAccessToken().then((newToken) => {
-              if (!newToken) return;
-              const newDecoded = jwtDecode(newToken);
-              setUserRole(newDecoded.role);
-            });
-          } else {
-            setUserRole(decoded.role);
-          }
-        } catch (error) {
-          console.error("Invalid token:", error);
-        }
-      }, []);
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
 
-
-    // Fetch data from the API
-    const fetchData = async () => {
-      try {      
-        const response = await List_Download_Files_from_Download_Log();
-        const formattedData = response.data.map((item) => { 
-            const createdDateStr = typeof item.Created_On === "string" ? item.Created_On.replace(" ", "T") : item.Created_On;
-            const expireDateStr = typeof item.File_Remove_On === "string" ? item.File_Remove_On.replace(" ", "T") : item.File_Remove_On;
-            const createdDate = createdDateStr ? new Date(createdDateStr) : null;
-            const expireDate = expireDateStr ? new Date(expireDateStr) : null;
-            return {
-              TaskID: item.file_download_seq || "N/A",
-              GroupID: item.file_download_seq || "N/A",
-              CreatedDTM: isNaN(createdDate) ? "N/A" : createdDate.toLocaleString() || "N/A",
-              ExpireDTM: isNaN(expireDate) ? "N/A" : expireDate.toLocaleString() || "N/A",
-              Filepath: item.File_Location || "N/A",
-              CreatedBy: item.Deligate_By
-            };
-          });
-          
-          setTableData(formattedData);
-          setIsLoading(false);
-      } catch {
-          setError("Failed to fetch DRC details. Please try again later.");
-          setIsLoading(false);
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+          setUserId(newDecoded.user_id || newDecoded.id);
+        });
+      } else {
+        setUserRole(decoded.role);
+        setUserId(decoded.user_id || decoded.id);
       }
-    };
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
 
-    // Fetch data when the component mounts
-    useEffect(() => {
-        fetchData();
-      }, []);
-   
-    // Handle loading state and error
-    const filteredData = tableData.filter((row) =>
-        Object.values(row)
-            .join(" ")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-    );
+  // Fetch data on mount and on page change
+  useEffect(() => {
+    if (!userId) return;
+    callAPI({ page: currentPage });
+  }, [currentPage, userId]);
 
+  // Refetch data on search change (with debounce)
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setCurrentPage(1);
+      if (userId) callAPI({ page: 1 });
+    }, 500);
 
-    const pages = Math.ceil(filteredData.length / rowsPerPage);
-    // Calculate the number of pages based on the filtered data length
-    const handlePrevPage = () => {
-        if (currentPage > 0) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
 
-    const handleNextPage = () => {
-        if (currentPage < pages - 1) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
+  const callAPI = async ({ page }) => {
+    try {
+      setIsLoading(true);
 
-    const startIndex = currentPage * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedData = filteredData.slice(startIndex, endIndex);
+      const response = await List_Download_Files_from_Download_Log({
+        Deligate_By: userId,
+        search: searchQuery,
+        pages: page,
+      });
+ 
+      const formattedData = response.data.map((item) => {
+        const createdDate = new Date(item.Created_On?.replace(" ", "T"));
+        const expireDate = new Date(item.File_Remove_On?.replace(" ", "T"));
+        return {
+          TaskID: item.file_download_seq || "N/A",
+          GroupID: item.file_download_seq || "N/A",
+          CreatedDTM: isNaN(createdDate) ? "N/A" : createdDate.toISOString(),
+          ExpireDTM: isNaN(expireDate) ? "N/A" : expireDate.toISOString(),
+          Filepath: item.File_Location || "N/A",
+          CreatedBy: item.Deligate_By || "N/A",
+        };
+      });
 
-    // Handle file download
-    const handleDownload = (filepath) => {
-        alert ("Need to configure the download with the server")
+      setFilteredData(formattedData);
+      setIsMoreDataAvailable(response.hasMore);
+    } catch (err) {
+      console.error("Error during paginated API fetch:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // try {
-        //     const filename = filepath.split(/[\\/]/).pop();  // Extract the filename from the file path
-        //     const downloadurl = `http://localhost:5000/uploads/${filename}`; // Construct the download URL
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
 
-        //     const link = document.createElement("a");
-        //     link.href = downloadurl;
-            
-        //     link.setAttribute("download", filename); // Set the download attribute with the filename
-        //     document.body.appendChild(link);
-        //     link.click(); // Trigger the download
-        //     document.body.removeChild(link); // Clean up the link element
-            
-        //     console.log("Download initiated for:", filename);
+  const handleNextPage = () => {
+    if (isMoreDataAvailable) setCurrentPage(currentPage + 1);
+  };
 
+  const handleDownload = (filepath) => {
+    alert("Need to configure the download with the server");
+  };
 
-
-            
-        // } catch (error) {
-        //     console.error('Download failed:', error);
-
-        // }
-    };
-
+  if (isLoading) {
     return (
-        <div className={GlobalStyle.fontPoppins}>
-
-            <h2 className={GlobalStyle.headingLarge}>File Download - Incident / Cases</h2>
-
-
-
-            {/* Updated Search Bar Section */}
-            <div className="mb-8 flex justify-start mt-8">
-                <div className={GlobalStyle.searchBarContainer}>
-                    <input
-                        type="text"
-                        placeholder=""
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className={GlobalStyle.inputSearch}
-                    />
-                    <FaSearch className={GlobalStyle.searchBarIcon} />
-                </div>
-            </div>
-
-            {/* Table */}
-            <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
-                <table className={GlobalStyle.table}>
-                    <thead className={GlobalStyle.thead}>
-                        <tr>
-                            <th scope="col" className={GlobalStyle.tableHeader}>
-                                Task ID
-                            </th>
-                            <th scope="col" className={GlobalStyle.tableHeader}>
-                                Group ID
-                            </th>
-                            <th scope="col" className={GlobalStyle.tableHeader}>
-                                Created By
-                            </th>
-                            <th scope="col" className={GlobalStyle.tableHeader}>
-                                Created DTM
-                            </th>
-                            <th scope="col" className={GlobalStyle.tableHeader}>
-                                Expire DTM
-                            </th>
-                            
-                            <th scope="col" className={GlobalStyle.tableHeader}>
-                                Download
-                            </th>
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {paginatedData.map((log, index) => {
-                            // const isExpired = new Date(log.ExpireDTM).toLocaleString() < new Date().toLocaleString();
-                            return(
-                            <tr
-                                key={log.TaskID}
-                                className={`${index % 2 === 0
-                                    ? "bg-white bg-opacity-75"
-                                    : "bg-gray-50 bg-opacity-50"
-                                    } border-b`}
-                            >
-                                <td className={GlobalStyle.tableData}>{log.TaskID}</td>
-                                <td className={GlobalStyle.tableData}>{log.GroupID}</td>
-                                <td className={GlobalStyle.tableData}>{log.CreatedBy}</td>
-                                <td className={GlobalStyle.tableData}>{new Date(log.CreatedDTM).toLocaleString("en-GB", {
-                                            day: "2-digit",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            second: "2-digit",
-                                            hour12: true,
-                                        })}</td>
-                                <td className={GlobalStyle.tableData}>{new Date(log.ExpireDTM).toLocaleString("en-GB", {
-                                            day: "2-digit",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            second: "2-digit",
-                                            hour12: true,
-                                        })}</td>
-                                
-                                <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <div>
-                                    {["admin", "superadmin", "slt"].includes(userRole) && (
-                                        <button
-                                        onClick={() => handleDownload(log.File_Location)}
-                                        className="text-blue-600 hover:text-blue-800 " 
-                                        data-tooltip-id="download-tooltip"
-                                        // disabled={isExpired}
-                                    >
-                                        <FaDownload />
-
-                                    </button>
-                                    )}
-                                </div>
-                                    {/* <button
-                                        onClick={() => handleDownload(log.TaskID)}
-                                        className="text-blue-600 hover:text-blue-800 " 
-                                        data-tooltip-id="download-tooltip"
-                                        disabled={isExpired}
-                                    >
-                                        <FaDownload />
-
-                                    </button> */}
-                                    {/* <Tooltip id="download-tooltip" place="bottom" content={isExpired ? "Download expired" : "Download file"} /> */}
-                                    <Tooltip id="download-tooltip" place="bottom" content="Download file" />
-                                </td>
-                            </tr>
-                          )
-                        })}
-                        {filteredData.length === 0 && (
-                            <tr>
-                                <td colSpan="6" className="text-center py-4">
-                                    No records found
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Navigation Buttons */}
-            {filteredData.length > rowsPerPage && (
-                <div className={GlobalStyle.navButtonContainer}>
-                    <button
-                        className={GlobalStyle.navButton}
-                        onClick={handlePrevPage}
-                        disabled={currentPage === 0}
-                    >
-                        <FaArrowLeft />
-                    </button>
-                    <span>
-                        Page {currentPage + 1} of {pages}
-                    </span>
-                    <button
-                        className={GlobalStyle.navButton}
-                        onClick={handleNextPage}
-                        disabled={currentPage === pages - 1}
-                    >
-                        <FaArrowRight />
-                    </button>
-                </div>
-            )}
-
-
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
     );
+  }
+
+  return (
+    <div className={GlobalStyle.fontPoppins}>
+      <h2 className={GlobalStyle.headingLarge}>File Download - Incident / Cases</h2>
+
+      <div className="mb-8 flex justify-start mt-8">
+        <div className={GlobalStyle.searchBarContainer}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={GlobalStyle.inputSearch}
+            placeholder="Search..."
+          />
+          <FaSearch className={GlobalStyle.searchBarIcon} />
+        </div>
+      </div>
+
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
+        <table className={GlobalStyle.table}>
+          <thead className={GlobalStyle.thead}>
+            <tr>
+              <th className={GlobalStyle.tableHeader}>Task ID</th>
+              <th className={GlobalStyle.tableHeader}>Group ID</th>
+              <th className={GlobalStyle.tableHeader}>Created By</th>
+              <th className={GlobalStyle.tableHeader}>Created DTM</th>
+              <th className={GlobalStyle.tableHeader}>Expire DTM</th>
+              <th className={GlobalStyle.tableHeader}>Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.map((log, index) => (
+              <tr
+                key={log.TaskID}
+                className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} border-b`}
+              >
+                <td className={GlobalStyle.tableData}>{log.TaskID}</td>
+                <td className={GlobalStyle.tableData}>{log.GroupID}</td>
+                <td className={GlobalStyle.tableData}>{log.CreatedBy}</td>
+                <td className={GlobalStyle.tableData}>
+                  {new Date(log.CreatedDTM).toLocaleString("en-GB")}
+                </td>
+                <td className={GlobalStyle.tableData}>
+                  {new Date(log.ExpireDTM).toLocaleString("en-GB")}
+                </td>
+                <td className={GlobalStyle.tableData}>
+                  {userRole && ["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                      onClick={() => handleDownload(log.Filepath)}
+                      className="text-blue-600 hover:text-blue-800"
+                      data-tooltip-id="download-tooltip"
+                    >
+                      <FaDownload />
+                    </button>
+                  )}
+                  <Tooltip id="download-tooltip" place="bottom" content="Download file" />
+                </td>
+              </tr>
+            ))}
+            {filteredData.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center py-4">No records found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {filteredData.length > 0 && (
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+          >
+            <FaArrowLeft />
+          </button>
+          <span>Page {currentPage}</span>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handleNextPage}
+            disabled={!isMoreDataAvailable}
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
-// Add PropTypes validation
 Incident_File_Download.propTypes = {
-    data: PropTypes.arrayOf(
-        PropTypes.shape({
-            TaskID: PropTypes.string.isRequired,
-            GroupID: PropTypes.string.isRequired,
-            CreatedDTM: PropTypes.string.isRequired,
-            ExpireDTM: PropTypes.string.isRequired,
-            CreatedBy: PropTypes.string.isRequired,
-        })
-    ),
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      TaskID: PropTypes.string.isRequired,
+      GroupID: PropTypes.string.isRequired,
+      CreatedDTM: PropTypes.string.isRequired,
+      ExpireDTM: PropTypes.string.isRequired,
+      CreatedBy: PropTypes.string.isRequired,
+    })
+  ),
 };
 
 export default Incident_File_Download;
