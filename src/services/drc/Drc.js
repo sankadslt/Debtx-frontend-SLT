@@ -431,11 +431,11 @@ export const Service_detais_of_the_DRC  = async (drc_id, pages, service_status) 
   }
 }
 
-export const Rtom_detais_of_the_DRC = async (drc_id, pages, rtom_status) => {
+export const Rtom_detais_of_the_DRC = async (drc_id, pages, handling_type) => {
   try {
     const response = await axios.post(
       `${URL3}/Rtom_detais_of_the_DRC`,
-      { drc_id, pages, rtom_status }
+      { drc_id, pages, handling_type }
     );
 
     if (response.data.status === "error") {
@@ -449,11 +449,11 @@ export const Rtom_detais_of_the_DRC = async (drc_id, pages, rtom_status) => {
   }
 }
 
-export const Ro_detais_of_the_DRC = async (drc_id, pages, rtom_status) => {
+export const Ro_detais_of_the_DRC = async (drc_id, pages, drcUser_status) => {
   try {
     const response = await axios.post(
       `${URL3}/Ro_detais_of_the_DRC`,
-      { drc_id, pages, rtom_status }
+      { drc_id, pages, drcUser_status }
     );
 
     if (response.data.status === "error") {
