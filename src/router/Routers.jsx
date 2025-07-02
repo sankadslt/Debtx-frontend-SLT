@@ -115,7 +115,7 @@ import RtomInfoNew from "../pages/Rtom/RtomInfoNew";
 import UserList from "../pages/User/UserList";
 import UserInfo from "../pages/User/UserInfo";
 import SignUp from "../pages/User/SignUp";
-
+import UserApproval from "../pages/User/UserApproval";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
@@ -547,7 +547,8 @@ const Routers = () => {
         }
       />
       <Route
-        path="/Incident/Incident_List"
+        path="
+		"
         element={
           <ProtectedRoute
             element={<Incident_List />}
@@ -735,7 +736,7 @@ const Routers = () => {
       <Route path="/pages/User/UserList" element={<ProtectedRoute element={<UserList />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/User/SignUp" element={<ProtectedRoute element={<SignUp />} allowedRoles={['superadmin']} />} />
-
+	    <Route path="/pages/User/UserApproval" element={<ProtectedRoute element={<UserApproval />} allowedRoles={["superadmin"]} />} />
 
       {/* RO */}
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
