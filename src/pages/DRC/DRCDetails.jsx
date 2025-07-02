@@ -11,7 +11,7 @@ Notes: This template uses Tailwind CSS */
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
-import { List_RO_Details_Owen_By_DRC_ID, List_RTOM_Details_Owen_By_DRC_ID, List_Service_Details_Owen_By_DRC_ID } from "../../services/drc/Drc";
+import { List_RO_Details_Owen_By_DRC_ID, List_RTOM_Details_Owen_By_DRC_ID, List_Service_Details_Owen_By_DRC_ID , Service_detais_of_the_DRC  , Rtom_detais_of_the_DRC , Ro_detais_of_the_DRC} from "../../services/drc/Drc";
 import { useSearchParams , useLocation ,useNavigate  } from "react-router-dom";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
@@ -30,14 +30,15 @@ const DRCDetails = () => {
   const location = useLocation();
   const { state } = location;
   const drcId = state?.drcId;
+
   const initialTab = state?.activeTab || "RO"; 
 
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const rowsPerPage = 7;
   const statuses = ["Active", "Inactive"];
-  const rtomNames = ["RTOM 1", "RTOM 2", "RTOM 3", "RTOM 4"];
-  const serviceTypes = ["PEO", "LTE", "FTTH", "DSL"];
+  const handlingtype = ["Arrears", "CPE", "All Type"];
+  const status1 = ["Active", "Inactive", "Terminated"];
 
   const [roListData, setRoListData] = useState([]);
   const [rtomListData, setRtomListData] = useState([]);
@@ -81,60 +82,146 @@ const DRCDetails = () => {
         navigate(-1); 
     };
 
-  const fetchROList = async () => {
-    const res = await List_RO_Details_Owen_By_DRC_ID(drcId);
-    return res.map((ro) => ({
-      name: ro.ro_name,
-      status: ro.status,
-      enableDate: (ro.ro_end_date || "").split("T")[0],
-      contact: ro.ro_contact_no,
-    }));
-  };
 
-  const fetchRtomList = async () => {
-    const res = await List_RTOM_Details_Owen_By_DRC_ID(drcId);
-    return res.map((rtom) => ({
-      name: rtom.area_name,
-      billing_center_Code: rtom.billing_center_Code,
-      handlingType: rtom.handling_type,
-      enableDate: (rtom.created_dtm || "").split("T")[0],
-      rtom_contact_number: rtom.rtom_mobile_no
-    ?.map(item => item.mobile_number)
-    .join(", "), // Join mobile numbers as comma-separated string
-      roCount: rtom.ro_count,
-    }));
-  };
-
-  const fetchServicesList = async () => {
-    const res = await List_Service_Details_Owen_By_DRC_ID(drcId);
-    return res.map((svc) => ({
-      type: svc.service_type,
-      enableDate: (svc.enable_date || "").split("T")[0],
-      status: svc.status,
-    }));
-  };
-
-  const fetchAllLists = async () => {
-    setIsLoading(true);
-    try {
-      const [ro, rtom, svc] = await Promise.all([
-        fetchROList(),
-        fetchRtomList(),
-        fetchServicesList(),
-      ]);
-      setRoListData(ro);
-      setRtomListData(rtom);
-      setServicesListData(svc);
-    } catch (err) {
-      console.error("Error fetching DRC details:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Fetching RO, RTOM, and Services data based on DRC ID
 
   useEffect(() => {
-    fetchAllLists();
-  }, []);
+
+    const fetchServicesList = async () => {
+      try {
+        const res = await Service_detais_of_the_DRC(drcId);
+        const serviceEntries = res.data || [];
+        console.log("Raw Service Entries:", serviceEntries);
+        const formattedEntries = serviceEntries.map(({ service }) => {
+          const enableDate = service?.status_update_dtm
+            ? new Intl.DateTimeFormat('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              }).format(new Date(service.status_update_dtm))
+            : "N/A";
+
+          return {
+            type: service?.service_type || "N/A",
+            enableDate,
+            status: service?.service_status || "N/A",
+          };
+        });
+
+        setServicesListData(formattedEntries);
+        console.log("Formatted Service Entries:", formattedEntries);
+      } catch (error) {
+        console.error("Error fetching services list:", error);
+        
+        setServicesListData([]); // Set to empty array on error
+      }
+    };
+
+    fetchServicesList();
+  }, [drcId]);
+
+  useEffect(() => {
+    const fetchRtomList = async () => {
+      try {
+        const res = await Rtom_detais_of_the_DRC(drcId);
+        const rtomEntries = res.data || [];
+        console.log("Raw RTOM Entries:", rtomEntries);
+
+        const formattedEntries = rtomEntries.map((rtom) => {
+          const enableDate = rtom.created_dtm
+            ? new Intl.DateTimeFormat('en-GB', {
+                day: '2-digit', 
+                month: '2-digit',
+                year: 'numeric',
+              }).format(new Date(rtom.created_dtm))
+            : "N/A";
+
+          return {
+            name: rtom.rtom_name || "N/A",
+            billing_center_Code: rtom.rtom_billing_center_code || "N/A",
+            handlingType: rtom.handling_type || "N/A",
+            enableDate,
+
+            rtom_contact_number:"" ,
+            roCount:  "",
+
+          };
+        });
+        setRtomListData(formattedEntries);
+        console.log("Formatted RTOM Entries:", formattedEntries);
+      } catch (error) {
+        console.error("Error fetching RTOM list:", error);
+        setRtomListData([]); // Set to empty array on error
+      }
+    };
+    fetchRtomList();
+  }, [drcId]);
+
+
+    
+
+
+//   const fetchROList = async () => {
+//     const res = await List_RO_Details_Owen_By_DRC_ID(drcId);
+//     return res.map((ro) => ({
+//       name: ro.ro_name,
+//       status: ro.status,
+//       enableDate: (ro.ro_end_date || "").split("T")[0],
+//       contact: ro.ro_contact_no,
+//     }));
+//   };
+
+//   const fetchRtomList = async () => {
+//     const res = await List_RTOM_Details_Owen_By_DRC_ID(drcId);
+//     return res.map((rtom) => ({
+//       name: rtom.area_name,
+//       billing_center_Code: rtom.billing_center_Code,
+//       handlingType: rtom.handling_type,
+//       enableDate: (rtom.created_dtm || "").split("T")[0],
+//       rtom_contact_number: rtom.rtom_mobile_no
+//     ?.map(item => item.mobile_number)
+//     .join(", "), // Join mobile numbers as comma-separated string
+//       roCount: rtom.ro_count,
+//     }));
+//   };
+
+//   const fetchServicesList = async () => {
+//     const res = await Service_detais_of_the_DRC(drcId);
+
+//     const serviceEntries = res.data || [];
+//   console.log("Raw Service Entries:", serviceEntries);
+
+//   return serviceEntries.map(({ service }) => ({
+//     type: service?.service_type || "N/A",
+//     enableDate: (service?.status_update_dtm || "").split("T")[0],
+//     status: service?.service_status || "N/A",
+//   }));
+// };
+
+ 
+
+//   const fetchAllLists = async () => {
+//     setIsLoading(true);
+//     try {
+//       const [ro, rtom, item] = await Promise.all([
+//         fetchROList(),
+//         fetchRtomList(),
+//         fetchServicesList(),
+//       ]);
+//       setRoListData(ro);
+//       setRtomListData(rtom);
+//       setServicesListData(item);
+      
+//     } catch (err) {
+//       console.error("Error fetching DRC details:", err);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchAllLists();
+//   }, []);
 
   const filteredData =
     activeTab === "RO"
@@ -152,9 +239,9 @@ const DRCDetails = () => {
         : activeTab === "Services"
           ? servicesListData.filter((row) => {
             const matchesSearchQuery = Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesService = !appliedFilters.service || row.type === appliedFilters.service;
-            const matchesStatus = !appliedFilters.status || row.status === appliedFilters.status;
-            return matchesSearchQuery && matchesService && matchesStatus;
+            //const matchesService = !appliedFilters.service || row.type === appliedFilters.service;
+            //const matchesStatus = !appliedFilters.status || row.status === appliedFilters.status;
+            return matchesSearchQuery ;
           })
           : [];
 
@@ -191,21 +278,21 @@ const DRCDetails = () => {
             {activeTab === "RO" && (
               <>
                 <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
+                  value={serviceFilter}
+                  onChange={(e) => setServiceFilter(e.target.value)}
                   className={GlobalStyle.selectBox}
                 >
                   <option value="" disabled hidden>
                     Select Status
                   </option>
-                  {statuses.map((statusOption, index) => (
+                  {status1.map((statusOption, index) => (
                     <option key={index} value={statusOption}>
                       {statusOption}
                     </option>
                   ))}
                 </select>
 
-                <select
+                {/* <select
                   value={rtomFilter}
                   onChange={(e) => setRtomFilter(e.target.value)}
                   className={GlobalStyle.selectBox}
@@ -218,7 +305,7 @@ const DRCDetails = () => {
                       {rtomOption}
                     </option>
                   ))}
-                </select>
+                </select> */}
               </>
             )}
 
@@ -230,9 +317,9 @@ const DRCDetails = () => {
                 className={GlobalStyle.selectBox}
               >
                 <option value="" disabled hidden>
-                  Select Billing Center
+                  Select Handeling Type
                 </option>
-                {rtomNames.map((rtomOption, index) => (
+                {handlingtype.map((rtomOption, index) => (
                   <option key={index} value={rtomOption}>
                     {rtomOption}
                   </option>
@@ -321,7 +408,7 @@ const DRCDetails = () => {
                 <>
                   <th className={GlobalStyle.tableHeader}>RO Name</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
-                  <th className={GlobalStyle.tableHeader}>Enable Date</th>
+                  <th className={GlobalStyle.tableHeader}>Created Date</th>
                   <th className={GlobalStyle.tableHeader}>Contact Number</th>
                 </>
               )}
@@ -330,7 +417,7 @@ const DRCDetails = () => {
                   <th className={GlobalStyle.tableHeader}>Billing Center Name</th>
                   <th className={GlobalStyle.tableHeader}>Billing Center Code</th>
                   <th className={GlobalStyle.tableHeader}>Handling Type</th>
-                  <th className={GlobalStyle.tableHeader}>Enable Date</th>
+                  <th className={GlobalStyle.tableHeader}>Created Date</th>
                   <th className={GlobalStyle.tableHeader}>Contact Number</th>
                   <th className={GlobalStyle.tableHeader}>RO Count</th>
                 </>
@@ -345,7 +432,7 @@ const DRCDetails = () => {
             </tr>
           </thead>
           <tbody>
-              {paginatedData.length === 0 ?(
+              {filteredData.length === 0 ?(
                 <tr>
 
                   <td colSpan={activeTab === "RO" ? 4 : activeTab === "Billing Center" ? 6 : 3} className={GlobalStyle.tableData}
@@ -375,7 +462,8 @@ const DRCDetails = () => {
                 {activeTab === "Billing Center" && (
                   <>
                     <td className={GlobalStyle.tableData}>{row.name}</td>
-                    <td className={GlobalStyle.tableData}>{row.abbreviation}</td>
+                    <td className={GlobalStyle.tableData}>{row.billing_center_Code}</td>
+                    <td className={GlobalStyle.tableData}>{row.handlingType}</td>
                     <td className={GlobalStyle.tableData}>{row.enableDate}</td>
                      <td className={GlobalStyle.tableData}>{row.rtom_contact_number}</td> 
                      
