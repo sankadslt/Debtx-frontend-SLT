@@ -36,7 +36,6 @@ const UserInfo = () => {
   const [loggedUserData, setLoggedUserData] =useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [logHistory, setLogHistory] = useState([]);
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
   const [endDate, setEndDate] = useState(null);
@@ -64,7 +63,7 @@ const UserInfo = () => {
     userType: "",
     userMail: "",
     loginMethod: "",
-    userRoles: [],
+    userRole: "",
     createdOn: "",
     createdBy: "",
     approvedOn: "",
@@ -73,11 +72,7 @@ const UserInfo = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showEndSection, setShowEndSection] = useState(false);
-  const [showLogHistory, setShowLogHistory] = useState(false);
 
-  // User roles data for editing
-  const [userRolesData, setUserRolesData] = useState([]);
-  
   // Available roles dropdown
   const availableRoles = [
     { role_name: "GM" },
@@ -94,7 +89,6 @@ const UserInfo = () => {
   const loadUser = async () => {
     const user = await getLoggedUserId();
     setLoggedUserData(user);
-    // console.log("User data:", user);
   };
 
   useEffect(() => {
@@ -102,7 +96,7 @@ const UserInfo = () => {
       try {
         setLoading(true);
         const fetchedData = await getUserDetailsById(user_id);
-        // console.log(fetchedData);
+        console.log(fetchedData);
         
 
         if (fetchedData) {
@@ -113,21 +107,15 @@ const UserInfo = () => {
             userType: fetchedData.data.user_type || "",
             userMail: fetchedData.data.email || "",
             loginMethod: fetchedData.data.login_method || "",
-            userRoles: fetchedData.data.user_roles || [],
+            userRole: fetchedData.data.role || "",
             createdOn: fetchedData.data.Created_DTM || "",
             createdBy: fetchedData.data.Created_BY || "",
             approvedOn: fetchedData.data.Approved_DTM || "",
             approvedBy: fetchedData.data.Approved_By || "",
           });
-          // Set userRolesData for editing - use user_roles if available, otherwise fallback to single role
-          if (fetchedData.data.user_roles && fetchedData.data.user_roles.length > 0) {
-            setUserRolesData(fetchedData.data.user_roles.map(role => ({
-              roleName: role.role_name || role,
-              active: role.active || false
-            })));
-          } else if (fetchedData.data.role) {
-            setUserRolesData([{ roleName: fetchedData.data.role, active: true }]);
-          }
+
+          setSelectedRole(fetchedData.data.role);
+
         }
         setLoading(false);
       } catch (err) {
@@ -154,20 +142,6 @@ const UserInfo = () => {
   };
 
   const handleSave = async () => {
-    // Get the current active role from userRolesData
-    const activeRole = userRolesData.find(role => role.active);
-
-    if (!activeRole) {
-      Swal.fire({
-        title: "Warning",
-        text: "At least one active role must be selected",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
-      return;
-    }
-
     if (!remark.trim()) {
       Swal.fire({
         title: "Warning",
@@ -185,8 +159,7 @@ const UserInfo = () => {
       const updateData = {
         user_id: user_id,
         updated_by: loggedUserData,
-        role: activeRole.roleName,
-        user_roles: userRolesData,
+        role: selectedRole,
         user_status: isActive ? "Active" : "Inactive",
         remark: remark
       };
@@ -218,40 +191,6 @@ const UserInfo = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const addUserRole = () => {
-    if (selectedRole) {
-      // Check if user already has a role
-      if (userRolesData.length > 0) {
-        Swal.fire({
-          title: "Warning",
-          text: "User can only have one role at a time. Please remove the existing role first.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        });
-        return;
-      }
-      
-      // Add the new role as active
-      setUserRolesData([{ roleName: selectedRole, active: true }]);
-      setSelectedRole("");
-    }
-  };
-
-  const toggleUserRole = (index) => {
-    // Since there's only one role allowed, this function can remain as is
-    // but it will only be called when there's exactly one role
-    const updatedData = [...userRolesData];
-    updatedData[index].active = !updatedData[index].active;
-    setUserRolesData(updatedData);
-  };
-
-  const removeUserRole = (index) => {
-    const updatedData = [...userRolesData];
-    updatedData.splice(index, 1);
-    setUserRolesData(updatedData);
   };
 
   const formatDate = (dateString) => {
@@ -338,11 +277,6 @@ const UserInfo = () => {
       (log.remark_dtm && formatDate(log.remark_dtm).toLowerCase().includes(searchLower))
     );
   }) || [];
-
-  // Pagination
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = userRolesData.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -466,78 +400,8 @@ const UserInfo = () => {
                                 </option>
                               ))}
                             </select>
-                            <button
-                              className="bg-white rounded-full p-1 border border-gray-300 shrink-0"
-                              onClick={addUserRole}
-                              title="Add User Role"
-                              disabled={!selectedRole}
-                            >
-                              <img src={add} alt="Add" className="w-5 h-5" />
-                            </button>
                           </div>
                         </td>
-                    </tr>
-
-                    {/* User Roles Table */}
-                    <tr>
-                      <td colSpan="3">
-                        <div className="mb-4">
-                          <div className={`${GlobalStyle.cardContainer} p-2 sm:p-4 md:p-6 lg:p-8 w-full max-w-full overflow-hidden`}>
-                            <table className={GlobalStyle.table}>
-                              <thead className={GlobalStyle.thead}>
-                                <tr>
-                                  <th scope="col" className={GlobalStyle.tableHeader}>
-                                    User Roles
-                                  </th>
-                                  <th scope="col" className={GlobalStyle.tableHeader}>
-                                    Action
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {paginatedData.length > 0 ? (
-                                  paginatedData.map((row, index) => (
-                                    <tr
-                                      key={index}
-                                      className={`${
-                                        index % 2 === 0
-                                          ? GlobalStyle.tableRowEven
-                                          : GlobalStyle.tableRowOdd
-                                      } border-b`}
-                                    >
-                                      <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                                        <span 
-                                          className={`cursor-pointer ${row.active ? 'text-green-600 font-semibold' : ''}`}
-                                          onClick={() => toggleUserRole(index)}
-                                        >
-                                          {row.roleName}
-                                        </span>
-                                      </td>
-                                      <td className={GlobalStyle.tableData}>
-                                        <div className="flex justify-center items-center">
-                                          <button
-                                            className="bg-white rounded-full p-1 "
-                                            onClick={() => removeUserRole(index)}
-                                            title="Remove User Role"
-                                          >
-                                            <img src={remove} alt="Remove" className="w-5 h-5" />
-                                          </button>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  ))
-                                ) : (
-                                  <tr>
-                                    <td colSpan="2" className="text-center py-4">
-                                      No results found
-                                    </td>
-                                  </tr>
-                                )}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </td>
                     </tr>
 
                     <tr className="h-2"></tr>
@@ -731,57 +595,16 @@ const UserInfo = () => {
                     <tr>
                       <td className="w-1/3 sm:w-auto">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          User Roles
+                          User Role
                         </p>
                       </td>
                       <td className="text-center align-middle w-4 sm:w-auto">
                         :
                       </td>
-                    </tr>
-                    <tr>
-                      <td colSpan="3">
-                        <div className="mb-4">
-                          {/* User Roles Table - Display all roles from userRolesData or fallback to single role */}
-                          <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-                            <table className={GlobalStyle.table}>
-                              <thead className={GlobalStyle.thead}>
-                                <tr>
-                                  <th scope="col" className={GlobalStyle.tableHeader}>
-                                    User Roles
-                                  </th>
-                                  <th scope="col" className={GlobalStyle.tableHeader}></th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {(userRolesData.length > 0 ? userRolesData : 
-                                  (userInfo.role ? [{ roleName: userInfo.role, active: true }] : [])
-                                ).map((role, index) => (
-                                  <tr key={index} className={`${GlobalStyle.tableRowOdd} border-b`}>
-                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                                      <span>{role.roleName || role}</span>
-                                    </td>
-                                    <td className={GlobalStyle.tableData}>
-                                      <div className="flex justify-center items-center">
-                                        <img 
-                                          src={completeIcon} 
-                                          alt="Active" 
-                                          className="h-5 w-5 lg:h-6 lg:w-6"
-                                        />
-                                      </div>
-                                    </td>
-                                  </tr>
-                                ))}
-                                {(userRolesData.length === 0 && !userInfo.role) && (
-                                  <tr>
-                                    <td colSpan="2" className="text-center py-4">
-                                      No results found
-                                    </td>
-                                  </tr>
-                                )}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
+                      <td className="w-2/3 sm:w-auto">
+                        <label className={GlobalStyle.headingSmall}>
+                          {userInfo.role || "N/A"}
+                        </label>
                       </td>
                     </tr>
 

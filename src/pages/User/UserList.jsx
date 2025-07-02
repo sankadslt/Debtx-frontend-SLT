@@ -109,6 +109,9 @@ const UserList = () => {
               user_role: user.role,
               user_name: user.username,
               user_email: user.email,
+              contact_num: Array.isArray(user.contact_num) && user.contact_num.length > 0 
+                ? user.contact_num[0].contact_num 
+                : "N/A",
               created_on: new Date(user.Created_DTM).toLocaleDateString("en-CA"),
             })),
           ]);
@@ -449,6 +452,7 @@ const UserList = () => {
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER ROLE</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER NAME</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER EMAIL</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>CONTACT NO.</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>CREATED ON</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>ACTIONS</th>
               </tr>
@@ -462,7 +466,12 @@ const UserList = () => {
                       : GlobalStyle.tableRowOdd
                   }`}
                 >
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_id}</td>
+                  <td
+                    className={`${GlobalStyle.tableData} w-[100px] max-w-[100px] truncate`}
+                    title={user.user_id}
+                  >
+                    {user.user_id}
+                  </td>
                   <td className={`${GlobalStyle.tableData}`}>
                     <div className="relative flex items-center justify-center">
                       <div className="relative">
@@ -497,11 +506,12 @@ const UserList = () => {
                       </div>
                     </div>
                   </td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_type}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_role}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_name}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_email}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.created_on}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_type || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_role || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_name || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_email || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.contact_num || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.created_on  || "N/A"}</td>
                   <td className={`${GlobalStyle.tableData}`}>
                     <div className="flex justify-center">
                       <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
