@@ -464,7 +464,11 @@ const Case_List = () => {
       if (response && response.data && response.status === "success") {
 
         // Append the new data to the existing data
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data); // Reset data for page 1
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
@@ -536,11 +540,6 @@ const Case_List = () => {
   };
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
       CallAPI({
@@ -588,7 +587,7 @@ const Case_List = () => {
   }
 
   // Search Section
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -624,6 +623,7 @@ const Case_List = () => {
     setSelectedCaseStatus("");
     setFromDate(null);
     setToDate(null);
+    setSearchQuery("");
     setIsFilterApplied(false);
     setIsMoreDataAvailable(true);
     setMaxCurrentPage(0);
@@ -893,7 +893,7 @@ const Case_List = () => {
           </thead>
           <tbody>
             {filteredDataBySearch.length > 0 ? (
-              filteredDataBySearch.map((row, index) => {
+              filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => {
                 const createdDate = row.createddtm
                 //   ? new Date(row.createddtm).toLocaleDateString()
                 //   : '';
