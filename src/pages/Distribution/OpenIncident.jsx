@@ -391,7 +391,7 @@ export default function OpenIncident() {
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
               {" "}
               <span> 100,000 &lt;</span>
-              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-100_"] || 0}</p>
+              <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-100<"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
               {" "}

@@ -156,7 +156,13 @@ const LOD_Log = () => {
         setIsLoading(true);
         try {
             const LOD = await List_Final_Reminder_Lod_Cases(filters.LODStatus, filters.DateType, filters.fromDate, filters.toDate, "Final Reminder", filters.currentPage);
-            setFinalReminderData((prevData) => [...prevData, ...LOD]);
+
+            if (currentPage === 1) {
+                setFinalReminderData(LOD);
+            } else {
+                setFinalReminderData((prevData) => [...prevData, ...LOD]);
+            }
+
             if (LOD.length === 0) {
                 setIsMoreDataAvailable(false);
                 if (currentPage === 1) {
@@ -192,11 +198,6 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        if (!hasMounted.current) {
-            hasMounted.current = true;
-            return;
-        }
-
         if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage); // Update max current page
             fetchData({
@@ -212,6 +213,7 @@ const LOD_Log = () => {
         setDateType("");
         setFromDate("");
         setToDate("");
+        setSearchQuery("");
         setFinalReminderData([]);
         setIsFilterApplied(false); // Reset filter applied state
         setIsMoreDataAvailable(true); // Reset more data available state    
@@ -244,7 +246,7 @@ const LOD_Log = () => {
     const paginatedData = FinalReminderdata.slice(startIndex, startIndex + rowsPerPage);
 
     // handle search
-    const filteredData = paginatedData.filter((row) =>
+    const filteredData = FinalReminderdata.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -383,7 +385,7 @@ const LOD_Log = () => {
                     </thead>
                     <tbody>
                         {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
+                            filteredData.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
