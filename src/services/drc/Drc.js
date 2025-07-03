@@ -69,21 +69,32 @@ export const Active_DRC_Details = async () => {
 export const listAllDRCDetails = async (filter) => {
   try {
     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
-      status: filter.status || "", // Default to 'active' if not provided
-      page: filter.page || 1, // Default to page 1 if not provided
+      status: filter.status || "",
+      page: filter.page || 1,
     });
 
     if (response.data.status === "error") {
-      throw new Error(response.data.message);
+      throw new Error(response.data.message || "Failed to fetch DRC data");
     }
 
-    return response.data; // Return the full response data as-is
+    return response.data;
   } catch (error) {
-    console.error("Error retrieving List_All_DRC:", error.response?.data || error.message);
-    throw error;
+    console.error("Error in listAllDRCDetails:", {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
+    
+    // More specific error messages
+    if (error.response?.status === 500) {
+      throw new Error("Server error while fetching DRC data. Please try again later.");
+    } else if (error.response?.status === 404) {
+      throw new Error("No DRC records found matching your criteria.");
+    } else {
+      throw new Error("Failed to fetch DRC data. Please check your connection and try again.");
+    }
   }
 };
-
 
 export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
   try {
@@ -186,6 +197,7 @@ export const getDebtCompanyByDRCID = async (drcId) => {
 };
 
 // terminateCompanyByDRCID
+// services/drc/Drc.js
 export const terminateCompanyByDRCID = async (
   drcId,
   remark,
@@ -197,26 +209,24 @@ export const terminateCompanyByDRCID = async (
       drc_id: drcId,
       remark: remark,
       remark_by: remarkBy,
-      remark_dtm: terminatedDate,
+      remark_dtm: terminatedDate.toISOString(), // Ensure proper date format
     });
 
-    // Add validation and logging to debug
-    console.log("API Response:", response.data);
-
-    if (response.data && response.data.data) {
-      return {
-        ...response.data.data,
-        status: response.data.status || "success", // Ensure a status property exists
-      };
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to terminate DRC");
     }
 
-    return response.data; // Fallback
+    return response.data;
   } catch (error) {
     console.error(
       "Error terminating company:",
       error.response?.data || error.message
     );
-    throw new Error(error.response?.data?.message || "Failed to terminate DRC");
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to terminate DRC"
+    );
   }
 };
 
