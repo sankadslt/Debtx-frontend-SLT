@@ -9,6 +9,7 @@ import ActiveIcon from "../../assets/images/rtom/ROTM_Active.png";
 import InactiveIcon from "../../assets/images/rtom/ROTM_Inactive.png";
 import TerminateIcon from "../../assets/images/rtom/ROTM_Terminate.png";
 import MoreIcon from "../../assets/images/more.svg";
+import { Tooltip } from "react-tooltip";
 
 const RtomList = () => {
   const navigate = useNavigate();
@@ -48,6 +49,18 @@ const RtomList = () => {
 
       if (rtoms.length === 0) {
         hasMoreData.current = false;
+
+        // status filter warning message
+        if (pageNo === 1) {
+          Swal.fire({
+            icon: filtersApplied ? "info" : "warning",
+            iconColor: filtersApplied ? "#ff6b6b" : "#ff9999",
+            title: filtersApplied ? "No Records Found" : "No Data Available",
+            text: filtersApplied
+              ? "No applicable records available for the selected filter."
+              : "There are currently no RTOM records available.",
+          });
+        }
       } else {
         setAllData((prev) => {
           const newData = rtoms.filter(
@@ -58,7 +71,13 @@ const RtomList = () => {
         setLastFetchedBackendPage(pageNo);
       }
     } catch (err) {
-      Swal.fire("Error", err.message || "Failed to fetch RTOMs", "error");
+       Swal.fire({
+              title: "Error",
+              text: err.message || "Failed to fetch RTOMs",
+              icon: "error",
+              confirmButtonColor: "#d33",
+            });
+
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +106,13 @@ const RtomList = () => {
     setCurrentPage(1);
     hasMoreData.current = true;
     setAllData([]);
-    callRTOMAPI(1);
+
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      callRTOMAPI({ status: "", page: 1 });
+    }
+    
   };
 
   // handle search change
@@ -110,17 +135,21 @@ const RtomList = () => {
 
   // Filter data based on search query and status filter
   const filteredData = allData.filter((row) => {
+    const searchableFields = { ...row };
+    delete searchableFields.rtom_status;
+
     const matchesSearch =
       searchQuery === "" ||
-      Object.values(row)
+      Object.values(searchableFields)
         .join(" ")
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      !filtersApplied ||
-      appliedStatus === "" ||
-      row.rtom_status === appliedStatus;
-    return matchesSearch && matchesStatus;
+    // const matchesStatus =
+    //   !filtersApplied ||
+    //   appliedStatus === "" ||
+    //   row.rtom_status === appliedStatus;
+    // return matchesSearch && matchesStatus;
+    return matchesSearch
   });
 
   // Calculate pagination
@@ -159,7 +188,7 @@ const RtomList = () => {
 
   return (
     <div className={GlobalStyle.fontPoppins}>
-      <h2 className={GlobalStyle.headingLarge}> RTOM List </h2>
+      <h2 className={GlobalStyle.headingLarge}> Billing Center List </h2>
       <div className="flex justify-end mt-2">
         <button onClick={handleAdd} className={GlobalStyle.buttonPrimary}>
           Add
@@ -220,7 +249,7 @@ const RtomList = () => {
             <thead className={GlobalStyle.thead}>
               <tr>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  RTOM Id
+                  Billing Center Id
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Status
@@ -257,14 +286,16 @@ const RtomList = () => {
                       <img
                         src={getStatusIcon(rtom.rtom_status)}
                         alt={rtom.rtom_status}
+                        data-tooltip-id="status-tooltip"
                         className="w-6 h-6"
                       />
                       {/* Tooltip */}
-                      <div className="absolute top-full right-0 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                      <Tooltip id="status-tooltip" place="bottom" effect="solid">
                         {rtom.rtom_status}
+
                         {/* Tooltip arrow */}
-                        <div className="absolute bottom-full right-2 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-800"></div>
-                      </div>
+                        {/* <div className="absolute bottom-full right-2 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-800"></div> */}
+                      </Tooltip>
                     </div>
                   </td>
 
@@ -275,7 +306,7 @@ const RtomList = () => {
                   <td className={GlobalStyle.tableData}>
                     {rtom.rtom_mobile_no}
                   </td>
-                  <td className={GlobalStyle.tableData}>
+                  <td className={GlobalStyle.tableData} style={{ display: "flex", justifyContent: "center" }}>
                     <button
                       onClick={() => handleRowClick(rtom.rtom_id)}
                       className="w-6 h-6 cursor-pointer"
@@ -284,7 +315,11 @@ const RtomList = () => {
                         src={MoreIcon}
                         alt="View Details"
                         className="w-full h-full"
+                        data-tooltip-id="view-details-tooltip"
                       />
+                      <Tooltip id="view-details-tooltip" place="bottom" effect="solid">
+                        More Info
+                      </Tooltip>
                     </button>
                   </td>
                 </tr>

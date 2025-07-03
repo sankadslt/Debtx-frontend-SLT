@@ -30,7 +30,6 @@ const LOD_Log = () => {
     const [LODdata, setLODData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
-    const [totalPages, setTotalPages] = useState(0);
     const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Track the maximum current page
     const [isFilterApplied, setIsFilterApplied] = useState(false); // Track if filter is applied
     const rowsPerPage = 10; // Number of rows per page
@@ -157,7 +156,11 @@ const LOD_Log = () => {
         try {
             const LOD = await List_Final_Reminder_Lod_Cases(filters.LODStatus, filters.DateType, filters.fromDate, filters.toDate, "LOD", filters.currentPage);
             console.log("LOD data:", LOD);
-            setLODData((prevData) => [...prevData, ...LOD]);
+            if (currentPage === 1) {
+                setLODData(LOD); // Set LOD data for the first page
+            } else {
+                setLODData((prevData) => [...prevData, ...LOD]);
+            }
             if (LOD.length === 0) {
                 setIsMoreDataAvailable(false);
                 if (currentPage === 1) {
@@ -194,11 +197,6 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        if (!hasMounted.current) {
-            hasMounted.current = true;
-            return;
-        }
-
         if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage); // Update max current page
             fetchData({
@@ -217,8 +215,8 @@ const LOD_Log = () => {
         setFromDate("");
         setToDate("");
         setLODData([]);
-        setTotalPages(0);
         setIsMoreDataAvailable(true);
+        setSearchQuery("");
         setCommittedFilters({
             LODStatus: "",
             DateType: "",
@@ -246,7 +244,7 @@ const LOD_Log = () => {
     const paginatedData = LODdata.slice(startIndex, startIndex + rowsPerPage);
 
     // handle search
-    const filteredData = paginatedData.filter((row) =>
+    const filteredData = LODdata.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -261,15 +259,9 @@ const LOD_Log = () => {
 
     // handle next page
     const handleNextPage = async () => {
-        if (isMoreDataAvailable) {
+        if (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
             setCurrentPage(currentPage + 1);
-        } else {
-            const totalPages = Math.ceil(LODdata.length / rowsPerPage);
-            setTotalPages(totalPages);
-            if (currentPage < totalPages) {
-                setCurrentPage(currentPage + 1);
-            }
-        }
+        } 
         // console.log("Current page:", currentPage);
         // console.log("Total pages:", totalPages);
         // setIsLoading(true);
@@ -334,20 +326,20 @@ const LOD_Log = () => {
                     </select>
 
                     <label className={GlobalStyle.dataPickerDate}>Date</label>
-                        <DatePicker
-                            selected={fromDate}
-                            onChange={handleFromDateChange}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="From Date"
-                            className={GlobalStyle.inputText}
-                        />
-                        <DatePicker
-                            selected={toDate}
-                            onChange={handleToDateChange}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="To Date"
-                            className={GlobalStyle.inputText}
-                        />
+                    <DatePicker
+                        selected={fromDate}
+                        onChange={handleFromDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="From Date"
+                        className={GlobalStyle.inputText}
+                    />
+                    <DatePicker
+                        selected={toDate}
+                        onChange={handleToDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="To Date"
+                        className={GlobalStyle.inputText}
+                    />
 
                     <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
                     <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
@@ -362,7 +354,10 @@ const LOD_Log = () => {
                         type="text"
                         placeholder=""
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setCurrentPage(1); // Reset to page 1 on search
+                            setSearchQuery(e.target.value)
+                        }}
                         className={GlobalStyle.inputSearch}
                     />
                     <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -386,7 +381,7 @@ const LOD_Log = () => {
                     </thead>
                     <tbody>
                         {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
+                            filteredData.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
@@ -484,7 +479,7 @@ const LOD_Log = () => {
                 <span className="text-gray-700">
                     Page {currentPage}
                 </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === totalPages}>
+                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}>
                     <FaArrowRight />
                 </button>
             </div>

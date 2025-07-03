@@ -5,6 +5,7 @@ import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import editImg from "../../assets/images/more.svg";
 import ListImg from "../../assets/images/ConfigurationImg/list.png";
+import Checklist from "../../assets/images/ConfigurationImg/checklist.png";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
@@ -370,19 +371,31 @@ const DRCList = () => {
                                     </td>
 
 
-                                    <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
-                                        <button 
-                                            onClick={() => navigateToEdit(log.DRCID)}
-                                            className="p-1 hover:bg-gray-100 rounded"
-                                        >
-                                            <img src={editImg} alt="Edit" title="Edit" className="w-6 h-6" />
-                                        </button>
-                                        <button 
-                                            className="p-1 hover:bg-gray-100 rounded"
-                                        >
-                                            <img src={ListImg} alt="Details" title="Details" className="w-6 h-6" />
-                                        </button>
-                                    </td> 
+                                   <td className={`${GlobalStyle.tableData} flex justify-center items-center gap-2 w-[140px]`}>
+  
+                                            <button 
+                                                onClick={() => navigateToEdit(log.DRCID)}
+                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                                title="Edit"
+                                            >
+                                                <img src={editImg} alt="Edit" className="w-6 h-6" />
+                                            </button>
+  
+  
+                                            <button 
+                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                                title="Details"
+                                            >
+                                                <img src={ListImg} alt="Details" className="w-6 h-6" />
+                                            </button>
+  
+                                            <button 
+                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                                title="Caselist"
+                                            >
+                                                <img src={Checklist} alt="Caselist" className="w-6 h-6" />
+                                            </button>
+                                      </td>
                                 </tr>
                             ))
                         ) : (
