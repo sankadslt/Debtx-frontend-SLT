@@ -24,10 +24,10 @@ export const createIncident = async (incidentData) => {
 export const incidentRegisterBulkUpload = async (incidentData) => {
   try {
     const response = await axios.post(`${INCIDENT_URL}/Upload_DRS_File`, incidentData);
-    return response.data; // Return the success response
+    return response.data;  
   } catch (error) {
     console.error("Error creating incident:", error.response?.data || error.message);
-    throw error.response?.data || error; // Throw detailed error for handling
+    throw error.response?.data || error;  
   }
 };
 

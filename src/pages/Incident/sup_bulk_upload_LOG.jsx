@@ -173,7 +173,7 @@ const SupBulkUploadLog = () => {
     }, [fromDate, toDate]);
 
     // Search Section
-    const filteredDataBySearch = paginatedData.filter((row) =>
+    const filteredDataBySearch = filteredData.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -245,8 +245,12 @@ const SupBulkUploadLog = () => {
             setIsLoading(false); // Set loading state to false
 
             // Updated response handling
-            if (response && response.data) {
-                setFilteredData((prevData) => [...prevData, ...response.data]);
+            if (response && response.data ) {
+                if (currentPage === 1) {
+                  setFilteredData(response.data);
+                } else {
+                  setFilteredData((prevData) => [...prevData, ...response.data]);
+                }
 
                 if (response.data.length === 0) {
                     setIsMoreDataAvailable(false);
@@ -292,11 +296,7 @@ const SupBulkUploadLog = () => {
     }
 
     useEffect(() => {
-        if (!hasMounted.current) {
-            hasMounted.current = true;
-            return;
-        }
-
+       
         if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage);
             callAPI({
@@ -352,49 +352,7 @@ const SupBulkUploadLog = () => {
         }
     }
 
-    //     const result = await response;
-    //     if (result.status === "success") {
-    //         const transformedData = result.data.map((item) => ({
-    //             dateTime: new Date(item.Uploaded_Dtm).toLocaleDateString(),
-    //             createdTime: new Date(item.Uploaded_Dtm).toLocaleTimeString(),
-    //             uploadedBy: item.Uploaded_By || "N/A",
-    //             fileName: item.File_Name || "N/A",
-    //             type: item.File_Type || "N/A",
-    //             status: item.File_Status || "N/A",
-    //         }));
-    //         setData(transformedData);
-    //     } else {
-    //         setData([]);
-    //     }
-    // } catch (error) {
-    //     console.error("Error fetching data:", error);
-    //     setError(error.message || "Failed to fetch data");
-    //     Swal.fire({
-    //         title: "Error",
-    //         text: "Failed to fetch data. Please try again later.",
-    //         icon: "error",
-    //         confirmButtonColor: "#d33",
-    //         confirmButtonText: "OK"
-    //     });
-    //     setData([]);
-    // } finally {
-    //     setLoading(false);
-    // }
-    //         }, [fromDate, toDate, status]);
-
-    // // Fetch data when the component mounts or when the filters change
-    // useEffect(() => {
-    //     fetchData();
-    // }, [fetchData, fromDate, toDate, status]);
-
-
-
-
-    // const pages = Math.ceil(filteredData.length / rowsPerPage);
-    // const startIndex = currentPage * rowsPerPage;
-    // const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
-    // Function to clear filters and reset the state
+  
     const handleClear = () => {
         setStatus("");
         setFromDate(null);
@@ -532,8 +490,8 @@ const SupBulkUploadLog = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                                    filteredDataBySearch.map((row, index) => (
+                                { filteredDataBySearch.length > 0 ? (
+                                    filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                                         <tr
                                             key={index}
                                             className={
@@ -551,9 +509,9 @@ const SupBulkUploadLog = () => {
                                                 </div>
                                             </td>
 
-                                            <td className={GlobalStyle.tableData}>{row.fileName || "N/A"}</td>
-                                            <td className={GlobalStyle.tableData}>{row.type || "N/A"}</td>
-                                            <td className={GlobalStyle.tableData}>{row.uploadedBy || "N/A"}</td>
+                                            <td className={GlobalStyle.tableData}>{row.fileName || ""}</td>
+                                            <td className={GlobalStyle.tableData}>{row.type || ""}</td>
+                                            <td className={GlobalStyle.tableData}>{row.uploadedBy || ""}</td>
                                             <td className={GlobalStyle.tableData}>{new Date(row.dateTime).toLocaleDateString("en-GB")},{" "}
                                                 {new Date(row.createdTime).toLocaleTimeString("en-GB", {
                                                     hour: "2-digit",
