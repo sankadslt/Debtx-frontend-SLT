@@ -14,6 +14,21 @@ const SignUp = () => {
         role: "",
     });
 
+    const [selectedRole, setSelectedRole] =useState("");
+
+    //Roles available for the dropdown
+    const userRoles = [
+        { value: "", label: "User Role", hidden: true },
+        { value: "GM", label: "GM" },
+        { value: "DGM", label: "DGM" },
+        { value: "legal_officer", label: "Legal Officer" },
+        { value: "manager", label: "Manager" },
+        { value: "slt_coordinator", label: "SLT Coordinator" },
+        { value: "DRC_user", label: "DRC User" },
+        { value: "recovery_staff", label: "Recovery Staff" },
+        { value: "rtom", label: "RTOM" }
+    ];
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -166,46 +181,48 @@ const SignUp = () => {
                                 <option value="Manual">Manual</option>
                             </select>
                             <select
-                                name="role"
-                                value={formData.role}
-                                onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                              className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                              value={selectedRole}
+                              onChange={(e) => setSelectedRole(e.target.value)}
                             >
-                                <option value="" disabled hidden>Roles</option>
-                                <option value="DGM">DGM</option>
-                                <option value="Manager">Manager</option>
-                                <option value="Clerk">Clerk</option>
-                                <option value="Field Officer">Field Officer</option>
+                                <option value="">User Role</option>
+                                {userRoles.map((role) => (
+                                    <option
+                                        key={role.value}
+                                        value={role.value}
+                                        hidden={role.hidden}
+                                        style={{ color: "black" }}
+                                    >
+                                        {role.label}
+                                    </option>
+                                ))}
                             </select>
                            {formData.role && (
-    <div className={`${GlobalStyle.selectBox} w-full mb-4 pl-1 1/2`}>
-        <div className="flex items-center max-w-[100px] bg-gray-200 text-sm px-3 py-1 rounded-full">
-            <span className="truncate mr-2">{formData.role}</span>
-            <button
-                onClick={() => setFormData((prev) => ({ ...prev, role: "" }))}
-                className="text-blue-900 font-bold hover:text-red-600"
-                title="Remove role"
-            >
-                ×
-            </button>
-        </div>
-    </div>
-)}
-
+                                <div className={`${GlobalStyle.selectBox} w-full mb-4 pl-1 1/2`}>
+                                    <div className="flex items-center max-w-[100px] bg-gray-200 text-sm px-3 py-1 rounded-full">
+                                        <span className="truncate mr-2">{formData.role}</span>
+                                        <button
+                                            onClick={() => setFormData((prev) => ({ ...prev, role: "" }))}
+                                            className="text-blue-900 font-bold hover:text-red-600"
+                                            title="Remove role"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                         </>
                     )}
 
                     <div className="w-full">
-    <button
-        onClick={handleRegister}
-        className={`${GlobalStyle.selectBox} ${GlobalStyle.buttonPrimary} text-blue-900 text-center mt-4 rounded-md`}
-    >
-        Register
-    </button>
-</div>
-
-
+                        <button
+                            onClick={handleRegister}
+                            className={`${GlobalStyle.selectBox} ${GlobalStyle.buttonPrimary} text-blue-900 text-center mt-4 rounded-md`}
+                        >
+                            Register
+                        </button>
+                    </div>
 
                 </div>
             </div>
