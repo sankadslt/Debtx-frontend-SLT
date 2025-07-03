@@ -24,7 +24,8 @@ import { refreshAccessToken } from "../../services/auth/authService";
 const Incident_Register_Individual = () => {
   const [accountNo, setAccountNo] = useState(""); // Account number state
   const [actionType, setActionType] = useState(""); // Action type state
-  const [sourceType, setSourceType] = useState(""); // Source type state
+  const [sourceType, setSourceType] = useState(""); 
+  const [reason,setreason]=useState("")
   const [calendarMonth, setCalendarMonth] = useState(3); // Calendar month state (default to 3)
   const [contactNumber, setContactNumber] = useState("");  // Contact number state (only for "collect CPE" action type)
   
@@ -125,6 +126,7 @@ const handleSubmit = async (e) => {
       DRC_Action: actionType,
       Monitor_Months: calendarMonth,
       Source_Type: sourceType,
+      Incident_Required_Reason: reason,
       Created_By: user_id,  
       ...(actionType === "collect CPE" && { Contact_Number: contactNumber }),
     };
@@ -142,6 +144,7 @@ const handleSubmit = async (e) => {
     setAccountNo("");
     setActionType("");
     setSourceType("");
+    setreason("");
     setCalendarMonth(3);
     setContactNumber("");
     setErrors({});
@@ -373,6 +376,29 @@ const handleSubmit = async (e) => {
                       </select>
                       </div>
                       
+                    </td>
+
+                  </tr>
+                  <tr className="align-center">
+                    <td className="w-[180px] py-2">
+                      <label htmlFor="reason">Incident Required Reason
+                         
+                      </label>
+                    </td>
+                    <td className="py-2">
+                    <div className="flex items-center gap-1">
+                      
+                      <input
+                        id="reason"
+                        type="text"
+                        value={reason}
+                        onChange={(e) => setreason(e.target.value)}
+                        className={`${GlobalStyle.inputText} w-full px-2 py-1`}
+                      />
+                    </div>
+                    
+
+                  
                     </td>
                   </tr>
 
