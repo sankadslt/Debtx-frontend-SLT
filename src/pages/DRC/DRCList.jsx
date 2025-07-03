@@ -35,32 +35,38 @@ const DRCList = () => {
     });
 
     // Status icons 
-    const getStatusIcon = (status) => {
-        switch (status?.toLowerCase()) {
-            case "active":
-                return activeIcon;
-            case "inactive":
-                return inactiveIcon;
-            case "terminate":
-                return terminatedIcon;
-            default:
-                return null;
-        }
-    };
+   const getStatusIcon = (status) => {
+    const statusStr = String(status || '').toLowerCase();
+    
+    switch (statusStr) {
+        case "active":
+            return activeIcon;
+        case "inactive":
+            return inactiveIcon;
+        case "terminate":
+            return terminatedIcon;
+        default:
+            return null;
+    }
+};
 
     const renderStatusIcon = (status) => {
-        const iconPath = getStatusIcon(status);
-    
-        if (!iconPath) {
-            return <span className="capitalize">{status}</span>;
+        if (status === undefined || status === null) {
+            return <span className="capitalize">Unknown</span>;
         }
-    
+
+        const iconPath = getStatusIcon(status);
+
+        if (!iconPath) {
+            return <span className="capitalize">{String(status)}</span>;
+        }
+
         return (
             <img
                 src={iconPath}
-                alt={status}
+                alt={String(status)}
                 className="w-6 h-6 mx-auto"
-                title={status}
+                title={String(status)}
             />
         );
     };
