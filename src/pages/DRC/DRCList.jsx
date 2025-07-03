@@ -65,6 +65,26 @@ const DRCList = () => {
         );
     };
 
+    // Show no data swal message
+    const showNoDataMessage = (status = "") => {
+        let message = "No DRCs available";
+        if (status) {
+            message = `No ${status} DRCs found`;
+            if (status === "Terminate") {
+                message = "No Terminated DRCs found";
+            }
+        }
+
+        Swal.fire({
+            title: "No Results",
+            text: message,
+            icon: "info",
+            confirmButtonColor: "#3085d6",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+    };
+
     // API call 
     const callAPI = useCallback(async (filters) => {
         try {
@@ -83,54 +103,53 @@ const DRCList = () => {
                     ContactNo: drc.drc_contact_no,
                     ServiceCount: drc.service_count,
                     ROCount: drc.ro_count,
-                    RTOMCount: drc.rtom_count
+                    BillingCenterCode: drc.billing_center_code 
                 }));
 
                 if (filters.page === 1) {
                     setAllData(drcData);
                     setFilteredData(drcData);
+                    
+                   
+                    if (drcData.length === 0 && filters.status) {
+                        showNoDataMessage(filters.status);
+                    }
                 } else {
                     setFilteredData(prev => [...prev, ...drcData]);
                 }
 
-                //  more data
                 const hasMore = response.pagination 
                     ? response.pagination.page < response.pagination.totalPages
                     : response.data.length === rowsPerPage;
                 
                 setHasMoreData(hasMore);
-
-                if (response.data.length === 0 && filters.page === 1) {
-                    Swal.fire({
-                        title: "No Results",
-                        text: "No matching data found for the selected filters.",
-                        icon: "warning",
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        confirmButtonColor: "#f1c40f"
-                    });
-                }
             } else {
-                Swal.fire({
-                    title: "Error",
-                    text: "No valid DRC data found in response.",
-                    icon: "error",
-                    confirmButtonColor: "#d33"
-                });
+                // Handle empty response
+                if (filters.status) {
+                    showNoDataMessage(filters.status);
+                } else {
+                    showNoDataMessage();
+                }
                 setFilteredData([]);
             }
         } catch (error) {
             console.error("Error fetching DRC list:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Failed to fetch DRC data. Please try again.",
-                icon: "error",
-                confirmButtonColor: "#d33"
-            });
+            
+            if (!error.response || error.response.status !== 404) {
+                Swal.fire({
+                    title: "Error",
+                    text: "Failed to fetch DRC data. Please try again.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            } else if (committedFilters.status) {
+                
+                showNoDataMessage(committedFilters.status);
+            }
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [committedFilters.status]);
 
     // Handle pagination
     const handlePrevPage = () => {
@@ -147,6 +166,13 @@ const DRCList = () => {
 
     // Handle filter button 
     const handleFilterButton = () => {
+        if (!statusFilter) {
+            // If no status selected, just refresh the data
+            setCurrentPage(1);
+            callAPI({ status: "", page: 1 });
+            return;
+        }
+
         setHasMoreData(true);
         setMaxCurrentPage(0);
         setCommittedFilters({ status: statusFilter });
@@ -168,7 +194,6 @@ const DRCList = () => {
         setSearchQuery("");
         setMaxCurrentPage(0);
         setCommittedFilters({ status: "" });
-        setFilteredData([]);
         
         if (currentPage !== 1) {
             setCurrentPage(1);
@@ -301,7 +326,7 @@ const DRCList = () => {
                             <th className={GlobalStyle.tableHeader}>Contact No.</th>
                             <th className={GlobalStyle.tableHeader}>Service Count</th>
                             <th className={GlobalStyle.tableHeader}>RO Count</th>
-                            <th className={GlobalStyle.tableHeader}>RTOM Count</th>
+                            <th className={GlobalStyle.tableHeader}>Billing Center Code</th>
                             <th className={GlobalStyle.tableHeader}></th>
                         </tr>
                     </thead>
@@ -335,7 +360,7 @@ const DRCList = () => {
 
                                     <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
                                         onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RTOM" } })}>
-                                                 {log.RTOMCount}
+                                                 {log.BillingCenterCode}
                                     </td>
 
 
