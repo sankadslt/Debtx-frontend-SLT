@@ -25,12 +25,12 @@ import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
 import { Create_Task_for_Download_Case_List } from "../../services/task/taskService";
-import Incident_Done from "/src/assets/images/Incidents/Incident_Done.png";
-import Reject_Pending from "/src/assets/images/Incidents/Reject_Pending.png";
-import Incident_Reject from "/src/assets/images/Incidents/Incident_Reject.png";
-import Open_No_Agent from "/src/assets/images/Incidents/Open_No_Agent.png"; 
-import Only_CPE_Collect from "/src/assets/images/Incidents/Only_CPE_Collect.png";
-import Direct_LOD from "/src/assets/images/Incidents/Direct_LOD.png";
+import Incident_Done from "/src/assets/images/incidents/Incident_Done.png";
+import Reject_Pending from "/src/assets/images/incidents/Reject_Pending.png";
+import Incident_Reject from "/src/assets/images/incidents/Incident_Reject.png";
+import Open_No_Agent from "/src/assets/images/incidents/Open_No_Agent.png"; 
+import Only_CPE_Collect from "/src/assets/images/incidents/Only_CPE_Collect.png";
+import Direct_LOD from "/src/assets/images/incidents/Direct_LOD.png";
 import Pending_Assign_Agent from "/src/assets/images/distribution/Pending_Assign_Agent.png";
 import Pending_Assign_Agent_Approval from "/src/assets/images/distribution/Pending_Assign_Agent_Approval.png";
 //Reject Assign Agent Approval
