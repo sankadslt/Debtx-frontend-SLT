@@ -463,160 +463,165 @@ const Add_DRC = () => {
         </h1>
         {/*Company Section */}   
         <form onSubmit={handleSubmit} className="w-full mt-6">
-           <div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[750px] lg:w-[750px]`}>          
-            <h2 className={`${GlobalStyle.headingMedium} mb-4 text-center font-bold`}  >
+           <div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[750px] lg:w-[750px]`}>
+              <h2 className={`${GlobalStyle.headingMedium} mb-4 ml-10 text-left font-bold`}>
               <span className="underline">Company Details</span>
             </h2>
-           <table className="w-full">
-              <tbody className="block md:table-row-group">
-                <tr className="block md:table-row">
-                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
-                    Business Registration No :
-                  </td>
-                  <td className="block md:table-cell md:w-2/3 pb-2">
-                    <input
-                      type="text"
-                      value={BusinessRegistrationNo}
-                      onChange={(e) =>
-                        setBusinessRegistrationNo(e.target.value)
-                      }
-                      className={`${GlobalStyle.inputText} w-full`}
-                    />
-                    {errors.BusinessRegistrationNo && (
-                      <p className="text-red-500">
-                        {errors.BusinessRegistrationNo}
-                      </p>
-                    )}
-                  </td>
-                </tr>
-                <tr className="block md:table-row mb-2">
-                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center pb-2">
-                    Company Name :
-                  </td>
-                  <td className="block md:table-cell md:w-2/3 pb-2">
-                    <input
-                      type="text"
-                      value={DRCName}
-                      onChange={(e) => setDRCName(e.target.value)}
-                      className={`${GlobalStyle.inputText} w-full`}
-                    />
-                    {errors.DRCName && (
-                      <p className="text-red-500">{errors.DRCName}</p>
-                    )}
-                  </td>
-                </tr>
-                
-                <tr className="block md:table-row">
-                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
-                    Contact No :
-                  </td>
-                  <td className="block md:table-cell md:w-2/3 pb-2">
-                    <input
-                      type="tel"
-                      value={ContactNo}
-                      onChange={(e) => setContactNo(e.target.value)}
-                      placeholder=""
-                      className={`${GlobalStyle.inputText} w-full`}
-                    />
-                    {errors.ContactNo && (
-                      <p className="text-red-500">{errors.ContactNo}</p>
-                    )}
-                  </td>
-                </tr>
-                <tr className="block md:table-row">
-                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
-                    Address :
-                  </td>
-                  <td className="block md:table-cell md:w-2/3 pb-2">
-                    <input
-                      type="text"
-                      value={Address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      className={`${GlobalStyle.inputText} w-full`}
-                    />
-                    {errors.Address && (
-                      <p className="text-red-500">{errors.Address}</p>
-                    )}
-                  </td>
-                </tr>
-                <tr className="block md:table-row">
-                  <td className="block md:table-cell md:w-1/3 md:text-right pr-0 md:pr-2 align-center mt-5">
-                    Email :
-                  </td>
-                  <td className="block md:table-cell md:w-2/3">
-                    <input
-                      type="text"
-                      value={Email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={`${GlobalStyle.inputText} w-full`}
-                    />
-                    {errors.Email && (
-                      <p className="text-red-500">{errors.Email}</p>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
 
-{/* Coordinator section*/}
 
-        <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
-          <span className="underline">SLT Coordinator Details</span>
-        </h2>
-        <table className="w-full">
-          <tbody>
-            <tr className="block md:table-row">
-              <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-2">
-                Service No :
-              </td>
-              <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
-                <input
-                  type="text"
-                  value={ServiceNo}
-                  onChange={(e) => setServiceNo(e.target.value)}
-                  className={`${GlobalStyle.inputText} w-full`}
-                />
-                {errors.ServiceNo && (
-                  <p className="text-red-500">{errors.ServiceNo}</p>
-                )}
-              </td>
-            </tr>
+         <table className="w-full">
+            <tbody className="block md:table-row-group">
+              <tr className="block md:table-row">
+                <td className="block md:table-cell md:w-1/3 text-right pr-2 pb-2 whitespace-nowrap">
+            <span className="inline-block min-w-[180px] text-left mr-4">DRC Name</span> :
+          </td>
+            <td className="block md:table-cell md:w-2/3 pb-2">
+              <input
+                type="text"
+                value={DRCName}
+                onChange={(e) => setDRCName(e.target.value)}
+                className={`${GlobalStyle.inputText} w-full`}
+              />
+              {errors.DRCName && (
+                <p className="text-red-500">{errors.DRCName}</p>
+              )}
+            </td>
+          </tr>
+
+    <tr className="block md:table-row mb-2">
+      <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
+        <span className="inline-block min-w-[180px] text-left">Business Registration No</span> :
+      </td>
+      <td className="block md:table-cell md:w-2/3 pb-2">
+        <input
+          type="text"
+          value={BusinessRegistrationNo}
+          onChange={(e) => setBusinessRegistrationNo(e.target.value)}
+          className={`${GlobalStyle.inputText} w-full`}
+        />
+        {errors.BusinessRegistrationNo && (
+          <p className="text-red-500">{errors.BusinessRegistrationNo}</p>
+        )}
+      </td>
+    </tr>
+
+        <tr className="block md:table-row">
+          <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
+            <span className="inline-block min-w-[180px] text-left mr-4">Contact No</span> :
+          </td>
+          <td className="block md:table-cell md:w-2/3 pb-2">
+            <input
+              type="tel"
+              value={ContactNo}
+              onChange={(e) => setContactNo(e.target.value)}
+              className={`${GlobalStyle.inputText} w-full`}
+            />
+            {errors.ContactNo && (
+              <p className="text-red-500">{errors.ContactNo}</p>
+            )}
+          </td>
+        </tr>
+
+        <tr className="block md:table-row">
+          <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
+            <span className="inline-block min-w-[180px] text-left mr-4 ">Address</span> :
+          </td>
+          <td className="block md:table-cell md:w-2/3 pb-2">
+            <input
+              type="text"
+              value={Address}
+              onChange={(e) => setAddress(e.target.value)}
+              className={`${GlobalStyle.inputText} w-full`}
+            />
+            {errors.Address && (
+              <p className="text-red-500">{errors.Address}</p>
+            )}
+          </td>
+        </tr>
 
             <tr className="block md:table-row">
-              <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-2">
-                Name :
+              <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
+                <span className="inline-block min-w-[180px] text-left mr-4 ">Email</span> :
               </td>
-              <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+              <td className="block md:table-cell md:w-2/3">
                 <input
                   type="text"
-                  value={C_Name}
-                  onChange={(e) => setCName(e.target.value)}
+                  value={Email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className={`${GlobalStyle.inputText} w-full`}
                 />
-                {errors.C_Name && (
-                  <p className="text-red-500">{errors.C_Name}</p>
-                )}
-              </td>
-            </tr>
-
-            <tr className="block md:table-row">
-              <td className="block md:table-cell w-full md:w-1/3 md:text-right md:pr-2 align-center pb-1 md:pb-0">
-                Email :
-              </td>
-              <td className="block md:table-cell w-full md:w-2/3">
-                <input
-                  type="text"
-                  value={C_Email}
-                  onChange={(e) => setCEmail(e.target.value)}
-                  className={`${GlobalStyle.inputText} w-full`}
-                />
-                {errors.C_Email && (
-                  <p className="text-red-500">{errors.C_Email}</p>
+                {errors.Email && (
+                  <p className="text-red-500">{errors.Email}</p>
                 )}
               </td>
             </tr>
           </tbody>
         </table>
+
+    {/* Coordinator section*/}
+
+        <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 ml-10 text-left font-bold`}>
+          <span className="underline">SLT Coordinator Details</span>
+        </h2>
+       <table className="w-full">
+          <tbody>
+                  <tr className="block md:table-row">
+                  <td className="block md:table-cell w-full md:w-1/3 text-left pb-1 md:pb-2 whitespace-nowrap">
+                    <span className="inline-block min-w-[120px] pl-6">Service No</span>
+                    <span className="ml-8">:</span>
+                  </td>
+                  <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+                    <input
+                      type="text"
+                      value={ServiceNo}
+                      onChange={(e) => setServiceNo(e.target.value)}
+                      className={`${GlobalStyle.inputText} w-full`}
+                    />
+                    {errors.ServiceNo && (
+                      <p className="text-red-500">{errors.ServiceNo}</p>
+                    )}
+                  </td>
+                </tr>
+
+
+                <tr className="block md:table-row">
+                <td className="block md:table-cell w-full md:w-1/3 text-left pb-1 md:pb-2 whitespace-nowrap">
+                  <span className="inline-block min-w-[120px] pl-6">Name</span>
+                  <span className="ml-8">:</span>
+                </td>
+                <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+                  <input
+                    type="text"
+                    value={C_Name}
+                    onChange={(e) => setCName(e.target.value)}
+                    className={`${GlobalStyle.inputText} w-full`}
+                  />
+                  {errors.C_Name && (
+                    <p className="text-red-500">{errors.C_Name}</p>
+                  )}
+                </td>
+              </tr>
+
+                <tr className="block md:table-row">
+                <td className="block md:table-cell w-full md:w-1/3 text-left pb-1 md:pb-0 whitespace-nowrap">
+                  <span className="inline-block min-w-[120px] pl-6">Email</span>
+                  <span className="ml-8">:</span>
+                </td>
+                <td className="block md:table-cell w-full md:w-2/3">
+                  <input
+                    type="text"
+                    value={C_Email}
+                    onChange={(e) => setCEmail(e.target.value)}
+                    className={`${GlobalStyle.inputText} w-full`}
+                  />
+                  {errors.C_Email && (
+                    <p className="text-red-500">{errors.C_Email}</p>
+                  )}
+                </td>
+              </tr>
+
+        </tbody>
+    </table>
 
     {/*Service section */}            
          <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 text-center font-bold`}>
