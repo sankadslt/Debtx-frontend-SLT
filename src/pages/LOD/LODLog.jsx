@@ -354,7 +354,10 @@ const LOD_Log = () => {
                         type="text"
                         placeholder=""
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setCurrentPage(1); // Reset to page 1 on search
+                            setSearchQuery(e.target.value)
+                        }}
                         className={GlobalStyle.inputSearch}
                     />
                     <FaSearch className={GlobalStyle.searchBarIcon} />
