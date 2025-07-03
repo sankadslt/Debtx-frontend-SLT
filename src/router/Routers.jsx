@@ -109,10 +109,13 @@ import AddRtom from "../pages/Rtom/AddRtom";
 import RtomInfoEdit from "../pages/Rtom/RtomInfoEdit";
 import RtomInfoEnd from "../pages/Rtom/RtomInfoEnd";
 import ListofServicetype from "../pages/Rtom/ListofServicetype";
+import RtomInfoNew from "../pages/Rtom/RtomInfoNew";
 
 //USER  
 import UserList from "../pages/User/UserList";
 import UserInfo from "../pages/User/UserInfo";
+import SignUp from "../pages/User/SignUp";
+
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
@@ -713,6 +716,7 @@ const Routers = () => {
       <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/ListofServiceType" element={<ProtectedRoute element={<ListofServicetype />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/Rtom/RtomInfoEdit/:rtomId" element={<ProtectedRoute element={<RtomInfoEdit />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/Rtom/RtomInfoNew" element={<ProtectedRoute element={<RtomInfoNew />} allowedRoles={['superadmin']} />} />
 
       {/* //MASTER DRC */}
       <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
@@ -730,9 +734,12 @@ const Routers = () => {
       {/* User */}
       <Route path="/pages/User/UserList" element={<ProtectedRoute element={<UserList />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/User/SignUp" element={<ProtectedRoute element={<SignUp />} allowedRoles={['superadmin']} />} />
+
 
       {/* RO */}
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
+    
 
       {/* Service */}
       <Route path="/pages/Service/ServiceTypeList" element={<ProtectedRoute element={<ServiceTypeList />} allowedRoles={['superadmin']} />} />

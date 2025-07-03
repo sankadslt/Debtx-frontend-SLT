@@ -15,8 +15,38 @@ import axios from "axios"
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/RTOM`;
 
+// export const createRTOM = async (rtomData) => {
+//   try {
+//     const response = await axios.post(`${URL}/Create_Active_RTOM`, {
+//       billing_center_code: rtomData.billingCenterCode,
+//       rtom_name: rtomData.name,
+//       area_code: rtomData.areaCode,
+//       rtom_email: rtomData.email,
+//       rtom_mobile_no: rtomData.mobile,
+//       rtom_telephone_no: rtomData.telephone,
+//       created_by: rtomData.createdBy 
+//     });
+    
+//     if (response.data.status === "success") {
+//       return response.data;
+//     } else {
+//       throw new Error(response.data.message || "Failed to create RTOM");
+//     }
+//   } catch (error) {
+//     console.error("Error creating RTOM:", {
+//       message: error.message,
+//       response: error.response?.data,
+//       status: error.response?.status,
+//     });
+//     throw error.response?.data?.message || "An error occurred while creating RTOM";
+//   }
+// };
+
+
 export const createRTOM = async (rtomData) => {
   try {
+    console.log("Sending RTOM data:", rtomData); // Debug logging
+    
     const response = await axios.post(`${URL}/Create_Active_RTOM`, {
       billing_center_code: rtomData.billingCenterCode,
       rtom_name: rtomData.name,
@@ -26,6 +56,8 @@ export const createRTOM = async (rtomData) => {
       rtom_telephone_no: rtomData.telephone,
       created_by: rtomData.createdBy 
     });
+    
+    console.log("Response received:", response.data); // Debug logging
     
     if (response.data.status === "success") {
       return response.data;
@@ -37,10 +69,58 @@ export const createRTOM = async (rtomData) => {
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
+      requestData: rtomData
     });
-    throw error.response?.data?.message || "An error occurred while creating RTOM";
+    
+    // Enhanced error handling
+    if (error.response?.data?.errors?.exception) {
+      throw new Error(`Server Error: ${error.response.data.errors.exception}`);
+    } else if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("An unexpected error occurred while creating RTOM");
+    }
   }
 };
+
+
+// export const createRTOM = async (rtomData) => {
+//   try {
+//     const response = await axios.post(`${URL}/Create_Active_RTOM`, {
+//       billing_center_code: rtomData.billingCenterCode,
+//       rtom_name: rtomData.name,
+//       area_code: rtomData.areaCode,
+//       rtom_email: rtomData.email,
+//       rtom_mobile_no: rtomData.mobile,
+//       rtom_telephone_no: rtomData.telephone,
+//       created_by: rtomData.createdBy 
+//     });
+    
+//     if (response.data.status === "success") {
+//       return response.data;
+//     } else {
+//       throw new Error(response.data.message || "Failed to create RTOM");
+//     }
+//   } catch (error) {
+//     console.error("Error creating RTOM:", {
+//       message: error.message,
+//       response: error.response?.data,
+//       status: error.response?.status,
+//     });
+    
+//     // Consistent Error object throwing
+//     if (error.response?.data?.message) {
+//       throw new Error(error.response.data.message);
+//     } else if (error.message) {
+//       throw error; // Re-throw if it's already an Error object
+//     } else {
+//       throw new Error("An error occurred while creating RTOM");
+//     }
+//   }
+// };
+
 
 
 export const getRTOMDetails = async () => {
