@@ -333,69 +333,87 @@ const DRCInfo = () => {
 
   // Handle DRC End
   const handleEndSubmit = async () => {
-    try {
-      let remarkBy = userData
-        ? userData.id || userData.userId || userData
-        : "system";
+  try {
 
-      const formattedDate =
-        endDate instanceof Date ? endDate : new Date(endDate);
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to terminate this DRC?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, terminate it!",
+      cancelButtonText: "Cancel",
+    });
 
-      // Validate remark field
-      if (!terminationRemark.trim()) {
-        setTerminationRemarkError(true);
-        return Swal.fire({
-          icon: "error",
-          title: "Remark Required",
-          text: "Please enter a remark",
-        });
-      }
+    // If user cancels, exit the function
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
 
-      setTerminationRemarkError(false);
+    let remarkBy = userData
+      ? userData.id || userData.userId || userData
+      : "system";
 
-      Swal.fire({
-        title: "Processing...",
-        text: "Please wait while terminating the DRC",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
+    const formattedDate =
+      endDate instanceof Date ? endDate : new Date(endDate);
 
-      // Call termination API
-      const response = await terminateCompanyByDRCID(
-        companyData.drc_id,
-        terminationRemark,
-        remarkBy,
-        formattedDate
-      );
-
-      Swal.close();
-
-      // success message
-      Swal.fire({
-        icon: "success",
-        title: "Termination Successful",
-        text: `DRC ${companyData.drc_name
-          } has been successfully terminated with effect from ${formattedDate.toLocaleDateString()}.`,
-        confirmButtonText: "Done",
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          setTerminationRemark("");
-          setShowEndFields(false);
-          navigate(-1);
-        }
-      });
-    } catch (err) {
-      console.error("Failed to terminate DRC:", err);
-      Swal.fire({
+    // Validate remark field
+    if (!terminationRemark.trim()) {
+      setTerminationRemarkError(true);
+      return Swal.fire({
         icon: "error",
-        title: "Error",
-        text: err.message || "Failed to terminate DRC",
+        title: "Remark Required",
+        text: "Please enter a remark",
       });
     }
-  };
+
+    setTerminationRemarkError(false);
+
+    // Show processing indicator
+    Swal.fire({
+      title: "Processing...",
+      text: "Please wait while terminating the DRC",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    // Call termination API
+    const response = await terminateCompanyByDRCID(
+      companyData.drc_id,
+      terminationRemark,
+      remarkBy,
+      formattedDate
+    );
+
+    // Close processing indicator
+    Swal.close();
+
+    // Show success message
+    Swal.fire({
+      icon: "success",
+      title: "Termination Successful",
+      text: `DRC ${companyData.drc_name} has been successfully terminated with effect from ${formattedDate.toLocaleDateString()}.`,
+      confirmButtonText: "Done",
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTerminationRemark("");
+        setShowEndFields(false);
+        navigate(-1);
+      }
+    });
+  } catch (err) {
+    console.error("Failed to terminate DRC:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err.message || "Failed to terminate DRC",
+    });
+  }
+};
 
   const handleDropdownClick = () => {
     if (!dropdownClicked) {
