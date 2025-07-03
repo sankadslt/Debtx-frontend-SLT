@@ -799,11 +799,13 @@ const DRCInfo = () => {
               <tbody className="space-y-2 sm:space-y-0">
                 {[
                   {
-                    label: "Added Date",
-                    value: companyData.create_on
-                      ? new Date(companyData.create_on).toLocaleDateString()
-                      : ""
-                  },
+                  label: "Added Date",
+                  value: companyData.createdAt
+                    ? new Date(companyData.createdAt).toLocaleDateString()
+                    : companyData.create_on
+                    ? new Date(companyData.create_on).toLocaleDateString()
+                    : "Not specified"
+                },
                   {
                     label: "Business Reg No",
                     value: companyData.drc_business_registration_number || "Not specified"
