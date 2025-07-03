@@ -157,7 +157,11 @@ const LOD_Log = () => {
         try {
             const LOD = await List_Final_Reminder_Lod_Cases(filters.LODStatus, filters.DateType, filters.fromDate, filters.toDate, "LOD", filters.currentPage);
             console.log("LOD data:", LOD);
-            setLODData((prevData) => [...prevData, ...LOD]);
+            if (currentPage === 1) {
+                setLODData(LOD); // Set LOD data for the first page
+            } else {
+                setLODData((prevData) => [...prevData, ...LOD]);
+            }
             if (LOD.length === 0) {
                 setIsMoreDataAvailable(false);
                 if (currentPage === 1) {
@@ -194,11 +198,6 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        if (!hasMounted.current) {
-            hasMounted.current = true;
-            return;
-        }
-
         if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage); // Update max current page
             fetchData({
@@ -219,6 +218,7 @@ const LOD_Log = () => {
         setLODData([]);
         setTotalPages(0);
         setIsMoreDataAvailable(true);
+        setSearchQuery("");
         setCommittedFilters({
             LODStatus: "",
             DateType: "",
@@ -246,7 +246,7 @@ const LOD_Log = () => {
     const paginatedData = LODdata.slice(startIndex, startIndex + rowsPerPage);
 
     // handle search
-    const filteredData = paginatedData.filter((row) =>
+    const filteredData = LODdata.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -334,20 +334,20 @@ const LOD_Log = () => {
                     </select>
 
                     <label className={GlobalStyle.dataPickerDate}>Date</label>
-                        <DatePicker
-                            selected={fromDate}
-                            onChange={handleFromDateChange}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="From Date"
-                            className={GlobalStyle.inputText}
-                        />
-                        <DatePicker
-                            selected={toDate}
-                            onChange={handleToDateChange}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="To Date"
-                            className={GlobalStyle.inputText}
-                        />
+                    <DatePicker
+                        selected={fromDate}
+                        onChange={handleFromDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="From Date"
+                        className={GlobalStyle.inputText}
+                    />
+                    <DatePicker
+                        selected={toDate}
+                        onChange={handleToDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="To Date"
+                        className={GlobalStyle.inputText}
+                    />
 
                     <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
                     <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
@@ -386,7 +386,7 @@ const LOD_Log = () => {
                     </thead>
                     <tbody>
                         {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
+                            filteredData.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
