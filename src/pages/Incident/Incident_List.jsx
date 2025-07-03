@@ -26,11 +26,11 @@ import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
-import rejectincident from "/src/assets/images/incidents/Incident_Reject.png";
+ 
 import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
 import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
 import errorincident from "/src/assets/images/incidents/Incident_Error.png";
-import error from "/src/assets/images/incidents/Reject.png";
+//import error from "/src/assets/images/incidents/Reject.png"
 
 const Incident_List = () => {
  
@@ -259,6 +259,7 @@ const Incident_List = () => {
       setIsLoading(true);
       const response = await fetchIncidents(payload);
       setIsLoading(false);
+      console.log("API Response:", response);
       
       if (response && response.data ) {
         if (currentPage === 1) {
@@ -266,6 +267,7 @@ const Incident_List = () => {
         } else {
           setFilteredData((prevData) => [...prevData, ...response.data]);
         }
+      
         
        if (response.data.length === 0) {
            setIsMoreDataAvailable(false);  
@@ -312,6 +314,8 @@ const Incident_List = () => {
 
  
   useEffect(() => {
+   
+
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI({
@@ -423,14 +427,7 @@ const Incident_List = () => {
     try {
       
  
-      // const requestData = {
-      //   DRC_Action: status1,
-      //   Incident_Status: status2,
-      //   Source_Type: status3,
-      //   from_date:fromDate,
-      //   to_date: toDate,
-      //   Created_By: user_id
-      // };
+   
  
       const response = await Task_for_Download_Incidents( status1,status2,fromDate,toDate,userData);
       if (response && response.message === "Task created successfully") {
@@ -595,8 +592,8 @@ const Incident_List = () => {
               </thead>
 
               <tbody>
-              {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.slice(startIndex, endIndex).map((row, index) => (
+              {filteredDataBySearch.length > 0 ? (
+                  filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                     <tr
                       key={row.incidentID||index}
                       className={
