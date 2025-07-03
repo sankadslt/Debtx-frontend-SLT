@@ -818,7 +818,13 @@ const DRCInfo = () => {
                   {
                     label: "Email",
                     value: companyData.drc_email || "Not specified"
-                  }
+                  }, 
+                  companyData.drc_status === "Terminate" && {
+                    label: "End Date",
+                    value: companyData.drc_end_dtm
+                    ? new Date(companyData.drc_end_dtm).toLocaleDateString()
+                    : "Not specified"
+                }
                 ].map((item, index) => (
                   <tr key={index} className="block sm:table-row">
 
