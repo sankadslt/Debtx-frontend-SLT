@@ -1353,10 +1353,13 @@ const DRCInfo = () => {
                     Added Date<span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
+
                   <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left block sm:table-cell`}>
-                    {companyData.create_on
-                      ? new Date(companyData.create_on).toLocaleDateString()
-                      : ""}
+                    {companyData.createdAt
+                        ? new Date(companyData.createdAt).toLocaleDateString()
+                        : companyData.create_on
+                        ? new Date(companyData.create_on).toLocaleDateString()
+                        : "Not specified"}
                   </td>
                 </tr>
 
@@ -1875,7 +1878,7 @@ const DRCInfo = () => {
                         <td
                           className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
                         >
-                          {rtom.selectedhandlingtype}
+                          {rtom.handling_type}
                         </td>
                         <td
                           className={`${GlobalStyle.tableData} whitespace-normal text-left`}
