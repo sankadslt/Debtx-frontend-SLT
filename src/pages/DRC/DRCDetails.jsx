@@ -17,6 +17,7 @@ import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
 import Swal from "sweetalert2";
+import { Tooltip } from "react-tooltip";
 
 const DRCDetails = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,6 +42,7 @@ const DRCDetails = () => {
   const location = useLocation();
   const { state } = location;
   const drcId = state?.drcId;
+  //const drcId = 1;
 
   const initialTab = state?.activeTab || "RO";
   //const [currentPage, setCurrentPage] = useState(0);
@@ -52,7 +54,7 @@ const DRCDetails = () => {
 
   const rowsPerPage = 10;
   const statuses = ["Active", "Inactive"];
-  const handlingtype = ["Arrears", "CPE", "All Type"];
+  const handlingtype = ["Arrears", "CPE", "All-Type"];
   const status1 = ["Active", "Inactive", "Terminated"];
 
   const [roListData, setRoListData] = useState([]);
@@ -67,7 +69,7 @@ const DRCDetails = () => {
         return activeIcon;
       case "inactive":
         return inactiveIcon;
-      case "ended":
+      case "terminate":
         return terminatedIcon;
       default:
         return null;
@@ -87,7 +89,9 @@ const DRCDetails = () => {
         src={iconPath}
         alt={status}
         className="w-6 h-6 mx-auto"
-        title={status}
+        //title={status}
+         data-tooltip-id={`status-tooltip-${status}`}
+        data-tooltip-content={status}
       />
     );
   };
@@ -148,10 +152,10 @@ const DRCDetails = () => {
             }).format(new Date(ro.create_on))
             : "";
           return {
-            name: ro.drc_name || "",
-            status: "",
+            name: ro.ro_name || "",
+            status: ro.drcUser_status,
             enableDate,
-            contact: ro.drc_contact_no || "",
+            contact: ro.login_contact_no || "",
           };
         });
       } else if (activeTab === "Billing Center") {
@@ -172,7 +176,6 @@ const DRCDetails = () => {
             billing_center_Code: rtom.rtom_billing_center_code || "",
             handlingType: rtom.handling_type || "",
             enableDate,
-
             rtom_contact_number: "",
             roCount: "",
 
@@ -696,7 +699,15 @@ const DRCDetails = () => {
                   {activeTab === "RO" && (
                     <>
                       <td className={GlobalStyle.tableData}>{row.name}</td>
-                      <td className={GlobalStyle.tableData}>{renderStatusIcon(row.status)}</td>
+                      <td className={GlobalStyle.tableData}>{renderStatusIcon(row.status)}
+
+                        <Tooltip
+                          id={`status-tooltip-${row.status}`}
+                          place="bottom"
+                          content={row.status}
+                        />
+
+                      </td>
                       <td className={GlobalStyle.tableData}>{row.enableDate}</td>
                       <td className={GlobalStyle.tableData}>{row.contact}</td>
                     </>
@@ -721,7 +732,13 @@ const DRCDetails = () => {
                     <>
                       <td className={GlobalStyle.tableData}>{row.type}</td>
                       <td className={GlobalStyle.tableData}>{row.enableDate}</td>
-                      <td className={GlobalStyle.tableData}>{renderStatusIcon(row.status)}</td>
+                      <td className={GlobalStyle.tableData}>{renderStatusIcon(row.status)}
+                        <Tooltip
+                          id={`status-tooltip-${row.status}`}
+                          place="bottom"
+                          content={row.status}
+                        />
+                      </td>
                     </>
                   )}
                 </tr>
