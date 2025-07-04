@@ -201,42 +201,6 @@ const DRCInfo = () => {
     }
   }, [drcId]);
 
-  // // Function to fetch active service types
-  // const fetchActiveServices = async () => {
-  //   try {
-  //     setServiceLoading(true);
-  //     const response = await getActiveServiceDetails();
-
-  //     if (response && response.data) {
-  //       const filtered = response.data.filter(
-  //         (service) => service.service_status === "Active"
-  //       );
-
-  //       const formatted = filtered.map((service) => {
-  //         const isAlreadySelected = companyData.services.some(
-  //           (s) => s.service_type === service.service_type
-  //         );
-
-  //         return {
-  //           id: service.service_id,
-  //           name: service.service_type,
-  //           selected: isAlreadySelected,
-  //         };
-  //       });
-
-  //       setServiceTypes(formatted);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error loading service types:", error);
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Error",
-  //       text: "Failed to load active service types.",
-  //     });
-  //   } finally {
-  //     setServiceLoading(false);
-  //   }
-  // };
 
   // Fetch active service types from the API
   const fetchActiveServices = async () => {

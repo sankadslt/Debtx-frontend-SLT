@@ -110,7 +110,7 @@ const DRCList = () => {
                     ContactNo: drc.drc_contact_no,
                     ServiceCount: drc.service_count,
                     ROCount: drc.ro_count,
-                    BillingCenterCode: drc.billing_center_code 
+                    BillingCenterCount: drc.billing_center_code 
                 }));
 
                 if (filters.page === 1) {
@@ -333,7 +333,7 @@ const DRCList = () => {
                             <th className={GlobalStyle.tableHeader}>Contact No.</th>
                             <th className={GlobalStyle.tableHeader}>Service Count</th>
                             <th className={GlobalStyle.tableHeader}>RO Count</th>
-                            <th className={GlobalStyle.tableHeader}>Billing Center Code</th>
+                            <th className={GlobalStyle.tableHeader}>Billing Center Count</th>
                             <th className={GlobalStyle.tableHeader}></th>
                         </tr>
                     </thead>
@@ -366,8 +366,8 @@ const DRCList = () => {
 
 
                                     <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
-                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RTOM" } })}>
-                                                 {log.BillingCenterCode}
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Billing Center" } })}>
+                                                 {log.BillingCenterCount}
                                     </td>
 
 
@@ -391,9 +391,9 @@ const DRCList = () => {
   
                                             <button 
                                                 className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                                title="Caselist"
+                                                title="Agreement Details"
                                             >
-                                                <img src={Checklist} alt="Caselist" className="w-6 h-6" />
+                                                <img src={Checklist} alt="Agreement Details" className="w-6 h-6" />
                                             </button>
                                       </td>
                                 </tr>
