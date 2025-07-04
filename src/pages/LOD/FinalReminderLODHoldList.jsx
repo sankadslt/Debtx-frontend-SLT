@@ -152,7 +152,7 @@ const Final_Reminder_LOD_Hold_List = () => {
   //   );
 
   // handle search
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -242,7 +242,11 @@ const Final_Reminder_LOD_Hold_List = () => {
       if (response && response.data) {
         // console.log("Valid data received:", response.data);
 
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data); // Set initial data for page 1
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
 
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
@@ -287,11 +291,6 @@ const Final_Reminder_LOD_Hold_List = () => {
   };
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
       // callAPI(); // Call the function whenever currentPage changes
@@ -565,7 +564,7 @@ const Final_Reminder_LOD_Hold_List = () => {
 
               <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.map((item, index) => (
+                  filteredDataBySearch.slice(startIndex, endIndex).map((item, index) => (
                     <tr
                       key={item.settlement_id || index}
                       className={
@@ -578,31 +577,31 @@ const Final_Reminder_LOD_Hold_List = () => {
                         className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
                         onClick={() => naviCaseID(item.case_id)}
                       >
-                        {item.case_id || "N/A"}
+                        {item.case_id || ""}
                       </td>
 
                       <td className={GlobalStyle.tableData}>
                         {" "}
-                        {item.status || "N/A"}{" "}
+                        {item.status || ""}{" "}
                       </td>
                       <td className={GlobalStyle.tableData}>
                         {" "}
-                        {item.lod_type || "N/A"}{" "}
+                        {item.lod_type || ""}{" "}
                       </td>
                       <td className={GlobalStyle.tableData}>
                         {" "}
-                        {item.hold_by || "N/A"}{" "}
+                        {item.hold_by || ""}{" "}
                       </td>
                       <td className={GlobalStyle.tableData}>
                         {new Date(item.date).toLocaleDateString("en-GB") ||
-                          "N/A"}
+                          ""}
                       </td>
                       <td className={GlobalStyle.tableData}>
                         {["admin", "superadmin", "slt"].includes(userRole) && (
                           <div className="flex flex-row gap-2">
                             <button
                               className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-                              // onClick={}
+                            // onClick={}
                             >
                               Proceed
                             </button>
@@ -672,9 +671,8 @@ const Final_Reminder_LOD_Hold_List = () => {
               <button
                 onClick={() => handlePrevNext("prev")}
                 disabled={currentPage <= 1}
-                className={`${GlobalStyle.navButton} ${
-                  currentPage <= 1 ? "cursor-not-allowed" : ""
-                }`}
+                className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""
+                  }`}
               >
                 <FaArrowLeft />
               </button>
@@ -684,9 +682,8 @@ const Final_Reminder_LOD_Hold_List = () => {
               <button
                 onClick={() => handlePrevNext("next")}
                 disabled={currentPage === totalPages}
-                className={`${GlobalStyle.navButton} ${
-                  currentPage === totalPages ? "cursor-not-allowed" : ""
-                }`}
+                className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+                  }`}
               >
                 <FaArrowRight />
               </button>
@@ -697,9 +694,8 @@ const Final_Reminder_LOD_Hold_List = () => {
             filteredDataBySearch.length > 0 && (
               <button
                 // onClick={HandleCreateTaskDownloadSettlementList}
-                className={`${GlobalStyle.buttonPrimary} ${
-                  isCreatingTask ? "opacity-50" : ""
-                }`}
+                className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? "opacity-50" : ""
+                  }`}
                 disabled={isCreatingTask}
                 style={{ display: "flex", alignItems: "center" }}
               >
