@@ -109,6 +109,9 @@ const UserList = () => {
               user_role: user.role,
               user_name: user.username,
               user_email: user.email,
+              contact_num: Array.isArray(user.contact_num) && user.contact_num.length > 0 
+                ? user.contact_num[0].contact_num 
+                : "N/A",
               created_on: new Date(user.Created_DTM).toLocaleDateString("en-CA"),
             })),
           ]);
@@ -273,7 +276,7 @@ const UserList = () => {
 
   // Function to render status icon with tooltip
   const renderStatusIcon = (user) => {
-    if (user.status === "true") {
+    if (user.status === "Active") {
       return (
         <div className="relative">
           <img 
@@ -290,7 +293,7 @@ const UserList = () => {
           )}
         </div>
       );
-    } else if (user.status === "false") {
+    } else if (user.status === "Inactive") {
       return (
         <div className="relative">
           <img 
@@ -411,9 +414,9 @@ const UserList = () => {
                 style={{ color: status === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>Status</option>
-                <option value="true" style={{ color: "black" }}>Active</option>
-                <option value="false" style={{ color: "black" }}>Inactive</option>
-                <option value="terminate" style={{ color: "black" }}>Terminated</option>
+                <option value="Active" style={{ color: "black" }}>Active</option>
+                <option value="Inactive" style={{ color: "black" }}>Inactive</option>
+                <option value="Terminate" style={{ color: "black" }}>Terminated</option>
               </select>
             </div>
             
@@ -449,6 +452,7 @@ const UserList = () => {
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER ROLE</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER NAME</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER EMAIL</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>CONTACT NO.</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>CREATED ON</th>
                 <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>ACTIONS</th>
               </tr>
@@ -462,22 +466,27 @@ const UserList = () => {
                       : GlobalStyle.tableRowOdd
                   }`}
                 >
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_id}</td>
+                  <td
+                    className={`${GlobalStyle.tableData} w-[100px] max-w-[100px] truncate`}
+                    title={user.user_id}
+                  >
+                    {user.user_id}
+                  </td>
                   <td className={`${GlobalStyle.tableData}`}>
                     <div className="relative flex items-center justify-center">
                       <div className="relative">
                         <img 
                           src={
-                            user.status === "true"
+                            user.status === "Active"
                               ? activeIcon
-                              : user.status === "false"
+                              : user.status === "Inactive"
                               ? deactiveIcon
                               : terminateIcon
                           }
                           alt={
-                            user.status === "true"
+                            user.status === "Active"
                               ? "Active"
-                              : user.status === "false"
+                              : user.status === "Inactive"
                               ? "Inactive"
                               : "Terminated"
                           }
@@ -487,9 +496,9 @@ const UserList = () => {
                         />
                         {tooltipVisible === `status-${user.user_id}` && (
                           <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-                            {user.status === "true"
+                            {user.status === "Active"
                               ? "Active"
-                              : user.status === "false"
+                              : user.status === "Inactive"
                               ? "Inactive"
                               : "Terminated"}
                           </div>
@@ -497,11 +506,12 @@ const UserList = () => {
                       </div>
                     </div>
                   </td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_type}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_role}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_name}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_email}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.created_on}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_type || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_role || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_name || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.user_email || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.contact_num || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{user.created_on  || "N/A"}</td>
                   <td className={`${GlobalStyle.tableData}`}>
                     <div className="flex justify-center">
                       <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
@@ -529,19 +539,19 @@ const UserList = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-gray-900">#{user.user_id}</span> 
                     <div className="flex items-center">
-                      {user.status === "true" && (
+                      {user.status === "Active" && (
                         <>
                           <img src={activeIcon} alt="Active" className="h-5 w-5" />
                           <span className="ml-1 text-xs text-gray-600">Active</span>
                         </>
                       )}
-                      {user.status === "false" && (
+                      {user.status === "Inactive" && (
                         <>
                           <img src={deactiveIcon} alt="Inactive" className="h-5 w-5" />
                           <span className="ml-1 text-xs text-gray-600">Inactive</span>
                         </>
                       )}
-                      {user.status === "terminated" && (
+                      {user.status === "Terminate" && (
                         <>
                           <img src={terminateIcon} alt="Terminated" className="h-5 w-5" />
                           <span className="ml-1 text-xs text-gray-600">Terminate</span>
