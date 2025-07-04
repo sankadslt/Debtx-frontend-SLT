@@ -482,7 +482,7 @@ export default function AssignPendingDRCSummary() {
   // Function to handle exchange click
   const handleonexchangeclick = async (batchID) => {
     try {
-      const response = await Validate_Existing_Batch_Task({ case_distribution_batch_id: batchID });
+      const response = await Validate_Existing_Batch_Task(batchID);
       console.log("Validation Response:", response);
       console.log("Batch ID:", batchID);
       if (response.status === 200) {

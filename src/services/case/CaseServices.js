@@ -758,7 +758,7 @@ export const Validate_Existing_Batch_Task = async (case_distribution_batch_id) =
     console.log("Validation response:", response.data);
     return response;
   } catch (error) {
-    // console.error("Already has tasks with this case distribution batch id", error.message);
+    console.error("Already has tasks with this case distribution batch id", error.message);
     throw error;
   }
 };
