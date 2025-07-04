@@ -73,7 +73,8 @@ const CaseDistributionDRCSummarywithRTOM = () => {
        // console.log("Fetching data with payload:", payload);
         
         const response = await List_Case_Distribution_Details(payload);
-        setFilteredData(response.data);
+        const batchData = response.data[0];
+        setFilteredData(batchData.rtom_distribution);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -135,9 +136,9 @@ const handleonbacknuttonclick = () => {
                     : GlobalStyle.tableRowOdd
                 }
               >
-                <td className={GlobalStyle.tableData}>{item.rtom_distribution?.[0]?.rtom}</td>
-                <td className={GlobalStyle.tableData}>{item.rtom_distribution?.[0]?.case_count}</td>
-                <td className={GlobalStyle.tableCurrency}>{item.rtom_distribution?.[0]?.rtom_tot_arrease}</td>
+                <td className={GlobalStyle.tableData}>{item.rtom}</td>
+                <td className={GlobalStyle.tableData}>{item.case_count}</td>
+                <td className={GlobalStyle.tableCurrency}>{item.rtom_tot_arrease}</td>
               </tr>
             ))
             ) : (

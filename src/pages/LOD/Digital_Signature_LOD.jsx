@@ -184,10 +184,11 @@ const Digital_Signature_LOD = () => {
         setIsCreatingTask(true);
         try {
             const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData, LODType);
-            if (response === "success") {
+            console.log("Response:", response);
+            if (response.status === 200) {
                 Swal.fire({
-                    title: response,
-                    text: `Task created successfully!`,
+                    title: `Task created successfully!`,
+                    text: "Task ID: " + response.data.data.data.Task_Id,
                     icon: "success",
                     confirmButtonColor: "#28a745"
                 });
@@ -304,10 +305,10 @@ const Digital_Signature_LOD = () => {
         try {
             const intLODCount = parseInt(LODCount, 10); // convert string variable into int variable
             const response = await Create_Task_for_Proceed_LOD_OR_Final_Reminder_List(userData, intLODCount, LODType);
-            if (response === "success") {
+            if (response.status === 200) {
                 Swal.fire({
-                    title: response, 
-                    text: `Task created successfully!`, 
+                    title: `Task created successfully!`, 
+                    text: "Task ID: " + response.data.data.data.Task_Id, 
                     icon: "success",
                     confirmButtonColor: "#28a745"
                 });
@@ -336,7 +337,7 @@ const Digital_Signature_LOD = () => {
     const paginatedData = LODData.slice(startIndex, startIndex + rowsPerPage);
 
     // Handle search bar
-    const filteredData = paginatedData.filter((row) =>
+    const filteredData = LODData.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -489,7 +490,7 @@ const Digital_Signature_LOD = () => {
                     </thead>
                     <tbody>
                         {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
+                            filteredData.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
@@ -592,8 +593,7 @@ const Digital_Signature_LOD = () => {
                     </button>
                     <div className="flex justify-end gap-4">
                         <input
-                            type="text"
-                            placeholder="Text here"
+                            type="number"
                             className={GlobalStyle.inputText}
                             value={LODCount}
                             onChange={(e) => handleInputCount(e.target.value)}

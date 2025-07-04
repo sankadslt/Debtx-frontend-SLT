@@ -124,7 +124,7 @@ export default function DRCAssignManagerApproval3() {
       // console.log("Request Payload:", payload);
       try {
         const response = await List_DRC_Assign_Manager_Approval(payload);
-        //  console.log("Response:", response);
+        console.log("Response:", response);
         setFilteredData(response);
       } catch (error) {
         console.error("Error fetching DRC assign manager approval:", error);
@@ -212,6 +212,7 @@ export default function DRCAssignManagerApproval3() {
 
   // Filter data based on selected filters
   const applyFilters = async () => {
+    setCurrentPage(1); // Reset to the first page
     const payload = {};
     if (drcFilter) {
       payload.approver_type = drcFilter;
@@ -242,8 +243,22 @@ export default function DRCAssignManagerApproval3() {
 
     try {
       const response = await List_DRC_Assign_Manager_Approval(payload);
+      console.log("Filtered Response Data:", response);
+
+      if (response.length > 0) {
+        setFilteredData(response);
+      } else {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data available for the selected filters.",
+          confirmButtonColor: "#f1c40f",
+        });
+        setFilteredData([]); // Clear the filtered data if no data is found
+        return;
+      }
       // console.log("Filtered Response Data:", response);
-      setFilteredData(response);
+
     } catch (error) {
       console.error("Error fetching DRC assign manager approval:", error);
     }
@@ -256,6 +271,7 @@ export default function DRCAssignManagerApproval3() {
     setEndDate(null);
     setApproverStatus("");
     setSelectedRows(new Set());
+    setCurrentPage(1); // Reset to the first page
 
     const filterclear = async () => {
       const userId = await getLoggedUserId();
@@ -266,7 +282,17 @@ export default function DRCAssignManagerApproval3() {
       try {
         const response = await List_DRC_Assign_Manager_Approval(payload);
         //  console.log("Response:", response);
-        setFilteredData(response);
+        if (response.length > 0) {
+          setFilteredData(response);
+        } else {
+          Swal.fire({
+            icon: "warning",
+            title: "No Data Found",
+            text: "There is no data available for the selected filters.",
+            confirmButtonColor: "#f1c40f",
+          });
+          setFilteredData([]); // Clear the filtered data if no data is found
+        }
       } catch (error) {
         console.error("Error fetching DRC assign manager approval:", error);
       }
@@ -345,30 +371,16 @@ export default function DRCAssignManagerApproval3() {
   };
 
   // Function to handle approve button click
-  const onApproveButtonClick = async () => {
+  const onApproveButtonClick = async (currentRow) => {
     const userId = await getLoggedUserId();
-    const batchIds = Array.from(selectedRows);
+    // const batchIds = Array.from(selectedRows);
     // console.log("Selected batch IDs:", batchIds);
-    if (batchIds.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please select at least one record to approve.",
-        confirmButtonColor: "#f1c40f",
-      });
-      return;
-    }
+    const batchIds = currentRow;
 
-    const alreadyApproved = batchIds.some((id) => {
-      const record = filteredData.find((row) => row.approver_reference === id);
+    const record = filteredData.find((row) => row.approver_reference === batchIds);
+    const status = record?.approve_status?.[0]?.status || "";
 
-      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
-
-      return status === "Approve";
-
-    });
-    //console.log("Already Approved:", alreadyApproved);
-    if (alreadyApproved) {
+    if (status === "Approve") {
       Swal.fire({
         icon: "warning",
         title: "Warning",
@@ -378,17 +390,7 @@ export default function DRCAssignManagerApproval3() {
       return;
     }
 
-    const rejected = batchIds.some((id) => {
-      const record = filteredData.find((row) => row.approver_reference === id);
-
-      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
-
-      return status === "Reject";
-
-    });
-    //console.log("Rejected:", rejected);
-
-    if (rejected) {
+    if (status === "Reject") {
       Swal.fire({
         icon: "warning",
         title: "Warning",
@@ -397,8 +399,6 @@ export default function DRCAssignManagerApproval3() {
       });
       return;
     }
-
-
 
     // Show confirmation alert before calling API
     const result = await Swal.fire({
@@ -450,30 +450,14 @@ export default function DRCAssignManagerApproval3() {
   };
 
   // Function to handle reject button click
-  const onRejectButtonClick = async () => {
+  const onRejectButtonClick = async (currentRow) => {
     const userId = await getLoggedUserId();
-    const batchIds = Array.from(selectedRows);
-    // console.log("Selected batch IDs:", batchIds);
-    if (batchIds.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please select at least one record to reject.",
-        confirmButtonColor: "#f1c40f",
-      });
-      return;
-    }
+    const batchIds = currentRow;
 
-    const alreadyApproved = batchIds.some((id) => {
-      const record = filteredData.find((row) => row.approver_reference === id);
+    const record = filteredData.find((row) => row.approver_reference === batchIds);
+    const status = record?.approve_status?.[0]?.status || "";
 
-      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
-
-      return status === "Approve";
-
-    });
-    //console.log("Already Approved:", alreadyApproved);
-    if (alreadyApproved) {
+    if (status === "Approve") {
       Swal.fire({
         icon: "warning",
         title: "Warning",
@@ -483,17 +467,7 @@ export default function DRCAssignManagerApproval3() {
       return;
     }
 
-    const rejected = batchIds.some((id) => {
-      const record = filteredData.find((row) => row.approver_reference === id);
-
-      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
-
-      return status === "Reject";
-
-    });
-    //console.log("Rejected:", rejected);
-
-    if (rejected) {
+    if (status === "Reject") {
       Swal.fire({
         icon: "warning",
         title: "Warning",
@@ -520,7 +494,7 @@ export default function DRCAssignManagerApproval3() {
     }
 
     const payload = {
-      approver_references: batchIds,
+      approver_reference: batchIds,
       approved_by: userId,
     };
     //console.log("Approve payload:", payload);
@@ -777,14 +751,14 @@ export default function DRCAssignManagerApproval3() {
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
-              <th className={GlobalStyle.tableHeader}>
+              {/* <th className={GlobalStyle.tableHeader}> */}
                 {/* <input
                   type="checkbox"
                   checked={selectAll}
                   onChange={handleSelectAll}
                   className="mx-auto"
                 /> */}
-              </th>
+              {/* </th> */}
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Approve Type</th>
@@ -796,6 +770,7 @@ export default function DRCAssignManagerApproval3() {
 
 
 
+              <th className={GlobalStyle.tableHeader}></th>
               <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
@@ -810,14 +785,14 @@ export default function DRCAssignManagerApproval3() {
                       : GlobalStyle.tableRowOdd
                   }
                 >
-                  <td className="text-center">
+                  {/* <td className="text-center">
                     <input
                       type="checkbox"
                       checked={selectedRows.has(item.approver_reference)}
                       onChange={() => handleRowSelect(item.approver_reference)}
                       className="mx-auto"
                     />
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData}>
                     <button
                       onClick={() => onhoverbuttonclick(item.approver_reference)}
@@ -850,7 +825,7 @@ export default function DRCAssignManagerApproval3() {
 
 
 
-                  <td className={GlobalStyle.tableData}>
+                  <td className={`${GlobalStyle.tableData} text-center`}>
                     <button onClick={() => onTableIconClick(item)}>
 
                       <img
@@ -863,6 +838,28 @@ export default function DRCAssignManagerApproval3() {
                       />
                       <Tooltip id="my-tooltip" place="bottom" content="View Parameters" />
                     </button>
+                  </td>
+                  <td className="text-center">
+                    <div className="flex justify-center gap-2 ml-2 mr-2">
+                      {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                          onClick={() => onApproveButtonClick(item.approver_reference)}
+                          className={GlobalStyle.buttonPrimary}
+                        >
+                          Approve
+                        </button>
+                      )}
+
+                      {/* Reject Button */}
+                      {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                          onClick={() => onRejectButtonClick(item.approver_reference)}
+                          className={GlobalStyle.buttonRemove}
+                        >
+                          Reject
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -925,7 +922,7 @@ export default function DRCAssignManagerApproval3() {
           Approve
         </button> */}
 
-        <div>
+        {/* <div>
           {["admin", "superadmin", "slt"].includes(userRole) && (
             <button
               onClick={onApproveButtonClick}
@@ -934,11 +931,11 @@ export default function DRCAssignManagerApproval3() {
               Approve
             </button>
           )}
-        </div>
+        </div> */}
 
         {/* Reject Button */}
 
-        <div>
+        {/* <div>
           {["admin", "superadmin", "slt"].includes(userRole) && (
             <button
               onClick={onRejectButtonClick}
@@ -947,7 +944,7 @@ export default function DRCAssignManagerApproval3() {
               Reject
             </button>
           )}
-        </div>
+        </div> */}
         {/* <button
           onClick={onRejectButtonClick}
           className={GlobalStyle.buttonRemove}

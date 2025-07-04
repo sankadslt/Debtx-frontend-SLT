@@ -11,7 +11,7 @@ Notes: The following page conatins the codes */
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaSearch ,FaArrowLeft } from "react-icons/fa";
+import { FaSearch, FaArrowLeft } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Minorbw from "../../assets/images/distribution/minorbw.png";
 import Plusbw from "../../assets/images/distribution/plusbw.png";
@@ -22,7 +22,7 @@ import {
   Case_Distribution_Details_With_Drc_Rtom_ByBatchId,
   Exchange_DRC_RTOM_Cases
 } from "/src/services/case/CaseServices.js";
-import {getLoggedUserId} from "/src/services/auth/authService.js";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 
 import { jwtDecode } from "jwt-decode";
@@ -42,39 +42,40 @@ export default function AmendAssignedDRC() {
     DRC2: "",
     RTOM: "",
     Count: "",
-    
+
   }); // State for new entry
   //console.log("BatchID", BatchID);
-const [drcData, setdrcData] = useState([]); // State for DRC data
+  const [drcData, setdrcData] = useState([]); // State for DRC data
+  // const BatchID = 1;
 
-      // Role-Based Buttons
-      useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return;
-    
-        try {
-          let decoded = jwtDecode(token);
-          const currentTime = Date.now() / 1000;
-    
-          if (decoded.exp < currentTime) {
-            refreshAccessToken().then((newToken) => {
-              if (!newToken) return;
-              const newDecoded = jwtDecode(newToken);
-              setUserRole(newDecoded.role);
-            });
-          } else {
-            setUserRole(decoded.role);
-          }
-        } catch (error) {
-          console.error("Invalid token:", error);
-        }
-      }, []);
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
 
   // Function to fetch data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = { case_distribution_batch_id: BatchID};
+        const data = { case_distribution_batch_id: BatchID };
         //console.log("Data", data);
         const response = await List_all_transaction_seq_of_batch_id(data);
         //console.log("Response", response);
@@ -101,10 +102,12 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
     const fetchDetails = async () => {
       try {
         const data = { case_distribution_batch_id: BatchID };
-       // console.log("Data", data);
+        // console.log("Data", data);
         const response =
           await Case_Distribution_Details_With_Drc_Rtom_ByBatchId(data);
-        //console.log("Retrival", response);
+        console.log("Retrival", response);
+        console.log("DRC Data:", response.data);
+
         if (response.status === "success") {
           setdrcData(response.data || []); // Ensure `data` is always an array
         } else {
@@ -124,56 +127,58 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
   }, [BatchID]);
 
   // Function to fetch DRC data from the API
-  const handleonclick = async() => {
+  const handleonclick = async () => {
     const user_id = await getLoggedUserId();
 
     const drc_list = cpeData.map((item) => ({
-            plus_drc_id: item.DRC2ID  , // Ensure this is a number
-            plus_drc: item.DRC2,
-            plus_rulebase_count: Number(item.DRC1Count), // Ensure this is a number
-            minus_drc_id:  item.DRC1ID, // Ensure this is a number
-            minus_drc: item.DRC1,
-            minus_rulebase_count: Number(item.DRC2Count), // Ensure this is a number
-            rtom: item.RTOM,
-        }));
-    
+      plus_drc_id: item.DRC2ID, // Ensure this is a number
+      plus_drc: item.DRC2,
+      plus_rulebase_count: Number(item.DRC1Count), // Ensure this is a number
+      minus_drc_id: item.DRC1ID, // Ensure this is a number
+      minus_drc: item.DRC1,
+      minus_rulebase_count: Number(item.DRC2Count), // Ensure this is a number
+      rtom: item.RTOM,
+    }));
+
     const payload = {
-        case_distribution_batch_id: BatchID ,
-        drc_list: drc_list,
-        created_by: user_id,
-        };
+      case_distribution_batch_id: BatchID,
+      drc_list: drc_list,
+      created_by: user_id,
+      drc_commision_rule : transaction[0]?.drc_commision_rule , 
+      current_arrears_band: transaction[0]?.current_arrears_band ,
+    };
     //console.log("Payload", payload);
 
     try {
-        const response = await Exchange_DRC_RTOM_Cases(payload);
-        if (response.status === "success") {
-            //console.log("Success", response);
-            setCpeData([]); // Clear table data after successful submission
-            
-            Swal.fire({
-            icon: "success",
-            title: "Success",
-            text: "DRC RTOM cases exchanged successfully",
-            confirmButtonColor: "#28a745",
-            });
-        } else {
-            console.error(
-            "Error in API response:",
-            response.message || "Unknown error"
-            );
-        }
-        } catch (error) {
-        console.error(
-            "Error exchanging DRC RTOM cases:",
-            error.response?.data || error.message
-        );
-        const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      const response = await Exchange_DRC_RTOM_Cases(payload);
+      if (response.status === "success") {
+        //console.log("Success", response);
+        setCpeData([]); // Clear table data after successful submission
+
         Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: errorMessage,
-            confirmButtonColor: "#d33",
+          icon: "success",
+          title: "Success",
+          text: "DRC RTOM cases exchanged successfully",
+          confirmButtonColor: "#28a745",
         });
+      } else {
+        console.error(
+          "Error in API response:",
+          response.message || "Unknown error"
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Error exchanging DRC RTOM cases:",
+        error.response?.data || error.message
+      );
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+      });
     }
   };
 
@@ -197,22 +202,22 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
         confirmButtonColor: "#ffc107",
       });
       return;
-    } 
-    
+    }
+
     if (parseInt(newEntry.Count, 10) > assignedCaseCount) {
-        
-        Swal.fire({
-          icon: "warning",
-          title: "Warning",
-          text: "Entered case count cannot be greater than the assigned case count.",
-          confirmButtonColor: "#ffc107",
-        });
-        return;
-      }
-      
+
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Entered case count cannot be greater than the assigned case count.",
+        confirmButtonColor: "#ffc107",
+      });
+      return;
+    }
+
     const entry = {
       RTOM: newEntry.RTOM,
-      DRC1: newEntry.DRC1, 
+      DRC1: newEntry.DRC1,
       DRC1ID: newEntry.selectedDRCID,
       DRC1Count: newEntry.Count,
       DRC2: newEntry.DRC2,
@@ -220,11 +225,11 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
       DRC2Count: newEntry.Count,
     };
 
-    
+
     setCpeData([...cpeData, entry]); // Add new entry to table data
 
     // Clear input fields after adding
-    setNewEntry({ RTOM: "", DRC1: "", Count: "", DRC2: "" , });
+    setNewEntry({ RTOM: "", DRC1: "", Count: "", DRC2: "", });
   };
 
   //search function
@@ -235,37 +240,48 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
       .includes(searchQuery.toLowerCase())
   );
 
-    const assignedCaseCount = drcData
-    .filter(
-      (item) =>
-        item.drc_name == newEntry.DRC1 && item.rtom == newEntry.RTOM
-    )
-    .reduce((total, item) => total + item.case_count, 0) || 0;
+  // const assignedCaseCount = drcData
+  //   .filter(
+  //     (item) =>
+  //       item.drc_id == Number(newEntry.DRC1) && item.rtoms.rtom == newEntry.RTOM
+  //   )
+  //   .reduce((total, item) => total + item.case_count, 0) || 0;
+
+  const assignedCaseCount =
+    drcData
+      // .find((item) => item.drc_id === Number(newEntry.DRC1))
+      .find((item) => item.drc_name === newEntry.DRC1)
+      ?.rtoms.find((rtom) => rtom.rtom === newEntry.RTOM)?.case_count || 0;
 
 
-    //console.log("filteredData", filteredData);
+
+  //console.log("filteredData", filteredData);
 
   // Function to handle DRC1 selection change  
   const handleselectchangeDRC1 = (e) => {
     const selectedDRCName = e.target.value;
     const selectedDRCID = drcData.find((item) => item.drc_name === selectedDRCName);
-    setNewEntry({ ...newEntry,
-       DRC1: selectedDRCName,
-       selectedDRCID: selectedDRCID ? selectedDRCID.drc_id : null});
+    setNewEntry({
+      ...newEntry,
+      DRC1: selectedDRCName,
+      selectedDRCID: selectedDRCID ? selectedDRCID.drc_id : null
+    });
   };
 
   // Function to handle DRC2 selection change
   const handleselectchangeDRC2 = (e) => {
     const selectedDRCName2 = e.target.value;
     const selectedDRCID2 = drcData.find((item) => item.drc_name === selectedDRCName2);
-    setNewEntry({ ...newEntry,
-       DRC2: selectedDRCName2,
-       selectedDRCID2: selectedDRCID2 ? selectedDRCID2.drc_id : null});
+    setNewEntry({
+      ...newEntry,
+      DRC2: selectedDRCName2,
+      selectedDRCID2: selectedDRCID2 ? selectedDRCID2.drc_id : null
+    });
   };
 
   // Function to handle back button click
   const handleoniconclick = () => {
-    navigate("/pages/Distribute/AssignedDRCSummary", );
+    navigate("/pages/Distribute/AssignedDRCSummary",);
   }
 
   return (
@@ -292,16 +308,16 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
                 <td className="py-2"> : </td>
                 <td className="py-2"> {transaction[0]?.created_dtm
                   ? new Date(transaction[0].created_dtm).toLocaleString("en-GB", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric", 
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      hour12: true,
-                    })
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                  })
                   : "N/A"}
-                  </td>
+                </td>
               </tr>
               <tr>
                 <td className="py-2"><strong>DRC Commission Rule  </strong></td>
@@ -316,12 +332,17 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
               <tr>
                 <td className="py-2"><strong>Case Count  </strong></td>
                 <td className="py-2"> : </td>
-                <td className="py-2"> {transaction[0]?.rulebase_count || "N/A"}</td>
+                <td className="py-2"> {transaction[0]?.inspected_count || "N/A"}</td>
               </tr>
-                  
+              <tr>
+                <td className="py-2"><strong>Captured Count  </strong></td>
+                <td className="py-2"> : </td>
+                <td className="py-2"> {transaction[0]?.captured_count || "N/A"}</td>
+              </tr>
+
             </tbody>
           </table>
-         
+
           {/* <p className="mb-2">
             <strong>Total Arrears Amount: </strong>{" "}
             {transaction[0]?.rulebase_arrears_sum || "N/A"}
@@ -331,109 +352,133 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
 
       {/* case count Bar */}
       <div className="flex justify-center items-center w-full">
-      <div className={`${GlobalStyle.miniCaseCountBar} w-full max-w-[52rem] `}>
-        <div className="flex flex-wrap px-3 py-2 items-center  gap-4 sm:gap-10 ">
-          <img src={Minorc} alt="Icon" className="w-[20px] h-[20px] " />
-          {/* dropdown */}
-          <div className="flex gap-10 flex-wrap">
-            <select
-              className={GlobalStyle.selectBox}
-              value={newEntry.DRC1}
-              style={{ color: newEntry.DRC1 === "" ? "gray" : "black" }}
-              onChange={handleselectchangeDRC1}
-            >
-              <option value="" hidden>
-                DRC
-              </option>
-              {[...new Set(drcData.map((item) => item.drc_name))].map((item) => (
+        <div className={`${GlobalStyle.miniCaseCountBar} w-full max-w-[52rem] `}>
+          <div className="flex flex-wrap px-3 py-2 items-center  gap-4 sm:gap-10 ">
+            <img src={Minorc} alt="Icon" className="w-[20px] h-[20px] " />
+            {/* dropdown */}
+            <div className="flex gap-10 flex-wrap">
+              <select
+                className={GlobalStyle.selectBox}
+                value={newEntry.DRC1}
+                style={{ color: newEntry.DRC1 === "" ? "gray" : "black" }}
+                onChange={handleselectchangeDRC1}
+              >
+                <option value="" hidden>
+                  DRC
+                </option>
+                {/* {[...new Set(drcData.map((item) => item.drc_name))].map((item) => (
                <option key={item} value={item} style={{ color: "black" }}>
                   {`${item}`}
                 </option> 
-               ))} 
-            </select>
-            
-          </div>
-          {/* dropdown */}
-          <div className="flex gap-10 flex-wrap">
-            <select
-              className={GlobalStyle.selectBox}
-              value={newEntry.RTOM}
-              style={{ color: newEntry.RTOM === "" ? "gray" : "black" }}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, RTOM: e.target.value })
-              }
-              disabled={!newEntry.DRC1}
-            >
-              <option value="" hidden>
-                RTOM
-              </option>
-              {drcData
-                .filter((item) => item.drc_name == newEntry.DRC1)
-                .map((item) => (
-                  <option key={item.rtom} value={item.rtom} style={{ color: "black" }}>
-                    {`${item.rtom}`}
+               ))}  */}
+                {drcData.length > 0 ? (drcData.map((drc) => (
+                  // <option key={drc.drc_id} value={drc.drc_id} style={{ color: "black" }}>
+                  <option key={drc.drc_id} value={drc.drc_name} style={{ color: "black" }}>
+                    {drc.drc_name}
                   </option>
-                ))}
-            </select>
-          </div>
-          {/* textbox */}
-          <div className="flex gap-7 flex-wrap">
-            <h1 className={GlobalStyle.headingMedium}>
-              Assigned case count:{assignedCaseCount}
-              
-            </h1>
-            <input
-              type="number"
-              placeholder="Enter case count"
-              className={`${GlobalStyle.inputText} min-w-[120px] w-full sm:w-auto`}
-              value={newEntry.Count}
-              min="1"
-              onChange={(e) =>
-                
-                setNewEntry({ ...newEntry, Count: e.target.value })
-                
-              }
-            />
-          </div>
-        </div>
-        <div className="flex px-3 py-2 items-center  gap-10 ">
-          <img src={Plusc} alt="Icon" className="w-[20px] h-[20px] " />
-          {/* dropdown */}
-          <div className="flex gap-4">
-            <select
-              className={GlobalStyle.selectBox}
-              value={newEntry.DRC2}
-              onChange={handleselectchangeDRC2}
-              style={{ color: newEntry.DRC2 === "" ? "gray" : "black" }}
-            >
-              <option value="" hidden>
-                DRC
-              </option>
-              {[...new Set(drcData.map((item) => item.drc_name))].map((item) => (
-               <option key={item} value={item} style={{ color: "black" }}>
-                  {`${item}`}
-                </option> 
-               ))}
-            </select>
-          </div>
-        </div>
-        {/* button */}
-        <div className="flex justify-end mr-5">
+                ))
+                ) : (
+                  <option value="" disabled style={{ color: "gray" }}>No DRCs available</option>
+                )}
+              </select>
 
-        <div>
-                    {["admin", "superadmin", "slt"].includes(userRole) && (
-                    <button
-                    onClick={handleaddclick}
-                    className={`${GlobalStyle.buttonPrimary} w-[80px] h-[35px]`}
-                    
-                    
-                  >
-                    Add
-                  </button>
-                    
-                    )}
-         </div>
-          {/* <button
+            </div>
+            {/* dropdown */}
+            <div className="flex gap-10 flex-wrap">
+              <select
+                className={GlobalStyle.selectBox}
+                value={newEntry.RTOM}
+                style={{ color: newEntry.RTOM === "" ? "gray" : "black" }}
+                onChange={(e) =>
+                  setNewEntry({ ...newEntry, RTOM: e.target.value })
+                }
+                disabled={!newEntry.DRC1}
+              >
+                <option value="" hidden>
+                  RTOM
+                </option>
+                {drcData
+                  // .filter((item) => item.drc_id === Number(newEntry.DRC1))
+                  .filter((item) => item.drc_name === newEntry.DRC1)
+                  .flatMap((item) =>
+                    item.rtoms && item.rtoms.length > 0 ? (
+                      item.rtoms.map((rtomEntry, idx) => (
+                        <option key={idx} value={rtomEntry.rtom} style={{ color: "black" }}>
+                          {rtomEntry.rtom}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled style={{ color: "gray" }}>No DRCs available</option>
+                    )
+                  )}
+
+              </select>
+            </div>
+            {/* textbox */}
+            <div className="flex gap-7 flex-wrap">
+              <h1 className={GlobalStyle.headingMedium}>
+                Assigned case count:{assignedCaseCount}
+
+              </h1>
+              <input
+                type="number"
+                placeholder="Enter case count"
+                className={`${GlobalStyle.inputText} min-w-[120px] w-full sm:w-auto`}
+                value={newEntry.Count}
+                min="1"
+                onChange={(e) =>
+
+                  setNewEntry({ ...newEntry, Count: e.target.value })
+
+                }
+              />
+            </div>
+          </div>
+          <div className="flex px-3 py-2 items-center  gap-10 ">
+            <img src={Plusc} alt="Icon" className="w-[20px] h-[20px] " />
+            {/* dropdown */}
+            <div className="flex gap-4">
+              <select
+                className={GlobalStyle.selectBox}
+                value={newEntry.DRC2}
+                onChange={handleselectchangeDRC2}
+                style={{ color: newEntry.DRC2 === "" ? "gray" : "black" }}
+              >
+                <option value="" hidden>
+                  DRC
+                </option>
+                {drcData.length > 0 ? (
+                  drcData
+                    // .filter((drc) => drc.drc_id !== Number(newEntry.DRC1))
+                    .filter((drc) => drc.drc_name !== newEntry.DRC1)
+                    .map((drc) => (
+                      <option key={drc.drc_id} value={drc.drc_name} style={{ color: "black" }}>
+                        {drc.drc_name}
+                      </option>
+                    ))
+                ) : (
+                  <option value="" disabled style={{ color: "gray" }}>No DRCs available</option>
+                )}
+              </select>
+            </div>
+          </div>
+          {/* button */}
+          <div className="flex justify-end mr-5">
+
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  onClick={handleaddclick}
+                  className={`${GlobalStyle.buttonPrimary} w-[80px] h-[35px]`}
+
+
+                >
+                  Add
+                </button>
+
+              )}
+            </div>
+            {/* <button
             onClick={handleaddclick}
             className={`${GlobalStyle.buttonPrimary} w-[80px] h-[35px]`}
             
@@ -441,8 +486,8 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
           >
             Add
           </button> */}
+          </div>
         </div>
-      </div>
       </div>
 
       {/* Table Section */}
@@ -460,7 +505,7 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
             <FaSearch className={GlobalStyle.searchBarIcon} />
           </div>
         </div>
-         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
               <tr>
@@ -470,20 +515,20 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
                   className={`${GlobalStyle.tableHeader} `}
                 >
                   <div className="flex justify-center items-center">
-                  <img
-                    src={Minorbw}
-                    alt="Icon"
-                    className="w-[20px] h-[20px] "
-                  />
-                </div>
+                    <img
+                      src={Minorbw}
+                      alt="Icon"
+                      className="w-[20px] h-[20px] "
+                    />
+                  </div>
                 </th>
                 <th className={GlobalStyle.tableHeader}>DRC 2</th>
                 <th
                   className={`${GlobalStyle.tableHeader}`}
                 >
-                <div className="flex justify-center items-center">
-                  <img src={Plusbw} alt="Icon" className="w-[20px] h-[20px] " />
-                </div>
+                  <div className="flex justify-center items-center">
+                    <img src={Plusbw} alt="Icon" className="w-[20px] h-[20px] " />
+                  </div>
                 </th>
                 <th className={GlobalStyle.tableHeader}></th>
               </tr>
@@ -505,17 +550,17 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
                     <td className={GlobalStyle.tableData}>{item.DRC2}</td>
                     <td className={GlobalStyle.tableData}>{item.DRC2Count}</td>
                     <td className={GlobalStyle.tableData}>
-                    <div>
-                      {["admin", "superadmin", "slt"].includes(userRole) && (
-                      <button
-                        onClick={() =>
-                          handledeleteclick(item.RTOM, item.DRC1, item.DRC2)
-                        }
-                        className={`${GlobalStyle.buttonPrimary}`}
-                      >
-                        Delete
-                      </button>
-                      )}
+                      <div className="flex justify-center items-center">
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                          <button
+                            onClick={() =>
+                              handledeleteclick(item.RTOM, item.DRC1, item.DRC2)
+                            }
+                            className={`${GlobalStyle.buttonPrimary}`}
+                          >
+                            Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -535,17 +580,17 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
       {/* Button */}
       <div className="flex justify-end">
         <div>
-              {["admin", "superadmin", "slt"].includes(userRole) && (
-              <button
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
               onClick={handleonclick}
               className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px]`}
             >
               Submit
             </button>
-              
-              )}
+
+          )}
         </div>
-          {/* <button
+        {/* <button
             onClick={handleonclick}
             className={`${GlobalStyle.buttonPrimary} h-[35px] mt-[30px]`}
           >
@@ -554,10 +599,10 @@ const [drcData, setdrcData] = useState([]); // State for DRC data
       </div>
 
       <div className="flex justify-start mt-4">
-        <button className= {GlobalStyle.buttonPrimary} onClick={handleoniconclick}>
-        <FaArrowLeft className="mr-2" />
+        <button className={GlobalStyle.buttonPrimary} onClick={handleoniconclick}>
+          <FaArrowLeft className="mr-2" />
         </button>
-        </div>
+      </div>
     </div>
   );
 }

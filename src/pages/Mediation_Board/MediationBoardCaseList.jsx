@@ -219,8 +219,13 @@ const MediationBoardCaseList = () => {
       if (response && response.data && response.status === "success") {
         // console.log("Valid data received:", response.data);
 
-        // Append the new data to the existing data
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data); // Set initial data for page 1
+        } else {
+          // Append the new data to the existing data
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
+
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
@@ -315,11 +320,6 @@ const MediationBoardCaseList = () => {
   }, [caseId]);
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
       // CallAPI(); // Call the function whenever currentPage changes
@@ -369,7 +369,7 @@ const MediationBoardCaseList = () => {
   // console.log("Paginated data:", paginatedData);
 
   // Search Section
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -584,7 +584,7 @@ const MediationBoardCaseList = () => {
           </thead>
           <tbody>
             {filteredDataBySearch.length > 0 ? (
-              filteredDataBySearch.map((row, index) => (
+              filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                 <tr
                   key={index}
                   className={
