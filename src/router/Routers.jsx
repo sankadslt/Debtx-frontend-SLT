@@ -100,6 +100,7 @@ import DRCList from "../pages/DRC/DRCList";
 import DRCInfo from "../pages/DRC/DRCInfo";
 import DRCDetails from "../pages/DRC/DRCDetails";
 import DRCInfoEdit from "../pages/DRC/DRCInfoEdit";
+import DrcAgreement from "../pages/DRC/DrcAgreement";
 
 //Rtom
 
@@ -114,6 +115,8 @@ import RtomInfoNew from "../pages/Rtom/RtomInfoNew";
 //USER  
 import UserList from "../pages/User/UserList";
 import UserInfo from "../pages/User/UserInfo";
+import SignUp from "../pages/User/SignUp";
+import UserApproval from "../pages/User/UserApproval";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
@@ -545,7 +548,8 @@ const Routers = () => {
         }
       />
       <Route
-        path="/Incident/Incident_List"
+        path="
+		"
         element={
           <ProtectedRoute
             element={<Incident_List />}
@@ -722,6 +726,8 @@ const Routers = () => {
       <Route path="/pages/DRC/DRCDetails" element={<ProtectedRoute element={<DRCDetails />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/DRC/DRCInfo" element={<ProtectedRoute element={<DRCInfo />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} />
+       
+      <Route path="/pages/DRC/DrcAgreement" element={<ProtectedRoute element={<DrcAgreement />} allowedRoles={['superadmin']} />} />
 
       {/* //MASTER DRC
     <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
@@ -732,6 +738,8 @@ const Routers = () => {
       {/* User */}
       <Route path="/pages/User/UserList" element={<ProtectedRoute element={<UserList />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
+      <Route path="/pages/User/SignUp" element={<ProtectedRoute element={<SignUp />} allowedRoles={['superadmin']} />} />
+	    <Route path="/pages/User/UserApproval" element={<ProtectedRoute element={<UserApproval />} allowedRoles={["superadmin"]} />} />
 
       {/* RO */}
       <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />

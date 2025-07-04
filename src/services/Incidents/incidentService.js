@@ -24,41 +24,36 @@ export const createIncident = async (incidentData) => {
 export const incidentRegisterBulkUpload = async (incidentData) => {
   try {
     const response = await axios.post(`${INCIDENT_URL}/Upload_DRS_File`, incidentData);
-    return response.data; // Return the success response
+    return response.data;  
   } catch (error) {
     console.error("Error creating incident:", error.response?.data || error.message);
-    throw error.response?.data || error; // Throw detailed error for handling
+    throw error.response?.data || error;  
   }
 };
 
-export const fetchIncidents = async (filters) => {
+export const fetchIncidents = async (payload) => {
   try {
-    console.log("Sending filters:", filters);
-    const response = await axios.post(`${INCIDENT_URL}/List_Incidents`, filters);
-    console.log("Response:", response.data);
+  //  console.log("Sending filters:", filters);
+    const response = await axios.post(
+      `${INCIDENT_URL}/List_Incidents`,
+      payload
+    );
+   // console.log("Response:", response.data);
 
-    if (response.data.status === "success") {
-      return response.data.incidents.map((incident) => ({
-        incidentID: incident.Incident_Id,
-        status: incident.Incident_Status,
-        accountNo: incident.Account_Num,
-        action: incident.Actions,
-        sourceType: incident.Source_Type,
-        createdDTM: new Date(incident.Created_Dtm).toLocaleString(),
-      }));
-    } else {
-      throw new Error("Failed to fetch incidents");
-    }
-  } catch (error) {
-    console.error("Detailed error:", {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    throw error.response?.data?.message || "An error occurred while fetching data";
+     
+      return response.data;
+      } 
+  catch (error) {
+    console.error(
+      "Detailed error:",
+     
+    error.response?.data || error.message
+     
+    );
+    throw error ;
   }
 };
-
+ 
 export const List_Distribution_Ready_Incidents = async () => {
   try {
     const response = await axios.post(`${INCIDENT_URL}/List_Distribution_Ready_Incidents`);
@@ -81,9 +76,9 @@ export const distribution_ready_incidents_group_by_arrears_band= async () => {
   }
 };
 
-export const List_Transaction_Logs_Upload_Files = async (requestBody) => {
+export const List_Transaction_Logs_Upload_Files = async (payload) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/List_Transaction_Logs_Upload_Files`, requestBody);
+    const response = await axios.post(`${INCIDENT_URL}/List_Transaction_Logs_Upload_Files`, payload);
 
     return response.data;
   } catch (error) {
@@ -196,12 +191,23 @@ export const getOpenTaskCountforCPECollect = async () => {
 };
 
 
-export const Task_for_Download_Incidents = async (incidentData) => {
+export const Task_for_Download_Incidents = async (status1, status2,fromDate,toDate,createdBy) => {
+  
   try {
-      const response = await axios.post(`${INCIDENT_URL}/Task_for_Download_Incidents`, incidentData);
+      const response = await axios.post(`${INCIDENT_URL}/Task_for_Download_Incidents`, { 
+      
+        Incident_Status: status2,
+        Actions: status1,
+        From_Date: fromDate,
+        To_Date: toDate,
+        Created_By:createdBy,
+      
+      
+      });
       return response.data;
   } catch (error) {
       console.error("Error creating incident:", error.response?.data || error.message);
       throw error.response?.data || error;
   }
 };
+ 

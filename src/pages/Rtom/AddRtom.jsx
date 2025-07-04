@@ -49,6 +49,7 @@ const AddRtom = () => {
         icon: "error",
         title: "Authentication Error",
         text: "Failed to load user information. Please login again.",
+        confirmButtonColor: "#d33"
       });
     }
   };
@@ -127,6 +128,7 @@ const AddRtom = () => {
         icon: "success",
         title: "Successfully Created",
         text: `RTOM registered successfully!`,
+        confirmButtonColor: "#28a745"
       }).then(() => {
         navigate("/pages/Rtom/RtomList");
       });
@@ -136,6 +138,7 @@ const AddRtom = () => {
         icon: "error",
         title: "Registration Failed",
         text: error.message || "Failed to create RTOM. Please try again.",
+        confirmButtonColor: "#d33"
       });
     } finally {
       setIsSubmitting(false);
@@ -144,9 +147,26 @@ const AddRtom = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+
+    let processedValue = value;
+
+  if (name === "billingCenterCode") {
+    processedValue = value.replace(/[^a-zA-Z]/g, '');
+  }
+
+  if (name === "telephone" || name === "mobile") {
+    // Allow only digits
+    processedValue = value.replace(/[^0-9]/g, '');
+  }
+ 
+
+  // if (name === "areaCode") {
+  //   processedValue = value.replace(/[^a-zA-Z]/g, '');
+  // }
+
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue
     }));
 
     // Clear specific field error when user starts typing
@@ -228,7 +248,9 @@ const AddRtom = () => {
                       width: isMobile ? "100%" : "12rem",
                     }}
                   >
-                    <span>{field.label}</span>
+                     <span>
+                       {field.label} <span className="text-red-500">*</span>
+                    </span>
                     {!isMobile && <span>:</span>}
                   </div>
                   <input
@@ -242,7 +264,8 @@ const AddRtom = () => {
                     style={{
                       width: isMobile ? "100%" : "calc(100% - 13rem)",
                     }}
-                    required
+                    
+                    //required
                   />
                 </div>
                 {field.validation && (
