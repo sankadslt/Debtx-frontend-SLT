@@ -1452,7 +1452,7 @@ const DRCInfo = () => {
 
 
           {/* SLT Coordinator Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <div className="flex flex-col sm:flex-row justify-between  underline items-start sm:items-center">
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
               SLT Coordinator Details
             </h2>
@@ -1547,6 +1547,125 @@ const DRCInfo = () => {
               </div>
             )}
           </div>
+
+
+          {/*DRC coordinator*/}
+
+           <div>
+            <h2
+              className={`${GlobalStyle.headingMedium} mt-6 mb-2 sm:mt-8 sm:mb-4 underline text-left font-semibold`}
+            >
+             DRC coordinator Details
+            </h2>
+
+
+           <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+              <table className={`${GlobalStyle.table} min-w-full`}>
+                <thead className={GlobalStyle.thead}>
+                  <tr>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Name
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                     NIC
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Email
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Contact no
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentCoordinator ? (
+                    <tr className="bg-white bg-opacity-75 border-b">
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {currentCoordinator.service_no || "Not specified"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {currentCoordinator.slt_coordinator_name || "Not specified"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {currentCoordinator.slt_coordinator_email || "Not specified"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {currentCoordinator.slt_coordinator_email || "Not specified"}
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="text-center py-4 text-gray-500">
+                        No coordinator assigned
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Services Section */}
+            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+              Services
+            </h2>
+
+            <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+              <table className={`${GlobalStyle.table} min-w-full`}>
+                <thead className={GlobalStyle.thead}>
+                  <tr>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Service Type
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Changed On
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {companyData.services && companyData.services.map((service, index) => (
+                    <tr
+                      key={index}
+                      className={`${index % 2 === 0
+                        ? "bg-white bg-opacity-75"
+                        : "bg-gray-50 bg-opacity-50"
+                        } border-b`}
+                    >
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {service.service_type}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
+                        {service.status_update_dtm
+                          ? new Date(service.status_update_dtm).toLocaleDateString()
+                          : ""}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} text-left`}>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={service.service_status === "Active"}
+                            readOnly
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                          after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                      </td>
+                    </tr>
+                  ))}
+                  {(!companyData.services || companyData.services.length === 0) && (
+                    <tr>
+                      <td colSpan="3" className="text-center py-4 text-gray-500">
+                        No services available
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            </div>
 
           {/* Services Section  */}
 
@@ -1689,7 +1808,10 @@ const DRCInfo = () => {
             </div>
           </div>
 
-          {/* RTOM Section - With dropdown below the heading, aligned left */}
+
+          
+
+          {/* Billing center Section - With dropdown below the heading, aligned left */}
           <div>
             <h2
               className={`${GlobalStyle.headingMedium} mt-6 mb-2 sm:mt-8 sm:mb-4 underline text-left font-semibold`}
