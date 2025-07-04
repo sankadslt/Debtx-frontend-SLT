@@ -49,6 +49,7 @@ const UserInfo = () => {
     username: "",
     user_type: "",
     email: "",
+    contact_num: "",
     login_method: "",
     role: "",
     Created_DTM: "",
@@ -56,12 +57,12 @@ const UserInfo = () => {
     Approved_DTM: "",
     Approved_By: "",
     Remark: [],
-    user_roles: [] // Added to store multiple roles
   });
 
   const [formData, setFormData] = useState({
     userType: "",
     userMail: "",
+    contact_num: "",
     loginMethod: "",
     userRole: "",
     createdOn: "",
@@ -74,16 +75,18 @@ const UserInfo = () => {
   const [showEndSection, setShowEndSection] = useState(false);
 
   // Available roles dropdown
-  const availableRoles = [
-    { role_name: "GM" },
-    { role_name: "DGM" },
-    { role_name: "legal_officer" },
-    { role_name: "manager" },
-    { role_name: "slt_coordinator" },
-    { role_name: "DRC_user" },
-    { role_name: "recovery_staff" },
-    { role_name: "rtom" },
+  const userRoles = [
+    { value: "", label: "User Role", hidden: true },
+    { value: "GM", label: "GM" },
+    { value: "DGM", label: "DGM" },
+    { value: "legal_officer", label: "Legal Officer" },
+    { value: "manager", label: "Manager" },
+    { value: "slt_coordinator", label: "SLT Coordinator" },
+    { value: "DRC_user", label: "DRC User" },
+    { value: "recovery_staff", label: "Recovery Staff" },
+    { value: "rtom", label: "RTOM" }
   ];
+
 
   // get system user
   const loadUser = async () => {
@@ -106,6 +109,9 @@ const UserInfo = () => {
           setFormData({
             userType: fetchedData.data.user_type || "",
             userMail: fetchedData.data.email || "",
+            contact_num: Array.isArray(fetchedData.data.contact_num) && fetchedData.data.contact_num.length > 0 
+                ? fetchedData.data.contact_num[0].contact_num 
+                : "N/A",
             loginMethod: fetchedData.data.login_method || "",
             userRole: fetchedData.data.role || "",
             createdOn: fetchedData.data.Created_DTM || "",
@@ -359,6 +365,23 @@ const UserInfo = () => {
                       </td>
                     </tr>
 
+                    {/* User Contact */}
+                    <tr className="align-middle">
+                      <td className="w-1/3 sm:w-auto align-middle">
+                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
+                          Contact No.
+                        </p>
+                      </td>
+                      <td className="text-center w-4 sm:w-auto align-middle">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto align-middle">
+                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
+                          {formData.contact_num || "N/A"}
+                        </label>
+                      </td>
+                    </tr>
+
                     {/* Login Method */}
                     <tr className="align-middle">
                       <td className="w-1/3 sm:w-auto align-middle">
@@ -389,14 +412,19 @@ const UserInfo = () => {
                         <td className="w-2/3 sm:w-auto">
                           <div className="flex items-center space-x-2 my-2">
                             <select
-                              className={`${GlobalStyle.selectBox} flex-1`}
                               value={selectedRole}
                               onChange={(e) => setSelectedRole(e.target.value)}
+                              className={`${GlobalStyle.selectBox} w-full`}
+                              style={{ color: selectedRole === "" ? "gray" : "black" }}
                             >
-                              <option value="">Select User Role</option>
-                              {availableRoles.map((role, index) => (
-                                <option key={index} value={role.role_name}>
-                                  {role.role_name}
+                              {userRoles.map((role) => (
+                                <option
+                                  key={role.value}
+                                  value={role.value}
+                                  hidden={role.hidden}
+                                  style={{ color: "black" }}
+                                >
+                                  {role.label}
                                 </option>
                               ))}
                             </select>
@@ -572,6 +600,26 @@ const UserInfo = () => {
                           {userInfo.email || "N/A"}
                         </label>
                       </td>
+                    </tr>
+
+                    {/* User Contact */}
+                    <tr className="align-middle">
+                      <td className="w-1/3 sm:w-auto align-middle">
+                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
+                          Contact No.
+                        </p>
+                      </td>
+                      <td className="text-center w-4 sm:w-auto align-middle">
+                        :
+                      </td>
+                      <td className="w-2/3 sm:w-auto align-middle">
+                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
+                          {Array.isArray(userInfo.contact_num) && userInfo.contact_num.length > 0
+                            ? userInfo.contact_num[0].contact_num
+                            : "N/A"}
+                        </label>
+                      </td>
+
                     </tr>
 
                     {/* Login Method */}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import signUpImage from "../../assets/images/User/SignUp.jpeg";
 
@@ -15,6 +15,21 @@ const SignUp = () => {
     });
 
     const [selectedRole, setSelectedRole] =useState("");
+    const [selectedDRC, setSelectedDRC] =useState("");
+
+    // Clear form data when user type is changed
+    useEffect(() => {
+        setFormData({
+            serviceNo: "",
+            name: "",
+            nic: "",
+            email: "",
+            contactNo: "",
+            loginMethod: "",
+            role: "",
+        });
+    }, [userType])
+    
 
     //Roles available for the dropdown
     const userRoles = [
@@ -69,7 +84,7 @@ const SignUp = () => {
 
                 {/* Right - Form */}
                 <div className="w-full md:w-1/2 flex flex-col justify-center p-10 bg-white text-blue-900">
-                    <h4 className={`${GlobalStyle.headingLarge} mb-2`} style={{ fontSize: '1.5rem' }}>
+                    <h4 className={`${GlobalStyle.headingLarge}`} style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
                         Sign Up
                     </h4>
                     <p className="mb-6">Welcome.!</p>
@@ -79,7 +94,7 @@ const SignUp = () => {
                         <select
                             value={userType}
                             onChange={(e) => setUserType(e.target.value)}
-                            className={`${GlobalStyle.selectBox} w-full text-blue-900 placeholder-blue-900 pl-2`}
+                            className={`${GlobalStyle.selectBox} w-full text-blue-900 placeholder-blue-900 py-2 pl-2`}
                         >
                             <option value="" disabled hidden>User Type</option>
                             <option value="DRC">DRC</option>
@@ -89,14 +104,26 @@ const SignUp = () => {
 
                     {/* DRC Form */}
                     {userType === "DRC" && (
-                        <>
+                        <>  
+                            <div className="mb-2">
+                                <select
+                                    value={selectedDRC}
+                                    onChange={(e) => setSelectedDRC(e.target.value)}
+                                    className={`${GlobalStyle.selectBox} w-full text-blue-900 placeholder-blue-900 py-2 pl-2`}
+                                >
+                                    <option value="" disabled hidden>Select DRC</option>
+                                    <option value="">Option 1</option>
+                                    <option value="">Option 2</option>
+                                </select>
+                            </div>
+
                             <input
                                 type="text"
                                 name="name"
                                 placeholder="Name"
                                 value={formData.name}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             />
                             <input
                                 type="text"
@@ -104,7 +131,7 @@ const SignUp = () => {
                                 placeholder="NIC"
                                 value={formData.nic}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             />
                             <input
                                 type="email"
@@ -112,7 +139,7 @@ const SignUp = () => {
                                 placeholder="Email"
                                 value={formData.email}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             />
                             <input
                                 type="text"
@@ -120,13 +147,13 @@ const SignUp = () => {
                                 placeholder="Contact No"
                                 value={formData.contactNo}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             />
                             <select
                                 name="loginMethod"
                                 value={formData.loginMethod}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             >
                                 <option value="" disabled hidden>Login Method</option>
                                 <option value="Gmail">Gmail</option>
@@ -144,7 +171,7 @@ const SignUp = () => {
                                 placeholder="Service No"
                                 value={formData.serviceNo}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             />
                             <input
                                 type="text"
@@ -152,7 +179,7 @@ const SignUp = () => {
                                 placeholder="Name"
                                 value={formData.name}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             />
                             <input
                                 type="email"
@@ -160,7 +187,7 @@ const SignUp = () => {
                                 placeholder="Email"
                                 value={formData.email}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             />
                             <input
                                 type="text"
@@ -168,20 +195,20 @@ const SignUp = () => {
                                 placeholder="Contact No"
                                 value={formData.contactNo}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             />
                             <select
                                 name="loginMethod"
                                 value={formData.loginMethod}
                                 onChange={handleInputChange}
-                                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                                className={`${GlobalStyle.selectBox} w-full mb-2 text-blue-900 placeholder-blue-900 py-2 pl-2`}
                             >
                                 <option value="" disabled hidden>Login Method</option>
                                 <option value="Gmail">Gmail</option>
                                 <option value="Manual">Manual</option>
                             </select>
                             <select
-                              className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+                              className={`${GlobalStyle.selectBox} w-full text-blue-900 placeholder-blue-900 py-2 pl-2`}
                               value={selectedRole}
                               onChange={(e) => setSelectedRole(e.target.value)}
                             >
@@ -197,28 +224,14 @@ const SignUp = () => {
                                     </option>
                                 ))}
                             </select>
-                           {formData.role && (
-                                <div className={`${GlobalStyle.selectBox} w-full mb-4 pl-1 1/2`}>
-                                    <div className="flex items-center max-w-[100px] bg-gray-200 text-sm px-3 py-1 rounded-full">
-                                        <span className="truncate mr-2">{formData.role}</span>
-                                        <button
-                                            onClick={() => setFormData((prev) => ({ ...prev, role: "" }))}
-                                            className="text-blue-900 font-bold hover:text-red-600"
-                                            title="Remove role"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
                         </>
                     )}
 
                     <div className="w-full">
                         <button
                             onClick={handleRegister}
-                            className={`${GlobalStyle.selectBox} ${GlobalStyle.buttonPrimary} text-blue-900 text-center mt-4 rounded-md`}
+                            disabled ={!userType}
+                            className={`${GlobalStyle.buttonPrimary} w-full max-w-40 sm:max-w-48 md:max-w-56 lg:max-w-64 bg-blue-900 text-white font-bold text-center mt-4 py-2 rounded-md  disabled:text-gray-400 disabled:cursor-not-allowed`}
                         >
                             Register
                         </button>

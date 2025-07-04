@@ -571,7 +571,7 @@ const UserApproval = () => {
 							<select
 								value={userType}
 								onChange={handleUserTypeChange}
-								className={`${GlobalStyle.selectBox} w-[200px]`}
+								className={`${GlobalStyle.selectBox} w-auto lg:w-[150px]`}
 								style={{ color: userType === "" ? "gray" : "black" }}
 							>
 								<option value="" hidden>User Type</option>
@@ -588,14 +588,14 @@ const UserApproval = () => {
 								onChange={handleFromDateChange}
 								dateFormat="dd/MM/yyyy"
 								placeholderText="From"
-								className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+								className={`${GlobalStyle.inputText} lg:w-[150px] w-auto`}
 							/>
 							<DatePicker
 								selected={toDate}
 								onChange={handleToDateChange}
 								dateFormat="dd/MM/yyyy"
 								placeholderText="To"
-								className={`${GlobalStyle.inputText}  w-full sm:w-auto`}
+								className={`${GlobalStyle.inputText}  lg:w-[150px] w-auto`}
 							/>
 						</div>
 											
