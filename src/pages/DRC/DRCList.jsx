@@ -376,9 +376,9 @@ const DRCList = () => {
                                             <button 
                                                 onClick={() => navigateToEdit(log.DRCID)}
                                                 className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                                title="Edit"
+                                                title="More Info"
                                             >
-                                                <img src={editImg} alt="Edit" className="w-6 h-6" />
+                                                <img src={editImg} alt="More Info" className="w-6 h-6" />
                                             </button>
   
   
