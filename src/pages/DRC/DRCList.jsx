@@ -10,6 +10,7 @@ import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
 import { listAllDRCDetails } from "../../services/drc/Drc";
+import { Tooltip } from "react-tooltip";
 
 const DRCList = () => {
     // State Variables
@@ -67,7 +68,9 @@ const DRCList = () => {
                 src={iconPath}
                 alt={String(status)}
                 className="w-6 h-6 mx-auto"
-                title={String(status)}
+                data-tooltip-id={`status-tooltip-${status}`}
+                data-tooltip-content={status}
+                //title={status}
             />
         );
     };
@@ -348,7 +351,14 @@ const DRCList = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.DRCID}</td>
-                                    <td className={GlobalStyle.tableData}>{renderStatusIcon(log.Status)}</td>
+                                    <td className={GlobalStyle.tableData}>{renderStatusIcon(log.Status)}
+
+                                        <Tooltip
+                                            id={`status-tooltip-${log.Status}`}
+                                            place="bottom"
+                                            content={log.Status}
+                                        />
+                                    </td>
                                     <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
