@@ -780,6 +780,11 @@ const DRCInfo = () => {
 
   console.log("ShowPOPUp:", showPopup);
 
+  const currentStatus = companyData.drc_status?.length > 0 
+  ? companyData.drc_status[companyData.drc_status.length - 1].drc_status
+  : "Inactive";
+
+
   if (!editMode) {
     // View mode
     return (
@@ -793,20 +798,21 @@ const DRCInfo = () => {
           <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
 
             <div className="absolute top-4 right-4">
-              <img
-                src={Edit}
-                onClick={() => {
-                  if (companyData.drc_status !== "Terminate") {
-                    handleNavigateToEdit();
-                  }
-                }}
-                className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${companyData.drc_status === "Terminate"
+            <img
+              src={Edit}
+              onClick={() => {
+                if (currentStatus !== "Terminate") {  
+                  handleNavigateToEdit();
+                }
+              }}
+              className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${
+                currentStatus === "Terminate"  
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
-                  }`}
-                alt="Edit"
-              />
-            </div>
+              }`}
+              alt="Edit"
+            />
+          </div>
 
             {/* Company Details Section */}
             <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
@@ -840,12 +846,14 @@ const DRCInfo = () => {
                     label: "Email",
                     value: companyData.drc_email || "Not specified"
                   }, 
-                  companyData.drc_status === "Terminate" && {
+                 currentStatus === "Terminate" && {
                     label: "End Date",
                     value: companyData.drc_end_dtm
-                    ? new Date(companyData.drc_end_dtm).toLocaleDateString()
-                    : "Not specified"
-                }
+                      ? new Date(companyData.drc_end_dtm).toLocaleDateString()
+                      : companyData.drc_status?.find(s => s.drc_status === "Terminate")?.drc_status_dtm
+                        ? new Date(companyData.drc_status.find(s => s.drc_status === "Terminate").drc_status_dtm).toLocaleDateString()
+                        : "Not specified"
+                  }
                 ].map((item, index) => (
                   <tr key={index} className="block sm:table-row">
 
@@ -1202,15 +1210,16 @@ const DRCInfo = () => {
             <div>
               <button
                 onClick={() => {
-                  if (companyData.drc_status !== "Terminate") {
+                  if (currentStatus !== "Terminate") {  
                     setShowEndFields(true);
                   }
                 }}
-                className={`${GlobalStyle.buttonPrimary} ${companyData.drc_status === "Terminate"
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-                  }`}
-                disabled={companyData.drc_status === "Terminate"}
+                className={`${GlobalStyle.buttonPrimary} ${
+                  currentStatus === "Terminate" 
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+                disabled={currentStatus === "Terminate"}  
               >
                 End
               </button>

@@ -197,7 +197,6 @@ export const getDebtCompanyByDRCID = async (drcId) => {
 };
 
 // terminateCompanyByDRCID
-// services/drc/Drc.js
 export const terminateCompanyByDRCID = async (
   drcId,
   remark,
