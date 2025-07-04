@@ -984,7 +984,7 @@ const DRCInfo = () => {
                         {rtom.rtom_name}
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.handlingtype}
+                        {rtom.handling_type}
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
                         {rtom.status_update_dtm
