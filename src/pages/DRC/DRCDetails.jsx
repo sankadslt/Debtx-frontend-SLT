@@ -670,7 +670,7 @@ const DRCDetails = () => {
               {activeTab === "Services" && (
                 <>
                   <th className={GlobalStyle.tableHeader}>Service Type</th>
-                  <th className={GlobalStyle.tableHeader}>Enable Date</th>
+                  <th className={GlobalStyle.tableHeader}>Created Date</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
                 </>
               )}
