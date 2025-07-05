@@ -55,7 +55,7 @@ const SupBulkUploadLog = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
+    //const [totalPages, setTotalPages] = useState(0);
 
     const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
     const rowsPerPage = 10;
@@ -245,11 +245,11 @@ const SupBulkUploadLog = () => {
             setIsLoading(false); // Set loading state to false
 
             // Updated response handling
-            if (response && response.data ) {
+            if (response && response.data) {
                 if (currentPage === 1) {
-                  setFilteredData(response.data);
+                    setFilteredData(response.data);
                 } else {
-                  setFilteredData((prevData) => [...prevData, ...response.data]);
+                    setFilteredData((prevData) => [...prevData, ...response.data]);
                 }
 
                 if (response.data.length === 0) {
@@ -296,7 +296,7 @@ const SupBulkUploadLog = () => {
     }
 
     useEffect(() => {
-       
+
         if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage);
             callAPI({
@@ -310,23 +310,18 @@ const SupBulkUploadLog = () => {
     const handlePrevNext = (direction) => {
         if (direction === "prev" && currentPage > 1) {
             setCurrentPage(currentPage - 1);
-        } else if (direction === "next") {
-            if (isMoreDataAvailable) {
-                setCurrentPage(currentPage + 1);
-            } else {
-                const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-                setTotalPages(totalPages);
-                if (currentPage < totalPages) {
-                    setCurrentPage(currentPage + 1);
-                }
-            }
+        } else if (
+            direction === "next" &&
+            (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage))
+        ) {
+            setCurrentPage(currentPage + 1);
         }
     };
 
     // Handle Filter Button
     const handleFilterButton = () => {
         setIsMoreDataAvailable(true);
-        setTotalPages(0);
+        //setTotalPages(0);
         setMaxCurrentPage(0);
         const isValid = filterValidations();
         if (!isValid) {
@@ -352,14 +347,13 @@ const SupBulkUploadLog = () => {
         }
     }
 
-  
+
     const handleClear = () => {
         setStatus("");
         setFromDate(null);
         setToDate(null);
-        setTotalPages(0);
+        //setTotalPages(0);
         setSearchQuery("");
-        setTotalPages(0);
         setFilteredData([]);
         setMaxCurrentPage(0);
         setIsMoreDataAvailable(true);
@@ -471,7 +465,10 @@ const SupBulkUploadLog = () => {
                                 type="text"
                                 className={GlobalStyle.inputSearch}
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                    setCurrentPage(1); // Reset to page 1 on search
+                                    setSearchQuery(e.target.value)
+                                }}
                             />
                             <FaSearch className={GlobalStyle.searchBarIcon} />
                         </div>
@@ -490,7 +487,7 @@ const SupBulkUploadLog = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                { filteredDataBySearch.length > 0 ? (
+                                {filteredDataBySearch.length > 0 ? (
                                     filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                                         <tr
                                             key={index}
@@ -550,8 +547,8 @@ const SupBulkUploadLog = () => {
                         </span>
                         <button
                             onClick={() => handlePrevNext("next")}
-                            disabled={currentPage === totalPages}
-                            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+                            disabled={!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+                            className={`${GlobalStyle.navButton} ${(!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)) ? "cursor-not-allowed" : ""}`}
                         >
                             <FaArrowRight />
                         </button>
