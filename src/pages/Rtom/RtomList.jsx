@@ -103,14 +103,11 @@ const RtomList = () => {
     setAppliedStatus("");
     setFiltersApplied(false);
     setCurrentPage(1);
+    setLastFetchedBackendPage(1);
     hasMoreData.current = true;
     setAllData([]);
 
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    } else {
-      callRTOMAPI({ status: "", page: 1 });
-    }
+    // callRTOMAPI(1);
   };
 
   // handle search change
