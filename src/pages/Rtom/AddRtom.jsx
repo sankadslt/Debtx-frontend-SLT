@@ -49,7 +49,7 @@ const AddRtom = () => {
         icon: "error",
         title: "Authentication Error",
         text: "Failed to load user information. Please login again.",
-        confirmButtonColor: "#d33"
+        confirmButtonColor: "#d33",
       });
     }
   };
@@ -62,31 +62,40 @@ const AddRtom = () => {
     const newErrors = {};
 
     if (!formData.billingCenterCode.trim()) {
-      newErrors.billingCenterCode = "Billing Center Code is required";
+    newErrors.billingCenterCode = "Billing Center Code is required";
+  }
+
+  if (!formData.name.trim()) {
+    newErrors.name = "Name is required";
+  }
+
+  if (!formData.areaCode.trim()) {
+    newErrors.areaCode = "Area Code is required";
+  }
+
+    // Email: optional but must be valid if entered
+    if (formData.email.trim()) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+        newErrors.email = "Invalid email format";
+      }
     }
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
-    if (!formData.areaCode.trim()) {
-      newErrors.areaCode = "Area Code is required";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-
+    // Mobile: optional but if entered must be 10 digits starting with 07
     const mobileDigits = formData.mobile.replace(/\D/g, "");
-    if (!mobileDigits || mobileDigits.length !== 10) {
-      newErrors.mobile = "Mobile number must be exactly 10 digits";
+    if (mobileDigits) {
+      if (!/^07\d{8}$/.test(mobileDigits)) {
+        newErrors.mobile =
+          "Mobile number must be 10 digits and start with '07'";
+      }
     }
 
+    // Telephone: optional but if entered must be 10 digits and start with valid SL area codes
     const telephoneDigits = formData.telephone.replace(/\D/g, "");
-    if (!telephoneDigits || telephoneDigits.length !== 10) {
-      newErrors.telephone = "Telephone number must be exactly 10 digits";
+    if (telephoneDigits) {
+      if (!/^0(11|21|31|41|51|61|81)\d{7}$/.test(telephoneDigits)) {
+        newErrors.telephone =
+          "Telephone number must be 10 digits and start with a valid area code (e.g., 011)";
+      }
     }
 
     if (!userData) {
@@ -95,7 +104,18 @@ const AddRtom = () => {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (Object.keys(newErrors).length > 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "Missing or Invalid Fields",
+      text: "Please fill in all required fields and ensure valid input.",
+      confirmButtonColor: "#d33",
+    });
+    return false;
+  }
+
+  return true;
   };
 
   const handleSubmit = async (e) => {
@@ -128,7 +148,7 @@ const AddRtom = () => {
         icon: "success",
         title: "Successfully Created",
         text: `RTOM registered successfully!`,
-        confirmButtonColor: "#28a745"
+        confirmButtonColor: "#28a745",
       }).then(() => {
         navigate("/pages/Rtom/RtomList");
       });
@@ -138,7 +158,7 @@ const AddRtom = () => {
         icon: "error",
         title: "Registration Failed",
         text: error.message || "Failed to create RTOM. Please try again.",
-        confirmButtonColor: "#d33"
+        confirmButtonColor: "#d33",
       });
     } finally {
       setIsSubmitting(false);
@@ -150,23 +170,22 @@ const AddRtom = () => {
 
     let processedValue = value;
 
-  if (name === "billingCenterCode") {
-    processedValue = value.replace(/[^a-zA-Z]/g, '');
-  }
+    if (name === "billingCenterCode") {
+      processedValue = value.replace(/[^a-zA-Z]/g, "");
+    }
 
-  if (name === "telephone" || name === "mobile") {
-    // Allow only digits
-    processedValue = value.replace(/[^0-9]/g, '');
-  }
- 
+    if (name === "telephone" || name === "mobile") {
+      // Allow only digits
+      processedValue = value.replace(/[^0-9]/g, "");
+    }
 
-  // if (name === "areaCode") {
-  //   processedValue = value.replace(/[^a-zA-Z]/g, '');
-  // }
+    // if (name === "areaCode") {
+    //   processedValue = value.replace(/[^a-zA-Z]/g, '');
+    // }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: processedValue
+      [name]: processedValue,
     }));
 
     // Clear specific field error when user starts typing
@@ -210,6 +229,7 @@ const AddRtom = () => {
         >
           <form
             onSubmit={handleSubmit}
+            noValidate
             className="space-y-4"
             style={{ marginLeft: isMobile ? "0" : "2rem" }}
           >
@@ -248,8 +268,8 @@ const AddRtom = () => {
                       width: isMobile ? "100%" : "12rem",
                     }}
                   >
-                     <span>
-                       {field.label} <span className="text-red-500">*</span>
+                    <span>
+                      {field.label} <span className="text-red-500">*</span>
                     </span>
                     {!isMobile && <span>:</span>}
                   </div>
@@ -264,20 +284,9 @@ const AddRtom = () => {
                     style={{
                       width: isMobile ? "100%" : "calc(100% - 13rem)",
                     }}
-                    
-                    //required
                   />
                 </div>
-                {field.validation && (
-                  <p
-                    className="text-red-500 text-sm"
-                    style={{
-                      marginLeft: isMobile ? "0" : "12rem",
-                    }}
-                  >
-                    {field.validation}
-                  </p>
-                )}
+                
               </div>
             ))}
 
@@ -312,15 +321,9 @@ const AddRtom = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`${GlobalStyle.inputText} ${
-                    errors.email ? "border-red-500" : ""
+                  className={`${GlobalStyle.inputText} 
                   }`}
-                  style={{
-                    width: isMobile ? "100%" : "calc(100% - 13rem)",
-                  }}
-
-                  placeholder="abc@gmail.com" 
-                  required
+                  placeholder="abc@gmail.com"
                 />
               </div>
               {errors.email && (
@@ -386,9 +389,7 @@ const AddRtom = () => {
                     style={{
                       width: isMobile ? "100%" : "calc(100% - 13rem)",
                     }}
-                    pattern={field.pattern}
                     placeholder={field.placeholder}
-                    required
                   />
                 </div>
                 {field.validation && (
