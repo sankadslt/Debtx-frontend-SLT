@@ -23,25 +23,21 @@ import Open_No_Agent from "../../assets/images/incidents/Open_No_Agent.png";
 import { Create_Task_for_OpenNoAgent, Create_Task_for_Create_CaseFromIncident, Open_Task_Count_Incident_To_Case } from "../../services/task/taskService";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
-
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 
-
-
 export default function OpenIncident() {
-  const [searchQuery, setSearchQuery] = useState("");  //  usestate for the Search bar
-  const [selectAllData, setSelectAllData] = useState(false); // usestate for the Select all checkbox
-  const [data, setData] = useState([]); // usestate for the data
-  const [total, setTotal] = useState(0);  // usestate for the total number of incidents
-  const [distributionData, setDistributionData] = useState({}); // usestate for the distribution data
-  const [setError] = useState(null); // usestate for the error message
-  const [currentPage, setCurrentPage] = useState(0); // usestate for the current page
-  const [selectedRows, setSelectedRows] = useState([]); // usestate for the selected rows
-  const [isProcessing, setIsProcessing] = useState(false); // usestate for the processing state
-  const [user, setUser] = useState(null); // usestate for the user data
-
-  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectAllData, setSelectAllData] = useState(false);
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [distributionData, setDistributionData] = useState({});
+  const [setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
 
   const rowsPerPage = 7;
@@ -75,8 +71,6 @@ export default function OpenIncident() {
       try {
         const user_id = await getLoggedUserId();
         setUser(user_id);
-        //console.log("User ID:", user_id);
-
       } catch (err) {
         console.error("Failed to fetch user data", err);
       }
@@ -91,8 +85,7 @@ export default function OpenIncident() {
     try {
       const response = await List_Distribution_Ready_Incidents();
       setData(response.data);
-      console.log("Fetched Data:", response.data);
-
+      
       const distributionResponse = await distribution_ready_incidents_group_by_arrears_band();
       setDistributionData(distributionResponse);
 
@@ -106,18 +99,63 @@ export default function OpenIncident() {
     }
   };
 
+  // Filter data based on search query
+  const filteredData = data.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+  // Handle previous page navigation
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Handle next page navigation
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Get paginated data for current page
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Handle row checkbox change
+  const handleRowCheckboxChange = (Incident_Id) => {
+    if (selectedRows.includes(Incident_Id)) {
+      setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
+    } else {
+      setSelectedRows([...selectedRows, Incident_Id]);
+    }
+  };
+
+  // Handle select all checkbox change
+  const handleSelectAllDataChange = () => {
+    if (selectAllData) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(paginatedData.map((row) => row.Incident_Id));
+    }
+    setSelectAllData(!selectAllData);
+  };
+
   // Function to handle task creation
   const handleCreateTask = async () => {
-
-
-
-
     try {
-      const taskParams = {
-
-      };
-
-
+      const taskParams = {};
       const response = await Create_Task_for_OpenNoAgent(taskParams);
 
       Swal.fire({
@@ -127,7 +165,6 @@ export default function OpenIncident() {
         confirmButtonText: "OK",
         confirmButtonColor: "#28a745"
       });
-
 
       setSelectedRows([]);
       const updatedResponse = await List_Distribution_Ready_Incidents();
@@ -188,7 +225,6 @@ export default function OpenIncident() {
       }
 
       if (selectedRows.length > 5) {
-
         const taskConfirmResult = await Swal.fire({
           title: "Create Task Confirmation",
           text: `You have selected more than 5 incidents. Do you want to create a task to handle all of them?`,
@@ -205,7 +241,6 @@ export default function OpenIncident() {
           return;
         }
 
-
         const taskParams = {
           Incident_Status: "Open No Agent",
           Proceed_By: user,
@@ -213,7 +248,6 @@ export default function OpenIncident() {
         };
 
         const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
-        // console.log("Response from Create_Task:", response);
         Swal.fire({
           title: "Task Created Successfully!",
           text: `Task created to handle incidents.`,
@@ -222,14 +256,6 @@ export default function OpenIncident() {
           confirmButtonColor: "#28a745",
         });
       } else {
-
-
-
-        // const response = await Create_Case_for_incident({
-        //   Incident_Ids: selectedRows,
-        //   Proceed_By: user,
-        //  // Proceed_Dtm: new Date().toISOString().split("T")[0],
-        // });
         for (const row of selectedRows) {
           await Create_Case_for_incident(row);
         }
@@ -242,9 +268,9 @@ export default function OpenIncident() {
           confirmButtonColor: "#28a745",
         }).then((result) => {
           if (result.isConfirmed) {
-            setCurrentPage(0); // Reset to the first page after successful creation
-            setSelectAllData(false); // Reset select all checkbox
-            setSelectedRows([]); // Clear selected rows
+            setCurrentPage(1);
+            setSelectAllData(false);
+            setSelectedRows([]);
             fetchData();
           }
         });
@@ -252,7 +278,6 @@ export default function OpenIncident() {
 
       setSelectedRows([]);
     } catch (error) {
-      // console.error("Error in handleCaseforIncident:", error);
       Swal.fire({
         title: "Error",
         text: error.message || "Action failed",
@@ -266,58 +291,10 @@ export default function OpenIncident() {
     }
   };
 
-
-  const filteredData = data.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
-
-
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
-
-  // Function to handle previous and next page navigation
-  const handlePrevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < pages - 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-
-  // Function to handle checkbox change for individual rows
-  const handleRowCheckboxChange = (Incident_Id) => {
-
-    if (selectedRows.includes(Incident_Id)) {
-      setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
-    } else {
-      setSelectedRows([...selectedRows, Incident_Id]);
-    }
-  };
-
-  // Function to handle select all checkbox change
-  const handleSelectAllDataChange = () => {
-    if (selectAllData) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(data.map((row) => row.Incident_Id));
-    }
-    setSelectAllData(!selectAllData);
-  };
-
-  // Function to handle back navigation
   const handlebacknavigate = () => {
-    window.history.back(); // Go back to the previous page
-  }
+    window.history.back();
+  };
+
   return (
     <>
       <div className={GlobalStyle.fontPoppins}>
@@ -325,25 +302,15 @@ export default function OpenIncident() {
           <h1 className={`${GlobalStyle.headingLarge} m-0 mb-4`}>
             Incidents Open for Distribution
           </h1>
-
         </div>
 
         <div className="flex justify-end items-center mb-4">
-          {/* <button
-          className={`${GlobalStyle.buttonPrimary}   pr-4 flex items-center mb-4`}
-         onClick={handleCreateTask}
-       
-        >
-        <FaDownload className="mr-1" />
-          Create task and let me know
-        </button> */}
           {paginatedData.length > 0 && (
             <div>
               {["admin", "superadmin", "slt"].includes(userRole) && (
                 <button
-                  className={`${GlobalStyle.buttonPrimary}   pr-4 flex items-center mb-4`}
+                  className={`${GlobalStyle.buttonPrimary} pr-4 flex items-center mb-4`}
                   onClick={handleCreateTask}
-
                 >
                   <FaDownload className="mr-1" />
                   Create task and let me know
@@ -353,73 +320,58 @@ export default function OpenIncident() {
           )}
         </div>
 
-
         <div className={`${GlobalStyle.caseCountBar}`}>
           <div className="flex mb-2">
-            {" "}
             <span className={GlobalStyle.countBarTopic}>
               Open Pending Cases
             </span>
           </div>
           <div className={`${GlobalStyle.countBarSubTopicContainer} gap-4`}>
-            {" "}
             <div className={`${GlobalStyle.countBarMainBox} py-2 px-6`}>
-              {" "}
               <span>Total:</span>
               <p className={GlobalStyle.countBarMainTopic}>{total}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
               <span>5,000 - 10,000</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-5_10"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
               <span>10,000 - 25,000</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-10_25"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
               <span>25,000 - 50,000</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-25_50"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
               <span>50,000 - 100,000</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-50_100"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
-              <span> 100,000 &lt;</span>
+              <span>100,000 &lt;</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-100<"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
-              <span> CP_Collect </span>
+              <span>CP_Collect</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["CP_Collect"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
-              <span> &lt; 1000 </span>
+              <span>&lt; 1000</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-0_1"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
-              <span> 1000 - 2500 </span>
+              <span>1000 - 2500</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-1-2.5"] || 0}</p>
             </div>
             <div className={`${GlobalStyle.countBarSubBox} py-2 px-6`}>
-              {" "}
-              <span> 2500 - 5000 </span>
+              <span>2500 - 5000</span>
               <p className={GlobalStyle.countBarSubTopic}>{distributionData["AB-2.5-5"] || 0}</p>
             </div>
-
           </div>
         </div>
       </div>
 
       <div className="flex flex-col">
-
         <div className="mb-4 flex justify-start">
           <div className={GlobalStyle.searchBarContainer}>
             <input
@@ -448,52 +400,51 @@ export default function OpenIncident() {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((row, index) => (
-                <tr
-                  key={index}
-                  className={`${index % 2 === 0
-                    ? "bg-white bg-opacity-75"
-                    : "bg-gray-50 bg-opacity-50"
-                    } border-b`}
-                >
-                  <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <input
-                      type="checkbox"
-                      className="rounded-lg"
-                      checked={selectedRows.includes(row.Incident_Id)}
-                      onChange={() => handleRowCheckboxChange(row.Incident_Id)}
-                    />
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    <a href={`#${row.Incident_Id}`} className="hover:underline">
-                      {row.Incident_Id}
-                    </a>
-                  </td>
-                  <td className={GlobalStyle.tableData}>
-                    <div className="flex justify-center items-center h-full">
-                      {row.Incident_Status === "Open No Agent" && (
-                        <div data-tooltip-id="incident-tooltip">
-                          <img
-                            src={Open_No_Agent}
-                            alt="open no agent"
-
-                            className="w-5 h-5"
-                          />
-                        </div>
-
-                      )}
-                    </div>
-                    <Tooltip id="incident-tooltip" place="bottom" content="Open No Agent" />
-                  </td>
-                  <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
-                  <td className={GlobalStyle.tableData}>{row.Actions}</td>
-                  <td className={`${GlobalStyle.tableCurrency}`}>
-                    {new Intl.NumberFormat("en-US").format(row.Arrears)}
-                  </td>
-                  <td className={GlobalStyle.tableData}>{row.Source_Type}</td>
-                </tr>
-              ))}
-              {paginatedData.length === 0 && (
+              {paginatedData.length > 0 ? (
+                paginatedData.map((row, index) => (
+                  <tr
+                    key={index}
+                    className={`${index % 2 === 0
+                      ? "bg-white bg-opacity-75"
+                      : "bg-gray-50 bg-opacity-50"
+                      } border-b`}
+                  >
+                    <td className={GlobalStyle.tableData} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <input
+                        type="checkbox"
+                        className="rounded-lg"
+                        checked={selectedRows.includes(row.Incident_Id)}
+                        onChange={() => handleRowCheckboxChange(row.Incident_Id)}
+                      />
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      <a href={`#${row.Incident_Id}`} className="hover:underline">
+                        {row.Incident_Id}
+                      </a>
+                    </td>
+                    <td className={GlobalStyle.tableData}>
+                      <div className="flex justify-center items-center h-full">
+                        {row.Incident_Status === "Open No Agent" && (
+                          <div data-tooltip-id="incident-tooltip">
+                            <img
+                              src={Open_No_Agent}
+                              alt="open no agent"
+                              className="w-5 h-5"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <Tooltip id="incident-tooltip" place="bottom" content="Open No Agent" />
+                    </td>
+                    <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
+                    <td className={GlobalStyle.tableData}>{row.Actions}</td>
+                    <td className={`${GlobalStyle.tableCurrency}`}>
+                      {new Intl.NumberFormat("en-US").format(row.Arrears)}
+                    </td>
+                    <td className={GlobalStyle.tableData}>{row.Source_Type}</td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td colSpan="7" className="text-center py-4">
                     No results found
@@ -504,39 +455,36 @@ export default function OpenIncident() {
           </table>
         </div>
 
-        {/* Pagnation section */}
-        {filteredData.length > rowsPerPage && (
-          <div className={GlobalStyle.navButtonContainer}>
-            <button
-              className={GlobalStyle.navButton}
-              onClick={handlePrevPage}
-              disabled={currentPage === 0}
-            >
-              <FaArrowLeft />
-            </button>
-            <span>
-              Page {currentPage + 1} of {pages}
-            </span>
-            <button
-              className={GlobalStyle.navButton}
-              onClick={handleNextPage}
-              disabled={currentPage === pages - 1}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
-        )}
+        {/* Pagination section */}
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handlePrevPage}
+            disabled={currentPage <= 1 || filteredData.length === 0}
+          >
+            <FaArrowLeft />
+          </button>
+          <span className="text-gray-700">
+            Page {currentPage} {filteredData.length > 0 && `of ${totalPages}`}
+          </span>
+          <button
+            className={GlobalStyle.navButton}
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages || filteredData.length === 0}
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+
         <div className="flex justify-start items-center w-full mt-4 mb-4">
           <button
-            className={`${GlobalStyle.buttonPrimary} `}
+            className={`${GlobalStyle.buttonPrimary}`}
             onClick={handlebacknavigate}
           >
             <FaArrowLeft className="mr-1" />
-
           </button>
         </div>
-        <div className="flex justify-end items-center w-full ">
-
+        <div className="flex justify-end items-center w-full">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -546,29 +494,17 @@ export default function OpenIncident() {
             />
             Select All
           </label>
-          {/* <button
-                className={`${GlobalStyle.buttonPrimary} ml-4`}
-                onClick={handleCaseforIncident}
-                disabled={isProcessing}
-                
-
-              >
-                Proceed
-        </button> */}
           <div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
               <button
                 className={`${GlobalStyle.buttonPrimary} ml-4`}
                 onClick={handleCaseforIncident}
                 disabled={isProcessing}
-
-
               >
                 Proceed
               </button>
             )}
           </div>
-
         </div>
       </div>
     </>
