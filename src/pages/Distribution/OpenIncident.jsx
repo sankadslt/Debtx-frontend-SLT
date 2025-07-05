@@ -38,7 +38,6 @@ export default function OpenIncident() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
-  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const navigate = useNavigate();
 
   const rowsPerPage = 7;
@@ -95,14 +94,62 @@ export default function OpenIncident() {
         0
       );
       setTotal(totalCount);
-      
-      // Check if there's more data available
-      if (response.data.length < rowsPerPage) {
-        setIsMoreDataAvailable(false);
-      }
     } catch (error) {
       setError(error.message || "Failed to fetch data.");
     }
+  };
+
+  // Filter data based on search query
+  const filteredData = data.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+  // Handle previous page navigation
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Handle next page navigation
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Get paginated data for current page
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Handle row checkbox change
+  const handleRowCheckboxChange = (Incident_Id) => {
+    if (selectedRows.includes(Incident_Id)) {
+      setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
+    } else {
+      setSelectedRows([...selectedRows, Incident_Id]);
+    }
+  };
+
+  // Handle select all checkbox change
+  const handleSelectAllDataChange = () => {
+    if (selectAllData) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(paginatedData.map((row) => row.Incident_Id));
+    }
+    setSelectAllData(!selectAllData);
   };
 
   // Function to handle task creation
@@ -244,45 +291,6 @@ export default function OpenIncident() {
     }
   };
 
-  const filteredData = data.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
-  const handleRowCheckboxChange = (Incident_Id) => {
-    if (selectedRows.includes(Incident_Id)) {
-      setSelectedRows(selectedRows.filter((id) => id !== Incident_Id));
-    } else {
-      setSelectedRows([...selectedRows, Incident_Id]);
-    }
-  };
-
-  const handleSelectAllDataChange = () => {
-    if (selectAllData) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(paginatedData.map((row) => row.Incident_Id));
-    }
-    setSelectAllData(!selectAllData);
-  };
-
   const handlebacknavigate = () => {
     window.history.back();
   };
@@ -370,10 +378,7 @@ export default function OpenIncident() {
               type="text"
               placeholder=""
               value={searchQuery}
-              onChange={(e) => {
-                setCurrentPage(1);
-                setSearchQuery(e.target.value);
-              }}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className={GlobalStyle.inputSearch}
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -455,17 +460,17 @@ export default function OpenIncident() {
           <button
             className={GlobalStyle.navButton}
             onClick={handlePrevPage}
-            disabled={currentPage <= 1}
+            disabled={currentPage <= 1 || filteredData.length === 0}
           >
             <FaArrowLeft />
           </button>
           <span className="text-gray-700">
-            Page {currentPage}
+            Page {currentPage} {filteredData.length > 0 && `of ${totalPages}`}
           </span>
           <button
             className={GlobalStyle.navButton}
             onClick={handleNextPage}
-            disabled={!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+            disabled={currentPage >= totalPages || filteredData.length === 0}
           >
             <FaArrowRight />
           </button>
