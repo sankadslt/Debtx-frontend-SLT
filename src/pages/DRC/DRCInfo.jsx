@@ -22,6 +22,7 @@ import {
   getSLTCoordinators,
   getActiveServiceDetails,
   getActiveRTOMDetails,
+  
 } from "../../services/drc/Drc";
 import { getLoggedUserId } from "../../services/auth/authService";
 
@@ -49,6 +50,7 @@ const DRCInfo = () => {
   const [error, setError] = useState(null);
 
   // DRC company data 
+  
   const [companyData, setCompanyData] = useState({
     drc_id: "",
     create_on: "",
@@ -95,6 +97,8 @@ const DRCInfo = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 5;
 
+  
+
   //loghistory function
   const filteredLogHistory = remarkHistory
     .filter((log) =>
@@ -117,6 +121,8 @@ const DRCInfo = () => {
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, pages - 1));
   };
+
+ 
 
   // Fetch DRC data 
   useEffect(() => {
@@ -711,6 +717,7 @@ const DRCInfo = () => {
   const toggleLogHistory = () => {
     setShowLogHistory(!showLogHistory);
   };
+  console.log("Log History Data:", remarkHistory);
 
   // Get current coordinator (last one in array)
   const currentCoordinator =
@@ -844,44 +851,108 @@ console.log("DRC Status Data:", {
               SLT Coordinator Details
             </h2>
 
-            <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-              <table className={`${GlobalStyle.table} min-w-full`}>
-                <thead className={GlobalStyle.thead}>
-                  <tr>
-                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Service No
-                    </th>
-                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Name
-                    </th>
-                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Email
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentCoordinator ? (
-                    <tr className="bg-white bg-opacity-75 border-b">
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.service_no || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_name || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_email || "Not specified"}
-                      </td>
-                    </tr>
-                  ) : (
-                    <tr>
-                      <td colSpan="3" className="text-center py-4 text-gray-500">
-                        No coordinator assigned
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <div className={`${GlobalStyle} overflow-x-auto`}>
+                <table className={`${GlobalStyle.table} min-w-full text-left`}>
+                  <tbody>
+                    {currentCoordinator ? (
+                      <>
+                        <tr>
+                          <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                            Service No
+                          </td>
+                          <td className="w-4 text-left">:</td>
+                          <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                            {currentCoordinator.service_no || "Not specified"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                            Name
+                          </td>
+                          <td className="w-4 text-left">:</td>
+                          <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                            {currentCoordinator.slt_coordinator_name || "Not specified"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                            Email
+                          </td>
+                          <td className="w-4 text-left">:</td>
+                          <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                            {currentCoordinator.slt_coordinator_email || "Not specified"}
+                          </td>
+                        </tr>
+                      </>
+                    ) : (
+                      <tr>
+                        <td colSpan="3" className="text-center py-4 text-gray-500">
+                          No coordinator assigned
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* DRC Coordinator Section */}
+                <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+                  DRC Coordinator Details
+                </h2>
+
+                <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                  <table className={`${GlobalStyle.table} min-w-full`}>
+                    <thead className={GlobalStyle.thead}>
+                      <tr>
+                        <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                          Name
+                        </th>
+                        <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                          NIC
+                        </th>
+                        <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                        Email
+                        </th>
+                        <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                          contact no
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {companyData.drc_coordinator && companyData.drc_coordinator.length > 0 ? (
+                        companyData.drc_coordinator.map((coordinator, index) => (
+                          <tr
+                            key={index}
+                            className={`${
+                              index % 2 === 0
+                                ? "bg-white bg-opacity-75"
+                                : "bg-gray-50 bg-opacity-50"
+                            } border-b`}
+                          >
+                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                              {coordinator.user_name || "N/A"}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                              {coordinator.user_nic || "N/A"}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                              {coordinator.user_email || "N/A"}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                              {coordinator.user_contact_no?.[0]?.contact_number || "N/A"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" className="text-center py-4 text-gray-500">
+                            No DRC Coordinators found
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
 
             {/* Services Section */}
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
@@ -1236,11 +1307,11 @@ console.log("DRC Status Data:", {
                               : "bg-gray-50 bg-opacity-50"
                               } border-b`}
                           >
-                            <td className={`${GlobalStyle.tableData} whitespace-nowrap`}>
-                              {log.remark_dtm
-                                ? new Date(log.remark_dtm).toLocaleDateString('en-GB')
-                                : ""}
-                            </td>
+                           <td className={`${GlobalStyle.tableData} whitespace-nowrap`}>
+  {log.remark_dtm
+    ? new Date(log.remark_dtm).toLocaleDateString('en-GB')
+    : "N/A"}
+</td>
                             <td className={GlobalStyle.tableData}>
                               {log.remark || "No remark provided"}
                             </td>
