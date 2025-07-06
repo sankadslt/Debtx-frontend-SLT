@@ -467,15 +467,15 @@ const UserList = () => {
           <table className={`${GlobalStyle.table} md:table min-w-full`}>
             <thead className={GlobalStyle.thead}>
               <tr>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER ID</th>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>STATUS</th>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER TYPE</th>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER ROLE</th>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER NAME</th>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>USER EMAIL</th>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>CONTACT NO.</th>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>CREATED ON</th>
-                <th scope="col" className={`${GlobalStyle.tableHeader} text-xs lg:text-sm`}>ACTIONS</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>USER ID</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>STATUS</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>USER TYPE</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>USER ROLE</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>USER NAME</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>USER EMAIL</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>CONTACT NO.</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>CREATED ON</th>
+                <th scope="col" className={`${GlobalStyle.tableHeader}`}>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
