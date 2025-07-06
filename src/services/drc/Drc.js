@@ -4,6 +4,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/DRC`;
 const URL2 = `${BASE_URL}/recovery_officer`;
+const URL3 = `${BASE_URL}/DRC_service`;
 
 export const Active_DRC_Details = async () => {
   try {
@@ -27,44 +28,6 @@ export const Active_DRC_Details = async () => {
     throw error;
   }
 };
-
-// export const listAllDRCDetails = async (status, page = 1) => {
-//   try {
-//     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
-//       status,
-//       page,
-//     });
-
-//     console.log("Full DRC API response:", response.data);
-
-//     const drcArray = response.data;
-
-//     if (!Array.isArray(drcArray)) {
-//       throw new Error("Invalid DRC data format received");
-//     }
-
-//     const formattedDRCs = drcArray.map((drc) => ({
-//       key: drc.drc_id,
-//       value: drc.drc_name,
-//       id: drc.drc_id,
-//       email: drc.drc_email,
-//       tel: drc.drc_contact_no,
-//       status: drc.drc_status,
-//       roCount: drc.ro_count,
-//       rtomCount: drc.rtom_count,
-//       business_registration_number: drc.drc_business_registration_number,
-//       service_count: drc.service_count,
-//     }));
-
-//     return formattedDRCs;
-//   } catch (error) {
-//     console.error(
-//       "Error fetching DRCs by status:",
-//       error.response?.data || error.message
-//     );
-//     throw error;
-//   }
-// };
 
 export const listAllDRCDetails = async (filter) => {
   try {
@@ -422,6 +385,60 @@ export const Create_DRC_With_Services_and_SLT_Coordinator = async (drcData) => {
   }
 };
 
+export const Service_detais_of_the_DRC  = async (drc_id, pages, service_status) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Service_detais_of_the_DRC`,
+      { drc_id, pages, service_status }
+    );
 
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch service details");
+    }
+
+    
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching service details:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+export const Rtom_detais_of_the_DRC = async (drc_id, pages, handling_type) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Rtom_detais_of_the_DRC`,
+      { drc_id, pages, handling_type }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch RTOM details");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching RTOM details:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+export const Ro_detais_of_the_DRC = async (drc_id, pages, drcUser_status) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Ro_detais_of_the_DRC`,
+      { drc_id, pages, drcUser_status }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch RO details");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching RO details:", error.response?.data || error.message);
+    throw error;
+  }
+}
 
 

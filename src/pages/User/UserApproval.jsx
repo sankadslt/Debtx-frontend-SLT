@@ -303,7 +303,7 @@ const UserApproval = () => {
 		initializeData();
 	}, []);
 
-	// Handle pagination effect - following Monitor Settlement pattern
+	// Handle pagination effect
 	useEffect(() => {
 		if (!hasMounted.current) {
 			hasMounted.current = true;
@@ -430,7 +430,7 @@ const UserApproval = () => {
 		}
 	};
 
-	// Handle Pagination - following Monitor Settlement pattern
+	// Handle Pagination
 	const handlePrevNext = (direction) => {
 		if (direction === "prev" && currentPage > 1) {
 			setCurrentPage(currentPage - 1);
@@ -549,105 +549,72 @@ const UserApproval = () => {
 				</h1>
 			</div>
 
-			{/* Filter section - Following incident_list layout */}
-			<div className={`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
-				<div className="flex flex-wrap items-center justify-end w-full gap-0.5">
-					{/* User Role Filter */}
-					<div className="min-w-[150px] w-full sm:w-auto mt-2 mb-2">
-						<select
-							value={userRole}
-							onChange={handleUserRoleChange}
-							className={GlobalStyle.selectBox}
-							style={{ color: userRole === "" ? "gray" : "black" }}
-						>
-							<option value="" hidden>
-								User Role
-							</option>
-							<option value="Admin" style={{ color: "black" }}>
-								Admin
-							</option>
-							<option value="User" style={{ color: "black" }}>
-								User
-							</option>
-							<option value="Moderator" style={{ color: "black" }}>
-								Moderator
-							</option>
-						</select>
-					</div>
+			{/* Search and Filters - Responsive */}
+			<div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
+				{/* Search Bar */}
+				<div className={GlobalStyle.searchBarContainer} >
+				<input
+					type="text"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className={`${GlobalStyle.inputSearch} w-full`}
+				/>
+				<FaSearch className={GlobalStyle.searchBarIcon} />
+				</div>
 
-					{/* User Type Filter */}
-					<div className="min-w-[150px] w-full sm:w-auto mt-2 mb-2">
-						<select
-							value={userType}
-							onChange={handleUserTypeChange}
-							className={GlobalStyle.selectBox}
-							style={{ color: userType === "" ? "gray" : "black" }}
-						>
-							<option value="" hidden>
-								User Type
-							</option>
-							<option value="SLT" style={{ color: "black" }}>
-								SLT
-							</option>
-							<option value="DRC" style={{ color: "black" }}>
-								DRC
-							</option>
-							<option value="RO" style={{ color: "black" }}>
-								RO
-							</option>
-						</select>
-					</div>
-
-					{/* Date Picker */}
-					<label>Date:</label>
-					<DatePicker
-						selected={fromDate}
-						onChange={handleFromDateChange}
-						dateFormat="dd/MM/yyyy"
-						placeholderText="From"
-						className={`${GlobalStyle.inputText}  w-full sm:w-auto`}
-					/>
-					<DatePicker
-						selected={toDate}
-						onChange={handleToDateChange}
-						dateFormat="dd/MM/yyyy"
-						placeholderText="To"
-						className={`${GlobalStyle.inputText}  w-full sm:w-auto`}
-					/>
-
-					{/* Filter Button */}
-					<div>
+				{/* Filters */}
+				<div className={`${GlobalStyle.cardContainer} w-full lg:w-auto`}>
+					<div className="flex flex-col lg:flex-row gap-4 sm:items-start w-full">
+						
+						{/* User Type Filter */}
+						<div className="w-full">
+							<select
+								value={userType}
+								onChange={handleUserTypeChange}
+								className={`${GlobalStyle.selectBox} w-auto lg:w-[150px]`}
+								style={{ color: userType === "" ? "gray" : "black" }}
+							>
+								<option value="" hidden>User Type</option>
+								<option value="Slt" style={{ color: "black" }}>SLT</option>
+								<option value="Drcuser" style={{ color: "black" }}>DRC User</option>
+								<option value="ro" style={{ color: "black" }}>RO</option>
+							</select>
+						</div>
+						
+						<div className="flex flex-col lg:flex-row gap-2 items-center">
+							<label className={GlobalStyle.dataPickerDate}>Date</label>
+							<DatePicker
+								selected={fromDate}
+								onChange={handleFromDateChange}
+								dateFormat="dd/MM/yyyy"
+								placeholderText="From"
+								className={`${GlobalStyle.inputText} lg:w-[150px] w-auto`}
+							/>
+							<DatePicker
+								selected={toDate}
+								onChange={handleToDateChange}
+								dateFormat="dd/MM/yyyy"
+								placeholderText="To"
+								className={`${GlobalStyle.inputText}  lg:w-[150px] w-auto`}
+							/>
+						</div>
+											
+						{/* Filter Button */}
 						<button
 							onClick={handleFilter}
-							className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-						>
+							className={`${GlobalStyle.buttonPrimary} w-full`}
+							>
 							Filter
 						</button>
-					</div>
 
-					{/* Clear Button */}
-					<div>
+						{/* Clear Button */}
 						<button
-							className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
 							onClick={handleClear}
-						>
+							className={`${GlobalStyle.buttonRemove} w-full`}
+							>
 							Clear
 						</button>
 					</div>
-				</div>
-			</div>
-
-			{/* Search Section - Following incident_list layout */}
-			<div className="mb-4 flex justify-start">
-				<div className={GlobalStyle.searchBarContainer}>
-					<input
-						type="text"
-						placeholder=""
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className={GlobalStyle.inputSearch}
-					/>
-					<FaSearch className={GlobalStyle.searchBarIcon} />
 				</div>
 			</div>
 

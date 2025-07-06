@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Swal from "sweetalert2";
-import editImg from "../../assets/images/more.svg";
+import moreImg from "../../assets/images/more.svg";
 import ListImg from "../../assets/images/ConfigurationImg/list.png";
 import Checklist from "../../assets/images/ConfigurationImg/checklist.png";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
 import { listAllDRCDetails } from "../../services/drc/Drc";
+import { Tooltip } from "react-tooltip";
 
 const DRCList = () => {
     // State Variables
@@ -67,7 +68,9 @@ const DRCList = () => {
                 src={iconPath}
                 alt={String(status)}
                 className="w-6 h-6 mx-auto"
-                title={String(status)}
+                data-tooltip-id={`status-tooltip-${status}`}
+                data-tooltip-content={status}
+                //title={status}
             />
         );
     };
@@ -104,13 +107,13 @@ const DRCList = () => {
             if (response && response.data) {
                 const drcData = response.data.map(drc => ({
                     DRCID: drc.drc_id,
-                    Status: drc.drc_status,
+                    Status: drc.status,
                     BusinessRegNo: drc.drc_business_registration_number,
                     DRCName: drc.drc_name,
                     ContactNo: drc.drc_contact_no,
                     ServiceCount: drc.service_count,
                     ROCount: drc.ro_count,
-                    BillingCenterCount: drc.billing_center_code 
+                    BillingCenterCount: drc.rtom_count
                 }));
 
                 if (filters.page === 1) {
@@ -211,7 +214,7 @@ const DRCList = () => {
 
     // Navigation 
     const handleAddDRC = () => navigate("/pages/DRC/Add_DRC");
-    const navigateToEdit = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
+    const navigateToDRCInfo = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
 
     // Effect for API calls
     useEffect(() => {
@@ -348,7 +351,14 @@ const DRCList = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.DRCID}</td>
-                                    <td className={GlobalStyle.tableData}>{renderStatusIcon(log.Status)}</td>
+                                    <td className={GlobalStyle.tableData}>{renderStatusIcon(log.Status)}
+
+                                        <Tooltip
+                                            id={`status-tooltip-${log.Status}`}
+                                            place="bottom"
+                                            content={log.Status}
+                                        />
+                                    </td>
                                     <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
@@ -371,31 +381,31 @@ const DRCList = () => {
                                     </td>
 
 
-                                   <td className={`${GlobalStyle.tableData} flex justify-center items-center gap-2 w-[140px]`}>
+                                   <td className={`${GlobalStyle.tableData} flex justify-center`}>
   
-                                            <button 
-                                                onClick={() => navigateToEdit(log.DRCID)}
-                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                                title="Edit"
-                                            >
-                                                <img src={editImg} alt="Edit" className="w-6 h-6" />
-                                            </button>
-  
-  
-                                            <button 
-                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                                title="Details"
-                                            >
-                                                <img src={ListImg} alt="Details" className="w-6 h-6" />
-                                            </button>
-  
-                                            <button 
-                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                                title="Agreement Details"
-                                            >
-                                                <img src={Checklist} alt="Agreement Details" className="w-6 h-6" />
-                                            </button>
-                                      </td>
+                                        <button 
+                                            onClick={() => navigateToDRCInfo(log.DRCID)}
+                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                            title="More Info"
+                                        >
+                                            <img src={moreImg} alt="More Info" className="w-6 h-6" />
+                                        </button>
+
+
+                                        <button 
+                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                            title="Details"
+                                        >
+                                            <img src={ListImg} alt="Details" className="w-6 h-6" />
+                                        </button>
+
+                                        <button 
+                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                            title="Agreement Details"
+                                        >
+                                            <img src={Checklist} alt="Agreement Details" className="w-6 h-6" />
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         ) : (
