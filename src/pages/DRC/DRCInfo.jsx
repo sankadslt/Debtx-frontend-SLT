@@ -97,7 +97,13 @@ const DRCInfo = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 5;
 
-  
+   //drc_coordinator pagination
+    const [currentCoordinatorPage, setCurrentCoordinatorPage] = useState(0);
+    const coordinatorsPerPage = 5;
+    
+    // Billing center pagination
+      const [currentRtomPage, setCurrentRtomPage] = useState(0);
+      const rtomPerPage = 5; 
 
   //loghistory function
   const filteredLogHistory = remarkHistory
@@ -123,6 +129,50 @@ const DRCInfo = () => {
   };
 
  
+  // Add this calculation before your return statement
+  const coordinatorPages = companyData.drc_coordinator 
+    ? Math.ceil(companyData.drc_coordinator.length / coordinatorsPerPage)
+    : 0;
+
+  const paginatedCoordinators = companyData.drc_coordinator 
+    ? companyData.drc_coordinator.slice(
+        currentCoordinatorPage * coordinatorsPerPage,
+        (currentCoordinatorPage + 1) * coordinatorsPerPage
+      )
+    : [];
+
+      const handlePrevCoordinatorPage = () => {
+        setCurrentCoordinatorPage(prev => Math.max(prev - 1, 0));
+      };
+
+      const handleNextCoordinatorPage = () => {
+        setCurrentCoordinatorPage(prev => Math.min(prev + 1, coordinatorPages - 1));
+      };
+
+
+      // Billing center pagination
+      const rtomPages = companyData.rtom 
+        ? Math.ceil(companyData.rtom.length / rtomPerPage)
+        : 0;
+
+      const paginatedRtom = companyData.rtom 
+        ? companyData.rtom.slice(
+            currentRtomPage * rtomPerPage,
+            (currentRtomPage + 1) * rtomPerPage
+          )
+        : [];
+
+
+
+   // billing center prev & next 
+    const handlePrevRtomPage = () => {
+      setCurrentRtomPage(prev => Math.max(prev - 1, 0));
+    };
+
+    const handleNextRtomPage = () => {
+      setCurrentRtomPage(prev => Math.min(prev + 1, rtomPages - 1));
+    };
+
 
   // Fetch DRC data 
   useEffect(() => {
@@ -896,63 +946,89 @@ console.log("DRC Status Data:", {
               </div>
 
               {/* DRC Coordinator Section */}
-                <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
-                  DRC Coordinator Details
-                </h2>
 
-                <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-                  <table className={`${GlobalStyle.table} min-w-full`}>
-                    <thead className={GlobalStyle.thead}>
-                      <tr>
-                        <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                          Name
-                        </th>
-                        <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                          NIC
-                        </th>
-                        <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                        Email
-                        </th>
-                        <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                          contact no
-                        </th>
+            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+              DRC Coordinator Details
+            </h2>
+
+            <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+              <table className={`${GlobalStyle.table} min-w-full`}>
+                <thead className={GlobalStyle.thead}>
+                  <tr>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Name
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      NIC
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Email
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Contact No
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedCoordinators.length > 0 ? (
+                    paginatedCoordinators.map((coordinator, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0
+                            ? "bg-white bg-opacity-75"
+                            : "bg-gray-50 bg-opacity-50"
+                        } border-b`}
+                      >
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_name || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_nic || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_email || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_contact_no?.[0]?.contact_number || "N/A"}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {companyData.drc_coordinator && companyData.drc_coordinator.length > 0 ? (
-                        companyData.drc_coordinator.map((coordinator, index) => (
-                          <tr
-                            key={index}
-                            className={`${
-                              index % 2 === 0
-                                ? "bg-white bg-opacity-75"
-                                : "bg-gray-50 bg-opacity-50"
-                            } border-b`}
-                          >
-                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                              {coordinator.user_name || "N/A"}
-                            </td>
-                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                              {coordinator.user_nic || "N/A"}
-                            </td>
-                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                              {coordinator.user_email || "N/A"}
-                            </td>
-                            <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                              {coordinator.user_contact_no?.[0]?.contact_number || "N/A"}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="4" className="text-center py-4 text-gray-500">
-                            No DRC Coordinators found
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="text-center py-4 text-gray-500">
+                        No DRC Coordinators found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              </div>
+
+      {/* Add pagination controls */}
+
+              {companyData.drc_coordinator && companyData.drc_coordinator.length > coordinatorsPerPage && (
+                <div className={GlobalStyle.navButtonContainer}>
+                  <button
+                    className={`${GlobalStyle.navButton} ${currentCoordinatorPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={handlePrevCoordinatorPage}
+                    disabled={currentCoordinatorPage === 0}
+                  >
+                    <FaArrowLeft />
+                  </button>
+
+                  <span>Page {currentCoordinatorPage + 1} of {coordinatorPages}</span>
+
+                  <button
+                    className={`${GlobalStyle.navButton} ${currentCoordinatorPage === coordinatorPages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={handleNextCoordinatorPage}
+                    disabled={currentCoordinatorPage === coordinatorPages - 1}
+                  >
+                    <FaArrowRight />
+                  </button>
                 </div>
+              )}
+
 
             {/* Services Section */}
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
@@ -1017,7 +1093,7 @@ console.log("DRC Status Data:", {
             </div>
 
             {/* RTOM Areas Section */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+           <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
               Billing Center Areas
             </h2>
 
@@ -1040,52 +1116,78 @@ console.log("DRC Status Data:", {
                   </tr>
                 </thead>
                 <tbody>
-                  {companyData.rtom && companyData.rtom.map((rtom, index) => (
-                    <tr
-                      key={index}
-                      className={`${index % 2 === 0
-                        ? "bg-white bg-opacity-75"
-                        : "bg-gray-50 bg-opacity-50"
+                  {paginatedRtom.length > 0 ? (
+                    paginatedRtom.map((rtom, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0
+                            ? "bg-white bg-opacity-75"
+                            : "bg-gray-50 bg-opacity-50"
                         } border-b`}
-                    >
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.rtom_name}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.handling_type}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
-                        {rtom.status_update_dtm
-                          ? new Date(rtom.status_update_dtm).toLocaleDateString()
-                          : ""}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} text-left`}>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={rtom.rtom_status === "Active"}
-                            readOnly
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full 
-                          peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
-                          after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                        </label>
-                      </td>
-                    </tr>
-                  ))}
-                  {(!companyData.rtom || companyData.rtom.length === 0) && (
+                      >
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {rtom.rtom_name}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {rtom.handling_type}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
+                          {rtom.status_update_dtm
+                            ? new Date(rtom.status_update_dtm).toLocaleDateString()
+                            : ""}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} text-left`}>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={rtom.rtom_status === "Active"}
+                              readOnly
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full 
+                            peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
+                            after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                          </label>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
-                      <td colSpan="3" className="text-center py-4 text-gray-500">
+                      <td colSpan="4" className="text-center py-4 text-gray-500">
                         No Billing Center information available
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+              </div>
+
+          {/* Add pagination controls */}
+          {companyData.rtom && companyData.rtom.length > rtomPerPage && (
+            <div className={GlobalStyle.navButtonContainer}>
+              <button
+                className={`${GlobalStyle.navButton} ${currentRtomPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={handlePrevRtomPage}
+                disabled={currentRtomPage === 0}
+              >
+                <FaArrowLeft />
+              </button>
+
+              <span>Page {currentRtomPage + 1} of {rtomPages}</span>
+
+              <button
+                className={`${GlobalStyle.navButton} ${currentRtomPage === rtomPages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={handleNextRtomPage}
+                disabled={currentRtomPage === rtomPages - 1}
+              >
+                <FaArrowRight />
+              </button>
             </div>
+          )}
           </div>
-        </div>
+          </div>
+
 
         {/* Termination Form  */}
         {showEndFields && (
@@ -1308,10 +1410,10 @@ console.log("DRC Status Data:", {
                               } border-b`}
                           >
                            <td className={`${GlobalStyle.tableData} whitespace-nowrap`}>
-  {log.remark_dtm
-    ? new Date(log.remark_dtm).toLocaleDateString('en-GB')
-    : "N/A"}
-</td>
+                              {log.remark_dtm
+                                ? new Date(log.remark_dtm).toLocaleDateString('en-GB')
+                                : "N/A"}
+                            </td>
                             <td className={GlobalStyle.tableData}>
                               {log.remark || "No remark provided"}
                             </td>
