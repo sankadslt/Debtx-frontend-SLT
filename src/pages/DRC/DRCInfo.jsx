@@ -786,7 +786,7 @@ console.log("DRC Status Data:", {
               <tbody className="space-y-2 sm:space-y-0">
                 {[
                   {
-                 label: "Created Date",
+                    label: "Created Date",
                     value: companyData.drc_create_dtm
                       ? new Date(companyData.drc_create_dtm).toLocaleDateString()
                       : companyData.createdAt
@@ -809,14 +809,12 @@ console.log("DRC Status Data:", {
                     label: "Email",
                     value: companyData.drc_email || "Not specified"
                   }, 
-                 companyData.status === "Terminate" && {
-                    label: "Terminate Date",
-                    value: companyData.drc_end_dtm
-                      ? new Date(companyData.drc_end_dtm).toLocaleDateString()
-                      : companyData.drc_status?.find(s => s.drc_status === "Terminate")?.drc_status_dtm
-                        ? new Date(companyData.drc_status.find(s => s.drc_status === "Terminate").drc_status_dtm).toLocaleDateString()
+                    companyData.status === "Terminate" && {
+                     label: "Terminate Date",
+                      value: companyData.drc_terminate_dtm
+                        ? new Date(companyData.drc_terminate_dtm).toLocaleDateString()
                         : "Not specified"
-                  }
+                    }
                 ].map((item, index) => (
                   <tr key={index} className="block sm:table-row">
 
