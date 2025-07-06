@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Swal from "sweetalert2";
-import editImg from "../../assets/images/more.svg";
+import moreImg from "../../assets/images/more.svg";
 import ListImg from "../../assets/images/ConfigurationImg/list.png";
 import Checklist from "../../assets/images/ConfigurationImg/checklist.png";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
@@ -381,14 +381,14 @@ const DRCList = () => {
                                     </td>
 
 
-                                   <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
+                                   <td className={`${GlobalStyle.tableData} flex justify-center`}>
   
                                         <button 
                                             onClick={() => navigateToDRCInfo(log.DRCID)}
                                             className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
                                             title="More Info"
                                         >
-                                            <img src={editImg} alt="More Info" className="w-6 h-6" />
+                                            <img src={moreImg} alt="More Info" className="w-6 h-6" />
                                         </button>
 
 
