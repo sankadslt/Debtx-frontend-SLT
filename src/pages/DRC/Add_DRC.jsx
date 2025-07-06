@@ -471,10 +471,31 @@ const Add_DRC = () => {
 
          <table className="w-full">
             <tbody className="block md:table-row-group">
+               <tr className="block md:table-row mb-2">
+          <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
+            <span className="inline-block min-w-[180px] text-left">Business Registration No<span className="text-red-500">*</span></span> :
+          </td>
+              <td className="block md:table-cell md:w-2/3 pb-2">
+                <input
+                  type="text"
+                  value={BusinessRegistrationNo}
+                  onChange={(e) => setBusinessRegistrationNo(e.target.value)}
+                  className={`${GlobalStyle.inputText} w-full`}
+                />
+                {errors.BusinessRegistrationNo && (
+                  <p className="text-red-500">{errors.BusinessRegistrationNo}</p>
+                )}
+              </td>
+          </tr>
+
               <tr className="block md:table-row">
                 <td className="block md:table-cell md:w-1/3 text-right pr-2 pb-2 whitespace-nowrap">
-            <span className="inline-block min-w-[180px] text-left mr-4">DRC Name</span> :
-          </td>
+                    <span className="inline-block min-w-[180px] text-left mr-6">
+                      DRC Name<span className="text-red-500">*</span>
+                    </span>
+                  :
+                </td>
+
             <td className="block md:table-cell md:w-2/3 pb-2">
               <input
                 type="text"
@@ -488,26 +509,11 @@ const Add_DRC = () => {
             </td>
           </tr>
 
-    <tr className="block md:table-row mb-2">
-      <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
-        <span className="inline-block min-w-[180px] text-left">Business Registration No</span> :
-      </td>
-      <td className="block md:table-cell md:w-2/3 pb-2">
-        <input
-          type="text"
-          value={BusinessRegistrationNo}
-          onChange={(e) => setBusinessRegistrationNo(e.target.value)}
-          className={`${GlobalStyle.inputText} w-full`}
-        />
-        {errors.BusinessRegistrationNo && (
-          <p className="text-red-500">{errors.BusinessRegistrationNo}</p>
-        )}
-      </td>
-    </tr>
+   
 
         <tr className="block md:table-row">
           <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
-            <span className="inline-block min-w-[180px] text-left mr-4">Contact No</span> :
+            <span className="inline-block min-w-[180px] text-left mr-5">Contact No <span className="text-red-500">*</span></span> :
           </td>
           <td className="block md:table-cell md:w-2/3 pb-2">
             <input
@@ -524,7 +530,7 @@ const Add_DRC = () => {
 
         <tr className="block md:table-row">
           <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
-            <span className="inline-block min-w-[180px] text-left mr-4 ">Address</span> :
+            <span className="inline-block min-w-[180px] text-left mr-5 ">Address <span className="text-red-500">*</span> </span> :
           </td>
           <td className="block md:table-cell md:w-2/3 pb-2">
             <input
@@ -541,7 +547,7 @@ const Add_DRC = () => {
 
             <tr className="block md:table-row">
               <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
-                <span className="inline-block min-w-[180px] text-left mr-4 ">Email</span> :
+                <span className="inline-block min-w-[180px] text-left mr-5 ">Email <span className="text-red-500">*</span></span> :
               </td>
               <td className="block md:table-cell md:w-2/3">
                 <input
@@ -567,7 +573,7 @@ const Add_DRC = () => {
           <tbody>
                   <tr className="block md:table-row">
                   <td className="block md:table-cell w-full md:w-1/3 text-left pb-1 md:pb-2 whitespace-nowrap">
-                    <span className="inline-block min-w-[120px] pl-6">Service No</span>
+                    <span className="inline-block min-w-[120px] pl-6">Service No <span className="text-red-500">*</span></span>
                     <span className="ml-8">:</span>
                   </td>
                   <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
@@ -626,7 +632,7 @@ const Add_DRC = () => {
     {/*Service section */}            
         <div className="flex flex-col md:flex-row items-start md:items-center gap-16 mb-4 mt-8 ml-10 ">
               <h2 className={`${GlobalStyle.headingMedium} font-bold underline`}>
-                Service Types
+                Service Types  <span className="text-red-500">*</span>
               </h2>
               
               <div className="w-full md:w-2/3">
@@ -730,7 +736,7 @@ const Add_DRC = () => {
         {/* Billing Center section*/}
               <div className="mb-4 mt-8 ml-10">
                   <h2 className={`${GlobalStyle.headingMedium} text-left font-bold mb-2`}>
-                    <span className="underline">Billing Center Areas</span>
+                    <span className="underline">Billing Center Areas  <span className="text-red-500">*</span> </span>
                   </h2>
 
                     <div className="flex flex-col md:flex-row items-start gap-y-2 md:gap-y-0 md:items-center">
