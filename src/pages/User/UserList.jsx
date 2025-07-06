@@ -8,7 +8,7 @@ Related Files: (routes)
 Notes:The following page conatins the code for the User list Screen */
 
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import activeIcon from "../../assets/images/User/User_Active.png";
 import deactiveIcon from "../../assets/images/User/User_Inactive.png";
@@ -19,6 +19,8 @@ import Swal from "sweetalert2";
 import { getAllUserDetails } from "../../services/user/user_services"; 
 
 const UserList = () => {
+  const navigate =useNavigate();
+
   // Search
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -61,10 +63,10 @@ const UserList = () => {
   const paginatedData = filteredData.slice(startIndex, endIndex);
   const hasMounted = useRef(false);
 
-  useEffect(() => {
-    console.log("Filtered Data", filteredData);
+  // useEffect(() => {
+  //   console.log("Filtered Data", filteredData);
     
-  }, [filteredData])
+  // }, [filteredData])
 
   const fetchUsers = async (filters) => {
     setIsLoading(true);
@@ -279,6 +281,19 @@ const UserList = () => {
     setTooltipVisible(null);
   };
 
+  const formatRoleLabel = (value) => {
+    if (!value) return "N/A";
+
+    return value
+      .split("_")
+      .map(word => word[0].toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+
+  const handleUserRegister = () => navigate("/pages/user/signup");
+
+
   // Function to render status icon with tooltip
   const renderStatusIcon = (user) => {
     if (user.status === "Active") {
@@ -348,18 +363,19 @@ const UserList = () => {
 
   return (
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
-      {/* Header Section - Responsive */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
-        <h1 className={`${GlobalStyle.headingLarge} text-xl sm:text-2xl lg:text-3xl`}>User List</h1>
-        <Link to="/pages/user/signup">
-          <button className={GlobalStyle.buttonPrimary}>
-            User Register
+      <h2 className={GlobalStyle.headingLarge}>User List</h2>
+
+      <div className="flex justify-end mt-2 sm:mt-0">
+          <button 
+              className={GlobalStyle.buttonPrimary} 
+              onClick={handleUserRegister}
+          >
+              User Register
           </button>
-        </Link>
       </div>
 
       {/* Search and Filters - Responsive */}
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4 lg:gap-0">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 mt-4 gap-4 lg:gap-0">
         {/* Search Bar */}
         <div className={GlobalStyle.searchBarContainer} >
           <input
@@ -512,7 +528,7 @@ const UserList = () => {
                     </div>
                   </td>
                   <td className={`${GlobalStyle.tableData}`}>{user.user_type || "N/A"}</td>
-                  <td className={`${GlobalStyle.tableData}`}>{user.user_role || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData}`}>{formatRoleLabel(user.user_role)}</td>
                   <td className={`${GlobalStyle.tableData}`}>{user.user_name || "N/A"}</td>
                   <td className={`${GlobalStyle.tableData}`}>{user.user_email || "N/A"}</td>
                   <td className={`${GlobalStyle.tableData}`}>{user.contact_num || "N/A"}</td>
@@ -536,7 +552,7 @@ const UserList = () => {
             </tbody>
           </table>
 
-          {/* Mobile Card View */}
+          {/* Mobile Card View
           <div className="md:hidden space-y-4">
             {paginatedData.map((user) => (
               <div key={user.user_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -599,7 +615,7 @@ const UserList = () => {
                 No results found
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       </div> 
 
