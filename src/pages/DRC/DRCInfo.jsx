@@ -298,7 +298,6 @@ const DRCInfo = () => {
   // Handle DRC End
   const handleEndSubmit = async () => {
   try {
-
     const confirmResult = await Swal.fire({
       title: "Are you sure?",
       text: "Do you really want to terminate this DRC?",
@@ -310,17 +309,9 @@ const DRCInfo = () => {
       cancelButtonText: "Cancel",
     });
 
-    // If user cancels, exit the function
     if (!confirmResult.isConfirmed) {
       return;
     }
-
-    let remarkBy = userData
-      ? userData.id || userData.userId || userData
-      : "system";
-
-    const formattedDate =
-      endDate instanceof Date ? endDate : new Date(endDate);
 
     // Validate remark field
     if (!terminationRemark.trim()) {
@@ -334,7 +325,6 @@ const DRCInfo = () => {
 
     setTerminationRemarkError(false);
 
-    // Show processing indicator
     Swal.fire({
       title: "Processing...",
       text: "Please wait while terminating the DRC",
@@ -344,22 +334,25 @@ const DRCInfo = () => {
       },
     });
 
-    // Call termination API
+    // Get the user who is terminating
+    const terminate_by = userData
+      ? userData.id || userData.userId || userData
+      : "system";
+
+    // Call termination API with corrected field names
     const response = await terminateCompanyByDRCID(
       companyData.drc_id,
       terminationRemark,
-      remarkBy,
-      formattedDate
+      terminate_by,
+      endDate
     );
 
-    // Close processing indicator
     Swal.close();
 
-    // Show success message
     Swal.fire({
       icon: "success",
       title: "Termination Successful",
-      text: `DRC ${companyData.drc_name} has been successfully terminated with effect from ${formattedDate.toLocaleDateString()}.`,
+      text: `DRC ${companyData.drc_name} has been successfully terminated with effect from ${endDate.toLocaleDateString()}.`,
       confirmButtonText: "Done",
       allowOutsideClick: false,
     }).then((result) => {
@@ -811,7 +804,7 @@ const DRCInfo = () => {
                     value: companyData.drc_email || "Not specified"
                   }, 
                  currentStatus === "Terminate" && {
-                    label: "End Date",
+                    label: "Terminate Date",
                     value: companyData.drc_end_dtm
                       ? new Date(companyData.drc_end_dtm).toLocaleDateString()
                       : companyData.drc_status?.find(s => s.drc_status === "Terminate")?.drc_status_dtm
