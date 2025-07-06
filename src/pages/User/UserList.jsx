@@ -61,6 +61,11 @@ const UserList = () => {
   const paginatedData = filteredData.slice(startIndex, endIndex);
   const hasMounted = useRef(false);
 
+  useEffect(() => {
+    console.log("Filtered Data", filteredData);
+    
+  }, [filteredData])
+
   const fetchUsers = async (filters) => {
     setIsLoading(true);
     setError(null);
@@ -346,7 +351,7 @@ const UserList = () => {
       {/* Header Section - Responsive */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
         <h1 className={`${GlobalStyle.headingLarge} text-xl sm:text-2xl lg:text-3xl`}>User List</h1>
-        <Link to="/config/add-user">
+        <Link to="/pages/user/signup">
           <button className={GlobalStyle.buttonPrimary}>
             User Register
           </button>

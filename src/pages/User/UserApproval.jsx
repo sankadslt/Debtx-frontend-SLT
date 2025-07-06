@@ -1,3 +1,13 @@
+/* Purpose: This template is used for the 17.3 - User Approval .
+Created Date: 2025-06-06
+Created By: sakumini (sakuminic@gmail.com)
+Mofilfied by: Nimesh Perera (nimeshmathew999@gmail.com)
+Version: node 20
+ui number :17.3
+Dependencies: tailwind css
+Related Files: (routes)
+Notes:The following page conatins the code for the User Approvals list Screen */
+
 import React, { useEffect, useState, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import {
@@ -11,48 +21,224 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Link } from "react-router-dom";
 import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
+import { getAllUserApprovals } from "../../services/user/user_services";
 
 const UserApproval = () => {
+	// Search
 	const [searchQuery, setSearchQuery] = useState("");
+
+	// Filter States
 	const [fromDate, setFromDate] = useState(null);
 	const [toDate, setToDate] = useState(null);
-	const [userRole, setUserRole] = useState("");
 	const [userType, setUserType] = useState("");
 	const [appliedFilters, setAppliedFilters] = useState({
-		userRole: "",
 		userType: "",
 		fromDate: null,
 		toDate: null,
 	});
-	const [roData, setRoData] = useState([]);
-	const [originalData, setOriginalData] = useState([]);
+	
+	const [filteredData, setFilteredData] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
-	const [tooltipVisible, setTooltipVisible] = useState(null);
+
 	const [selectAll, setSelectAll] = useState(false);
 	const [selectedUsers, setSelectedUsers] = useState([]);
 	const [isCreatingTask, setIsCreatingTask] = useState(false);
 	const [isFiltered, setIsFiltered] = useState(false);
 
-	// Pagination state - following Monitor Settlement pattern
+	// Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
 	const [maxCurrentPage, setMaxCurrentPage] = useState(0);
 	const [totalPages, setTotalPages] = useState(0);
 	const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
-	const [committedFilters, setCommittedFilters] = useState({
-		userRole: "",
-		userType: "",
-		fromDate: null,
-		toDate: null,
-	});
-
 	const rowsPerPage = 10;
-	const hasMounted = useRef(false);
 
-	// Variables for table - following Monitor Settlement pattern
+	// Variables for table
 	const startIndex = (currentPage - 1) * rowsPerPage;
 	const endIndex = startIndex + rowsPerPage;
-	const paginatedData = roData.slice(startIndex, endIndex);
+	const paginatedData = filteredData.slice(startIndex, endIndex);
+	const hasMounted = useRef(false);
+
+	useEffect(() => {
+		console.log("Filtered Data", filteredData);
+		
+	}, [filteredData])
+	
+
+	const fetchUserApprovals =async(filters) => {
+		setIsLoading(true);
+		setError(null);
+		
+		try {
+			const requestData = {
+				page : filters.page,
+				user_type: filters.userType,
+				from_date: filters.fromDate,
+				to_date: filters.toDate,
+			}
+
+			console.log("Payload sent to API: ", requestData);
+
+			const response =await getAllUserApprovals(requestData);
+			console.log("API Response:", response);
+
+			if (response && response.status === "success" && Array.isArray(response.data)) {
+				if (response.data.length === 0) {
+					setIsMoreDataAvailable(false);
+			
+					if (currentPage === 1) {
+						Swal.fire({
+						title: "No Results",
+						text: "No matching user approvals found for the selected filters.",
+						icon: "warning",
+						allowOutsideClick: false,
+						allowEscapeKey: false,
+						confirmButtonColor: "#f1c40f",
+						});
+					} else if (currentPage === 2) {
+						setCurrentPage(1); // Reset to page 1 if no data on page 2
+					}
+					
+					setFilteredData([]); // Clear data on no results
+				} else {
+					const maxData = currentPage === 1 ? 10 : 30;
+					// Append new users to existing data
+					setFilteredData((prevData) => [
+						...prevData,
+						...response.data.map(approval => ({
+							approval_id: approval.approval_id,
+							user_type: approval.user_type?.toUpperCase() || "",
+							user_name: approval.user_name,
+							user_email: approval.login_email,
+							created_on: new Date(approval.created_dtm).toLocaleDateString("en-CA"),
+						})),
+					]);
+			
+					// If fewer than max data returned, no more data available
+					if (response.data.length < maxData) {
+						setIsMoreDataAvailable(false);
+					}
+				}
+			} else {
+				Swal.fire({
+				  title: "Error",
+				  text: "No valid user data found in response.",
+				  icon: "error",
+				  confirmButtonColor: "#d33",
+				});
+				setFilteredData([]);
+			}
+		} catch (error) {
+			console.error("Error fetching user approvals:", error);
+			setError(error.message || "Failed to fetch user approvals");
+			setFilteredData([]);
+		} finally {
+			setIsLoading(false);
+		}
+	}
+	
+	useEffect(() => {
+		if (!hasMounted.current) {
+			hasMounted.current = true;
+			return;
+		}
+
+		if (isMoreDataAvailable && currentPage > maxCurrentPage) {
+			setMaxCurrentPage(currentPage);
+			fetchUserApprovals({
+				...appliedFilters,
+				page: currentPage
+			});
+		}
+	}, [currentPage]);
+
+	// Handle Pagination
+	const handlePrevNext = (direction) => {
+		if (direction === "prev" && currentPage > 1) {
+			setCurrentPage(currentPage - 1);
+		} else if (direction === "next") {
+		if (isMoreDataAvailable) {
+			setCurrentPage(currentPage + 1);
+		} else {
+			const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+			setTotalPages(totalPages);
+			if (currentPage < totalPages) {
+				setCurrentPage(currentPage + 1);
+			}
+		}
+		}
+	};
+
+	const handleFilterButton = () => {
+		setIsMoreDataAvailable(true);
+		setTotalPages(0);
+		setMaxCurrentPage(0);
+
+		const isValid =filterValidations();
+		console.log("Is valid: ",isValid);
+		
+		if (!isValid) {
+			return;
+		} else {
+		setAppliedFilters({
+			userType :userType,
+			toDate :toDate,
+			fromDate: fromDate,
+		});
+		setFilteredData([]);
+		if (currentPage === 1) {
+			fetchUserApprovals({
+				page: 1,
+				userType,
+				toDate,
+				fromDate
+			});
+		}else {
+			setCurrentPage(1);
+		}
+		}
+	}
+
+	const handleClear = () => {
+		// Clear both the form fields and applied filters
+		setUserType("");
+		setFromDate(null);
+		setToDate(null);
+		
+		// Reset Search Query
+		setSearchQuery("");
+
+		// Reset Pagination
+		setTotalPages(0); // Reset total pages
+		setFilteredData([]); // Clear filtered data
+		setMaxCurrentPage(0); // Reset max current page
+		setIsMoreDataAvailable(true);
+
+		setAppliedFilters({ 
+			userType: "",
+			fromDate: "",
+			toDate: "" 
+		});
+
+		if (currentPage != 1) {
+			setCurrentPage(1); // Reset to page 1
+		} else {
+			setCurrentPage(0); // Temp set to 0
+			setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+		}
+	};
+
+	// Search Section
+	const filteredDataBySearch = paginatedData.filter((row) =>
+		Object.values(row)
+		.join(" ")
+		.toLowerCase()
+		.includes(searchQuery.toLowerCase())
+	);
+
+	const handleUserTypeChange = (e) => {
+		setUserType(e.target.value || "");
+	};
 
 	const handleFromDateChange = (date) => {
 		if (toDate && date > toDate) {
@@ -112,224 +298,9 @@ const UserApproval = () => {
 		}
 	};
 
-	// Mock API call function - following Monitor Settlement pattern
-	const callAPI = async (filters) => {
-		try {
-			setIsLoading(true);
-			
-			// Mock data for Users based on the updated structure
-			const mockUserData = [
-				{
-					user_id: "0001",
-					user_type: "SLT",
-					user_role: "Admin",
-					user_name: "W.M. Wimalasiri",
-					user_email: "wimal@example.com",
-					created_on: "2024-01-15",
-					login_method: "SLT",
-				},
-				{
-					user_id: "0002",
-					user_type: "DRC",
-					user_role: "User",
-					user_name: "R.A. Siripala",
-					user_email: "siripala@example.com",
-					created_on: "2024-02-10",
-					login_method: "Gmail",
-				},
-				{
-					user_id: "0003",
-					user_type: "RO",
-					user_role: "Moderator",
-					user_name: "K.S. Fernando",
-					user_email: "fernando@example.com",
-					created_on: "2024-03-05",
-					login_method: "Gmail",
-				},
-				{
-					user_id: "0004",
-					user_type: "SLT",
-					user_role: "Admin",
-					user_name: "N.S. Perera",
-					user_email: "perera@example.com",
-					created_on: "2024-03-22",
-					login_method: "SLT",
-				},
-				{
-					user_id: "0005",
-					user_type: "DRC",
-					user_role: "User",
-					user_name: "M.A. Gunawardena",
-					user_email: "gunawardena@example.com",
-					created_on: "2024-04-01",
-					login_method: "Gmail",
-				},
-				{
-					user_id: "0006",
-					user_type: "RO",
-					user_role: "Moderator",
-					user_name: "T.D. Jayasuriya",
-					user_email: "jayasuriya@example.com",
-					created_on: "2024-04-10",
-					login_method: "Gmail",
-				},
-				{
-					user_id: "0007",
-					user_type: "SLT",
-					user_role: "Admin",
-					user_name: "K.P. Ranasinghe",
-					user_email: "ranasinghe@example.com",
-					created_on: "2024-05-05",
-					login_method: "SLT",
-				},
-				{
-					user_id: "0008",
-					user_type: "DRC",
-					user_role: "User",
-					user_name: "S.H. Madushanka",
-					user_email: "madushanka@example.com",
-					created_on: "2024-05-20",
-					login_method: "Gmail",
-				},
-				{
-					user_id: "0009",
-					user_type: "RO",
-					user_role: "Moderator",
-					user_name: "D.L. Bandara",
-					user_email: "bandara@example.com",
-					created_on: "2024-06-01",
-					login_method: "Gmail",
-				},
-				{
-					user_id: "0010",
-					user_type: "SLT",
-					user_role: "User",
-					user_name: "P.V. Lakmal",
-					user_email: "lakmal@example.com",
-					created_on: "2024-06-05",
-					login_method: "SLT",
-				},
-				{
-					user_id: "0011",
-					user_type: "DRC",
-					user_role: "Admin",
-					user_name: "R.M. De Silva",
-					user_email: "desilva@example.com",
-					created_on: "2024-06-06",
-					login_method: "Gmail",
-				},
-			];
-
-			// Apply filters
-			let filteredMockData = mockUserData.filter((row) => {
-				const matchesUserRole =
-					filters.userRole === "" ||
-					row.user_role.toLowerCase() === filters.userRole.toLowerCase();
-
-				const matchesUserType =
-					filters.userType === "" ||
-					row.user_type.toLowerCase() === filters.userType.toLowerCase();
-
-				// Date filtering
-				let matchesDateRange = true;
-				if (filters.fromDate && filters.toDate) {
-					const itemDate = new Date(row.created_on);
-					matchesDateRange = itemDate >= filters.fromDate && itemDate <= filters.toDate;
-				}
-
-				return matchesUserRole && matchesUserType && matchesDateRange;
-			});
-
-			// Simulate pagination - get data for current page
-			const startIdx = (filters.page - 1) * rowsPerPage;
-			const endIdx = startIdx + rowsPerPage;
-			const pageData = filteredMockData.slice(startIdx, endIdx);
-
-			// Simulate API delay
-			await new Promise(resolve => setTimeout(resolve, 500));
-
-			setIsLoading(false);
-
-			if (pageData.length === 0) {
-				setIsMoreDataAvailable(false);
-				if (filters.page === 1) {
-					Swal.fire({
-						title: "No Results",
-						text: "No matching data found for the selected filters.",
-						icon: "warning",
-						allowOutsideClick: false,
-						allowEscapeKey: false,
-						confirmButtonColor: "#f1c40f"
-					});
-				}
-			} else {
-				// Check if more data is available
-				const hasMoreData = endIdx < filteredMockData.length;
-				setIsMoreDataAvailable(hasMoreData);
-				
-				// Set data based on page
-				if (filters.page === 1) {
-					setRoData(pageData);
-				} else {
-					setRoData(prevData => [...prevData, ...pageData]);
-				}
-			}
-
-		} catch (error) {
-			console.error("Error filtering users:", error);
-			Swal.fire({
-				title: "Error",
-				text: "Failed to fetch filtered data. Please try again.",
-				icon: "error",
-				confirmButtonColor: "#d33"
-			});
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	// Initialize with mock data on first load
-	useEffect(() => {
-		const initializeData = async () => {
-			await callAPI({
-				userRole: "",
-				userType: "",
-				fromDate: null,
-				toDate: null,
-				page: 1
-			});
-		};
-		
-		initializeData();
-	}, []);
-
-	// Handle pagination effect
-	useEffect(() => {
-		if (!hasMounted.current) {
-			hasMounted.current = true;
-			return;
-		}
-
-		if (isMoreDataAvailable && currentPage > maxCurrentPage) {
-			setMaxCurrentPage(currentPage);
-			callAPI({
-				...committedFilters,
-				page: currentPage
-			});
-		}
-	}, [currentPage]);
-
-	// Filter data by search query
-	const filteredDataBySearch = paginatedData.filter((row) => {
-		return Object.values(row)
-			.join(" ")
-			.toLowerCase()
-			.includes(searchQuery.toLowerCase());
-	});
-
 	// Validate filters before calling the API
 	const filterValidations = () => {
-		if (!userRole && !userType && !fromDate && !toDate) {
+		if (!userType && !fromDate && !toDate) {
 			Swal.fire({
 				title: "Warning",
 				text: "No filter is selected. Please, select a filter.",
@@ -358,97 +329,8 @@ const UserApproval = () => {
 		return true;
 	};
 
-	const handleFilter = () => {
-		setIsMoreDataAvailable(true);
-		setTotalPages(0);
-		setMaxCurrentPage(0);
-		
-		const isValid = filterValidations();
-		if (!isValid) {
-			return;
-		}
-
-		setCommittedFilters({
-			userRole,
-			userType,
-			fromDate,
-			toDate,
-		});
-		
-		setAppliedFilters({
-			userRole,
-			userType,
-			fromDate,
-			toDate,
-		});
-		
-		setIsFiltered(true);
-		setRoData([]);
-
-		if (currentPage === 1) {
-			callAPI({
-				userRole,
-				userType,
-				fromDate,
-				toDate,
-				page: 1
-			});
-		} else {
-			setCurrentPage(1);
-		}
-	};
-
-	const handleClear = () => {
-		setUserRole("");
-		setUserType("");
-		setFromDate(null);
-		setToDate(null);
-		setAppliedFilters({
-			userRole: "",
-			userType: "",
-			fromDate: null,
-			toDate: null,
-		});
-		setCommittedFilters({
-			userRole: "",
-			userType: "",
-			fromDate: null,
-			toDate: null,
-		});
-		setIsFiltered(false);
-		setSearchQuery("");
-		setTotalPages(0);
-		setRoData([]);
-		setMaxCurrentPage(0);
-		setIsMoreDataAvailable(true);
-		
-		if (currentPage !== 1) {
-			setCurrentPage(1);
-		} else {
-			setCurrentPage(0);
-			setTimeout(() => setCurrentPage(1), 0);
-		}
-	};
-
-	// Handle Pagination
-	const handlePrevNext = (direction) => {
-		if (direction === "prev" && currentPage > 1) {
-			setCurrentPage(currentPage - 1);
-		} else if (direction === "next") {
-			if (isMoreDataAvailable) {
-				setCurrentPage(currentPage + 1);
-			} else {
-				const totalPages = Math.ceil(roData.length / rowsPerPage);
-				setTotalPages(totalPages);
-				if (currentPage < totalPages) {
-					setCurrentPage(currentPage + 1);
-				}
-			}
-		}
-	};
-
 	const handleSelectAll = () => {
-		const currentPageUserIds = filteredDataBySearch.map((user) => user.user_id);
+		const currentPageUserIds = filteredDataBySearch.map((approval) => approval.approval_id);
 
 		if (selectAll) {
 			// Deselect only current page users
@@ -519,16 +401,8 @@ const UserApproval = () => {
 		}
 	};
 
-	const handleUserTypeChange = (e) => {
-		setUserType(e.target.value || "");
-	};
-
-	const handleUserRoleChange = (e) => {
-		setUserRole(e.target.value || "");
-	};
-
 	// Display loading animation when data is loading
-	if (isLoading && roData.length === 0) {
+	if (isLoading && filteredData.length === 0) {
 		return (
 			<div className="flex justify-center items-center h-64">
 				<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -575,9 +449,8 @@ const UserApproval = () => {
 								style={{ color: userType === "" ? "gray" : "black" }}
 							>
 								<option value="" hidden>User Type</option>
-								<option value="Slt" style={{ color: "black" }}>SLT</option>
-								<option value="Drcuser" style={{ color: "black" }}>DRC User</option>
-								<option value="ro" style={{ color: "black" }}>RO</option>
+								<option value="drcUser" style={{ color: "black" }}>DRC User</option>
+								<option value="RO" style={{ color: "black" }}>RO</option>
 							</select>
 						</div>
 						
@@ -601,7 +474,7 @@ const UserApproval = () => {
 											
 						{/* Filter Button */}
 						<button
-							onClick={handleFilter}
+							onClick={handleFilterButton}
 							className={`${GlobalStyle.buttonPrimary} w-full`}
 							>
 							Filter
@@ -656,9 +529,9 @@ const UserApproval = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{filteredDataBySearch.map((user, index) => (
+							{filteredDataBySearch.map((approval, index) => (
 								<tr
-									key={user.user_id}
+									key={approval.approval_id}
 									className={`${
 										index % 2 === 0
 											? GlobalStyle.tableRowEven
@@ -668,26 +541,26 @@ const UserApproval = () => {
 									<td className={`${GlobalStyle.tableData} text-center`}>
 										<input
 											type="checkbox"
-											checked={selectedUsers.includes(user.user_id)}
+											checked={selectedUsers.includes(approval.approval_id)}
 											className="cursor-pointer"
-											onChange={() => handleCheckboxChange(user.user_id)}
+											onChange={() => handleCheckboxChange(approval.approval_id)}
 										/>
 									</td>
-									<td className={`${GlobalStyle.tableData}`}>{user.user_id}</td>
+									<td className={`${GlobalStyle.tableData}`}>{approval.approval_id}</td>
 									<td className={`${GlobalStyle.tableData}`}>
-										{user.user_name}
+										{approval.user_name}
 									</td>
 									<td className={`${GlobalStyle.tableData}`}>
-										{user.user_type}
+										{approval.user_type}
 									</td>
 									<td className={`${GlobalStyle.tableData} break-all`}>
-										{user.user_email}
+										{approval.user_email}
 									</td>
 									<td className={`${GlobalStyle.tableData} break-all`}>
-										{user.login_method}
+										{approval.login_method || "N/A"}
 									</td>
 									<td className={`${GlobalStyle.tableData}`}>
-										{user.created_on}
+										{approval.created_on}
 									</td>
 								</tr>
 							))}
@@ -702,7 +575,7 @@ const UserApproval = () => {
 					</table>
 
 					{/* Mobile Card View */}
-					<div className="md:hidden space-y-4">
+					{/* <div className="md:hidden space-y-4">
 						{filteredDataBySearch.map((user, index) => (
 							<div
 								key={user.user_id}
@@ -753,30 +626,30 @@ const UserApproval = () => {
 								No results found
 							</div>
 						)}
-					</div>
+					</div> */}
 				</div>
 			</div>
 
-			{/* Pagination - Following Monitor Settlement pattern */}
+			{/* Pagination Section */}
 			{filteredDataBySearch.length > 0 && (
 				<div className={GlobalStyle.navButtonContainer}>
-					<button
-						onClick={() => handlePrevNext("prev")}
-						disabled={currentPage <= 1}
-						className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
-					>
-						<FaArrowLeft />
-					</button>
-					<span className={`${GlobalStyle.pageIndicator} mx-4`}>
-						Page {currentPage}
-					</span>
-					<button
-						onClick={() => handlePrevNext("next")}
-						disabled={currentPage === totalPages}
-						className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
-					>
-						<FaArrowRight />
-					</button>
+				<button
+					onClick={() => handlePrevNext("prev")}
+					disabled={currentPage <= 1}
+					className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+				>
+					<FaArrowLeft />
+				</button>
+				<span className={`${GlobalStyle.pageIndicator} mx-4 my-auto`}>
+					Page {currentPage}
+				</span>
+				<button
+					onClick={() => handlePrevNext("next")}
+					disabled={currentPage === totalPages}
+					className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+				>
+					<FaArrowRight />
+				</button>
 				</div>
 			)}
 
