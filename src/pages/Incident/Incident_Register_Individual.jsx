@@ -380,27 +380,24 @@ const handleSubmit = async (e) => {
 
                   </tr>
                   <tr className="align-center">
-                    <td className="w-[180px] py-2">
-                      <label htmlFor="reason">Incident Required Reason
-                         
-                      </label>
-                    </td>
-                    <td className="py-2">
-                    <div className="flex items-center gap-1">
-                      
-                      <input
-                        id="reason"
-                        type="text"
-                        value={reason}
-                        onChange={(e) => setreason(e.target.value)}
-                        className={`${GlobalStyle.inputText} w-full px-2 py-1`}
-                      />
-                    </div>
-                    
+  <td className="py-2">
+    <label htmlFor="reason" >
+      Incident Required Reason
+    </label>
+  </td>
 
-                  
-                    </td>
-                  </tr>
+  <td className="py-2">
+    <textarea
+      id="reason"
+      name="reason"
+      value={reason}
+      onChange={(e) => setreason(e.target.value)}
+      className={`${GlobalStyle.remark}  w-full px-2 py-1`}
+      rows="3"
+      
+    ></textarea>
+  </td>
+</tr>
 
                   {/* Calendar Month */}
                   <tr className="align-center">
