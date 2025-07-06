@@ -160,17 +160,13 @@ const DRCInfo = () => {
             });
           }
 
-          // Fix for remark - ensure it's treated as a string
-          if (typeof data.remark === "string") {
-            setRemark(data.remark);
-          } else if (Array.isArray(data.remark)) {
-            const remarkText =
-              data.remark.length > 0 && typeof data.remark[0] === "string"
-                ? data.remark[0]
-                : "";
-            setRemark(remarkText);
+          if (Array.isArray(data.remark)) {
+            const validRemarks = data.remark.filter(r => r && (r.remark || r.remark_by || r.remark_dtm));
+            setRemarkHistory(validRemarks);
+          } else if (data.remark && typeof data.remark === 'object') {
+            setRemarkHistory([data.remark]);
           } else {
-            setRemark("");
+            setRemarkHistory([]);
           }
 
           // Set remark history if available
@@ -205,42 +201,6 @@ const DRCInfo = () => {
     }
   }, [drcId]);
 
-  // // Function to fetch active service types
-  // const fetchActiveServices = async () => {
-  //   try {
-  //     setServiceLoading(true);
-  //     const response = await getActiveServiceDetails();
-
-  //     if (response && response.data) {
-  //       const filtered = response.data.filter(
-  //         (service) => service.service_status === "Active"
-  //       );
-
-  //       const formatted = filtered.map((service) => {
-  //         const isAlreadySelected = companyData.services.some(
-  //           (s) => s.service_type === service.service_type
-  //         );
-
-  //         return {
-  //           id: service.service_id,
-  //           name: service.service_type,
-  //           selected: isAlreadySelected,
-  //         };
-  //       });
-
-  //       setServiceTypes(formatted);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error loading service types:", error);
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Error",
-  //       text: "Failed to load active service types.",
-  //     });
-  //   } finally {
-  //     setServiceLoading(false);
-  //   }
-  // };
 
   // Fetch active service types from the API
   const fetchActiveServices = async () => {
@@ -286,12 +246,14 @@ const DRCInfo = () => {
           const isAlreadySelected = companyData.rtom.some(
             (r) => r.rtom_id === rtom.rtom_id
           );
+          
 
           return {
             id: rtom.rtom_id || rtom._id,
             code: rtom.rtom_id?.toString() || "",
             name: rtom.rtom_name || "",
             selected: isAlreadySelected,
+
           };
         });
 
@@ -335,69 +297,87 @@ const DRCInfo = () => {
 
   // Handle DRC End
   const handleEndSubmit = async () => {
-    try {
-      let remarkBy = userData
-        ? userData.id || userData.userId || userData
-        : "system";
+  try {
 
-      const formattedDate =
-        endDate instanceof Date ? endDate : new Date(endDate);
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to terminate this DRC?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, terminate it!",
+      cancelButtonText: "Cancel",
+    });
 
-      // Validate remark field
-      if (!terminationRemark.trim()) {
-        setTerminationRemarkError(true);
-        return Swal.fire({
-          icon: "error",
-          title: "Remark Required",
-          text: "Please enter a remark",
-        });
-      }
+    // If user cancels, exit the function
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
 
-      setTerminationRemarkError(false);
+    let remarkBy = userData
+      ? userData.id || userData.userId || userData
+      : "system";
 
-      Swal.fire({
-        title: "Processing...",
-        text: "Please wait while terminating the DRC",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
+    const formattedDate =
+      endDate instanceof Date ? endDate : new Date(endDate);
 
-      // Call termination API
-      const response = await terminateCompanyByDRCID(
-        companyData.drc_id,
-        terminationRemark,
-        remarkBy,
-        formattedDate
-      );
-
-      Swal.close();
-
-      // success message
-      Swal.fire({
-        icon: "success",
-        title: "Termination Successful",
-        text: `DRC ${companyData.drc_name
-          } has been successfully terminated with effect from ${formattedDate.toLocaleDateString()}.`,
-        confirmButtonText: "Done",
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          setTerminationRemark("");
-          setShowEndFields(false);
-          navigate(-1);
-        }
-      });
-    } catch (err) {
-      console.error("Failed to terminate DRC:", err);
-      Swal.fire({
+    // Validate remark field
+    if (!terminationRemark.trim()) {
+      setTerminationRemarkError(true);
+      return Swal.fire({
         icon: "error",
-        title: "Error",
-        text: err.message || "Failed to terminate DRC",
+        title: "Remark Required",
+        text: "Please enter a remark",
       });
     }
-  };
+
+    setTerminationRemarkError(false);
+
+    // Show processing indicator
+    Swal.fire({
+      title: "Processing...",
+      text: "Please wait while terminating the DRC",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    // Call termination API
+    const response = await terminateCompanyByDRCID(
+      companyData.drc_id,
+      terminationRemark,
+      remarkBy,
+      formattedDate
+    );
+
+    // Close processing indicator
+    Swal.close();
+
+    // Show success message
+    Swal.fire({
+      icon: "success",
+      title: "Termination Successful",
+      text: `DRC ${companyData.drc_name} has been successfully terminated with effect from ${formattedDate.toLocaleDateString()}.`,
+      confirmButtonText: "Done",
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTerminationRemark("");
+        setShowEndFields(false);
+        navigate(-1);
+      }
+    });
+  } catch (err) {
+    console.error("Failed to terminate DRC:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err.message || "Failed to terminate DRC",
+    });
+  }
+};
 
   const handleDropdownClick = () => {
     if (!dropdownClicked) {
@@ -438,37 +418,40 @@ const DRCInfo = () => {
     }
   };
 
-  const handleAddRTOM = () => {
-    if (
-      selectedRTOM &&
-      !rtomAreas.some((a) => a.code === selectedRTOM && a.selected)
-    ) {
-      const updatedAreas = rtomAreas.map((item) =>
-        item.code === selectedRTOM ? { ...item, selected: true } : item
-      );
-      setRtomAreas(updatedAreas);
+ const handleAddRTOM = () => {
+  if (
+    selectedRTOM &&
+    !rtomAreas.some((a) => a.code === selectedRTOM && a.selected)
+  ) {
+    const updatedAreas = rtomAreas.map((item) =>
+      item.code === selectedRTOM ? { ...item, selected: true } : item
+    );
+    setRtomAreas(updatedAreas);
 
-      const selectedRtomItem = rtomAreas.find(
-        (area) => area.code === selectedRTOM
-      );
+    const selectedRtomItem = rtomAreas.find(
+      (area) => area.code === selectedRTOM
+    );
 
-      if (selectedRtomItem) {
-        const newRtom = {
-          rtom_id: selectedRtomItem.id,
-          rtom_name: selectedRtomItem.name,
-          rtom_status: "Active",
-          status_update_dtm: new Date().toISOString(),
-        };
+    if (selectedRtomItem) {
+      const newRtom = {
+        rtom_id: selectedRtomItem.id,
+        rtom_name: selectedRtomItem.name,
+        rtom_status: "Active",
+        handling_type: selectedhandlingtype, // Add handling type here
+        status_update_dtm: new Date().toISOString(),
+      };
 
-        setCompanyData({
-          ...companyData,
-          rtom: [...companyData.rtom, newRtom],
-        });
-      }
-
-      setSelectedRTOM("");
+      setCompanyData({
+        ...companyData,
+        rtom: [...companyData.rtom, newRtom],
+      });
     }
-  };
+
+    setSelectedRTOM("");
+    Setselectedhandlingtype(""); // Reset handling type selection
+  }
+};
+
 
   const handleRemoveServiceType = (type) => {
     const updatedTypes = serviceTypes.map((item) =>
@@ -761,6 +744,11 @@ const DRCInfo = () => {
 
   console.log("ShowPOPUp:", showPopup);
 
+  const currentStatus = companyData.drc_status?.length > 0 
+  ? companyData.drc_status[companyData.drc_status.length - 1].drc_status
+  : "Inactive";
+
+
   if (!editMode) {
     // View mode
     return (
@@ -774,20 +762,21 @@ const DRCInfo = () => {
           <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
 
             <div className="absolute top-4 right-4">
-              <img
-                src={Edit}
-                onClick={() => {
-                  if (companyData.drc_status !== "Terminate") {
-                    handleNavigateToEdit();
-                  }
-                }}
-                className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${companyData.drc_status === "Terminate"
+            <img
+              src={Edit}
+              onClick={() => {
+                if (currentStatus !== "Terminate") {  
+                  handleNavigateToEdit();
+                }
+              }}
+              className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${
+                currentStatus === "Terminate"  
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
-                  }`}
-                alt="Edit"
-              />
-            </div>
+              }`}
+              alt="Edit"
+            />
+          </div>
 
             {/* Company Details Section */}
             <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
@@ -798,11 +787,13 @@ const DRCInfo = () => {
               <tbody className="space-y-2 sm:space-y-0">
                 {[
                   {
-                    label: "Added Date",
-                    value: companyData.create_on
-                      ? new Date(companyData.create_on).toLocaleDateString()
-                      : ""
-                  },
+                  label: "Added Date",
+                  value: companyData.createdAt
+                    ? new Date(companyData.createdAt).toLocaleDateString()
+                    : companyData.create_on
+                    ? new Date(companyData.create_on).toLocaleDateString()
+                    : "Not specified"
+                },
                   {
                     label: "Business Reg No",
                     value: companyData.drc_business_registration_number || "Not specified"
@@ -818,6 +809,14 @@ const DRCInfo = () => {
                   {
                     label: "Email",
                     value: companyData.drc_email || "Not specified"
+                  }, 
+                 currentStatus === "Terminate" && {
+                    label: "End Date",
+                    value: companyData.drc_end_dtm
+                      ? new Date(companyData.drc_end_dtm).toLocaleDateString()
+                      : companyData.drc_status?.find(s => s.drc_status === "Terminate")?.drc_status_dtm
+                        ? new Date(companyData.drc_status.find(s => s.drc_status === "Terminate").drc_status_dtm).toLocaleDateString()
+                        : "Not specified"
                   }
                 ].map((item, index) => (
                   <tr key={index} className="block sm:table-row">
@@ -1175,15 +1174,16 @@ const DRCInfo = () => {
             <div>
               <button
                 onClick={() => {
-                  if (companyData.drc_status !== "Terminate") {
+                  if (currentStatus !== "Terminate") {  
                     setShowEndFields(true);
                   }
                 }}
-                className={`${GlobalStyle.buttonPrimary} ${companyData.drc_status === "Terminate"
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-                  }`}
-                disabled={companyData.drc_status === "Terminate"}
+                className={`${GlobalStyle.buttonPrimary} ${
+                  currentStatus === "Terminate" 
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+                disabled={currentStatus === "Terminate"}  
               >
                 End
               </button>
@@ -1661,7 +1661,7 @@ const DRCInfo = () => {
               Billing Center Areas
             </h2>
 
-            <div className="flex items-center mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <select
                 onClick={handleRtomDropdownClick}
                 value={selectedRTOM}
@@ -1686,23 +1686,21 @@ const DRCInfo = () => {
                 onChange={(e) => Setselectedhandlingtype(e.target.value)}
                 className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
               >
-                <option value="">Select Handling Type</option>
-                <option value="CPE">CPE</option>
-                <option value="Arrears">Arrears</option>
-                <option value="All-Type">All Type</option>
-              </select>
+                    <option value="">Select Handling Type</option>
+                    <option value="CPE">CPE</option>
+                    <option value="Arrears">Arrears</option>
+                    <option value="All-Type">All Type</option>
+                  </select>
+
+
               <div className="flex justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">
-                <button
-                  type="button"
-                  onClick={handleAddRTOM}
-                  className={`${GlobalStyle.buttonCircle}`}
-                  disabled={!selectedRTOM}
-                >
-                  <img
-                    src={addIcon}
-                    alt="Add"
-                    style={{ width: 20, height: 20 }}
-                  />
+                 <button
+                      type="button"
+                      onClick={handleAddRTOM}
+                      className={`${GlobalStyle.buttonCircle}`}
+                      disabled={!selectedRTOM || !selectedhandlingtype}
+                    >
+                      <img src={addIcon} alt="Add" style={{ width: 20, height: 20 }} />
                 </button>
               </div>
             </div>

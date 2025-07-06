@@ -4,6 +4,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/DRC`;
 const URL2 = `${BASE_URL}/recovery_officer`;
+const URL3 = `${BASE_URL}/DRC_service`;
 
 export const Active_DRC_Details = async () => {
   try {
@@ -28,62 +29,35 @@ export const Active_DRC_Details = async () => {
   }
 };
 
-// export const listAllDRCDetails = async (status, page = 1) => {
-//   try {
-//     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
-//       status,
-//       page,
-//     });
-
-//     console.log("Full DRC API response:", response.data);
-
-//     const drcArray = response.data;
-
-//     if (!Array.isArray(drcArray)) {
-//       throw new Error("Invalid DRC data format received");
-//     }
-
-//     const formattedDRCs = drcArray.map((drc) => ({
-//       key: drc.drc_id,
-//       value: drc.drc_name,
-//       id: drc.drc_id,
-//       email: drc.drc_email,
-//       tel: drc.drc_contact_no,
-//       status: drc.drc_status,
-//       roCount: drc.ro_count,
-//       rtomCount: drc.rtom_count,
-//       business_registration_number: drc.drc_business_registration_number,
-//       service_count: drc.service_count,
-//     }));
-
-//     return formattedDRCs;
-//   } catch (error) {
-//     console.error(
-//       "Error fetching DRCs by status:",
-//       error.response?.data || error.message
-//     );
-//     throw error;
-//   }
-// };
-
 export const listAllDRCDetails = async (filter) => {
   try {
     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
-      status: filter.status || "", // Default to 'active' if not provided
-      page: filter.page || 1, // Default to page 1 if not provided
+      status: filter.status || "",
+      page: filter.page || 1,
     });
 
     if (response.data.status === "error") {
-      throw new Error(response.data.message);
+      throw new Error(response.data.message || "Failed to fetch DRC data");
     }
 
-    return response.data; // Return the full response data as-is
+    return response.data;
   } catch (error) {
-    console.error("Error retrieving List_All_DRC:", error.response?.data || error.message);
-    throw error;
+    console.error("Error in listAllDRCDetails:", {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
+    
+    // More specific error messages
+    if (error.response?.status === 500) {
+      throw new Error("Server error while fetching DRC data. Please try again later.");
+    } else if (error.response?.status === 404) {
+      throw new Error("No DRC records found matching your criteria.");
+    } else {
+      throw new Error("Failed to fetch DRC data. Please check your connection and try again.");
+    }
   }
 };
-
 
 export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
   try {
@@ -197,26 +171,24 @@ export const terminateCompanyByDRCID = async (
       drc_id: drcId,
       remark: remark,
       remark_by: remarkBy,
-      remark_dtm: terminatedDate,
+      remark_dtm: terminatedDate.toISOString(), // Ensure proper date format
     });
 
-    // Add validation and logging to debug
-    console.log("API Response:", response.data);
-
-    if (response.data && response.data.data) {
-      return {
-        ...response.data.data,
-        status: response.data.status || "success", // Ensure a status property exists
-      };
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to terminate DRC");
     }
 
-    return response.data; // Fallback
+    return response.data;
   } catch (error) {
     console.error(
       "Error terminating company:",
       error.response?.data || error.message
     );
-    throw new Error(error.response?.data?.message || "Failed to terminate DRC");
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to terminate DRC"
+    );
   }
 };
 
@@ -240,7 +212,10 @@ export const updateDRCInfo = async (
         drc_id: drcId,
         coordinator,
         services,
-        rtom,
+       rtom: rtom.map(rtomItem => ({
+          ...rtomItem,
+          handling_type:  rtomItem.handling_type
+        })),
         remark,
         updated_by,
         remark_dtm,
@@ -410,6 +385,60 @@ export const Create_DRC_With_Services_and_SLT_Coordinator = async (drcData) => {
   }
 };
 
+export const Service_detais_of_the_DRC  = async (drc_id, pages, service_status) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Service_detais_of_the_DRC`,
+      { drc_id, pages, service_status }
+    );
 
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch service details");
+    }
+
+    
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching service details:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+export const Rtom_detais_of_the_DRC = async (drc_id, pages, handling_type) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Rtom_detais_of_the_DRC`,
+      { drc_id, pages, handling_type }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch RTOM details");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching RTOM details:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+export const Ro_detais_of_the_DRC = async (drc_id, pages, drcUser_status) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Ro_detais_of_the_DRC`,
+      { drc_id, pages, drcUser_status }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch RO details");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching RO details:", error.response?.data || error.message);
+    throw error;
+  }
+}
 
 
