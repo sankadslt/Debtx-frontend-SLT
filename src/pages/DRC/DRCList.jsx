@@ -107,13 +107,13 @@ const DRCList = () => {
             if (response && response.data) {
                 const drcData = response.data.map(drc => ({
                     DRCID: drc.drc_id,
-                    Status: drc.drc_status,
+                    Status: drc.status,
                     BusinessRegNo: drc.drc_business_registration_number,
                     DRCName: drc.drc_name,
                     ContactNo: drc.drc_contact_no,
                     ServiceCount: drc.service_count,
                     ROCount: drc.ro_count,
-                    BillingCenterCount: drc.billing_center_code 
+                    BillingCenterCount: drc.rtom_count
                 }));
 
                 if (filters.page === 1) {
@@ -214,7 +214,7 @@ const DRCList = () => {
 
     // Navigation 
     const handleAddDRC = () => navigate("/pages/DRC/Add_DRC");
-    const navigateToEdit = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
+    const navigateToDRCInfo = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
 
     // Effect for API calls
     useEffect(() => {
@@ -381,31 +381,31 @@ const DRCList = () => {
                                     </td>
 
 
-                                   <td className={`${GlobalStyle.tableData} flex justify-center items-center gap-2 w-[140px]`}>
+                                   <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
   
-                                            <button 
-                                                onClick={() => navigateToEdit(log.DRCID)}
-                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                                title="More Info"
-                                            >
-                                                <img src={editImg} alt="More Info" className="w-6 h-6" />
-                                            </button>
-  
-  
-                                            <button 
-                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                                title="Details"
-                                            >
-                                                <img src={ListImg} alt="Details" className="w-6 h-6" />
-                                            </button>
-  
-                                            <button 
-                                                className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                                title="Agreement Details"
-                                            >
-                                                <img src={Checklist} alt="Agreement Details" className="w-6 h-6" />
-                                            </button>
-                                      </td>
+                                        <button 
+                                            onClick={() => navigateToDRCInfo(log.DRCID)}
+                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                            title="More Info"
+                                        >
+                                            <img src={editImg} alt="More Info" className="w-6 h-6" />
+                                        </button>
+
+
+                                        <button 
+                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                            title="Details"
+                                        >
+                                            <img src={ListImg} alt="Details" className="w-6 h-6" />
+                                        </button>
+
+                                        <button 
+                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
+                                            title="Agreement Details"
+                                        >
+                                            <img src={Checklist} alt="Agreement Details" className="w-6 h-6" />
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         ) : (
