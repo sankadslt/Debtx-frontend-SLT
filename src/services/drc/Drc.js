@@ -204,6 +204,7 @@ export const updateDRCInfo = async (
   remark_dtm,
   drc_contact_no,
   drc_email,
+  drc_address,
   drc_status 
 ) => {
   try {
@@ -222,6 +223,7 @@ export const updateDRCInfo = async (
         remark_dtm,
         drc_contact_no,
         drc_email,
+        drc_address,
         drc_status, // Include status in the request
       }
     );

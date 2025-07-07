@@ -1556,7 +1556,7 @@ console.log("DRC Status Data:", {
                     <input
                       type="text"
                       value={address}
-                      onChange={(e) => setContactNo(e.target.value)}
+                      onChange={(e) => setAddress(e.target.value)}
                       className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
                     />
                   </td>
