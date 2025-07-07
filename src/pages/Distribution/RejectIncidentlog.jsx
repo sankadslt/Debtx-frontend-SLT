@@ -435,7 +435,7 @@ export default function RejectIncidentlog() {
 
           {/* Filter Section */}
           <div className="flex justify-end">
-            <div className={`${GlobalStyle.cardContainer}  w-full md:w-[73vw] mb-8 mt-8`}>
+            <div className={`${GlobalStyle.cardContainer}  w-full md:w-[1100px] mb-8 mt-8`}>
               <div className="flex flex-wrap gap-4 justify-end">
                 {/* Source Dropdown */}
                 <div className="flex items-center gap-4 sm:w-auto  sm:flex-row sm:items-center">

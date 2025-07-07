@@ -206,7 +206,7 @@ const Incident_File_Download = () => {
 
             onClick={() => handlePrevNext("prev")}
             disabled={currentPage <= 1}
-            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+            className={`${GlobalStyle.navButton}`}
           >
             <FaArrowLeft />
           </button>
@@ -215,8 +215,10 @@ const Incident_File_Download = () => {
           </span>
           <button
             onClick={() => handlePrevNext("next")}
-            disabled={!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
-            className={`${GlobalStyle.navButton} ${(!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)) ? "cursor-not-allowed" : ""}`}
+            disabled={searchQuery
+              ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+            className={`${GlobalStyle.navButton}`}
           >
             <FaArrowRight />
           </button>
