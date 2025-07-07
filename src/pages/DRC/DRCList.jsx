@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Swal from "sweetalert2";
-import editImg from "../../assets/images/more.svg";
+import moreImg from "../../assets/images/more.svg";
 import ListImg from "../../assets/images/ConfigurationImg/list.png";
+import Checklist from "../../assets/images/ConfigurationImg/checklist.png";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
@@ -36,30 +37,36 @@ const DRCList = () => {
     });
 
     // Status icons 
-    const getStatusIcon = (status) => {
-        switch (status?.toLowerCase()) {
-            case "active":
-                return activeIcon;
-            case "inactive":
-                return inactiveIcon;
-            case "terminate":
-                return terminatedIcon;
-            default:
-                return null;
-        }
-    };
+   const getStatusIcon = (status) => {
+    const statusStr = String(status || '').toLowerCase();
+    
+    switch (statusStr) {
+        case "active":
+            return activeIcon;
+        case "inactive":
+            return inactiveIcon;
+        case "terminate":
+            return terminatedIcon;
+        default:
+            return null;
+    }
+};
 
     const renderStatusIcon = (status) => {
+        if (status === undefined || status === null) {
+            return <span className="capitalize">Unknown</span>;
+        }
+
         const iconPath = getStatusIcon(status);
 
         if (!iconPath) {
-            return <span className="capitalize">{status}</span>;
+            return <span className="capitalize">{String(status)}</span>;
         }
 
         return (
             <img
                 src={iconPath}
-                alt={status}
+                alt={String(status)}
                 className="w-6 h-6 mx-auto"
                 data-tooltip-id={`status-tooltip-${status}`}
                 data-tooltip-content={status}
@@ -68,72 +75,83 @@ const DRCList = () => {
         );
     };
 
-    // API call 
-    const callAPI = useCallback(async (filters) => {
-        try {
-            setIsLoading(true);
-            const response = await listAllDRCDetails({
-                status: filters.status || "",
-                page: filters.page || 1
-            });
+   
+const callAPI = useCallback(async (filters) => {
+  try {
+    setIsLoading(true);
+    const response = await listAllDRCDetails({
+      status: filters.status || "",
+      page: filters.page || 1
+    });
 
-            if (response && response.data) {
-                const drcData = response.data.map(drc => ({
-                    DRCID: drc.drc_id,
-                    Status: drc.drc_status,
-                    BusinessRegNo: drc.drc_business_registration_number,
-                    DRCName: drc.drc_name,
-                    ContactNo: drc.drc_contact_no,
-                    ServiceCount: drc.service_count,
-                    ROCount: drc.ro_count,
-                    RTOMCount: drc.rtom_count
-                }));
+    // Process the data
+    const drcData = response?.data?.map(drc => ({
+      DRCID: drc.drc_id,
+      Status: drc.status,
+      BusinessRegNo: drc.drc_business_registration_number,
+      DRCName: drc.drc_name,
+      ContactNo: drc.drc_contact_no,
+      ServiceCount: drc.service_count,
+      ROCount: drc.ro_count,
+      BillingCenterCount: drc.rtom_count
+    })) || [];
 
-                if (filters.page === 1) {
-                    setAllData(drcData);
-                    setFilteredData(drcData);
-                } else {
-                    setFilteredData(prev => [...prev, ...drcData]);
-                }
-
-                //  more data
-                const hasMore = response.pagination
-                    ? response.pagination.page < response.pagination.totalPages
-                    : response.data.length === rowsPerPage;
-
-                setHasMoreData(hasMore);
-
-                if (response.data.length === 0 && filters.page === 1) {
-                    Swal.fire({
-                        title: "No Results",
-                        text: "No matching data found for the selected filters.",
-                        icon: "warning",
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        confirmButtonColor: "#f1c40f"
-                    });
-                }
-            } else {
-                Swal.fire({
-                    title: "Error",
-                    text: "No valid DRC data found in response.",
-                    icon: "error",
-                    confirmButtonColor: "#d33"
-                });
-                setFilteredData([]);
-            }
-        } catch (error) {
-            console.error("Error fetching DRC list:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Failed to fetch DRC data. Please try again.",
-                icon: "error",
-                confirmButtonColor: "#d33"
-            });
-        } finally {
-            setIsLoading(false);
+    // Update state
+    if (filters.page === 1) {
+      setAllData(drcData);
+      setFilteredData(drcData);
+      
+      // Show message if no data found
+      if (drcData.length === 0) {
+        if (filters.status) {
+          showNoDataMessage(filters.status);
+        } else if (response?.message) {
+          showNoDataMessage();
         }
-    }, []);
+      }
+    } else {
+      setFilteredData(prev => [...prev, ...drcData]);
+    }
+
+   
+    setHasMoreData(drcData.length === (filters.page === 1 ? 10 : 30));
+    
+  } catch (error) {
+    console.error("Error fetching DRC list:", error);
+    Swal.fire({
+      title: "Error",
+      text: error.message,
+      icon: "error",
+      confirmButtonColor: "#d33"
+    });
+    setFilteredData([]);
+    setHasMoreData(false);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
+
+// Update the showNoDataMessage function
+const showNoDataMessage = (status = "") => {
+  let message = "No DRCs available";
+  if (status) {
+    message = `No ${status} DRCs found`;
+    if (status === "Terminate") {
+      message = "No Terminated DRCs found";
+    }
+  }
+
+  Swal.fire({
+    title: "No Records Found",
+    text: message,
+    icon: "info",
+    iconColor:"#ff9999",
+    confirmButtonColor: "#ff9999",
+    allowOutsideClick: false,
+    allowEscapeKey: false
+  });
+};
+
 
     // Handle pagination
     const handlePrevPage = () => {
@@ -150,15 +168,22 @@ const DRCList = () => {
 
     // Handle filter button 
     const handleFilterButton = () => {
+        if (!statusFilter) {
+            // If no status selected, just refresh the data
+            setCurrentPage(1);
+            callAPI({ status: "", page: 1 });
+            return;
+        }
+
         setHasMoreData(true);
         setMaxCurrentPage(0);
         setCommittedFilters({ status: statusFilter });
         setFilteredData([]);
-
+        
         if (currentPage === 1) {
-            callAPI({
-                status: statusFilter,
-                page: 1
+            callAPI({ 
+                status: statusFilter, 
+                page: 1 
             });
         } else {
             setCurrentPage(1);
@@ -171,8 +196,7 @@ const DRCList = () => {
         setSearchQuery("");
         setMaxCurrentPage(0);
         setCommittedFilters({ status: "" });
-        setFilteredData([]);
-
+        
         if (currentPage !== 1) {
             setCurrentPage(1);
         } else {
@@ -182,7 +206,7 @@ const DRCList = () => {
 
     // Navigation 
     const handleAddDRC = () => navigate("/pages/DRC/Add_DRC");
-    const navigateToEdit = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
+    const navigateToDRCInfo = (drcId) => navigate(`/pages/DRC/DRCInfo`, { state: { drcId } });
 
     // Effect for API calls
     useEffect(() => {
@@ -223,8 +247,8 @@ const DRCList = () => {
             <h2 className={GlobalStyle.headingLarge}>DRC List</h2>
 
             <div className="flex justify-end mt-2 sm:mt-0">
-                <button
-                    className={GlobalStyle.buttonPrimary}
+                <button 
+                    className={GlobalStyle.buttonPrimary} 
                     onClick={handleAddDRC}
                 >
                     Add
@@ -293,7 +317,7 @@ const DRCList = () => {
                 </div>
             </div>
 
-            <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+           <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
                 <table className={`${GlobalStyle.table} w-full`}>
                     <thead className={`${GlobalStyle.thead} sticky top-0`}>
                         <tr>
@@ -331,49 +355,54 @@ const DRCList = () => {
                                     <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
 
-                                    <td className={`${GlobalStyle.tableData} cursor-pointer text-center `}
-                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" } })}>
-                                        {log.ServiceCount}
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer text-center `} 
+                                     onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" } })}>
+                                                {log.ServiceCount}
                                     </td>
 
 
-                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`}
+                                    <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
                                         onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RO" } })}>
-                                        {log.ROCount}
+                                               {log.ROCount}
                                     </td>
 
 
                                     <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
                                         onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Billing Center" } })}>
-                                                 {log.RTOMCount}
-
+                                                 {log.BillingCenterCount}
                                     </td>
 
 
-                                    <td className={`${GlobalStyle.tableData} flex justify-center gap-2 w-[100px]`}>
-                                        <button
-                                            onClick={() => navigateToEdit(log.DRCID)}
-                                            className="p-1 hover:bg-gray-100 rounded"
-                                        >
-                                            <img src={editImg} alt="Info"  className="w-6 h-6" data-tooltip-id={`edit-tooltip`} />
-                                            <Tooltip id={`edit-tooltip`} place="bottom" content="More Info" />
+                                  <td className={`${GlobalStyle.tableData} flex justify-center space-x-2`}>
+                                    <button 
+                                        onClick={() => navigateToDRCInfo(log.DRCID)}
+                                        className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
+                                        title="More Info"
+                                    >
+                                        <img src={moreImg} alt="More Info" className="h-auto w-5 max-w-[24px]" />
+                                    </button>
 
-                                        </button>
-                                        <button
-                                            onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID } })}
-                                            className="p-1 hover:bg-gray-100 rounded"
-                                        >
-                                            <img src={ListImg} alt="Case List" className="w-6 h-6" data-tooltip-id={`case-list-tooltip`} />
-                                            <Tooltip id={`case-list-tooltip`} place="bottom" content="Case List" />
-                                        </button>
+                                    <button 
+                                        className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
+                                        title="Details"
+                                    >
+                                        <img src={ListImg} alt="Details" className="h-auto w-5 max-w-[24px]" />
+                                    </button>
+
+                                    <button 
+                                        className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
+                                        title="Agreement Details"
+                                    >
+                                        <img src={Checklist} alt="Agreement Details" className="h-auto w-5 max-w-[24px]" />
+                                    </button>
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
                                 <td colSpan="9" className="text-center py-4">
-                                    {statusFilter || searchQuery
-                                        ? "No matching DRCs found"
+                                    {statusFilter || searchQuery 
+                                        ? "No matching DRCs found" 
                                         : "No DRCs available"}
                                 </td>
                             </tr>
@@ -395,10 +424,11 @@ const DRCList = () => {
                     <span>Page {currentPage}</span>
 
                     <button
-                        className={`${GlobalStyle.navButton} ${!hasMoreData && currentPage >= Math.ceil(filteredData.length / rowsPerPage)
-                                ? 'opacity-50 cursor-not-allowed'
+                        className={`${GlobalStyle.navButton} ${
+                            !hasMoreData && currentPage >= Math.ceil(filteredData.length / rowsPerPage) 
+                                ? 'opacity-50 cursor-not-allowed' 
                                 : ''
-                            }`}
+                        }`}
                         onClick={handleNextPage}
                         disabled={!hasMoreData && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
                     >
