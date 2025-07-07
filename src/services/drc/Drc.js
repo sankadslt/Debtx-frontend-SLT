@@ -29,59 +29,32 @@ export const Active_DRC_Details = async () => {
   }
 };
 
-// export const listAllDRCDetails = async (status, page = 1) => {
-//   try {
-//     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
-//       status,
-//       page,
-//     });
-
-//     console.log("Full DRC API response:", response.data);
-
-//     const drcArray = response.data;
-
-//     if (!Array.isArray(drcArray)) {
-//       throw new Error("Invalid DRC data format received");
-//     }
-
-//     const formattedDRCs = drcArray.map((drc) => ({
-//       key: drc.drc_id,
-//       value: drc.drc_name,
-//       id: drc.drc_id,
-//       email: drc.drc_email,
-//       tel: drc.drc_contact_no,
-//       status: drc.drc_status,
-//       roCount: drc.ro_count,
-//       rtomCount: drc.rtom_count,
-//       business_registration_number: drc.drc_business_registration_number,
-//       service_count: drc.service_count,
-//     }));
-
-//     return formattedDRCs;
-//   } catch (error) {
-//     console.error(
-//       "Error fetching DRCs by status:",
-//       error.response?.data || error.message
-//     );
-//     throw error;
-//   }
-// };
 
 export const listAllDRCDetails = async (filter) => {
   try {
     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
-      status: filter.status || "", // Default to 'active' if not provided
-      page: filter.page || 1, // Default to page 1 if not provided
+      status: filter.status || "",
+      page: filter.page || 1,
     });
 
-    if (response.data.status === "error") {
-      throw new Error(response.data.message);
-    }
-
-    return response.data; // Return the full response data as-is
+    return response.data;
   } catch (error) {
-    console.error("Error retrieving List_All_DRC:", error.response?.data || error.message);
-    throw error;
+
+    if (error.response?.status === 404) {
+      console.log('No records found for filter', filter); 
+      return { 
+        data: [], 
+        status: "success",
+        message: error.response.data?.message || "No matching records found"
+      };
+    }
+    
+    // For all other errors, throw with user-friendly message
+    console.error("Error fetching DRC data:", error);
+    throw new Error(
+      error.response?.data?.message || 
+      "Failed to fetch DRC data. Please try again later."
+    );
   }
 };
 
@@ -190,36 +163,35 @@ export const getDebtCompanyByDRCID = async (drcId) => {
 export const terminateCompanyByDRCID = async (
   drcId,
   remark,
-  remarkBy,
-  terminatedDate
+  terminate_by,
+  terminate_dtm
 ) => {
   try {
     const response = await axios.patch(`${URL}/Terminate_Company_By_DRC_ID`, {
       drc_id: drcId,
       remark: remark,
-      remark_by: remarkBy,
-      remark_dtm: terminatedDate,
+      terminate_by: terminate_by,
+      terminate_dtm: terminate_dtm.toISOString(), // Ensure proper date format
     });
 
-    // Add validation and logging to debug
-    console.log("API Response:", response.data);
-
-    if (response.data && response.data.data) {
-      return {
-        ...response.data.data,
-        status: response.data.status || "success", // Ensure a status property exists
-      };
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to terminate DRC");
     }
 
-    return response.data; // Fallback
+    return response.data;
   } catch (error) {
     console.error(
       "Error terminating company:",
       error.response?.data || error.message
     );
-    throw new Error(error.response?.data?.message || "Failed to terminate DRC");
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to terminate DRC"
+    );
   }
 };
+
 
 // Update DRC information with services and SLT coordinator
 export const updateDRCInfo = async (
@@ -232,7 +204,8 @@ export const updateDRCInfo = async (
   remark_dtm,
   drc_contact_no,
   drc_email,
-  drc_status 
+  drc_address,
+  status 
 ) => {
   try {
     const response = await axios.patch(
@@ -241,13 +214,17 @@ export const updateDRCInfo = async (
         drc_id: drcId,
         coordinator,
         services,
-        rtom,
+       rtom: rtom.map(rtomItem => ({
+          ...rtomItem,
+          handling_type:  rtomItem.handling_type
+        })),
         remark,
         updated_by,
         remark_dtm,
         drc_contact_no,
         drc_email,
-        drc_status, // Include status in the request
+        drc_address,
+        status, // Include status in the request
       }
     );
 

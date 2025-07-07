@@ -310,7 +310,7 @@ export const Case_Details_Settlement_LOD_FTL_LOD = async (case_id) => {
   }
 };
 
-export const listAllLODHoldlist = async (payload) => {
+export const List_All_LOD_Holdlist = async (payload) => {
   try {
     const response = await axios.post(
       `${LOD_URL}/List_All_LOD_Holdlist`,
@@ -320,6 +320,22 @@ export const listAllLODHoldlist = async (payload) => {
   } catch (error) {
     console.error(
       "Error withdrawing LD Hold list Details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const Proceed_LD_Hold_List = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${LOD_URL}/Proceed_LD_Hold_List`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error processing proceed button:",
       error.response?.data || error.message
     );
     throw error;
