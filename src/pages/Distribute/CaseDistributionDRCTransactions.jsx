@@ -66,6 +66,7 @@ export default function AssignPendingDRCSummary() {
   const [currentPage1, setCurrentPage1] = useState(1); // Current page for pagination
   const [disabledRows, setDisabledRows] = useState({}); // Disabled rows for buttons
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [isLoading, setIsLoading] = useState(false); // Loading state for data fetching
 
   const navigate = useNavigate();
   // Items per page
@@ -172,9 +173,11 @@ export default function AssignPendingDRCSummary() {
       Created_By: userId,
     };
 
+    setIsLoading(true); // Set loading state to true
     // console.log("Create Task Payload:", payload);
     try {
       const response = await Create_Task_For_case_distribution(payload);
+      setIsLoading(false); // Set loading state to false
       // console.log("Create Task Response:", response);
 
       if (response.status = "success") {
@@ -197,6 +200,8 @@ export default function AssignPendingDRCSummary() {
         confirmButtonColor: "#d33",
       });
 
+    } finally {
+      setIsLoading(false); // Set loading state to false after API call
     }
 
   };
@@ -211,6 +216,18 @@ export default function AssignPendingDRCSummary() {
 
   // Fetch the data and set it to filteredData1 state
   const applyFilters = async () => {
+    setFilteredData1([]);
+    setCurrentPage1(1); // Reset to first page on filter apply
+
+    if (!startDate && !endDate && !selectedBandKey && !selectedService) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select at least one filter.",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
 
     const fetchData = async () => {
 
@@ -233,28 +250,41 @@ export default function AssignPendingDRCSummary() {
 
       if ((startDate && !endDate) || (!startDate && endDate)) {
         Swal.fire({
-          title: "Error",
+          title: "Warning",
           text: "Please select both start and end dates.",
-          icon: "error",
+          icon: "warning",
           confirmButtonColor: "#f1c40f",
         });
         return;
       }
       //console.log("Filtered Request Data:", requestdata);;
-
+      setIsLoading(true); // Set loading state to true
       try {
         // Send the filtered data to the backend
         // console.log("Request Data:", requestdata);
+        console.log("Request Data:", requestdata);
         const response = await List_Case_Distribution_DRC_Summary(requestdata);
+        setIsLoading(false); // Set loading state to false
 
-        // console.log("API Response:", response);
+        console.log("API Response:", response);
 
         if (Array.isArray(response.data)) {
-          setFilteredData1(response.data); // Store the fetched data into state
+          if (response.data.length === 0) {
+            Swal.fire({
+              title: "Warning",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              confirmButtonColor: "#f1c40f",
+            });
+          } else {
+            setFilteredData1(response.data); // Store the fetched data into state
+          }
           // console.log("Filtered Data:", response.data);
         }
       } catch (error) {
         console.error("API Fetch Error:", error);
+      } finally {
+        setIsLoading(false); // Set loading state to false after API call
       }
     };
 
@@ -266,6 +296,7 @@ export default function AssignPendingDRCSummary() {
   const clearfilters = async () => {
     setStartDate(null);
     setEndDate(null);
+    setSelectedBandKey("");
     setSelectedBand("");
     setSelectedService("");
     setFilteredData1([]);
@@ -342,13 +373,18 @@ export default function AssignPendingDRCSummary() {
 
   // Handle Arrears Band Change
   const handlearrersBandChange = (e) => {
-    setSelectedBand(e.target.value);
+    setSelectedBandKey(e.target.value);
     // console.log ("Arrears band :",e.target.value);
 
-    const selectedkey = arrearsBands.find((band) => band.value === e.target.value);
-    setSelectedBandKey(selectedkey.key);
+    // const selectedkey = arrearsBands.find((band) => band.value === e.target.value);
+    // setSelectedBandKey(selectedkey.key);
     // console.log("Selected Band Key :",selectedkey.key);
   };
+
+  const displayArrearsBand = (key) => {
+    const selectedBand = arrearsBands.find((band) => band.key === key);
+    return selectedBand;
+  }
 
 
   // Handle Service Type Change
@@ -540,104 +576,117 @@ export default function AssignPendingDRCSummary() {
     });
     //  console.log("Case Distribution batch ID:", batchID);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <h1 className={`${GlobalStyle.headingLarge}`}>Case distribution </h1>
 
 
       {/* Filter Section */}
-      <div className={`${GlobalStyle.cardContainer} w-full mt-4 `}>
-        <div className="flex flex-wrap justify-end items-center justify-end w-full gap-8 ">
-          {/* <div className="flex   gap-8"> */}
-          {" "}
-          <div className="flex gap-4 h-[35px] ">
-            <select
-              className={`${GlobalStyle.selectBox}`}
-              value={selectedBand}
-              onChange={handlearrersBandChange}
-              style={{ color: selectedBand === "" ? "gray" : "black" }}
-            >
-              <option value="" hidden>
-                Arrears Band
-              </option>
-              {arrearsBands.map(({ key, value }) => (
-                <option key={key} value={value} style={{ color: "black" }}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-4 h-[35px] ">
-            <select
-              className={GlobalStyle.selectBox}
-              value={selectedService}
-              onChange={handlesrvicetypeChange}
-              style={{ color: selectedService === "" ? "gray" : "black" }}
-            >
-              <option value="" hidden>
-                Service Type
-              </option>
-              {services.map((service) => (
-                <option key={service.drc_commision_rule} value={service.drc_commision_rule} style={{ color: "black" }}>
-                  {service.drc_commision_rule}
-                </option>
-              ))}
+      <div className="flex justify-end">
+        <div className="w-[1110px] sm:w-[100%] md:w-[1110px]">
+          <div className={`${GlobalStyle.cardContainer} w-full mt-4 `}>
+            <div className="flex flex-wrap justify-end items-center justify-end w-full gap-4 ">
+              {/* <div className="flex   gap-8"> */}
+              {" "}
+              <div className="flex gap-4 h-[35px] ">
+                <select
+                  className={`${GlobalStyle.selectBox}`}
+                  value={selectedBandKey}
+                  onChange={handlearrersBandChange}
+                  style={{ color: selectedBandKey === "" ? "gray" : "black" }}
+                >
+                  <option value="" hidden>
+                    Arrears Band
+                  </option>
+                  {arrearsBands.map(({ key, value }) => (
+                    <option key={key} value={key} style={{ color: "black" }}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-4 h-[35px] ">
+                <select
+                  className={GlobalStyle.selectBox}
+                  value={selectedService}
+                  onChange={handlesrvicetypeChange}
+                  style={{ color: selectedService === "" ? "gray" : "black" }}
+                >
+                  <option value="" hidden>
+                    Service Type
+                  </option>
+                  {services.map((service) => (
+                    <option key={service.drc_commision_rule} value={service.drc_commision_rule} style={{ color: "black" }}>
+                      {service.drc_commision_rule}
+                    </option>
+                  ))}
 
 
 
-            </select>
-          </div>
+                </select>
+              </div>
 
 
-          <label className={GlobalStyle.dataPickerDate} style={{ marginTop: '5px', display: 'block' }} >Date :  </label>
+              <label className={GlobalStyle.dataPickerDate} style={{ marginTop: '5px', display: 'block' }} >Date :  </label>
 
-          <DatePicker
-            selected={startDate}
-            onChange={handlestartdatechange}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="From"
-            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-          />
+              <DatePicker
+                selected={startDate}
+                onChange={handlestartdatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
 
-          <DatePicker
-            selected={endDate}
-            onChange={handleenddatechange}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="To"
-            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-          />
+              <DatePicker
+                selected={endDate}
+                onChange={handleenddatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
 
 
 
-          {/* <button
+              {/* <button
                 onClick={applyFilters}
                 className={`${GlobalStyle.buttonPrimary} h-[35px] `}
               >
                 Filter
               </button> */}
-          <div>
-            {["admin", "superadmin", "slt"].includes(userRole) && (
-              <button
-                onClick={applyFilters}
-                className={`${GlobalStyle.buttonPrimary} w-full h-[35px] sm:w-auto`}
-              >
-                Filter
-              </button>
-            )}
-          </div>
+              <div>
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button
+                    onClick={applyFilters}
+                    className={`${GlobalStyle.buttonPrimary} w-full h-[35px] sm:w-auto`}
+                  >
+                    Filter
+                  </button>
+                )}
+              </div>
 
-          {/* <button className={`${GlobalStyle.buttonRemove} h-[35px] `}  onClick={clearfilters}>
+              {/* <button className={`${GlobalStyle.buttonRemove} h-[35px] `}  onClick={clearfilters}>
                             Clear 
                         </button> */}
-          <div>
-            {["admin", "superadmin", "slt"].includes(userRole) && (
-              <button className={`${GlobalStyle.buttonRemove} h-[35px] w-full sm:w-auto`} onClick={clearfilters}>
-                Clear
-              </button>
-            )}
-          </div>
+              <div>
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button className={`${GlobalStyle.buttonRemove} h-[35px] w-full sm:w-auto`} onClick={clearfilters}>
+                    Clear
+                  </button>
+                )}
+              </div>
 
-          {/* </div> */}
+              {/* </div> */}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -651,7 +700,10 @@ export default function AssignPendingDRCSummary() {
                 type="text"
                 placeholder=""
                 value={searchQuery1}
-                onChange={(e) => setSearchQuery1(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage1(1); // Reset to first page on search
+                  setSearchQuery1(e.target.value)
+                }}
                 className={GlobalStyle.inputSearch}
               />
               <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -738,7 +790,7 @@ export default function AssignPendingDRCSummary() {
                       {item.drc_commision_rule}
                     </td>
                     <td className={GlobalStyle.tableData} style={{ width: "120px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {item.current_arrears_band}
+                      {displayArrearsBand(item.current_arrears_band)?.value}
                     </td>
                     <td className={GlobalStyle.tableData} style={{ width: "90px", textAlign: "center" }}>
                       {item.inspected_count}
