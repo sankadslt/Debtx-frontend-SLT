@@ -175,7 +175,7 @@ export default function DirectLODSendingIncident() {
     if (!source_type && !fromDate && !toDate) {
       Swal.fire({
         title: 'Warning',
-        text: 'Missing Parameters',
+        text: 'Please select a Source Type or provide a date range before creating a task.',
         icon: 'warning',
         confirmButtonText: 'OK',
         confirmButtonColor: "#f1c40f"
@@ -741,11 +741,14 @@ export default function DirectLODSendingIncident() {
                   type="text"
                   placeholder=""
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                      setCurrentPage(1); // Reset to page 1 on search
+                      setSearchQuery(e.target.value)
+                  }}
                   className={GlobalStyle.inputSearch}
-                />
-                <FaSearch className={GlobalStyle.searchBarIcon} />
-              </div>
+              />
+              <FaSearch className={GlobalStyle.searchBarIcon} />
+          </div>
             </div>
             <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
               <table className={GlobalStyle.table}>

@@ -110,7 +110,7 @@ export default function RejectIncidentlog() {
       if (response.data.length === 0) {
         Swal.fire({
           title: "No Data Found",
-          text: "No incident reject data found for the selected filters.",
+          text: "No incident reject data found",
           icon: "warning",
           confirmButtonText: "OK",
           confirmButtonColor: "#f1c40f"
