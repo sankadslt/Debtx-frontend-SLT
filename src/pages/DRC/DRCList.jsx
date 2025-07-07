@@ -75,91 +75,83 @@ const DRCList = () => {
         );
     };
 
-    // Show no data swal message
-    const showNoDataMessage = (status = "") => {
-        let message = "No DRCs available";
-        if (status) {
-            message = `No ${status} DRCs found`;
-            if (status === "Terminate") {
-                message = "No Terminated DRCs found";
-            }
+   
+const callAPI = useCallback(async (filters) => {
+  try {
+    setIsLoading(true);
+    const response = await listAllDRCDetails({
+      status: filters.status || "",
+      page: filters.page || 1
+    });
+
+    // Process the data
+    const drcData = response?.data?.map(drc => ({
+      DRCID: drc.drc_id,
+      Status: drc.status,
+      BusinessRegNo: drc.drc_business_registration_number,
+      DRCName: drc.drc_name,
+      ContactNo: drc.drc_contact_no,
+      ServiceCount: drc.service_count,
+      ROCount: drc.ro_count,
+      BillingCenterCount: drc.rtom_count
+    })) || [];
+
+    // Update state
+    if (filters.page === 1) {
+      setAllData(drcData);
+      setFilteredData(drcData);
+      
+      // Show message if no data found
+      if (drcData.length === 0) {
+        if (filters.status) {
+          showNoDataMessage(filters.status);
+        } else if (response?.message) {
+          showNoDataMessage();
         }
+      }
+    } else {
+      setFilteredData(prev => [...prev, ...drcData]);
+    }
 
-        Swal.fire({
-            title: "No Results",
-            text: message,
-            icon: "info",
-            confirmButtonColor: "#3085d6",
-            allowOutsideClick: false,
-            allowEscapeKey: false
-        });
-    };
+   
+    setHasMoreData(drcData.length === (filters.page === 1 ? 10 : 30));
+    
+  } catch (error) {
+    console.error("Error fetching DRC list:", error);
+    Swal.fire({
+      title: "Error",
+      text: error.message,
+      icon: "error",
+      confirmButtonColor: "#d33"
+    });
+    setFilteredData([]);
+    setHasMoreData(false);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
 
-    // API call 
-    const callAPI = useCallback(async (filters) => {
-        try {
-            setIsLoading(true);
-            const response = await listAllDRCDetails({
-                status: filters.status || "",
-                page: filters.page || 1
-            });
-            
-            if (response && response.data) {
-                const drcData = response.data.map(drc => ({
-                    DRCID: drc.drc_id,
-                    Status: drc.status,
-                    BusinessRegNo: drc.drc_business_registration_number,
-                    DRCName: drc.drc_name,
-                    ContactNo: drc.drc_contact_no,
-                    ServiceCount: drc.service_count,
-                    ROCount: drc.ro_count,
-                    BillingCenterCount: drc.rtom_count
-                }));
+// Update the showNoDataMessage function
+const showNoDataMessage = (status = "") => {
+  let message = "No DRCs available";
+  if (status) {
+    message = `No ${status} DRCs found`;
+    if (status === "Terminate") {
+      message = "No Terminated DRCs found";
+    }
+  }
 
-                if (filters.page === 1) {
-                    setAllData(drcData);
-                    setFilteredData(drcData);
-                    
-                   
-                    if (drcData.length === 0 && filters.status) {
-                        showNoDataMessage(filters.status);
-                    }
-                } else {
-                    setFilteredData(prev => [...prev, ...drcData]);
-                }
+  Swal.fire({
+    title: "No Records Found",
+    text: message,
+    icon: "info",
+    iconColor:"#ff9999",
+    confirmButtonColor: "#ff9999",
+    allowOutsideClick: false,
+    allowEscapeKey: false
+  });
+};
 
-                const hasMore = response.pagination 
-                    ? response.pagination.page < response.pagination.totalPages
-                    : response.data.length === rowsPerPage;
-                
-                setHasMoreData(hasMore);
-            } else {
-                // Handle empty response
-                if (filters.status) {
-                    showNoDataMessage(filters.status);
-                } else {
-                    showNoDataMessage();
-                }
-                setFilteredData([]);
-            }
-        } catch (error) {
-            console.error("Error fetching DRC list:", error);
-            
-            if (!error.response || error.response.status !== 404) {
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to fetch DRC data. Please try again.",
-                    icon: "error",
-                    confirmButtonColor: "#d33"
-                });
-            } else if (committedFilters.status) {
-                
-                showNoDataMessage(committedFilters.status);
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    }, [committedFilters.status]);
 
     // Handle pagination
     const handlePrevPage = () => {
@@ -381,30 +373,28 @@ const DRCList = () => {
                                     </td>
 
 
-                                   <td className={`${GlobalStyle.tableData} flex justify-center`}>
-  
-                                        <button 
-                                            onClick={() => navigateToDRCInfo(log.DRCID)}
-                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                            title="More Info"
-                                        >
-                                            <img src={moreImg} alt="More Info" className="w-6 h-6" />
-                                        </button>
+                                  <td className={`${GlobalStyle.tableData} flex justify-center space-x-2`}>
+                                    <button 
+                                        onClick={() => navigateToDRCInfo(log.DRCID)}
+                                        className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
+                                        title="More Info"
+                                    >
+                                        <img src={moreImg} alt="More Info" className="h-auto w-5 max-w-[24px]" />
+                                    </button>
 
+                                    <button 
+                                        className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
+                                        title="Details"
+                                    >
+                                        <img src={ListImg} alt="Details" className="h-auto w-5 max-w-[24px]" />
+                                    </button>
 
-                                        <button 
-                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                            title="Details"
-                                        >
-                                            <img src={ListImg} alt="Details" className="w-6 h-6" />
-                                        </button>
-
-                                        <button 
-                                            className="p-1 hover:bg-gray-100 rounded flex items-center justify-center"
-                                            title="Agreement Details"
-                                        >
-                                            <img src={Checklist} alt="Agreement Details" className="w-6 h-6" />
-                                        </button>
+                                    <button 
+                                        className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
+                                        title="Agreement Details"
+                                    >
+                                        <img src={Checklist} alt="Agreement Details" className="h-auto w-5 max-w-[24px]" />
+                                    </button>
                                     </td>
                                 </tr>
                             ))
