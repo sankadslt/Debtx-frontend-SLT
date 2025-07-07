@@ -9,6 +9,7 @@ import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
 import { listAllDRCDetails } from "../../services/drc/Drc";
+import { Tooltip } from "react-tooltip";
 
 const DRCList = () => {
     // State Variables
@@ -60,7 +61,9 @@ const DRCList = () => {
                 src={iconPath}
                 alt={status}
                 className="w-6 h-6 mx-auto"
-                title={status}
+                data-tooltip-id={`status-tooltip-${status}`}
+                data-tooltip-content={status}
+                //title={status}
             />
         );
     };
@@ -316,7 +319,14 @@ const DRCList = () => {
                                         } border-b`}
                                 >
                                     <td className={GlobalStyle.tableData}>{log.DRCID}</td>
-                                    <td className={GlobalStyle.tableData}>{renderStatusIcon(log.Status)}</td>
+                                    <td className={GlobalStyle.tableData}>{renderStatusIcon(log.Status)}
+
+                                        <Tooltip
+                                            id={`status-tooltip-${log.Status}`}
+                                            place="bottom"
+                                            content={log.Status}
+                                        />
+                                    </td>
                                     <td className={GlobalStyle.tableData}>{log.BusinessRegNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.DRCName}</td>
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
@@ -345,13 +355,16 @@ const DRCList = () => {
                                             onClick={() => navigateToEdit(log.DRCID)}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
-                                            <img src={editImg} alt="Info" title="Info" className="w-6 h-6" />
+                                            <img src={editImg} alt="Info"  className="w-6 h-6" data-tooltip-id={`edit-tooltip`} />
+                                            <Tooltip id={`edit-tooltip`} place="bottom" content="More Info" />
+
                                         </button>
                                         <button
                                             onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID } })}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
-                                            <img src={ListImg} alt="Case List" title="Case List" className="w-6 h-6" />
+                                            <img src={ListImg} alt="Case List" className="w-6 h-6" data-tooltip-id={`case-list-tooltip`} />
+                                            <Tooltip id={`case-list-tooltip`} place="bottom" content="Case List" />
                                         </button>
                                     </td>
                                 </tr>
