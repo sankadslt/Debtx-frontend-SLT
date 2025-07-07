@@ -97,18 +97,24 @@ const RtomList = () => {
 
   // handle clear
   const handleClear = () => {
-    setSearchQuery("");
-    setTempSearchQuery("");
-    setStatusFilter("");
-    setAppliedStatus("");
+  setSearchQuery("");            
+  setTempSearchQuery("");      
+  setStatusFilter("");           
+  setAppliedStatus("");     
+  setFiltersApplied(false);     
+  setCurrentPage(1);             
+  setLastFetchedBackendPage(1);  
+  hasMoreData.current = true;     
+  setAllData([]); 
+  
+  if (filtersApplied) {
     setFiltersApplied(false);
-    setCurrentPage(1);
-    setLastFetchedBackendPage(1);
-    hasMoreData.current = true;
-    setAllData([]);
+  } else {
+    callRTOMAPI(1);
+  }
+  
+};
 
-    // callRTOMAPI(1);
-  };
 
   // handle search change
   const handleSearchChange = (e) => {
