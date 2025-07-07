@@ -22,12 +22,14 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
-import { listAllLODHoldlist } from "../../services/LOD/LOD";
+import { List_All_LOD_Holdlist } from "../../services/LOD/LOD";
 import Swal from "sweetalert2";
 import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import { Withdraw_CasesOwened_By_DRC } from "../../services/case/CaseServices.js";
+import { Proceed_LD_Hold_List } from "../../services/LOD/LOD";
 
 import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
 
@@ -235,7 +237,7 @@ const Final_Reminder_LOD_Hold_List = () => {
       console.log("Payload sent to API: ", payload);
 
       setIsLoading(true); // Set loading state to true
-      const response = await listAllLODHoldlist(payload);
+      const response = await List_All_LOD_Holdlist(payload);
       setIsLoading(false); // Set loading state to false
 
       // Updated response handling
@@ -464,6 +466,140 @@ const Final_Reminder_LOD_Hold_List = () => {
     const userData = await getLoggedUserId(); // Assign user ID
   };
 
+  // Handles submission after remark is entered
+  const handleWithdrawSubmit = async () => {
+    try {
+      // Validate WithdrawRemark
+      if (!WithdrawRemark || WithdrawRemark.trim() === "") {
+        Swal.fire(
+          "Error",
+          "Please enter a remark for the withdrawal.",
+          "error"
+        );
+        return;
+      }
+
+      // Fetch user ID
+      const userId = await getLoggedUserId();
+      if (!userId) {
+        Swal.fire("Error", "User not authenticated. Please log in.", "error");
+        return;
+      }
+
+      // Construct payload with simple values
+      const payload = {
+        approver_reference: activeWithdrawPopupLODID,
+        remark: WithdrawRemark.trim(),
+        remark_edit_by: userId,
+        created_by: userId,
+        case_status: "LD Hold",
+      };
+
+      // Log payload for debugging
+      console.log("Payload before API call:", payload);
+      setIsLoading(true);
+      const response = await Withdraw_CasesOwened_By_DRC(payload);
+      setIsLoading(false);
+      if (response.status === "success") {
+        Swal.fire({
+          title: "Success",
+          text: "Case withdrawal request added successfully!", // Change to "withdrawal" if intended
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setFilteredData([]); // Clear previous data when LODType changes
+            setMaxCurrentPage(0); // Reset the current page
+            if (currentPage === 1) {
+              callAPI({
+                lodtype,
+                fromDate,
+                toDate,
+                currentPage: 1,
+              });
+            } else {
+              setCurrentPage(1); // Reset to the first page if LODType changes
+            }
+          }
+        });
+
+        setWithdrawRemark("");
+        setActiveWithdrawPopupLODID(null); // Close popup
+      } else {
+        Swal.fire(
+          "Error",
+          `Failed to submit withdrawal request: ${response.message}`,
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error in handleWithdrawSubmit:", error.message);
+      Swal.fire("Error", `An error occurred: ${error.message}`, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  //handle proceed button
+  const handleProceedButton = async (CASE_ID) => {
+    try {
+      // Fetch user ID
+      const userId = await getLoggedUserId();
+      if (!userId) {
+        Swal.fire("Error", "User not authenticated. Please log in.", "error");
+        return;
+      }
+
+      // Construct payload with simple values
+      const payload = {
+        approver_reference: CASE_ID,
+        created_by: userId,
+      };
+
+      // Log payload for debugging
+      console.log("Payload before API call:", payload);
+      setIsLoading(true);
+      const response = await Proceed_LD_Hold_List(payload);
+      setIsLoading(false);
+
+      if (response.status === "success") {
+        Swal.fire({
+          title: "Success",
+          text: "Case proceed request added successfully!", // Change to "withdrawal" if intended
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setFilteredData([]); // Clear previous data when LODType changes
+            setMaxCurrentPage(0); // Reset the current page
+            if (currentPage === 1) {
+              callAPI({
+                lodtype,
+                fromDate,
+                toDate,
+                currentPage: 1,
+              });
+            } else {
+              setCurrentPage(1); // Reset to the first page if LODType changes
+            }
+            // fetchLODCounts(); // Refresh the counts after changing the document type
+          }
+        });
+      } else {
+        Swal.fire(
+          "Error",
+          `Failed to submit proceed request: ${response.message}`,
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error in handleProceedButton:", error.message);
+      Swal.fire("Error", `An error occurred: ${error.message}`, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
@@ -564,58 +700,66 @@ const Final_Reminder_LOD_Hold_List = () => {
 
               <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.slice(startIndex, endIndex).map((item, index) => (
-                    <tr
-                      key={item.settlement_id || index}
-                      className={
-                        index % 2 === 0
-                          ? GlobalStyle.tableRowEven
-                          : GlobalStyle.tableRowOdd
-                      }
-                    >
-                      <td
-                        className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
-                        onClick={() => naviCaseID(item.case_id)}
+                  filteredDataBySearch
+                    .slice(startIndex, endIndex)
+                    .map((item, index) => (
+                      <tr
+                        key={item.settlement_id || index}
+                        className={
+                          index % 2 === 0
+                            ? GlobalStyle.tableRowEven
+                            : GlobalStyle.tableRowOdd
+                        }
                       >
-                        {item.case_id || ""}
-                      </td>
+                        <td
+                          className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                          onClick={() => naviCaseID(item.case_id)}
+                        >
+                          {item.case_id || ""}
+                        </td>
 
-                      <td className={GlobalStyle.tableData}>
-                        {" "}
-                        {item.status || ""}{" "}
-                      </td>
-                      <td className={GlobalStyle.tableData}>
-                        {" "}
-                        {item.lod_type || ""}{" "}
-                      </td>
-                      <td className={GlobalStyle.tableData}>
-                        {" "}
-                        {item.hold_by || ""}{" "}
-                      </td>
-                      <td className={GlobalStyle.tableData}>
-                        {new Date(item.date).toLocaleDateString("en-GB") ||
-                          ""}
-                      </td>
-                      <td className={GlobalStyle.tableData}>
-                        {["admin", "superadmin", "slt"].includes(userRole) && (
-                          <div className="flex flex-row gap-2">
-                            <button
-                              className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-                            // onClick={}
-                            >
-                              Proceed
-                            </button>
-                            <button
-                              className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-                              onClick={() => handleWithdrawPopup(item.case_id)}
-                            >
-                              Withdraw
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                        <td className={GlobalStyle.tableData}>
+                          {" "}
+                          {item.status || ""}{" "}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {" "}
+                          {item.lod_type || ""}{" "}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {" "}
+                          {item.hold_by || ""}{" "}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {new Date(item.date).toLocaleDateString("en-GB") ||
+                            ""}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {["admin", "superadmin", "slt"].includes(
+                            userRole
+                          ) && (
+                            <div className="flex flex-row gap-2">
+                              <button
+                                className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+                                onClick={() =>
+                                  handleProceedButton(item.case_id)
+                                }
+                              >
+                                Proceed
+                              </button>
+                              <button
+                                className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+                                onClick={() =>
+                                  handleWithdrawPopup(item.case_id)
+                                }
+                              >
+                                Withdraw
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
                 ) : (
                   <tr>
                     <td
@@ -654,7 +798,7 @@ const Final_Reminder_LOD_Hold_List = () => {
                   </div>
                   <div className="flex justify-end mt-4">
                     <button
-                      onClick={handleWithdraw}
+                      onClick={handleWithdrawSubmit}
                       className={`${GlobalStyle.buttonPrimary} mr-4`}
                     >
                       Withdraw
@@ -671,8 +815,9 @@ const Final_Reminder_LOD_Hold_List = () => {
               <button
                 onClick={() => handlePrevNext("prev")}
                 disabled={currentPage <= 1}
-                className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""
-                  }`}
+                className={`${GlobalStyle.navButton} ${
+                  currentPage <= 1 ? "cursor-not-allowed" : ""
+                }`}
               >
                 <FaArrowLeft />
               </button>
@@ -682,8 +827,9 @@ const Final_Reminder_LOD_Hold_List = () => {
               <button
                 onClick={() => handlePrevNext("next")}
                 disabled={currentPage === totalPages}
-                className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
-                  }`}
+                className={`${GlobalStyle.navButton} ${
+                  currentPage === totalPages ? "cursor-not-allowed" : ""
+                }`}
               >
                 <FaArrowRight />
               </button>
@@ -694,8 +840,9 @@ const Final_Reminder_LOD_Hold_List = () => {
             filteredDataBySearch.length > 0 && (
               <button
                 // onClick={HandleCreateTaskDownloadSettlementList}
-                className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? "opacity-50" : ""
-                  }`}
+                className={`${GlobalStyle.buttonPrimary} ${
+                  isCreatingTask ? "opacity-50" : ""
+                }`}
                 disabled={isCreatingTask}
                 style={{ display: "flex", alignItems: "center" }}
               >
