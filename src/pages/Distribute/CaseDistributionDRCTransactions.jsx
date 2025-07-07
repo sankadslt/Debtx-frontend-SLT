@@ -218,6 +218,7 @@ export default function AssignPendingDRCSummary() {
   const applyFilters = async () => {
     setFilteredData1([]);
     setCurrentPage1(1); // Reset to first page on filter apply
+    setSearchQuery1(""); // Reset search query on filter apply
 
     if (!startDate && !endDate && !selectedBandKey && !selectedService) {
       Swal.fire({
