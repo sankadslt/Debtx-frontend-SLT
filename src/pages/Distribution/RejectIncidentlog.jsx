@@ -173,6 +173,7 @@ export default function RejectIncidentlog() {
   const handleFilterClick = () => {
     const from = fromDate ? new Date(fromDate) : null;
     const to = toDate ? new Date(toDate) : null;
+    setCurrentPage(0); // Reset to page 1
 
     if (!selectedAction && !from && !to) {
       Swal.fire({
@@ -227,6 +228,7 @@ export default function RejectIncidentlog() {
   };
 
   const handleclearFilter = () => {
+    setCurrentPage(0); // Reset to page 1
     setFromDate(null);
     setToDate(null);
     setSelectedAction("");
@@ -515,7 +517,10 @@ export default function RejectIncidentlog() {
                   type="text"
                   placeholder=""
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setCurrentPage(0); // Reset to page 1
+                    setSearchQuery(e.target.value)}
+                  }
                   className={GlobalStyle.inputSearch}
                 />
                 <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -615,7 +620,7 @@ export default function RejectIncidentlog() {
           </div>
 
           {/* Navigation Buttons */}
-          {filteredData.length > rowsPerPage && (
+          {filteredData.length > 0 && (
             <div className={GlobalStyle.navButtonContainer}>
               <button
                 className={GlobalStyle.navButton}
@@ -630,7 +635,10 @@ export default function RejectIncidentlog() {
               <button
                 className={GlobalStyle.navButton}
                 onClick={handleNextPage}
-                disabled={currentPage === pages - 1}
+                disabled={
+                  searchQuery
+                    ? currentPage >= Math.ceil(filteredData.length / rowsPerPage) - 1
+                    : currentPage === pages - 1}
               >
                 <FaArrowRight />
               </button>
