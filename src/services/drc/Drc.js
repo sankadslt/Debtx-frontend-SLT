@@ -205,7 +205,7 @@ export const updateDRCInfo = async (
   drc_contact_no,
   drc_email,
   drc_address,
-  drc_status 
+  status 
 ) => {
   try {
     const response = await axios.patch(
@@ -224,7 +224,7 @@ export const updateDRCInfo = async (
         drc_contact_no,
         drc_email,
         drc_address,
-        drc_status, // Include status in the request
+        status, // Include status in the request
       }
     );
 
