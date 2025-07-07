@@ -99,11 +99,11 @@ const SupBulkUploadLog = () => {
         switch (status) {
             case "Upload Open":
                 return uploadopen;
-            case "InProgress":
+            case "Upload InProgress":
                 return uploadinprogress;
-            case "Reject":
+            case "Upload Failed":
                 return uploadfailed;
-            case "Complete":
+            case "Upload Complete":
                 return uploadcomplete;
             default:
                 return null;
@@ -402,64 +402,68 @@ const SupBulkUploadLog = () => {
                     </div>
 
                     {/* Filters */}
-                    <div className={`${GlobalStyle.cardContainer}  w-full mt-6`} > {/* Filter Section Small issue with the viewport width. or 
-                                                                                        else can use  w-3/4  */}
-                        <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
-                            <div className="flex items-center">
-                                <select
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    className={`${GlobalStyle.selectBox}`}
-                                    style={{ color: status === "" ? "gray" : "black" }}
-                                >
-                                    <option value="" hidden>Status</option>
-                                    <option value="Open" style={{ color: "black" }}>Open</option>
-                                    <option value="InProgress" style={{ color: "black" }}>In Progress</option>
-                                    <option value="Reject" style={{ color: "black" }}>Reject</option>
-                                </select>
+                    <div className="flex justify-end w-full">
+                        <div className="w-[950px] md:w-[950px] sm:w-full">
+                            <div className={`${GlobalStyle.cardContainer}  w-full mt-6`} > {/* Filter Section Small issue with the viewport width. or else can use  w-3/4  */}
+                                <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
+                                    <div className="flex items-center">
+                                        <select
+                                            value={status}
+                                            onChange={(e) => setStatus(e.target.value)}
+                                            className={`${GlobalStyle.selectBox}`}
+                                            style={{ color: status === "" ? "gray" : "black" }}
+                                        >
+                                            <option value="" hidden>Status</option>
+                                            <option value="Upload Open" style={{ color: "black" }}>Upload Open</option>
+                                            <option value="Upload InProgress" style={{ color: "black" }}>Upload InProgress</option>
+                                            <option value="Upload Failed" style={{ color: "black" }}>Upload Failed</option>
+                                            <option value="Upload Complete" style={{ color: "black" }}>Upload Complete</option>
+                                        </select>
+                                    </div>
+
+                                    <label className={GlobalStyle.dataPickerDate}>Date:</label>
+
+                                    <DatePicker
+                                        selected={fromDate}
+                                        onChange={handlestartdatechange}
+                                        dateFormat="dd/MM/yyyy"
+                                        placeholderText="From"
+                                        className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                                    />
+
+                                    <DatePicker
+                                        selected={toDate}
+                                        onChange={handleenddatechange}
+                                        dateFormat="dd/MM/yyyy"
+                                        placeholderText="To"
+                                        className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                                    />
+
+                                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                                        <button
+                                            className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+                                            onClick={handleFilterButton}
+                                        >
+                                            Filter
+                                        </button>
+                                    )}
+
+                                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                                        <button
+                                            className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
+                                            onClick={handleClear}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                                {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
                             </div>
-
-                            <label className={GlobalStyle.dataPickerDate}>Date:</label>
-
-                            <DatePicker
-                                selected={fromDate}
-                                onChange={handlestartdatechange}
-                                dateFormat="dd/MM/yyyy"
-                                placeholderText="From"
-                                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                            />
-
-                            <DatePicker
-                                selected={toDate}
-                                onChange={handleenddatechange}
-                                dateFormat="dd/MM/yyyy"
-                                placeholderText="To"
-                                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                            />
-
-                            {["admin", "superadmin", "slt"].includes(userRole) && (
-                                <button
-                                    className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-                                    onClick={handleFilterButton}
-                                >
-                                    Filter
-                                </button>
-                            )}
-
-                            {["admin", "superadmin", "slt"].includes(userRole) && (
-                                <button
-                                    className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
-                                    onClick={handleClear}
-                                >
-                                    Clear
-                                </button>
-                            )}
                         </div>
-                        {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
                     </div>
 
                     {/* Search Bar */}
-                    <div className="mb-4 flex justify-start mt-10">
+                    <div className="mb-4 flex justify-start mt-4">
                         <div className={GlobalStyle.searchBarContainer}>
                             <input
                                 type="text"
@@ -538,7 +542,7 @@ const SupBulkUploadLog = () => {
                         <button
                             onClick={() => handlePrevNext("prev")}
                             disabled={currentPage <= 1}
-                            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+                            className={`${GlobalStyle.navButton}`}
                         >
                             <FaArrowLeft />
                         </button>
@@ -547,8 +551,11 @@ const SupBulkUploadLog = () => {
                         </span>
                         <button
                             onClick={() => handlePrevNext("next")}
-                            disabled={!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
-                            className={`${GlobalStyle.navButton} ${(!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)) ? "cursor-not-allowed" : ""}`}
+                            disabled={
+                                searchQuery
+                                    ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                                    : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+                            className={`${GlobalStyle.navButton}`}
                         >
                             <FaArrowRight />
                         </button>
