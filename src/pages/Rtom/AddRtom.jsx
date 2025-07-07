@@ -62,16 +62,16 @@ const AddRtom = () => {
     const newErrors = {};
 
     if (!formData.billingCenterCode.trim()) {
-    newErrors.billingCenterCode = "Billing Center Code is required";
-  }
+      newErrors.billingCenterCode = "Billing Center Code is required";
+    }
 
-  if (!formData.name.trim()) {
-    newErrors.name = "Name is required";
-  }
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    }
 
-  if (!formData.areaCode.trim()) {
-    newErrors.areaCode = "Area Code is required";
-  }
+    if (!formData.areaCode.trim()) {
+      newErrors.areaCode = "Area Code is required";
+    }
 
     // Email: optional but must be valid if entered
     if (formData.email.trim()) {
@@ -106,16 +106,16 @@ const AddRtom = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-    Swal.fire({
-      icon: "warning",
-      title: "Missing or Invalid Fields",
-      text: "Please fill in all required fields and ensure valid input.",
-      confirmButtonColor: "#d33",
-    });
-    return false;
-  }
+      Swal.fire({
+        icon: "warning",
+        title: "Missing or Invalid Fields",
+        text: "Please fill in all required fields and ensure valid input.",
+        confirmButtonColor: "#d33",
+      });
+      return false;
+    }
 
-  return true;
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -154,12 +154,27 @@ const AddRtom = () => {
       });
     } catch (error) {
       console.error("Error in form submission:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Registration Failed",
-        text: error.message || "Failed to create RTOM. Please try again.",
-        confirmButtonColor: "#d33",
-      });
+
+      const backendMessage =
+        typeof error === "string"
+          ? error
+          : error.response?.data?.message || error.message || "";
+
+      if (backendMessage.toLowerCase().includes("already exists")) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Duplicate Entry",
+          text: "RTOM with this Billing Center Code and Name already exists.",
+          confirmButtonColor: "#f39c12",
+        });
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text: backendMessage || "Failed to create RTOM. Please try again.",
+          confirmButtonColor: "#d33",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -286,7 +301,6 @@ const AddRtom = () => {
                     }}
                   />
                 </div>
-                
               </div>
             ))}
 
