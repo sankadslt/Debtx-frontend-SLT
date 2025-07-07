@@ -68,6 +68,7 @@ const DRCInfo = () => {
 
   // Edit mode fields
   const [contactNo, setContactNo] = useState("");
+  const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [editingCoordinator, setEditingCoordinator] = useState(false);
   const [showLogHistory, setShowLogHistory] = useState(false);
@@ -203,6 +204,7 @@ const DRCInfo = () => {
         if (data) {
           setCompanyData(data);
           setContactNo(data.drc_contact_no || "");
+          setAddress(data.drc_address || "");
           setEmail(data.drc_email || "");
 
           // Initialize coordinator fields from current coordinator if exists
@@ -629,6 +631,7 @@ const DRCInfo = () => {
         remark,
         remarkBy,
         currentDate,
+        address,
         contactNo,
         email,
         companyData.drc_status
@@ -1549,8 +1552,13 @@ console.log("DRC Status Data:", {
                     Address<span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
-                  <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                    {companyData.drc_address || "Not specified"}
+                  <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setContactNo(e.target.value)}
+                      className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
+                    />
                   </td>
                 </tr>
 
