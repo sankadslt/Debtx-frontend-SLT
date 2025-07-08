@@ -16,6 +16,7 @@ import terminateIcon from "../../assets/images/User/User_Terminate.png";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
+import { Tooltip } from "react-tooltip";
 import { getAllUserDetails } from "../../services/user/user_services"; 
 
 const UserList = () => {
@@ -494,8 +495,8 @@ const UserList = () => {
                     {user.user_id}
                   </td>
                   <td className={`${GlobalStyle.tableData}`}>
-                    <div className="relative flex items-center justify-center">
-                      <div className="relative">
+                    <div className=" flex items-center justify-center">
+                      {/* <div className="relative"> */}
                         <img 
                           src={
                             user.status === "Active"
@@ -511,11 +512,20 @@ const UserList = () => {
                               ? "Inactive"
                               : "Terminated"
                           }
+                          data-tooltip-id={`status-${user.user_id}`}
+                          data-tooltip-content={
+                            user.status === "Active"
+                              ? "Active"
+                              : user.status === "Inactive"
+                              ? "Inactive"
+                              : "Terminated"
+                          }
+
                           className="h-5 w-5 lg:h-6 lg:w-6"
-                          onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
-                          onMouseLeave={hideTooltip}
+                          //onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+                          //onMouseLeave={hideTooltip}
                         />
-                        {tooltipVisible === `status-${user.user_id}` && (
+                        {/* {tooltipVisible === `status-${user.user_id}` && (
                           <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
                             {user.status === "Active"
                               ? "Active"
@@ -523,9 +533,16 @@ const UserList = () => {
                               ? "Inactive"
                               : "Terminated"}
                           </div>
-                        )}
-                      </div>
+                        )} */}
+                      {/* </div> */}
                     </div>
+                    <Tooltip id={`status-${user.user_id}`} place="bottom" content={
+                      user.status === "Active"
+                        ? "Active"
+                        : user.status === "Inactive"
+                        ? "Inactive"
+                        : "Terminated"
+                    } />
                   </td>
                   <td className={`${GlobalStyle.tableData}`}>{user.user_type || "N/A"}</td>
                   <td className={`${GlobalStyle.tableData}`}>{formatRoleLabel(user.user_role)}</td>
@@ -536,8 +553,11 @@ const UserList = () => {
                   <td className={`${GlobalStyle.tableData}`}>
                     <div className="flex justify-center">
                       <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
-                        <img src={more_info} alt="More Info" className="h-5 w-5 lg:h-6 lg:w-6" />
+                        <img src={more_info} alt="More Info" className="h-5 w-5 lg:h-6 lg:w-6"  data-tooltip-id={`more-info-tooltip-${user.user_id}`} />
+
+          
                       </Link>
+                      <Tooltip id={`more-info-tooltip-${user.user_id}`} place="bottom" content="More Info" />
                     </div>
                   </td>
                 </tr>
