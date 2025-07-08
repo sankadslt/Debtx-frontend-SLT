@@ -8,6 +8,7 @@ import ListImg from "../../assets/images/ConfigurationImg/list.png";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
+import agreementIcon from "../../assets/images/ConfigurationImg/Agreement_Details.png";
 import { listAllDRCDetails } from "../../services/drc/Drc";
 import { Tooltip } from "react-tooltip";
 
@@ -365,7 +366,7 @@ const DRCList = () => {
                                             onClick={() => navigate('/pages/DRC/DrcAgreement', { state: { drcId: log.DRCID , drcname: log.DRCName } })}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
-                                            <img src={editImg} alt="Ag" className="w-6 h-6" data-tooltip-id={`agreement-tooltip`} />
+                                            <img src={agreementIcon} alt="Ag" className="w-6 h-6" data-tooltip-id={`agreement-tooltip`} />
                                             <Tooltip id={`agreement-tooltip`} place="bottom" content="Agreement" />
                                         </button>
                                         <button
