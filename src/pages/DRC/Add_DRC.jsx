@@ -14,10 +14,10 @@ import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Swal from "sweetalert2";
 import { getLoggedUserId } from "../../services/auth/authService";
+import { getUserDetailsById } from "../../services/user/user_services";
 import {
   getActiveServiceDetails,
   getActiveRTOMDetails,
-  getSLTCoordinators,
   Create_DRC_With_Services_and_SLT_Coordinator,
 } from "../../services/drc/Drc.js";
 
@@ -408,6 +408,8 @@ const Add_DRC = () => {
       coordinator_create_dtm: new Date().toISOString(),
       coordinator_create_by: user_id,
     };
+
+    
 
     
     const drcData = {
