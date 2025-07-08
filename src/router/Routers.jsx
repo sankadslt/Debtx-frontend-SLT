@@ -100,6 +100,7 @@ import DRCList from "../pages/DRC/DRCList";
 import DRCInfo from "../pages/DRC/DRCInfo";
 import DRCDetails from "../pages/DRC/DRCDetails";
 import DRCInfoEdit from "../pages/DRC/DRCInfoEdit";
+import DrcAgreement from "../pages/DRC/DrcAgreement";
 
 //Rtom
 
@@ -724,6 +725,7 @@ const Routers = () => {
       <Route path="/pages/DRC/DRCDetails" element={<ProtectedRoute element={<DRCDetails />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/DRC/DRCInfo" element={<ProtectedRoute element={<DRCInfo />} allowedRoles={['superadmin']} />} />
       <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} />
+      <Route path="/pages/DRC/DrcAgreement" element={<ProtectedRoute element={<DrcAgreement />} allowedRoles={['superadmin']} />} />
 
       {/* //MASTER DRC
     <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
