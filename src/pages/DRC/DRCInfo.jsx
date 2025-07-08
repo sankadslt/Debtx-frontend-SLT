@@ -1013,7 +1013,7 @@ console.log("latest Status History:", companyData.status || []);
               </table>
               </div>
 
-      {/* Add pagination controls */}
+            {/* Add pagination controls */}
 
               {companyData.drc_coordinator && companyData.drc_coordinator.length > coordinatorsPerPage && (
                 <div className={GlobalStyle.navButtonContainer}>
