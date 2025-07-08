@@ -748,3 +748,17 @@ export const List_DRC_Distribution_Rejected_Batches = async () => {
   }
 };
 
+export const Validate_Existing_Batch_Task = async (case_distribution_batch_id) => {
+  try {
+    console.log("Validating case distribution batch ID:", case_distribution_batch_id);
+    const response = await axios.post(`${URL}/Validate_Existing_Batch_Task`, {
+        case_distribution_batch_id
+      }
+    );
+    console.log("Validation response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Already has tasks with this case distribution batch id", error.message);
+    throw error;
+  }
+};
