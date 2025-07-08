@@ -46,7 +46,6 @@ export default function DRCAssignManagerApproval3() {
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
 
   // Role-Based Buttons
   useEffect(() => {
@@ -319,6 +318,7 @@ export default function DRCAssignManagerApproval3() {
     )
     : currentData;
   //console.log("Filtered Data:", filteredDataBySearch);
+  const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
 
   //const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
@@ -739,7 +739,10 @@ export default function DRCAssignManagerApproval3() {
             placeholder=""
 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setCurrentPage(1); // Reset to first page on new search
+              setSearchQuery(e.target.value)
+            }}
             className={GlobalStyle.inputSearch}
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />

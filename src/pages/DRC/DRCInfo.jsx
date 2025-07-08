@@ -22,6 +22,7 @@ import {
   getSLTCoordinators,
   getActiveServiceDetails,
   getActiveRTOMDetails,
+  
 } from "../../services/drc/Drc";
 import { getLoggedUserId } from "../../services/auth/authService";
 
@@ -49,6 +50,7 @@ const DRCInfo = () => {
   const [error, setError] = useState(null);
 
   // DRC company data 
+  
   const [companyData, setCompanyData] = useState({
     drc_id: "",
     create_on: "",
@@ -66,6 +68,7 @@ const DRCInfo = () => {
 
   // Edit mode fields
   const [contactNo, setContactNo] = useState("");
+  const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [editingCoordinator, setEditingCoordinator] = useState(false);
   const [showLogHistory, setShowLogHistory] = useState(false);
@@ -95,6 +98,14 @@ const DRCInfo = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 5;
 
+   //drc_coordinator pagination
+    const [currentCoordinatorPage, setCurrentCoordinatorPage] = useState(0);
+    const coordinatorsPerPage = 5;
+    
+    // Billing center pagination
+      const [currentRtomPage, setCurrentRtomPage] = useState(0);
+      const rtomPerPage = 5; 
+
   //loghistory function
   const filteredLogHistory = remarkHistory
     .filter((log) =>
@@ -117,6 +128,52 @@ const DRCInfo = () => {
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, pages - 1));
   };
+
+ 
+  // Add this calculation before your return statement
+  const coordinatorPages = companyData.drc_coordinator 
+    ? Math.ceil(companyData.drc_coordinator.length / coordinatorsPerPage)
+    : 0;
+
+  const paginatedCoordinators = companyData.drc_coordinator 
+    ? companyData.drc_coordinator.slice(
+        currentCoordinatorPage * coordinatorsPerPage,
+        (currentCoordinatorPage + 1) * coordinatorsPerPage
+      )
+    : [];
+
+      const handlePrevCoordinatorPage = () => {
+        setCurrentCoordinatorPage(prev => Math.max(prev - 1, 0));
+      };
+
+      const handleNextCoordinatorPage = () => {
+        setCurrentCoordinatorPage(prev => Math.min(prev + 1, coordinatorPages - 1));
+      };
+
+
+      // Billing center pagination
+      const rtomPages = companyData.rtom 
+        ? Math.ceil(companyData.rtom.length / rtomPerPage)
+        : 0;
+
+      const paginatedRtom = companyData.rtom 
+        ? companyData.rtom.slice(
+            currentRtomPage * rtomPerPage,
+            (currentRtomPage + 1) * rtomPerPage
+          )
+        : [];
+
+
+
+   // billing center prev & next 
+    const handlePrevRtomPage = () => {
+      setCurrentRtomPage(prev => Math.max(prev - 1, 0));
+    };
+
+    const handleNextRtomPage = () => {
+      setCurrentRtomPage(prev => Math.min(prev + 1, rtomPages - 1));
+    };
+
 
   // Fetch DRC data 
   useEffect(() => {
@@ -147,6 +204,7 @@ const DRCInfo = () => {
         if (data) {
           setCompanyData(data);
           setContactNo(data.drc_contact_no || "");
+          setAddress(data.drc_address || "");
           setEmail(data.drc_email || "");
 
           // Initialize coordinator fields from current coordinator if exists
@@ -160,17 +218,13 @@ const DRCInfo = () => {
             });
           }
 
-          // Fix for remark - ensure it's treated as a string
-          if (typeof data.remark === "string") {
-            setRemark(data.remark);
-          } else if (Array.isArray(data.remark)) {
-            const remarkText =
-              data.remark.length > 0 && typeof data.remark[0] === "string"
-                ? data.remark[0]
-                : "";
-            setRemark(remarkText);
+          if (Array.isArray(data.remark)) {
+            const validRemarks = data.remark.filter(r => r && (r.remark || r.remark_by || r.remark_dtm));
+            setRemarkHistory(validRemarks);
+          } else if (data.remark && typeof data.remark === 'object') {
+            setRemarkHistory([data.remark]);
           } else {
-            setRemark("");
+            setRemarkHistory([]);
           }
 
           // Set remark history if available
@@ -205,42 +259,6 @@ const DRCInfo = () => {
     }
   }, [drcId]);
 
-  // // Function to fetch active service types
-  // const fetchActiveServices = async () => {
-  //   try {
-  //     setServiceLoading(true);
-  //     const response = await getActiveServiceDetails();
-
-  //     if (response && response.data) {
-  //       const filtered = response.data.filter(
-  //         (service) => service.service_status === "Active"
-  //       );
-
-  //       const formatted = filtered.map((service) => {
-  //         const isAlreadySelected = companyData.services.some(
-  //           (s) => s.service_type === service.service_type
-  //         );
-
-  //         return {
-  //           id: service.service_id,
-  //           name: service.service_type,
-  //           selected: isAlreadySelected,
-  //         };
-  //       });
-
-  //       setServiceTypes(formatted);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error loading service types:", error);
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Error",
-  //       text: "Failed to load active service types.",
-  //     });
-  //   } finally {
-  //     setServiceLoading(false);
-  //   }
-  // };
 
   // Fetch active service types from the API
   const fetchActiveServices = async () => {
@@ -286,12 +304,14 @@ const DRCInfo = () => {
           const isAlreadySelected = companyData.rtom.some(
             (r) => r.rtom_id === rtom.rtom_id
           );
+          
 
           return {
             id: rtom.rtom_id || rtom._id,
             code: rtom.rtom_id?.toString() || "",
             name: rtom.rtom_name || "",
             selected: isAlreadySelected,
+
           };
         });
 
@@ -335,69 +355,80 @@ const DRCInfo = () => {
 
   // Handle DRC End
   const handleEndSubmit = async () => {
-    try {
-      let remarkBy = userData
-        ? userData.id || userData.userId || userData
-        : "system";
+  try {
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to terminate this DRC?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, terminate it!",
+      cancelButtonText: "Cancel",
+    });
 
-      const formattedDate =
-        endDate instanceof Date ? endDate : new Date(endDate);
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
 
-      // Validate remark field
-      if (!terminationRemark.trim()) {
-        setTerminationRemarkError(true);
-        return Swal.fire({
-          icon: "error",
-          title: "Remark Required",
-          text: "Please enter a remark",
-        });
-      }
-
-      setTerminationRemarkError(false);
-
-      Swal.fire({
-        title: "Processing...",
-        text: "Please wait while terminating the DRC",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      // Call termination API
-      const response = await terminateCompanyByDRCID(
-        companyData.drc_id,
-        terminationRemark,
-        remarkBy,
-        formattedDate
-      );
-
-      Swal.close();
-
-      // success message
-      Swal.fire({
-        icon: "success",
-        title: "Termination Successful",
-        text: `DRC ${companyData.drc_name
-          } has been successfully terminated with effect from ${formattedDate.toLocaleDateString()}.`,
-        confirmButtonText: "Done",
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          setTerminationRemark("");
-          setShowEndFields(false);
-          navigate(-1);
-        }
-      });
-    } catch (err) {
-      console.error("Failed to terminate DRC:", err);
-      Swal.fire({
+    // Validate remark field
+    if (!terminationRemark.trim()) {
+      setTerminationRemarkError(true);
+      return Swal.fire({
         icon: "error",
-        title: "Error",
-        text: err.message || "Failed to terminate DRC",
+        title: "Remark Required",
+        text: "Please enter a remark",
       });
     }
-  };
+
+    setTerminationRemarkError(false);
+
+    Swal.fire({
+      title: "Processing...",
+      text: "Please wait while terminating the DRC",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    // Get the user who is terminating
+    const terminate_by = userData
+      ? userData.id || userData.userId || userData
+      : "system";
+
+    // Call termination API with corrected field names
+    const response = await terminateCompanyByDRCID(
+      companyData.drc_id,
+      terminationRemark,
+      terminate_by,
+      endDate
+    );
+
+    Swal.close();
+
+    Swal.fire({
+      icon: "success",
+      title: "Termination Successful",
+      text: `DRC ${companyData.drc_name} has been successfully terminated with effect from ${endDate.toLocaleDateString()}.`,
+      confirmButtonText: "Done",
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTerminationRemark("");
+        setShowEndFields(false);
+        navigate(-1);
+      }
+    });
+  } catch (err) {
+    console.error("Failed to terminate DRC:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err.message || "Failed to terminate DRC",
+    });
+  }
+};
 
   const handleDropdownClick = () => {
     if (!dropdownClicked) {
@@ -438,37 +469,40 @@ const DRCInfo = () => {
     }
   };
 
-  const handleAddRTOM = () => {
-    if (
-      selectedRTOM &&
-      !rtomAreas.some((a) => a.code === selectedRTOM && a.selected)
-    ) {
-      const updatedAreas = rtomAreas.map((item) =>
-        item.code === selectedRTOM ? { ...item, selected: true } : item
-      );
-      setRtomAreas(updatedAreas);
+ const handleAddRTOM = () => {
+  if (
+    selectedRTOM &&
+    !rtomAreas.some((a) => a.code === selectedRTOM && a.selected)
+  ) {
+    const updatedAreas = rtomAreas.map((item) =>
+      item.code === selectedRTOM ? { ...item, selected: true } : item
+    );
+    setRtomAreas(updatedAreas);
 
-      const selectedRtomItem = rtomAreas.find(
-        (area) => area.code === selectedRTOM
-      );
+    const selectedRtomItem = rtomAreas.find(
+      (area) => area.code === selectedRTOM
+    );
 
-      if (selectedRtomItem) {
-        const newRtom = {
-          rtom_id: selectedRtomItem.id,
-          rtom_name: selectedRtomItem.name,
-          rtom_status: "Active",
-          status_update_dtm: new Date().toISOString(),
-        };
+    if (selectedRtomItem) {
+      const newRtom = {
+        rtom_id: selectedRtomItem.id,
+        rtom_name: selectedRtomItem.name,
+        rtom_status: "Active",
+        handling_type: selectedhandlingtype, // Add handling type here
+        status_update_dtm: new Date().toISOString(),
+      };
 
-        setCompanyData({
-          ...companyData,
-          rtom: [...companyData.rtom, newRtom],
-        });
-      }
-
-      setSelectedRTOM("");
+      setCompanyData({
+        ...companyData,
+        rtom: [...companyData.rtom, newRtom],
+      });
     }
-  };
+
+    setSelectedRTOM("");
+    Setselectedhandlingtype(""); // Reset handling type selection
+  }
+};
+
 
   const handleRemoveServiceType = (type) => {
     const updatedTypes = serviceTypes.map((item) =>
@@ -597,6 +631,7 @@ const DRCInfo = () => {
         remark,
         remarkBy,
         currentDate,
+        address,
         contactNo,
         email,
         companyData.drc_status
@@ -735,6 +770,7 @@ const DRCInfo = () => {
   const toggleLogHistory = () => {
     setShowLogHistory(!showLogHistory);
   };
+  console.log("Log History Data:", remarkHistory);
 
   // Get current coordinator (last one in array)
   const currentCoordinator =
@@ -761,6 +797,17 @@ const DRCInfo = () => {
 
   console.log("ShowPOPUp:", showPopup);
 
+
+  const currentStatus = companyData.drc_status?.length > 0 
+  ? companyData.drc_status[companyData.drc_status.length - 1].drc_status
+  : "Inactive";
+
+console.log("DRC Status Data:", {
+  currentStatus: currentStatus,
+
+  
+});
+
   if (!editMode) {
     // View mode
     return (
@@ -774,20 +821,21 @@ const DRCInfo = () => {
           <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
 
             <div className="absolute top-4 right-4">
-              <img
-                src={Edit}
-                onClick={() => {
-                  if (companyData.drc_status !== "Terminate") {
-                    handleNavigateToEdit();
-                  }
-                }}
-                className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${companyData.drc_status === "Terminate"
+            <img
+              src={Edit}
+              onClick={() => {
+                if (companyData.status !== "Terminate") {  
+                  handleNavigateToEdit();
+                }
+              }}
+              className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${
+                companyData.status === "Terminate"  
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
-                  }`}
-                alt="Edit"
-              />
-            </div>
+              }`}
+              alt="Edit"
+            />
+          </div>
 
             {/* Company Details Section */}
             <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
@@ -798,10 +846,12 @@ const DRCInfo = () => {
               <tbody className="space-y-2 sm:space-y-0">
                 {[
                   {
-                    label: "Added Date",
-                    value: companyData.create_on
-                      ? new Date(companyData.create_on).toLocaleDateString()
-                      : ""
+                    label: "Created Date",
+                    value: companyData.drc_create_dtm
+                      ? new Date(companyData.drc_create_dtm).toLocaleDateString()
+                      : companyData.createdAt
+                      ? new Date(companyData.createdAt).toLocaleDateString()
+                      : "Not specified"
                   },
                   {
                     label: "Business Reg No",
@@ -818,7 +868,13 @@ const DRCInfo = () => {
                   {
                     label: "Email",
                     value: companyData.drc_email || "Not specified"
-                  }
+                  }, 
+                    companyData.status === "Terminate" && {
+                     label: "Terminate Date",
+                      value: companyData.drc_terminate_dtm
+                        ? new Date(companyData.drc_terminate_dtm).toLocaleDateString()
+                        : "Not specified"
+                    }
                 ].map((item, index) => (
                   <tr key={index} className="block sm:table-row">
 
@@ -848,44 +904,134 @@ const DRCInfo = () => {
               SLT Coordinator Details
             </h2>
 
+            <div className={`${GlobalStyle} overflow-x-auto`}>
+                <table className={`${GlobalStyle.table} min-w-full text-left`}>
+                  <tbody>
+                    {currentCoordinator ? (
+                      <>
+                        <tr>
+                          <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                            Service No
+                          </td>
+                          <td className="w-4 text-left">:</td>
+                          <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                            {currentCoordinator.service_no || "Not specified"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                            Name
+                          </td>
+                          <td className="w-4 text-left">:</td>
+                          <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                            {currentCoordinator.slt_coordinator_name || "Not specified"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                            Email
+                          </td>
+                          <td className="w-4 text-left">:</td>
+                          <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                            {currentCoordinator.slt_coordinator_email || "Not specified"}
+                          </td>
+                        </tr>
+                      </>
+                    ) : (
+                      <tr>
+                        <td colSpan="3" className="text-center py-4 text-gray-500">
+                          No coordinator assigned
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* DRC Coordinator Section */}
+
+            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+              DRC Coordinator Details
+            </h2>
+
             <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
               <table className={`${GlobalStyle.table} min-w-full`}>
                 <thead className={GlobalStyle.thead}>
                   <tr>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Service No
+                      Name
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Name
+                      NIC
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                       Email
                     </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Contact No
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {currentCoordinator ? (
-                    <tr className="bg-white bg-opacity-75 border-b">
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.service_no || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_name || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_email || "Not specified"}
-                      </td>
-                    </tr>
+                  {paginatedCoordinators.length > 0 ? (
+                    paginatedCoordinators.map((coordinator, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0
+                            ? "bg-white bg-opacity-75"
+                            : "bg-gray-50 bg-opacity-50"
+                        } border-b`}
+                      >
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_name || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_nic || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_email || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_contact_no?.[0]?.contact_number || "N/A"}
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
-                      <td colSpan="3" className="text-center py-4 text-gray-500">
-                        No coordinator assigned
+                      <td colSpan="4" className="text-center py-4 text-gray-500">
+                        No DRC Coordinators found
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
-            </div>
+              </div>
+
+      {/* Add pagination controls */}
+
+              {companyData.drc_coordinator && companyData.drc_coordinator.length > coordinatorsPerPage && (
+                <div className={GlobalStyle.navButtonContainer}>
+                  <button
+                    className={`${GlobalStyle.navButton} ${currentCoordinatorPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={handlePrevCoordinatorPage}
+                    disabled={currentCoordinatorPage === 0}
+                  >
+                    <FaArrowLeft />
+                  </button>
+
+                  <span>Page {currentCoordinatorPage + 1} of {coordinatorPages}</span>
+
+                  <button
+                    className={`${GlobalStyle.navButton} ${currentCoordinatorPage === coordinatorPages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={handleNextCoordinatorPage}
+                    disabled={currentCoordinatorPage === coordinatorPages - 1}
+                  >
+                    <FaArrowRight />
+                  </button>
+                </div>
+              )}
+
 
             {/* Services Section */}
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
@@ -950,7 +1096,7 @@ const DRCInfo = () => {
             </div>
 
             {/* RTOM Areas Section */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+           <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
               Billing Center Areas
             </h2>
 
@@ -973,52 +1119,78 @@ const DRCInfo = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {companyData.rtom && companyData.rtom.map((rtom, index) => (
-                    <tr
-                      key={index}
-                      className={`${index % 2 === 0
-                        ? "bg-white bg-opacity-75"
-                        : "bg-gray-50 bg-opacity-50"
+                  {paginatedRtom.length > 0 ? (
+                    paginatedRtom.map((rtom, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0
+                            ? "bg-white bg-opacity-75"
+                            : "bg-gray-50 bg-opacity-50"
                         } border-b`}
-                    >
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.rtom_name}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.handlingtype}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
-                        {rtom.status_update_dtm
-                          ? new Date(rtom.status_update_dtm).toLocaleDateString()
-                          : ""}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} text-left`}>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={rtom.rtom_status === "Active"}
-                            readOnly
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full 
-                          peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
-                          after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                        </label>
-                      </td>
-                    </tr>
-                  ))}
-                  {(!companyData.rtom || companyData.rtom.length === 0) && (
+                      >
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {rtom.rtom_name}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {rtom.handling_type}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
+                          {rtom.status_update_dtm
+                            ? new Date(rtom.status_update_dtm).toLocaleDateString()
+                            : ""}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} text-left`}>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={rtom.rtom_status === "Active"}
+                              readOnly
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full 
+                            peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
+                            after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                          </label>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
-                      <td colSpan="3" className="text-center py-4 text-gray-500">
+                      <td colSpan="4" className="text-center py-4 text-gray-500">
                         No Billing Center information available
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+              </div>
+
+          {/* Add pagination controls */}
+          {companyData.rtom && companyData.rtom.length > rtomPerPage && (
+            <div className={GlobalStyle.navButtonContainer}>
+              <button
+                className={`${GlobalStyle.navButton} ${currentRtomPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={handlePrevRtomPage}
+                disabled={currentRtomPage === 0}
+              >
+                <FaArrowLeft />
+              </button>
+
+              <span>Page {currentRtomPage + 1} of {rtomPages}</span>
+
+              <button
+                className={`${GlobalStyle.navButton} ${currentRtomPage === rtomPages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={handleNextRtomPage}
+                disabled={currentRtomPage === rtomPages - 1}
+              >
+                <FaArrowRight />
+              </button>
             </div>
+          )}
           </div>
-        </div>
+          </div>
+
 
         {/* Termination Form  */}
         {showEndFields && (
@@ -1175,15 +1347,16 @@ const DRCInfo = () => {
             <div>
               <button
                 onClick={() => {
-                  if (companyData.drc_status !== "Terminate") {
+                  if (companyData.status !== "Terminate") {  
                     setShowEndFields(true);
                   }
                 }}
-                className={`${GlobalStyle.buttonPrimary} ${companyData.drc_status === "Terminate"
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-                  }`}
-                disabled={companyData.drc_status === "Terminate"}
+                className={`${GlobalStyle.buttonPrimary} ${
+                  companyData.status === "Terminate" 
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+                disabled={companyData.status === "Terminate"}  
               >
                 End
               </button>
@@ -1239,10 +1412,10 @@ const DRCInfo = () => {
                               : "bg-gray-50 bg-opacity-50"
                               } border-b`}
                           >
-                            <td className={`${GlobalStyle.tableData} whitespace-nowrap`}>
+                           <td className={`${GlobalStyle.tableData} whitespace-nowrap`}>
                               {log.remark_dtm
                                 ? new Date(log.remark_dtm).toLocaleDateString('en-GB')
-                                : ""}
+                                : "N/A"}
                             </td>
                             <td className={GlobalStyle.tableData}>
                               {log.remark || "No remark provided"}
@@ -1353,10 +1526,13 @@ const DRCInfo = () => {
                     Added Date<span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
+
                   <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left block sm:table-cell`}>
-                    {companyData.create_on
-                      ? new Date(companyData.create_on).toLocaleDateString()
-                      : ""}
+                    {companyData.createdAt
+                        ? new Date(companyData.createdAt).toLocaleDateString()
+                        : companyData.create_on
+                        ? new Date(companyData.create_on).toLocaleDateString()
+                        : "Not specified"}
                   </td>
                 </tr>
 
@@ -1376,8 +1552,13 @@ const DRCInfo = () => {
                     Address<span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
-                  <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                    {companyData.drc_address || "Not specified"}
+                  <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
+                    />
                   </td>
                 </tr>
 
@@ -1416,7 +1597,7 @@ const DRCInfo = () => {
 
 
           {/* SLT Coordinator Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <div className="flex flex-col sm:flex-row justify-between  underline items-start sm:items-center">
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
               SLT Coordinator Details
             </h2>
@@ -1510,6 +1691,63 @@ const DRCInfo = () => {
                 No coordinator assigned
               </div>
             )}
+          </div>
+
+
+          {/*DRC coordinator*/}
+
+           <div>
+            <h2
+              className={`${GlobalStyle.headingMedium} mt-6 mb-2 sm:mt-8 sm:mb-4 underline text-left font-semibold`}
+            >
+             DRC coordinator Details
+            </h2>
+
+
+           <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+              <table className={`${GlobalStyle.table} min-w-full`}>
+                <thead className={GlobalStyle.thead}>
+                  <tr>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Name
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                     NIC
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Email
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
+                      Contact no
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentCoordinator ? (
+                    <tr className="bg-white bg-opacity-75 border-b">
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {currentCoordinator.service_no || "Not specified"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {currentCoordinator.slt_coordinator_name || "Not specified"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {currentCoordinator.slt_coordinator_email || "Not specified"}
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                        {currentCoordinator.slt_coordinator_email || "Not specified"}
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="text-center py-4 text-gray-500">
+                        No coordinator assigned
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Services Section  */}
@@ -1653,7 +1891,10 @@ const DRCInfo = () => {
             </div>
           </div>
 
-          {/* RTOM Section - With dropdown below the heading, aligned left */}
+
+          
+
+          {/* Billing center Section - With dropdown below the heading, aligned left */}
           <div>
             <h2
               className={`${GlobalStyle.headingMedium} mt-6 mb-2 sm:mt-8 sm:mb-4 underline text-left font-semibold`}
@@ -1661,7 +1902,7 @@ const DRCInfo = () => {
               Billing Center Areas
             </h2>
 
-            <div className="flex items-center mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <select
                 onClick={handleRtomDropdownClick}
                 value={selectedRTOM}
@@ -1686,23 +1927,21 @@ const DRCInfo = () => {
                 onChange={(e) => Setselectedhandlingtype(e.target.value)}
                 className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
               >
-                <option value="">Select Handling Type</option>
-                <option value="CPE">CPE</option>
-                <option value="Arrears">Arrears</option>
-                <option value="All-Type">All Type</option>
-              </select>
+                    <option value="">Select Handling Type</option>
+                    <option value="CPE">CPE</option>
+                    <option value="Arrears">Arrears</option>
+                    <option value="All-Type">All Type</option>
+                  </select>
+
+
               <div className="flex justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">
-                <button
-                  type="button"
-                  onClick={handleAddRTOM}
-                  className={`${GlobalStyle.buttonCircle}`}
-                  disabled={!selectedRTOM}
-                >
-                  <img
-                    src={addIcon}
-                    alt="Add"
-                    style={{ width: 20, height: 20 }}
-                  />
+                 <button
+                      type="button"
+                      onClick={handleAddRTOM}
+                      className={`${GlobalStyle.buttonCircle}`}
+                      disabled={!selectedRTOM || !selectedhandlingtype}
+                    >
+                      <img src={addIcon} alt="Add" style={{ width: 20, height: 20 }} />
                 </button>
               </div>
             </div>
@@ -1755,7 +1994,7 @@ const DRCInfo = () => {
                         <td
                           className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
                         >
-                          {rtom.selectedhandlingtype}
+                          {rtom.handling_type}
                         </td>
                         <td
                           className={`${GlobalStyle.tableData} whitespace-normal text-left`}

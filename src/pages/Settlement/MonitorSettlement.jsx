@@ -426,9 +426,7 @@ const Monitor_settlement = () => {
       if (isMoreDataAvailable) {
         setCurrentPage(currentPage + 1);
       } else {
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        setTotalPages(totalPages);
-        if (currentPage < totalPages) {
+        if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
           setCurrentPage(currentPage + 1);
         }
       }
@@ -684,7 +682,10 @@ const Monitor_settlement = () => {
                 type="text"
                 className={GlobalStyle.inputSearch}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage(1); // Reset to page 1 on search
+                  setSearchQuery(e.target.value)
+                }}
               />
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
@@ -764,8 +765,17 @@ const Monitor_settlement = () => {
             </span>
             <button
               onClick={() => handlePrevNext("next")}
-              disabled={currentPage === totalPages}
-              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+              disabled={
+                searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage
+                  )}
+              className={`${GlobalStyle.navButton} ${(searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                  ? "cursor-not-allowed"
+                  : ""
+                }`}
             >
               <FaArrowRight />
             </button>

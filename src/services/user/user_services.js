@@ -67,3 +67,13 @@ export const endUser = async (requestData ={}) => {
   }
 };
 
+export const getAllUserApprovals = async (requestData) => {
+  try {
+    const response = await axios.post(`${USER_URL}/List_User_Approval_Details`, requestData);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user approvals:', error.response?.data || error.message);
+    throw error.response?.data || { status: 'error', message: 'Something went wrong while fetching user approvals.' };
+  }
+};
+

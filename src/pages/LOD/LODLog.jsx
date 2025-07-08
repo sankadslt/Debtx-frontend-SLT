@@ -261,7 +261,7 @@ const LOD_Log = () => {
     const handleNextPage = async () => {
         if (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
             setCurrentPage(currentPage + 1);
-        } 
+        }
         // console.log("Current page:", currentPage);
         // console.log("Total pages:", totalPages);
         // setIsLoading(true);
@@ -479,7 +479,15 @@ const LOD_Log = () => {
                 <span className="text-gray-700">
                     Page {currentPage}
                 </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={!isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}>
+                <button
+                    className={GlobalStyle.navButton}
+                    onClick={handleNextPage}
+                    disabled={
+                        searchQuery
+                            ? currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+                            : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+                    }
+                >
                     <FaArrowRight />
                 </button>
             </div>
