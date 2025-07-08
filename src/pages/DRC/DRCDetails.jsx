@@ -163,12 +163,12 @@ const DRCDetails = () => {
         console.log("Billing Center: ", res.data);
 
         formattedEntries = (res.data ?? []).map((rtom) => {
-          const enableDate = rtom.created_dtm
+          const enableDate = rtom.create_dtm
             ? new Intl.DateTimeFormat('en-GB', {
               day: '2-digit',
               month: '2-digit',
               year: 'numeric',
-            }).format(new Date(rtom.created_dtm))
+            }).format(new Date(rtom.create_dtm))
             : "N/A";
 
           return {
