@@ -4,6 +4,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { List_All_RO_and_DRCuser_Details_to_SLT } from "../../services/RO/RO.js";
 import Swal from 'sweetalert2';
+import { Tooltip } from "react-tooltip";
 
 import RO_Active from "../../assets/images/status/RO_DRC_Status_Icons/RO_Active.svg";
 import RO_Inactive from "../../assets/images/status/RO_DRC_Status_Icons/RO_Inactive.svg";
@@ -91,11 +92,11 @@ export default function ROList() {
     const getStatusIcon = (status) => {
         switch (status) {
             case "Active":
-                return <img src={RO_Active} alt="RO Active" title="RO Active" className="w-6 h-6 cursor-pointer" />;
+                return <img src={RO_Active} alt="RO Active" title="RO Active" className="w-6 h-6 cursor-pointer" data-tooltip-id={`status-tooltip-${status}`} data-tooltip-content={status} />;
             case "Inactive":
-                return <img src={RO_Inactive} alt="RO Inactive" title="RO Inactive" className="w-6 h-6 cursor-pointer" />;
+                return <img src={RO_Inactive} alt="RO Inactive" title="RO Inactive" className="w-6 h-6 cursor-pointer" data-tooltip-id={`status-tooltip-${status}`} data-tooltip-content={status} />;
             case "Terminate":
-                return <img src={RO_Terminate} alt="RO Terminate" title="RO Terminate" className="w-6 h-6 cursor-pointer" />;
+                return <img src={RO_Terminate} alt="RO Terminate" title="RO Terminate" className="w-6 h-6 cursor-pointer" data-tooltip-id={`status-tooltip-${status}`} data-tooltip-content={status} />;
             default:
                 return null;
         }
@@ -140,7 +141,7 @@ export default function ROList() {
                                 onChange={handleStatusChange}
                                 className={`${GlobalStyle.selectBox} w-32 md:w-40`}
                             >
-                                <option disabled value="">Select Status</option>
+                                <option hidden value="">Select Status</option>
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
                                 <option value="Terminate">Terminate</option>
@@ -177,6 +178,7 @@ export default function ROList() {
                                     <td className={GlobalStyle.tableData}>{item.drc_name || "N/A"}</td>
                                     <td className={`${GlobalStyle.tableData} flex justify-center items-center pt-6`}>
                                         {getStatusIcon(item.drcUser_status) || "N/A"}
+                                        <Tooltip id={`status-tooltip-${item.drcUser_status}`} place="bottom" content={item.drcUser_status} />
                                     </td>
                                     <td className={GlobalStyle.tableData}>{item.nic || "N/A"}</td>
                                     <td className={GlobalStyle.tableData}>{item.ro_name || "N/A"}</td>
