@@ -122,7 +122,7 @@ const Incident_Register_Individual = () => {
       const user_id = await getCurrentUser();
 
       const incidentData = {
-        Account_Num: accountNo,
+        Account_Num: accountNo.trim(),
         DRC_Action: actionType,
         Monitor_Months: calendarMonth,
         Source_Type: sourceType,
