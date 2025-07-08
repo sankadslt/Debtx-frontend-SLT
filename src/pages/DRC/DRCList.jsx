@@ -393,6 +393,7 @@ const showNoDataMessage = (status = "") => {
                                          onClick={() => navigate('/pages/DRC/DrcAgreement', { state: { drcId: log.DRCID , drcname: log.DRCName } })}
                                         className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
                                         title="Agreement Details"
+                                        disabled={log.Status === "Terminate"}
                                     >
                                         <img src={agreementIcon} alt="Agreement Details" className="h-auto w-5 max-w-[24px]" data-tooltip-id="agreement-tooltip" />
                                         <Tooltip
