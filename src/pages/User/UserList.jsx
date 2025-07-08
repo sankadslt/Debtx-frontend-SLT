@@ -17,6 +17,7 @@ import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
 import { getAllUserDetails } from "../../services/user/user_services"; 
+import { Tooltip } from "react-tooltip";
 
 const UserList = () => {
   // Search
@@ -482,10 +483,18 @@ const UserList = () => {
                               : "Terminated"
                           }
                           className="h-5 w-5 lg:h-6 lg:w-6"
-                          onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
-                          onMouseLeave={hideTooltip}
+                          data-tooltip-id={`status-${user.user_id}`}
+                          data-tooltip-content={
+                            user.status === "true"
+                              ? "Active"
+                              : user.status === "false"
+                              ? "Inactive"
+                              : "Terminated"
+                          }
+                         // onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+                          //onMouseLeave={hideTooltip}
                         />
-                        {tooltipVisible === `status-${user.user_id}` && (
+                        {/* {tooltipVisible === `status-${user.user_id}` && (
                           <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
                             {user.status === "true"
                               ? "Active"
@@ -493,9 +502,10 @@ const UserList = () => {
                               ? "Inactive"
                               : "Terminated"}
                           </div>
-                        )}
+                        )} */}
                       </div>
                     </div>
+                    <Tooltip id={`status-${user.user_id}`} place="bottom" ></Tooltip>
                   </td>
                   <td className={`${GlobalStyle.tableData}`}>{user.user_type}</td>
                   <td className={`${GlobalStyle.tableData}`}>{user.user_role}</td>
@@ -505,7 +515,8 @@ const UserList = () => {
                   <td className={`${GlobalStyle.tableData}`}>
                     <div className="flex justify-center">
                       <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
-                        <img src={more_info} alt="More Info" className="h-5 w-5 lg:h-6 lg:w-6" />
+                        <img src={more_info} alt="More Info" data-tooltip-id={`more-info-tooltip-${user.user_id}`} className="h-5 w-5 lg:h-6 lg:w-6" />
+                        <Tooltip id={`more-info-tooltip-${user.user_id}`} place="bottom" content="More Info" />
                       </Link>
                     </div>
                   </td>
