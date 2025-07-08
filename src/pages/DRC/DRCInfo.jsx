@@ -96,11 +96,12 @@ const DRCInfo = () => {
   const rowsPerPage = 5;
 
   //loghistory function
-  const filteredLogHistory = remarkHistory
-    .filter((log) =>
-      (log.remark || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (log.remark_by || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
+ const filteredLogHistory = remarkHistory
+  .sort((a, b) => new Date(b.remark_dtm) - new Date(a.remark_dtm)) // Newest first
+  .filter((log) =>
+    (log.remark || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (log.remark_by || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const pages = Math.ceil(filteredLogHistory.length / rowsPerPage);
   const paginatedLogHistory = filteredLogHistory.slice(
@@ -984,7 +985,7 @@ const DRCInfo = () => {
                         {rtom.rtom_name}
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {rtom.handlingtype}
+                        {rtom.handling_type}
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
                         {rtom.status_update_dtm
@@ -1753,7 +1754,7 @@ const DRCInfo = () => {
                         <td
                           className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
                         >
-                          {rtom.selectedhandlingtype}
+                          {rtom.handling_type}
                         </td>
                         <td
                           className={`${GlobalStyle.tableData} whitespace-normal text-left`}
