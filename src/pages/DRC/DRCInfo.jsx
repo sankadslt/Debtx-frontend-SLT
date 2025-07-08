@@ -1009,7 +1009,7 @@ console.log("DRC Status Data:", {
               </table>
               </div>
 
-      {/* Add pagination controls */}
+            {/* Add pagination controls */}
 
               {companyData.drc_coordinator && companyData.drc_coordinator.length > coordinatorsPerPage && (
                 <div className={GlobalStyle.navButtonContainer}>
