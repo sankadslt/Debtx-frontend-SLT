@@ -71,13 +71,12 @@ const RtomList = () => {
         setLastFetchedBackendPage(pageNo);
       }
     } catch (err) {
-       Swal.fire({
-              title: "Error",
-              text: err.message || "Failed to fetch RTOMs",
-              icon: "error",
-              confirmButtonColor: "#d33",
-            });
-
+      Swal.fire({
+        title: "Error",
+        text: err.message || "Failed to fetch RTOMs",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -98,22 +97,24 @@ const RtomList = () => {
 
   // handle clear
   const handleClear = () => {
-    setSearchQuery("");
-    setTempSearchQuery("");
-    setStatusFilter("");
-    setAppliedStatus("");
+  setSearchQuery("");            
+  setTempSearchQuery("");      
+  setStatusFilter("");           
+  setAppliedStatus("");     
+  setFiltersApplied(false);     
+  setCurrentPage(1);             
+  setLastFetchedBackendPage(1);  
+  hasMoreData.current = true;     
+  setAllData([]); 
+  
+  if (filtersApplied) {
     setFiltersApplied(false);
-    setCurrentPage(1);
-    hasMoreData.current = true;
-    setAllData([]);
+  } else {
+    callRTOMAPI(1);
+  }
+  
+};
 
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    } else {
-      callRTOMAPI({ status: "", page: 1 });
-    }
-    
-  };
 
   // handle search change
   const handleSearchChange = (e) => {
@@ -149,7 +150,7 @@ const RtomList = () => {
     //   appliedStatus === "" ||
     //   row.rtom_status === appliedStatus;
     // return matchesSearch && matchesStatus;
-    return matchesSearch
+    return matchesSearch;
   });
 
   // Calculate pagination
@@ -286,15 +287,23 @@ const RtomList = () => {
                       <img
                         src={getStatusIcon(rtom.rtom_status)}
                         alt={rtom.rtom_status}
-                        data-tooltip-id="status-tooltip"
+                        data-tooltip-id={`status-tooltip-${rtom.rtom_id}`}
                         className="w-6 h-6"
                       />
                       {/* Tooltip */}
-                      <Tooltip id="status-tooltip" place="bottom" effect="solid">
-                        {rtom.rtom_status}
-
-                        {/* Tooltip arrow */}
-                        {/* <div className="absolute bottom-full right-2 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-800"></div> */}
+                      <Tooltip
+                        id={`status-tooltip-${rtom.rtom_id}`}
+                        place="bottom"
+                        effect="solid"
+                        className="z-50"
+                      >
+                        {rtom.rtom_status === "Active"
+                          ? "Active"
+                          : rtom.rtom_status === "Inactive"
+                          ? "Inactive"
+                          : rtom.rtom_status === "Terminate"
+                          ? "Terminate"
+                          : "Unknown Status"}
                       </Tooltip>
                     </div>
                   </td>
@@ -306,7 +315,10 @@ const RtomList = () => {
                   <td className={GlobalStyle.tableData}>
                     {rtom.rtom_mobile_no}
                   </td>
-                  <td className={GlobalStyle.tableData} style={{ display: "flex", justifyContent: "center" }}>
+                  <td
+                    className={GlobalStyle.tableData}
+                    style={{ display: "flex", justifyContent: "center" }}
+                  >
                     <button
                       onClick={() => handleRowClick(rtom.rtom_id)}
                       className="w-6 h-6 cursor-pointer"
@@ -317,7 +329,11 @@ const RtomList = () => {
                         className="w-full h-full"
                         data-tooltip-id="view-details-tooltip"
                       />
-                      <Tooltip id="view-details-tooltip" place="bottom" effect="solid">
+                      <Tooltip
+                        id="view-details-tooltip"
+                        place="bottom"
+                        effect="solid"
+                      >
                         More Info
                       </Tooltip>
                     </button>

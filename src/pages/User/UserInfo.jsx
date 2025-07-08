@@ -284,6 +284,15 @@ const UserInfo = () => {
     );
   }) || [];
 
+  const formatRoleLabel = (value) => {
+    if (!value) return "N/A";
+
+    return value
+      .split("_")
+      .map(word => word[0].toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -308,7 +317,7 @@ const UserInfo = () => {
 
       {/* Card box */}
       <div className="w-full flex justify-center">
-        <div className={`${GlobalStyle.cardContainer} relative  w-full max-w-xl`}>
+        <div className={`${GlobalStyle.cardContainer} relative  w-full max-w-4xl`}>
           {/* Edit Mode UI */}
           {isEditing ? (
             <div className="space-y-4">
@@ -333,7 +342,7 @@ const UserInfo = () => {
                   <tbody>
                     {/* User type */}
                     <tr className="align-middle">
-                      <td className="w-1/3 sm:w-auto align-middle">
+                      <td className="w-[150px] sm:w-[164px] align-middle">
                         <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
                           User Type
                         </p>
@@ -570,7 +579,7 @@ const UserInfo = () => {
                   <tbody>
                     {/* User type */}
                     <tr>
-                      <td className="w-1/3 sm:w-auto">
+                      <td className="w-[170px] lg:w-[164px] align-middle">
                         <p className={`${GlobalStyle.paragraph} mb-2`}>
                           User Type
                         </p>
@@ -651,7 +660,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto">
                         <label className={GlobalStyle.headingSmall}>
-                          {userInfo.role || "N/A"}
+                          {formatRoleLabel(userInfo.role)}
                         </label>
                       </td>
                     </tr>
@@ -730,26 +739,6 @@ const UserInfo = () => {
           )}
         </div>
       </div>
-      {/* End button */}
-      <div className="flex justify-end pr-0 sm:pr-40 mt-4">
-        {!isEditing && !showEndSection && (
-          <button
-            onClick={() => {
-              if (userInfo.user_status !== "Terminate") {
-                setShowEndSection(true);
-              }
-            }}
-            className={`${GlobalStyle.buttonPrimary} ${
-              userInfo.user_status === "Terminate" 
-                ? "opacity-50 cursor-not-allowed" 
-                : ""
-            }`}
-            disabled={userInfo.user_status === "Terminate"}
-          >
-            End
-          </button>
-        )}
-      </div>
 
       {/* End Date and Remark Section */}
       {showEndSection && (
@@ -801,20 +790,47 @@ const UserInfo = () => {
         </div>
       )}
 
-{/* Log History button */}
-      <div className="flex gap-4 pl-0 sm:pl-20 my-4">
-        <button
-          className={`${GlobalStyle.buttonPrimary}`}
-          onClick={() => setShowPopup(true)}
-        >
-          Log History
-        </button>
-      </div>
+      {/* Buttons */}
+      <div className="flex justify-between max-w-4xl m-auto">
+        <div className="flex flex-col just-start">
+          {/* Log History button */}
+          <div className="flex gap-4">
+            <button
+              className={`${GlobalStyle.buttonPrimary}`}
+              onClick={() => setShowPopup(true)}
+            >
+              Log History
+            </button>
+          </div>
 
-      <div style={{ marginTop: '12px' }}>
-          <button className={GlobalStyle.buttonPrimary} onClick={goBack}>
-          <FaArrowLeft /> 
-          </button>
+          <div style={{ marginTop: '12px' }}>
+              <button className={GlobalStyle.buttonPrimary} onClick={goBack}>
+              <FaArrowLeft /> 
+              </button>
+          </div>
+        </div>
+        
+        {/* End button */}
+        <div className="flex justify-end h-fit">
+          {!isEditing && !showEndSection && (
+            <button
+              onClick={() => {
+                if (userInfo.user_status !== "Terminate") {
+                  setShowEndSection(true);
+                }
+              }}
+              className={`${GlobalStyle.buttonPrimary} ${
+                userInfo.user_status === "Terminate" 
+                  ? "opacity-50 cursor-not-allowed" 
+                  : ""
+              }`}
+              disabled={userInfo.user_status === "Terminate"}
+            >
+              End
+            </button>
+          )}
+        </div>
+
       </div>
 
       {/* Log History Section - Updated as Popup with Working Search */}

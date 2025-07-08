@@ -26,16 +26,16 @@ import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
- 
+
 import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
 import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
 import errorincident from "/src/assets/images/incidents/Incident_Error.png";
 //import error from "/src/assets/images/incidents/Reject.png"
 
 const Incident_List = () => {
- 
- 
-  
+
+
+
   const [searchQuery, setSearchQuery] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
@@ -43,15 +43,15 @@ const Incident_List = () => {
   const [status1, setStatus1] = useState("");
   const [status2, setStatus2] = useState("");
   const [status3, setStatus3] = useState("");
-   
-  
+
+
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  //const [totalPages, setTotalPages] = useState(0);
 
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const rowsPerPage = 10;
@@ -60,9 +60,9 @@ const Incident_List = () => {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
- 
+
   const hasMounted = useRef(false);
-  
+
   const [committedFilters, setCommittedFilters] = useState({
     status1: "",
     status2: "",
@@ -71,7 +71,7 @@ const Incident_List = () => {
     toDate: null
   });
 
- 
+
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -116,19 +116,19 @@ const Incident_List = () => {
 
   const renderStatusIcon = (status, index) => {
     const iconPath = getStatusIcon(status);
-    if (!iconPath){
+    if (!iconPath) {
       return <span>{status}</span>;
-    }  
+    }
 
     const tooltipId = `tooltip-${index}`;
 
     return (
       <div className="flex items-center gap-2">
-        <img src={iconPath} 
-        alt={status} 
-       
-        className="w-6 h-6" 
-        data-tooltip-id={tooltipId} />
+        <img src={iconPath}
+          alt={status}
+
+          className="w-6 h-6"
+          data-tooltip-id={tooltipId} />
 
         <Tooltip id={tooltipId} place="bottom" effect="solid">
           {status}
@@ -137,15 +137,15 @@ const Incident_List = () => {
     );
   };
   const navigate = useNavigate();
-  
+
   const handlestartdatechange = (date) => {
     setFromDate(date);
-    
+
   };
 
   const handleenddatechange = (date) => {
     setToDate(date);
-   
+
   };
   const CheckDateDifference = (fromDate, toDate) => {
     const start = new Date(fromDate).getTime();
@@ -167,9 +167,9 @@ const Incident_List = () => {
       }).then((result) => {
         if (result.isConfirmed) {
           endDate = toDate;
-          handleApicall(fromDate, toDate);  
+          handleApicall(fromDate, toDate);
         } else {
-          setToDate(null);  
+          setToDate(null);
           console.log("EndDate cleared");
         }
       });
@@ -194,53 +194,53 @@ const Incident_List = () => {
       }
     }
   }, [fromDate, toDate]);
-  
-  
-  
-    const filteredDataBySearch = filteredData.filter((row) =>
-      Object.values(row)
-        .join(" ")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
 
 
-      const filterValidations = () => {
-        if ( !status1 && !status2 && !status3 && !fromDate && !toDate ) {
-          Swal.fire({
-            title: "Warning",
-            text: "No filter is selected. Please, select a filter.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonColor: "#f1c40f"
-          });
-          setToDate(null);
-          setFromDate(null);
-          return false;
-        }
-    
-        if ((fromDate && !toDate) || (!fromDate && toDate)) {
-          Swal.fire({
-            title: "Warning",
-            text: "Both From Date and To Date must be selected.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonColor: "#f1c40f"
-          });
-          setToDate(null);
-          setFromDate(null);
-          return false;
-        }
-    
-        return true;  
-      };
 
-   
+  const filteredDataBySearch = filteredData.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+
+  const filterValidations = () => {
+    if (!status1 && !status2 && !status3 && !fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "No filter is selected. Please, select a filter.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Both From Date and To Date must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    return true;
+  };
+
+
   const callAPI = async (filters) => {
     try {
-      
+
       const formatDate = (date) => {
         if (!date) return null;
         const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -260,61 +260,61 @@ const Incident_List = () => {
       const response = await fetchIncidents(payload);
       setIsLoading(false);
       console.log("API Response:", response);
-      
-      if (response && response.data ) {
+
+      if (response && response.data) {
         if (currentPage === 1) {
           setFilteredData(response.data);
         } else {
           setFilteredData((prevData) => [...prevData, ...response.data]);
         }
-      
-        
-       if (response.data.length === 0) {
-           setIsMoreDataAvailable(false);  
-           if (currentPage === 1) {
-             Swal.fire({
-               title: "No Results",
-               text: "No matching data found for the selected filters.",
-               icon: "warning",
-               allowOutsideClick: false,
-               allowEscapeKey: false,
-               confirmButtonColor: "#f1c40f"
-             });
-           } else if (currentPage === 2) {
-             setCurrentPage(1);  
-           }
-         } else {
-           const maxData = currentPage === 1 ? 10 : 30;
-           if (response.data.length < maxData) {
-             setIsMoreDataAvailable(false); 
-           }
-         }
- 
-       } else {
-         Swal.fire({
-           title: "Error",
-           text: "No valid incident data found in response.",
-           icon: "error",
-           confirmButtonColor: "#d33"
-         });
-         setFilteredData([]);
-       }
-     } catch (error) {
-       console.error("Error filtering cases:", error);
-       Swal.fire({
-         title: "Error",
-         text: "Failed to fetch filtered data. Please try again.",
-         icon: "error",
-         confirmButtonColor: "#d33"
-       });
-     } finally {
-       setIsLoading(false);  
-     }
-   }
 
- 
+
+        if (response.data.length === 0) {
+          setIsMoreDataAvailable(false);
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
+            });
+          } else if (currentPage === 2) {
+            setCurrentPage(1);
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.data.length < maxData) {
+            setIsMoreDataAvailable(false);
+          }
+        }
+
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid incident data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+        setFilteredData([]);
+      }
+    } catch (error) {
+      console.error("Error filtering cases:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+
   useEffect(() => {
-   
+
 
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
@@ -325,59 +325,54 @@ const Incident_List = () => {
     }
   }, [currentPage]);
 
- 
+
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === "next") {
-      if (isMoreDataAvailable) {
-        setCurrentPage(currentPage + 1);
-      } else {
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        setTotalPages(totalPages);
-        if (currentPage < totalPages) {
-          setCurrentPage(currentPage + 1);
-        }
-      }
+    } else if (
+      direction === "next" &&
+      (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage))
+    ) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
- 
- 
-    const handleFilterButton = () => {
+
+
+  const handleFilterButton = () => {
     setIsMoreDataAvailable(true);
-    setTotalPages(0);
+    //setTotalPages(0);
     setMaxCurrentPage(0);
-    const isValid = filterValidations();  
+    const isValid = filterValidations();
     if (!isValid) {
-      return;  
+      return;
     } else {
-    setCommittedFilters({
-      status1,
-      status2,
-      status3,
-      fromDate,
-      toDate
-    });
-    setFilteredData([]);
-    
-    if (currentPage === 1) {
-      callAPI({
+      setCommittedFilters({
         status1,
         status2,
         status3,
         fromDate,
-        toDate,
-        page: 1
+        toDate
       });
-    } else {
-      setCurrentPage(1);
+      setFilteredData([]);
 
+      if (currentPage === 1) {
+        callAPI({
+          status1,
+          status2,
+          status3,
+          fromDate,
+          toDate,
+          page: 1
+        });
+      } else {
+        setCurrentPage(1);
+
+      }
     }
-    }
-    
+
   }
-  
+
   const handleClear = () => {
     setStatus1("");
     setStatus2("");
@@ -385,7 +380,7 @@ const Incident_List = () => {
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
-    setTotalPages(0);
+    //setTotalPages(0);
     setFilteredData([]);
     setMaxCurrentPage(0);
     setIsMoreDataAvailable(true);
@@ -397,47 +392,47 @@ const Incident_List = () => {
       toDate: null
     });
     if (currentPage != 1) {
-        setCurrentPage(1);  
-      } else {
-        setCurrentPage(0); 
-        setTimeout(() => setCurrentPage(1), 0); 
-      }
+      setCurrentPage(1);
+    } else {
+      setCurrentPage(0);
+      setTimeout(() => setCurrentPage(1), 0);
+    }
   };
 
-   
+
   const HandleCreateTask = async () => {
 
-   const userData = await getLoggedUserId(); 
+    const userData = await getLoggedUserId();
 
-     if (!fromDate || !toDate) {
-          Swal.fire({
-            title: "Warning",
-            text: "Please select From Date and To Date.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonColor: "#f1c40f"
-          });
+    if (!fromDate || !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select From Date and To Date.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
       return;
     }
 
-   
+
     setIsCreatingTask(true);
- 
+
     try {
-      
- 
-   
- 
-      const response = await Task_for_Download_Incidents( status1,status2,fromDate,toDate,userData);
+
+
+
+
+      const response = await Task_for_Download_Incidents(status1, status2, fromDate, toDate, userData);
       if (response && response.message === "Task created successfully") {
-           Swal.fire({
-             title:  "Success",
-             text: `Task created successfully!`,
-             icon: "success",
-             confirmButtonColor: "#28a745"
-           });
-        }
+        Swal.fire({
+          title: "Success",
+          text: `Task created successfully!`,
+          icon: "success",
+          confirmButtonColor: "#28a745"
+        });
+      }
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -450,15 +445,15 @@ const Incident_List = () => {
     }
   };
 
-   
 
-  
+
+
   const HandleAddIncident = () => navigate("/incident/register");
 
-  
- 
 
- 
+
+
+
 
   if (isLoading) {
     return (
@@ -484,7 +479,7 @@ const Incident_List = () => {
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
             <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
-              
+
               <div className="flex items-center">
 
                 <select
@@ -571,7 +566,10 @@ const Incident_List = () => {
                 type="text"
                 className={GlobalStyle.inputSearch}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage(1); // Reset to page 1 on search
+                  setSearchQuery(e.target.value)
+                }}
               />
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
@@ -592,10 +590,10 @@ const Incident_List = () => {
               </thead>
 
               <tbody>
-              {filteredDataBySearch.length > 0 ? (
+                {filteredDataBySearch.length > 0 ? (
                   filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                     <tr
-                      key={row.incidentID||index}
+                      key={row.incidentID || index}
                       className={
                         index % 2 === 0
                           ? GlobalStyle.tableRowEven
@@ -617,13 +615,13 @@ const Incident_List = () => {
                         minute: "2-digit",
                         hour12: true
                       }) || ""}</td>
-                     
+
                     </tr>
                   ))
                 ) : (
-                 <tr>
-                                   <td colSpan={9} className={`${GlobalStyle.tableData} text-center`}>No cases available</td>
-                                 </tr>
+                  <tr>
+                    <td colSpan={9} className={`${GlobalStyle.tableData} text-center`}>No cases available</td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -634,7 +632,7 @@ const Incident_List = () => {
             <button
               onClick={() => handlePrevNext("prev")}
               disabled={currentPage <= 1}
-              className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+              className={`${GlobalStyle.navButton}`}
             >
               <FaArrowLeft />
             </button>
@@ -643,8 +641,11 @@ const Incident_List = () => {
             </span>
             <button
               onClick={() => handlePrevNext("next")}
-              disabled={currentPage === totalPages}
-              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+              disabled={
+                searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+              className={`${GlobalStyle.navButton}`}
             >
               <FaArrowRight />
             </button>
@@ -658,8 +659,8 @@ const Incident_List = () => {
                 className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
                 disabled={isCreatingTask}
               >
-                 {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-                 {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+                {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
               </button>
             </div>
           )}

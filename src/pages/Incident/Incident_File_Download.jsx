@@ -26,7 +26,7 @@ const Incident_File_Download = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  //const [totalPages, setTotalPages] = useState(0);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const rowsPerPage = 10;
 
@@ -92,7 +92,7 @@ const Incident_File_Download = () => {
   };
 
   useEffect(() => {
-   
+
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI(currentPage);
@@ -102,20 +102,17 @@ const Incident_File_Download = () => {
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === "next") {
-      if (isMoreDataAvailable) {
-        setCurrentPage(currentPage + 1);
-      } else {
-        const total = Math.ceil(filteredData.length / rowsPerPage);
-        setTotalPages(total);
-        if (currentPage < total) setCurrentPage(currentPage + 1);
-      }
+    } else if (
+      direction === "next" &&
+      (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage))
+    ) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
   const handleDownload = (File_Location) => {
     alert("Need to configure the download with the server");
-     
+
   };
 
   if (isLoading) {
@@ -137,7 +134,10 @@ const Incident_File_Download = () => {
             className={GlobalStyle.inputSearch}
             placeholder="Search..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setCurrentPage(1); // Reset to page 1 on search
+              setSearchQuery(e.target.value)
+            }}
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
@@ -199,24 +199,27 @@ const Incident_File_Download = () => {
         </table>
       </div>
 
+      {/* Pagination Section */}
       {filteredDataBySearch.length > 0 && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
-         
+
             onClick={() => handlePrevNext("prev")}
             disabled={currentPage <= 1}
-            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+            className={`${GlobalStyle.navButton}`}
           >
             <FaArrowLeft />
           </button>
           <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-                            Page {currentPage}
-                        </span>
-                        <button
-                            onClick={() => handlePrevNext("next")}
-                            disabled={currentPage === totalPages}
-                            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
-                        >
+            Page {currentPage}
+          </span>
+          <button
+            onClick={() => handlePrevNext("next")}
+            disabled={searchQuery
+              ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+            className={`${GlobalStyle.navButton}`}
+          >
             <FaArrowRight />
           </button>
         </div>

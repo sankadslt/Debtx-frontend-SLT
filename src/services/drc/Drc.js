@@ -29,6 +29,7 @@ export const Active_DRC_Details = async () => {
   }
 };
 
+
 export const listAllDRCDetails = async (filter) => {
   try {
     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
@@ -36,28 +37,27 @@ export const listAllDRCDetails = async (filter) => {
       page: filter.page || 1,
     });
 
-    if (response.data.status === "error") {
-      throw new Error(response.data.message || "Failed to fetch DRC data");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error in listAllDRCDetails:", {
-      message: error.message,
-      response: error.response?.data,
-      config: error.config
-    });
-    
-    // More specific error messages
-    if (error.response?.status === 500) {
-      throw new Error("Server error while fetching DRC data. Please try again later.");
-    } else if (error.response?.status === 404) {
-      throw new Error("No DRC records found matching your criteria.");
-    } else {
-      throw new Error("Failed to fetch DRC data. Please check your connection and try again.");
+
+    if (error.response?.status === 404) {
+      console.log('No records found for filter', filter); 
+      return { 
+        data: [], 
+        status: "success",
+        message: error.response.data?.message || "No matching records found"
+      };
     }
+    
+    // For all other errors, throw with user-friendly message
+    console.error("Error fetching DRC data:", error);
+    throw new Error(
+      error.response?.data?.message || 
+      "Failed to fetch DRC data. Please try again later."
+    );
   }
 };
+
 
 export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
   try {
@@ -163,15 +163,15 @@ export const getDebtCompanyByDRCID = async (drcId) => {
 export const terminateCompanyByDRCID = async (
   drcId,
   remark,
-  remarkBy,
-  terminatedDate
+  terminate_by,
+  terminate_dtm
 ) => {
   try {
     const response = await axios.patch(`${URL}/Terminate_Company_By_DRC_ID`, {
       drc_id: drcId,
       remark: remark,
-      remark_by: remarkBy,
-      remark_dtm: terminatedDate.toISOString(), // Ensure proper date format
+      terminate_by: terminate_by,
+      terminate_dtm: terminate_dtm.toISOString(), // Ensure proper date format
     });
 
     if (response.data.status === "error") {
@@ -192,6 +192,7 @@ export const terminateCompanyByDRCID = async (
   }
 };
 
+
 // Update DRC information with services and SLT coordinator
 export const updateDRCInfo = async (
   drcId,
@@ -203,7 +204,8 @@ export const updateDRCInfo = async (
   remark_dtm,
   drc_contact_no,
   drc_email,
-  drc_status 
+  drc_address,
+  status 
 ) => {
   try {
     const response = await axios.patch(
@@ -221,7 +223,8 @@ export const updateDRCInfo = async (
         remark_dtm,
         drc_contact_no,
         drc_email,
-        drc_status, // Include status in the request
+        drc_address,
+        status, // Include status in the request
       }
     );
 
