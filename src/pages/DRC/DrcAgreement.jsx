@@ -72,7 +72,7 @@ const DrcAgreement = () => {
         const response = await DRC_Agreement_details_list(drcId);
         console.log("Fetched Data:", response.data);
         if (response.data) {
-          const agreements = response.data?.[0]?.drc_agreement_details;// Assuming the first item contains the agreements array
+          const agreements = response.data// Assuming the first item contains the agreements array
           console.log("Agreements:", agreements);
 
           if (agreements && agreements.length > 0) {
