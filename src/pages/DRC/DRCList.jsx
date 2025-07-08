@@ -37,6 +37,7 @@ const DRCList = () => {
 
     // Status icons 
     const getStatusIcon = (status) => {
+        
         switch (status?.toLowerCase()) {
             case "active":
                 return activeIcon;
@@ -78,6 +79,7 @@ const DRCList = () => {
             });
 
             if (response && response.data) {
+                
                 const drcData = response.data.map(drc => ({
                     DRCID: drc.drc_id,
                     Status: drc.drc_status,
@@ -358,6 +360,13 @@ const DRCList = () => {
                                             <img src={editImg} alt="Info"  className="w-6 h-6" data-tooltip-id={`edit-tooltip`} />
                                             <Tooltip id={`edit-tooltip`} place="bottom" content="More Info" />
 
+                                        </button>
+                                        <button
+                                            onClick={() => navigate('/pages/DRC/DrcAgreement', { state: { drcId: log.DRCID , drcname: log.DRCName } })}
+                                            className="p-1 hover:bg-gray-100 rounded"
+                                        >
+                                            <img src={editImg} alt="Ag" className="w-6 h-6" data-tooltip-id={`agreement-tooltip`} />
+                                            <Tooltip id={`agreement-tooltip`} place="bottom" content="Agreement" />
                                         </button>
                                         <button
                                             onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID } })}
