@@ -155,26 +155,17 @@ const AddRtom = () => {
     } catch (error) {
       console.error("Error in form submission:", error);
 
+      const status = error?.status;      
       const backendMessage =
-        typeof error === "string"
-          ? error
-          : error.response?.data?.message || error.message || "";
+        error?.response?.data?.message || "Failed to create RTOM. Please try again.";
+      
+      await Swal.fire({
+        icon: status === 409 ? "warning" : "error",
+        title: status === 409 ? "Duplicate Entry" : "Registration Failed",
+        text: backendMessage,
+        confirmButtonColor: status === 409 ? "#f39c12" : "#d33",
+      });
 
-      if (backendMessage.toLowerCase().includes("already exists")) {
-        await Swal.fire({
-          icon: "warning",
-          title: "Duplicate Entry",
-          text: "RTOM with this Billing Center Code and Name already exists.",
-          confirmButtonColor: "#f39c12",
-        });
-      } else {
-        await Swal.fire({
-          icon: "error",
-          title: "Registration Failed",
-          text: backendMessage || "Failed to create RTOM. Please try again.",
-          confirmButtonColor: "#d33",
-        });
-      }
     } finally {
       setIsSubmitting(false);
     }
