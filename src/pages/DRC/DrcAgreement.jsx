@@ -23,12 +23,12 @@ const DrcAgreement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   // Form data states
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [remark, setRemark] = useState("");
-  
+
   // Agreement history data
   const [agreementHistory, setAgreementHistory] = useState([
     {
@@ -230,12 +230,21 @@ const DrcAgreement = () => {
         <span className="italic">DRC ID</span> - Sensus BPO Services (Pvt) Ltd.
       </h2>
 
+      {!isEditing && (<div className="flex justify-end">
+        <button
+          onClick={toggleEdit}
+          className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto mb-4 sm:mb-6`}
+        >
+          Add
+        </button>
+      </div>)}
+
       {/* Main Content */}
       <div className="w-full flex justify-center">
         <div className="w-full max-w-4xl">
           {/* Agreement Details Card */}
-          <div className={`${GlobalStyle.cardContainer} relative w-full`}>
-            <div className="absolute top-4 right-4">
+
+          {/* <div className="absolute top-4 right-4">
               {!isEditing && (
                 <img
                   src={edit}
@@ -245,14 +254,14 @@ const DrcAgreement = () => {
                   title="Edit Agreement"
                 />
               )}
-            </div>
+            </div> */}
 
-            <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
+          {/* <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
               Company's Agreement Details
-            </h2>
+            </h2> */}
 
-            {isEditing ? (
-              /* Edit Mode */
+          {isEditing && (
+            <div className={`${GlobalStyle.cardContainer} relative w-full`}>
               <div className="space-y-6">
                 {/* Start Date */}
                 <table className={`${GlobalStyle.table} w-full text-left`}>
@@ -274,9 +283,9 @@ const DrcAgreement = () => {
                           />
                         </div>
                       </td>
-                      
+
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                        Start Date
+                        Start Date<span className="text-red-500 ml-1">*</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -312,9 +321,9 @@ const DrcAgreement = () => {
                           />
                         </div>
                       </td>
-                      
+
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                        End Date
+                        End Date<span className="text-red-500 ml-1">*</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -346,7 +355,7 @@ const DrcAgreement = () => {
                           rows="5"
                         />
                       </td>
-                      
+
                       <td className={`${GlobalStyle.tableData} font-semibold whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
                         Remark<span className="text-red-500 ml-1">*</span>
                       </td>
@@ -375,18 +384,206 @@ const DrcAgreement = () => {
                   </button>
                 </div>
               </div>
-            ) : (
-              /* View Mode */
-              <div className="space-y-6">
-                <table className={`${GlobalStyle.table} w-full text-left`}>
+            </div>
+          )}
+
+          {/* Agreement History Section */}
+          <h3 className={`${GlobalStyle.headingMedium} font-bold`}>
+            Agreement History
+          </h3>
+          <div className="p-6 overflow-auto max-h-[70vh]">
+            <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+              <table className={GlobalStyle.table}>
+                <thead className={GlobalStyle.thead}>
+                  <tr>
+                    <th className={`${GlobalStyle.tableHeader} text-left`}>
+                      Start Date
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} text-left`}>
+                      End Date
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} text-left`}>
+                      Remark
+                    </th>
+                    <th className={`${GlobalStyle.tableHeader} text-left`}>
+                      Updated By
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAgreementHistory.length > 0 ? (
+                    filteredAgreementHistory.map((agreement, index) => (
+                      <tr
+                        key={index}
+                        className={`${index % 2 === 0
+                          ? GlobalStyle.tableRowEven
+                          : GlobalStyle.tableRowOdd
+                          } hover:bg-gray-50 transition-colors border-b`}
+                      >
+                        <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                          {formatDateForDisplay(agreement.start_date)}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                          {formatDateForDisplay(agreement.end_date)}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                          {agreement.remark}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                          {agreement.updated_by}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="text-center py-8 text-gray-500">
+                        {searchQuery ? "No matching results found" : "No agreement history found"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* {isEditing ? ( */}
+            {/* /* Edit Mode */}
+            {/* <div className={`${GlobalStyle.cardContainer} relative w-full`}> */}
+              {/* <div className="space-y-6"> */}
+                {/* Start Date */}
+                {/* <table className={`${GlobalStyle.table} w-full text-left`}>
+                  <tbody>
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                        Start Date:
+                      </td>
+                      <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
+                        <div className="w-full">
+                          <DatePicker
+                            selected={startDate}
+                            onChange={(date) => setStartDate(date)}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="dd/mm/yyyy"
+                            className={`${GlobalStyle.inputText} w-full text-left`}
+                            showYearDropdown
+                            scrollableYearDropdown
+                          />
+                        </div>
+                      </td>
+
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
+                        Start Date
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
+                        <div className="flex justify-start w-full">
+                          <DatePicker
+                            selected={startDate}
+                            onChange={(date) => setStartDate(date)}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="dd/mm/yyyy"
+                            className={`${GlobalStyle.inputText} w-full text-left`}
+                            showYearDropdown
+                            scrollableYearDropdown
+                          />
+                        </div>
+                      </td>
+                    </tr> */}
+
+                    {/* End Date */}
+                    {/* <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                        End Date:
+                      </td>
+                      <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
+                        <div className="w-full">
+                          <DatePicker
+                            selected={endDate}
+                            onChange={(date) => setEndDate(date)}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="dd/mm/yyyy"
+                            className={`${GlobalStyle.inputText} w-full text-left`}
+                            showYearDropdown
+                            scrollableYearDropdown
+                          />
+                        </div>
+                      </td> */}
+
+                      {/* <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
+                        End Date
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
+                        <div className="flex justify-start w-full">
+                          <DatePicker
+                            selected={endDate}
+                            onChange={(date) => setEndDate(date)}
+                            dateFormat="dd/MM/yyyy"
+                            placeholderText="dd/mm/yyyy"
+                            className={`${GlobalStyle.inputText} w-full text-left`}
+                            showYearDropdown
+                            scrollableYearDropdown
+                          />
+                        </div>
+                      </td>
+                    </tr> */}
+
+                    {/* Remark */}
+                    {/* <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-semibold block sm:hidden`}>
+                        Remark:
+                      </td>
+                      <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
+                        <textarea
+                          className={`${GlobalStyle.inputText} w-full text-left h-32 resize-none`}
+                          value={remark}
+                          onChange={(e) => setRemark(e.target.value)}
+                          placeholder="Enter remark for this update..."
+                          rows="5"
+                        />
+                      </td>
+
+                      <td className={`${GlobalStyle.tableData} font-semibold whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
+                        Remark<span className="text-red-500 ml-1">*</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
+                        <textarea
+                          className={`${GlobalStyle.inputText} w-full text-left h-32 resize-none`}
+                          value={remark}
+                          onChange={(e) => setRemark(e.target.value)}
+                          placeholder="Enter remark for this update..."
+                          rows="5"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table> */}
+
+                {/* Save Button */}
+                {/* <div className="flex justify-end mt-4">
+                  <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
+                  >
+                    {loading ? "Saving..." : "Save"}
+                  </button>
+                </div> */}
+              {/* </div>
+            </div> */}
+          {/* ) : ( */}
+            {/* /* View Mode */}
+            {/* <div className="space-y-6"> */}
+              {/* <table className={`${GlobalStyle.table} w-full text-left`}>
                   <tbody>
                     {[
-                      { 
-                        label: "Start Date", 
+                      {
+                        label: "Start Date",
                         value: formatDate(currentAgreement.start_date)
                       },
-                      { 
-                        label: "End Date", 
+                      {
+                        label: "End Date",
                         value: formatDate(currentAgreement.end_date)
                       }
                     ].map((item, index) => (
@@ -397,7 +594,7 @@ const DrcAgreement = () => {
                         <td className={`${GlobalStyle.tableData} text-gray-500 block sm:hidden pl-4`}>
                           {item.value}
                         </td>
-                        
+
                         <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
                           {item.label}
                         </td>
@@ -408,25 +605,82 @@ const DrcAgreement = () => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                </table> */}
+              {/* Modal Body */}
+              {/* <h3 className={`${GlobalStyle.headingMedium} font-bold`}>
+                Agreement History
+              </h3> */}
+              {/* <div className="p-6 overflow-auto max-h-[70vh]">
+                <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                  <table className={GlobalStyle.table}>
+                    <thead className={GlobalStyle.thead}>
+                      <tr>
+                        <th className={`${GlobalStyle.tableHeader} text-left`}>
+                          Start Date
+                        </th>
+                        <th className={`${GlobalStyle.tableHeader} text-left`}>
+                          End Date
+                        </th>
+                        <th className={`${GlobalStyle.tableHeader} text-left`}>
+                          Remark
+                        </th>
+                        <th className={`${GlobalStyle.tableHeader} text-left`}>
+                          Updated By
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAgreementHistory.length > 0 ? (
+                        filteredAgreementHistory.map((agreement, index) => (
+                          <tr
+                            key={index}
+                            className={`${index % 2 === 0
+                              ? GlobalStyle.tableRowEven
+                              : GlobalStyle.tableRowOdd
+                              } hover:bg-gray-50 transition-colors border-b`}
+                          >
+                            <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                              {formatDateForDisplay(agreement.start_date)}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                              {formatDateForDisplay(agreement.end_date)}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                              {agreement.remark}
+                            </td>
+                            <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                              {agreement.updated_by}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" className="text-center py-8 text-gray-500">
+                            {searchQuery ? "No matching results found" : "No agreement history found"}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div> */}
+            {/* </div> */}
+          {/* )} */}
 
           {/* Agreement History Button */}
-          <div className="flex justify-start mt-6">
-            <button 
+          {/* <div className="flex justify-start mt-6">
+            <button
               className={GlobalStyle.buttonPrimary}
               onClick={() => setShowPopup(true)}
             >
               Agreement History
             </button>
-          </div>
+          </div> */}
 
           {/* Back Button - Updated to match UserInfo style */}
           <div style={{ marginTop: '12px' }}>
             <button className={GlobalStyle.buttonPrimary} onClick={goBack}>
-              <FaArrowLeft /> 
+              <FaArrowLeft />
             </button>
           </div>
         </div>
@@ -454,7 +708,7 @@ const DrcAgreement = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={GlobalStyle.inputSearch}
-            
+
                 />
                 <FaSearch className={GlobalStyle.searchBarIcon} />
               </div>
@@ -485,11 +739,10 @@ const DrcAgreement = () => {
                       filteredAgreementHistory.map((agreement, index) => (
                         <tr
                           key={index}
-                          className={`${
-                            index % 2 === 0
-                              ? GlobalStyle.tableRowEven
-                              : GlobalStyle.tableRowOdd
-                          } hover:bg-gray-50 transition-colors border-b`}
+                          className={`${index % 2 === 0
+                            ? GlobalStyle.tableRowEven
+                            : GlobalStyle.tableRowOdd
+                            } hover:bg-gray-50 transition-colors border-b`}
                         >
                           <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
                             {formatDateForDisplay(agreement.start_date)}

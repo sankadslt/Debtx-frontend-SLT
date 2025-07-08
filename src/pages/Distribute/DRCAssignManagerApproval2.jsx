@@ -317,7 +317,10 @@ export default function DRCAssignManagerApproval2() {
               type="text"
               placeholder=""
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setCurrentPage(1); // Reset to first page on new search
+                setSearchQuery(e.target.value)
+              }}
               className={GlobalStyle.inputSearch}
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />

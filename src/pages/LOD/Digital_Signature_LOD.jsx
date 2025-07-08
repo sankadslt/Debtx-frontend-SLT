@@ -468,7 +468,10 @@ const Digital_Signature_LOD = () => {
                         type="text"
                         placeholder=""
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setCurrentPage(1); // Reset to the first page on search
+                            setSearchQuery(e.target.value);
+                        }}
                         className={GlobalStyle.inputSearch}
                     />
                     <FaSearch className={GlobalStyle.searchBarIcon} />
