@@ -107,11 +107,12 @@ const DRCInfo = () => {
       const rtomPerPage = 5; 
 
   //loghistory function
-  const filteredLogHistory = remarkHistory
-    .filter((log) =>
-      (log.remark || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (log.remark_by || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
+ const filteredLogHistory = remarkHistory
+  .sort((a, b) => new Date(b.remark_dtm) - new Date(a.remark_dtm)) // Newest first
+  .filter((log) =>
+    (log.remark || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (log.remark_by || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const pages = Math.ceil(filteredLogHistory.length / rowsPerPage);
   const paginatedLogHistory = filteredLogHistory.slice(
