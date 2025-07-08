@@ -23,7 +23,7 @@ import {
 
 import addIcon from "../../assets/images/add.svg";
 import iconImg from "../../assets/images/minorc.png";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaSearch } from "react-icons/fa";
 
 
 const Add_DRC = () => {
@@ -188,32 +188,6 @@ const Add_DRC = () => {
     }
   };
 
-  // // Fetch SLT Coordinators
-  // const fetchSLTCoordinators = async () => {
-  //   try {
-  //     setCoordinatorLoading(true);
-  //     const response = await getSLTCoordinators();
-  //     console.log("SLT Coordinators Response:", response);
-
-  //     if (response.status === "success" && response.data) {
-  //       setCoordinators(response.data);
-  //     } else {
-  //       console.error(
-  //         "Failed to fetch SLT Coordinators:",
-  //         response.message || "Unknown error"
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching SLT Coordinators:", error.message);
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Error",
-  //       text: "Failed to load SLT Coordinators.",
-  //     });
-  //   } finally {
-  //     setCoordinatorLoading(false);
-  //   }
-  // };
 
 
   // Call it once when the component mounts
@@ -284,12 +258,6 @@ const Add_DRC = () => {
     }
 
     if (!ServiceNo) newErrors.ServiceNo = "Service number is required.";
-    if (!C_Name) newErrors.C_Name = "Coordinator Name is required.";
-    if (!C_Email) {
-      newErrors.C_Email = "Coordinator Email is required.";
-    } else if (!isValidEmail(Email)) {
-      newErrors.Email = "Only Gmail addresses are allowed.";
-    }
 
     // Check if at least one service type is selected
     if (serviceTypes.filter((s) => s.selected).length === 0) {
@@ -358,6 +326,38 @@ const Add_DRC = () => {
     setRtomAreas(updatedAreas);
   };
 
+  const handleSearchUsers = async (e) => {
+    e.preventDefault();
+    
+    if (!ServiceNo || ServiceNo.trim() === "") {
+      Swal.fire("Error", "Please provide a valid service number.", "error");
+      return;
+    }
+
+    try {
+
+      // Fetch user details
+      const response = await getUserDetailsById(ServiceNo);
+      
+      // Handle different response structures:
+      const userData = response.data || response; // Check for nested data
+      
+      // Extract name - try multiple possible fields
+      const userName = userData.username || userData.name || userData.fullName || "";
+      
+      // Extract email
+      const userEmail = userData.email || "";
+      setCName(userName);
+      setCEmail(userEmail);
+
+    } catch (error) {
+      Swal.close();
+      Swal.fire("Error", "Coordinator not found", "error");
+      setCName("");
+      setCEmail("");
+    }
+  };
+
   const handleSubmit = async (e) => {
   e.preventDefault();
   if (!validateForm()) {
@@ -398,7 +398,7 @@ const Add_DRC = () => {
         create_dtm: new Date().toISOString(),
         status_update_by: user_id,
         status_update_dtm: new Date().toISOString(),
-      }));
+    }));
 
     // Format the coordinator data
     const coordinatorData = {
@@ -408,9 +408,6 @@ const Add_DRC = () => {
       coordinator_create_dtm: new Date().toISOString(),
       coordinator_create_by: user_id,
     };
-
-    
-
     
     const drcData = {
       drc_name: DRCName,
@@ -583,8 +580,15 @@ const Add_DRC = () => {
                       type="text"
                       value={ServiceNo}
                       onChange={(e) => setServiceNo(e.target.value)}
-                      className={`${GlobalStyle.inputText} w-full`}
+                      className={`${GlobalStyle.inputText} w-100`}
                     />
+                    <button
+                      type="button"
+                      onClick={handleSearchUsers}
+                      className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
+                    >
+                      <FaSearch style={{ width: 20, height: 20 }} />
+                    </button>
                     {errors.ServiceNo && (
                       <p className="text-red-500">{errors.ServiceNo}</p>
                     )}
@@ -601,7 +605,7 @@ const Add_DRC = () => {
                   <input
                     type="text"
                     value={C_Name}
-                    onChange={(e) => setCName(e.target.value)}
+                    readOnly // Make read-only since we're auto-populating
                     className={`${GlobalStyle.inputText} w-full`}
                   />
                   {errors.C_Name && (
@@ -617,9 +621,9 @@ const Add_DRC = () => {
                 </td>
                 <td className="block md:table-cell w-full md:w-2/3">
                   <input
-                    type="text"
+                    type="email"
                     value={C_Email}
-                    onChange={(e) => setCEmail(e.target.value)}
+                    readOnly
                     className={`${GlobalStyle.inputText} w-full`}
                   />
                   {errors.C_Email && (
@@ -846,7 +850,7 @@ const Add_DRC = () => {
               </table>
             </div>
 
-           <div className="flex justify-end mt-6 w-full px-4 md:px-0">
+          <div className="flex justify-end mt-6 w-full px-4 md:px-0">
               <button type="submit" 
                 className={`${GlobalStyle.buttonPrimary} w-full md:w-auto`}
               >
