@@ -378,7 +378,7 @@ const showNoDataMessage = (status = "") => {
                                     <button 
                                         onClick={() => navigateToDRCInfo(log.DRCID)}
                                         className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
-                                        title="More Info"
+                                        //title="More Info"
                                         
                                     >
                                         <img src={moreImg} alt="More Info" className="h-auto w-5 max-w-[24px]" data-tooltip-id="more-info-tooltip" />
@@ -392,7 +392,7 @@ const showNoDataMessage = (status = "") => {
                                     <button 
                                          onClick={() => navigate('/pages/DRC/DrcAgreement', { state: { drcId: log.DRCID , drcname: log.DRCName } })}
                                         className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
-                                        title="Agreement Details"
+                                        //title="Agreement Details"
                                         disabled={log.Status === "Terminate"}
                                     >
                                         <img src={agreementIcon} alt="Agreement Details" className="h-auto w-5 max-w-[24px]" data-tooltip-id="agreement-tooltip" />
