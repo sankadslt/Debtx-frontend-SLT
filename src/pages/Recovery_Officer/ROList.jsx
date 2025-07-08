@@ -1,222 +1,566 @@
+// import { useState, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import GlobalStyle from "../../assets/prototype/GlobalStyle";
+// import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+// import { List_All_RO_and_DRCuser_Details_to_SLT } from "../../services/RO/RO.js";
+// import { Active_DRC_Details } from "/src/services/drc/Drc.js";
+// import Swal from "sweetalert2";
+
+// import RO_Active from "../../assets/images/status/RO_DRC_Status_Icons/RO_Active.svg";
+// import RO_Inactive from "../../assets/images/status/RO_DRC_Status_Icons/RO_Inactive.svg";
+// import RO_Terminate from "../../assets/images/status/RO_DRC_Status_Icons/RO_Terminate.svg";
+
+// export default function ROList() {
+//   const [data, setData] = useState([]);
+//   const [selectedStatus, setSelectedStatus] = useState("");
+//   const [selectedDRC, setSelectedDRC] = useState("");
+//   const [drcNames, setDrcNames] = useState([]);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [totalPages, setTotalPages] = useState(1);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [searchQuery, setSearchQuery] = useState("");
+//   const [isFilterApplied, setIsFilterApplied] = useState(false);
+
+//   const rowsPerPage = 10;
+//   const navigate = useNavigate();
+
+//   // Fetch DRC names
+//   useEffect(() => {
+//     const fetchDRCNames = async () => {
+//       try {
+//         const names = await Active_DRC_Details();
+//         setDrcNames(names);
+//         console.log("Fetched DRC Names:", names);
+//       } catch (error) {
+//         console.error("Error fetching DRC names:", error);
+//         Swal.fire({
+//           icon: "error",
+//           title: "Error",
+//           text: "Failed to fetch DRC names. Please try again later.",
+//         });
+//       }
+//     };
+//     fetchDRCNames();
+//   }, []);
+
+//   const handleFilter = async () => {
+//     try {
+//       const payload = {
+//         drcUser_status: selectedStatus || null,
+//         drc_id: selectedDRC || null,
+//         search: searchQuery || null,
+//         pages: currentPage,
+//       };
+
+//       console.log("Payload sent to API: ", payload);
+//       setIsLoading(true);
+
+//       const response = await List_All_RO_and_DRCuser_Details_to_SLT(payload).catch((error) => {
+//         if (error.response?.status === 404) {
+//           return null;
+//         }
+//         throw error;
+//       });
+
+//       setIsLoading(false);
+
+//       if (response && response.data) {
+//         const newList = response.data;
+//         console.log("Valid data received:", newList);
+//         setData(newList);
+//         setTotalPages(Math.ceil(response.total_records / rowsPerPage));
+//       } else {
+//         setData([]);
+//         Swal.fire({
+//           icon: "info",
+//           title: "No Data",
+//           text: "No records found for the applied filters.",
+//         });
+//       }
+//     } catch (error) {
+//       setIsLoading(false);
+//       console.error("Error during filtering: ", error);
+//       Swal.fire({
+//         icon: "error",
+//         title: "Error",
+//         text: "Failed to fetch data. Please try again later.",
+//       });
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (isFilterApplied || !selectedStatus) {
+//       handleFilter();
+//     }
+//   }, [currentPage, isFilterApplied]);
+
+//   const handleStatusChange = (e) => {
+//     setSelectedStatus(e.target.value);
+//     setIsFilterApplied(false);
+//   };
+
+//   const handleDRCChange = (e) => {
+//     const selectedValue = e.target.value;
+//     const selected = drcNames.find(item => item.value === selectedValue);
+//     setSelectedDRC(selected ? selected.key : "");
+//     setIsFilterApplied(false);
+//   };
+
+//   const handleFilterButton = () => {
+//     setCurrentPage(1);
+//     setIsFilterApplied(true);
+//   };
+
+//   const handleClear = () => {
+//     setSelectedStatus("");
+//     setSelectedDRC("");
+//     setSearchQuery("");
+//     setIsFilterApplied(false);
+//     setCurrentPage(1);
+//     setData([]);
+//   };
+
+//   const getStatusIcon = (status) => {
+//     switch (status) {
+//       case "Active":
+//         return <img src={RO_Active} alt="RO Active" title="RO Active" className="w-6 h-6 cursor-pointer" />;
+//       case "Inactive":
+//         return <img src={RO_Inactive} alt="RO Inactive" title="RO Inactive" className="w-6 h-6 cursor-pointer" />;
+//       case "Terminate":
+//         return <img src={RO_Terminate} alt="RO Terminate" title="RO Terminate" className="w-6 h-6 cursor-pointer" />;
+//       default:
+//         return null;
+//     }
+//   };
+
+//   const filteredDataBySearch = searchQuery
+//     ? data.filter((row) =>
+//         [row.ro_name, row.nic, row.drc_name]
+//           .join(" ")
+//           .toLowerCase()
+//           .includes(searchQuery.toLowerCase())
+//       )
+//     : data;
+
+//   if (isLoading) {
+//     return (
+//       <div className="flex justify-center items-center h-64">
+//         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
+//       <h2 className={`${GlobalStyle.headingLarge} text-xl sm:text-2xl lg:text-3xl mt-8`}>RO List</h2>
+
+//       {/* Filters */}
+//       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-8 w-full">
+//         <div className="w-full sm:w-fit sm:max-w-md">
+//           <div className={GlobalStyle.searchBarContainer}>
+//             <input
+//               type="text"
+//               value={searchQuery}
+//               onChange={(e) => setSearchQuery(e.target.value)}
+//               className={GlobalStyle.inputSearch}
+//               aria-label="Search RO details"
+//             />
+//             <FaSearch className={GlobalStyle.searchBarIcon} />
+//           </div>
+//         </div>
+
+//         <div className={`${GlobalStyle.cardContainer} flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-end items-stretch`}>
+//           <select
+//             name="drc"
+//             value={drcNames.find(item => item.key === selectedDRC)?.value || ""}
+//             onChange={handleDRCChange}
+//             className={`${GlobalStyle.selectBox} w-full sm:w-32 md:w-40`}
+//             style={{ color: selectedDRC === "" ? "gray" : "black" }}
+//             aria-label="Select DRC filter"
+//           >
+//             <option value="" hidden>Drc</option>
+//             {drcNames.map(({ key, value }) => (
+//               <option key={key} value={value} style={{ color: "black" }}>
+//                 {value}
+//               </option>
+//             ))}
+//           </select>
+//           <select
+//             name="status"
+//             value={selectedStatus}
+//             onChange={handleStatusChange}
+//             className={`${GlobalStyle.selectBox} w-full sm:w-32 md:w-40`}
+//             aria-label="Select status filter"
+//           >
+//             <option value="">Select Status</option>
+//             <option value="Active">Active</option>
+//             <option value="Inactive">Inactive</option>
+//             <option value="Terminate">Terminate</option>
+//           </select>
+//           <button
+//             onClick={handleFilterButton}
+//             className={`${GlobalStyle.buttonPrimary} ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+//             disabled={isLoading}
+//           >
+//             {isLoading ? "Filtering..." : "Filter"}
+//           </button>
+//           <button
+//             onClick={handleClear}
+//             className={GlobalStyle.buttonRemove}
+//             disabled={isLoading}
+//           >
+//             Clear
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* Table */}
+//       <div className={`${GlobalStyle.tableContainer} overflow-x-auto mt-4`}>
+//         <table className={`${GlobalStyle.table} table-auto w-full`} style={{ fontSize: '0.875rem' }} aria-label="RO List Table">
+//           <thead className={GlobalStyle.thead}>
+//             <tr>
+//               <th className={`${GlobalStyle.tableHeader} min-w-[80px]`} scope="col">RO ID</th>
+//               <th className={`${GlobalStyle.tableHeader} min-w-[100px]`} scope="col">DRC</th>
+//               <th className={`${GlobalStyle.tableHeader} min-w-[80px]`} scope="col">Status</th>
+//               <th className={`${GlobalStyle.tableHeader} min-w-[120px]`} scope="col">NIC</th>
+//               <th className={`${GlobalStyle.tableHeader} min-w-[150px]`} scope="col">RO Name</th>
+//               <th className={`${GlobalStyle.tableHeader} min-w-[120px]`} scope="col">Contact No.</th>
+//               <th className={`${GlobalStyle.tableHeader} min-w-[120px]`} scope="col">RTOM Area count</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {filteredDataBySearch.length > 0 ? (
+//               filteredDataBySearch.map((item, index) => (
+//                 <tr
+//                   key={item.ro_id || index}
+//                   className={`${
+//                     index % 2 === 0 ? "bg-white bg-opacity-75" : "bg-gray-50 bg-opacity-50"
+//                   } border-b`}
+//                 >
+//                   <td className={GlobalStyle.tableData}>{item.ro_id || "N/A"}</td>
+//                   <td className={GlobalStyle.tableData}>{item.drc_name || "N/A"}</td>
+//                   <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+//                     {getStatusIcon(item.drcUser_status) || "N/A"}
+//                   </td>
+//                   <td className={GlobalStyle.tableData}>{item.nic || "N/A"}</td>
+//                   <td className={GlobalStyle.tableData}>{item.ro_name || "N/A"}</td>
+//                   <td className={GlobalStyle.tableData}>{item.login_contact_no || "N/A"}</td>
+//                   <td className={GlobalStyle.tableData}>{item.rtom_area_count || "N/A"}</td>
+//                 </tr>
+//               ))
+//             ) : (
+//               <tr>
+//                 <td colSpan={7} className="text-center py-4">No data available</td>
+//               </tr>
+//             )}
+//           </tbody>
+//         </table>
+//       </div>
+
+//       {/* Pagination */}
+//       {totalPages > 1 && (
+//         <div className={`${GlobalStyle.navButtonContainer} mt-4`}>
+//           <button
+//             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+//             disabled={currentPage === 1 || isLoading}
+//             className={`${GlobalStyle.navButton} ${currentPage === 1 || isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+//             aria-label="Previous page"
+//           >
+//             <FaArrowLeft />
+//           </button>
+//           <span>Page {currentPage} of {totalPages}</span>
+//           <button
+//             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+//             disabled={currentPage === totalPages || isLoading}
+//             className={`${GlobalStyle.navButton} ${currentPage === totalPages || isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+//             aria-label="Next page"
+//           >
+//             <FaArrowRight />
+//           </button>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
 import { List_All_RO_and_DRCuser_Details_to_SLT } from "../../services/RO/RO.js";
-import Swal from 'sweetalert2';
+import { Active_DRC_Details } from "/src/services/drc/Drc.js";
+import Swal from "sweetalert2";
 
 import RO_Active from "../../assets/images/status/RO_DRC_Status_Icons/RO_Active.svg";
 import RO_Inactive from "../../assets/images/status/RO_DRC_Status_Icons/RO_Inactive.svg";
 import RO_Terminate from "../../assets/images/status/RO_DRC_Status_Icons/RO_Terminate.svg";
 
 export default function ROList() {
-    const [data, setData] = useState([]);
-    const [selectedStatus, setSelectedStatus] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isLoading, setIsLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [isFilterApplied, setIsFilterApplied] = useState(false);
+  const [data, setData] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedDRC, setSelectedDRC] = useState("");
+  const [drcNames, setDrcNames] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isFilterApplied, setIsFilterApplied] = useState(false);
 
-    const rowsPerPage = 10;
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleFilter = async () => {
-        try {
-            const payload = {
-                drcUser_status: selectedStatus || "",
-                pages: currentPage,
-            };
+  // Fetch DRC names
+  useEffect(() => {
+    const fetchDRCNames = async () => {
+      try {
+        const names = await Active_DRC_Details();
+        setDrcNames(names);
+        console.log("Fetched DRC Names:", names);
+      } catch (error) {
+        console.error("Error fetching DRC names:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to fetch DRC names. Please try again later.",
+        });
+      }
+    };
+    fetchDRCNames();
+  }, []);
 
-            console.log("Payload sent to API: ", payload);
-            setIsLoading(true);
+  const handleFilter = async () => {
+    try {
+      const payload = {
+        drcUser_status: selectedStatus || null,
+        drc_id: selectedDRC || null,
+        pages: currentPage,
+      };
 
-            const response = await List_All_RO_and_DRCuser_Details_to_SLT(payload).catch((error) => {
-                if (error.response && error.response.status === 404) {
-                   
-                    return null;
-                } else {
-                    throw error;
-                }
-            });
+      console.log("Payload sent to API: ", payload);
+      setIsLoading(true);
 
-            setIsLoading(false);
-
-            if (response && response.data) {
-                const newList = response.data;
-                console.log("Valid data received:", newList);
-                setData(newList); // Set fresh data
-                setTotalPages(Math.ceil(response.total_records / rowsPerPage));
-            } else {
-                console.error("No valid data found in response:", response);
-                setData([]);
-            }
-        } catch (error) {
-            
-           
+      const response = await List_All_RO_and_DRCuser_Details_to_SLT(payload).catch((error) => {
+        if (error.response?.status === 404) {
+          return null;
         }
-    };
+        throw error;
+      });
 
-    useEffect(() => {
-        handleFilter();
-    }, [currentPage]);
+      setIsLoading(false);
 
-    const handleStatusChange = (e) => {
-        setSelectedStatus(e.target.value);
-    };
-
-    const handleFilterButton = () => {
-        setCurrentPage(1);
-        setIsFilterApplied(true);
-        handleFilter();
-    };
-
-    const handleClear = () => {
-        setSelectedStatus("");
+      if (response && response.status === "success") {
+        setData(response.data);
+        setTotalPages(Math.ceil(response.total_records / response.records_per_page));
+      } else {
         setData([]);
-        setCurrentPage(1);
-        setTotalPages(1);
-        setIsFilterApplied(false);
-        handleFilter();
-    };
-
-    const handlePrevNext = (direction) => {
-        if (direction === "prev" && currentPage > 1) {
-            setCurrentPage(prev => prev - 1);
-        } else if (direction === "next" && currentPage < totalPages) {
-            setCurrentPage(prev => prev + 1);
-        }
-    };
-
-    const getStatusIcon = (status) => {
-        switch (status) {
-            case "Active":
-                return <img src={RO_Active} alt="RO Active" title="RO Active" className="w-6 h-6 cursor-pointer" />;
-            case "Inactive":
-                return <img src={RO_Inactive} alt="RO Inactive" title="RO Inactive" className="w-6 h-6 cursor-pointer" />;
-            case "Terminate":
-                return <img src={RO_Terminate} alt="RO Terminate" title="RO Terminate" className="w-6 h-6 cursor-pointer" />;
-            default:
-                return null;
-        }
-    };
-
-    const filteredDataBySearch = data.filter((row) =>
-        Object.values(row).join(" ").toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
+        Swal.fire({
+          icon: "info",
+          title: "No Data",
+          text: "No records found for the applied filters.",
+        });
+      }
+    } catch (error) {
+      setIsLoading(false);
+      console.error("Error during filtering: ", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to fetch data. Please try again later.",
+      });
     }
+  };
 
+  useEffect(() => {
+    if (isFilterApplied || !selectedStatus) {
+      handleFilter();
+    }
+  }, [currentPage, isFilterApplied]);
+
+  const handleStatusChange = (e) => {
+    setSelectedStatus(e.target.value);
+    setIsFilterApplied(false);
+  };
+
+  const handleDRCChange = (e) => {
+    const selectedValue = e.target.value;
+    const selected = drcNames.find(item => item.value === selectedValue);
+    setSelectedDRC(selected ? selected.key : "");
+    setIsFilterApplied(false);
+  };
+
+  const handleFilterButton = () => {
+    setCurrentPage(1);
+    setIsFilterApplied(true);
+  };
+
+  const handleClear = () => {
+    setSelectedStatus("");
+    setSelectedDRC("");
+    setSearchQuery("");
+    setIsFilterApplied(false);
+    setCurrentPage(1);
+    setData([]);
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Active":
+        return <img src={RO_Active} alt="RO Active" title="RO Active" className="w-6 h-6 cursor-pointer" />;
+      case "Inactive":
+        return <img src={RO_Inactive} alt="RO Inactive" title="RO Inactive" className="w-6 h-6 cursor-pointer" />;
+      case "Terminate":
+        return <img src={RO_Terminate} alt="RO Terminate" title="RO Terminate" className="w-6 h-6 cursor-pointer" />;
+      default:
+        return null;
+    }
+  };
+
+  const filteredDataBySearch = searchQuery
+    ? data.filter((row) =>
+        [row.ro_name, row.nic, row.drc_name]
+          .join(" ")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    : data;
+
+  if (isLoading) {
     return (
-        <div className={GlobalStyle.fontPoppins}>
-            <h2 className={GlobalStyle.headingLarge}>RO List</h2>
-
-            {/* Filters */}
-            <div className="w-full mb-2 mt-4">
-                <div className="flex justify-between items-center w-full mb-2">
-                    <div className="flex justify-start mt-10 mb-4">
-                        <div className={GlobalStyle.searchBarContainer}>
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className={GlobalStyle.inputSearch}
-                            />
-                            <FaSearch className={GlobalStyle.searchBarIcon} />
-                        </div>
-                    </div>
-
-                    <div className={`${GlobalStyle.cardContainer} w-auto`}>
-                        <div className="flex justify-end items-center space-x-4">
-                            <select
-                                name="status"
-                                value={selectedStatus}
-                                onChange={handleStatusChange}
-                                className={`${GlobalStyle.selectBox} w-32 md:w-40`}
-                            >
-                                <option disabled value="">Select Status</option>
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                                <option value="Terminate">Terminate</option>
-                            </select>
-                            <button onClick={handleFilterButton} className={GlobalStyle.buttonPrimary}>Filter</button>
-                            <button onClick={handleClear} className={GlobalStyle.buttonRemove}>Clear</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Table */}
-            <div className={GlobalStyle.tableContainer}>
-                <table className={GlobalStyle.table}>
-                    <thead className={GlobalStyle.thead}>
-                        <tr>
-                            <th className={GlobalStyle.tableHeader}>RO ID</th>
-                            <th className={GlobalStyle.tableHeader}>DRC</th>
-                            <th className={GlobalStyle.tableHeader}>Status</th>
-                            <th className={GlobalStyle.tableHeader}>NIC</th>
-                            <th className={GlobalStyle.tableHeader}>RO Name</th>
-                            <th className={GlobalStyle.tableHeader}>Contact No.</th>
-                            <th className={GlobalStyle.tableHeader}>RTOM Area count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredDataBySearch.length > 0 ? (
-                            filteredDataBySearch.map((item, index) => (
-                                <tr
-                                    key={item.ro_id || index}
-                                    className={index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd}
-                                >
-                                    <td className={GlobalStyle.tableData}>{item.ro_id || "N/A"}</td>
-                                    <td className={GlobalStyle.tableData}>{item.drc_name || "N/A"}</td>
-                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center pt-6`}>
-                                        {getStatusIcon(item.drcUser_status) || "N/A"}
-                                    </td>
-                                    <td className={GlobalStyle.tableData}>{item.nic || "N/A"}</td>
-                                    <td className={GlobalStyle.tableData}>{item.ro_name || "N/A"}</td>
-                                    <td className={GlobalStyle.tableData}>{item.login_contact_no || "N/A"}</td>
-                                    <td className={GlobalStyle.tableData}>{item.rtom_area_count || "N/A"}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={7} className="text-center py-4">No data available</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Pagination */}
-			{totalPages > 1 && (
-				<div className={GlobalStyle.navButtonContainer}>
-					<button
-						onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-						disabled={currentPage === 1}
-						className={`${GlobalStyle.navButton} ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-					>
-						<FaArrowLeft />
-					</button>
-					<span>Page {currentPage} </span>
-					<button
-						onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-						disabled={currentPage === totalPages}
-						className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
-					>
-						<FaArrowRight />
-					</button>
-				</div>
-			)}
-
-            <button onClick={() => navigate(-1)} className={GlobalStyle.buttonPrimary}>
-                <FaArrowLeft />
-            </button>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
     );
+  }
+
+  return (
+    <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
+      <h2 className={`${GlobalStyle.headingLarge} text-xl sm:text-2xl lg:text-3xl mt-8`}>RO List</h2>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-8 w-full">
+        <div className="w-full sm:w-fit sm:max-w-md">
+          <div className={GlobalStyle.searchBarContainer}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={GlobalStyle.inputSearch}
+              aria-label="Search RO details"
+            />
+            <FaSearch className={GlobalStyle.searchBarIcon} />
+          </div>
+        </div>
+
+        <div className={`${GlobalStyle.cardContainer} flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-end items-stretch`}>
+          <select
+            name="drc"
+            value={drcNames.find(item => item.key === selectedDRC)?.value || ""}
+            onChange={handleDRCChange}
+            className={`${GlobalStyle.selectBox} w-full sm:w-32 md:w-40`}
+            style={{ color: selectedDRC === "" ? "gray" : "black" }}
+            aria-label="Select DRC filter"
+          >
+            <option value="" hidden>Drc</option>
+            {drcNames.map(({ key, value }) => (
+              <option key={key} value={value} style={{ color: "black" }}>
+                {value}
+              </option>
+            ))}
+          </select>
+          <select
+            name="status"
+            value={selectedStatus}
+            onChange={handleStatusChange}
+            className={`${GlobalStyle.selectBox} w-full sm:w-32 md:w-40`}
+            aria-label="Select status filter"
+          >
+            <option value="">Select Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Terminate">Terminate</option>
+          </select>
+          <button
+            onClick={handleFilterButton}
+            className={`${GlobalStyle.buttonPrimary} ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={isLoading}
+          >
+            {isLoading ? "Filtering..." : "Filter"}
+          </button>
+          <button
+            onClick={handleClear}
+            className={GlobalStyle.buttonRemove}
+            disabled={isLoading}
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto mt-4`}>
+        <table className={`${GlobalStyle.table} table-auto w-full`} style={{ fontSize: '0.875rem' }} aria-label="RO List Table">
+          <thead className={GlobalStyle.thead}>
+            <tr>
+              <th className={`${GlobalStyle.tableHeader} min-w-[80px]`} scope="col">RO ID</th>
+              <th className={`${GlobalStyle.tableHeader} min-w-[100px]`} scope="col">DRC</th>
+              <th className={`${GlobalStyle.tableHeader} min-w-[80px]`} scope="col">Status</th>
+              <th className={`${GlobalStyle.tableHeader} min-w-[120px]`} scope="col">NIC</th>
+              <th className={`${GlobalStyle.tableHeader} min-w-[150px]`} scope="col">RO Name</th>
+              <th className={`${GlobalStyle.tableHeader} min-w-[120px]`} scope="col">Contact No.</th>
+              <th className={`${GlobalStyle.tableHeader} min-w-[120px]`} scope="col">RTOM Area count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredDataBySearch.length > 0 ? (
+              filteredDataBySearch.map((item, index) => (
+                <tr
+                  key={item.ro_id || index}
+                  className={`${
+                    index % 2 === 0 ? "bg-white bg-opacity-75" : "bg-gray-50 bg-opacity-50"
+                  } border-b`}
+                >
+                  <td className={GlobalStyle.tableData}>{item.ro_id || "N/A"}</td>
+                  <td className={GlobalStyle.tableData}>{item.drc_name || "N/A"}</td>
+                  <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+                    {getStatusIcon(item.drcUser_status) || "N/A"}
+                  </td>
+                  <td className={GlobalStyle.tableData}>{item.nic || "N/A"}</td>
+                  <td className={GlobalStyle.tableData}>{item.ro_name || "N/A"}</td>
+                  <td className={GlobalStyle.tableData}>{item.login_contact_no || "N/A"}</td>
+                  <td className={GlobalStyle.tableData}>{item.rtom_area_count || "N/A"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} className="text-center py-4">No data available</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className={`${GlobalStyle.navButtonContainer} mt-4`}>
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1 || isLoading}
+            className={`${GlobalStyle.navButton} ${currentPage === 1 || isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+            aria-label="Previous page"
+          >
+            <FaArrowLeft />
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages || isLoading}
+            className={`${GlobalStyle.navButton} ${currentPage === totalPages || isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+            aria-label="Next page"
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
