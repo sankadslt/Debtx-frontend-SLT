@@ -9,6 +9,7 @@ import Checklist from "../../assets/images/ConfigurationImg/checklist.png";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
+import agreementIcon from "../../assets/images/ConfigurationImg/Agreement_Details.png";
 import { listAllDRCDetails } from "../../services/drc/Drc";
 import { Tooltip } from "react-tooltip";
 
@@ -378,23 +379,45 @@ const showNoDataMessage = (status = "") => {
                                         onClick={() => navigateToDRCInfo(log.DRCID)}
                                         className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
                                         title="More Info"
+                                        
                                     >
-                                        <img src={moreImg} alt="More Info" className="h-auto w-5 max-w-[24px]" />
+                                        <img src={moreImg} alt="More Info" className="h-auto w-5 max-w-[24px]" data-tooltip-id="more-info-tooltip" />
+                                        <Tooltip
+                                            id="more-info-tooltip"
+                                            place="bottom"
+                                            content="More Info"
+                                        />
                                     </button>
 
                                     <button 
+                                         onClick={() => navigate('/pages/DRC/DrcAgreement', { state: { drcId: log.DRCID , drcname: log.DRCName } })}
+                                        className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
+                                        title="Agreement Details"
+                                    >
+                                        <img src={agreementIcon} alt="Agreement Details" className="h-auto w-5 max-w-[24px]" data-tooltip-id="agreement-tooltip" />
+                                        <Tooltip
+                                            id="agreement-tooltip"
+                                            place="bottom"
+                                            content="Agreement"
+                                        />
+                                    </button>
+
+                                    <button
+                                            //onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID } })}
+                                            className="p-1 hover:bg-gray-100 rounded"
+                                        >
+                                            <img src={ListImg} alt="Case List" className="h-auto w-5 max-w-[24px]" data-tooltip-id={`case-list-tooltip`} />
+                                            <Tooltip id={`case-list-tooltip`} place="bottom" content="Case List" />
+                                        </button>
+
+                                    {/* <button 
                                         className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
                                         title="Details"
                                     >
                                         <img src={ListImg} alt="Details" className="h-auto w-5 max-w-[24px]" />
-                                    </button>
+                                    </button> */}
 
-                                    <button 
-                                        className="p-2 hover:bg-gray-100 rounded flex items-center justify-center"
-                                        title="Agreement Details"
-                                    >
-                                        <img src={Checklist} alt="Agreement Details" className="h-auto w-5 max-w-[24px]" />
-                                    </button>
+                                    
                                     </td>
                                 </tr>
                             ))
