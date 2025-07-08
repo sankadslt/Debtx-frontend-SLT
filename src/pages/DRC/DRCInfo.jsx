@@ -806,8 +806,12 @@ const DRCInfo = () => {
 console.log("DRC Status Data:", {
   currentStatus: currentStatus,
 
-  
-});
+ });
+
+console.log("latest Status History:", companyData.status || []);
+
+ 
+
 
   if (!editMode) {
     // View mode
@@ -1485,7 +1489,7 @@ console.log("DRC Status Data:", {
             <button
               onClick={() => {
                 const newStatus =
-                  companyData.drc_status === "Active" ? "Inactive" : "Active";
+                  companyData.currentStatus === "Active" ? "Inactive" : "Active";
                 setCompanyData({
                   ...companyData,
                   drc_status: newStatus,
@@ -1713,43 +1717,52 @@ console.log("DRC Status Data:", {
                       Name
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                     NIC
+                      NIC
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                       Email
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Contact no
+                      Contact No
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {currentCoordinator ? (
-                    <tr className="bg-white bg-opacity-75 border-b">
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.service_no || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_name || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_email || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_email || "Not specified"}
-                      </td>
-                    </tr>
+                  {paginatedCoordinators.length > 0 ? (
+                    paginatedCoordinators.map((coordinator, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0
+                            ? "bg-white bg-opacity-75"
+                            : "bg-gray-50 bg-opacity-50"
+                        } border-b`}
+                      >
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_name || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_nic || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_email || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_contact_no?.[0]?.contact_number || "N/A"}
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
-                      <td colSpan="3" className="text-center py-4 text-gray-500">
-                        No coordinator assigned
+                      <td colSpan="4" className="text-center py-4 text-gray-500">
+                        No DRC Coordinators found
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
-            </div>
-          </div>
+              </div>
+              </div>
 
           {/* Services Section  */}
 
