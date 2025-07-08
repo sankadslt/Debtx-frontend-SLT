@@ -258,12 +258,6 @@ const Add_DRC = () => {
     }
 
     if (!ServiceNo) newErrors.ServiceNo = "Service number is required.";
-    // if (!C_Name) newErrors.C_Name = "Coordinator Name is required.";
-    // if (!C_Email) {
-    //   newErrors.C_Email = "Coordinator Email is required.";
-    // } else if (!isValidEmail(Email)) {
-    //   newErrors.Email = "Only Gmail addresses are allowed.";
-    // }
 
     // Check if at least one service type is selected
     if (serviceTypes.filter((s) => s.selected).length === 0) {
