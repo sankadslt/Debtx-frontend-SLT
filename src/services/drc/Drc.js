@@ -467,4 +467,39 @@ export const Ro_detais_of_the_DRC = async (drc_id, pages, drcUser_status) => {
   }
 }
 
+export const DRC_Agreement_details_list = async (drc_id) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/DRC_Agreement_details_list`,
+      { drc_id }
+    );
 
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch DRC agreement details");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching DRC agreement details:", error.response?.data || error.message);
+    throw error;
+  }
+} 
+
+
+export const Assign_DRC_To_Agreement = async (updateData) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Assign_DRC_To_Agreement`,
+      updateData
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to assign DRC to agreement");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error assigning DRC to agreement:", error.response?.data || error.message);
+    throw error;
+  }
+}
