@@ -635,7 +635,7 @@ const DRCInfo = () => {
         address,
         contactNo,
         email,
-        companyData.drc_status
+        companyData.status
       );
 
       Swal.fire({
@@ -1488,39 +1488,34 @@ console.log("latest Status History:", companyData.status || []);
           className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}
         >
           {/* DRC Status Toggle Button - Top Right Corner */}
-          <div className="absolute top-4 right-4 flex items-center">
+         <div className="absolute top-4 right-4 flex items-center">
+  <button
+    onClick={() => {
+      const newStatus = companyData.status === "Active" ? "Inactive" : "Active";
+      setCompanyData((prev) => ({
+        ...prev,
+        status: newStatus,
+      }));
+    }}
+    className="relative inline-flex items-center cursor-pointer"
+    aria-label={companyData.status === "Active" ? "Active" : "Inactive"}
+  >
+    <div
+      className={`w-11 h-6 rounded-full transition-colors ${
+        companyData.status === "Active" ? "bg-green-500" : "bg-gray-300"
+      }`}
+    ></div>
+    <div
+      className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full shadow transform transition-transform ${
+        companyData.status === "Active" ? "translate-x-5" : ""
+      }`}
+    ></div>
+    <span className="ml-3 text-sm font-medium">
+      {companyData.status === "Active" ? "Active" : "Inactive"}
+    </span>
+  </button>
+</div>
 
-            <button
-              onClick={() => {
-                const newStatus =
-                  companyData.companyData.status === "Active" ? "Inactive" : "Active";
-                setCompanyData({
-                  ...companyData,
-                  drc_status: newStatus,
-                });
-
-
-              }}
-              className="relative inline-flex items-center cursor-pointer"
-              aria-label={
-                companyData.status === "Active" ? "Active" : "Inactive"
-              }
-            >
-              <div
-                className={`w-11 h-6 rounded-full transition-colors ${companyData.status === "Active"
-                  ? "bg-green-500"
-                  : "bg-gray-300"
-                  }`}
-              ></div>
-              <div
-                className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full shadow transform transition-transform ${companyData.drc_status === "Active" ? "translate-x-5" : ""
-                  }`}
-              ></div>
-              <span className="ml-3 text-sm font-medium">
-                {companyData.status === "Active" ? "Active" : "Inactive"}
-              </span>
-            </button>
-          </div>
 
           {/* Company Details Section */}
           <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
