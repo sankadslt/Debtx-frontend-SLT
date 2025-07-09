@@ -903,6 +903,9 @@ console.log("latest Status History:", companyData.status || []);
               </tbody>
             </table>
 
+            {/* DRC Agreement Section */}
+            
+
             {/* SLT Coordinator Section */}
 
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
