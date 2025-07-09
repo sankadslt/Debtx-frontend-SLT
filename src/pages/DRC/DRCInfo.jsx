@@ -107,11 +107,12 @@ const DRCInfo = () => {
       const rtomPerPage = 5; 
 
   //loghistory function
-  const filteredLogHistory = remarkHistory
-    .filter((log) =>
-      (log.remark || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (log.remark_by || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
+ const filteredLogHistory = remarkHistory
+  .sort((a, b) => new Date(b.remark_dtm) - new Date(a.remark_dtm)) // Newest first
+  .filter((log) =>
+    (log.remark || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (log.remark_by || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const pages = Math.ceil(filteredLogHistory.length / rowsPerPage);
   const paginatedLogHistory = filteredLogHistory.slice(
@@ -1008,7 +1009,7 @@ console.log("DRC Status Data:", {
               </table>
               </div>
 
-      {/* Add pagination controls */}
+            {/* Add pagination controls */}
 
               {companyData.drc_coordinator && companyData.drc_coordinator.length > coordinatorsPerPage && (
                 <div className={GlobalStyle.navButtonContainer}>
@@ -1748,69 +1749,7 @@ console.log("DRC Status Data:", {
                 </tbody>
               </table>
             </div>
-
-            {/* Services Section */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
-              Services
-            </h2>
-
-            <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-              <table className={`${GlobalStyle.table} min-w-full`}>
-                <thead className={GlobalStyle.thead}>
-                  <tr>
-                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Service Type
-                    </th>
-                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Changed On
-                    </th>
-                    <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {companyData.services && companyData.services.map((service, index) => (
-                    <tr
-                      key={index}
-                      className={`${index % 2 === 0
-                        ? "bg-white bg-opacity-75"
-                        : "bg-gray-50 bg-opacity-50"
-                        } border-b`}
-                    >
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {service.service_type}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
-                        {service.status_update_dtm
-                          ? new Date(service.status_update_dtm).toLocaleDateString()
-                          : ""}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} text-left`}>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={service.service_status === "Active"}
-                            readOnly
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                          after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                        </label>
-                      </td>
-                    </tr>
-                  ))}
-                  {(!companyData.services || companyData.services.length === 0) && (
-                    <tr>
-                      <td colSpan="3" className="text-center py-4 text-gray-500">
-                        No services available
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            </div>
+          </div>
 
           {/* Services Section  */}
 

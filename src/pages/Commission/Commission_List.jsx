@@ -89,8 +89,8 @@ const ForwardApprovalsModal = ({ isOpen, onClose, summaryData, onConfirm, isLoad
                           onClick={onConfirm}
                           disabled={isLoading || summaryData.length === 0}
                           className={`${GlobalStyle.buttonPrimary} ${isLoading || summaryData.length === 0
-                              ? 'opacity-50 cursor-not-allowed'
-                              : ''
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
                             }`}
                         >
                           {isLoading ? (
@@ -433,9 +433,7 @@ const Commission_List = () => {
     if (isMoreDataAvailable) {
       setCurrentPage(currentPage + 1);
     } else {
-      const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-      setTotalPages(totalPages);
-      if (currentPage < totalPages) {
+      if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
         setCurrentPage(currentPage + 1);
       }
     }
@@ -581,13 +579,13 @@ const Commission_List = () => {
 
 
       setIsModalOpen(false);
-      if(response === "success")
-      Swal.fire({
-        title: response,
-        text: "Cases have been forwarded for approvals successfully!",
-        icon: "success",
-        confirmButtonColor: "#28a745",
-      });
+      if (response === "success")
+        Swal.fire({
+          title: response,
+          text: "Cases have been forwarded for approvals successfully!",
+          icon: "success",
+          confirmButtonColor: "#28a745",
+        });
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -760,7 +758,10 @@ const Commission_List = () => {
             type="text"
             className={GlobalStyle.inputSearch}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setCurrentPage(1); // Reset to the first page on search
+              setSearchQuery(e.target.value)
+            }}
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
@@ -853,9 +854,17 @@ const Commission_List = () => {
               Page {currentPage}
             </span>
             <button
-              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+              className={`${GlobalStyle.navButton} ${(searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                  ? "cursor-not-allowed"
+                  : ""
+                }`}
               onClick={handleNextPage}
-              disabled={currentPage === totalPages}
+              disabled={
+                searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
             >
               <FaArrowRight />
             </button>
