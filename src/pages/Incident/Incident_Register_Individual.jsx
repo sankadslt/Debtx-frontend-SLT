@@ -126,7 +126,7 @@ const Incident_Register_Individual = () => {
         DRC_Action: actionType,
         Monitor_Months: calendarMonth,
         Source_Type: sourceType,
-        Incident_Required_Reason: reason.trim(),
+        // Incident_Required_Reason: reason.trim(),
         Created_By: user_id,
         ...(actionType === "collect CPE" && { Contact_Number: contactNumber }),
       };
@@ -379,7 +379,7 @@ const Incident_Register_Individual = () => {
                       </td>
 
                     </tr>
-                    <tr className="align-center">
+                    {/* <tr className="align-center">
                       <td className="py-2">
                         <label htmlFor="reason" >
                           Incident Required Reason
@@ -397,7 +397,7 @@ const Incident_Register_Individual = () => {
 
                         ></textarea>
                       </td>
-                    </tr>
+                    </tr> */}
 
                     {/* Calendar Month */}
                     <tr className="align-center">

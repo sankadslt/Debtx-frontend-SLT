@@ -12,3 +12,13 @@ export const fetchChartData = async () => {
     throw error.response?.data || error;
   }
 };
+
+export const fetchRtomCaseCountChartData = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/chart-data`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching chart data:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
