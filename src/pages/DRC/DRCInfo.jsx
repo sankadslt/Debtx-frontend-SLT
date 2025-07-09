@@ -40,7 +40,7 @@ const DRCInfo = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [terminationRemark, setTerminationRemark] = useState("");
   const [terminationRemarkError, setTerminationRemarkError] = useState(false);
-
+  
   // Edit mode state
   const [editMode, setEditMode] = useState(false);
 
@@ -810,6 +810,7 @@ console.log("DRC Status Data:", {
 
 console.log("latest Status History:", companyData.status || []);
 
+
  
 
 
@@ -1492,7 +1493,7 @@ console.log("latest Status History:", companyData.status || []);
             <button
               onClick={() => {
                 const newStatus =
-                  companyData.currentStatus === "Active" ? "Inactive" : "Active";
+                  companyData.companyData.status === "Active" ? "Inactive" : "Active";
                 setCompanyData({
                   ...companyData,
                   drc_status: newStatus,
@@ -1502,11 +1503,11 @@ console.log("latest Status History:", companyData.status || []);
               }}
               className="relative inline-flex items-center cursor-pointer"
               aria-label={
-                companyData.drc_status === "Active" ? "Active" : "Inactive"
+                companyData.status === "Active" ? "Active" : "Inactive"
               }
             >
               <div
-                className={`w-11 h-6 rounded-full transition-colors ${companyData.drc_status === "Active"
+                className={`w-11 h-6 rounded-full transition-colors ${companyData.status === "Active"
                   ? "bg-green-500"
                   : "bg-gray-300"
                   }`}
@@ -1516,7 +1517,7 @@ console.log("latest Status History:", companyData.status || []);
                   }`}
               ></div>
               <span className="ml-3 text-sm font-medium">
-                {companyData.drc_status === "Active" ? "Active" : "Inactive"}
+                {companyData.status === "Active" ? "Active" : "Inactive"}
               </span>
             </button>
           </div>
