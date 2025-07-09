@@ -263,9 +263,9 @@ const LOD_Log = () => {
         if (isMoreDataAvailable) {
             setCurrentPage(currentPage + 1);
         } else {
-            const totalPages = Math.ceil(FinalReminderdata.length / rowsPerPage);
-            setTotalPages(totalPages);
-            if (currentPage < totalPages) {
+            // const totalPages = Math.ceil(FinalReminderdata.length / rowsPerPage);
+            // setTotalPages(totalPages);
+            if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
                 setCurrentPage(currentPage + 1);
             }
         }
@@ -361,7 +361,10 @@ const LOD_Log = () => {
                         type="text"
                         placeholder=""
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setCurrentPage(1); // Reset to page 1 on new search
+                            setSearchQuery(e.target.value);
+                        }}
                         className={GlobalStyle.inputSearch}
                     />
                     <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -484,7 +487,14 @@ const LOD_Log = () => {
                     <span className="text-gray-700">
                         Page {currentPage}
                     </span>
-                    <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === totalPages}>
+                    <button
+                        className={GlobalStyle.navButton}
+                        onClick={handleNextPage}
+                        disabled={searchQuery
+                            ? currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+                            : !isMoreDataAvailable && currentPage >= Math.ceil(FinalReminderdata.length / rowsPerPage)
+                        }
+                    >
                         <FaArrowRight />
                     </button>
                 </div>
