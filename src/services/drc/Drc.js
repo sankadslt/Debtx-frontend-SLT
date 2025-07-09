@@ -29,7 +29,6 @@ export const Active_DRC_Details = async () => {
   }
 };
 
-
 export const listAllDRCDetails = async (filter) => {
   try {
     const response = await axios.post(`${URL}/List_All_DRC_Details`, {
@@ -37,27 +36,28 @@ export const listAllDRCDetails = async (filter) => {
       page: filter.page || 1,
     });
 
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch DRC data");
+    }
+
     return response.data;
   } catch (error) {
-
-    if (error.response?.status === 404) {
-      console.log('No records found for filter', filter); 
-      return { 
-        data: [], 
-        status: "success",
-        message: error.response.data?.message || "No matching records found"
-      };
-    }
+    console.error("Error in listAllDRCDetails:", {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
     
-    // For all other errors, throw with user-friendly message
-    console.error("Error fetching DRC data:", error);
-    throw new Error(
-      error.response?.data?.message || 
-      "Failed to fetch DRC data. Please try again later."
-    );
+    // More specific error messages
+    if (error.response?.status === 500) {
+      throw new Error("Server error while fetching DRC data. Please try again later.");
+    } else if (error.response?.status === 404) {
+      throw new Error("No DRC records found matching your criteria.");
+    } else {
+      throw new Error("Failed to fetch DRC data. Please check your connection and try again.");
+    }
   }
 };
-
 
 export const List_RO_Details_Owen_By_DRC_ID = async (drc_id) => {
   try {
@@ -163,15 +163,15 @@ export const getDebtCompanyByDRCID = async (drcId) => {
 export const terminateCompanyByDRCID = async (
   drcId,
   remark,
-  terminate_by,
-  terminate_dtm
+  remarkBy,
+  terminatedDate
 ) => {
   try {
     const response = await axios.patch(`${URL}/Terminate_Company_By_DRC_ID`, {
       drc_id: drcId,
       remark: remark,
-      terminate_by: terminate_by,
-      terminate_dtm: terminate_dtm.toISOString(), // Ensure proper date format
+      remark_by: remarkBy,
+      remark_dtm: terminatedDate.toISOString(), // Ensure proper date format
     });
 
     if (response.data.status === "error") {
@@ -192,7 +192,6 @@ export const terminateCompanyByDRCID = async (
   }
 };
 
-
 // Update DRC information with services and SLT coordinator
 export const updateDRCInfo = async (
   drcId,
@@ -202,38 +201,42 @@ export const updateDRCInfo = async (
   remark,
   updated_by,
   remark_dtm,
-  drc_contact_no,
-  drc_email,
-  drc_address,
-  status 
+  address,
+  contactNo,
+  email,
+  status
 ) => {
   try {
+    // Prepare the request data
+    const requestData = {
+      drc_id: drcId,
+      coordinator,
+      services,
+      rtom: rtom.map(rtomItem => ({
+        rtom_id: rtomItem.rtom_id,
+        rtom_name: rtomItem.rtom_name,
+        rtom_status: rtomItem.rtom_status,
+        handling_type: rtomItem.handling_type,
+        status_update_dtm: rtomItem.status_update_dtm || new Date().toISOString(),
+        status_update_by: rtomItem.status_update_by || updated_by
+      })),
+      remark,
+      updated_by,
+      remark_dtm,
+      drc_address: address,
+      drc_email: email,
+      status
+    };
+
+    // Only include contact number if it's provided
+    if (contactNo) {
+      requestData.drc_contact_no = contactNo;
+    }
+
     const response = await axios.patch(
       `${URL}/Update_DRC_With_Services_and_SLT_Cordinator`,
-      {
-        drc_id: drcId,
-        coordinator,
-        services,
-       rtom: rtom.map(rtomItem => ({
-          ...rtomItem,
-          handling_type:  rtomItem.handling_type
-        })),
-        remark,
-        updated_by,
-        remark_dtm,
-        drc_contact_no,
-        drc_email,
-        drc_address,
-        status, // Include status in the request
-      }
+      requestData
     );
-
-    if (response.data && response.data.data) {
-      return {
-        ...response.data.data,
-        status: response.data.status || "success",
-      };
-    }
 
     return response.data;
   } catch (error) {
@@ -244,6 +247,7 @@ export const updateDRCInfo = async (
     throw new Error(error.response?.data?.message || "Failed to update DRC");
   }
 };
+
 
 export const getActiveRTOMDetails = async () => {
   try {
@@ -440,6 +444,43 @@ export const Ro_detais_of_the_DRC = async (drc_id, pages, drcUser_status) => {
     return response.data; // Assuming the data is in response.data
   } catch (error) {
     console.error("Error fetching RO details:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+export const DRC_Agreement_details_list = async (drc_id) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/DRC_Agreement_details_list`,
+      { drc_id }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to fetch DRC agreement details");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error fetching DRC agreement details:", error.response?.data || error.message);
+    throw error;
+  }
+} 
+
+
+export const Assign_DRC_To_Agreement = async (updateData) => {
+  try {
+    const response = await axios.post(
+      `${URL3}/Assign_DRC_To_Agreement`,
+      updateData
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message || "Failed to assign DRC to agreement");
+    }
+
+    return response.data; // Assuming the data is in response.data
+  } catch (error) {
+    console.error("Error assigning DRC to agreement:", error.response?.data || error.message);
     throw error;
   }
 }

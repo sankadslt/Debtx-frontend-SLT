@@ -307,8 +307,8 @@ const Digital_Signature_LOD = () => {
             const response = await Create_Task_for_Proceed_LOD_OR_Final_Reminder_List(userData, intLODCount, LODType);
             if (response.status === 200) {
                 Swal.fire({
-                    title: `Task created successfully!`, 
-                    text: "Task ID: " + response.data.data.data.Task_Id, 
+                    title: `Task created successfully!`,
+                    text: "Task ID: " + response.data.data.data.Task_Id,
                     icon: "success",
                     confirmButtonColor: "#28a745"
                 });
@@ -468,7 +468,10 @@ const Digital_Signature_LOD = () => {
                         type="text"
                         placeholder=""
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setCurrentPage(1); // Reset to the first page on search
+                            setSearchQuery(e.target.value);
+                        }}
                         className={GlobalStyle.inputSearch}
                     />
                     <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -564,15 +567,22 @@ const Digital_Signature_LOD = () => {
                 )}
             </div>
 
-            {LODType && (
+            {LODType && filteredData.length > 0 && (
                 <div className={GlobalStyle.navButtonContainer}>
                     <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 1}>
                         <FaArrowLeft />
                     </button>
                     <span className="text-gray-700">
-                        Page {currentPage} of {maxTablePages}
+                        Page {currentPage} of {searchQuery
+                            ? Math.ceil(filteredData.length / rowsPerPage)
+                            : maxTablePages}
                     </span>
-                    <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === maxTablePages}>
+                    <button
+                        className={GlobalStyle.navButton}
+                        onClick={handleNextPage}
+                        disabled={searchQuery
+                            ? currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+                            : currentPage >= maxTablePages}>
                         <FaArrowRight />
                     </button>
                 </div>
