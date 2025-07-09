@@ -324,7 +324,7 @@ const AssignDRC = () => {
                   </button>
                 )}
               </div>
-              <RtomCaseCountChart showPopup={showPopUpBilingCenterCount} setShowPopup={setShowPopUpBilingCenterCount} arrearsBands={arrearsBands} />
+              <RtomCaseCountChart showPopup={showPopUpBilingCenterCount} setShowPopup={setShowPopUpBilingCenterCount} arrearsBands={arrearsBands} serviceType={serviceType} />
             </div>
             {/* Arrears Band Dropdown */}
             <div className="flex items-center space-x-4 gap-4 flex-col sm:flex-row sm:items-center">

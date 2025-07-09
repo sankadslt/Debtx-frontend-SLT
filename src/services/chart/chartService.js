@@ -13,9 +13,9 @@ export const fetchChartData = async () => {
   }
 };
 
-export const fetchRtomCaseCountChartData = async () => {
+export const fetchRtomCaseCountChartData = async (payload) => {
   try {
-    const response = await axios.get(`${BASE_URL}/chart-data`);
+    const response = await axios.post(`${BASE_URL}/chart-data`, payload);
     return response.data;
   } catch (error) {
     console.error("Error fetching chart data:", error.response?.data || error.message);
