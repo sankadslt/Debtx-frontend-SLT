@@ -2,13 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from "chart.js";
 import { fetchRtomCaseCountChartData } from "../services/chart/chartService";
+import GlobalStyle from "../assets/prototype/GlobalStyle.jsx";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const RtomCaseCountChart = ({ showPopup, setShowPopup }) => {
+const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands }) => {
     const [chartData, setChartData] = useState(null);
     const popupRef = useRef(null);
     const drcListRef = useRef(null);
+    const [selectedBand, setSelectedBand] = useState("");
     const response = [
         { Billing_Centre: "HAVELOCK TOWN", count: 1, drc_list: ["D1"] },
         { Billing_Centre: "KANDY", count: 2, drc_list: ["D1", "D2"] },
@@ -56,13 +58,14 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup }) => {
         };
 
         if (showPopup) getChartData();
-    }, [showPopup]);
+    }, [showPopup, selectedBand]);
 
     // Close modal if clicking outside
     useEffect(() => {
         const handleOutsideClick = (e) => {
             if (popupRef.current && !popupRef.current.contains(e.target)) {
                 setShowPopup(false);
+                setSelectedBand("");
             }
         };
 
@@ -77,11 +80,31 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup }) => {
                     <div ref={popupRef} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl relative">
                         {/* Close Button */}
                         <button
-                            onClick={() => setShowPopup(false)}
+                            onClick={() => {
+                                setShowPopup(false);
+                                setSelectedBand("");
+                            }}
                             className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
                         >
                             ✖
                         </button>
+                        <div className="flex justify-center mb-4">
+                            <select
+                                className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
+                                value={selectedBand}
+                                onChange={(e) => setSelectedBand(e.target.value)}
+                                style={{ color: selectedBand ? "black" : "gray" }}
+                            >
+                                <option value="" hidden>
+                                    Arrears Band
+                                </option>
+                                {arrearsBands.map(({ key, value }) => (
+                                    <option key={key} value={value} style={{ color: "black" }}>
+                                        {value}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <h3 className="text-lg font-medium text-gray-700 mb-3 text-center">
                             Success Path Chart
                         </h3>

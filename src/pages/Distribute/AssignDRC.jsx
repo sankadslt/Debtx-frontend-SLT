@@ -89,6 +89,7 @@ const AssignDRC = () => {
     const fetchArrearsBands = async () => {
       try {
         const bands = await fetchAllArrearsBands();
+        console.log("Arrears Bands:", bands);
         setArrearsBands(bands);
       } catch (error) {
         console.error("Error fetching arrears bands:", error);
@@ -109,9 +110,7 @@ const AssignDRC = () => {
       }
     };
     fetchDRCNames();
-  });
-
-
+  }, []);
 
   //fetch count cases rulebase and arrears band
   useEffect(() => {
@@ -325,7 +324,7 @@ const AssignDRC = () => {
                   </button>
                 )}
               </div>
-              <RtomCaseCountChart showPopup={showPopUpBilingCenterCount} setShowPopup={setShowPopUpBilingCenterCount} />
+              <RtomCaseCountChart showPopup={showPopUpBilingCenterCount} setShowPopup={setShowPopUpBilingCenterCount} arrearsBands={arrearsBands} />
             </div>
             {/* Arrears Band Dropdown */}
             <div className="flex items-center space-x-4 gap-4 flex-col sm:flex-row sm:items-center">
@@ -354,12 +353,13 @@ const AssignDRC = () => {
                     value={selectedBand}
                     onChange={handleArrearsBandChange}
                     disabled={totalDistributedAmount > 0}
+                    style={{ color: selectedBand ? "black" : "gray" }}
                   >
                     <option value="" hidden>
                       Arrears Band
                     </option>
                     {arrearsBands.map(({ key, value }) => (
-                      <option key={key} value={value}>
+                      <option key={key} value={value} style={{ color: "black" }}>
                         {value}
                       </option>
                     ))}
@@ -376,12 +376,14 @@ const AssignDRC = () => {
                         drc: selectedDRC.value
                       });
                     }}
+                    disabled={!selectedBand}
+                    style={{ color: newEntry.drc ? "black" : "gray" }}
                   >
                     <option value="" hidden>
                       DRC
                     </option>
                     {drcNames.map(({ key, value }) => (
-                      <option key={key} value={value}>
+                      <option key={key} value={value} style={{ color: "black" }}>
                         {value}
                       </option>
                     ))}
@@ -398,6 +400,7 @@ const AssignDRC = () => {
                     onChange={(e) =>
                       setNewEntry({ ...newEntry, casesAmount: e.target.value })
                     }
+                    disabled={!selectedBand}
                   />
 
                   {/* Add Button */}
