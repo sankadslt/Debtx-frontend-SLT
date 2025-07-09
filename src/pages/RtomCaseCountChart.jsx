@@ -6,7 +6,7 @@ import GlobalStyle from "../assets/prototype/GlobalStyle.jsx";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands }) => {
+const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands, serviceType }) => {
     const [chartData, setChartData] = useState(null);
     const popupRef = useRef(null);
     const drcListRef = useRef(null);
@@ -35,7 +35,12 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands }) => {
     useEffect(() => {
         const getChartData = async () => {
             try {
-                // const response = await fetchRtomCaseCountChartData();
+                const payload = {
+                    arrears_band: selectedBand,
+                    drc_commision_rule: serviceType
+                }
+                // const response = await fetchRtomCaseCountChartData(payload);
+                console.log("Response:", response);
                 const labels = response.map(item => item.Billing_Centre);
                 const counts = response.map(item => item.count);
                 drcListRef.current = response.map(item => item.drc_list.join(", "));
@@ -57,7 +62,7 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands }) => {
             }
         };
 
-        if (showPopup) getChartData();
+        if (showPopup && selectedBand) getChartData();
     }, [showPopup, selectedBand]);
 
     // Close modal if clicking outside
@@ -147,7 +152,9 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands }) => {
                                     }}
                                 />
                             ) : (
-                                <p className="text-center text-gray-500">Loading chart...</p>
+                                <p className="text-center text-gray-500">
+                                    {selectedBand ? 'Loading chart...' : 'Please select an Arrears Band'}
+                                </p>
                             )}
                         </div>
                     </div>
