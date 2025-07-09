@@ -183,8 +183,8 @@ export default function AssignPendingDRCSummary() {
       if (response.status = "success") {
         Swal.fire({
           icon: "success",
-          title: "Success",
-          text: "Task created successfully.",
+          title: "Task created successfully!",
+          text: "Task ID: " + response.data.data.Task_Id,
           confirmButtonColor: "#28a745",
         });
       }
@@ -426,8 +426,8 @@ export default function AssignPendingDRCSummary() {
       if (response.status = "success") {
         Swal.fire({
           icon: "success",
-          title: "Success",
-          text: `Task created successfully! `,
+          title: "Task created successfully!",
+          text: "Task ID: " + response.data.data.Task_Id,
           // text: `Task created successfully! Task ID: ${response.ResponseData.data.Task_Id}`,
           confirmButtonColor: "#28a745",
         });
