@@ -11,39 +11,23 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands, serviceType
     const popupRef = useRef(null);
     const drcListRef = useRef(null);
     const [selectedBand, setSelectedBand] = useState("");
-    const response = [
-        { Billing_Centre: "HAVELOCK TOWN", count: 1, drc_list: ["D1"] },
-        { Billing_Centre: "KANDY", count: 2, drc_list: ["D1", "D2"] },
-        { Billing_Centre: "NUGEGODA", count: 1, drc_list: ["D2"] },
-        { Billing_Centre: "MARADANA", count: 1, drc_list: ["D1"] },
-        { Billing_Centre: "HAVELOCK TOWN", count: 1, drc_list: ["Central Management Services (Pvt) Ltd."] },
-        { Billing_Centre: "KANDY", count: 2, drc_list: ["Central Management Services (Pvt) Ltd.", "Total Credit Management Services Lanka (Pvt) Ltd."] },
-        { Billing_Centre: "NUGEGODA", count: 1, drc_list: ["Total Credit Management Services Lanka (Pvt) Ltd."] },
-        { Billing_Centre: "MARADANA", count: 1, drc_list: ["Central Management Services (Pvt) Ltd."] },
-        { Billing_Centre: "GALLE", count: 3, drc_list: ["Central Management Services (Pvt) Ltd.", "Recover Enterprises Pvt Ltd"] },
-        { Billing_Centre: "KURUNEGALA", count: 2, drc_list: ["Total Credit Management Services Lanka (Pvt) Ltd."] },
-        { Billing_Centre: "MATARA", count: 1, drc_list: ["Recover Enterprises Pvt Ltd"] },
-        { Billing_Centre: "RATMALANA", count: 2, drc_list: ["Central Management Services (Pvt) Ltd.", "Total Credit Management Services Lanka (Pvt) Ltd."] },
-        { Billing_Centre: "ANURADHAPURA", count: 1, drc_list: ["Recover Enterprises Pvt Ltd"] },
-        { Billing_Centre: "BATTICALOA", count: 2, drc_list: ["Total Credit Management Services Lanka (Pvt) Ltd.", "Recover Enterprises Pvt Ltd"] },
-    ];
 
     const datasetColors = ["#4F46E5", "#1bd33f", "#F43F5E"];
-    const colors = response.map((_, index) => datasetColors[index % datasetColors.length]);
 
     // Fetch data when popup is shown
     useEffect(() => {
         const getChartData = async () => {
             try {
                 const payload = {
-                    arrears_band: selectedBand,
+                    current_arrears_band: selectedBand,
                     drc_commision_rule: serviceType
                 }
-                // const response = await fetchRtomCaseCountChartData(payload);
+                const response = await fetchRtomCaseCountChartData(payload);
                 console.log("Response:", response);
                 const labels = response.map(item => item.Billing_Centre);
                 const counts = response.map(item => item.count);
-                drcListRef.current = response.map(item => item.drc_list.join(", "));
+                const colors = response.map((_, index) => datasetColors[index % datasetColors.length]);
+                drcListRef.current = response.map(item => item.drc_names.join(", "));
 
                 setChartData({
                     labels,
