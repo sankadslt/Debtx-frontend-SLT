@@ -27,6 +27,7 @@ import Minus from "/src/assets/images/distribution/minorc.png";
 import { Tooltip } from "react-tooltip";
 import Swal from "sweetalert2";
 import Chart from "/src/pages/Chart.jsx";
+import RtomCaseCountChart from "/src/pages/RtomCaseCountChart.jsx";
 import { FaArrowLeft } from "react-icons/fa";
 
 import { jwtDecode } from "jwt-decode";
@@ -47,6 +48,7 @@ const AssignDRC = () => {
   const navigate = useNavigate(); // Using useNavigate for routing
   const [selectedBandKey, setSelectedBandKey] = useState(null); // Usestate for selected band key
   const [showPopup, setShowPopup] = useState(false); // Usestate for showing the popup
+  const [showPopUpBilingCenterCount, setShowPopUpBilingCenterCount] = useState(false); // Usestate for showing the popup for billing center count
   const { serviceType } = location.state || {};
 
   const [drcData, setDrcData] = useState([]); // Usestate for DRC data
@@ -87,6 +89,7 @@ const AssignDRC = () => {
     const fetchArrearsBands = async () => {
       try {
         const bands = await fetchAllArrearsBands();
+        console.log("Arrears Bands:", bands);
         setArrearsBands(bands);
       } catch (error) {
         console.error("Error fetching arrears bands:", error);
@@ -107,9 +110,7 @@ const AssignDRC = () => {
       }
     };
     fetchDRCNames();
-  });
-
-
+  }, []);
 
   //fetch count cases rulebase and arrears band
   useEffect(() => {
@@ -302,20 +303,28 @@ const AssignDRC = () => {
 
         {/* Service Type and Table */}
         <div className="relative">
-          <div className="flex justify-between items-center my-4 space-x-4 gap-14 flex-col sm:flex-row sm:items-center">
-            <div>
+          <div className="flex flex-wrap justify-between items-center my-4 space-x-4 gap-14 flex-col sm:flex-row sm:items-center">
+            <div className="flex space-x-5 item-center">
               {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
                   Pie Chart 1
                 </button> */}
-
               <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5  mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
+                  <button className={`${GlobalStyle.buttonPrimary} mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
                     DRC Summary
                   </button>
                 )}
               </div>
               <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
+
+              <div>
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button className={`${GlobalStyle.buttonPrimary} mt-2 w-full sm:w-auto `} onClick={() => setShowPopUpBilingCenterCount(true)}>
+                    Success Path Chart
+                  </button>
+                )}
+              </div>
+              <RtomCaseCountChart showPopup={showPopUpBilingCenterCount} setShowPopup={setShowPopUpBilingCenterCount} arrearsBands={arrearsBands} serviceType={serviceType} />
             </div>
             {/* Arrears Band Dropdown */}
             <div className="flex items-center space-x-4 gap-4 flex-col sm:flex-row sm:items-center">
@@ -335,97 +344,103 @@ const AssignDRC = () => {
             </div>
           </div>
           <div className="flex justify-end items-center">
-            <div className={`${GlobalStyle.cardContainer} w-[50vw] flex flex-wrap justify-end items-center gap-4`}>
-              <div className="flex items-center space-x-3 gap-3 flex-col sm:flex-row sm:items-center ">
+            <div className="w-[750px] sm:w-[100%] md:w-[750px]">
+              <div className={`${GlobalStyle.cardContainer} w-full flex flex-wrap justify-end items-center gap-4`}>
+                <div className="flex flex-wrap items-center space-x-3 gap-3 flex-col sm:flex-row sm:items-center ">
 
-                <select
-                  className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
-                  value={selectedBand}
-                  onChange={handleArrearsBandChange}
-                  disabled={totalDistributedAmount > 0}
-                >
-                  <option value="" hidden>
-                    Arrears Band
-                  </option>
-                  {arrearsBands.map(({ key, value }) => (
-                    <option key={key} value={value}>
-                      {value}
+                  <select
+                    className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
+                    value={selectedBand}
+                    onChange={handleArrearsBandChange}
+                    disabled={totalDistributedAmount > 0}
+                    style={{ color: selectedBand ? "black" : "gray" }}
+                  >
+                    <option value="" hidden>
+                      Arrears Band
                     </option>
-                  ))}
-                </select>
-                {/* DRC Dropdown */}
-                <select
-                  className={`${GlobalStyle.selectBox}  w-full sm:w-44`}
-                  value={newEntry.drc}
-                  onChange={(e) => {
-                    const selectedDRC = drcNames.find((drc) => drc.value === e.target.value);
-                    setNewEntry({
-                      ...newEntry,
-                      drckey: selectedDRC.key,
-                      drc: selectedDRC.value
-                    });
-                  }}
-                >
-                  <option value="" hidden>
-                    DRC
-                  </option>
-                  {drcNames.map(({ key, value }) => (
-                    <option key={key} value={value}>
-                      {value}
+                    {arrearsBands.map(({ key, value }) => (
+                      <option key={key} value={value} style={{ color: "black" }}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                  {/* DRC Dropdown */}
+                  <select
+                    className={`${GlobalStyle.selectBox}  w-full sm:w-44`}
+                    value={newEntry.drc}
+                    onChange={(e) => {
+                      const selectedDRC = drcNames.find((drc) => drc.value === e.target.value);
+                      setNewEntry({
+                        ...newEntry,
+                        drckey: selectedDRC.key,
+                        drc: selectedDRC.value
+                      });
+                    }}
+                    disabled={!selectedBand}
+                    style={{ color: newEntry.drc ? "black" : "gray" }}
+                  >
+                    <option value="" hidden>
+                      DRC
                     </option>
-                  ))}
-                </select>
+                    {drcNames.map(({ key, value }) => (
+                      <option key={key} value={value} style={{ color: "black" }}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
 
-                {/* Input for "+ cases" */}
-                <input
-                  type="number"
-                  placeholder="+ cases "
-                  className="py-1 px-5 w-44 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
-                  min="1"
-                  max={arrearsbandTotal}
-                  value={newEntry.casesAmount}
-                  onChange={(e) =>
-                    setNewEntry({ ...newEntry, casesAmount: e.target.value })
-                  }
-                />
+                  {/* Input for "+ cases" */}
+                  <input
+                    type="number"
+                    placeholder="+ cases "
+                    className="py-1 px-5 w-44 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
+                    min="1"
+                    max={arrearsbandTotal}
+                    value={newEntry.casesAmount}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, casesAmount: e.target.value })
+                    }
+                    disabled={!selectedBand}
+                  />
 
-                {/* Add Button */}
+                  {/* Add Button */}
 
-                {/* <button
+                  {/* <button
                   className={`${GlobalStyle.buttonPrimary} w-[135px]`}
                   onClick={handleAdd}
                 >
                   Add
                 </button> */}
-                <div>
-                  {["admin", "superadmin", "slt"].includes(userRole) && (
-                    <button
-                      className={`${GlobalStyle.buttonPrimary}  w-[135px]`}
-                      onClick={handleAdd}
-                    >
-                      Add
-                    </button>
-                  )}
+                  <div>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                      <button
+                        className={`${GlobalStyle.buttonPrimary}  w-[135px]`}
+                        onClick={handleAdd}
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex justify-end items-center sm:items-center flex-col sm:flex-row   space-x-4">
-                {/* <div> */}
+                {/* <div className="flex justify-end items-center sm:items-center flex-col sm:flex-row   space-x-4"> */}
+                  {/* <div> */}
 
-                {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
+                  {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
                   Pie Chart 2
                 </button> */}
-                {/* <div>
+                  {/* <div>
                   {["admin", "superadmin", "slt"].includes(userRole) && (
                     <button className={`${GlobalStyle.buttonPrimary} h-10  mt-2  w-full sm:w-auto`} onClick={handlepiechart2}>
                       Pie Chart 2
                     </button>
                   )}
                 </div> */}
-                {/* <Chart showPopup={showPopup} setShowPopup={setShowPopup} /> */}
+                  {/* <Chart showPopup={showPopup} setShowPopup={setShowPopup} /> */}
+                  {/* </div> */}
                 {/* </div> */}
-              </div>
 
+              </div>
             </div>
           </div>
 
