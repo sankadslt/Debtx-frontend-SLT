@@ -3,6 +3,7 @@ import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from "chart.js";
 import { fetchRtomCaseCountChartData } from "../services/chart/chartService";
 import GlobalStyle from "../assets/prototype/GlobalStyle.jsx";
+import Swal from "sweetalert2";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -43,6 +44,13 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands, serviceType
                 })
             } catch (error) {
                 console.error("Error fetching chart data:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Failed to fetch chart data. Please try again later.",
+                    confirmButtonColor: "#d33"
+                });
+                setShowPopup(false);
             }
         };
 
