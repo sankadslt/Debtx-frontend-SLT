@@ -75,11 +75,15 @@ export const createRTOM = async (rtomData) => {
       rtom_telephone_no: rtomData.telephone,
       created_by: rtomData.createdBy 
     });
-    
+
     if (response.data.status === "success") {
       return response.data;
     } else {
-      throw new Error(response.data.message || "Failed to create RTOM");
+      throw {
+        message: response.data.message || "Failed to create RTOM",
+        status: 400,
+        response: response.data,
+      };
     }
   } catch (error) {
     console.error("Error creating RTOM:", {
@@ -87,9 +91,11 @@ export const createRTOM = async (rtomData) => {
       response: error.response?.data,
       status: error.response?.status,
     });
-    throw error.response?.data?.message || "An error occurred while creating RTOM";
+
+    throw error;
   }
 };
+
 
 
 
