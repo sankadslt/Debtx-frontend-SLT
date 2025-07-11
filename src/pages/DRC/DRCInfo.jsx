@@ -497,7 +497,7 @@ const DRCInfo = () => {
         rtom_name: selectedRtomItem.name,
         rtom_status: "Active",
         handling_type: selectedhandlingtype, // Add handling type here
-        status_update_dtm: new Date().toISOString(),
+        last_update_dtm: new Date().toISOString(),
       };
 
       setCompanyData({
@@ -1129,17 +1129,17 @@ console.log("latest Status History:", companyData.status || []);
                       </td>
                       <td className={`${GlobalStyle.tableData} text-center`}>
                         <label className="relative inline-flex items-center cursor-pointer">
-                          <input
+                          {/* <input
                             type="checkbox"
                             className="sr-only peer"
                             checked={service.service_status === "Active"}
                             readOnly
-                          />
-                          {/* <img
+                          /> */}
+                          <img
                             src={service.service_status === "Active" ? ActiveStatus : InactiveStatus}
                             alt={service.service_status}
                             className="w-5 h-5"
-                          /> */}
+                          />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
                           after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                         </label>
@@ -1216,8 +1216,8 @@ console.log("latest Status History:", companyData.status || []);
                           </label>
                         </td>
                         <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
-                          {rtom.status_update_dtm
-                            ? new Date(rtom.status_update_dtm).toLocaleDateString()
+                          {rtom.last_update_dtm
+                            ? new Date(rtom.last_update_dtm).toLocaleDateString()
                             : ""}
                         </td>
                       </tr>
@@ -1926,12 +1926,12 @@ console.log("latest Status History:", companyData.status || []);
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      Changed On
+                      Status
                     </th>
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      Status
+                      Changed On
                     </th>
                   </tr>
                 </thead>
@@ -1949,15 +1949,6 @@ console.log("latest Status History:", companyData.status || []);
                           className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
                         >
                           {service.service_type}
-                        </td>
-                        <td
-                          className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}
-                        >
-                          {service.status_update_dtm
-                            ? new Date(
-                              service.status_update_dtm
-                            ).toLocaleDateString()
-                            : ""}
                         </td>
                         <td className={`${GlobalStyle.tableData} text-center`}>
                           <button
@@ -1987,6 +1978,15 @@ console.log("latest Status History:", companyData.status || []);
                                 : "Inactive"}
                             </span>
                           </button>
+                        </td>
+                        <td
+                          className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}
+                        >
+                          {service.status_update_dtm
+                            ? new Date(
+                              service.status_update_dtm
+                            ).toLocaleDateString()
+                            : ""}
                         </td>
                       </tr>
                     ))}
@@ -2082,12 +2082,12 @@ console.log("latest Status History:", companyData.status || []);
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      Changed On
+                      Status
                     </th>
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      Status
+                      Changed On
                     </th>
                   </tr>
                 </thead>
@@ -2110,15 +2110,6 @@ console.log("latest Status History:", companyData.status || []);
                           className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
                         >
                           {rtom.handling_type}
-                        </td>
-                        <td
-                          className={`${GlobalStyle.tableData} whitespace-normal text-left`}
-                        >
-                          {rtom.status_update_dtm
-                            ? new Date(
-                              rtom.status_update_dtm
-                            ).toLocaleDateString()
-                            : ""}
                         </td>
                         <td className={`${GlobalStyle.tableData} text-center`}>
                           <button
@@ -2148,6 +2139,15 @@ console.log("latest Status History:", companyData.status || []);
                                 : "Inactive"}
                             </span>
                           </button>
+                        </td>
+                        <td
+                          className={`${GlobalStyle.tableData} whitespace-normal text-left`}
+                        >
+                          {rtom.last_update_dtm
+                            ? new Date(
+                              rtom.last_update_dtm
+                            ).toLocaleDateString()
+                            : ""}
                         </td>
                       </tr>
                     ))}
