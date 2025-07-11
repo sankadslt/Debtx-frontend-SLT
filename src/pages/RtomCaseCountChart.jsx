@@ -97,7 +97,7 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands, serviceType
                                     Arrears Band
                                 </option>
                                 {arrearsBands.map(({ key, value }) => (
-                                    <option key={key} value={value} style={{ color: "black" }}>
+                                    <option key={key} value={key} style={{ color: "black" }}>
                                         {value}
                                     </option>
                                 ))}
