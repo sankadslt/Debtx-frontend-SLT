@@ -15,6 +15,8 @@ import Swal from "sweetalert2";
 import Edit from "../../assets/images/edit-info.svg";
 import addIcon from "../../assets/images/add.svg";
 import { FaArrowLeft, FaSearch, FaArrowRight } from "react-icons/fa";
+import ActiveStatus from "../../assets/images/complete.png";
+import InactiveStatus from "../../assets/images/Cross.png";
 import {
   getDebtCompanyByDRCID,
   terminateCompanyByDRCID,
@@ -819,7 +821,7 @@ console.log("latest Status History:", companyData.status || []);
     return (
       <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 md:px-8 max-w-7xl mx-auto`}>
         <h2 className={`${GlobalStyle.headingLarge} text-center sm:text-left mb-4 sm:mb-6`}>
-          {companyData.drc_id} - {companyData.drc_name}
+          {companyData.drc_name}
         </h2>
 
         {/* Main Content Card */}
@@ -905,7 +907,45 @@ console.log("latest Status History:", companyData.status || []);
             </table>
 
             {/* DRC Agreement Section */}
-            
+            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+              Current Agreement Details
+            </h2>
+
+            <div className={`${GlobalStyle} overflow-x-auto`}>
+              <table className={`${GlobalStyle.table} min-w-full text-left`}>
+                <tbody>
+                  {currentCoordinator ? (
+                    <>
+                      <tr>
+                        <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                          Start Date
+                        </td>
+                        <td className="w-4 text-left">:</td>
+                        <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                          {currentCoordinator.slt_coordinator_name || "Not specified"}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                          End Date
+                        </td>
+                        <td className="w-4 text-left">:</td>
+                        <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                          {currentCoordinator.slt_coordinator_email || "Not specified"}
+                        </td>
+                      </tr>
+                    </>
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="text-center py-4 text-gray-500">
+                        No coordinator assigned
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
 
             {/* SLT Coordinator Section */}
 
@@ -1055,10 +1095,10 @@ console.log("latest Status History:", companyData.status || []);
                       Service Type
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Changed On
+                      Status
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Status
+                      Changed On
                     </th>
                   </tr>
                 </thead>
@@ -1074,12 +1114,7 @@ console.log("latest Status History:", companyData.status || []);
                       <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                         {service.service_type}
                       </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
-                        {service.status_update_dtm
-                          ? new Date(service.status_update_dtm).toLocaleDateString()
-                          : ""}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} text-left`}>
+                      <td className={`${GlobalStyle.tableData} text-center`}>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
@@ -1087,9 +1122,19 @@ console.log("latest Status History:", companyData.status || []);
                             checked={service.service_status === "Active"}
                             readOnly
                           />
+                          {/* <img
+                            src={service.service_status === "Active" ? ActiveStatus : InactiveStatus}
+                            alt={service.service_status}
+                            className="w-5 h-5"
+                          /> */}
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
                           after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                         </label>
+                      </td>
+                      <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
+                        {service.status_update_dtm
+                          ? new Date(service.status_update_dtm).toLocaleDateString()
+                          : ""}
                       </td>
                     </tr>
                   ))}
@@ -1120,10 +1165,10 @@ console.log("latest Status History:", companyData.status || []);
                       Handling Type
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Changed On
+                      Status
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Status
+                      Changed On
                     </th>
                   </tr>
                 </thead>
@@ -1144,12 +1189,7 @@ console.log("latest Status History:", companyData.status || []);
                         <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                           {rtom.handling_type}
                         </td>
-                        <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
-                          {rtom.status_update_dtm
-                            ? new Date(rtom.status_update_dtm).toLocaleDateString()
-                            : ""}
-                        </td>
-                        <td className={`${GlobalStyle.tableData} text-left`}>
+                        <td className={`${GlobalStyle.tableData} text-center`}>
                           <label className="relative inline-flex items-center cursor-pointer">
                             <input
                               type="checkbox"
@@ -1161,6 +1201,11 @@ console.log("latest Status History:", companyData.status || []);
                             peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
                             after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                           </label>
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
+                          {rtom.status_update_dtm
+                            ? new Date(rtom.status_update_dtm).toLocaleDateString()
+                            : ""}
                         </td>
                       </tr>
                     ))
