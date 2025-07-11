@@ -88,10 +88,10 @@ const DRCInfo = () => {
     slt_coordinator_name: "",
     slt_coordinator_email: "",
   });
-  const [currentAgreement, setCurrentAgreement] = useState({
-    agreement_start_dtm: "",
-    agreement_end_dtm: "",
-  });
+  // const [currentAgreement, setCurrentAgreement] = useState({
+  //   agreement_start_dtm: "",
+  //   agreement_end_dtm: "",
+  // });
   const [serviceOptions, setServiceOptions] = useState([]);
   const [editingServiceIds, setEditingServiceIds] = useState([]);
   const [editingRtomIds, setEditingRtomIds] = useState([]);
@@ -786,6 +786,14 @@ const DRCInfo = () => {
       ? companyData.slt_coordinator[companyData.slt_coordinator.length - 1]
       : null;
 
+  // Add this above both return statements to get current agreement
+  const currentAgreement = companyData.drc_agreement_details && 
+                          companyData.drc_agreement_details.length > 0
+    ? companyData.drc_agreement_details[
+        companyData.drc_agreement_details.length - 1
+      ]
+    : null;
+
   // Loading state
   if (loading) {
     return (
@@ -907,7 +915,7 @@ console.log("latest Status History:", companyData.status || []);
               </tbody>
             </table>
 
-            {/* DRC Agreement Section */}
+            {/* Current Agreement Section */}
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
               Current Agreement Details
             </h2>
@@ -915,7 +923,7 @@ console.log("latest Status History:", companyData.status || []);
             <div className={`${GlobalStyle} overflow-x-auto`}>
               <table className={`${GlobalStyle.table} min-w-full text-left`}>
                 <tbody>
-                  {currentCoordinator ? (
+                  {currentAgreement ? (
                     <>
                       <tr>
                         <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
@@ -923,7 +931,9 @@ console.log("latest Status History:", companyData.status || []);
                         </td>
                         <td className="w-4 text-left">:</td>
                         <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
-                          {currentCoordinator.slt_coordinator_name || "Not specified"}
+                          {currentAgreement.agreement_start_dtm
+                            ? new Date(currentAgreement.agreement_start_dtm).toLocaleDateString()
+                            : "Not specified"}
                         </td>
                       </tr>
                       <tr>
@@ -932,14 +942,16 @@ console.log("latest Status History:", companyData.status || []);
                         </td>
                         <td className="w-4 text-left">:</td>
                         <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
-                          {currentCoordinator.slt_coordinator_email || "Not specified"}
+                          {currentAgreement.agreement_end_dtm
+                            ? new Date(currentAgreement.agreement_end_dtm).toLocaleDateString()
+                            : "Not specified"}
                         </td>
                       </tr>
                     </>
                   ) : (
                     <tr>
                       <td colSpan="3" className="text-center py-4 text-gray-500">
-                        No coordinator assigned
+                        No agreement details available
                       </td>
                     </tr>
                   )}
@@ -947,7 +959,7 @@ console.log("latest Status History:", companyData.status || []);
               </table>
             </div>
 
-
+            
             {/* SLT Coordinator Section */}
 
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
@@ -1641,6 +1653,50 @@ console.log("latest Status History:", companyData.status || []);
                     />
                   </td>
                 </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Current Agreement Section */}
+          <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+            Current Agreement Details
+          </h2>
+
+          <div className={`overflow-x-auto`}>
+            <table className={`${GlobalStyle.table} min-w-full text-left`}>
+              <tbody>
+                {currentAgreement ? (
+                  <>
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                        Start Date<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left block sm:table-cell`}>
+                        {currentAgreement.agreement_start_dtm
+                          ? new Date(currentAgreement.agreement_start_dtm).toLocaleDateString()
+                          : "Not specified"}
+                      </td>
+                    </tr>
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                        End Date<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left block sm:table-cell`}>
+                        {currentAgreement.agreement_end_dtm
+                          ? new Date(currentAgreement.agreement_end_dtm).toLocaleDateString()
+                          : "Not specified"}
+                      </td>
+                    </tr>
+                  </>
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="text-center py-4 text-gray-500">
+                      No agreement details available
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
