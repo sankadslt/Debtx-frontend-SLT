@@ -246,12 +246,22 @@ const AssignDRC = () => {
         error?.message ||
         "An error occurred. Please try again.";
 
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: errorMessage,
-        confirmButtonColor: "#d33",
-      });
+      if (error.response && error.response.status === 409) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: errorMessage,
+          confirmButtonColor: "#ffc107",
+        });
+      } else {
+
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+        });
+      }
     }
   };
 
@@ -424,20 +434,20 @@ const AssignDRC = () => {
                 </div>
 
                 {/* <div className="flex justify-end items-center sm:items-center flex-col sm:flex-row   space-x-4"> */}
-                  {/* <div> */}
+                {/* <div> */}
 
-                  {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
+                {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
                   Pie Chart 2
                 </button> */}
-                  {/* <div>
+                {/* <div>
                   {["admin", "superadmin", "slt"].includes(userRole) && (
                     <button className={`${GlobalStyle.buttonPrimary} h-10  mt-2  w-full sm:w-auto`} onClick={handlepiechart2}>
                       Pie Chart 2
                     </button>
                   )}
                 </div> */}
-                  {/* <Chart showPopup={showPopup} setShowPopup={setShowPopup} /> */}
-                  {/* </div> */}
+                {/* <Chart showPopup={showPopup} setShowPopup={setShowPopup} /> */}
+                {/* </div> */}
                 {/* </div> */}
 
               </div>
