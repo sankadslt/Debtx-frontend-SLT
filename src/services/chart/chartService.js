@@ -15,7 +15,7 @@ export const fetchChartData = async () => {
 
 export const fetchRtomCaseCountChartData = async (payload) => {
   try {
-    const response = await axios.post(`${BASE_URL}/chart-data`, payload);
+    const response = await axios.post(`https://debtx.slt.lk:6500/how_case_distribution/`, payload);
     return response.data;
   } catch (error) {
     console.error("Error fetching chart data:", error.response?.data || error.message);
