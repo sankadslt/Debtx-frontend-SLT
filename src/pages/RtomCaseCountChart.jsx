@@ -23,6 +23,7 @@ const RtomCaseCountChart = ({ showPopup, setShowPopup, arrearsBands, serviceType
                     current_arrears_band: selectedBand,
                     drc_commision_rule: serviceType
                 }
+                console.log("Payload:", payload);
                 const response = await fetchRtomCaseCountChartData(payload);
                 console.log("Response:", response);
                 const labels = response.map(item => item.Billing_Centre);
