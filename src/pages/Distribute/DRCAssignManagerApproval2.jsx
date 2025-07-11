@@ -55,31 +55,33 @@ export default function DRCAssignManagerApproval2() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 4;
+  const [totalPages, setTotalPages] = useState(0);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const rowsPerPage = 10;
 
-  const fetchData = async () => {
-
+  const fetchData = async (page = 1) => {
     const userId = await getLoggedUserId();
-    // console.log("Logged in user ID:", userId);
     const payload = {
       approved_deligated_by: userId,
+      pages: page,
     };
-    // console.log("Payload:", payload);
     try {
       const response = await List_All_Batch_Details(payload);
-      if (response.length > 0) {
+      // Support both array and object response for compatibility
+      if (Array.isArray(response)) {
         setFilteredData(response);
+        setTotalPages(1);
+        setIsMoreDataAvailable(false);
+      } else if (response && response.data && Array.isArray(response.data)) {
+        setFilteredData(response.data);
+        setTotalPages(response.totalPages || 1);
+        setIsMoreDataAvailable(page < (response.totalPages || 1));
       } else {
-        Swal.fire({
-          icon: "warning",
-          title: "No Data Found",
-          text: "There are no batch details available for approval.",
-          confirmButtonColor: "#f1c40f",
-        })
+        setFilteredData([]);
+        setIsMoreDataAvailable(false);
+        setTotalPages(1);
       }
-      // console.log("All batch details:", response);
     } catch (error) {
-      //console.error("Error fetching all batch details:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -91,36 +93,35 @@ export default function DRCAssignManagerApproval2() {
 
   // Fetch data on component mount
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(currentPage);
+  }, [currentPage]);
 
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-
+  // Remove frontend slicing for backend pagination
   const filteredDataBySearch = searchQuery
-
     ? filteredData.filter((item) => {
-      const batchId = item.case_distribution_details?.case_distribution_batch_id || "N/A";
-      const createdDate = new Date(item.created_on).toLocaleDateString();
-      const commissionRule = item.case_distribution_details?.drc_commision_rule || "N/A";
-      const ruleBaseCount = item.case_distribution_details?.rulebase_count || "N/A";
-
-      const rowString = `${batchId} ${createdDate} ${commissionRule} ${ruleBaseCount}`.toLowerCase();
-      return rowString.includes(searchQuery.toLowerCase());
-    })
+        const batchId = item.case_distribution_details?.case_distribution_batch_id || "N/A";
+        const createdDate = new Date(item.created_on).toLocaleDateString();
+        const commissionRule = item.case_distribution_details?.drc_commision_rule || "N/A";
+        const ruleBaseCount = item.case_distribution_details?.rulebase_count || "N/A";
+        const rowString = `${batchId} ${createdDate} ${commissionRule} ${ruleBaseCount}`.toLowerCase();
+        return rowString.includes(searchQuery.toLowerCase());
+      })
     : filteredData;
 
-
-  const currentData = filteredDataBySearch.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
+  // Use backend data directly for current page
+  const currentData = filteredDataBySearch;
 
 
   // Handle pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+    } else if (direction === "next" && isMoreDataAvailable) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      if (nextPage > maxCurrentPage) {
+        fetchData(nextPage);
+      }
     }
   };
 
@@ -372,7 +373,7 @@ export default function DRCAssignManagerApproval2() {
 
                   <td className={GlobalStyle.tableData}> {item.case_distribution_details?.drc_commision_rule || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.case_distribution_details?.rulebase_count || "N/A"}</td>
-                  {/* <td className={GlobalStyle.tableData}>{item.totalArrears}</td> */}
+                  {/* <td className={GlobalStyle.tableData>{item.totalArrears}</td> */}
                   <td className={GlobalStyle.tableData}>{new Date(item.created_on).toLocaleDateString("en-GB")}</td>
                   <td className="text-center">
                     <div className="flex justify-center gap-2">
@@ -418,8 +419,7 @@ export default function DRCAssignManagerApproval2() {
           <button
             onClick={() => handlePrevNext("prev")}
             disabled={currentPage === 1}
-            className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
-              }`}
+            className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""}`}
           >
             <FaArrowLeft />
           </button>
@@ -429,8 +429,7 @@ export default function DRCAssignManagerApproval2() {
           <button
             onClick={() => handlePrevNext("next")}
             disabled={currentPage === totalPages}
-            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
-              }`}
+            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
           >
             <FaArrowRight />
           </button>
