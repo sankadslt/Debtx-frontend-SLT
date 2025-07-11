@@ -406,7 +406,7 @@ const AssignDRCReject = () => {
             <div>
               <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button className={`${GlobalStyle.buttonPrimary} h-10 mr-5 mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
+                  <button className={`${GlobalStyle.buttonPrimary} mr-5 mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
                     DRC Summary
                   </button>
                 )}
@@ -429,70 +429,73 @@ const AssignDRCReject = () => {
               </div>
             </div>
           </div>
-          <div className={`flex justify-end items-center my-5 lg:flex-row flex-col lg:items-center`}>
-            <div className={`${GlobalStyle.cardContainer} w-[50vw] flex flex-wrap justify-end items-center gap-4`}>
+          <div className="flex justify-end">
+            <div className={`w-[720px] md:w-[720px] sm:w-[100%]`}>
+              <div className={`${GlobalStyle.cardContainer} w-full flex flex-wrap justify-end items-center gap-4`}>
 
-              {/* DRC Dropdown */}
-              <select
-                className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
-                value={selectedBand}
-                onChange={handleArrearsBandChange}
-                disabled={selectedBand}
-              >
-                <option value="" hidden>
-                  Arrears Band
-                </option>
-                {arrearsBands.map(({ key, value }) => (
-                  <option key={key} value={key}>
-                    {value}
+                {/* DRC Dropdown */}
+                <select
+                  className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
+                  value={selectedBand}
+                  onChange={handleArrearsBandChange}
+                  disabled={selectedBand}
+                >
+                  <option value="" hidden>
+                    Arrears Band
                   </option>
-                ))}
-              </select>
-              <select
-                className={`${GlobalStyle.selectBox}  w-full sm:w-44`}
-                value={newEntry.drc}
-                onChange={(e) => {
-                  const selectedDRC = drcNames.find((drc) => drc.value === e.target.value);
-                  setNewEntry({
-                    ...newEntry,
-                    drckey: selectedDRC.key,
-                    drc: selectedDRC.value
-                  });
-                }}
-              >
-                <option value="" hidden>
-                  DRC
-                </option>
-                {drcNames.map(({ key, value }) => (
-                  <option key={key} value={value}>
-                    {value}
+                  {arrearsBands.map(({ key, value }) => (
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className={`${GlobalStyle.selectBox}  w-full sm:w-44`}
+                  value={newEntry.drc}
+                  onChange={(e) => {
+                    const selectedDRC = drcNames.find((drc) => drc.value === e.target.value);
+                    setNewEntry({
+                      ...newEntry,
+                      drckey: selectedDRC.key,
+                      drc: selectedDRC.value
+                    });
+                  }}
+                  style={{ color: newEntry.drc ? "black" : "gray" }}
+                >
+                  <option value="" hidden>
+                    DRC
                   </option>
-                ))}
-              </select>
+                  {drcNames.map(({ key, value }) => (
+                    <option key={key} value={value} style={{ color: "black" }}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
 
-              {/* Input for "+ cases" */}
-              <input
-                type="number"
-                placeholder="+ cases "
-                className="py-1 px-5 w-44 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
-                min="1"
-                max={arrearsbandTotal}
-                value={newEntry.casesAmount}
-                onChange={(e) =>
-                  setNewEntry({ ...newEntry, casesAmount: e.target.value })
-                }
-              />
+                {/* Input for "+ cases" */}
+                <input
+                  type="number"
+                  placeholder="+ cases "
+                  className="py-1 px-5 w-44 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
+                  min="1"
+                  max={arrearsbandTotal}
+                  value={newEntry.casesAmount}
+                  onChange={(e) =>
+                    setNewEntry({ ...newEntry, casesAmount: e.target.value })
+                  }
+                />
 
-              {/* Add Button */}
-              <div>
-                {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button
-                    className={`${GlobalStyle.buttonPrimary}  w-[135px]`}
-                    onClick={handleAdd}
-                  >
-                    Add
-                  </button>
-                )}
+                {/* Add Button */}
+                <div>
+                  {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button
+                      className={`${GlobalStyle.buttonPrimary}  w-[135px]`}
+                      onClick={handleAdd}
+                    >
+                      Add
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
