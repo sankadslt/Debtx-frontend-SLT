@@ -125,6 +125,10 @@ import ServiceTypeList from "../pages/Service/ServiceTypeList";
 //TASKS
 import ListAllTasks from "../pages/Task/ListAllTasks";
 
+//Abnormal
+import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
+ 
+
 const Routers = () => {
   return (
     <Routes>
@@ -899,6 +903,7 @@ const Routers = () => {
        
       <Route path="/pages/DRC/DrcAgreement" element={<ProtectedRoute element={<DrcAgreement />} allowedRoles={['superadmin']} />} />
 
+     
       {/* //MASTER DRC
     <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
@@ -939,6 +944,15 @@ const Routers = () => {
           />
         }
       />
+        {/* Abnormal*/}
+        <Route path="/pages/Abnormal/Withdraw_Case_Log"
+     element={<ProtectedRoute
+       element={<WithdrawalCaseLog />}
+        allowedRoles={['superadmin' ]} />} />
+
+
+ 
+ 
     </Routes>
   );
 };
