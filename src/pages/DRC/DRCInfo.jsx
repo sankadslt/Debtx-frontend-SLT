@@ -1136,12 +1136,11 @@ console.log("latest Status History:", companyData.status || []);
                             readOnly
                           /> */}
                           <img
-                            src={service.service_status === "Active" ? ActiveStatus : InactiveStatus}
-                            alt={service.service_status}
-                            className="w-5 h-5"
+                            src={service.service_status ? ActiveStatus : InactiveStatus}
+                            alt={service.service_status? "Active" : "Inactive"}
+                            title={service.service_status ? "Active" : "Inactive"}
+                            className="w-6 h-6 mx-auto"
                           />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                          after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                         </label>
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
@@ -1204,15 +1203,12 @@ console.log("latest Status History:", companyData.status || []);
                         </td>
                         <td className={`${GlobalStyle.tableData} text-center`}>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="sr-only peer"
-                              checked={rtom.rtom_status === "Active"}
-                              readOnly
+                            <img
+                              src={rtom.rtom_status === "Active" ? ActiveStatus : InactiveStatus}
+                              alt={rtom.rtom_status === "Active" ? "Active" : "Inactive"}
+                              title={rtom.rtom_status === "Active" ? "Active" : "Inactive"}
+                              className="w-6 h-6 mx-auto"
                             />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full 
-                            peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
-                            after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                           </label>
                         </td>
                         <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
