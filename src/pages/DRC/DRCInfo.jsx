@@ -27,6 +27,7 @@ import {
   
 } from "../../services/drc/Drc";
 import { getLoggedUserId } from "../../services/auth/authService";
+import { getUserDetailsById } from "../../services/user/user_services";
 
 const DRCInfo = () => {
   // Navigation 
@@ -98,6 +99,10 @@ const DRCInfo = () => {
   const [selectedhandlingtype, Setselectedhandlingtype] = useState("");
   const [remark, setRemark] = useState("");
   const [remarkHistory, setRemarkHistory] = useState([]);
+  const [ServiceNo, setServiceNo] = useState("");
+  const [C_Name, setCName] = useState("");
+  const [C_Email, setCEmail] = useState("");
+  const [errors, setErrors] = useState({});
 
   //loghistory
   const [showPopup, setShowPopup] = useState(false);
@@ -131,6 +136,38 @@ const DRCInfo = () => {
   const handlePrevPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 0));
   };
+
+    const handleSearchUsers = async (e) => {
+      e.preventDefault();
+      
+      if (!ServiceNo || ServiceNo.trim() === "") {
+        Swal.fire("Error", "Please provide a valid service number.", "error");
+        return;
+      }
+  
+      try {
+  
+        // Fetch user details
+        const response = await getUserDetailsById(ServiceNo);
+        
+        // Handle different response structures:
+        const userData = response.data || response; // Check for nested data
+        
+        // Extract name - try multiple possible fields
+        const userName = userData.username || userData.name || userData.fullName || "";
+        
+        // Extract email
+        const userEmail = userData.email || "";
+        setCName(userName);
+        setCEmail(userEmail);
+  
+      } catch (error) {
+        Swal.close();
+        Swal.fire("Error", "Coordinator not found", error);
+        setCName("");
+        setCEmail("");
+      }
+    };
 
   //next page
   const handleNextPage = () => {
@@ -1722,27 +1759,24 @@ console.log("latest Status History:", companyData.status || []);
                       Service No<span className="sm:hidden">:</span>
                     </td>
                     <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
-                      {editingCoordinator ? (
-                        <select
-                          name="service_no"
-                          value={coordinatorFields.service_no}
-                          onChange={handleServiceSelection}
-                          className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
-                        >
-                          <option value="">Select a service</option>
-                          {serviceOptions.map((option, idx) => (
-                            <option key={idx} value={option.service_no}>
-                              {option.service_no}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.service_no || "Not specified"}
-                        </span>
-                      )}
-                    </td>
+                    <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+                    <input
+                      type="text"
+                      value={coordinatorFields.service_no}
+                      onChange={(e) => setServiceNo(e.target.value)}
+                      className={`${GlobalStyle.inputText} w-100`}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSearchUsers}
+                      className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
+                    >
+                      <FaSearch style={{ width: 20, height: 20 }} />
+                    </button>
+                    {errors.ServiceNo && (
+                      <p className="text-red-500">{errors.ServiceNo}</p>
+                    )}
+                  </td>
                   </tr>
                   <tr className="block sm:table-row">
                     <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
