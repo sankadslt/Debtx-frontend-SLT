@@ -924,22 +924,18 @@ console.log("latest Status History:", companyData.status || []);
                     value: companyData.drc_email || "Not specified"
                   }, 
                     companyData.status === "Terminate" && {
-                     label: "Terminate Date",
+                      label: "Terminate Date",
                       value: companyData.drc_terminate_dtm
-                        ? new Date(companyData.drc_terminate_dtm).toLocaleDateString()
-                        : "Not specified"
+                        ? new Date(companyData.drc_terminate_dtm).toLocaleDateString() : "Not specified"
                     }
                 ].map((item, index) => (
                   <tr key={index} className="block sm:table-row">
-
-                    <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                    {/* <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
                       {item.label}:
                     </td>
                     <td className={`${GlobalStyle.tableData} text-gray-500 block sm:hidden pl-4`}>
                       {item.value}
-                    </td>
-
-
+                    </td> */}
                     <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
                       {item.label}
                     </td>
