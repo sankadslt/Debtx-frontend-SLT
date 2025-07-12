@@ -740,7 +740,7 @@ export default function AssignPendingDRCSummary() {
                       GlobalStyle.tableRowOdd}>
                     <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-                        {item.current_batch_distribution_status === "open" && (
+                        {item.current_batch_distribution_status === "Open" && (
                           <>
                             <img data-tooltip-id={`tooltip-open-${index}`} data-tooltip-content={`Open - ${new Date(item.create_dtm).toLocaleDateString('en-GB')}`} src={open} width={20} height={15} alt="Open" />
                             <Tooltip id={`tooltip-open-${index}`} place="bottom" />
@@ -850,7 +850,7 @@ export default function AssignPendingDRCSummary() {
                       <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary" />
 
 
-                      <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status != "open" && item.current_batch_distribution_status != "batch_forword_distribute" && item.current_batch_distribution_status != "batch_amend"} >
+                      <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status != "Open" && item.current_batch_distribution_status != "batch_forword_distribute" && item.current_batch_distribution_status != "batch_amend"} >
                         {/* <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} /> */}
                         <RiExchangeLine size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                       </button>
@@ -864,7 +864,7 @@ export default function AssignPendingDRCSummary() {
                       <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary" />
 
 
-                      <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status != "open" && item.current_batch_distribution_status != "batch_forword_distribute" && item.current_batch_distribution_status != "batch_amend"} >
+                      <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status != "Open" && item.current_batch_distribution_status != "batch_forword_distribute" && item.current_batch_distribution_status != "batch_amend"} >
                         {/* <img
                       src={four}
                       width={15}
