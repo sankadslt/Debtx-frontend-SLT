@@ -307,36 +307,36 @@ const DRCInfo = () => {
 
   // Fetch active service types from the API
   const fetchActiveServices = async () => {
-    try {
-      setLoading(true);
-      const response = await getActiveServiceDetails();
-      console.log("API Response:", response);
+  try {
+    setLoading(true);
+    const response = await getActiveServiceDetails();
+    console.log("API Response:", response);
 
-      if (response && Array.isArray(response)) {
-        const formatted = response.map((service) => ({
-          id: service.service_id,
-          code: service.service_id.toString(),
-          name: service.service_type,
-          selected: false,
-        }));
+    if (response && Array.isArray(response)) {
+      const formatted = response.map((service) => ({
+        id: service.service_id,
+        code: service.service_id.toString(),
+        name: service.service_type,
+        selected: companyData.services?.some(s => s.service_type === service.service_type),
+      }));
 
-        setServiceTypes(formatted);
-      } else {
-        console.error("Unexpected API response format:", response);
-        setServiceTypes([]);
-      }
-    } catch (error) {
-      console.error("Error loading service types:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load active service types.",
-      });
+      setServiceTypes(formatted);
+    } else {
+      console.error("Unexpected API response format:", response);
       setServiceTypes([]);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Error loading service types:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to load active service types.",
+    });
+    setServiceTypes([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Function to fetch RTOM data
   const fetchRTOMData = async () => {
@@ -649,10 +649,15 @@ const DRCInfo = () => {
       }
 
       // Get updated services and RTOM data
-      const updatedServices = companyData.services.map((service) => ({
-        ...service,
+     const updatedServices = companyData.services.map((service) => {
+      const matchedService = serviceTypes.find(st => st.name === service.service_type);
+      return {
+        service_id: matchedService?.id || service.service_id, // Include service_id
+        service_type: service.service_type,
+        service_status: service.service_status,
         status_update_dtm: new Date().toISOString(),
-      }));
+      };
+    });
 
       const updatedRtom = companyData.rtom.map((rtom) => ({
         ...rtom,
@@ -817,6 +822,9 @@ const DRCInfo = () => {
   };
   console.log("Log History Data:", remarkHistory);
 
+
+
+
   // Get current coordinator (last one in array)
   const currentCoordinator =
     companyData.slt_coordinator && companyData.slt_coordinator.length > 0
@@ -861,6 +869,37 @@ console.log("DRC Status Data:", {
  });
 
 console.log("latest Status History:", companyData.status || []);
+
+console.log("Service Details with IDs:");
+if (companyData.services && Array.isArray(companyData.services)) {
+  companyData.services.forEach((service, index) => {
+    // Find the matching service in serviceTypes to get the ID
+    const matchedService = serviceTypes.find(st => st.name === service.service_type);
+    
+    console.log(`Service ${index + 1}:`, {
+      id: matchedService?.id || 'Unknown ID',
+      type: service.service_type || 'Unknown Type',
+      status: service.service_status || 'Unknown Status',
+      // Include the raw service object for debugging
+      rawService: service
+    });
+  });
+} else {
+  console.log("No services found or services is not an array");
+}
+
+
+console.log("Company RTOM data:", {
+  rawRtomData: companyData.rtom,
+  mappedData: companyData.rtom?.map(r => ({
+    id: r.rtom_id,
+    code: r.rtom_billing_center_code,
+    name: r.rtom_name,
+    status: r.rtom_status,
+    handling_type: r.handling_type
+  }))
+});
+
 
   if (!editMode) {
     // View mode

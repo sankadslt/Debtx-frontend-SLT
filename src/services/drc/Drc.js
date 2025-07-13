@@ -232,22 +232,43 @@ export const updateDRCInfo = async (
     if (contactNo) {
       requestData.drc_contact_no = contactNo;
     }
+    
 
     const response = await axios.patch(
       `${URL}/Update_DRC_With_Services_and_SLT_Cordinator`,
-      requestData
+      requestData,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
     );
+
+    // Check for error in response
+    if (response.data.status === 'error') {
+      throw new Error(response.data.message || 'Failed to update DRC');
+    }
 
     return response.data;
   } catch (error) {
     console.error(
-      "Error updating DRC information:",
-      error.response?.data || error.message
+      "Detailed error updating DRC:",
+      {
+        message: error.message,
+        responseData: error.response?.data,
+        requestData: error.config?.data,
+        stack: error.stack
+      }
     );
-    throw new Error(error.response?.data?.message || "Failed to update DRC");
+    
+    throw new Error(
+      error.response?.data?.message || 
+      error.response?.data?.errors?.exception || 
+      error.message || 
+      'Failed to update DRC'
+    );
   }
 };
-
 
 export const getActiveRTOMDetails = async () => {
   try {
