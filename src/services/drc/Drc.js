@@ -216,6 +216,7 @@ export const updateDRCInfo = async (
         rtom_id: rtomItem.rtom_id,
         rtom_name: rtomItem.rtom_name,
         rtom_status: rtomItem.rtom_status,
+         rtom_billing_center_code: rtomItem.rtom_billing_center_code,
         handling_type: rtomItem.handling_type,
         status_update_dtm: rtomItem.status_update_dtm || new Date().toISOString(),
         status_update_by: rtomItem.status_update_by || updated_by
