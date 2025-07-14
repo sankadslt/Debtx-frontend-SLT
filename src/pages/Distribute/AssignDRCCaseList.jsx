@@ -359,6 +359,10 @@ export default function AssignDRCsLOG() {
   const currentCurrentPageFromDRCList = location.state?.currentCurrentPage || 0;
   const currentDataPageFromDRCList = location.state?.currentData || [];
 
+  
+
+
+
   // Role-Based Buttons
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -592,8 +596,10 @@ export default function AssignDRCsLOG() {
     // Call API with payload
     const fetchCases = async () => {
       try {
+        payload.pages = currentPage;
         const data = await List_CasesOwened_By_DRC(payload);
-        setCases(data);
+        setCases(response?.Cases || []);
+        //setCases(data);
       } catch (err) {
         setError(err.message);
         Swal.fire({
@@ -690,14 +696,66 @@ export default function AssignDRCsLOG() {
   }
 
   // Pagination handler
+  // const handlePrevNext = (direction) => {
+  //   if (direction === "prev" && currentPage > 1) {
+  //     setCurrentPage(currentPage - 1);
+  //   }
+  //   if (direction === "next" && currentPage < totalPages) {
+  //     setCurrentPage(currentPage + 1);
+  //   }
+  // };
+
+
+  //Handle Pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    }
-    if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      // console.log("Current Page:", currentPage);
+    } else if (direction === "next") {
+      if (isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      } else {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        setTotalPages(totalPages);
+        if (currentPage < totalPages) {
+          setCurrentPage(currentPage + 1);
+        }
+      }
+      // console.log("Current Page:", currentPage);
     }
   };
+
+
+  // const handlePrevNext = (direction) => {
+  //   const newPage = direction === "prev" ? currentPage - 1 : currentPage + 1;
+  
+  //   if ((direction === "prev" && currentPage > 1) ||
+  //       (direction === "next" && currentPage < totalPages)) {
+  //     setCurrentPage(newPage);
+  
+  //     // Trigger backend fetch with updated page
+  //     const payload = {
+  //       drc_id,
+  //       pages: newPage,
+  //     };
+  //     if (startDate) payload.from_date = startDate;
+  //     if (endDate) payload.to_date = endDate;
+  //     if (filterType === "Account No" && filterValue.trim() !== "") {
+  //       payload.account_no = String(filterValue.trim());
+  //     } else if (filterType === "Case ID" && filterValue.trim() !== "") {
+  //       payload.case_id = filterValue.trim();
+  //     }
+  
+  //     List_CasesOwened_By_DRC(payload)
+  //       .then((res) => {
+  //         setCases(res?.Cases || []);
+  //       })
+  //       .catch(() => {
+  //         Swal.fire({ icon: "error", text: "Error fetching page data." });
+  //       });
+  //   }
+  // };
+  
 
   // Function to handle row click and navigate to details page
   const onhoverbuttonclick = (caseid) => {
