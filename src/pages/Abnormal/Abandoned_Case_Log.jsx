@@ -1,3 +1,4 @@
+ 
 import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload, FaTimes } from "react-icons/fa";
@@ -6,26 +7,24 @@ import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
-import {
-  fetchWithdrawalCases,
-  Task_for_Download_Withdrawals,
-  updateWithdrawCaseRemark,
-} from "../../services/Abnormal/AbnormalServices";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import {
+  fetchAbondonedCases,
+  Task_for_Download_Abondoned,
+  updateAbondonedCaseRemark,
+} from "../../services/Abnormal/AbnormalServices";
 
-// Status Icons
-import Write_Off from "/src/assets/images/Stop/Write-Off.png";
-import Pending_Write_Off from "/src/assets/images/Stop/Pending Write-Off.png";
+ import Abondoned from "/src/assets/images/Abnormal/Abandoned.png";
 
 const STATUS_ICONS = {
-  "Write Off": {
-    icon: Write_Off,
-    tooltip: "Write Off",
+  "Abondoned": {
+    icon: Abondoned,
+    tooltip: "Abondoned",
   },
-  "Pending Write Off": {
-    icon: Pending_Write_Off,
-    tooltip: "Pending Write Off",
+  "Pending Abondoned": {
+    //icon: Pending_Abondoned,
+    tooltip: "Pending Abondoned",
   },
 };
 
@@ -50,12 +49,12 @@ const StatusIcon = ({ status, index }) => {
   );
 };
 
-const WithdrawCaseModal = ({ onSuccess, onClose }) => {
+const AbondonedCaseModal = ({ onSuccess, onClose }) => {
   const [caseId, setCaseId] = useState("");
   const [remark, setRemark] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleWithdraw = async () => {
+  const handleSubmit = async () => {
     if (!caseId) {
       Swal.fire({
         icon: "warning",
@@ -70,7 +69,7 @@ const WithdrawCaseModal = ({ onSuccess, onClose }) => {
       Swal.fire({
         icon: "warning",
         title: "Warning",
-        text: "Please enter a remark before withdrawing!",
+        text: "Please enter a remark before submitting!",
         confirmButtonColor: "#f1c40f",
       });
       return;
@@ -87,13 +86,13 @@ const WithdrawCaseModal = ({ onSuccess, onClose }) => {
         created_by: userId,
       };
 
-      const response = await updateWithdrawCaseRemark(payload);
+      const response = await updateAbondonedCaseRemark(payload);
 
       if (response.success) {
         Swal.fire({
           icon: "success",
           title: "Success",
-          text: "Case withdrawn successfully.",
+          text: "Case submitted successfully.",
           confirmButtonColor: "#28a745",
         });
         onSuccess?.();
@@ -113,7 +112,7 @@ const WithdrawCaseModal = ({ onSuccess, onClose }) => {
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <span className={GlobalStyle.headingLarge}>Withdraw Case</span>
+        <span className={GlobalStyle.headingLarge}>Abondoned Case</span>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
           <FaTimes size={20} />
         </button>
@@ -144,10 +143,10 @@ const WithdrawCaseModal = ({ onSuccess, onClose }) => {
       <div className="text-right">
         <button
           className={`${GlobalStyle.buttonPrimary} px-6 py-2`}
-          onClick={handleWithdraw}
+          onClick={handleSubmit}
           disabled={isLoading}
         >
-          {isLoading ? "Processing..." : "Withdraw"}
+          {isLoading ? "Processing..." : "Submit"}
         </button>
       </div>
     </div>
@@ -166,9 +165,9 @@ const Modal = ({ isOpen, onClose, children }) => {
   );
 };
 
-const WithdrawalCaseLog = () => {
-  
-  const [withdrawalCases, setWithdrawalCases] = useState([]);
+const AbondonedCaseLog = () => {
+ 
+  const [abondonedCases, setAbondonedCases] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [fromDate, setFromDate] = useState(null);
@@ -180,7 +179,7 @@ const WithdrawalCaseLog = () => {
   const [userRole, setUserRole] = useState(null);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [isWithdrawCaseModalOpen, setIsWithdrawCaseModalOpen] = useState(false);
+  const [isAbondonedCaseModalOpen, setIsAbondonedCaseModalOpen] = useState(false);
   const [committedFilters, setCommittedFilters] = useState({
     status: "",
     accountNumber: "",
@@ -191,14 +190,14 @@ const WithdrawalCaseLog = () => {
   const rowsPerPage = 10;
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const filteredDataBySearch = withdrawalCases.filter((row) =>
+  const filteredDataBySearch = abondonedCases.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
 
-   
+  
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
@@ -235,8 +234,6 @@ const WithdrawalCaseLog = () => {
         title: "Warning",
         text: "To date should be greater than or equal to From date",
         icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
         confirmButtonColor: "#f1c40f",
       });
       setToDate(null);
@@ -248,10 +245,8 @@ const WithdrawalCaseLog = () => {
     if (!status && !accountNumber && !fromDate && !toDate) {
       Swal.fire({
         title: "Warning",
-        text: "No filter is selected. Please, select a filter.",
+        text: "No filter is selected. Please select a filter.",
         icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
         confirmButtonColor: "#f1c40f",
       });
       return false;
@@ -262,8 +257,6 @@ const WithdrawalCaseLog = () => {
         title: "Warning",
         text: "Both From Date and To Date must be selected.",
         icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
         confirmButtonColor: "#f1c40f",
       });
       return false;
@@ -272,7 +265,7 @@ const WithdrawalCaseLog = () => {
     return true;
   };
 
-  const loadWithdrawalCases = async (filters) => {
+  const loadAbondonedCases = async (filters) => {
     try {
       const formatDate = (date) => {
         if (!date) return null;
@@ -289,14 +282,14 @@ const WithdrawalCaseLog = () => {
       };
 
       setLoading(true);
-      const response = await fetchWithdrawalCases(payload);
+      const response = await fetchAbondonedCases(payload);
       setLoading(false);
 
       if (response?.data) {
         if (currentPage === 1) {
-          setWithdrawalCases(response.data);
+          setAbondonedCases(response.data);
         } else {
-          setWithdrawalCases((prev) => [...prev, ...response.data]);
+          setAbondonedCases((prev) => [...prev, ...response.data]);
         }
 
         if (response.data.length === 0) {
@@ -316,13 +309,13 @@ const WithdrawalCaseLog = () => {
           }
         }
       } else {
-        setWithdrawalCases([]);
+        setAbondonedCases([]);
       }
     } catch (error) {
-      console.error("Error fetching withdrawal cases:", error);
+      console.error("Error fetching abondoned cases:", error);
       Swal.fire({
         title: "Error",
-        text: "Failed to fetch withdrawal cases.",
+        text: "Failed to fetch abondoned cases.",
         icon: "error",
         confirmButtonColor: "#d33",
       });
@@ -334,7 +327,7 @@ const WithdrawalCaseLog = () => {
   useEffect(() => {
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
-      loadWithdrawalCases({
+      loadAbondonedCases({
         ...committedFilters,
         page: currentPage,
       });
@@ -353,10 +346,10 @@ const WithdrawalCaseLog = () => {
       fromDate,
       toDate,
     });
-    setWithdrawalCases([]);
+    setAbondonedCases([]);
 
     if (currentPage === 1) {
-      loadWithdrawalCases({
+      loadAbondonedCases({
         status,
         accountNumber,
         fromDate,
@@ -374,7 +367,7 @@ const WithdrawalCaseLog = () => {
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
-    setWithdrawalCases([]);
+    setAbondonedCases([]);
     setMaxCurrentPage(0);
     setIsMoreDataAvailable(true);
     setCommittedFilters({
@@ -388,17 +381,17 @@ const WithdrawalCaseLog = () => {
   };
 
   const handleAdd = () => {
-    setIsWithdrawCaseModalOpen(true);
+    setIsAbondonedCaseModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsWithdrawCaseModalOpen(false);
+    setIsAbondonedCaseModalOpen(false);
   };
 
-  const handleWithdrawSuccess = () => {
+  const handleAbondonedSuccess = () => {
     handleCloseModal();
     if (Object.values(committedFilters).some(Boolean)) {
-      loadWithdrawalCases({ ...committedFilters, page: 1 });
+      loadAbondonedCases({ ...committedFilters, page: 1 });
     }
   };
 
@@ -406,7 +399,7 @@ const WithdrawalCaseLog = () => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
     } else if (direction === "next") {
-      if (isMoreDataAvailable || currentPage < Math.ceil(withdrawalCases.length / rowsPerPage)) {
+      if (isMoreDataAvailable || currentPage < Math.ceil(abondonedCases.length / rowsPerPage)) {
         setCurrentPage(currentPage + 1);
       }
     }
@@ -426,7 +419,7 @@ const WithdrawalCaseLog = () => {
     setIsCreatingTask(true);
     try {
       const userData = await getLoggedUserId();
-      const response = await Task_for_Download_Withdrawals(
+      const response = await Task_for_Download_Abondoned(
         status,
         accountNumber,
         fromDate,
@@ -471,7 +464,7 @@ const WithdrawalCaseLog = () => {
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          <h1 className={GlobalStyle.headingLarge}>Withdrawal Case Log</h1>
+          <h1 className={GlobalStyle.headingLarge}>Abondoned Case Log</h1>
           
           {["admin", "superadmin", "slt"].includes(userRole) && (
             <div className="flex justify-end mt-2 sm:mt-0">
@@ -502,8 +495,8 @@ const WithdrawalCaseLog = () => {
                   style={{ color: status === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select Status</option>
-                  <option value="Write Off" style={{ color: "black" }}>Write Off</option>
-                  <option value="Pending Write Off" style={{ color: "black" }}>Pending Write Off</option>
+                  <option value="Pending Abondoned" style={{ color: "black" }}>Pending Abondoned</option>
+                  <option value="Abondoned" style={{ color: "black" }}>Abondoned</option>
                 </select>
               </div>
 
@@ -567,11 +560,10 @@ const WithdrawalCaseLog = () => {
                 <tr>
                   <th className={GlobalStyle.tableHeader}>Case ID</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
-                  <th className={GlobalStyle.tableHeader}>Account No</th>
                   <th className={GlobalStyle.tableHeader}>Amount</th>
                   <th className={GlobalStyle.tableHeader}>Remark</th>
-                  <th className={GlobalStyle.tableHeader}>Withdraw By</th>
-                  <th className={GlobalStyle.tableHeader}>Withdraw On</th>
+                  <th className={GlobalStyle.tableHeader}>Abondoned By</th>
+                  <th className={GlobalStyle.tableHeader}>Abondoned On</th>
                   <th className={GlobalStyle.tableHeader}>Approved On</th>
                 </tr>
               </thead>
@@ -586,12 +578,11 @@ const WithdrawalCaseLog = () => {
                       <td className={`${GlobalStyle.tableData} flex justify-left`}>
                         <StatusIcon status={row.status} index={index} />
                       </td>
-                      <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
                       <td className={GlobalStyle.tableData}>{formatCurrency(row.amount)}</td>
                       <td className={GlobalStyle.tableData}>{row.remark || ""}</td>
-                      <td className={GlobalStyle.tableData}>{row.withdrawBy || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.abondonedBy || ""}</td>
                       <td className={GlobalStyle.tableData}>
-                        {row.withdrawOn ? new Date(row.withdrawOn).toLocaleDateString("en-GB") : ""}
+                        {row.abondonedOn ? new Date(row.abondonedOn).toLocaleDateString("en-GB") : ""}
                       </td>
                       <td className={GlobalStyle.tableData}>
                         {row.approvedOn ? new Date(row.approvedOn).toLocaleDateString("en-GB") : ""}
@@ -600,7 +591,7 @@ const WithdrawalCaseLog = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className={`${GlobalStyle.tableData} text-center`}>
+                    <td colSpan="7" className={`${GlobalStyle.tableData} text-center`}>
                       No cases available
                     </td>
                   </tr>
@@ -627,7 +618,7 @@ const WithdrawalCaseLog = () => {
                 disabled={
                   searchQuery
                     ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                    : !isMoreDataAvailable && currentPage >= Math.ceil(withdrawalCases.length / rowsPerPage)
+                    : !isMoreDataAvailable && currentPage >= Math.ceil(abondonedCases.length / rowsPerPage)
                 }
                 className={`${GlobalStyle.navButton}`}
               >
@@ -654,10 +645,10 @@ const WithdrawalCaseLog = () => {
         </main>
       </div>
 
-      {/* Withdraw Case Modal */}
-      <Modal isOpen={isWithdrawCaseModalOpen} onClose={handleCloseModal}>
-        <WithdrawCaseModal 
-          onSuccess={handleWithdrawSuccess} 
+      {/* Abondoned Case Modal */}
+      <Modal isOpen={isAbondonedCaseModalOpen} onClose={handleCloseModal}>
+        <AbondonedCaseModal 
+          onSuccess={handleAbondonedSuccess} 
           onClose={handleCloseModal} 
         />
       </Modal>
@@ -665,4 +656,4 @@ const WithdrawalCaseLog = () => {
   );
 };
 
-export default WithdrawalCaseLog;
+export default AbondonedCaseLog;

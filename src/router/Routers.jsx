@@ -127,6 +127,7 @@ import ListAllTasks from "../pages/Task/ListAllTasks";
 
 //Abnormal
 import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
+import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
  
 
 const Routers = () => {
@@ -950,7 +951,10 @@ const Routers = () => {
        element={<WithdrawalCaseLog />}
         allowedRoles={['superadmin' ]} />} />
 
-
+<Route path="/pages/Abnormal/Abondoned_Case_Log"
+     element={<ProtectedRoute
+       element={<AbondonedCaseLog />}
+        allowedRoles={['superadmin' ]} />} />
  
  
     </Routes>
