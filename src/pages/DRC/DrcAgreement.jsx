@@ -605,7 +605,7 @@ const renderStatusIcon = (status) => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="4" className="text-center py-8 text-gray-500">
+                          <td colSpan="5" className={`${GlobalStyle.tableData} `} style={{ textAlign: 'center' }}>
                             {searchQuery ? "No matching results found" : "No agreement history found"}
                           </td>
                         </tr>
@@ -710,7 +710,7 @@ const renderStatusIcon = (status) => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" className="text-center py-8 text-gray-500">
+                      <td colSpan="5" className={`${GlobalStyle.tableData} `} style={{ textAlign: 'center' }}>
                         {searchQuery ? "No matching results found" : "No agreement history found"}
                       </td>
                     </tr>
