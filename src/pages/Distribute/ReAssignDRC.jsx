@@ -119,7 +119,7 @@ export default function ReAssignDRC() {
       }
     };
     fetchDRCNames();
-  });
+  }, []); 
 
   // UseEffect to fetch data from the API
   const handleonbacknuttonclick = () => {
