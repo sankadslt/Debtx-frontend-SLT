@@ -531,6 +531,7 @@ const DRCInfo = () => {
     if (selectedRtomItem) {
       const newRtom = {
         rtom_id: selectedRtomItem.id,
+         rtom_billing_center_code: selectedRtomItem.code,
         rtom_name: selectedRtomItem.name,
         rtom_status: "Active",
         handling_type: selectedhandlingtype, // Add handling type here
@@ -1200,20 +1201,15 @@ console.log("Company RTOM data:", {
                         {service.service_type}
                       </td>
                       <td className={`${GlobalStyle.tableData} text-center`}>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          {/* <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={service.service_status === "Active"}
-                            readOnly
-                          /> */}
-                          <img
-                            src={service.service_status ? ActiveStatus : InactiveStatus}
-                            alt={service.service_status? "Active" : "Inactive"}
-                            title={service.service_status ? "Active" : "Inactive"}
-                            className="w-6 h-6 mx-auto"
-                          />
-                        </label>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <img
+                              src={service.service_status === "Active" ? ActiveStatus : InactiveStatus}
+                              alt={service.service_status === "Active" ? "Active" : "Inactive"}
+                              title={service.service_status === "Active" ? "Active" : "Inactive"}
+                              className="w-6 h-6 mx-auto"
+                              onClick={() => handleServiceStatusToggle(index)}
+                            />
+                          </label>
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
                         {service.status_update_dtm
