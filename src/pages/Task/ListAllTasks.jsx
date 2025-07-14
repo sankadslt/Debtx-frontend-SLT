@@ -23,7 +23,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
+// import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
@@ -83,7 +83,7 @@ const ListAllTasks = () => {
     }
   }, []);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
@@ -467,6 +467,15 @@ const ListAllTasks = () => {
                         {new Date(item.created_dtm).toLocaleDateString(
                           "en-GB"
                         ) || "N/A"}
+                        ,{" "}
+                        {new Date(item.created_dtm)
+                          .toLocaleTimeString("en-GB", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: true,
+                          })
+                          .toUpperCase()}
                       </td>
                     </tr>
                   ))
@@ -511,7 +520,7 @@ const ListAllTasks = () => {
             </div>
           )}
 
-          {["admin", "superadmin", "slt"].includes(userRole) &&
+          {/* {["admin", "superadmin", "slt"].includes(userRole) &&
             filteredDataBySearch.length > 0 && (
               <button
                 // onClick={HandleCreateTaskDownloadSettlementList}
@@ -528,7 +537,7 @@ const ListAllTasks = () => {
                   ? "Creating Tasks..."
                   : "Create task and let me know"}
               </button>
-            )}
+            )} */}
         </main>
       </div>
     </div>
