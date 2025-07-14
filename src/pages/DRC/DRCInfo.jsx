@@ -52,6 +52,8 @@ const DRCInfo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  
+
   // DRC company data 
   
   const [companyData, setCompanyData] = useState({
@@ -634,12 +636,9 @@ const DRCInfo = () => {
       }
 
       // Validate coordinator fields if in editing mode
+       let coordinatorData = [];
       if (editingCoordinator) {
-        if (
-          !coordinatorFields.service_no ||
-          !coordinatorFields.slt_coordinator_name ||
-          !coordinatorFields.slt_coordinator_email
-        ) {
+        if (!ServiceNo || !C_Name || !C_Email) {
           Swal.fire({
             icon: "error",
             title: "Error",
@@ -647,6 +646,12 @@ const DRCInfo = () => {
           });
           return;
         }
+        
+        coordinatorData = [{
+          service_no: ServiceNo,
+          slt_coordinator_name: C_Name,
+          slt_coordinator_email: C_Email
+        }];
       }
 
       // Get updated services and RTOM data
@@ -666,10 +671,7 @@ const DRCInfo = () => {
       }));
 
       // Prepare the coordinator data
-      let coordinatorData = currentCoordinator;
-      if (editingCoordinator) {
-        coordinatorData = coordinatorFields;
-      }
+     
 
       // Current date for remark timestamp
       const currentDate = new Date().toISOString();
@@ -1766,98 +1768,122 @@ console.log("Company RTOM data:", {
 
 
           {/* SLT Coordinator Section */}
-          <div className="flex flex-col sm:flex-row justify-between  underline items-start sm:items-center">
-            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
-              SLT Coordinator Details
-            </h2>
-            <div className="w-full flex justify-end sm:block sm:w-auto">
-              <button
-                onClick={() => setEditingCoordinator(!editingCoordinator)}
-                className={`${GlobalStyle.buttonPrimary} px-3 py-1 mb-4 sm:mb-0`}
-              >
-                {editingCoordinator ? "Cancel" : "Change"}
-              </button>
-            </div>
-          </div>
+      <div className="flex flex-col sm:flex-row justify-between underline items-start sm:items-center">
+        <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
+          SLT Coordinator Details
+        </h2>
+        <div className="w-full flex justify-end sm:block sm:w-auto">
+          <button
+            onClick={() => {
+              setEditingCoordinator(!editingCoordinator);
+              if (!editingCoordinator) {
+                setServiceNo(currentCoordinator?.service_no || "");
+                setCName(currentCoordinator?.slt_coordinator_name || "");
+                setCEmail(currentCoordinator?.slt_coordinator_email || "");
+              }
+            }}
+            className={`${GlobalStyle.buttonPrimary} px-3 py-1 mb-4 sm:mb-0`}
+          >
+            {editingCoordinator ? "Cancel" : "Change"}
+          </button>
+        </div>
+      </div>
 
-          <div className={`overflow-x-auto`}>
-            {currentCoordinator || editingCoordinator ? (
-              <table className={`${GlobalStyle.table} min-w-full text-left`}>
-                <tbody>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Service No<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
-                    <input
-                      type="text"
-                      value={coordinatorFields.service_no}
-                      onChange={(e) => setServiceNo(e.target.value)}
-                      className={`${GlobalStyle.inputText} w-100`}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSearchUsers}
-                      className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
-                    >
-                      <FaSearch style={{ width: 20, height: 20 }} />
-                    </button>
-                    {errors.ServiceNo && (
-                      <p className="text-red-500">{errors.ServiceNo}</p>
-                    )}
+        <div className={`overflow-x-auto`}>
+          {currentCoordinator || editingCoordinator ? (
+            <table className={`${GlobalStyle.table} min-w-full text-left`}>
+              <tbody>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Service No<span className="sm:hidden">:</span>
                   </td>
-                  </tr>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Name<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
-                      {editingCoordinator ? (
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                          <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+
+                    {editingCoordinator ? (
+                      <>
+                      
                         <input
                           type="text"
-                          name="slt_coordinator_name"
-                          value={coordinatorFields.slt_coordinator_name}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
+                          value={ServiceNo}
+                          onChange={(e) => {
+                            setServiceNo(e.target.value);
+                            // Clear other fields when service number changes
+                            if (e.target.value !== currentCoordinator?.service_no) {
+                              setCName("");
+                              setCEmail("");
+                            }
+                          }}
+                          className={`${GlobalStyle.inputText} w-100`}
                         />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_name || "Not specified"}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Email<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
-                      {editingCoordinator ? (
-                        <input
-                          type="email"
-                          name="slt_coordinator_email"
-                          value={coordinatorFields.slt_coordinator_email}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
-                        />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_email || "Not specified"}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                No coordinator assigned
-              </div>
-            )}
-          </div>
+                        <button
+                          type="button"
+                          onClick={handleSearchUsers}
+                          className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
+                        >
+                          <FaSearch style={{ width: 20, height: 20 }} />
+                        </button>
+                        {errors.ServiceNo && (
+                          <p className="text-red-500">{errors.ServiceNo}</p>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.service_no || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Name<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="text"
+                        value={C_Name}
+                         readOnly
+                        onFocus={(e) => e.target.blur()}
+                        className={`${GlobalStyle.inputText} w-2/4 cursor-not-allowed `}
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.slt_coordinator_name || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Email<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="email"
+                        value={C_Email}
+                        readOnly
+                        onFocus={(e) => e.target.blur()}
+                        className={`${GlobalStyle.inputText} w-2/4 bg-gray-100 cursor-not-allowed`}
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.slt_coordinator_email || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-center py-4 text-gray-500">
+              No coordinator assigned
+            </div>
+          )}
+        </div>
 
 
           {/*DRC coordinator*/}
