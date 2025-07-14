@@ -404,7 +404,7 @@ const showNoDataMessage = (status = "") => {
                                     </button>
 
                                     <button
-                                            //onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID } })}
+                                            onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID } })}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
                                             <img src={ListImg} alt="Case List" className="h-auto w-5 max-w-[24px]" data-tooltip-id={`case-list-tooltip`} />
