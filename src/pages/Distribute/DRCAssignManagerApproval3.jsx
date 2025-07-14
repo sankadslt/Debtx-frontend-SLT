@@ -39,13 +39,22 @@ export default function DRCAssignManagerApproval3() {
   const [startDate, setStartDate] = useState(null); // Start date state
   const [endDate, setEndDate] = useState(null); // End date state
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [isLoading, setIsLoading] = useState(false); // Loading state
   const navigate = useNavigate(); // For navigation
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5;
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const recordsPerPage = 10;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Track the maximum current page
+  const [committedFilters, setCommittedFilters] = useState({
+    drcFilter: "",
+    startDate: null,
+    endDate: null,
+    approverstatus: "",
+  });
 
   // Role-Based Buttons
   useEffect(() => {
@@ -86,7 +95,7 @@ export default function DRCAssignManagerApproval3() {
     }
     else {
       setStartDate(date);
-      if (endDate) checkdatediffrence(date, endDate);
+      // if (endDate) checkdatediffrence(date, endDate);
     }
 
   };
@@ -103,9 +112,9 @@ export default function DRCAssignManagerApproval3() {
 
     }
     else {
-      if (startDate) {
-        checkdatediffrence(startDate, date);
-      }
+      // if (startDate) {
+      //   checkdatediffrence(startDate, date);
+      // }
       setEndDate(date);
 
     }
@@ -113,122 +122,185 @@ export default function DRCAssignManagerApproval3() {
   }
 
   // Fetch data on component mount
-  useEffect(() => {
-    // Fetch data from the API
-    const fetchDRCData = async () => {
-      const userId = await getLoggedUserId();
-      const payload = {
-        approved_deligated_by: userId,
-      };
-      // console.log("Request Payload:", payload);
-      try {
-        const response = await List_DRC_Assign_Manager_Approval(payload);
-        console.log("Response:", response);
-        setFilteredData(response);
-      } catch (error) {
-        console.error("Error fetching DRC assign manager approval:", error);
-      }
-    };
-    fetchDRCData();
-  }, []);
+  // useEffect(() => {
+  //   // Fetch data from the API
+  //   const fetchDRCData = async () => {
+  //     const userId = await getLoggedUserId();
+  //     const payload = {
+  //       approved_deligated_by: userId,
+  //     };
+  //     // console.log("Request Payload:", payload);
+  //     try {
+  //       const response = await List_DRC_Assign_Manager_Approval(payload);
+  //       console.log("Response:", response);
+  //       setFilteredData(response);
+  //     } catch (error) {
+  //       console.error("Error fetching DRC assign manager approval:", error);
+  //     }
+  //   };
+  //   fetchDRCData();
+  // }, []);
 
 
   // Function to check date difference and show alert if more than 1 month
-  const checkdatediffrence = (startDate, endDate) => {
-    const start = new Date(startDate).getTime();
-    const end = new Date(endDate).getTime();
-    const diffInMs = end - start;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-    const diffInMonths = diffInDays / 30;
+  // const checkdatediffrence = (startDate, endDate) => {
+  //   const start = new Date(startDate).getTime();
+  //   const end = new Date(endDate).getTime();
+  //   const diffInMs = end - start;
+  //   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  //   const diffInMonths = diffInDays / 30;
 
-    if (diffInMonths > 1) {
-      Swal.fire({
-        title: "Date Range Exceeded",
-        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        confirmButtonColor: "#28a745",
-        cancelButtonText: "No",
-        cancelButtonColor: "#d33",
-      }).then((result) => {
-        if (result.isConfirmed) {
+  //   if (diffInMonths > 1) {
+  //     Swal.fire({
+  //       title: "Date Range Exceeded",
+  //       text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+  //       icon: "warning",
+  //       showCancelButton: true,
+  //       confirmButtonText: "Yes",
+  //       confirmButtonColor: "#28a745",
+  //       cancelButtonText: "No",
+  //       cancelButtonColor: "#d33",
+  //     }).then((result) => {
+  //       if (result.isConfirmed) {
 
-          endDate = endDate;
-          handleApicall(startDate, endDate);
-        } else {
-          setEndDate(null);
-          // console.log("EndDate cleared");
-        }
-      }
-      );
+  //         endDate = endDate;
+  //         handleApicall(startDate, endDate);
+  //       } else {
+  //         setEndDate(null);
+  //         // console.log("EndDate cleared");
+  //       }
+  //     }
+  //     );
 
-    }
-  };
+  //   }
+  // };
 
   // Function to handle API call for creating task when the date range exceeds 1 month
-  const handleApicall = async (startDate, endDate) => {
+  // const handleApicall = async (startDate, endDate) => {
+  //   try {
+  //     const userId = await getLoggedUserId();
+  //     const payload = {
+  //       date_from: startDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
+  //       date_to: endDate.toISOString().split("T")[0],     // Format: YYYY-MM-DD
+  //       Created_By: userId,
+  //     };
+
+  //     // console.log("Filtered Request Payload:", payload);
+
+  //     const data = await Create_task_for_DRC_Assign_Manager_Approval(payload);
+  //     // console.log("Response:", data);
+
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Success",
+  //       text: "Data sent successfully.",
+  //       confirmButtonColor: "#28a745",
+  //     });
+
+  //   } catch (error) {
+  //     console.error("Error in sending the data:", error);
+
+  //     const errorMessage = error?.response?.data?.message ||
+  //       error?.message ||
+  //       "An error occurred. Please try again.";
+
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: errorMessage,
+  //       confirmButtonColor: "#d33",
+  //     });
+  //   }
+  // };
+
+
+
+
+  const fetchDRCDataAPI = async (filters) => {
+    const userId = await getLoggedUserId();
+
+    const payload = {
+      approved_deligated_by: userId,
+      approver_type: filters.drcFilter,
+      date_from: filters.startDate,
+      date_to: filters.endDate,
+      approver_status: filters.approverstatus,
+      pages: filters.currentPage, // Add pagination parameter
+    };
+    console.log("Fetching DRC data with payload:", payload);
+
+    // console.log("Request Payload:", payload);
     try {
-      const userId = await getLoggedUserId();
-      const payload = {
-        date_from: startDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
-        date_to: endDate.toISOString().split("T")[0],     // Format: YYYY-MM-DD
-        Created_By: userId,
-      };
+      setIsLoading(true); // Set loading state to true
+      const response = await List_DRC_Assign_Manager_Approval(payload);
+      setIsLoading(false); // Set loading state to false
+      console.log("Response:", response);
+      // setFilteredData(response);
 
-      // console.log("Filtered Request Payload:", payload);
+      // Updated response handling
+      if (response) {
+        // console.log("Valid data received:", response.data);
+        if (currentPage === 1) {
+          setFilteredData(response)
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response]);
+        }
 
-      const data = await Create_task_for_DRC_Assign_Manager_Approval(payload);
-      // console.log("Response:", data);
+        if (response.length === 0) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
+            });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
+          }
+        }
 
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Data sent successfully.",
-        confirmButtonColor: "#28a745",
-      });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid Settlement data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+        setFilteredData([]);
+      }
 
     } catch (error) {
-      console.error("Error in sending the data:", error);
-
-      const errorMessage = error?.response?.data?.message ||
-        error?.message ||
-        "An error occurred. Please try again.";
-
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: errorMessage,
-        confirmButtonColor: "#d33",
-      });
+      console.error("Error fetching DRC assign manager approval:", error);
+      setIsLoading(false); // Set loading state to false
+    } finally {
+      setIsLoading(false); // Ensure loading state is false in case of error
     }
   };
 
-
-
-
-
+  useEffect(() => {
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      // callAPI(); // Call the function whenever currentPage changes
+      fetchDRCDataAPI({
+        ...committedFilters,
+        currentPage: currentPage
+      });
+    }
+  }, [currentPage]);
 
   // Filter data based on selected filters
-  const applyFilters = async () => {
-    setCurrentPage(1); // Reset to the first page
-    const payload = {};
-    if (drcFilter) {
-      payload.approver_type = drcFilter;
-    }
-    if (approverstatus) {
-      payload.approve_status = approverstatus;
-    }
-    if (startDate) {
-      payload.date_from = startDate;
-    }
-    if (endDate) {
-      payload.date_to = endDate;
-    }
-    const userId = await getLoggedUserId();
-    payload.approved_deligated_by = userId;
-
-    //console.log("Filtered Request Data:", payload);
+  const applyFilters = () => {
+    setCurrentPage(1);
+    setIsMoreDataAvailable(true); // Reset to allow fetching more data
+    setMaxCurrentPage(0); // Reset max current page
 
     if ((startDate && !endDate) || (!startDate && endDate)) {
       Swal.fire({
@@ -240,26 +312,25 @@ export default function DRCAssignManagerApproval3() {
       return;
     }
 
-    try {
-      const response = await List_DRC_Assign_Manager_Approval(payload);
-      console.log("Filtered Response Data:", response);
+    setCommittedFilters({
+      drcFilter: drcFilter,
+      startDate: startDate, // Format: YYYY-MM-DD
+      endDate: endDate, // Format: YYYY-MM-DD
+      approverstatus: approverstatus,
+    });
 
-      if (response.length > 0) {
-        setFilteredData(response);
-      } else {
-        Swal.fire({
-          icon: "warning",
-          title: "No Data Found",
-          text: "There is no data available for the selected filters.",
-          confirmButtonColor: "#f1c40f",
-        });
-        setFilteredData([]); // Clear the filtered data if no data is found
-        return;
-      }
-      // console.log("Filtered Response Data:", response);
-
-    } catch (error) {
-      console.error("Error fetching DRC assign manager approval:", error);
+    setFilteredData([]); // Clear previous filtered data
+    setSearchQuery(""); // Clear search query
+    if (currentPage === 1) {
+      fetchDRCDataAPI({
+        drcFilter: drcFilter,
+        startDate: startDate, // Format: YYYY-MM-DD
+        endDate: endDate, // Format: YYYY-MM-DD
+        approverstatus: approverstatus,
+        currentPage: 1, // Reset to page 1
+      });
+    } else {
+      setCurrentPage(1); // Reset to page 1 if filters are applied
     }
   };
 
@@ -270,53 +341,47 @@ export default function DRCAssignManagerApproval3() {
     setEndDate(null);
     setApproverStatus("");
     setSelectedRows(new Set());
-    setCurrentPage(1); // Reset to the first page
-
-    const filterclear = async () => {
-      const userId = await getLoggedUserId();
-      const payload = {
-        approved_deligated_by: userId,
-      };
-      // console.log("Request Payload:", payload);
-      try {
-        const response = await List_DRC_Assign_Manager_Approval(payload);
-        //  console.log("Response:", response);
-        if (response.length > 0) {
-          setFilteredData(response);
-        } else {
-          Swal.fire({
-            icon: "warning",
-            title: "No Data Found",
-            text: "There is no data available for the selected filters.",
-            confirmButtonColor: "#f1c40f",
-          });
-          setFilteredData([]); // Clear the filtered data if no data is found
-        }
-      } catch (error) {
-        console.error("Error fetching DRC assign manager approval:", error);
-      }
-    };
-    filterclear();
+    setIsMoreDataAvailable(true); // Reset to allow fetching more data
+    setMaxCurrentPage(0); // Reset max current page
+    setFilteredData([]); // Clear previous filtered data
+    setSearchQuery(""); // Clear search query
+    setCommittedFilters({
+      drcFilter: "",
+      startDate: null,
+      endDate: null,
+      approverstatus: "",
+    });
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   };
 
   // Handle pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+    } else if (direction === "next") {
+      if (isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      } else {
+        if (currentPage < Math.ceil(filteredData.length / recordsPerPage)) {
+          setCurrentPage(currentPage + 1);
+        }
+      }
     }
   };
 
   // Filtering the data based on search query
-  const filteredDataBySearch = searchQuery
-    ? filteredData.filter((row) =>
+  const filteredDataBySearch =
+    filteredData.filter((row) =>
       Object.values(row)
         .join(" ")
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
     )
-    : currentData;
   //console.log("Filtered Data:", filteredDataBySearch);
   const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
 
@@ -623,6 +688,13 @@ export default function DRCAssignManagerApproval3() {
     // console.log("Navigating to Case Details with ID:", caseid);
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -644,7 +716,7 @@ export default function DRCAssignManagerApproval3() {
               <option value="" hidden>
                 Select Approve Type
               </option>
-              <option value="DRC Assign Approval" style={{ color: "black" }}>DRC Assign Approval </option>
+              {/* <option value="DRC Assign Approval" style={{ color: "black" }}>DRC Assign Approval </option> */}
               <option value="DRC Re-Assign Approval" style={{ color: "black" }}>DRC Re-Assign Approval</option>
               <option value="Case Withdrawal Approval" style={{ color: "black" }}>Case Withdrawal Approval</option>
               <option value="Case Abandoned Approval" style={{ color: "black" }}>Case Abandoned Approval</option>
@@ -755,7 +827,7 @@ export default function DRCAssignManagerApproval3() {
           <thead className={GlobalStyle.thead}>
             <tr>
               {/* <th className={GlobalStyle.tableHeader}> */}
-                {/* <input
+              {/* <input
                   type="checkbox"
                   checked={selectAll}
                   onChange={handleSelectAll}
@@ -779,7 +851,7 @@ export default function DRCAssignManagerApproval3() {
           </thead>
           <tbody>
             {filteredDataBySearch.length > 0 ? (
-              filteredDataBySearch.map((item, index) => (
+              filteredDataBySearch.slice(indexOfFirstRecord, indexOfLastRecord).map((item, index) => (
                 <tr
                   key={`${item.drc}-${index}`}
                   className={
@@ -889,18 +961,26 @@ export default function DRCAssignManagerApproval3() {
             <FaArrowLeft />
           </button>
           <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-            Page {currentPage} of {totalPages}
+            Page {currentPage}
           </span>
           <button
             onClick={() => handlePrevNext("next")}
-            disabled={currentPage === totalPages}
-            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+            disabled={searchQuery
+              ? currentPage >= Math.ceil(filteredDataBySearch.length / recordsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / recordsPerPage
+              )}
+            className={`${GlobalStyle.navButton} ${(searchQuery
+              ? currentPage >= Math.ceil(filteredDataBySearch.length / recordsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / recordsPerPage))
+              ? "cursor-not-allowed"
+              : ""
               }`}
           >
             <FaArrowRight />
           </button>
         </div>
-      )}
+      )
+      }
 
       {/* Select All Data Checkbox and Approve Button */}
       <div className="flex justify-end gap-4 mt-4">
@@ -976,6 +1056,6 @@ export default function DRCAssignManagerApproval3() {
       </div>
 
 
-    </div>
+    </div >
   );
 }
