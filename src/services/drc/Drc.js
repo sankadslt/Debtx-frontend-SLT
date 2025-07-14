@@ -170,7 +170,7 @@ export const terminateCompanyByDRCID = async (
     const response = await axios.patch(`${URL}/Terminate_Company_By_DRC_ID`, {
       drc_id: drcId,
       remark: remark,
-      remark_by: remarkBy,
+      terminate_by: remarkBy,
       remark_dtm: terminatedDate.toISOString(), // Ensure proper date format
     });
 

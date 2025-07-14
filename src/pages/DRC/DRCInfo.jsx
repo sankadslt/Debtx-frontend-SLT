@@ -1336,7 +1336,7 @@ console.log("Company RTOM data:", {
                   {/* End Date Row */}
                   <tr className="block sm:table-row">
 
-                    <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                    {/* <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
                       End Date:
                     </td>
                     <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
@@ -1350,7 +1350,7 @@ console.log("Company RTOM data:", {
                           minDate={new Date()}
                         />
                       </div>
-                    </td>
+                    </td> */}
 
 
                     <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
@@ -1364,7 +1364,6 @@ console.log("Company RTOM data:", {
                           onChange={(date) => setEndDate(date)}
                           dateFormat="dd/MM/yyyy"
                           className={`${GlobalStyle.inputText} w-full text-left`}
-                          maxDate={new Date()}
                           minDate={new Date()}
                         />
                       </div>
@@ -1374,7 +1373,7 @@ console.log("Company RTOM data:", {
                   {/* Remark Row */}
                   <tr className="block sm:table-row">
 
-                    <td className={`${GlobalStyle.tableData} font-semibold block sm:hidden`}>
+                    {/* <td className={`${GlobalStyle.tableData} font-semibold block sm:hidden`}>
                       Remark:
                     </td>
                     <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
@@ -1397,7 +1396,7 @@ console.log("Company RTOM data:", {
                           Remark is required
                         </p>
                       )}
-                    </td>
+                    </td> */}
 
 
                     <td className={`${GlobalStyle.tableData} font-semibold whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
