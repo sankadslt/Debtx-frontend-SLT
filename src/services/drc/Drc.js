@@ -171,7 +171,7 @@ export const terminateCompanyByDRCID = async (
       drc_id: drcId,
       remark: remark,
       terminate_by: remarkBy,
-      remark_dtm: terminatedDate.toISOString(), // Ensure proper date format
+      terminate_dtm: terminatedDate.toISOString(), // Ensure proper date format
     });
 
     if (response.data.status === "error") {
