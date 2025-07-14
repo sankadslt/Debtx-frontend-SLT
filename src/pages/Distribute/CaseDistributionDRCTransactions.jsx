@@ -926,21 +926,45 @@ export default function AssignPendingDRCSummary() {
                       <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary" />
 
 
-                      <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status != "Open" && item.current_batch_distribution_status != "batch_forword_distribute" && item.current_batch_distribution_status != "batch_amend"} >
+                      <button data-tooltip-id={`tooltip-exchange-${index}`}
+                        onClick={() => handleonexchangeclick(item.case_distribution_id)}
+                        disabled={
+                          item.current_batch_distribution_status != "Open" &&
+                          item.current_batch_distribution_status != "batch_forword_distribute" &&
+                          item.current_batch_distribution_status != "batch_amend"
+                        }
+                        className={`${item.current_batch_distribution_status != "Open" &&
+                          item.current_batch_distribution_status != "batch_forword_distribute" &&
+                          item.current_batch_distribution_status != "batch_amend" ? "cursor-not-allowed" : ""}`}
+                      >
                         {/* <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} /> */}
                         <RiExchangeLine size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                       </button>
                       <Tooltip id={`tooltip-exchange-${index}`} place="bottom" content="Exchange case count" />
 
 
-                      <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status === "selection_failed"} >
+                      <button data-tooltip-id={`tooltip-full-${index}`}
+                        onClick={() => handleonfullsummaryclick(item.case_distribution_id)}
+                        disabled={item.current_batch_distribution_status === "selection_failed"}
+                        className={`${item.current_batch_distribution_status === "selection_failed" ? "cursor-not-allowed" : ""}`}
+                      >
                         {/* <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} /> */}
                         <IoListCircleOutline size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                       </button>
                       <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary" />
 
 
-                      <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status != "Open" && item.current_batch_distribution_status != "batch_forword_distribute" && item.current_batch_distribution_status != "batch_amend"} >
+                      <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`}
+                        onClick={() => handleonforwardclick(item.case_distribution_id)}
+                        disabled={
+                          item.current_batch_distribution_status != "Open" &&
+                          item.current_batch_distribution_status != "batch_forword_distribute" &&
+                          item.current_batch_distribution_status != "batch_amend"
+                        }
+                        className={`${item.current_batch_distribution_status != "Open" &&
+                          item.current_batch_distribution_status != "batch_forword_distribute" &&
+                          item.current_batch_distribution_status != "batch_amend" ? "cursor-not-allowed" : ""}`}
+                      >
                         {/* <img
                       src={four}
                       width={15}
