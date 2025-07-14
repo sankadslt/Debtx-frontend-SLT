@@ -600,139 +600,136 @@ const DRCInfo = () => {
   };
 
   const handleSave = async () => {
-    try {
-      let remarkBy = userData
-        ? userData.id || userData.userId || userData
-        : "system";
+  try {
+    let remarkBy = userData
+      ? userData.id || userData.userId || userData
+      : "system";
 
-      // Validate contact number
-      if (contactNo && !isValidPhoneNumber(contactNo)) {
-        Swal.fire({
-          icon: "error",
-          title: "Invalid Contact Number",
-          text: "Please enter a valid contact number.",
-        });
-        return;
-      }
+    // Validate contact number
+    if (contactNo && !isValidPhoneNumber(contactNo)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Contact Number",
+        text: "Please enter a valid contact number.",
+      });
+      return;
+    }
 
-      // Validate email
-      if (email && !isValidEmail(email)) {
-        Swal.fire({
-          icon: "error",
-          title: "Invalid Email",
-          text: "Please enter a valid email address.",
-        });
-        return;
-      }
+    // Validate email
+    if (email && !isValidEmail(email)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Email",
+        text: "Please enter a valid email address.",
+      });
+      return;
+    }
 
-      // Validate remark field
-      if (!remark.trim()) {
+    // Validate remark field
+    if (!remark.trim()) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please add a remark before saving",
+      });
+      return;
+    }
+
+    // Prepare coordinator data - either new data or existing
+    let coordinatorData = currentCoordinator;
+    if (editingCoordinator) {
+      if (!ServiceNo || !C_Name || !C_Email) {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "Please add a remark before saving",
+          text: "All SLT Coordinator fields are required",
         });
         return;
       }
+      
+      coordinatorData = [{
+        service_no: ServiceNo,
+        slt_coordinator_name: C_Name,
+        slt_coordinator_email: C_Email
+      }];
+    }
 
-      // Validate coordinator fields if in editing mode
-       let coordinatorData = [];
-      if (editingCoordinator) {
-        if (!ServiceNo || !C_Name || !C_Email) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "All SLT Coordinator fields are required",
-          });
-          return;
-        }
-        
-        coordinatorData = [{
-          service_no: ServiceNo,
-          slt_coordinator_name: C_Name,
-          slt_coordinator_email: C_Email
-        }];
-      }
-
-      // Get updated services and RTOM data
-     const updatedServices = companyData.services.map((service) => {
+    // Get updated services and RTOM data
+    const updatedServices = companyData.services.map((service) => {
       const matchedService = serviceTypes.find(st => st.name === service.service_type);
       return {
-        service_id: matchedService?.id || service.service_id, // Include service_id
+        service_id: matchedService?.id || service.service_id,
         service_type: service.service_type,
         service_status: service.service_status,
         status_update_dtm: new Date().toISOString(),
       };
     });
 
-      const updatedRtom = companyData.rtom.map((rtom) => ({
-        ...rtom,
-        status_update_dtm: new Date().toISOString(),
-      }));
+    const updatedRtom = companyData.rtom.map((rtom) => ({
+      ...rtom,
+      status_update_dtm: new Date().toISOString(),
+    }));
 
-      // Prepare the coordinator data
-     
+    // Current date for remark timestamp
+    const currentDate = new Date().toISOString();
 
-      // Current date for remark timestamp
-      const currentDate = new Date().toISOString();
+    const response = await updateDRCInfo(
+      companyData.drc_id,
+      coordinatorData,
+      updatedServices,
+      updatedRtom,
+      remark,
+      remarkBy,
+      currentDate,
+      address,
+      contactNo,
+      email,
+      companyData.status
+    );
 
-      const response = await updateDRCInfo(
-        companyData.drc_id,
-        coordinatorData,
-        updatedServices,
-        updatedRtom,
-        remark,
-        remarkBy,
-        currentDate,
-        address,
-        contactNo,
-        email,
-        companyData.status
-      );
-
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        html: `
-          <div class="flex flex-col items-center">
-            <p class="text-lg font-bold">DRC information updated successfully</p>
-            <p class="text-sm text-gray-600 mt-2">Changes have been saved to the database</p>
-          </div>
-        `,
-        showConfirmButton: true,
-        confirmButtonText: "Continue",
-        confirmButtonColor: "#3B82F6",
-      }).then(() => {
-        setEditMode(false);
-        // Refresh the data
-        const fetchCompanyData = async () => {
-          try {
-            setLoading(true);
-            const drcIdToUse = drcId;
-            const data = await getDebtCompanyByDRCID(drcIdToUse);
-            if (data) {
-              setCompanyData(data);
-            }
-            setLoading(false);
-          } catch (err) {
-            console.error("Failed to fetch DRC data:", err);
-            setLoading(false);
-          }
-        };
-        fetchCompanyData();
-      });
-
-      // Reset coordinator editing state
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      html: `
+        <div class="flex flex-col items-center">
+          <p class="text-lg font-bold">DRC information updated successfully</p>
+          <p class="text-sm text-gray-600 mt-2">Changes have been saved to the database</p>
+        </div>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: "Continue",
+      confirmButtonColor: "#3B82F6",
+    }).then(() => {
+      setEditMode(false);
       setEditingCoordinator(false);
-    } catch (err) {
-      console.error("Failed to update DRC data:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to update DRC information",
-      });
-    }
-  };
+      
+      // Refresh the data
+      const fetchCompanyData = async () => {
+        try {
+          setLoading(true);
+          const drcIdToUse = drcId;
+          const data = await getDebtCompanyByDRCID(drcIdToUse);
+          if (data) {
+            setCompanyData(data);
+          }
+          setLoading(false);
+        } catch (err) {
+          console.error("Failed to fetch DRC data:", err);
+          setLoading(false);
+        }
+      };
+      fetchCompanyData();
+    });
+
+  } catch (err) {
+    console.error("Failed to update DRC data:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to update DRC information",
+    });
+  }
+};
 
   const handleCoordinatorChange = (e) => {
     const { name, value } = e.target;
