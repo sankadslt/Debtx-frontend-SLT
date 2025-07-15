@@ -15,7 +15,7 @@ const CaseDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const caseId = location.state?.CaseID || null; // Get caseId from state or URL params
+    const caseId = location.state?.CaseID || null;
 
     useEffect(() => {
         const loadCaseDetails = async () => {
