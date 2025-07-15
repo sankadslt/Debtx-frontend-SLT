@@ -125,10 +125,17 @@ import ServiceTypeList from "../pages/Service/ServiceTypeList";
 //TASKS
 import ListAllTasks from "../pages/Task/ListAllTasks";
 
+
+//Abnormal
+import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
+import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
+ 
+
 //Dispute
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
 import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
 import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
+
 
 const Routers = () => {
   return (
@@ -904,6 +911,7 @@ const Routers = () => {
        
       <Route path="/pages/DRC/DrcAgreement" element={<ProtectedRoute element={<DrcAgreement />} allowedRoles={['superadmin']} />} />
 
+     
       {/* //MASTER DRC
     <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
     <Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
@@ -945,6 +953,20 @@ const Routers = () => {
         }
       />
 
+        {/* Abnormal*/}
+        <Route path="/pages/Abnormal/Withdraw_Case_Log"
+     element={<ProtectedRoute
+       element={<WithdrawalCaseLog />}
+        allowedRoles={['superadmin' ]} />} />
+
+<Route path="/pages/Abnormal/Abondoned_Case_Log"
+     element={<ProtectedRoute
+       element={<AbondonedCaseLog />}
+        allowedRoles={['superadmin' ]} />} />
+ 
+ 
+
+
       {/* Dispute */}
     
         <Route
@@ -956,6 +978,7 @@ const Routers = () => {
           />
         }
       />
+
         <Route
         path="/Dispute/Dispute_Settlement_Letter_Creation"
         element={
@@ -975,6 +998,7 @@ const Routers = () => {
           />
         }
       />
+
     </Routes>
   );
 };

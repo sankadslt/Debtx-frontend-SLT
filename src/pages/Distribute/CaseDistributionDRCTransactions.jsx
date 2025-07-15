@@ -67,10 +67,22 @@ export default function AssignPendingDRCSummary() {
   const [disabledRows, setDisabledRows] = useState({}); // Disabled rows for buttons
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
   const [isLoading, setIsLoading] = useState(false); // Loading state for data fetching
-
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // To check if more data is available for pagination
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0); // To track the maximum current page
+  const [committedFilters, setCommittedFilters] = useState({
+    selectedBandKey: "",
+    startDate: null,
+    endDate: null,
+    selectedService: "",
+  }); // To store committed filters for pagination
   const navigate = useNavigate();
   // Items per page
-  const itemsPerPage1 = 4;
+  const itemsPerPage1 = 10;
+  const [arrearsBands, setArrearsBands] = useState([]);
+  const [services, setServices] = useState([]);
+  const [selectedBand, setSelectedBand] = useState("");
+  const [selectedService, setSelectedService] = useState("");
+  const [selectedBandKey, setSelectedBandKey] = useState("");
 
 
   // Role-Based Buttons
@@ -108,7 +120,7 @@ export default function AssignPendingDRCSummary() {
       setStartDate(null);
     } else {
       setStartDate(date);
-      if (endDate) checkdatediffrence(date, endDate);
+      // if (endDate) checkdatediffrence(date, endDate);
     }
   };
   // Function to Handle end date change
@@ -122,103 +134,193 @@ export default function AssignPendingDRCSummary() {
       });
       setEndDate(null);
     } else {
-      if (startDate) {
-        checkdatediffrence(startDate, date);
-      }
+      // if (startDate) {
+      //   checkdatediffrence(startDate, date);
+      // }
       setEndDate(date);
     }
   };
 
   // Check the date diffrence
-  const checkdatediffrence = (startDate, endDate) => {
-    const start = new Date(startDate).getTime();
-    const end = new Date(endDate).getTime();
-    const diffInMs = end - start;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-    const diffInMonths = diffInDays / 30;
-    if (diffInMonths > 1) {
-      Swal.fire({
-        title: "Date Range Exceeded",
-        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        confirmButtonColor: "#28a745",
-        cancelButtonText: "No",
-        cancelButtonColor: "#d33",
-      }).then((result) => {
-        if (result.isConfirmed) {
+  // const checkdatediffrence = (startDate, endDate) => {
+  //   const start = new Date(startDate).getTime();
+  //   const end = new Date(endDate).getTime();
+  //   const diffInMs = end - start;
+  //   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  //   const diffInMonths = diffInDays / 30;
+  //   if (diffInMonths > 1) {
+  //     Swal.fire({
+  //       title: "Date Range Exceeded",
+  //       text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+  //       icon: "warning",
+  //       showCancelButton: true,
+  //       confirmButtonText: "Yes",
+  //       confirmButtonColor: "#28a745",
+  //       cancelButtonText: "No",
+  //       cancelButtonColor: "#d33",
+  //     }).then((result) => {
+  //       if (result.isConfirmed) {
 
-          endDate = endDate;
-          handleApicall(startDate, endDate);
-        } else {
-          setEndDate(null);
-          // console.log("EndDate cleared");
-        }
-      }
-      );
+  //         endDate = endDate;
+  //         handleApicall(startDate, endDate);
+  //       } else {
+  //         setEndDate(null);
+  //         // console.log("EndDate cleared");
+  //       }
+  //     }
+  //     );
 
-    }
-  };
+  //   }
+  // };
 
   // Handle API call
-  const handleApicall = async (startDate, endDate) => {
-    const userId = await getLoggedUserId();
+  // const handleApicall = async (startDate, endDate) => {
+  //   const userId = await getLoggedUserId();
 
+  //   const payload = {
+  //     current_arrears_band: selectedBandKey || "null",
+  //     date_from: startDate || "null",
+  //     date_to: endDate || "null",
+  //     drc_commision_rule: selectedService || "null",
+  //     Created_By: userId,
+  //   };
+
+  //   setIsLoading(true); // Set loading state to true
+  //   // console.log("Create Task Payload:", payload);
+  //   try {
+  //     const response = await Create_Task_For_case_distribution(payload);
+  //     setIsLoading(false); // Set loading state to false
+  //     // console.log("Create Task Response:", response);
+
+  //     if (response.status = "success") {
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "Task created successfully!",
+  //         text: "Task ID: " + response.data.data.Task_Id,
+  //         confirmButtonColor: "#28a745",
+  //       });
+  //     }
+
+  //   } catch (error) {
+  //     console.error("Error creating task for case distribution:", error);
+
+  //     const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: errorMessage,
+  //       confirmButtonColor: "#d33",
+  //     });
+
+  //   } finally {
+  //     setIsLoading(false); // Set loading state to false after API call
+  //   }
+
+  // };
+
+  const fetchDataAPI = async (filters) => {
     const payload = {
-      current_arrears_band: selectedBandKey || "null",
-      date_from: startDate || "null",
-      date_to: endDate || "null",
-      drc_commision_rule: selectedService || "null",
-      Created_By: userId,
-    };
+      current_arrears_band: filters.selectedBandKey,
+      date_from: filters.startDate,
+      date_to: filters.endDate,
+      drc_commision_rule: filters.selectedService,
+      pages: filters.currentPage1,
+    }
 
-    setIsLoading(true); // Set loading state to true
-    // console.log("Create Task Payload:", payload);
-    try {
-      const response = await Create_Task_For_case_distribution(payload);
-      setIsLoading(false); // Set loading state to false
-      // console.log("Create Task Response:", response);
-
-      if (response.status = "success") {
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Task created successfully.",
-          confirmButtonColor: "#28a745",
-        });
-      }
-
-    } catch (error) {
-      console.error("Error creating task for case distribution:", error);
-
-      const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+    if ((startDate && !endDate) || (!startDate && endDate)) {
       Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: errorMessage,
-        confirmButtonColor: "#d33",
+        title: "Warning",
+        text: "Please select both start and end dates.",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f",
       });
+      return;
+    }
+    //console.log("Filtered Request Data:", requestdata);;
+    setIsLoading(true); // Set loading state to true
+    try {
+      // Send the filtered data to the backend
+      // console.log("Request Data:", requestdata);
+      console.log("Request Data:", payload);
+      const response = await List_Case_Distribution_DRC_Summary(payload);
+      setIsLoading(false); // Set loading state to false
 
+      console.log("API Response:", response);
+
+      // if (Array.isArray(response.data)) {
+      //   if (response.data.length === 0) {
+      //     Swal.fire({
+      //       title: "Warning",
+      //       text: "No matching data found for the selected filters.",
+      //       icon: "warning",
+      //       confirmButtonColor: "#f1c40f",
+      //     });
+      //   } else {
+      //     setFilteredData1(response.data); // Store the fetched data into state
+      //   }
+      //   // console.log("Filtered Data:", response.data);
+      // }
+      // Updated response handling
+      if (response && response.data) {
+        // console.log("Valid data received:", response.data);
+        if (currentPage1 === 1) {
+          setFilteredData1(response.data)
+        } else {
+          setFilteredData1((prevData) => [...prevData, ...response.data]);
+        }
+
+        if (response.data.length === 0) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage1 === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
+            });
+          } else if (currentPage1 === 2) {
+            setCurrentPage1(1); // Reset to page 1 if no data found on page 2
+          }
+        } else {
+          const maxData = currentPage1 === 1 ? 10 : 30;
+          if (response.data.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
+          }
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid Settlement data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+        setFilteredData1([]);
+      }
+    } catch (error) {
+      console.error("API Fetch Error:", error);
     } finally {
       setIsLoading(false); // Set loading state to false after API call
     }
-
   };
 
-
-
-
-
-
-
-
+  useEffect(() => {
+    if (isMoreDataAvailable && currentPage1 > maxCurrentPage) {
+      setMaxCurrentPage(currentPage1); // Update max current page
+      // callAPI(); // Call the function whenever currentPage changes
+      fetchDataAPI({
+        ...committedFilters,
+        currentPage1: currentPage1
+      });
+    }
+  }, [currentPage1]);
 
   // Fetch the data and set it to filteredData1 state
   const applyFilters = async () => {
-    setFilteredData1([]);
     setCurrentPage1(1); // Reset to first page on filter apply
-    setSearchQuery1(""); // Reset search query on filter apply
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
 
     if (!startDate && !endDate && !selectedBandKey && !selectedService) {
       Swal.fire({
@@ -229,68 +331,25 @@ export default function AssignPendingDRCSummary() {
       });
       return;
     }
-
-    const fetchData = async () => {
-
-
-
-      const requestdata = {};
-
-      if (selectedBandKey) {
-        requestdata.current_arrears_band = selectedBandKey;
-      }
-      if (startDate) {
-        requestdata.date_from = startDate;
-      }
-      if (endDate) {
-        requestdata.date_to = endDate;
-      }
-      if (selectedService) {
-        requestdata.drc_commision_rule = selectedService;
-      }
-
-      if ((startDate && !endDate) || (!startDate && endDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "Please select both start and end dates.",
-          icon: "warning",
-          confirmButtonColor: "#f1c40f",
-        });
-        return;
-      }
-      //console.log("Filtered Request Data:", requestdata);;
-      setIsLoading(true); // Set loading state to true
-      try {
-        // Send the filtered data to the backend
-        // console.log("Request Data:", requestdata);
-        console.log("Request Data:", requestdata);
-        const response = await List_Case_Distribution_DRC_Summary(requestdata);
-        setIsLoading(false); // Set loading state to false
-
-        console.log("API Response:", response);
-
-        if (Array.isArray(response.data)) {
-          if (response.data.length === 0) {
-            Swal.fire({
-              title: "Warning",
-              text: "No matching data found for the selected filters.",
-              icon: "warning",
-              confirmButtonColor: "#f1c40f",
-            });
-          } else {
-            setFilteredData1(response.data); // Store the fetched data into state
-          }
-          // console.log("Filtered Data:", response.data);
-        }
-      } catch (error) {
-        console.error("API Fetch Error:", error);
-      } finally {
-        setIsLoading(false); // Set loading state to false after API call
-      }
-    };
-
-
-    await fetchData();
+    setFilteredData1([]); // Clear previous data
+    setSearchQuery1(""); // Clear search query
+    setCommittedFilters({
+      selectedBandKey: selectedBandKey,
+      startDate: startDate,
+      endDate: endDate,
+      selectedService: selectedService,
+    }); // Reset committed filters
+    if (currentPage1 === 1) {
+      fetchDataAPI({
+        startDate: startDate,
+        endDate: endDate,
+        selectedBandKey: selectedBandKey,
+        selectedService: selectedService,
+        currentPage1: 1,
+      }); // Fetch data with current filters
+    } else {
+      setCurrentPage1(1); // Reset to first page if filters are applied
+    }
   };
 
   // Clear filters and reset state
@@ -301,6 +360,21 @@ export default function AssignPendingDRCSummary() {
     setSelectedBand("");
     setSelectedService("");
     setFilteredData1([]);
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
+    setSearchQuery1(""); // Clear search query
+    setCommittedFilters({
+      selectedBandKey: "",
+      startDate: null,
+      endDate: null,
+      selectedService: "",
+    })
+    if (currentPage1 != 1) {
+      setCurrentPage1(1); // Reset to page 1
+    } else {
+      setCurrentPage1(0); // Temp set to 0
+      setTimeout(() => setCurrentPage1(1), 0); // Reset to 1 after
+    }
 
     // const fetchData = async () => {
     //   try {
@@ -332,11 +406,6 @@ export default function AssignPendingDRCSummary() {
   const startIndex1 = (currentPage1 - 1) * itemsPerPage1;
   const endIndex1 = startIndex1 + itemsPerPage1;
   const paginatedData1 = filteredSearchData1.slice(startIndex1, endIndex1);
-  const [arrearsBands, setArrearsBands] = useState([]);
-  const [services, setServices] = useState([]);
-  const [selectedBand, setSelectedBand] = useState("");
-  const [selectedService, setSelectedService] = useState("");
-  const [selectedBandKey, setSelectedBandKey] = useState("");
 
   //console.log("Page Data:", paginatedData1);
 
@@ -426,8 +495,8 @@ export default function AssignPendingDRCSummary() {
       if (response.status = "success") {
         Swal.fire({
           icon: "success",
-          title: "Success",
-          text: `Task created successfully! `,
+          title: "Task created successfully!",
+          text: "Task ID: " + response.data.data.Task_Id,
           // text: `Task created successfully! Task ID: ${response.ResponseData.data.Task_Id}`,
           confirmButtonColor: "#28a745",
         });
@@ -560,8 +629,14 @@ export default function AssignPendingDRCSummary() {
     if (direction === "prev" && currentPage1 > 1) {
       setCurrentPage1(currentPage1 - 1);
     }
-    if (direction === "next" && currentPage1 < totalPages1) {
-      setCurrentPage1(currentPage1 + 1);
+    if (direction === "next") {
+      if (isMoreDataAvailable) {
+        setCurrentPage1(currentPage1 + 1);
+      } else {
+        if (currentPage1 < Math.ceil(filteredData1.length / itemsPerPage1)) {
+          setCurrentPage1(currentPage1 + 1);
+        }
+      }
     }
   };
 
@@ -740,7 +815,7 @@ export default function AssignPendingDRCSummary() {
                       GlobalStyle.tableRowOdd}>
                     <td className={GlobalStyle.tableData} style={{ width: "100px", textAlign: "center" }}>
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-                        {item.current_batch_distribution_status === "open" && (
+                        {item.current_batch_distribution_status === "Open" && (
                           <>
                             <img data-tooltip-id={`tooltip-open-${index}`} data-tooltip-content={`Open - ${new Date(item.create_dtm).toLocaleDateString('en-GB')}`} src={open} width={20} height={15} alt="Open" />
                             <Tooltip id={`tooltip-open-${index}`} place="bottom" />
@@ -829,15 +904,16 @@ export default function AssignPendingDRCSummary() {
                     </div>
                   </td> */}
                     <td className={GlobalStyle.tableData} style={{ width: "90px", whiteSpace: "nowrap" }}>
-                      {new Date(item.create_dtm).toLocaleString('en-GB', {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric", // Ensures two-digit year (YY)
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        hour12: true, // Keeps AM/PM format
-                      })}
+                      {item.create_dtm && !isNaN(new Date(item.create_dtm)) &&
+                        new Date(item.create_dtm).toLocaleString('en-GB', {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric", // Ensures two-digit year (YY)
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: true, // Keeps AM/PM format
+                        })}
 
 
                     </td>
@@ -850,21 +926,45 @@ export default function AssignPendingDRCSummary() {
                       <Tooltip id={`tooltip-summary-${index}`} place="bottom" content="Distribution Summary" />
 
 
-                      <button data-tooltip-id={`tooltip-exchange-${index}`} onClick={() => handleonexchangeclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status != "open" && item.current_batch_distribution_status != "batch_forword_distribute" && item.current_batch_distribution_status != "batch_amend"} >
+                      <button data-tooltip-id={`tooltip-exchange-${index}`}
+                        onClick={() => handleonexchangeclick(item.case_distribution_id)}
+                        disabled={
+                          item.current_batch_distribution_status != "Open" &&
+                          item.current_batch_distribution_status != "batch_forword_distribute" &&
+                          item.current_batch_distribution_status != "batch_amend"
+                        }
+                        className={`${item.current_batch_distribution_status != "Open" &&
+                          item.current_batch_distribution_status != "batch_forword_distribute" &&
+                          item.current_batch_distribution_status != "batch_amend" ? "cursor-not-allowed" : ""}`}
+                      >
                         {/* <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} /> */}
                         <RiExchangeLine size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                       </button>
                       <Tooltip id={`tooltip-exchange-${index}`} place="bottom" content="Exchange case count" />
 
 
-                      <button data-tooltip-id={`tooltip-full-${index}`} onClick={() => handleonfullsummaryclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status === "selection_failed"} >
+                      <button data-tooltip-id={`tooltip-full-${index}`}
+                        onClick={() => handleonfullsummaryclick(item.case_distribution_id)}
+                        disabled={item.current_batch_distribution_status === "selection_failed"}
+                        className={`${item.current_batch_distribution_status === "selection_failed" ? "cursor-not-allowed" : ""}`}
+                      >
                         {/* <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} /> */}
                         <IoListCircleOutline size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
                       </button>
                       <Tooltip id={`tooltip-full-${index}`} place="bottom" content="Distributed Full Summary" />
 
 
-                      <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`} onClick={() => handleonforwardclick(item.case_distribution_id)} disabled={item.current_batch_distribution_status != "open" && item.current_batch_distribution_status != "batch_forword_distribute" && item.current_batch_distribution_status != "batch_amend"} >
+                      <button data-tooltip-id={`tooltip-${item.case_distribution_batch_id}`}
+                        onClick={() => handleonforwardclick(item.case_distribution_id)}
+                        disabled={
+                          item.current_batch_distribution_status != "Open" &&
+                          item.current_batch_distribution_status != "batch_forword_distribute" &&
+                          item.current_batch_distribution_status != "batch_amend"
+                        }
+                        className={`${item.current_batch_distribution_status != "Open" &&
+                          item.current_batch_distribution_status != "batch_forword_distribute" &&
+                          item.current_batch_distribution_status != "batch_amend" ? "cursor-not-allowed" : ""}`}
+                      >
                         {/* <img
                       src={four}
                       width={15}
@@ -904,12 +1004,19 @@ export default function AssignPendingDRCSummary() {
             <FaArrowLeft />
           </button>
           <span>
-            Page {currentPage1} of {totalPages1}
+            Page {currentPage1}
           </span>
           <button
             onClick={() => handlePrevNext1("next")}
-            disabled={currentPage1 === totalPages1}
-            className={`${GlobalStyle.navButton} ${currentPage1 === totalPages1 ? "cursor-not-allowed" : ""
+            disabled={
+              searchQuery1
+                ? currentPage1 >= Math.ceil(filteredSearchData1.length / itemsPerPage1)
+                : currentPage1 >= Math.ceil(filteredSearchData1.length / itemsPerPage1) && !isMoreDataAvailable
+            }
+            className={`${GlobalStyle.navButton} ${searchQuery1
+              ? currentPage1 >= Math.ceil(filteredSearchData1.length / itemsPerPage1)
+              : currentPage1 >= Math.ceil(filteredSearchData1.length / itemsPerPage1) && !isMoreDataAvailable
+                ? "cursor-not-allowed" : ""
               }`}
           >
             <FaArrowRight />
