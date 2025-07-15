@@ -18,7 +18,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import { List_All_Batch_Details, Approve_Batch_or_Batches, Create_task_for_batch_approval, Approve_Batch } from "/src/services/case/CaseServices.js";
 import { getLoggedUserId } from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
-
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 
@@ -28,10 +27,16 @@ export default function DRCAssignManagerApproval2() {
   // State for search query and filtered data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [filteredData, setFilteredData] = useState([]);
-  const [userRole, setUserRole] = useState(null); // Role-Based Buttons
-
+  const [userRole, setUserRole] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+   
+  const rowsPerPage = 10;
+  
   // Role-Based Buttons
   useEffect(() => {
+    const initializeUserRole = async () => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
 
@@ -51,79 +56,153 @@ export default function DRCAssignManagerApproval2() {
     } catch (error) {
       console.error("Invalid token:", error);
     }
+  };
+  initializeUserRole();
   }, []);
+  
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
-  const rowsPerPage = 10;
-
-  const fetchData = async (page = 1) => {
+const fetchData = async (page = 1) => {
+  setIsLoading(true);
+  try {
     const userId = await getLoggedUserId();
+    if (!userId) {
+      throw new Error("User ID not available");
+    }
+
     const payload = {
       approved_deligated_by: userId,
       pages: page,
+      limit: rowsPerPage,
     };
-    try {
-      const response = await List_All_Batch_Details(payload);
-      // Support both array and object response for compatibility
-      if (Array.isArray(response)) {
-        setFilteredData(response);
-        setTotalPages(1);
-        setIsMoreDataAvailable(false);
-      } else if (response && response.data && Array.isArray(response.data)) {
-        setFilteredData(response.data);
-        setTotalPages(response.totalPages || 1);
-        setIsMoreDataAvailable(page < (response.totalPages || 1));
+
+    console.log("Sending payload:", payload);
+
+    
+    const response = await List_All_Batch_Details(payload);
+    console.log("API Response:", response);
+    
+
+    const responseData = Array.isArray(response) ? response : response?.data || [];
+    
+    // Updated response handling
+    if (responseData.length >= 0) {
+    
+      if (page === 1) {
+        setFilteredData(responseData);
       } else {
-        setFilteredData([]);
-        setIsMoreDataAvailable(false);
-        setTotalPages(1);
+        setFilteredData((prevData) => [...prevData, ...responseData]);
       }
-    } catch (error) {
+
+      // Handle pagination logic
+      if (responseData.length === 0 && page === 1) {
+        setIsMoreDataAvailable(false);
+        if (page === 1) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching data found for the selected filters.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            confirmButtonColor: "#f1c40f"
+          });
+        } else if (responseData.length < rowsPerPage) {
+          setIsMoreDataAvailable(false); // No more data available
+        } else {
+          setIsMoreDataAvailable(true); // More data might be available
+        }
+      }
+    } else {
       Swal.fire({
-        icon: "error",
         title: "Error",
-        text: "An error occurred while fetching batch details.",
-        confirmButtonColor: "#d33",
-      })
+        text: "No valid data found in response.",
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
+      setFilteredData([]);
     }
-  };
-
-  // Fetch data on component mount
-  useEffect(() => {
+  } catch (error) {
+    console.error("Detailed error:", error);
+    console.error("Error response:", error?.response);
+    console.error("Error message:", error?.message);
+    Swal.fire({
+      title: "Error",
+      text: "Failed to fetch filtered data. Please try again.",
+      icon: "error",
+      confirmButtonColor: "#d33"
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+// Fetch data when component mounts or page changes
+useEffect(() => {
     fetchData(currentPage);
-  }, [currentPage]);
+        }, [currentPage]);
 
-  // Remove frontend slicing for backend pagination
+        
+      
+
+//   // Fetch data on component mount
+//    useEffect(() => {
+//   if (currentPage === 1 || (isMoreDataAvailable && currentPage > maxCurrentPage)) {
+//     setMaxCurrentPage(currentPage);
+//     fetchData(currentPage);
+//   }
+// }, [currentPage]);
+
+  // const indexOfLastRecord = currentPage * recordsPerPage;
+  // const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+
   const filteredDataBySearch = searchQuery
+
     ? filteredData.filter((item) => {
-        const batchId = item.case_distribution_details?.case_distribution_batch_id || "N/A";
-        const createdDate = new Date(item.created_on).toLocaleDateString();
-        const commissionRule = item.case_distribution_details?.drc_commision_rule || "N/A";
-        const ruleBaseCount = item.case_distribution_details?.rulebase_count || "N/A";
-        const rowString = `${batchId} ${createdDate} ${commissionRule} ${ruleBaseCount}`.toLowerCase();
-        return rowString.includes(searchQuery.toLowerCase());
-      })
+      const batchId = item.case_distribution_details?.case_distribution_batch_id || "N/A";
+      const createdDate = new Date(item.created_on).toLocaleDateString();
+      const commissionRule = item.case_distribution_details?.drc_commision_rule || "N/A";
+      const ruleBaseCount = item.case_distribution_details?.rulebase_count || "N/A";
+
+      const rowString = `${batchId} ${createdDate} ${commissionRule} ${ruleBaseCount}`.toLowerCase();
+      return rowString.includes(searchQuery.toLowerCase());
+    })
     : filteredData;
 
-  // Use backend data directly for current page
-  const currentData = filteredDataBySearch;
+  //    useEffect(() => {
+  //   console.log("Filtered data:", filteredData);
+  //   console.log("Filtered by search:", filteredDataBySearch);
+  // }, [filteredData, filteredDataBySearch]);
 
+// Pagination calculations
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filteredDataBySearch.slice(startIndex, endIndex);
 
-  // Handle pagination
+    // Handle pagination navigation
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === "next" && isMoreDataAvailable) {
-      const nextPage = currentPage + 1;
-      setCurrentPage(nextPage);
-      if (nextPage > maxCurrentPage) {
-        fetchData(nextPage);
+    } else if (direction === "next") {
+      const totalPagesFromData = Math.ceil(filteredDataBySearch.length / rowsPerPage);
+      
+      if (searchQuery) {
+        // When searching, only paginate through filtered results
+        if (currentPage < totalPagesFromData) {
+          setCurrentPage(currentPage + 1);
+        }
+      } else {
+        // When not searching, consider API pagination
+        if (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
+          setCurrentPage(currentPage + 1);
+        }
       }
     }
   };
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setCurrentPage(1); // Reset to first page on new search
+    setSearchQuery(e.target.value);
+  };
+
 
 
 
@@ -172,10 +251,11 @@ export default function DRCAssignManagerApproval2() {
   //console.log("Selected rows:", selectedRows);
 
   // Function to handle the approve button click
-  const onapprovebuttonclick = async (IsApproved, currentRow) => {
+  //const onapprovebuttonclick = async (IsApproved, currentRow) => {
+  const handleApproveReject = async (action, batchId) => {
     const userId = await getLoggedUserId();
     // const batchIds = Array.from(selectedRows);
-    const batchIds = currentRow;
+    //const batchIds = currentRow;
     // console.log("Selected batch IDs:", batchIds);
     // if (batchIds.length === 0) {
     //   Swal.fire({
@@ -204,9 +284,9 @@ export default function DRCAssignManagerApproval2() {
     }
 
     const payload = {
-      approver_reference: batchIds,
+      approver_reference: batchId,
       approved_by: userId,
-      IsApproved: IsApproved, // Pass the IsApproved value
+      IsApproved: action, // Pass the IsApproved value
     }
     //console.log("Payload:", payload);
     try {
@@ -263,7 +343,7 @@ export default function DRCAssignManagerApproval2() {
     // const batchIds = Array.from(selectedRows);
 
     // get all the batch ids from the current data
-    const batchIds = currentData
+    const batchIds = paginatedData
       .map(item => item.case_distribution_details?.case_distribution_batch_id)
       .filter(id => id);
 
@@ -328,6 +408,12 @@ export default function DRCAssignManagerApproval2() {
           </div>
         </div>
       </div>
+       {/* Loading indicator */}
+      {isLoading && (
+        <div className="text-center py-4">
+          
+        </div>
+      )}
 
       {/* Search Section */}
 
@@ -345,15 +431,14 @@ export default function DRCAssignManagerApproval2() {
               <th className={GlobalStyle.tableHeader}>Case count</th>
               {/* <th className={GlobalStyle.tableHeader}>Total Arrears</th> */}
               <th className={GlobalStyle.tableHeader}>Created Date</th>
-              <th className={GlobalStyle.tableHeader}></th>
+              <th className={GlobalStyle.tableHeader}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.length > 0 ? (
-              currentData.map((item, index) => (
-
+             {paginatedData.length > 0 ? (
+              paginatedData.map((item, index) => (
                 <tr
-                  key={`${item.drc}-${index}`}
+                  key={`${item.case_distribution_details?.case_distribution_batch_id}-${index}`}
                   className={
                     index % 2 === 0
                       ? GlobalStyle.tableRowEven
@@ -373,7 +458,7 @@ export default function DRCAssignManagerApproval2() {
 
                   <td className={GlobalStyle.tableData}> {item.case_distribution_details?.drc_commision_rule || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.case_distribution_details?.rulebase_count || "N/A"}</td>
-                  {/* <td className={GlobalStyle.tableData>{item.totalArrears}</td> */}
+                  {/* <td className={GlobalStyle.tableData}>{item.totalArrears}</td> */}
                   <td className={GlobalStyle.tableData}>{new Date(item.created_on).toLocaleDateString("en-GB")}</td>
                   <td className="text-center">
                     <div className="flex justify-center gap-2">
@@ -414,22 +499,34 @@ export default function DRCAssignManagerApproval2() {
       </div>
 
       {/* Pagination Section */}
-      {currentData.length > 0 && (
+      {filteredDataBySearch.length > 0 && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
             onClick={() => handlePrevNext("prev")}
-            disabled={currentPage === 1}
-            className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""}`}
+            disabled={currentPage <= 1}
+            className={`${GlobalStyle.navButton} ${
+              currentPage <= 1 ? "cursor-not-allowed opacity-50" : ""
+            }`}
           >
             <FaArrowLeft />
           </button>
           <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-            Page {currentPage} of {totalPages}
+            Page {currentPage}
           </span>
           <button
             onClick={() => handlePrevNext("next")}
-            disabled={currentPage === totalPages}
-            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+            disabled={
+              searchQuery
+                ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+            }
+            className={`${GlobalStyle.navButton} ${
+              (searchQuery
+                ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                ? "cursor-not-allowed opacity-50"
+                : ""
+            }`}
           >
             <FaArrowRight />
           </button>
@@ -484,7 +581,7 @@ export default function DRCAssignManagerApproval2() {
         </div> */}
       </div>
       <div>
-        {currentData.length > 0 && (
+        {filteredDataBySearch.length > 0 && (
           <div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
               <button onClick={onSubmit} className={`${GlobalStyle.buttonPrimary} flex items-center `} >
