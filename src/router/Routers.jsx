@@ -125,10 +125,15 @@ import ServiceTypeList from "../pages/Service/ServiceTypeList";
 //TASKS
 import ListAllTasks from "../pages/Task/ListAllTasks";
 
+
 //Abnormal
 import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
 import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
  
+
+//Dispute
+import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
+
 
 const Routers = () => {
   return (
@@ -945,6 +950,7 @@ const Routers = () => {
           />
         }
       />
+
         {/* Abnormal*/}
         <Route path="/pages/Abnormal/Withdraw_Case_Log"
      element={<ProtectedRoute
@@ -957,6 +963,19 @@ const Routers = () => {
         allowedRoles={['superadmin' ]} />} />
  
  
+
+
+      {/* Dispute */}
+ <Route
+        path="/Dispute/Dispute_Letter_creation"
+        element={
+          <ProtectedRoute
+            element={<Dispute_Letter_creation />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
     </Routes>
   );
 };

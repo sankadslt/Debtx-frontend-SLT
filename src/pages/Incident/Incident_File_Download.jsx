@@ -147,8 +147,7 @@ const Incident_File_Download = () => {
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
-              <th className={GlobalStyle.tableHeader}>Task ID</th>
-              <th className={GlobalStyle.tableHeader}>Group ID</th>
+              <th className={GlobalStyle.tableHeader}>Ref ID</th>
               <th className={GlobalStyle.tableHeader}>Created By</th>
               <th className={GlobalStyle.tableHeader}>Created DTM</th>
               <th className={GlobalStyle.tableHeader}>Expire DTM</th>
@@ -161,7 +160,6 @@ const Incident_File_Download = () => {
                 key={log.file_download_seq}
                 className={index % 2 === 0 ? "bg-white border-b" : "bg-gray-50 border-b"}
               >
-                <td className={GlobalStyle.tableData}>{log.file_download_seq}</td>
                 <td className={GlobalStyle.tableData}>{log.file_download_seq}</td>
                 <td className={GlobalStyle.tableData}>{log.Deligate_By}</td>
                 <td className={GlobalStyle.tableData}>
