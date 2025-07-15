@@ -1,7 +1,7 @@
 /*Purpose:
 Created Date: 2025-07-02
 Created By: Sathmi Peiris (sathmipeiris@gmail.com)
-Last Modified Date: 
+Last Modified Date: 2025-07-09
 Modified By: 
 Last Modified Date: 
 Modified By: 
@@ -23,7 +23,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
+// import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
@@ -83,7 +83,7 @@ const ListAllTasks = () => {
     }
   }, []);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
@@ -338,65 +338,68 @@ const ListAllTasks = () => {
           <h1 className={GlobalStyle.headingLarge}>Task List</h1>
 
           {/* Filters Section */}
-          <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
-            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
-              <div className="flex items-center">
-                <select
-                  value={taskstatus}
-                  onChange={(e) => setTaskstatus(e.target.value)}
-                  style={{ color: taskstatus === "" ? "gray" : "black" }}
-                  className={GlobalStyle.selectBox}
-                >
-                  <option value="" hidden>
-                    Task Status
-                  </option>
-                  <option value="open">Open</option>
-                  <option value="error">Error</option>
-                  <option value="success">Success</option>
-                  <option value="complete">Complete</option>
-                </select>
+          <div className="flex justify-end items-center">
+            <div className="w-[700px] sm:w-[100%] md:w-[700px]"></div>
+            <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
+              <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
+                <div className="flex items-center">
+                  <select
+                    value={taskstatus}
+                    onChange={(e) => setTaskstatus(e.target.value)}
+                    style={{ color: taskstatus === "" ? "gray" : "black" }}
+                    className={GlobalStyle.selectBox}
+                  >
+                    <option value="" hidden>
+                      Task Status
+                    </option>
+                    <option value="open">Open</option>
+                    <option value="error">Error</option>
+                    <option value="success">Success</option>
+                    <option value="complete">Complete</option>
+                  </select>
+                </div>
+
+                <label className={GlobalStyle.dataPickerDate}>Date</label>
+                {/* <div className={GlobalStyle.datePickerContainer}> */}
+                {/* <div className="flex items-center space-x-2"> */}
+                {/* <div className="flex items-center"> */}
+                <DatePicker
+                  selected={fromDate}
+                  onChange={handlestartdatechange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="From"
+                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                />
+                {/* </div> */}
+
+                {/* <div className="flex items-center"> */}
+                <DatePicker
+                  selected={toDate}
+                  onChange={handleenddatechange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="To"
+                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                />
+                {/* </div> */}
+                {/* </div> */}
+
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button
+                    className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+                    onClick={handleFilterButton}
+                  >
+                    Filter
+                  </button>
+                )}
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button
+                    className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                    onClick={handleClear}
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
-
-              <label className={GlobalStyle.dataPickerDate}>Date</label>
-              {/* <div className={GlobalStyle.datePickerContainer}> */}
-              {/* <div className="flex items-center space-x-2"> */}
-              {/* <div className="flex items-center"> */}
-              <DatePicker
-                selected={fromDate}
-                onChange={handlestartdatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="From"
-                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-              />
-              {/* </div> */}
-
-              {/* <div className="flex items-center"> */}
-              <DatePicker
-                selected={toDate}
-                onChange={handleenddatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="To"
-                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-              />
-              {/* </div> */}
-              {/* </div> */}
-
-              {["admin", "superadmin", "slt"].includes(userRole) && (
-                <button
-                  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-                  onClick={handleFilterButton}
-                >
-                  Filter
-                </button>
-              )}
-              {["admin", "superadmin", "slt"].includes(userRole) && (
-                <button
-                  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
-                  onClick={handleClear}
-                >
-                  Clear
-                </button>
-              )}
             </div>
           </div>
 
@@ -467,6 +470,15 @@ const ListAllTasks = () => {
                         {new Date(item.created_dtm).toLocaleDateString(
                           "en-GB"
                         ) || "N/A"}
+                        ,{" "}
+                        {new Date(item.created_dtm)
+                          .toLocaleTimeString("en-GB", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: true,
+                          })
+                          .toUpperCase()}
                       </td>
                     </tr>
                   ))
@@ -511,7 +523,7 @@ const ListAllTasks = () => {
             </div>
           )}
 
-          {["admin", "superadmin", "slt"].includes(userRole) &&
+          {/* {["admin", "superadmin", "slt"].includes(userRole) &&
             filteredDataBySearch.length > 0 && (
               <button
                 // onClick={HandleCreateTaskDownloadSettlementList}
@@ -528,7 +540,7 @@ const ListAllTasks = () => {
                   ? "Creating Tasks..."
                   : "Create task and let me know"}
               </button>
-            )}
+            )} */}
         </main>
       </div>
     </div>
