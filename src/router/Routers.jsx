@@ -127,6 +127,8 @@ import ListAllTasks from "../pages/Task/ListAllTasks";
 
 //Dispute
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
+import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
+import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
 
 const Routers = () => {
   return (
@@ -944,11 +946,31 @@ const Routers = () => {
       />
 
       {/* Dispute */}
- <Route
+    
+        <Route
         path="/Dispute/Dispute_Letter_creation"
         element={
           <ProtectedRoute
             element={<Dispute_Letter_creation />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+        <Route
+        path="/Dispute/Dispute_Settlement_Letter_Creation"
+        element={
+          <ProtectedRoute
+            element={<Dispute_Settlment_Letter_Creation />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+         <Route
+        path="/Dispute/Dispute_Settlement_Letter_Preview"
+        element={
+          <ProtectedRoute
+            element={<Dispute_Settlment_Letter_Preview />}
             allowedRoles={["superadmin"]}
           />
         }
