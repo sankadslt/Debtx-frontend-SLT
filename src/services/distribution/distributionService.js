@@ -200,16 +200,19 @@ export const List_Incidents_CPE_Collect = async (filters) => {
 };
 
 
-export const List_Reject_Incident = async (filters) => {
+export const List_Reject_Incident = async (payload) => {
   try {
-    const response = await axios.post(`${URL}/List_Reject_Incident`, filters);
-    console.log(response)
-    return response.data; 
+    const response = await axios.post(`${URL}/List_Reject_Incident`, payload);
+    return response.data;
   } catch (error) {
-    console.error("Error fetching rejected incidents:", error.response?.data || error.message);
-    throw error.response?.data || error; 
+    console.error(
+      "Detailed error:",
+      error.response?.data || error.message
+    );
+    throw error;
   }
 };
+
 
 export const Create_Rejected_List_for_Download = async (filteredParams) => {
   try {
