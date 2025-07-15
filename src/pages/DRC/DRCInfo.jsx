@@ -917,12 +917,12 @@ console.log("Company RTOM data:", {
             <img
               src={Edit}
               onClick={() => {
-                if (companyData.status !== "Terminate") {  
+                if (companyData.status !== "Terminate" || companyData.status !== "Pending") {  
                   handleNavigateToEdit();
                 }
               }}
               className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${
-                companyData.status === "Terminate"  
+                companyData.status === "Terminate" || companyData.status === "Pending" 
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
               }`}
@@ -1476,16 +1476,16 @@ console.log("Company RTOM data:", {
             <div>
               <button
                 onClick={() => {
-                  if (companyData.status !== "Terminate") {  
+                  if (companyData.status !== "Terminate" || companyData.status !== "Pending") {  
                     setShowEndFields(true);
                   }
                 }}
                 className={`${GlobalStyle.buttonPrimary} ${
-                  companyData.status === "Terminate" 
+                  companyData.status === "Terminate" || companyData.status === "Pending"
                     ? "opacity-50 cursor-not-allowed"
                     : ""
                 }`}
-                disabled={companyData.status === "Terminate"}  
+                disabled={companyData.status === "Terminate" || companyData.status === "Pending"}  
               >
                 End
               </button>
