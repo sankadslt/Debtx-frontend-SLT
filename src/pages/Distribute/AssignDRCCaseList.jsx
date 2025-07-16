@@ -425,8 +425,12 @@ export default function AssignDRCsLOG() {
   const [currentPage, setCurrentPage] = useState(1); // State for current page
   const [filterType, setFilterType] = useState(""); // State for filter type (Account No or Case ID)
   const [filterValue, setFilterValue] = useState(""); // State for filter value (input field)
+  const [isLoading, setIsLoading] = useState(false); // State for loading indicator
 
+  //console.log("Cases:", cases);
 
+  //console.log("Filtered Cases:", cases);
+  //console.log("Search Query:", searchQuery);
   // Search function
   const filteredCases = cases.filter((row) =>
     Object.values(row)
@@ -434,6 +438,14 @@ export default function AssignDRCsLOG() {
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
+
+// when the search query changes, reset the current page to 1
+  useEffect(() => {
+  if (searchQuery) {
+    setCurrentPage(1);
+  }
+}, [searchQuery]);
+
 
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
@@ -636,6 +648,17 @@ export default function AssignDRCsLOG() {
       return;
     }
 
+    
+    if (!filterType) {
+    Swal.fire({
+      title: "Warning",
+      text: "Please select a filter type (Account No or Case ID).",
+      icon: "warning",
+      confirmButtonColor: "#f1c40f"
+    });
+    return;
+  }
+
     if (!filterValue.trim()) {
       Swal.fire({
         title: "Warning",
@@ -669,23 +692,8 @@ export default function AssignDRCsLOG() {
 
 
   const fetchCasesWithPagination = async ({ page, filterType, filterValue, startDate, endDate }) => {
-
-
-
-     // 👉 Prevent API call if no filters are selected
-  const isNoFilters =
-    !filterValue?.trim() &&
-    (!startDate || !endDate) &&
-    (!filterType || filterType === "");
-
-  if (isNoFilters) {
-    console.log("No filters selected. Skipping API call.");
-    return;
-  }
-
-  
   const payload = {
-    drc_id: drc_id, // Use the drc_id from the URL parameters
+    drc_id: drc_id, // Use actual drc_id from context/state
     pages: page,
   };
 
@@ -708,60 +716,68 @@ export default function AssignDRCsLOG() {
 
   try {
     console.log("Filtered Request Payload:", payload);
+    setIsLoading(true); // If using loading indicator
+
     const response = await List_CasesOwened_By_DRC(payload);
     const data = Array.isArray(response?.data) ? response.data : [];
+    console.log("Filtered Response Data:", data);
 
-    console.log("Parsed Response Data:", data);
+    const maxData = page === 1 ? 10 : 30;
 
     if (page === 1) {
       setCases(data);
     } else {
-      setCases(prev => [...prev, ...data]);
+      setCases((prev) => [...prev, ...data]);
     }
 
+    //console.log("Cases after fetching:", cases);
     if (data.length === 0) {
       setIsMoreDataAvailable(false);
 
-      // Show warning if data was empty
-      Swal.fire({
-        title: "No Results",
-        text: "No matching cases found for the selected filters.",
-        icon: "warning",
-        confirmButtonColor: "#f1c40f"
-      });
-    } else if (data.length < 4) {
-      setIsMoreDataAvailable(false); // No more pages
+      if (page === 1) {
+        Swal.fire({
+          title: "No Results",
+          text: "No matching cases found for the selected filters.",
+          icon: "warning",
+          confirmButtonColor: "#f1c40f",
+        });
+      } else {
+        // If second page or later yields no results, roll back page
+        setCurrentPage((prev) => Math.max(1, prev - 1));
+      }
+    } else if (data.length < maxData) {
+      setIsMoreDataAvailable(false); // No more data available
+    } else {
+      setIsMoreDataAvailable(true); // More data available
     }
 
   } catch (err) {
-    // Check if it's a known 'no results' error
-    const errorMessage = err?.response?.data?.message || err?.message;
+    const errorMessage = err?.response?.data?.message || err?.message || "An unknown error occurred";
 
     if (errorMessage.includes("No matching cases found")) {
       setCases([]);
       setIsMoreDataAvailable(false);
-
       Swal.fire({
         title: "No Results",
         text: "No matching cases found for the selected filters.",
         icon: "warning",
-        confirmButtonColor: "#f1c40f"
+        confirmButtonColor: "#f1c40f",
       });
-
     } else {
-      // Unknown error
       setError(errorMessage);
       setCases([]);
-
       Swal.fire({
         title: "Error",
-        text: errorMessage || "Error fetching data. Please try again.",
+        text: errorMessage,
         icon: "error",
-        confirmButtonColor: "#d33"
+        confirmButtonColor: "#d33",
       });
     }
+  } finally {
+    setIsLoading(false); // Always reset loading state
   }
 };
+
 
 
   useEffect(() => {
@@ -909,6 +925,15 @@ const handleclearfilter = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedData = filteredCases.slice(startIndex, endIndex);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
 
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
