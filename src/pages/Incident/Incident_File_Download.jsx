@@ -111,26 +111,7 @@ const Incident_File_Download = () => {
   };
 
   const handleDownload = (File_Name) => {
-    try {
-      // Construct the file URL from the public directory
-      const fileUrl = `/uploads/outbox/${File_Name}`;
-      
-      // Create a temporary anchor element and trigger download
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = File_Name; // This will prompt the user to save the file
-      link.style.display = 'none';
-      
-      // Append to body, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      console.log("Download initiated for:", File_Name);
-    } catch (error) {
-      console.error("Download failed:", error);
-      alert("Download failed. Please try again later.");
-    }
+    console.log("Downloading file:", File_Name);
   };
 
   if (isLoading) {
