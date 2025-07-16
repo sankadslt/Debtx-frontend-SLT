@@ -27,8 +27,8 @@ export const List_incidents_Direct_LOD = async (filters) => {
         const user = await getUserData();
        
         const taskData = {
-            Template_Task_Id: 23,
-            task_type: "Create Direct LOD Incident Sending  List for Download",
+            Template_Task_Id: 21,
+            task_type: "Create incident  distribution download",
             Created_By: user.user_id, 
             task_status: "open",
             ...filteredParams,
@@ -97,8 +97,8 @@ export const Create_Task_Forward_Direct_LOD = async (parameters) => {
     try {
         const user = await getUserData();
         const taskData = {
-            Template_Task_Id: 22,
-            task_type: "Create Pending Reject List for Downloard",
+            Template_Task_Id: 21,
+            task_type: "Create incident  distribution download",
             Created_By: user.user_id, 
             task_status: "open",
             ...filteredParams,
@@ -218,8 +218,8 @@ export const Create_Rejected_List_for_Download = async (filteredParams) => {
   try {
       const user = await getUserData();
       const taskData = {
-          Template_Task_Id: 25,
-          task_type: "Create Rejected List for Download",
+          Template_Task_Id: 21,
+          task_type: "Create incident  distribution download",
           Created_By: user.user_id, 
           task_status: "open",
           ...filteredParams,
