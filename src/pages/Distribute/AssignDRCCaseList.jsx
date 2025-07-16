@@ -463,7 +463,7 @@ export default function AssignDRCsLOG() {
     }
 
     setStartDate(date);
-    if (endDate) checkdatediffrence(date, endDate);
+    //if (endDate) checkdatediffrence(date, endDate);
   };
 
   // End date change handler
@@ -478,9 +478,9 @@ export default function AssignDRCsLOG() {
       return;
     }
 
-    if (startDate) {
-      checkdatediffrence(startDate, date);
-    }
+    // if (startDate) {
+    //   checkdatediffrence(startDate, date);
+    // }
     setEndDate(date);
 
   }
