@@ -110,9 +110,8 @@ const Incident_File_Download = () => {
     }
   };
 
-  const handleDownload = (File_Location) => {
-    alert("Need to configure the download with the server");
-
+  const handleDownload = (File_Name) => {
+    console.log("Downloading file:", File_Name);
   };
 
   if (isLoading) {
@@ -175,7 +174,7 @@ const Incident_File_Download = () => {
                 <td className={GlobalStyle.tableData}>
                   {userRole && ["admin", "superadmin", "slt"].includes(userRole) && (
                     <button
-                      onClick={() => handleDownload(log.File_Location)}
+                      onClick={() => handleDownload(log.File_Name)}
                       className="text-blue-600 hover:text-blue-800"
                       data-tooltip-id="download-tooltip"
                     >
