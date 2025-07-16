@@ -21,7 +21,7 @@ import one from "/src/assets/images/distribution/imagefor1.a.13(one).png";
 import two from "/src/assets/images/distribution/imagefor1.a.13(two).png";
 import three from "/src/assets/images/distribution/imagefor1.a.13(three).png";
 import four from "/src/assets/images/distribution/imagefor1.a.13(four).png";
-import open from "/src/assets/images/distribution/Open.png";
+import open from "/src/assets/images/Remastered/Open.png";
 import Error from "/src/assets/images/distribution/Error.png";
 import Inprogress from "/src/assets/images/distribution/In_Progress.png";
 import Complete from "/src/assets/images/distribution/Complete.png";
@@ -54,6 +54,14 @@ import { HiDotsCircleHorizontal } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 
+import Batch_Ammend from "/src/assets/images/Remastered/Batch_Ammend.png";
+import Batch_Approved from "/src/assets/images/Remastered/Batch_Approved.png";
+import Batch_Distributed from "/src/assets/images/Remastered/Batch_Distributed.png";
+import Batch_Forward_Approved from "/src/assets/images/Remastered/Batch_Forward_Approved.png";
+import batch_forword_distribute from "/src/assets/images/Remastered/batch_forword_distribute.png";
+import Batch_Rejected from "/src/assets/images/Remastered/Batch_Rejected.png";
+import Rejected_Batch_Distributed from "/src/assets/images/Remastered/Rejected_Batch_Distributed.png";
+import Selection_Failed from "/src/assets/images/Remastered/Selection_Failed.png";
 
 
 export default function AssignPendingDRCSummary() {
@@ -821,22 +829,52 @@ export default function AssignPendingDRCSummary() {
                             <Tooltip id={`tooltip-open-${index}`} place="bottom" />
                           </>
                         )}
+                        {item.current_batch_distribution_status === "batch_forword_distribute" && (
+                          <>
+                            <img data-tooltip-id={`tooltip-batch-forword-distribute-${index}`} data-tooltip-content="Batch Forward Distribute" src={batch_forword_distribute} width={20} height={15} alt="Batch Forword Distribute" />
+                            <Tooltip id={`tooltip-batch-forword-distribute-${index}`} place="bottom" />
+                          </>
+                        )}
+                        {item.current_batch_distribution_status === "batch_amend" && (
+                          <>
+                            <img data-tooltip-id={`tooltip-batch-amend-${index}`} data-tooltip-content="Batch Amend" src={Batch_Ammend} width={20} height={15} alt="Batch Amend" />
+                            <Tooltip id={`tooltip-batch-amend-${index}`} place="bottom" />
+                          </>
+                        )}
+                        {item.current_batch_distribution_status === "batch_approved" && (
+                          <>
+                            <img data-tooltip-id={`tooltip-batch-approved-${index}`} data-tooltip-content="Batch Approved" src={Batch_Approved} width={20} height={15} alt="Batch Approved" />
+                            <Tooltip id={`tooltip-batch-approved-${index}`} place="bottom" />
+                          </>
+                        )}
                         {item.current_batch_distribution_status === "batch_distributed" && (
                           <>
-                            <img data-tooltip-id={`tooltip-complete-${index}`} data-tooltip-content="Batch Distributed" src={Complete} width={20} height={15} alt="Batch Distributed" />
-                            <Tooltip id={`tooltip-complete-${index}`} place="bottom" />
+                            <img data-tooltip-id={`tooltip-batch-distributed-${index}`} data-tooltip-content="Batch Distributed" src={Batch_Distributed} width={20} height={15} alt="Batch Distributed" />
+                            <Tooltip id={`tooltip-batch-distributed-${index}`} place="bottom" />
                           </>
                         )}
                         {item.current_batch_distribution_status === "batch_rejected" && (
                           <>
-                            <img data-tooltip-id={`tooltip-error-${index}`} data-tooltip-content={`Batch Rejected `} src={Error} width={20} height={15} alt="Batch Rejected" />
-                            <Tooltip id={`tooltip-error-${index}`} place="bottom" />
+                            <img data-tooltip-id={`tooltip-batch-rejected-${index}`} data-tooltip-content={`Batch Rejected `} src={Batch_Rejected} width={20} height={15} alt="Batch Rejected" />
+                            <Tooltip id={`tooltip-batch-rejected-${index}`} place="bottom" />
                           </>
                         )}
-                        {item.current_batch_distribution_status === "batch_forward_approval" && (
+                        {item.current_batch_distribution_status === "batch_forword_approval" && (
                           <>
-                            <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content={`Open - ${new Date(item.Forward_For_Approvals_On).toLocaleDateString('en-GB')}`} src={Inprogress} width={20} height={15} alt="Batch Forward Approval" />
+                            <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content={`Open - ${new Date(item.Forward_For_Approvals_On).toLocaleDateString('en-GB')}`} src={Batch_Forward_Approved} width={20} height={15} alt="Batch Forward Approval" />
                             <Tooltip id={`tooltip-progress-${index}`} place="bottom" />
+                          </>
+                        )}
+                        {item.current_batch_distribution_status === "selection_failed" && (
+                          <>
+                            <img data-tooltip-id={`tooltip-selection-failed-${index}`} data-tooltip-content={`Selection_Failed`} src={Selection_Failed} width={20} height={15} alt="Selection_Failed" />
+                            <Tooltip id={`tooltip-selection-failed-${index}`} place="bottom" />
+                          </>
+                        )}
+                        {item.current_batch_distribution_status === "rejected_batch_distributed" && (
+                          <>
+                            <img data-tooltip-id={`tooltip-rejected-batch-distributed-${index}`} data-tooltip-content={`Rejected Batch Distributed`} src={Rejected_Batch_Distributed} width={20} height={15} alt="Rejected Batch Distributed" />
+                            <Tooltip id={`tooltip-rejected-batch-distributed-${index}`} place="bottom" />
                           </>
                         )}
                       </div>
@@ -853,7 +891,7 @@ export default function AssignPendingDRCSummary() {
                             <Tooltip id={`tooltip-distribute-${index}`} place="bottom" />
                           </>
                         )}
-                        {item.action_type === "Amend" && (
+                        {item.action_type === "amend" && (
                           <>
                             <img data-tooltip-id={`tooltip-amend-${index}`} data-tooltip-content="Amend" src={Ammend} width={20} height={15} alt="Amend" />
                             <Tooltip id={`tooltip-amend-${index}`} place="bottom" />
@@ -935,7 +973,7 @@ export default function AssignPendingDRCSummary() {
                         }
                         className={`${item.current_batch_distribution_status != "Open" &&
                           item.current_batch_distribution_status != "batch_forword_distribute" &&
-                          item.current_batch_distribution_status != "batch_amend" ? "cursor-not-allowed" : ""}`}
+                          item.current_batch_distribution_status != "batch_amend" ? "cursor-not-allowed opacity-50" : ""}`}
                       >
                         {/* <img src={two} width={15} height={12} alt="Exchange case count" style={{ position: "relative", top: "3px",   }} /> */}
                         <RiExchangeLine size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
@@ -946,7 +984,7 @@ export default function AssignPendingDRCSummary() {
                       <button data-tooltip-id={`tooltip-full-${index}`}
                         onClick={() => handleonfullsummaryclick(item.case_distribution_id)}
                         disabled={item.current_batch_distribution_status === "selection_failed"}
-                        className={`${item.current_batch_distribution_status === "selection_failed" ? "cursor-not-allowed" : ""}`}
+                        className={`${item.current_batch_distribution_status === "selection_failed" ? "cursor-not-allowed opacity-50" : ""}`}
                       >
                         {/* <img src={three} width={15} height={15} alt="Full Summary" style={{ position: "relative", top: "3px", left: "4px" }} /> */}
                         <IoListCircleOutline size={20} color="#0056a2" style={{ position: "relative", top: "2px", left: "2px" }} />
@@ -963,7 +1001,7 @@ export default function AssignPendingDRCSummary() {
                         }
                         className={`${item.current_batch_distribution_status != "Open" &&
                           item.current_batch_distribution_status != "batch_forword_distribute" &&
-                          item.current_batch_distribution_status != "batch_amend" ? "cursor-not-allowed" : ""}`}
+                          item.current_batch_distribution_status != "batch_amend" ? "cursor-not-allowed opacity-50" : ""}`}
                       >
                         {/* <img
                       src={four}
@@ -998,7 +1036,7 @@ export default function AssignPendingDRCSummary() {
           <button
             onClick={() => handlePrevNext1("prev")}
             disabled={currentPage1 === 1}
-            className={`${GlobalStyle.navButton} ${currentPage1 === 1 ? "cursor-not-allowed" : ""
+            className={`${GlobalStyle.navButton} ${currentPage1 === 1 ? "cursor-not-allowed opacity-50" : ""
               }`}
           >
             <FaArrowLeft />
@@ -1016,7 +1054,7 @@ export default function AssignPendingDRCSummary() {
             className={`${GlobalStyle.navButton} ${searchQuery1
               ? currentPage1 >= Math.ceil(filteredSearchData1.length / itemsPerPage1)
               : currentPage1 >= Math.ceil(filteredSearchData1.length / itemsPerPage1) && !isMoreDataAvailable
-                ? "cursor-not-allowed" : ""
+                ? "cursor-not-allowed opacity-50" : ""
               }`}
           >
             <FaArrowRight />
