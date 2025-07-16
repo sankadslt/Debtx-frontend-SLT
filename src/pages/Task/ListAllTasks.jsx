@@ -28,6 +28,11 @@ import { getLoggedUserId } from "../../services/auth/authService";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { List_All_Tasks } from "../../services/task/taskService.js";
+import { Tooltip } from "react-tooltip";
+
+import Task_List_In_Progress from "/src/assets/images/Status Icons/In_Progress.png";
+import Task_List_Open from "/src/assets/images/Status Icons/Open.png";
+import Task_List_Success from "/src/assets/images/Status Icons/Success.png";
 
 const ListAllTasks = () => {
   // State Variables
@@ -82,6 +87,46 @@ const ListAllTasks = () => {
       console.error("Invalid token:", error);
     }
   }, []);
+
+  // return Icon based on settlement status and settlement phase
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case "open":
+        return Task_List_Open;
+      case "complete":
+        return Task_List_Success;
+      case "inprogress":
+        return Task_List_In_Progress;
+      default:
+        return null;
+    }
+  };
+
+  // render status icon with tooltip
+  const renderStatusIcon = (status, index) => {
+    const iconPath = getStatusIcon(status);
+
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+
+    const tooltipId = `tooltip-${index}`;
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={iconPath}
+          alt={status}
+          className="w-6 h-6"
+          data-tooltip-id={tooltipId} // Add tooltip ID to image
+        />
+        {/* Tooltip component */}
+        <Tooltip id={tooltipId} place="bottom" effect="solid">
+          {` ${status}`} {/* Tooltip text is status */}
+        </Tooltip>
+      </div>
+    );
+  };
 
   // const navigate = useNavigate();
 
@@ -353,8 +398,8 @@ const ListAllTasks = () => {
                       Task Status
                     </option>
                     <option value="open">Open</option>
-                    <option value="error">Error</option>
-                    <option value="success">Success</option>
+                    {/* <option value="error">Error</option> */}
+                    <option value="inprogress">In Progress</option>
                     <option value="complete">Complete</option>
                   </select>
                 </div>
@@ -426,6 +471,7 @@ const ListAllTasks = () => {
                   <th className={GlobalStyle.tableHeader}>Task ID</th>
                   {/* <th className={GlobalStyle.tableHeader}>Template Task ID</th> */}
                   <th className={GlobalStyle.tableHeader}>Task Type</th>
+                  {/* <th className={GlobalStyle.tableHeader}>Task Status</th> */}
                   <th className={GlobalStyle.tableHeader}>Task Status</th>
                   <th className={GlobalStyle.tableHeader}>Created By</th>
                   <th className={GlobalStyle.tableHeader}>Created Date</th>
@@ -458,10 +504,15 @@ const ListAllTasks = () => {
                         {" "}
                         {item.task_type || "N/A"}{" "}
                       </td>
-                      <td className={GlobalStyle.tableData}>
+                      <td
+                        className={`${GlobalStyle.tableData} flex justify-center items-center`}
+                      >
+                        {renderStatusIcon(item.task_status, index)}
+                      </td>
+                      {/* <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.task_status || "N/A"}{" "}
-                      </td>
+                      </td> */}
                       <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.Created_By || "N/A"}{" "}
