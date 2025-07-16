@@ -519,7 +519,7 @@ export default function ROList() {
               <th className={GlobalStyle.tableHeader}>NIC</th>
               <th className={GlobalStyle.tableHeader}>RO Name</th>
               <th className={GlobalStyle.tableHeader}>Contact No.</th>
-              <th className={GlobalStyle.tableHeader}>RTOM Area count</th>
+              <th className={GlobalStyle.tableHeader}>Billing Center Area count</th>
             </tr>
           </thead>
           <tbody>
