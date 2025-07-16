@@ -424,7 +424,7 @@ const ListAllTasks = () => {
               <thead className={GlobalStyle.thead}>
                 <tr>
                   <th className={GlobalStyle.tableHeader}>Task ID</th>
-                  <th className={GlobalStyle.tableHeader}>Template Task ID</th>
+                  {/* <th className={GlobalStyle.tableHeader}>Template Task ID</th> */}
                   <th className={GlobalStyle.tableHeader}>Task Type</th>
                   <th className={GlobalStyle.tableHeader}>Task Status</th>
                   <th className={GlobalStyle.tableHeader}>Created By</th>
@@ -450,10 +450,10 @@ const ListAllTasks = () => {
                         {item.task_id || "N/A"}
                       </td>
 
-                      <td className={GlobalStyle.tableData}>
+                      {/* <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.template_task_id || "N/A"}{" "}
-                      </td>
+                      </td> */}
                       <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.task_type || "N/A"}{" "}
@@ -470,15 +470,15 @@ const ListAllTasks = () => {
                         {new Date(item.created_dtm).toLocaleDateString(
                           "en-GB"
                         ) || "N/A"}
-                        ,{" "}
-                        {new Date(item.created_dtm)
+                        {/* ,{" "} */}
+                        {/* {new Date(item.created_dtm)
                           .toLocaleTimeString("en-GB", {
                             hour: "2-digit",
                             minute: "2-digit",
                             second: "2-digit",
                             hour12: true,
                           })
-                          .toUpperCase()}
+                          .toUpperCase()} */}
                       </td>
                     </tr>
                   ))
