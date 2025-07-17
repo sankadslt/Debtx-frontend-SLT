@@ -562,6 +562,7 @@ export default function DRCAssignManagerApproval3() {
     const payload = {
       approver_reference: batchIds,
       approved_by: userId,
+      approver_id: record?.approver_id || "", // Ensure approver_id is included
     };
     //console.log("Approve payload:", payload);
     try {
