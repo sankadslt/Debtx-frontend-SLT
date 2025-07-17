@@ -277,7 +277,7 @@ export const List_CasesOwened_By_DRC = async (requestData) => {
 
     // Validate response structure
     if (response.data && response.data.status === "success") {
-      return response.data.Cases; // Return the cases data
+      return response.data; // Return the cases data
     } else {
       console.error(
         "Error in API response:",
