@@ -484,8 +484,9 @@ export default function DRCAssignManagerApproval3() {
     const payload = {
       approver_reference: batchIds,
       approved_by: userId,
+      approver_id: record?.approver_id || "", // Ensure approver_id is included
     };
-    //console.log("Approve payload:", payload);
+    // console.log("Approve payload:", payload);
     try {
       const response = await Approve_DRC_Assign_Manager_Approval(payload);
       //console.log("Approve response:", response);
@@ -509,7 +510,7 @@ export default function DRCAssignManagerApproval3() {
         icon: "error",
         title: "Error",
         text: errorMessage,
-        confirmButtonColor: "#f1c40f",
+        confirmButtonColor: "#d33",
       });
     }
   };
