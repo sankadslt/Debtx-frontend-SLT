@@ -1,7 +1,7 @@
 /*Purpose:
 Created Date: 2025-07-02
 Created By: Sathmi Peiris (sathmipeiris@gmail.com)
-Last Modified Date: 
+Last Modified Date: 2025-07-09
 Modified By: 
 Last Modified Date: 
 Modified By: 
@@ -28,6 +28,11 @@ import { getLoggedUserId } from "../../services/auth/authService";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { List_All_Tasks } from "../../services/task/taskService.js";
+import { Tooltip } from "react-tooltip";
+
+import Task_List_In_Progress from "/src/assets/images/Status Icons/In_Progress.png";
+import Task_List_Open from "/src/assets/images/Status Icons/Open.png";
+import Task_List_Success from "/src/assets/images/Status Icons/Success.png";
 
 const ListAllTasks = () => {
   // State Variables
@@ -82,6 +87,46 @@ const ListAllTasks = () => {
       console.error("Invalid token:", error);
     }
   }, []);
+
+  // return Icon based on settlement status and settlement phase
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case "open":
+        return Task_List_Open;
+      case "complete":
+        return Task_List_Success;
+      case "inprogress":
+        return Task_List_In_Progress;
+      default:
+        return null;
+    }
+  };
+
+  // render status icon with tooltip
+  const renderStatusIcon = (status, index) => {
+    const iconPath = getStatusIcon(status);
+
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+
+    const tooltipId = `tooltip-${index}`;
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={iconPath}
+          alt={status}
+          className="w-6 h-6"
+          data-tooltip-id={tooltipId} // Add tooltip ID to image
+        />
+        {/* Tooltip component */}
+        <Tooltip id={tooltipId} place="bottom" effect="solid">
+          {` ${status}`} {/* Tooltip text is status */}
+        </Tooltip>
+      </div>
+    );
+  };
 
   // const navigate = useNavigate();
 
@@ -338,65 +383,68 @@ const ListAllTasks = () => {
           <h1 className={GlobalStyle.headingLarge}>Task List</h1>
 
           {/* Filters Section */}
-          <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
-            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
-              <div className="flex items-center">
-                <select
-                  value={taskstatus}
-                  onChange={(e) => setTaskstatus(e.target.value)}
-                  style={{ color: taskstatus === "" ? "gray" : "black" }}
-                  className={GlobalStyle.selectBox}
-                >
-                  <option value="" hidden>
-                    Task Status
-                  </option>
-                  <option value="open">Open</option>
-                  <option value="error">Error</option>
-                  <option value="success">Success</option>
-                  <option value="complete">Complete</option>
-                </select>
+          <div className="flex justify-end items-center">
+            <div className="w-[700px] sm:w-[100%] md:w-[700px]"></div>
+            <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
+              <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
+                <div className="flex items-center">
+                  <select
+                    value={taskstatus}
+                    onChange={(e) => setTaskstatus(e.target.value)}
+                    style={{ color: taskstatus === "" ? "gray" : "black" }}
+                    className={GlobalStyle.selectBox}
+                  >
+                    <option value="" hidden>
+                      Task Status
+                    </option>
+                    <option value="open">Open</option>
+                    {/* <option value="error">Error</option> */}
+                    <option value="inprogress">In Progress</option>
+                    <option value="complete">Complete</option>
+                  </select>
+                </div>
+
+                <label className={GlobalStyle.dataPickerDate}>Date</label>
+                {/* <div className={GlobalStyle.datePickerContainer}> */}
+                {/* <div className="flex items-center space-x-2"> */}
+                {/* <div className="flex items-center"> */}
+                <DatePicker
+                  selected={fromDate}
+                  onChange={handlestartdatechange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="From"
+                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                />
+                {/* </div> */}
+
+                {/* <div className="flex items-center"> */}
+                <DatePicker
+                  selected={toDate}
+                  onChange={handleenddatechange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="To"
+                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                />
+                {/* </div> */}
+                {/* </div> */}
+
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button
+                    className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+                    onClick={handleFilterButton}
+                  >
+                    Filter
+                  </button>
+                )}
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button
+                    className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                    onClick={handleClear}
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
-
-              <label className={GlobalStyle.dataPickerDate}>Date</label>
-              {/* <div className={GlobalStyle.datePickerContainer}> */}
-              {/* <div className="flex items-center space-x-2"> */}
-              {/* <div className="flex items-center"> */}
-              <DatePicker
-                selected={fromDate}
-                onChange={handlestartdatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="From"
-                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-              />
-              {/* </div> */}
-
-              {/* <div className="flex items-center"> */}
-              <DatePicker
-                selected={toDate}
-                onChange={handleenddatechange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="To"
-                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-              />
-              {/* </div> */}
-              {/* </div> */}
-
-              {["admin", "superadmin", "slt"].includes(userRole) && (
-                <button
-                  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-                  onClick={handleFilterButton}
-                >
-                  Filter
-                </button>
-              )}
-              {["admin", "superadmin", "slt"].includes(userRole) && (
-                <button
-                  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
-                  onClick={handleClear}
-                >
-                  Clear
-                </button>
-              )}
             </div>
           </div>
 
@@ -421,8 +469,9 @@ const ListAllTasks = () => {
               <thead className={GlobalStyle.thead}>
                 <tr>
                   <th className={GlobalStyle.tableHeader}>Task ID</th>
-                  <th className={GlobalStyle.tableHeader}>Template Task ID</th>
+                  {/* <th className={GlobalStyle.tableHeader}>Template Task ID</th> */}
                   <th className={GlobalStyle.tableHeader}>Task Type</th>
+                  {/* <th className={GlobalStyle.tableHeader}>Task Status</th> */}
                   <th className={GlobalStyle.tableHeader}>Task Status</th>
                   <th className={GlobalStyle.tableHeader}>Created By</th>
                   <th className={GlobalStyle.tableHeader}>Created Date</th>
@@ -447,18 +496,23 @@ const ListAllTasks = () => {
                         {item.task_id || "N/A"}
                       </td>
 
-                      <td className={GlobalStyle.tableData}>
+                      {/* <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.template_task_id || "N/A"}{" "}
-                      </td>
+                      </td> */}
                       <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.task_type || "N/A"}{" "}
                       </td>
-                      <td className={GlobalStyle.tableData}>
+                      <td
+                        className={`${GlobalStyle.tableData} flex justify-center items-center`}
+                      >
+                        {renderStatusIcon(item.task_status, index)}
+                      </td>
+                      {/* <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.task_status || "N/A"}{" "}
-                      </td>
+                      </td> */}
                       <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.Created_By || "N/A"}{" "}
@@ -467,15 +521,15 @@ const ListAllTasks = () => {
                         {new Date(item.created_dtm).toLocaleDateString(
                           "en-GB"
                         ) || "N/A"}
-                        ,{" "}
-                        {new Date(item.created_dtm)
+                        {/* ,{" "} */}
+                        {/* {new Date(item.created_dtm)
                           .toLocaleTimeString("en-GB", {
                             hour: "2-digit",
                             minute: "2-digit",
                             second: "2-digit",
                             hour12: true,
                           })
-                          .toUpperCase()}
+                          .toUpperCase()} */}
                       </td>
                     </tr>
                   ))

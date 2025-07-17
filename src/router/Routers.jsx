@@ -102,6 +102,12 @@ import DRCDetails from "../pages/DRC/DRCDetails";
 import DRCInfoEdit from "../pages/DRC/DRCInfoEdit";
 import DrcAgreement from "../pages/DRC/DrcAgreement";
 
+//FLT LOD
+import FTLLODCaseList from "../pages/FLT_LOD/FTL_LOD_List";
+import FTL_LOD_creation from "../pages/FLT_LOD/FTL_LOD_creation";
+import FTL_LOD_Change_Details_Form from "../pages/FLT_LOD/FTL_LOD_Change_Details_Form";
+import FTL_LOD_Case_Details from "../pages/FLT_LOD/FTL_LOD_Case_Details";
+
 //Rtom
 
 import RtomList from "../pages/Rtom/RtomList";
@@ -124,6 +130,15 @@ import ServiceTypeList from "../pages/Service/ServiceTypeList";
 
 //TASKS
 import ListAllTasks from "../pages/Task/ListAllTasks";
+
+//Abnormal
+import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
+import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
+
+//Dispute
+import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
+import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
+import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
 
 const Routers = () => {
   return (
@@ -896,8 +911,16 @@ const Routers = () => {
         }
       />
       <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} />
-       
-      <Route path="/pages/DRC/DrcAgreement" element={<ProtectedRoute element={<DrcAgreement />} allowedRoles={['superadmin']} />} />
+
+      <Route
+        path="/pages/DRC/DrcAgreement"
+        element={
+          <ProtectedRoute
+            element={<DrcAgreement />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //MASTER DRC
     <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
@@ -906,10 +929,39 @@ const Routers = () => {
     <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} /> */}
 
       {/* User */}
-      <Route path="/pages/User/UserList" element={<ProtectedRoute element={<UserList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/User/SignUp" element={<ProtectedRoute element={<SignUp />} allowedRoles={['superadmin']} />} />
-	    <Route path="/pages/User/UserApproval" element={<ProtectedRoute element={<UserApproval />} allowedRoles={["superadmin"]} />} />
+      <Route
+        path="/pages/User/UserList"
+        element={
+          <ProtectedRoute
+            element={<UserList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/User/UserInfo"
+        element={
+          <ProtectedRoute
+            element={<UserInfo />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/User/SignUp"
+        element={
+          <ProtectedRoute element={<SignUp />} allowedRoles={["superadmin"]} />
+        }
+      />
+      <Route
+        path="/pages/User/UserApproval"
+        element={
+          <ProtectedRoute
+            element={<UserApproval />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* RO */}
       <Route
@@ -935,6 +987,97 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<ListAllTasks />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      {/* Abnormal*/}
+      <Route
+        path="/pages/Abnormal/Withdraw_Case_Log"
+        element={
+          <ProtectedRoute
+            element={<WithdrawalCaseLog />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      <Route
+        path="/pages/Abnormal/Abondoned_Case_Log"
+        element={
+          <ProtectedRoute
+            element={<AbondonedCaseLog />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      {/* FTL LOD Routes */}
+      <Route
+        path="/pages/flt-lod/ftl-lod-list"
+        element={
+          <ProtectedRoute
+            element={<FTLLODCaseList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)"
+        element={
+          <ProtectedRoute
+            element={<FTL_LOD_creation />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/flt-lod/ftl-lod-change-details-form"
+        element={
+          <ProtectedRoute
+            element={<FTL_LOD_Change_Details_Form />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/flt-lod/ftl-lod-case-details"
+        element={
+          <ProtectedRoute
+            element={<FTL_LOD_Case_Details />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      {/* Dispute */}
+
+      <Route
+        path="/Dispute/Dispute_Letter_creation"
+        element={
+          <ProtectedRoute
+            element={<Dispute_Letter_creation />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      <Route
+        path="/Dispute/Dispute_Settlement_Letter_Creation"
+        element={
+          <ProtectedRoute
+            element={<Dispute_Settlment_Letter_Creation />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      <Route
+        path="/Dispute/Dispute_Settlement_Letter_Preview"
+        element={
+          <ProtectedRoute
+            element={<Dispute_Settlment_Letter_Preview />}
             allowedRoles={["superadmin"]}
           />
         }

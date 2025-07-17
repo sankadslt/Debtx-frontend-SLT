@@ -28,8 +28,8 @@ export const Create_Task = async (filteredParams) => {
     const user_id = await getLoggedUserId();
 
     const taskData = {
-      Template_Task_Id: 24,
-      task_type: "Create Collect Only CPE List for Download",
+      Template_Task_Id: 21,
+      task_type: "Create incident  distribution download",
       Created_By: user_id,
       task_status: "open",
       ...filteredParams,
@@ -67,7 +67,7 @@ export const Create_Task_for_OpenNoAgent = async (filteredParams) => {
     const user_id = await getLoggedUserId();
     const taskData = {
       Template_Task_Id: 21,
-      task_type: "Create incident open for distribution download",
+      task_type: "Create incident  distribution download",
       Created_By: user_id,
       task_status: "open",
       Incident_Status: "Open No Agent",
@@ -88,8 +88,8 @@ export const Create_Task_for_Create_CaseFromIncident = async (
   try {
     const user_id = await getLoggedUserId();
     const taskData = {
-      Template_Task_Id: 15,
-      task_type: "Create Case from Incident Direct NO Agent",
+      Template_Task_Id: 21,
+      task_type: "Create incident  distribution download",
       Created_By: user_id,
       task_status: "open",
       Incident_Status: "Open No Agent",
