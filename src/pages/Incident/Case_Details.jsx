@@ -98,10 +98,26 @@ const CaseDetails = () => {
             'mediationBoard': caseData?.mediationBoard,
             'settlement': caseData?.settlements,
             'payment': caseData?.payments,
-            'lod': caseData?.lod,
-            'abnormal_stop': caseData?.abnormal_stop
+            'lod': caseData?.ftlLodLetterDetails,
+            'abnormal_stop': caseData?.abnormal_stop,
+            'remark':caseData?.remark,
+            'approve':caseData?.approve,
+            'case_status': caseData?.caseStatus,
+ 
+            
+            'ref_products':caseData?.ref_products,
+            // 'ro_negotiation':caseData?.ro_negotiation,
+            'ro_requests':caseData?.roRequests,
+            // 'ro_cpe_collect':caseData?.ro_cpe_collect,
+            // 'mediation_board':caseData?.mediation_board,
+            // 'settlement':caseData?.settlement,
+           
+            'lit':caseData?.litigationInfo,
+            'lodFinalReminder':caseData?.lodFinalReminder
         };
+        
         return sectionMap[sectionKey];
+        
     };
 
     const formatDate = (dateString) => {
@@ -399,11 +415,7 @@ const CaseDetails = () => {
             {renderBasicInfoCard(caseData.basicInfo)}
 
             <div className="space-y-2 mb-8">
-                {caseData.referenceData && (
-                    <CollapsibleSection title="Reference Data" sectionKey="referenceData">
-                        {renderReferenceDataCard(caseData.referenceData, currentIndices['referenceData'] || 0, "Reference Data")}
-                    </CollapsibleSection>
-                )}
+              
 
                 {caseData.drcInfo && (
                     <CollapsibleSection title="DRC" sectionKey="drc">
@@ -412,13 +424,13 @@ const CaseDetails = () => {
                 )}
 
                 {caseData.roNegotiations && (
-                    <CollapsibleSection title="RO - Negotiate | Arrears" sectionKey="roNegotiateArrears">
+                    <CollapsibleSection title="RO Negotiations" sectionKey="roNegotiateArrears">
                         {renderCard(caseData.roNegotiations[currentIndices['roNegotiateArrears'] || 0], "RO Negotiations")}
                     </CollapsibleSection>
                 )}
 
                 {caseData.roCpeCollections && (
-                    <CollapsibleSection title="RO - CPE Collections" sectionKey="roCpeCollections">
+                    <CollapsibleSection title="RO CPE Collections" sectionKey="roCpeCollections">
                         {renderCard(caseData.roCpeCollections[currentIndices['roCpeCollections'] || 0], "RO CPE Collections")}
                     </CollapsibleSection>
                 )}
@@ -441,17 +453,13 @@ const CaseDetails = () => {
                     </CollapsibleSection>
                 )}
 
-                {caseData.settlements && (
+                {/* {caseData.settlements && (
                     <CollapsibleSection title="Settlement" sectionKey="settlement">
                         {renderCard(caseData.settlements[currentIndices['settlement'] || 0], "Settlement")}
                     </CollapsibleSection>
-                )}
+                )} */}
 
-                {caseData.abnormal_stop && (
-                    <CollapsibleSection title="Abnormal Stop" sectionKey="abnormal_stop">
-                        {renderCard(caseData.abnormal_stop[currentIndices['abnormal_stop'] || 0], "Abnormal Stop")}
-                    </CollapsibleSection>
-                )}
+              
 
                 {caseData.payments && (
                     <CollapsibleSection title="Payment" sectionKey="payment">
@@ -466,6 +474,77 @@ const CaseDetails = () => {
                         {renderCard(caseData.lod[currentIndices['lod'] || 0], "LOD")}
                     </CollapsibleSection>
                 )}
+
+{caseData.remark && (
+                    <CollapsibleSection title="Remark" sectionKey="remark">
+                        {renderCard(caseData.remark[currentIndices['remark'] || 0], "Remark")}
+                    </CollapsibleSection>
+                )}
+                
+{caseData.approve && (
+                    <CollapsibleSection title="Approve" sectionKey="approve">
+                        {renderCard(caseData.approve[currentIndices['approve'] || 0], "Approve")}
+                    </CollapsibleSection>
+                )} 
+
+{caseData.caseStatus && (
+                    <CollapsibleSection title="Case Status" sectionKey="case_status">
+                        {renderCard(caseData.caseStatus[currentIndices['case_status'] || 0], "Case Status")}
+                    </CollapsibleSection>
+                )}
+            
+                     {caseData.abnormal_stop && (
+                    <CollapsibleSection title="Abnormal Stop" sectionKey="abnormal_stop">
+                        {renderCard(caseData.abnormal_stop[currentIndices['abnormal_stop'] || 0], "Abnormal Stop")}
+                    </CollapsibleSection>
+                )}
+                        {caseData.refProducts && (
+                    <CollapsibleSection title="Ref Products" sectionKey="ref_products">
+                        {renderCard(caseData.refProducts[currentIndices['ref_products'] || 0], "Ref Products")}
+                    </CollapsibleSection>
+                )}
+                        {/* {caseData.ro_negotiation && (
+                    <CollapsibleSection title="RO Negotiation" sectionKey="ro_negotiation">
+                        {renderCard(caseData.ro_negotiation[currentIndices['ro_negotiation'] || 0], "RO_Negotiation")}
+                    </CollapsibleSection>
+                )} */}
+                        {caseData.roRequests && (
+                    <CollapsibleSection title="RO Requests" sectionKey="ro_requests">
+                        {renderCard(caseData.roRequests[currentIndices['ro_requests'] || 0], "RO Requests")}
+                    </CollapsibleSection>
+                )}
+                     {/* {caseData.ro_cpe_collect && (
+                    <CollapsibleSection title="RO_CPE_Collect" sectionKey="ro_cpe_collect">
+                        {renderCard(caseData.ro_cpe_collect[currentIndices['ro_cpe_collect'] || 0], "RO_CPE_Collect")}
+                    </CollapsibleSection>
+                )} */}
+                     {/* {caseData.mediation_board && (
+                    <CollapsibleSection title="Mediation Board" sectionKey="mediation_board">
+                        {renderCard(caseData.mediation_board[currentIndices['mediation_board'] || 0], "Mediation Board")}
+                    </CollapsibleSection>
+                )} */}
+                     {caseData.settlements && (
+                    <CollapsibleSection title="Settlement" sectionKey="settlement">
+                        {renderCard(caseData.settlements[currentIndices['settlement'] || 0], "Settlement")}
+                    </CollapsibleSection>
+                )}
+                   
+                    {caseData.litigationInfo && (
+                    <CollapsibleSection title="Litigation Information" sectionKey="lit">
+                        {renderCard(caseData.litigationInfo[currentIndices['lit'] || 0], "Litigation Information")}
+                  
+                         
+                    </CollapsibleSection>
+      
+                )}
+                
+                {caseData.lodFinalReminder && (
+  <CollapsibleSection title="lod Final Reminder" sectionKey="lodFinalReminder">
+    {renderCard(caseData.lodFinalReminder, "lod Final Reminder")}
+  </CollapsibleSection>
+)}
+
+                   
             </div>
 
             <div className="flex justify-between items-center">
