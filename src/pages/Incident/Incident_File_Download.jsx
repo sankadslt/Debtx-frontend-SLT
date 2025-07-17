@@ -9,13 +9,14 @@ ui number : 1.3
 Dependencies: Tailwind CSS
 Related Files: 
 Notes: This template uses Tailwind CSS */
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
-import { List_Download_Files_from_Download_Log } from "../../services/file/fileDownloadService";
+import { List_Download_Files_from_Download_Log, downloadIncidentFile } from "../../services/file/fileDownloadService";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import Swal from "sweetalert2";
 
 const Incident_File_Download = () => {
   const [filteredData, setFilteredData] = useState([]);
@@ -26,14 +27,11 @@ const Incident_File_Download = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  //const [totalPages, setTotalPages] = useState(0);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const rowsPerPage = 10;
 
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-  const hasMounted = useRef(false);
 
   const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
@@ -74,7 +72,7 @@ const Incident_File_Download = () => {
       });
 
       if (response && response.data) {
-        if (currentPage === 1) {
+        if (page === 1) {
           setFilteredData(response.data);
         } else {
           setFilteredData((prevData) => [...prevData, ...response.data]);
@@ -86,13 +84,18 @@ const Incident_File_Download = () => {
       }
     } catch (err) {
       console.error("Error during paginated API fetch:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to fetch incident files. Please try again later.",
+        confirmButtonColor: "#d33",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI(currentPage);
@@ -110,8 +113,16 @@ const Incident_File_Download = () => {
     }
   };
 
-  const handleDownload = (File_Name) => {
-    console.log("Downloading file:", File_Name);
+  const handleDownload = (fileDownloadSeq = 4) => {
+    downloadIncidentFile(fileDownloadSeq).catch((error) => {
+      console.error("Download error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Download Failed",
+        text: "Unable to download the file. Please try again later.",
+        confirmButtonColor: "#d33",
+      });
+    });
   };
 
   if (isLoading) {
@@ -135,7 +146,7 @@ const Incident_File_Download = () => {
             value={searchQuery}
             onChange={(e) => {
               setCurrentPage(1); // Reset to page 1 on search
-              setSearchQuery(e.target.value)
+              setSearchQuery(e.target.value);
             }}
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -154,7 +165,7 @@ const Incident_File_Download = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
+            {filteredDataBySearch.slice(startIndex, endIndex).map((log, index) => (
               <tr
                 key={log.file_download_seq}
                 className={index % 2 === 0 ? "bg-white border-b" : "bg-gray-50 border-b"}
@@ -174,7 +185,7 @@ const Incident_File_Download = () => {
                 <td className={GlobalStyle.tableData}>
                   {userRole && ["admin", "superadmin", "slt"].includes(userRole) && (
                     <button
-                      onClick={() => handleDownload(log.File_Name)}
+                      onClick={() => handleDownload(log.file_download_seq)}
                       className="text-blue-600 hover:text-blue-800"
                       data-tooltip-id="download-tooltip"
                     >
@@ -200,21 +211,20 @@ const Incident_File_Download = () => {
       {filteredDataBySearch.length > 0 && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
-
             onClick={() => handlePrevNext("prev")}
             disabled={currentPage <= 1}
             className={`${GlobalStyle.navButton}`}
           >
             <FaArrowLeft />
           </button>
-          <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-            Page {currentPage}
-          </span>
+          <span className={`${GlobalStyle.pageIndicator} mx-4`}>Page {currentPage}</span>
           <button
             onClick={() => handlePrevNext("next")}
-            disabled={searchQuery
-              ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+            disabled={
+              searchQuery
+                ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+            }
             className={`${GlobalStyle.navButton}`}
           >
             <FaArrowRight />
