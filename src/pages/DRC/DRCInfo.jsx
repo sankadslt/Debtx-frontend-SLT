@@ -52,6 +52,8 @@ const DRCInfo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  
+
   // DRC company data 
   
   const [companyData, setCompanyData] = useState({
@@ -307,36 +309,36 @@ const DRCInfo = () => {
 
   // Fetch active service types from the API
   const fetchActiveServices = async () => {
-    try {
-      setLoading(true);
-      const response = await getActiveServiceDetails();
-      console.log("API Response:", response);
+  try {
+    setLoading(true);
+    const response = await getActiveServiceDetails();
+    console.log("API Response:", response);
 
-      if (response && Array.isArray(response)) {
-        const formatted = response.map((service) => ({
-          id: service.service_id,
-          code: service.service_id.toString(),
-          name: service.service_type,
-          selected: false,
-        }));
+    if (response && Array.isArray(response)) {
+      const formatted = response.map((service) => ({
+        id: service.service_id,
+        code: service.service_id.toString(),
+        name: service.service_type,
+        selected: companyData.services?.some(s => s.service_type === service.service_type),
+      }));
 
-        setServiceTypes(formatted);
-      } else {
-        console.error("Unexpected API response format:", response);
-        setServiceTypes([]);
-      }
-    } catch (error) {
-      console.error("Error loading service types:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load active service types.",
-      });
+      setServiceTypes(formatted);
+    } else {
+      console.error("Unexpected API response format:", response);
       setServiceTypes([]);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Error loading service types:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to load active service types.",
+    });
+    setServiceTypes([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Function to fetch RTOM data
   const fetchRTOMData = async () => {
@@ -531,6 +533,7 @@ const DRCInfo = () => {
     if (selectedRtomItem) {
       const newRtom = {
         rtom_id: selectedRtomItem.id,
+         rtom_billing_center_code: selectedRtomItem.code,
         rtom_name: selectedRtomItem.name,
         rtom_status: "Active",
         handling_type: selectedhandlingtype, // Add handling type here
@@ -597,134 +600,136 @@ const DRCInfo = () => {
   };
 
   const handleSave = async () => {
-    try {
-      let remarkBy = userData
-        ? userData.id || userData.userId || userData
-        : "system";
+  try {
+    let remarkBy = userData
+      ? userData.id || userData.userId || userData
+      : "system";
 
-      // Validate contact number
-      if (contactNo && !isValidPhoneNumber(contactNo)) {
-        Swal.fire({
-          icon: "error",
-          title: "Invalid Contact Number",
-          text: "Please enter a valid contact number.",
-        });
-        return;
-      }
-
-      // Validate email
-      if (email && !isValidEmail(email)) {
-        Swal.fire({
-          icon: "error",
-          title: "Invalid Email",
-          text: "Please enter a valid email address.",
-        });
-        return;
-      }
-
-      // Validate remark field
-      if (!remark.trim()) {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Please add a remark before saving",
-        });
-        return;
-      }
-
-      // Validate coordinator fields if in editing mode
-      if (editingCoordinator) {
-        if (
-          !coordinatorFields.service_no ||
-          !coordinatorFields.slt_coordinator_name ||
-          !coordinatorFields.slt_coordinator_email
-        ) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "All SLT Coordinator fields are required",
-          });
-          return;
-        }
-      }
-
-      // Get updated services and RTOM data
-      const updatedServices = companyData.services.map((service) => ({
-        ...service,
-        status_update_dtm: new Date().toISOString(),
-      }));
-
-      const updatedRtom = companyData.rtom.map((rtom) => ({
-        ...rtom,
-        status_update_dtm: new Date().toISOString(),
-      }));
-
-      // Prepare the coordinator data
-      let coordinatorData = currentCoordinator;
-      if (editingCoordinator) {
-        coordinatorData = coordinatorFields;
-      }
-
-      // Current date for remark timestamp
-      const currentDate = new Date().toISOString();
-
-      const response = await updateDRCInfo(
-        companyData.drc_id,
-        coordinatorData,
-        updatedServices,
-        updatedRtom,
-        remark,
-        remarkBy,
-        currentDate,
-        address,
-        contactNo,
-        email,
-        companyData.status
-      );
-
+    // Validate contact number
+    if (contactNo && !isValidPhoneNumber(contactNo)) {
       Swal.fire({
-        icon: "success",
-        title: "Success!",
-        html: `
-          <div class="flex flex-col items-center">
-            <p class="text-lg font-bold">DRC information updated successfully</p>
-            <p class="text-sm text-gray-600 mt-2">Changes have been saved to the database</p>
-          </div>
-        `,
-        showConfirmButton: true,
-        confirmButtonText: "Continue",
-        confirmButtonColor: "#3B82F6",
-      }).then(() => {
-        setEditMode(false);
-        // Refresh the data
-        const fetchCompanyData = async () => {
-          try {
-            setLoading(true);
-            const drcIdToUse = drcId;
-            const data = await getDebtCompanyByDRCID(drcIdToUse);
-            if (data) {
-              setCompanyData(data);
-            }
-            setLoading(false);
-          } catch (err) {
-            console.error("Failed to fetch DRC data:", err);
-            setLoading(false);
-          }
-        };
-        fetchCompanyData();
+        icon: "error",
+        title: "Invalid Contact Number",
+        text: "Please enter a valid contact number.",
       });
+      return;
+    }
 
-      // Reset coordinator editing state
-      setEditingCoordinator(false);
-    } catch (err) {
-      console.error("Failed to update DRC data:", err);
+    // Validate email
+    if (email && !isValidEmail(email)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Email",
+        text: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    // Validate remark field
+    if (!remark.trim()) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Failed to update DRC information",
+        text: "Please add a remark before saving",
       });
+      return;
     }
-  };
+
+    // Prepare coordinator data - either new data or existing
+    let coordinatorData = currentCoordinator;
+    if (editingCoordinator) {
+      if (!ServiceNo || !C_Name || !C_Email) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "All SLT Coordinator fields are required",
+        });
+        return;
+      }
+      
+      coordinatorData = [{
+        service_no: ServiceNo,
+        slt_coordinator_name: C_Name,
+        slt_coordinator_email: C_Email
+      }];
+    }
+
+    // Get updated services and RTOM data
+    const updatedServices = companyData.services.map((service) => {
+      const matchedService = serviceTypes.find(st => st.name === service.service_type);
+      return {
+        service_id: matchedService?.id || service.service_id,
+        service_type: service.service_type,
+        service_status: service.service_status,
+        status_update_dtm: new Date().toISOString(),
+      };
+    });
+
+    const updatedRtom = companyData.rtom.map((rtom) => ({
+      ...rtom,
+      status_update_dtm: new Date().toISOString(),
+    }));
+
+    // Current date for remark timestamp
+    const currentDate = new Date().toISOString();
+
+    const response = await updateDRCInfo(
+      companyData.drc_id,
+      coordinatorData,
+      updatedServices,
+      updatedRtom,
+      remark,
+      remarkBy,
+      currentDate,
+      address,
+      contactNo,
+      email,
+      companyData.status
+    );
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      html: `
+        <div class="flex flex-col items-center">
+          <p class="text-lg font-bold">DRC information updated successfully</p>
+          <p class="text-sm text-gray-600 mt-2">Changes have been saved to the database</p>
+        </div>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: "Continue",
+      confirmButtonColor: "#3B82F6",
+    }).then(() => {
+      setEditMode(false);
+      setEditingCoordinator(false);
+      
+      // Refresh the data
+      const fetchCompanyData = async () => {
+        try {
+          setLoading(true);
+          const drcIdToUse = drcId;
+          const data = await getDebtCompanyByDRCID(drcIdToUse);
+          if (data) {
+            setCompanyData(data);
+          }
+          setLoading(false);
+        } catch (err) {
+          console.error("Failed to fetch DRC data:", err);
+          setLoading(false);
+        }
+      };
+      fetchCompanyData();
+    });
+
+  } catch (err) {
+    console.error("Failed to update DRC data:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to update DRC information",
+    });
+  }
+};
 
   const handleCoordinatorChange = (e) => {
     const { name, value } = e.target;
@@ -817,6 +822,9 @@ const DRCInfo = () => {
   };
   console.log("Log History Data:", remarkHistory);
 
+
+
+
   // Get current coordinator (last one in array)
   const currentCoordinator =
     companyData.slt_coordinator && companyData.slt_coordinator.length > 0
@@ -862,6 +870,37 @@ console.log("DRC Status Data:", {
 
 console.log("latest Status History:", companyData.status || []);
 
+console.log("Service Details with IDs:");
+if (companyData.services && Array.isArray(companyData.services)) {
+  companyData.services.forEach((service, index) => {
+    // Find the matching service in serviceTypes to get the ID
+    const matchedService = serviceTypes.find(st => st.name === service.service_type);
+    
+    console.log(`Service ${index + 1}:`, {
+      id: matchedService?.id || 'Unknown ID',
+      type: service.service_type || 'Unknown Type',
+      status: service.service_status || 'Unknown Status',
+      // Include the raw service object for debugging
+      rawService: service
+    });
+  });
+} else {
+  console.log("No services found or services is not an array");
+}
+
+
+console.log("Company RTOM data:", {
+  rawRtomData: companyData.rtom,
+  mappedData: companyData.rtom?.map(r => ({
+    id: r.rtom_id,
+    code: r.rtom_billing_center_code,
+    name: r.rtom_name,
+    status: r.rtom_status,
+    handling_type: r.handling_type
+  }))
+});
+
+
   if (!editMode) {
     // View mode
     return (
@@ -878,12 +917,12 @@ console.log("latest Status History:", companyData.status || []);
             <img
               src={Edit}
               onClick={() => {
-                if (companyData.status !== "Terminate") {  
+                if (companyData.status !== "Terminate" || companyData.status !== "Pending") {  
                   handleNavigateToEdit();
                 }
               }}
               className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${
-                companyData.status === "Terminate"  
+                companyData.status === "Terminate" || companyData.status === "Pending" 
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
               }`}
@@ -1161,20 +1200,15 @@ console.log("latest Status History:", companyData.status || []);
                         {service.service_type}
                       </td>
                       <td className={`${GlobalStyle.tableData} text-center`}>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          {/* <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={service.service_status === "Active"}
-                            readOnly
-                          /> */}
-                          <img
-                            src={service.service_status ? ActiveStatus : InactiveStatus}
-                            alt={service.service_status? "Active" : "Inactive"}
-                            title={service.service_status ? "Active" : "Inactive"}
-                            className="w-6 h-6 mx-auto"
-                          />
-                        </label>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <img
+                              src={service.service_status === "Active" ? ActiveStatus : InactiveStatus}
+                              alt={service.service_status === "Active" ? "Active" : "Inactive"}
+                              title={service.service_status === "Active" ? "Active" : "Inactive"}
+                              className="w-6 h-6 mx-auto"
+                              onClick={() => handleServiceStatusToggle(index)}
+                            />
+                          </label>
                       </td>
                       <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
                         {service.status_update_dtm
@@ -1297,7 +1331,7 @@ console.log("latest Status History:", companyData.status || []);
                   {/* End Date Row */}
                   <tr className="block sm:table-row">
 
-                    <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                    {/* <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
                       End Date:
                     </td>
                     <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
@@ -1311,7 +1345,7 @@ console.log("latest Status History:", companyData.status || []);
                           minDate={new Date()}
                         />
                       </div>
-                    </td>
+                    </td> */}
 
 
                     <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
@@ -1325,7 +1359,6 @@ console.log("latest Status History:", companyData.status || []);
                           onChange={(date) => setEndDate(date)}
                           dateFormat="dd/MM/yyyy"
                           className={`${GlobalStyle.inputText} w-full text-left`}
-                          maxDate={new Date()}
                           minDate={new Date()}
                         />
                       </div>
@@ -1335,7 +1368,7 @@ console.log("latest Status History:", companyData.status || []);
                   {/* Remark Row */}
                   <tr className="block sm:table-row">
 
-                    <td className={`${GlobalStyle.tableData} font-semibold block sm:hidden`}>
+                    {/* <td className={`${GlobalStyle.tableData} font-semibold block sm:hidden`}>
                       Remark:
                     </td>
                     <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
@@ -1358,7 +1391,7 @@ console.log("latest Status History:", companyData.status || []);
                           Remark is required
                         </p>
                       )}
-                    </td>
+                    </td> */}
 
 
                     <td className={`${GlobalStyle.tableData} font-semibold whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
@@ -1443,16 +1476,16 @@ console.log("latest Status History:", companyData.status || []);
             <div>
               <button
                 onClick={() => {
-                  if (companyData.status !== "Terminate") {  
+                  if (companyData.status !== "Terminate" || companyData.status !== "Pending") {  
                     setShowEndFields(true);
                   }
                 }}
                 className={`${GlobalStyle.buttonPrimary} ${
-                  companyData.status === "Terminate" 
+                  companyData.status === "Terminate" || companyData.status === "Pending"
                     ? "opacity-50 cursor-not-allowed"
                     : ""
                 }`}
-                disabled={companyData.status === "Terminate"}  
+                disabled={companyData.status === "Terminate" || companyData.status === "Pending"}  
               >
                 End
               </button>
@@ -1732,98 +1765,122 @@ console.log("latest Status History:", companyData.status || []);
 
 
           {/* SLT Coordinator Section */}
-          <div className="flex flex-col sm:flex-row justify-between  underline items-start sm:items-center">
-            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
-              SLT Coordinator Details
-            </h2>
-            <div className="w-full flex justify-end sm:block sm:w-auto">
-              <button
-                onClick={() => setEditingCoordinator(!editingCoordinator)}
-                className={`${GlobalStyle.buttonPrimary} px-3 py-1 mb-4 sm:mb-0`}
-              >
-                {editingCoordinator ? "Cancel" : "Change"}
-              </button>
-            </div>
-          </div>
+      <div className="flex flex-col sm:flex-row justify-between underline items-start sm:items-center">
+        <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
+          SLT Coordinator Details
+        </h2>
+        <div className="w-full flex justify-end sm:block sm:w-auto">
+          <button
+            onClick={() => {
+              setEditingCoordinator(!editingCoordinator);
+              if (!editingCoordinator) {
+                setServiceNo(currentCoordinator?.service_no || "");
+                setCName(currentCoordinator?.slt_coordinator_name || "");
+                setCEmail(currentCoordinator?.slt_coordinator_email || "");
+              }
+            }}
+            className={`${GlobalStyle.buttonPrimary} px-3 py-1 mb-4 sm:mb-0`}
+          >
+            {editingCoordinator ? "Cancel" : "Change"}
+          </button>
+        </div>
+      </div>
 
-          <div className={`overflow-x-auto`}>
-            {currentCoordinator || editingCoordinator ? (
-              <table className={`${GlobalStyle.table} min-w-full text-left`}>
-                <tbody>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Service No<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
-                    <input
-                      type="text"
-                      value={coordinatorFields.service_no}
-                      onChange={(e) => setServiceNo(e.target.value)}
-                      className={`${GlobalStyle.inputText} w-100`}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSearchUsers}
-                      className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
-                    >
-                      <FaSearch style={{ width: 20, height: 20 }} />
-                    </button>
-                    {errors.ServiceNo && (
-                      <p className="text-red-500">{errors.ServiceNo}</p>
-                    )}
+        <div className={`overflow-x-auto`}>
+          {currentCoordinator || editingCoordinator ? (
+            <table className={`${GlobalStyle.table} min-w-full text-left`}>
+              <tbody>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Service No<span className="sm:hidden">:</span>
                   </td>
-                  </tr>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Name<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
-                      {editingCoordinator ? (
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                          <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+
+                    {editingCoordinator ? (
+                      <>
+                      
                         <input
                           type="text"
-                          name="slt_coordinator_name"
-                          value={coordinatorFields.slt_coordinator_name}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
+                          value={ServiceNo}
+                          onChange={(e) => {
+                            setServiceNo(e.target.value);
+                            // Clear other fields when service number changes
+                            if (e.target.value !== currentCoordinator?.service_no) {
+                              setCName("");
+                              setCEmail("");
+                            }
+                          }}
+                          className={`${GlobalStyle.inputText} w-100`}
                         />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_name || "Not specified"}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Email<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
-                      {editingCoordinator ? (
-                        <input
-                          type="email"
-                          name="slt_coordinator_email"
-                          value={coordinatorFields.slt_coordinator_email}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
-                        />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_email || "Not specified"}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                No coordinator assigned
-              </div>
-            )}
-          </div>
+                        <button
+                          type="button"
+                          onClick={handleSearchUsers}
+                          className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
+                        >
+                          <FaSearch style={{ width: 20, height: 20 }} />
+                        </button>
+                        {errors.ServiceNo && (
+                          <p className="text-red-500">{errors.ServiceNo}</p>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.service_no || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Name<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="text"
+                        value={C_Name}
+                         readOnly
+                        onFocus={(e) => e.target.blur()}
+                        className={`${GlobalStyle.inputText} w-2/4 cursor-not-allowed `}
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.slt_coordinator_name || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Email<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="email"
+                        value={C_Email}
+                        readOnly
+                        onFocus={(e) => e.target.blur()}
+                        className={`${GlobalStyle.inputText} w-2/4 bg-gray-100 cursor-not-allowed`}
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.slt_coordinator_email || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-center py-4 text-gray-500">
+              No coordinator assigned
+            </div>
+          )}
+        </div>
 
 
           {/*DRC coordinator*/}
