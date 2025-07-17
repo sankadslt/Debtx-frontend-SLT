@@ -332,7 +332,7 @@ export default function RejectIncident() {
     if (!source_type && !fromDate && !toDate) {
       Swal.fire({
         title: 'Warning',
-        text: 'Missing Parameters',
+        text: 'Please select a Source Type or provide a date range before creating a task.',
         icon: 'warning',
         confirmButtonText: 'OK',
         confirmButtonColor: "#f1c40f"
