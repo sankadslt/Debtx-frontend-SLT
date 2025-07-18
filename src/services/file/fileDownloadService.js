@@ -23,4 +23,31 @@ export const List_Download_Files_from_Download_Log = async (pages) => {
       throw error;
     }
 };
-  
+
+
+ 
+
+export const downloadIncidentFile = async (fileDownloadSeq) => {
+  try {
+    const downloadBy = "abc@slt.com";
+
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/file/download",
+      {
+        file_download_seq: fileDownloadSeq,
+        download_by: downloadBy,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data; 
+
+  } catch (error) {
+    console.error("Error downloading file:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};

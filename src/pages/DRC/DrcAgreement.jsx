@@ -105,7 +105,7 @@ const DrcAgreement = () => {
 
           const latestEndDate = new Date(current.agreement_end_dtm.split("T")[0]);
           const today = new Date();
-          today.setHours(0, 0, 0, 0); 
+          today.setHours(0, 0, 0, 0);
 
           const disabled = latestEndDate > today;
           setIsRenewDisabled(disabled);
@@ -113,10 +113,10 @@ const DrcAgreement = () => {
 
         } else {
 
-        console.log("No agreements found for this DRC ID");
-         setAgreementHistory([]);
-        setIsRenewDisabled(false);
-        setButtonLabel("Add Agreement");
+          console.log("No agreements found for this DRC ID");
+          setAgreementHistory([]);
+          setIsRenewDisabled(false);
+          setButtonLabel("Add Agreement");
         }
       }
     } catch (err) {
@@ -134,52 +134,52 @@ const DrcAgreement = () => {
 
 
 
-   const getStatusIcon = (status) => {
-      const statusStr = String(status || '').toLowerCase();
-      
-      switch (statusStr) {
-          case  "approved":
-            return approved;
-          case "expired":
-            return expire;
-          case "pending":
-            return pending;
-          case "rejected":
-            return reject;
-          case "terminated":
-            return terminate;
-          default:
-            return null; // Return null if no matching status found
+  const getStatusIcon = (status) => {
+    const statusStr = String(status || '').toLowerCase();
+
+    switch (statusStr) {
+      case "approved":
+        return approved;
+      case "expired":
+        return expire;
+      case "pending":
+        return pending;
+      case "rejected":
+        return reject;
+      case "terminated":
+        return terminate;
+      default:
+        return null; // Return null if no matching status found
 
 
-      }
+    }
   };
-  
-    
 
 
-const renderStatusIcon = (status) => {
-        if (status === undefined || status === null) {
-            return <span className="flex justify-center items-center">Unknown</span>;
-        }
 
-        const iconPath = getStatusIcon(status);
 
-        if (!iconPath) {
-            return <span className="capitalize">{String(status)}</span>;
-        }
+  const renderStatusIcon = (status) => {
+    if (status === undefined || status === null) {
+      return <span className="flex justify-center items-center">Unknown</span>;
+    }
 
-        return (
-            <img
-                src={iconPath}
-                alt={String(status)}
-                className="w-6 h-6 mx-auto"
-                data-tooltip-id={`status-tooltip-${status}`}
-                data-tooltip-content={status}
-                //title={status}
-            />
-        );
-    };
+    const iconPath = getStatusIcon(status);
+
+    if (!iconPath) {
+      return <span className="capitalize">{String(status)}</span>;
+    }
+
+    return (
+      <img
+        src={iconPath}
+        alt={String(status)}
+        className="w-6 h-6 mx-auto"
+        data-tooltip-id={`status-tooltip-${status}`}
+        data-tooltip-content={status}
+      //title={status}
+      />
+    );
+  };
 
 
 
@@ -273,11 +273,18 @@ const renderStatusIcon = (status) => {
     try {
       setLoading(true);
 
+      const formatDateLocal = (date) => {
+        const year = date.getFullYear();
+        const month = `${date.getMonth() + 1}`.padStart(2, "0");
+        const day = `${date.getDate()}`.padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+
       // Simulate API call
       const updateData = {
         drc_id: drcId,
-        start_date: startDate.toISOString().split('T')[0],
-        end_date: endDate.toISOString().split('T')[0],
+        start_date: formatDateLocal(startDate),
+        end_date: formatDateLocal(endDate),
         remark: remark,
         assigned_by: loggedUserData
       };
@@ -320,10 +327,16 @@ const renderStatusIcon = (status) => {
       await fetchAgreementDetails();
     } catch (err) {
       console.error("Error updating agreement:", err);
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.response?.data?.errors?.description ||
+        err.message ||
+        "Failed to update agreement details";
+
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: err.message || "Failed to update agreement details",
+        text: errorMessage,
         confirmButtonColor: "#d33"
       });
     } finally {
@@ -381,7 +394,7 @@ const renderStatusIcon = (status) => {
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 md:px-8 max-w-7xl mx-auto`}>
       {/* Header */}
       <h2 className={`${GlobalStyle.headingLarge} text-center sm:text-left mb-4 sm:mb-6`}>
-        <span className="italic">{drcId}</span> - <span className="font-semibold">{companyname}</span>
+        <span className="font-semibold">{companyname}</span>
       </h2>
 
       {/* Main Content */}
@@ -576,8 +589,8 @@ const renderStatusIcon = (status) => {
                           <tr
                             key={index}
                             className={`${index % 2 === 0
-                                ? GlobalStyle.tableRowEven
-                                : GlobalStyle.tableRowOdd
+                              ? GlobalStyle.tableRowEven
+                              : GlobalStyle.tableRowOdd
                               } hover:bg-gray-50 transition-colors border-b`}
                           >
                             <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
@@ -690,15 +703,15 @@ const renderStatusIcon = (status) => {
                         <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
                           {formatDateForDisplay(agreement.end_date)}
                         </td>
-                          <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
-                             {renderStatusIcon(agreement.status)}
+                        <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
+                          {renderStatusIcon(agreement.status)}
 
-                              <Tooltip
-                                id={`status-tooltip-${agreement.status}`}
-                                place="bottom"
-                                content={agreement.status}
-                              />
-                          </td>
+                          <Tooltip
+                            id={`status-tooltip-${agreement.status}`}
+                            place="bottom"
+                            content={agreement.status}
+                          />
+                        </td>
 
                         <td className={`${GlobalStyle.tableData} text-left text-xs lg:text-sm`}>
                           {agreement.remark}
