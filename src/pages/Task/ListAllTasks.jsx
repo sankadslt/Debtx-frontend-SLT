@@ -158,7 +158,7 @@ const ListAllTasks = () => {
   }, [fromDate, toDate]);
 
   // handle search
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -236,8 +236,11 @@ const ListAllTasks = () => {
       if (response && response.data) {
         // console.log("Valid data received:", response.data);
 
-        setFilteredData((prevData) => [...prevData, ...response.data]);
-
+        if (currentPage === 1) {
+          setFilteredData(response.data);
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
@@ -281,14 +284,9 @@ const ListAllTasks = () => {
   };
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
-      setMaxCurrentPage(currentPage); // Update max current page
-      // callAPI(); // Call the function whenever currentPage changes
+      setMaxCurrentPage(currentPage); // Update max currentpage
+
       callAPI({
         ...committedFilters,
         currentPage: currentPage,
@@ -305,9 +303,7 @@ const ListAllTasks = () => {
       if (isMoreDataAvailable) {
         setCurrentPage(currentPage + 1);
       } else {
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        setTotalPages(totalPages);
-        if (currentPage < totalPages) {
+        if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
           setCurrentPage(currentPage + 1);
         }
       }
@@ -455,7 +451,10 @@ const ListAllTasks = () => {
                 type="text"
                 className={GlobalStyle.inputSearch}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage(1); // Reset to page 1 on search
+                  setSearchQuery(e.target.value);
+                }}
               />
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
@@ -470,9 +469,10 @@ const ListAllTasks = () => {
                 <tr>
                   <th className={GlobalStyle.tableHeader}>Task ID</th>
                   {/* <th className={GlobalStyle.tableHeader}>Template Task ID</th> */}
+                  <th className={GlobalStyle.tableHeader}>Task Status</th>
+
                   <th className={GlobalStyle.tableHeader}>Task Type</th>
                   {/* <th className={GlobalStyle.tableHeader}>Task Status</th> */}
-                  <th className={GlobalStyle.tableHeader}>Task Status</th>
                   <th className={GlobalStyle.tableHeader}>Created By</th>
                   <th className={GlobalStyle.tableHeader}>Created Date</th>
                 </tr>
@@ -480,49 +480,52 @@ const ListAllTasks = () => {
 
               <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.map((item, index) => (
-                    <tr
-                      key={item.settlement_id || index}
-                      className={
-                        index % 2 === 0
-                          ? GlobalStyle.tableRowEven
-                          : GlobalStyle.tableRowOdd
-                      }
-                    >
-                      <td
-                        className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
-                        onClick={() => naviCaseID(item.case_id)}
+                  filteredDataBySearch
+                    .slice(startIndex, endIndex)
+                    .map((item, index) => (
+                      <tr
+                        key={item.settlement_id || index}
+                        className={
+                          index % 2 === 0
+                            ? GlobalStyle.tableRowEven
+                            : GlobalStyle.tableRowOdd
+                        }
                       >
-                        {item.task_id || "N/A"}
-                      </td>
+                        <td
+                          className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                          // onClick={() => naviCaseID(item.case_id)}
+                        >
+                          {item.task_id || "N/A"}
+                        </td>
 
-                      {/* <td className={GlobalStyle.tableData}>
+                        {/* <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.template_task_id || "N/A"}{" "}
                       </td> */}
-                      <td className={GlobalStyle.tableData}>
-                        {" "}
-                        {item.task_type || "N/A"}{" "}
-                      </td>
-                      <td
-                        className={`${GlobalStyle.tableData} flex justify-center items-center`}
-                      >
-                        {renderStatusIcon(item.task_status, index)}
-                      </td>
-                      {/* <td className={GlobalStyle.tableData}>
+                        <td
+                          className={`${GlobalStyle.tableData} flex justify-center items-center`}
+                        >
+                          {renderStatusIcon(item.task_status, index)}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {" "}
+                          {item.task_type || "N/A"}{" "}
+                        </td>
+
+                        {/* <td className={GlobalStyle.tableData}>
                         {" "}
                         {item.task_status || "N/A"}{" "}
                       </td> */}
-                      <td className={GlobalStyle.tableData}>
-                        {" "}
-                        {item.Created_By || "N/A"}{" "}
-                      </td>
-                      <td className={GlobalStyle.tableData}>
-                        {new Date(item.created_dtm).toLocaleDateString(
-                          "en-GB"
-                        ) || "N/A"}
-                        {/* ,{" "} */}
-                        {/* {new Date(item.created_dtm)
+                        <td className={GlobalStyle.tableData}>
+                          {" "}
+                          {item.Created_By || "N/A"}{" "}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {new Date(item.created_dtm).toLocaleDateString(
+                            "en-GB"
+                          ) || "N/A"}
+                          {/* ,{" "} */}
+                          {/* {new Date(item.created_dtm)
                           .toLocaleTimeString("en-GB", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -530,9 +533,9 @@ const ListAllTasks = () => {
                             hour12: true,
                           })
                           .toUpperCase()} */}
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                      </tr>
+                    ))
                 ) : (
                   <tr>
                     <td
@@ -564,9 +567,25 @@ const ListAllTasks = () => {
               </span>
               <button
                 onClick={() => handlePrevNext("next")}
-                disabled={currentPage === totalPages}
+                disabled={
+                  searchQuery
+                    ? currentPage >=
+                      Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    : !isMoreDataAvailable &&
+                      currentPage >=
+                        Math.ceil(filteredData.length / rowsPerPage)
+                }
                 className={`${GlobalStyle.navButton} ${
-                  currentPage === totalPages ? "cursor-not-allowed" : ""
+                  (
+                    searchQuery
+                      ? currentPage >=
+                        Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                      : !isMoreDataAvailable &&
+                        currentPage >=
+                          Math.ceil(filteredData.length / rowsPerPage)
+                  )
+                    ? "cursor-not-allowed"
+                    : ""
                 }`}
               >
                 <FaArrowRight />
