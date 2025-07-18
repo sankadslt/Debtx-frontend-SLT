@@ -1,8 +1,8 @@
 import axios from "axios";
 import { getLoggedUserId } from "../auth/authService";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
-const INCIDENT_URL = `${BASE_URL}/incident`;
+const BASE_URL = import.meta.env.VITE_BASE_URL; // Should be http://localhost:5000/api
+const INCIDENT_URL = `${BASE_URL}/incident`; // This becomes http://localhost:5000/api/incident
 const API_BASE = "https://debtx.slt.lk:6500";
 
 /**
@@ -54,6 +54,16 @@ export const fetchIncidents = async (payload) => {
   }
 };
  
+
+export const New_List_Incidents = async (filters) => {
+  try {
+    const response = await axios.post(`${INCIDENT_URL}/New_List_Incidents`, filters);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching incidents:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
 export const List_Distribution_Ready_Incidents = async () => {
   try {
     const response = await axios.post(`${INCIDENT_URL}/List_Distribution_Ready_Incidents`);
@@ -210,4 +220,4 @@ export const Task_for_Download_Incidents = async (status1, status2,fromDate,toDa
       throw error.response?.data || error;
   }
 };
- 
+
