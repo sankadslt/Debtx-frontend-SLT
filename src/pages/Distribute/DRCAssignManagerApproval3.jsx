@@ -724,6 +724,7 @@ export default function DRCAssignManagerApproval3() {
               <option value="Case Abandoned Approval" style={{ color: "black" }}>Case Abandoned Approval</option>
               <option value="Case Write-Off Approval" style={{ color: "black" }}>Case Write-Off Approval</option>
               <option value="Commission Approval" style={{ color: "black" }}>Commission Approval</option>
+              <option value="DRC Agreement" style={{ color: "black" }}>DRC Agreement</option>
 
 
             </select>
@@ -836,7 +837,7 @@ export default function DRCAssignManagerApproval3() {
                   className="mx-auto"
                 /> */}
               {/* </th> */}
-              <th className={GlobalStyle.tableHeader}>Case ID</th>
+              <th className={GlobalStyle.tableHeader}>Approver Reference</th>
               <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Approve Type</th>
               <th className={GlobalStyle.tableHeader}>Approve By</th>
