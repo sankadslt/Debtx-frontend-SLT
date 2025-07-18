@@ -84,7 +84,7 @@ const UserList = () => {
       // console.log("Payload sent to API: ", requestData);
 
       const response = await getAllUserDetails(requestData);
-      // console.log("API Response:", response);
+      console.log("API Response:", response);
 
       if (response && response.status === "success" && Array.isArray(response.data)) {
         if (response.data.length === 0) {
@@ -118,7 +118,7 @@ const UserList = () => {
               user_name: user.username,
               user_email: user.email,
               contact_num: Array.isArray(user.contact_num) && user.contact_num.length > 0 
-                ? user.contact_num[0].contact_num 
+                ? user.contact_num[0].contact_number 
                 : "N/A",
               created_on: new Date(user.Created_DTM).toLocaleDateString("en-CA"),
             })),
@@ -222,7 +222,6 @@ const UserList = () => {
         setCurrentPage(1);
       }
     }
-
   }
 
   const handleClear = () => {
@@ -291,9 +290,7 @@ const UserList = () => {
       .join(" ");
   };
 
-
   const handleUserRegister = () => navigate("/pages/user/signup");
-
 
   // Function to render status icon with tooltip
   const renderStatusIcon = (user) => {
@@ -645,7 +642,7 @@ const UserList = () => {
           <button
             onClick={() => handlePrevNext("prev")}
             disabled={currentPage <= 1}
-            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <FaArrowLeft />
           </button>
@@ -655,7 +652,7 @@ const UserList = () => {
           <button
             onClick={() => handlePrevNext("next")}
             disabled={currentPage === totalPages}
-            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <FaArrowRight />
           </button>
