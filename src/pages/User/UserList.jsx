@@ -7,7 +7,7 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the User list Screen */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import activeIcon from "../../assets/images/User/User_Active.png";
@@ -35,18 +35,24 @@ const UserList = () => {
     userType: "" 
   });
   
-  const [filteredData, setFilteredData] = useState([]);
+  const [allFetchedData, setAllFetchedData] = useState([]);
+  const [displayData, setDisplayData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tooltipVisible, setTooltipVisible] = useState(null);
 
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true); // State to track if more data is available
   const rowsPerPage = 10;
-
+  const fetchFirstPageSize = 10;
+  const fetchSubsequentPageSize = 30;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const fetchedPages = useRef(new Set());
+  
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = displayData.slice(startIndex, endIndex);
+  
   const userRoles = [
     { value: "", label: "User Role", hidden: true },
     { value: "GM", label: "GM" },
@@ -59,124 +65,128 @@ const UserList = () => {
     { value: "rtom", label: "RTOM" }
   ];
 
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-  const hasMounted = useRef(false);
+  const getApiPageFromDisplayPage = (displayPage) => {
+    if (displayPage <= 1) return 1;
+    return Math.floor((displayPage - 1) / 3) + 2;
+  };
 
-  // useEffect(() => {
-  //   console.log("Filtered Data", filteredData);
-    
-  // }, [filteredData])
-
-  const fetchUsers = async (filters) => {
+  // Fetch users
+  const fetchUsers = async (page, filters) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const requestData = {
-        page: filters.page,
+        page,
         user_role: filters.userRole,
         user_type: filters.userType,
         user_status: filters.status
-      }
-      
-      // console.log("Payload sent to API: ", requestData);
+      };
 
       const response = await getAllUserDetails(requestData);
-      console.log("API Response:", response);
 
-      if (response && response.status === "success" && Array.isArray(response.data)) {
-        if (response.data.length === 0) {
-          setIsMoreDataAvailable(false); // No more data
+      if (response?.status === "success" && Array.isArray(response.data)) {
+        const newUsers = response.data.map((user) => ({
+          user_id: user.user_id,
+          status: user.user_status,
+          user_type: user.user_type?.toUpperCase() || "",
+          user_role: user.role,
+          user_name: user.username,
+          user_email: user.email,
+          contact_num:
+            Array.isArray(user.contact_num) && user.contact_num.length > 0
+              ? user.contact_num[0].contact_number
+              : "N/A",
+          created_on: new Date(user.Created_DTM).toLocaleDateString("en-CA")
+        }));
 
-          if (currentPage === 1) {
-            Swal.fire({
-              title: "No Results",
-              text: "No matching users found for the selected filters.",
-              icon: "warning",
-              allowOutsideClick: false,
-              allowEscapeKey: false,
-              confirmButtonColor: "#f1c40f",
-            });
-          } else if (currentPage === 2) {
-            setCurrentPage(1); // Reset to page 1 if no data on page 2
-          }
-          
-          setFilteredData([]); // Clear data on no results
-        } else {
-          const maxData = currentPage === 1 ? 10 : 30;
+        setAllFetchedData((prev) =>
+          page === 1 ? newUsers : [...prev, ...newUsers]
+        );
 
-          // Append new users to existing data
-          setFilteredData((prevData) => [
-            ...prevData,
-            ...response.data.map(user => ({
-              user_id: user.user_id,
-              status: user.user_status,
-              user_type: user.user_type?.toUpperCase() || "",
-              user_role: user.role,
-              user_name: user.username,
-              user_email: user.email,
-              contact_num: Array.isArray(user.contact_num) && user.contact_num.length > 0 
-                ? user.contact_num[0].contact_number 
-                : "N/A",
-              created_on: new Date(user.Created_DTM).toLocaleDateString("en-CA"),
-            })),
-          ]);
+        const expectedSize = page === 1 ? fetchFirstPageSize : fetchSubsequentPageSize;
+        setIsMoreDataAvailable(newUsers.length === expectedSize);
 
-          // If fewer than max data returned, no more data available
-          if (response.data.length < maxData) {
-            setIsMoreDataAvailable(false);
-          }
-        }
+        fetchedPages.current.add(page);
+
+        if (newUsers.length === 0 && page === 1) showNoResultsAlert();
       } else {
-        Swal.fire({
-          title: "Error",
-          text: "No valid user data found in response.",
-          icon: "error",
-          confirmButtonColor: "#d33",
-        });
-        setFilteredData([]);
+        throw new Error("No valid user data found");
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
       setError(error.message || "Failed to fetch users");
-      setFilteredData([]);
+      if (page === 1) setAllFetchedData([]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Initial + filter change
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
+    fetchedPages.current.clear();
+    setAllFetchedData([]);
+    setCurrentPage(1);
+    setIsMoreDataAvailable(true);
 
-    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
-      setMaxCurrentPage(currentPage);
-      fetchUsers({
-        ...appliedFilters,
-        page: currentPage
-      });
+    fetchUsers(1, appliedFilters);
+  }, [appliedFilters]);
+
+  // Search
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = allFetchedData.filter((user) =>
+        Object.values(user).some((val) =>
+          String(val).toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+      setDisplayData(filtered);
+    } else {
+      setDisplayData(allFetchedData);
+    }
+  }, [searchQuery, allFetchedData]);
+
+  // Ensure displayData stays in sync
+  useEffect(() => {
+    if (!searchQuery) setDisplayData(allFetchedData);
+  }, [allFetchedData, searchQuery]);
+
+  // Pagination lazy load
+  useEffect(() => {
+    const pagesAvailable = Math.ceil(allFetchedData.length / rowsPerPage);
+
+    if (currentPage > pagesAvailable && isMoreDataAvailable) {
+      const pageToFetch = getApiPageFromDisplayPage(currentPage);
+      if (!fetchedPages.current.has(pageToFetch)) {
+        fetchUsers(pageToFetch, appliedFilters);
+      }
     }
   }, [currentPage]);
+
 
   // Handle Pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage((prev) => prev - 1);
     } else if (direction === "next") {
-      if (isMoreDataAvailable) {
-        setCurrentPage(currentPage + 1);
-      } else {
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        setTotalPages(totalPages);
-        if (currentPage < totalPages) {
-          setCurrentPage(currentPage + 1);
-        }
+      const pagesAvailable = Math.ceil(displayData.length / rowsPerPage);
+      if (currentPage < pagesAvailable || isMoreDataAvailable) {
+        setCurrentPage((prev) => prev + 1);
       }
     }
+  };
+
+  const isNextDisabled = () => {
+    const lastDisplayPage = Math.ceil(displayData.length / rowsPerPage);
+    return currentPage >= lastDisplayPage && !isMoreDataAvailable;
+  };
+
+  const showNoResultsAlert = () => {
+    Swal.fire({
+      title: "No Results",
+      text: "No matching users found for the selected filters.",
+      icon: "warning",
+      confirmButtonColor: "#f1c40f"
+    });
   };
 
   // Validate filters before calling the API
@@ -197,60 +207,27 @@ const UserList = () => {
   };
 
   const handleFilterButton = () => {
-    setIsMoreDataAvailable(true);
-    setTotalPages(0);
-    setMaxCurrentPage(0);
-
-    const isValid =filterValidations();
-    if (!isValid) {
-      return;
-    } else {
-      setAppliedFilters({
-        userRole :userRole,
-        userType :userType,
-        status :status
+    if (!userRole && !userType && !status) {
+      Swal.fire({
+        title: "Warning",
+        text: "No filter is selected. Please, select a filter.",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f"
       });
-      setFilteredData([]);
-      if (currentPage === 1) {
-        fetchUsers({
-          page: 1,
-          userRole,
-          userType,
-          status
-        });
-      }else {
-        setCurrentPage(1);
-      }
+      return;
     }
-  }
+
+    setAppliedFilters({ userRole, userType, status });
+  };
 
   const handleClear = () => {
-    // Clear both the form fields and applied filters
     setStatus("");
     setUserRole("");
     setUserType("");
-    
-    // Reset Search Query
     setSearchQuery("");
-
-    // Reset Pagination
-    setTotalPages(0); // Reset total pages
-    setFilteredData([]); // Clear filtered data
-    setMaxCurrentPage(0); // Reset max current page
+    setAppliedFilters({ status: "", userRole: "", userType: "" });
+    setCurrentPage(1);
     setIsMoreDataAvailable(true);
-
-    setAppliedFilters({ 
-      status: "", 
-      userRole: "", 
-      userType: "" 
-    });
-
-    if (currentPage != 1) {
-      setCurrentPage(1); // Reset to page 1
-    } else {
-      setCurrentPage(0); // Temp set to 0
-      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
-    }
   };
 
   // Search Section
@@ -641,8 +618,8 @@ const UserList = () => {
         <div className={GlobalStyle.navButtonContainer}>
           <button
             onClick={() => handlePrevNext("prev")}
-            disabled={currentPage <= 1}
-            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={currentPage === 1}
+            className={`${GlobalStyle.navButton} disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <FaArrowLeft />
           </button>
@@ -651,8 +628,8 @@ const UserList = () => {
           </span>
           <button
             onClick={() => handlePrevNext("next")}
-            disabled={currentPage === totalPages}
-            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={isNextDisabled()}
+            className={`${GlobalStyle.navButton} disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <FaArrowRight />
           </button>
