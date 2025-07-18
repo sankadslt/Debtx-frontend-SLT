@@ -24,10 +24,10 @@ import {
   getSLTCoordinators,
   getActiveServiceDetails,
   getActiveRTOMDetails,
+  getUserDetailsByIdforDRC,
   
 } from "../../services/drc/Drc";
 import { getLoggedUserId } from "../../services/auth/authService";
-import { getUserDetailsById } from "../../services/user/user_services";
 
 const DRCInfo = () => {
   // Navigation 
@@ -150,7 +150,7 @@ const DRCInfo = () => {
       try {
   
         // Fetch user details
-        const response = await getUserDetailsById(ServiceNo);
+        const response = await getUserDetailsByIdforDRC(ServiceNo);
         
         // Handle different response structures:
         const userData = response.data || response; // Check for nested data
