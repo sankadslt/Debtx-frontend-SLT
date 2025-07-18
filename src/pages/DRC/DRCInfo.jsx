@@ -1354,7 +1354,8 @@ console.log("Company RTOM data:", {
 
 
                     <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                      End Date
+                      End Date  <span className="text-red-500">*</span>
+
                     </td>
                     <td className="w-4 text-left hidden sm:table-cell">:</td>
                     <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1400,7 +1401,8 @@ console.log("Company RTOM data:", {
 
 
                     <td className={`${GlobalStyle.tableData} font-semibold whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                      Remark
+                      Remark    <span className="text-red-500">*</span>
+
                     </td>
                     <td className="w-4 text-left hidden sm:table-cell">:</td>
                     <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1678,7 +1680,7 @@ console.log("Company RTOM data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Address<span className="sm:hidden">:</span>
+                    Address <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1693,7 +1695,7 @@ console.log("Company RTOM data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Contact Number<span className="sm:hidden">:</span>
+                    Contact Number  <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1708,7 +1710,7 @@ console.log("Company RTOM data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Email<span className="sm:hidden">:</span>
+                    Email  <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1796,8 +1798,10 @@ console.log("Company RTOM data:", {
             <table className={`${GlobalStyle.table} min-w-full text-left`}>
               <tbody>
                 <tr className="block sm:table-row">
-                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Service No<span className="sm:hidden">:</span>
+                 <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                  Service No
+                    {editingCoordinator && <span className="text-red-500">*</span>}
+                      <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                           <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
@@ -2259,9 +2263,9 @@ console.log("Company RTOM data:", {
             <tbody>
               <tr>
                 <td
-                  className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
+                  className={`${GlobalStyle.tableData}  whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
                 >
-                  Remark
+                  Remark  <span className="text-red-500">*</span>
                 </td>
               </tr>
               <tr>
