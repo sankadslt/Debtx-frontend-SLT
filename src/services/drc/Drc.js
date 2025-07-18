@@ -5,6 +5,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/DRC`;
 const URL2 = `${BASE_URL}/recovery_officer`;
 const URL3 = `${BASE_URL}/DRC_service`;
+const USER_URL = `${BASE_URL}/user`;
 
 export const Active_DRC_Details = async () => {
   try {
@@ -148,6 +149,7 @@ export const getDebtCompanyByDRCID = async (drcId) => {
     const response = await axios.post(`${URL}/List_DRC_Details_By_DRC_ID`, {
       drc_id: drcId,
     });
+    console.log("Response from getDebtCompanyByDRCID:", response.data);
     const data = response.data.data;
     return data;
   } catch (error) {
@@ -216,6 +218,7 @@ export const updateDRCInfo = async (
         rtom_id: rtomItem.rtom_id,
         rtom_name: rtomItem.rtom_name,
         rtom_status: rtomItem.rtom_status,
+         rtom_billing_center_code: rtomItem.rtom_billing_center_code,
         handling_type: rtomItem.handling_type,
         status_update_dtm: rtomItem.status_update_dtm || new Date().toISOString(),
         status_update_by: rtomItem.status_update_by || updated_by
@@ -506,4 +509,21 @@ export const Assign_DRC_To_Agreement = async (updateData) => {
   }
 }
 
+export const getUserDetailsByIdforDRC = async (user_id) => {
+  try {
+    const response = await axios.post(`${USER_URL}/List_All_User_Details_By_ID`, {
+      user_id,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to fetch user details by ID",
+      }
+    );
+  }
+};
 

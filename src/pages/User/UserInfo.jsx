@@ -109,8 +109,8 @@ const UserInfo = () => {
           setFormData({
             userType: fetchedData.data.user_type || "",
             userMail: fetchedData.data.email || "",
-            contact_num: Array.isArray(fetchedData.data.contact_num) && fetchedData.data.contact_num.length > 0 
-                ? fetchedData.data.contact_num[0].contact_num 
+            contact_num: fetchedData.contact_num && fetchedData.contact_num.length > 0
+                ? fetchedData.contact_num[0].contact_num
                 : "N/A",
             loginMethod: fetchedData.data.login_method || "",
             userRole: fetchedData.data.role || "",
@@ -244,7 +244,7 @@ const UserInfo = () => {
       };
 
       const response = await endUser(payload);
-      // console.log(response);
+      console.log(response);
       
       // Refresh user data if termination succeeded
       const fetchedData = await getUserDetailsById(user_id);
@@ -386,7 +386,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-2/3 sm:w-auto align-middle">
                         <label className={`${GlobalStyle.headingSmall} align-middle`}>
-                          {formData.contact_num || "N/A"}
+                          {formData.contact_num.contact_number || "N/A"}
                         </label>
                       </td>
                     </tr>

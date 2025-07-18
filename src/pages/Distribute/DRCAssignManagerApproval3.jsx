@@ -484,8 +484,9 @@ export default function DRCAssignManagerApproval3() {
     const payload = {
       approver_reference: batchIds,
       approved_by: userId,
+      approver_id: record?.approver_id || "", // Ensure approver_id is included
     };
-    //console.log("Approve payload:", payload);
+    // console.log("Approve payload:", payload);
     try {
       const response = await Approve_DRC_Assign_Manager_Approval(payload);
       //console.log("Approve response:", response);
@@ -509,7 +510,7 @@ export default function DRCAssignManagerApproval3() {
         icon: "error",
         title: "Error",
         text: errorMessage,
-        confirmButtonColor: "#f1c40f",
+        confirmButtonColor: "#d33",
       });
     }
   };
@@ -561,6 +562,7 @@ export default function DRCAssignManagerApproval3() {
     const payload = {
       approver_reference: batchIds,
       approved_by: userId,
+      approver_id: record?.approver_id || "", // Ensure approver_id is included
     };
     //console.log("Approve payload:", payload);
     try {
@@ -722,6 +724,7 @@ export default function DRCAssignManagerApproval3() {
               <option value="Case Abandoned Approval" style={{ color: "black" }}>Case Abandoned Approval</option>
               <option value="Case Write-Off Approval" style={{ color: "black" }}>Case Write-Off Approval</option>
               <option value="Commission Approval" style={{ color: "black" }}>Commission Approval</option>
+              <option value="DRC Agreement" style={{ color: "black" }}>DRC Agreement</option>
 
 
             </select>
@@ -834,7 +837,7 @@ export default function DRCAssignManagerApproval3() {
                   className="mx-auto"
                 /> */}
               {/* </th> */}
-              <th className={GlobalStyle.tableHeader}>Case ID</th>
+              <th className={GlobalStyle.tableHeader}>Approver Reference</th>
               <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Approve Type</th>
               <th className={GlobalStyle.tableHeader}>Approve By</th>
