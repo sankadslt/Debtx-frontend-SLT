@@ -394,7 +394,7 @@ const DrcAgreement = () => {
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 md:px-8 max-w-7xl mx-auto`}>
       {/* Header */}
       <h2 className={`${GlobalStyle.headingLarge} text-center sm:text-left mb-4 sm:mb-6`}>
-        <span className="italic">{drcId}</span> - <span className="font-semibold">{companyname}</span>
+        <span className="font-semibold">{companyname}</span>
       </h2>
 
       {/* Main Content */}
