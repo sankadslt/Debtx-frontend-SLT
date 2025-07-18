@@ -1968,24 +1968,24 @@ console.log("Company RTOM data:", {
 
             <div className="flex items-center mb-4 ">
               <select
-                onClick={handleDropdownClick}
-                value={selectedServiceType}
-                onChange={(e) => setSelectedServiceType(e.target.value)}
-                className={`${GlobalStyle.selectBox} mr-2`}
-              >
-                <option value="">Select Service Type</option>
-                {serviceLoading ? (
-                  <option disabled>Loading...</option>
-                ) : (
-                  serviceTypes
-                    .filter((service) => !service.selected)
-                    .map((service) => (
-                      <option key={service.id} value={service.name}>
-                        {service.name}
-                      </option>
-                    ))
-                )}
-              </select>
+                  onClick={handleDropdownClick}
+                  value={selectedServiceType}
+                  onChange={(e) => setSelectedServiceType(e.target.value)}
+                  className={`${GlobalStyle.selectBox} mr-2`}
+                >
+                  <option value="" disabled hidden>Select Service Type</option>
+                  {serviceLoading ? (
+                    <option disabled>Loading...</option>
+                  ) : (
+                    serviceTypes
+                      .filter((service) => !service.selected)
+                      .map((service) => (
+                        <option key={service.id} value={service.name}>
+                          {service.name}
+                        </option>
+                      ))
+                  )}
+                </select>
               <button
                 type="button"
                 onClick={handleAddServiceType}
@@ -2116,7 +2116,7 @@ console.log("Company RTOM data:", {
                 onChange={(e) => setSelectedRTOM(e.target.value)}
                 className={`${GlobalStyle.selectBox} mr-2`}
               >
-                <option value="">Select Billing Center Area</option>
+                <option value=""  disabled hidden >Select Billing Center Area</option>
                 {rtomLoading ? (
                   <option disabled>Loading...</option>
                 ) : (
@@ -2134,7 +2134,7 @@ console.log("Company RTOM data:", {
                 onChange={(e) => Setselectedhandlingtype(e.target.value)}
                 className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
               >
-                    <option value="">Select Handling Type</option>
+                    <option value="" disabled hidden >Select Handling Type</option>
                     <option value="CPE">CPE</option>
                     <option value="Arrears">Arrears</option>
                     <option value="All-Type">All Type</option>
