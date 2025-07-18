@@ -274,7 +274,7 @@ export default function DRCAssignManagerApproval2() {
           }
         });
 
-      } else {
+      } else if (IsApproved === "Reject") {
         Swal.fire({
           icon: "success",
           title: "Rejected",
@@ -289,6 +289,13 @@ export default function DRCAssignManagerApproval2() {
           } else {
             setCurrentPage(1); // Reset to first page
           }
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Invalid approval status.",
+          confirmButtonColor: "#d33",
         });
       }
 
