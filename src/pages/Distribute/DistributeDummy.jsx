@@ -15,7 +15,7 @@ const DistributeDummy = () => {
           display: "flex",
           flexDirection: "column",
           gap: "5px",
-          alignItems: "flex-start", // Align all links to the same vertical point
+          alignItems: "flex-start",  
           marginLeft: "auto",
           marginRight: "auto",
           width: "fit-content",

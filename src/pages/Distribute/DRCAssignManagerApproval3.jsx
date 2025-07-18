@@ -8,8 +8,8 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes: The following page conatins the codes */
 
-import { useState , useEffect } from "react";
-import { FaArrowLeft, FaArrowRight, FaSearch , FaDownload } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Importing GlobalStyle
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -35,18 +35,26 @@ export default function DRCAssignManagerApproval3() {
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [filteredData, setFilteredData] = useState([]); // State for filtered data
   const [drcFilter, setDrcFilter] = useState(""); // DRC filter state
-  const [ approverstatus , setApproverStatus] = useState(""); // Approver status state]
+  const [approverstatus, setApproverStatus] = useState(""); // Approver status state]
   const [startDate, setStartDate] = useState(null); // Start date state
   const [endDate, setEndDate] = useState(null); // End date state
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [isLoading, setIsLoading] = useState(false); // Loading state
   const navigate = useNavigate(); // For navigation
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5;
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const recordsPerPage = 10;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentData = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Track the maximum current page
+  const [committedFilters, setCommittedFilters] = useState({
+    drcFilter: "",
+    startDate: null,
+    endDate: null,
+    approverstatus: "",
+  });
 
   // Role-Based Buttons
   useEffect(() => {
@@ -83,11 +91,11 @@ export default function DRCAssignManagerApproval3() {
         text: "Start date cannot be later than end date.",
         confirmButtonColor: "#f1c40f",
       });
-    
+
     }
     else {
       setStartDate(date);
-    if (endDate) checkdatediffrence(date, endDate);
+      // if (endDate) checkdatediffrence(date, endDate);
     }
 
   };
@@ -101,12 +109,12 @@ export default function DRCAssignManagerApproval3() {
         text: "End date cannot be earlier than start date.",
         confirmButtonColor: "#f1c40f",
       });
-      
+
     }
     else {
-      if (startDate) {
-        checkdatediffrence(startDate, date);
-      }
+      // if (startDate) {
+      //   checkdatediffrence(startDate, date);
+      // }
       setEndDate(date);
 
     }
@@ -114,138 +122,215 @@ export default function DRCAssignManagerApproval3() {
   }
 
   // Fetch data on component mount
-  useEffect(() => {
-    // Fetch data from the API
-    const fetchDRCData = async () => {
-      const userId = await getLoggedUserId();
-      const payload = {
-        approved_deligated_by: userId,
-      };
-     // console.log("Request Payload:", payload);
-      try {
-        const response = await List_DRC_Assign_Manager_Approval(payload);
-      //  console.log("Response:", response);
-        setFilteredData(response);
-      } catch (error) {
-        console.error("Error fetching DRC assign manager approval:", error);
-      }
+  // useEffect(() => {
+  //   // Fetch data from the API
+  //   const fetchDRCData = async () => {
+  //     const userId = await getLoggedUserId();
+  //     const payload = {
+  //       approved_deligated_by: userId,
+  //     };
+  //     // console.log("Request Payload:", payload);
+  //     try {
+  //       const response = await List_DRC_Assign_Manager_Approval(payload);
+  //       console.log("Response:", response);
+  //       setFilteredData(response);
+  //     } catch (error) {
+  //       console.error("Error fetching DRC assign manager approval:", error);
+  //     }
+  //   };
+  //   fetchDRCData();
+  // }, []);
+
+
+  // Function to check date difference and show alert if more than 1 month
+  // const checkdatediffrence = (startDate, endDate) => {
+  //   const start = new Date(startDate).getTime();
+  //   const end = new Date(endDate).getTime();
+  //   const diffInMs = end - start;
+  //   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  //   const diffInMonths = diffInDays / 30;
+
+  //   if (diffInMonths > 1) {
+  //     Swal.fire({
+  //       title: "Date Range Exceeded",
+  //       text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+  //       icon: "warning",
+  //       showCancelButton: true,
+  //       confirmButtonText: "Yes",
+  //       confirmButtonColor: "#28a745",
+  //       cancelButtonText: "No",
+  //       cancelButtonColor: "#d33",
+  //     }).then((result) => {
+  //       if (result.isConfirmed) {
+
+  //         endDate = endDate;
+  //         handleApicall(startDate, endDate);
+  //       } else {
+  //         setEndDate(null);
+  //         // console.log("EndDate cleared");
+  //       }
+  //     }
+  //     );
+
+  //   }
+  // };
+
+  // Function to handle API call for creating task when the date range exceeds 1 month
+  // const handleApicall = async (startDate, endDate) => {
+  //   try {
+  //     const userId = await getLoggedUserId();
+  //     const payload = {
+  //       date_from: startDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
+  //       date_to: endDate.toISOString().split("T")[0],     // Format: YYYY-MM-DD
+  //       Created_By: userId,
+  //     };
+
+  //     // console.log("Filtered Request Payload:", payload);
+
+  //     const data = await Create_task_for_DRC_Assign_Manager_Approval(payload);
+  //     // console.log("Response:", data);
+
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Success",
+  //       text: "Data sent successfully.",
+  //       confirmButtonColor: "#28a745",
+  //     });
+
+  //   } catch (error) {
+  //     console.error("Error in sending the data:", error);
+
+  //     const errorMessage = error?.response?.data?.message ||
+  //       error?.message ||
+  //       "An error occurred. Please try again.";
+
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: errorMessage,
+  //       confirmButtonColor: "#d33",
+  //     });
+  //   }
+  // };
+
+
+
+
+  const fetchDRCDataAPI = async (filters) => {
+    const userId = await getLoggedUserId();
+
+    const payload = {
+      approved_deligated_by: userId,
+      approver_type: filters.drcFilter,
+      date_from: filters.startDate,
+      date_to: filters.endDate,
+      approver_status: filters.approverstatus,
+      pages: filters.currentPage, // Add pagination parameter
     };
-    fetchDRCData();
-  }, []);
+    console.log("Fetching DRC data with payload:", payload);
 
+    // console.log("Request Payload:", payload);
+    try {
+      setIsLoading(true); // Set loading state to true
+      const response = await List_DRC_Assign_Manager_Approval(payload);
+      setIsLoading(false); // Set loading state to false
+      console.log("Response:", response);
+      // setFilteredData(response);
 
-    // Function to check date difference and show alert if more than 1 month
-    const checkdatediffrence = (startDate, endDate) => {
-      const start = new Date(startDate).getTime();
-      const end = new Date(endDate).getTime();
-      const diffInMs = end - start;
-      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-      const diffInMonths = diffInDays / 30;
-    
-      if (diffInMonths > 1) {
-        Swal.fire({
-          title: "Date Range Exceeded",
-          text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Yes",
-          confirmButtonColor: "#28a745",
-          cancelButtonText: "No",
-          cancelButtonColor: "#d33",
-        }).then((result) => {
-          if (result.isConfirmed) {
-  
-            endDate = endDate;
-            handleApicall(startDate, endDate);
-          } else {
-            setEndDate(null);
-           // console.log("EndDate cleared");
+      // Updated response handling
+      if (response) {
+        // console.log("Valid data received:", response.data);
+        if (currentPage === 1) {
+          setFilteredData(response)
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response]);
+        }
+
+        if (response.length === 0) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
+            });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
           }
         }
-        );
-  
-      }
-    };
 
-    // Function to handle API call for creating task when the date range exceeds 1 month
-    const handleApicall = async (startDate, endDate) => {
-      try {
-        const userId = await getLoggedUserId();
-        const payload = {
-          date_from: startDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
-          date_to: endDate.toISOString().split("T")[0],     // Format: YYYY-MM-DD
-          Created_By: userId,
-        };
-    
-       // console.log("Filtered Request Payload:", payload);
-    
-        const data = await Create_task_for_DRC_Assign_Manager_Approval(payload);
-       // console.log("Response:", data);
-    
+      } else {
         Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Data sent successfully.",
-          confirmButtonColor: "#28a745",
-        });
-
-      } catch (error) {
-        console.error("Error in sending the data:", error);
-    
-        const errorMessage = error?.response?.data?.message || 
-                             error?.message || 
-                             "An error occurred. Please try again.";
-    
-        Swal.fire({
-          icon: "error",
           title: "Error",
-          text: errorMessage,
-          confirmButtonColor: "#d33",
+          text: "No valid Settlement data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33"
         });
+        setFilteredData([]);
       }
-    };
-    
-      
 
-
-
-
-  // Filter data based on selected filters
-  const applyFilters = async () => {
-    const payload = {};
-    if (drcFilter) {
-      payload.approver_type = drcFilter;
-    }
-    if (approverstatus) {
-      payload.approve_status = approverstatus;
-    }
-    if (startDate) {
-      payload.date_from = startDate;
-    }
-    if (endDate) {
-      payload.date_to = endDate;
-    }
-    const userId = await getLoggedUserId();
-    payload.approved_deligated_by = userId;
-
-    //console.log("Filtered Request Data:", payload);
-
-    if ((startDate && !endDate) || (!startDate && endDate)) {
-          Swal.fire({
-            title: "Error",
-            text: "Please select both start and end dates.",
-            icon: "error",
-            confirmButtonColor: "#f1c40f",
-          });
-          return;
-        }
-
-    try {
-      const response = await List_DRC_Assign_Manager_Approval(payload);
-     // console.log("Filtered Response Data:", response);
-      setFilteredData(response);
     } catch (error) {
       console.error("Error fetching DRC assign manager approval:", error);
+      setIsLoading(false); // Set loading state to false
+    } finally {
+      setIsLoading(false); // Ensure loading state is false in case of error
+    }
+  };
+
+  useEffect(() => {
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      // callAPI(); // Call the function whenever currentPage changes
+      fetchDRCDataAPI({
+        ...committedFilters,
+        currentPage: currentPage
+      });
+    }
+  }, [currentPage]);
+
+  // Filter data based on selected filters
+  const applyFilters = () => {
+    setCurrentPage(1);
+    setIsMoreDataAvailable(true); // Reset to allow fetching more data
+    setMaxCurrentPage(0); // Reset max current page
+
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+      Swal.fire({
+        title: "Error",
+        text: "Please select both start and end dates.",
+        icon: "error",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    setCommittedFilters({
+      drcFilter: drcFilter,
+      startDate: startDate, // Format: YYYY-MM-DD
+      endDate: endDate, // Format: YYYY-MM-DD
+      approverstatus: approverstatus,
+    });
+
+    setFilteredData([]); // Clear previous filtered data
+    setSearchQuery(""); // Clear search query
+    if (currentPage === 1) {
+      fetchDRCDataAPI({
+        drcFilter: drcFilter,
+        startDate: startDate, // Format: YYYY-MM-DD
+        endDate: endDate, // Format: YYYY-MM-DD
+        approverstatus: approverstatus,
+        currentPage: 1, // Reset to page 1
+      });
+    } else {
+      setCurrentPage(1); // Reset to page 1 if filters are applied
     }
   };
 
@@ -255,43 +340,50 @@ export default function DRCAssignManagerApproval3() {
     setStartDate(null);
     setEndDate(null);
     setApproverStatus("");
-    
-    const filterclear = async () => {
-      const userId = await getLoggedUserId();
-      const payload = {
-        approved_deligated_by: userId,
-      };
-     // console.log("Request Payload:", payload);
-      try {
-        const response = await List_DRC_Assign_Manager_Approval(payload);
-      //  console.log("Response:", response);
-        setFilteredData(response);
-      } catch (error) {
-        console.error("Error fetching DRC assign manager approval:", error);
-      }
-    };
-    filterclear();
+    setSelectedRows(new Set());
+    setIsMoreDataAvailable(true); // Reset to allow fetching more data
+    setMaxCurrentPage(0); // Reset max current page
+    setFilteredData([]); // Clear previous filtered data
+    setSearchQuery(""); // Clear search query
+    setCommittedFilters({
+      drcFilter: "",
+      startDate: null,
+      endDate: null,
+      approverstatus: "",
+    });
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   };
 
   // Handle pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+    } else if (direction === "next") {
+      if (isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      } else {
+        if (currentPage < Math.ceil(filteredData.length / recordsPerPage)) {
+          setCurrentPage(currentPage + 1);
+        }
+      }
     }
   };
 
   // Filtering the data based on search query
-  const filteredDataBySearch = searchQuery
-    ? filteredData.filter((row) =>
-        Object.values(row)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      )
-    : currentData;
+  const filteredDataBySearch =
+    filteredData.filter((row) =>
+      Object.values(row)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    )
   //console.log("Filtered Data:", filteredDataBySearch);
+  const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
 
   //const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
@@ -344,30 +436,16 @@ export default function DRCAssignManagerApproval3() {
   };
 
   // Function to handle approve button click
-  const onApproveButtonClick = async ( ) => {
+  const onApproveButtonClick = async (currentRow) => {
     const userId = await getLoggedUserId();
-    const batchIds = Array.from(selectedRows);
-   // console.log("Selected batch IDs:", batchIds);
-    if (batchIds.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please select at least one record to approve.",
-        confirmButtonColor: "#f1c40f",
-      });
-      return;
-    }
+    // const batchIds = Array.from(selectedRows);
+    // console.log("Selected batch IDs:", batchIds);
+    const batchIds = currentRow;
 
-    const alreadyApproved = batchIds.some((id) => {
-      const record = filteredData.find((row) => row.approver_reference === id);
-      
-      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
+    const record = filteredData.find((row) => row.approver_reference === batchIds);
+    const status = record?.approve_status?.[0]?.status || "";
 
-      return status === "Approve" ;
-
-  });
-  //console.log("Already Approved:", alreadyApproved);
-    if (alreadyApproved) {
+    if (status === "Approve") {
       Swal.fire({
         icon: "warning",
         title: "Warning",
@@ -377,17 +455,7 @@ export default function DRCAssignManagerApproval3() {
       return;
     }
 
-    const rejected = batchIds.some((id) => {
-      const record = filteredData.find((row) => row.approver_reference === id);
-
-      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
-
-      return status === "Reject";
-
-    });
-    //console.log("Rejected:", rejected);
-
-    if (rejected) {
+    if (status === "Reject") {
       Swal.fire({
         icon: "warning",
         title: "Warning",
@@ -396,27 +464,22 @@ export default function DRCAssignManagerApproval3() {
       });
       return;
     }
-    
-   
 
-      // Show confirmation alert before calling API
-      const result = await Swal.fire({
-        title: "Are you sure?",
-        text: "Do you really want to approve the selected record?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
-        confirmButtonColor: "#28a745",
-        cancelButtonColor: "#d33",
+    // Show confirmation alert before calling API
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to approve the selected record?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
     });
 
     if (!result.isConfirmed) {
       return;
     }
-
-
-
 
     const payload = {
       approver_reference: batchIds,
@@ -437,10 +500,10 @@ export default function DRCAssignManagerApproval3() {
       applyFilters();
     } catch (error) {
       console.error("Error approving batch:", error);
-      
-      const errorMessage = error?.response?.data?.message || 
-                             error?.message || 
-                             "An error occurred. Please try again.";
+
+      const errorMessage = error?.response?.data?.message ||
+        error?.message ||
+        "An error occurred. Please try again.";
 
       Swal.fire({
         icon: "error",
@@ -452,30 +515,14 @@ export default function DRCAssignManagerApproval3() {
   };
 
   // Function to handle reject button click
-  const onRejectButtonClick = async () => {
+  const onRejectButtonClick = async (currentRow) => {
     const userId = await getLoggedUserId();
-    const batchIds = Array.from(selectedRows);
-   // console.log("Selected batch IDs:", batchIds);
-    if (batchIds.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please select at least one record to reject.",
-        confirmButtonColor: "#f1c40f",
-      });
-      return;
-    }
+    const batchIds = currentRow;
 
-    const alreadyApproved = batchIds.some((id) => {
-      const record = filteredData.find((row) => row.approver_reference === id);
+    const record = filteredData.find((row) => row.approver_reference === batchIds);
+    const status = record?.approve_status?.[0]?.status || "";
 
-      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
-
-      return status === "Approve";
-
-  });
-  //console.log("Already Approved:", alreadyApproved);
-    if (alreadyApproved) {
+    if (status === "Approve") {
       Swal.fire({
         icon: "warning",
         title: "Warning",
@@ -485,17 +532,7 @@ export default function DRCAssignManagerApproval3() {
       return;
     }
 
-    const rejected = batchIds.some((id) => {
-      const record = filteredData.find((row) => row.approver_reference === id);
-
-      const status = record.approve_status.length > 0 ? record.approve_status[0].status : "";
-
-      return status === "Reject";
-
-    });
-    //console.log("Rejected:", rejected);
-
-    if (rejected) {
+    if (status === "Reject") {
       Swal.fire({
         icon: "warning",
         title: "Warning",
@@ -504,17 +541,17 @@ export default function DRCAssignManagerApproval3() {
       });
       return;
     }
-    
-      // Show confirmation alert before calling API
-      const result = await Swal.fire({
-        title: "Are you sure?",
-        text: "Do you really want to rejected the selected record?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
-        confirmButtonColor: "#28a745",
-        cancelButtonColor: "#d33",
+
+    // Show confirmation alert before calling API
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to rejected the selected record?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
     });
 
     if (!result.isConfirmed) {
@@ -522,13 +559,13 @@ export default function DRCAssignManagerApproval3() {
     }
 
     const payload = {
-      approver_references: batchIds,
+      approver_reference: batchIds,
       approved_by: userId,
     };
     //console.log("Approve payload:", payload);
     try {
       const response = await Reject_DRC_Assign_Manager_Approval(payload);
-    //  console.log("Approve response:", response);
+      //  console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -540,10 +577,10 @@ export default function DRCAssignManagerApproval3() {
       applyFilters();
     } catch (error) {
       console.error("Error approving batch:", error);
-      
-      const errorMessage = error?.response?.data?.message || 
-                             error?.message || 
-                             "An error occurred. Please try again.";
+
+      const errorMessage = error?.response?.data?.message ||
+        error?.message ||
+        "An error occurred. Please try again.";
 
       Swal.fire({
         icon: "error",
@@ -557,15 +594,15 @@ export default function DRCAssignManagerApproval3() {
   // Function to handle create task button click
   const onCreateTask = async () => {
 
-    if(!startDate || !endDate) {
-          Swal.fire({
-            title: "warning",
-            text: "Please select both start and end dates.",
-            icon: "warning",
-            confirmButtonColor: "#f1c40f",
-          });
-          return;
-        }
+    if (!startDate || !endDate) {
+      Swal.fire({
+        title: "warning",
+        text: "Please select both start and end dates.",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
 
 
     const userId = await getLoggedUserId();
@@ -593,22 +630,22 @@ export default function DRCAssignManagerApproval3() {
       const response = await Create_task_for_DRC_Assign_Manager_Approval(
         payload
       );
-      //console.log("Approve response:", response);
+      // console.log("Approve response:", response);
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Data sent successfully.",
+        title: "Task Created Successfully",
+        text: "Task ID: " + response.response.data.Task_Id,
         confirmButtonColor: "#28a745",
       });
       //setSelectAll(false);
       setSelectedRows(new Set());
-      applyFilters();
+      // applyFilters();
     } catch (error) {
       console.error("Error approving batch:", error);
-        
-      const errorMessage = error?.response?.data?.message || 
-      error?.message || 
-      "An error occurred. Please try again.";
+
+      const errorMessage = error?.response?.data?.message ||
+        error?.message ||
+        "An error occurred. Please try again.";
 
 
       Swal.fire({
@@ -624,11 +661,11 @@ export default function DRCAssignManagerApproval3() {
   const onTableIconClick = (item) => {
 
     const formattedParameters = Object.entries(item.parameters)
-    .map(([key, value]) => `  "${key}": ${JSON.stringify(value)}`)
-    .join('\n');
+      .map(([key, value]) => `  "${key}": ${JSON.stringify(value)}`)
+      .join('\n');
 
     Swal.fire({
-      
+
       title: "Row Parameters",
       html: `
       <div style="margin-top: -15px; font-size: 15px; color: #000; margin-bottom: 10px;">
@@ -648,113 +685,120 @@ export default function DRCAssignManagerApproval3() {
     navigate("/Incident/Case_Details", {
       state: { CaseID: caseid }, // Pass the case ID as a parameter
     });
-   // console.log("Navigating to Case Details with ID:", caseid);
+    // console.log("Navigating to Case Details with ID:", caseid);
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
-      <h1 className={GlobalStyle.headingLarge}>Assigned DRC Summary</h1>
+      <h1 className={GlobalStyle.headingLarge}>Approval</h1>
       <div className="flex justify-end ">
         {/* Filter Section */}
-        <div  className= {`${GlobalStyle.cardContainer}  w-full mt-6    `}>
-            <div className="flex  flex-wrap gap-3">
-              {" "}
-              {/* <div className="flex flex-wrap gap-3 h-[35px] "> */}
-                <select
-                  className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
-                  value={drcFilter}
-                  onChange={handleOnApproveTypeChange}
-                  style={{ color: drcFilter === "" ? "gray" : "black" }}
+        <div className={`${GlobalStyle.cardContainer}  w-full mt-6    `}>
+          <div className="flex  flex-wrap  justify-end gap-3">
+            {" "}
+            {/* <div className="flex flex-wrap gap-3 h-[35px] "> */}
+            <select
+              className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
+              value={drcFilter}
+              onChange={handleOnApproveTypeChange}
+              style={{ color: drcFilter === "" ? "gray" : "black" }}
 
+            >
+              <option value="" hidden>
+                Select Approve Type
+              </option>
+              {/* <option value="DRC Assign Approval" style={{ color: "black" }}>DRC Assign Approval </option> */}
+              <option value="DRC Re-Assign Approval" style={{ color: "black" }}>DRC Re-Assign Approval</option>
+              <option value="Case Withdrawal Approval" style={{ color: "black" }}>Case Withdrawal Approval</option>
+              <option value="Case Abandoned Approval" style={{ color: "black" }}>Case Abandoned Approval</option>
+              <option value="Case Write-Off Approval" style={{ color: "black" }}>Case Write-Off Approval</option>
+              <option value="Commission Approval" style={{ color: "black" }}>Commission Approval</option>
+
+
+            </select>
+
+            <select
+              className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
+              value={approverstatus}
+              onChange={(e) => setApproverStatus(e.target.value)}
+              style={{ color: approverstatus === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>
+                Select Approve Status
+              </option>
+              <option value="Open" style={{ color: "black" }}>Open</option>
+              <option value="Approve" style={{ color: "black" }}>Approve</option>
+              <option value="Reject" style={{ color: "black" }}>Reject</option>
+
+
+            </select>
+
+
+
+
+            {/* </div> */}
+
+            <label className={GlobalStyle.dataPickerDate} style={{ marginTop: '5px', display: 'block' }}>Date : </label>
+            <DatePicker
+              selected={startDate}
+              onChange={handlestartdatechange}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="From"
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+            />
+
+            <DatePicker
+              selected={endDate}
+              onChange={handleenddatechange}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="To"
+              className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+            />
+
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  onClick={applyFilters}
+                  className={`${GlobalStyle.buttonPrimary} h-[35px] w-full sm:w-auto`}
                 >
-                  <option value="" hidden>
-                    Select Approve Type
-                  </option>
-                  <option value="DRC Assign Approval" style={{ color: "black" }}>DRC Assign Approval </option>
-                  <option value="DRC Re-Assign Approval" style={{ color: "black" }}>DRC Re-Assign Approval</option>
-                  <option value="Case Withdrawal Approval" style={{ color: "black" }}>Case Withdrawal Approval</option>
-                  <option value="Case Abandoned Approval" style={{ color: "black" }}>Case Abandoned Approval</option>
-                  <option value="Case Write-Off Approval" style={{ color: "black" }}>Case Write-Off Approval</option>
-                  <option value="Commission Approval" style={{ color: "black" }}>Commission Approval</option>
-                  
+                  Filter
+                </button>
+              )}
+            </div>
 
-                </select>
-
-                <select 
-                  className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
-                  value={approverstatus}
-                  onChange={(e) => setApproverStatus(e.target.value)}
-                  style={{ color: approverstatus === "" ? "gray" : "black" }}
-                >
-                  <option value="" hidden>
-                    Select Approve Status
-                  </option>
-                  <option value="Open" style={{ color: "black" }}>Open</option>
-                  <option value="Approve" style={{ color: "black" }}>Approve</option>
-                  <option value="Reject" style={{ color: "black" }}>Reject</option>
-                  
-
-                </select>
-
-
-
-
-              {/* </div> */}
-
-                  <label className={GlobalStyle.dataPickerDate}  style={{ marginTop: '5px', display: 'block' }}>Date : </label>
-                  <DatePicker
-                    selected={startDate}
-                    onChange={handlestartdatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="From"
-                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  />
-
-                  <DatePicker
-                    selected={endDate}
-                    onChange={handleenddatechange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="To"
-                   className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  />
-
-                <div>
-                    {["admin", "superadmin", "slt"].includes(userRole) && (
-                        <button
-                            onClick={applyFilters}
-                            className={`${GlobalStyle.buttonPrimary} h-[35px] w-full sm:w-auto`}
-                          >
-                            Filter
-                      </button>
-                    )}
-                 </div>
-              
-              {/* <button
+            {/* <button
                 onClick={applyFilters}
                 className={`${GlobalStyle.buttonPrimary} h-[35px] `}
               >
                 Filter
               </button> */}
 
-              <div>
-                  {["admin", "superadmin", "slt"].includes(userRole) && (
-                    <button
-                    className={`${GlobalStyle.buttonRemove} h-[35px]  w-full sm:w-auto`}
-                    onClick={handlefilterClear}
-                    >
-                      clear
-                    </button>
-                  )}
-              </div>
-              {/* <button
+            <div>
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonRemove} h-[35px]  w-full sm:w-auto`}
+                  onClick={handlefilterClear}
+                >
+                  clear
+                </button>
+              )}
+            </div>
+            {/* <button
                 className={`${GlobalStyle.buttonRemove} h-[35px] `}
                 onClick={handlefilterClear}
                 >
                   clear
                 </button> */}
-            </div>
+          </div>
         </div>
       </div>
 
@@ -764,10 +808,13 @@ export default function DRCAssignManagerApproval3() {
         <div className={GlobalStyle.searchBarContainer}>
           <input
             type="text"
-            placeholder=""  
+            placeholder=""
 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setCurrentPage(1); // Reset to first page on new search
+              setSearchQuery(e.target.value)
+            }}
             className={GlobalStyle.inputSearch}
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -775,18 +822,18 @@ export default function DRCAssignManagerApproval3() {
       </div>
 
       {/* Table Section */}
-       <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
-              <th className={GlobalStyle.tableHeader}>
-                {/* <input
+              {/* <th className={GlobalStyle.tableHeader}> */}
+              {/* <input
                   type="checkbox"
                   checked={selectAll}
                   onChange={handleSelectAll}
                   className="mx-auto"
                 /> */}
-              </th>
+              {/* </th> */}
               <th className={GlobalStyle.tableHeader}>Case ID</th>
               <th className={GlobalStyle.tableHeader}>Approve Status</th>
               <th className={GlobalStyle.tableHeader}>Approve Type</th>
@@ -794,16 +841,17 @@ export default function DRCAssignManagerApproval3() {
               <th className={GlobalStyle.tableHeader}>Remark</th>
               <th className={GlobalStyle.tableHeader}>Created by</th>
               <th className={GlobalStyle.tableHeader}>Created on</th>
-              
-              
-              
-              
+
+
+
+
+              <th className={GlobalStyle.tableHeader}></th>
               <th className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
           <tbody>
             {filteredDataBySearch.length > 0 ? (
-              filteredDataBySearch.map((item, index) => (
+              filteredDataBySearch.slice(indexOfFirstRecord, indexOfLastRecord).map((item, index) => (
                 <tr
                   key={`${item.drc}-${index}`}
                   className={
@@ -812,26 +860,26 @@ export default function DRCAssignManagerApproval3() {
                       : GlobalStyle.tableRowOdd
                   }
                 >
-                  <td className="text-center">
+                  {/* <td className="text-center">
                     <input
                       type="checkbox"
                       checked={selectedRows.has(item.approver_reference)}
                       onChange={() => handleRowSelect(item.approver_reference)}
                       className="mx-auto"
                     />
-                  </td>
+                  </td> */}
                   <td className={GlobalStyle.tableData}>
-                    <button 
+                    <button
                       onClick={() => onhoverbuttonclick(item.approver_reference)}
-                      onMouseOver={(e) => e.currentTarget.style.textDecoration = "underline"} 
+                      onMouseOver={(e) => e.currentTarget.style.textDecoration = "underline"}
                       onMouseOut={(e) => e.currentTarget.style.textDecoration = "none"} >
 
-                          {item.approver_reference}
+                      {item.approver_reference.toString().padStart(3, '0')}
 
                     </button>
                   </td>
                   <td className={GlobalStyle.tableData}>
-                  {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
+                    {item.approve_status.length > 0 ? item.approve_status[0].status : "N/A"}
                   </td>
                   <td className={GlobalStyle.tableData}>
                     {item.approver_type}
@@ -842,17 +890,17 @@ export default function DRCAssignManagerApproval3() {
                       ? item.remark[item.remark.length - 1].remark
                       : "N/A"}
                   </td>
-                  
+
                   <td className={GlobalStyle.tableData}>{item.created_by}</td>
                   <td className={GlobalStyle.tableData}>
                     {new Date(item.created_on).toLocaleDateString("en-GB")}
                   </td>
-                  
-                  
-                  
-                  
-                  
-                  <td className={GlobalStyle.tableData}>
+
+
+
+
+
+                  <td className={`${GlobalStyle.tableData} text-center`}>
                     <button onClick={() => onTableIconClick(item)}>
 
                       <img
@@ -865,6 +913,28 @@ export default function DRCAssignManagerApproval3() {
                       />
                       <Tooltip id="my-tooltip" place="bottom" content="View Parameters" />
                     </button>
+                  </td>
+                  <td className="text-center">
+                    <div className="flex justify-center gap-2 ml-2 mr-2">
+                      {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                          onClick={() => onApproveButtonClick(item.approver_reference)}
+                          className={GlobalStyle.buttonPrimary}
+                        >
+                          Approve
+                        </button>
+                      )}
+
+                      {/* Reject Button */}
+                      {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                          onClick={() => onRejectButtonClick(item.approver_reference)}
+                          className={GlobalStyle.buttonRemove}
+                        >
+                          Reject
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -880,31 +950,37 @@ export default function DRCAssignManagerApproval3() {
       </div>
 
       {/* Pagination Section */}
-      { filteredDataBySearch.length > 0 && (
-      <div className={GlobalStyle.navButtonContainer}>
-        <button
-          onClick={() => handlePrevNext("prev")}
-          disabled={currentPage === 1}
-          className={`${GlobalStyle.navButton} ${
-            currentPage === 1 ? "cursor-not-allowed" : ""
-          }`}
-        >
-          <FaArrowLeft />
-        </button>
-        <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => handlePrevNext("next")}
-          disabled={currentPage === totalPages}
-          className={`${GlobalStyle.navButton} ${
-            currentPage === totalPages ? "cursor-not-allowed" : ""
-          }`}
-        >
-          <FaArrowRight />
-        </button>
-      </div>
-      )}
+      {filteredDataBySearch.length > 0 && (
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            onClick={() => handlePrevNext("prev")}
+            disabled={currentPage === 1}
+            className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""
+              }`}
+          >
+            <FaArrowLeft />
+          </button>
+          <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+            Page {currentPage}
+          </span>
+          <button
+            onClick={() => handlePrevNext("next")}
+            disabled={searchQuery
+              ? currentPage >= Math.ceil(filteredDataBySearch.length / recordsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / recordsPerPage
+              )}
+            className={`${GlobalStyle.navButton} ${(searchQuery
+              ? currentPage >= Math.ceil(filteredDataBySearch.length / recordsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / recordsPerPage))
+              ? "cursor-not-allowed"
+              : ""
+              }`}
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+      )
+      }
 
       {/* Select All Data Checkbox and Approve Button */}
       <div className="flex justify-end gap-4 mt-4">
@@ -921,7 +997,7 @@ export default function DRCAssignManagerApproval3() {
 
 
         {/* Approve Button */}
-        
+
         {/* <button
           onClick={onApproveButtonClick}
           className={GlobalStyle.buttonPrimary}
@@ -929,29 +1005,29 @@ export default function DRCAssignManagerApproval3() {
           Approve
         </button> */}
 
-        <div>
-            {["admin", "superadmin", "slt"].includes(userRole) && (
-              <button
+        {/* <div>
+          {["admin", "superadmin", "slt"].includes(userRole) && (
+            <button
               onClick={onApproveButtonClick}
               className={GlobalStyle.buttonPrimary}
             >
               Approve
             </button>
-            )}
-        </div>
+          )}
+        </div> */}
 
         {/* Reject Button */}
 
-        <div>
-            {["admin", "superadmin", "slt"].includes(userRole) && (
+        {/* <div>
+          {["admin", "superadmin", "slt"].includes(userRole) && (
             <button
               onClick={onRejectButtonClick}
               className={GlobalStyle.buttonRemove}
             >
               Reject
             </button>
-            )}
-        </div>
+          )}
+        </div> */}
         {/* <button
           onClick={onRejectButtonClick}
           className={GlobalStyle.buttonRemove}
@@ -962,15 +1038,15 @@ export default function DRCAssignManagerApproval3() {
 
       {/* Create Task Button */}
       <div>
-        { filteredDataBySearch.length > 0 && (
-        <div>
+        {filteredDataBySearch.length > 0 && (
+          <div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
-            <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
-            <FaDownload className="mr-2" />
-               Create Task and Let me know
-           </button>
+              <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
+                <FaDownload className="mr-2" />
+                Create Task and Let me know
+              </button>
             )}
-        </div>
+          </div>
         )}
 
         {/* <button onClick={onCreateTask} className={`${GlobalStyle.buttonPrimary} flex items-center `}>
@@ -980,6 +1056,6 @@ export default function DRCAssignManagerApproval3() {
       </div>
 
 
-    </div>
+    </div >
   );
 }

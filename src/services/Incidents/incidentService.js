@@ -3,6 +3,7 @@ import { getLoggedUserId } from "../auth/authService";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL; // Ensure the base URL is correctly set
 const INCIDENT_URL = `${BASE_URL}/incident`;
+const API_BASE = "https://debtx.slt.lk:6500";
 
 /**
  * Creates a new incident by calling the Create_Incident API.
@@ -23,41 +24,36 @@ export const createIncident = async (incidentData) => {
 export const incidentRegisterBulkUpload = async (incidentData) => {
   try {
     const response = await axios.post(`${INCIDENT_URL}/Upload_DRS_File`, incidentData);
-    return response.data; // Return the success response
+    return response.data;  
   } catch (error) {
     console.error("Error creating incident:", error.response?.data || error.message);
-    throw error.response?.data || error; // Throw detailed error for handling
+    throw error.response?.data || error;  
   }
 };
 
-export const fetchIncidents = async (filters) => {
+export const fetchIncidents = async (payload) => {
   try {
-    console.log("Sending filters:", filters);
-    const response = await axios.post(`${INCIDENT_URL}/List_Incidents`, filters);
-    console.log("Response:", response.data);
+  //  console.log("Sending filters:", filters);
+    const response = await axios.post(
+      `${INCIDENT_URL}/List_Incidents`,
+      payload
+    );
+   // console.log("Response:", response.data);
 
-    if (response.data.status === "success") {
-      return response.data.incidents.map((incident) => ({
-        incidentID: incident.Incident_Id,
-        status: incident.Incident_Status,
-        accountNo: incident.Account_Num,
-        action: incident.Actions,
-        sourceType: incident.Source_Type,
-        createdDTM: new Date(incident.Created_Dtm).toLocaleString(),
-      }));
-    } else {
-      throw new Error("Failed to fetch incidents");
-    }
-  } catch (error) {
-    console.error("Detailed error:", {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    throw error.response?.data?.message || "An error occurred while fetching data";
+     
+      return response.data;
+      } 
+  catch (error) {
+    console.error(
+      "Detailed error:",
+     
+    error.response?.data || error.message
+     
+    );
+    throw error ;
   }
 };
-
+ 
 export const List_Distribution_Ready_Incidents = async () => {
   try {
     const response = await axios.post(`${INCIDENT_URL}/List_Distribution_Ready_Incidents`);
@@ -80,9 +76,9 @@ export const distribution_ready_incidents_group_by_arrears_band= async () => {
   }
 };
 
-export const List_Transaction_Logs_Upload_Files = async (requestBody) => {
+export const List_Transaction_Logs_Upload_Files = async (payload) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/List_Transaction_Logs_Upload_Files`, requestBody);
+    const response = await axios.post(`${INCIDENT_URL}/List_Transaction_Logs_Upload_Files`, payload);
 
     return response.data;
   } catch (error) {
@@ -128,9 +124,17 @@ export const getDirectLODIncidentsCount = async () => {
   return response.data?.data?.Distribution_ready_total;
 };
 
-export const Create_Case_for_incident = async (requestData) => {
+export const Create_Case_for_incident = async (Incident_Id) => {
   try {
-    const response = await axios.post(`${INCIDENT_URL}/Create_Case_for_incident`, requestData);
+
+    const user_id = await getLoggedUserId();
+    console.log("Request Data being sent:", Incident_Id);
+
+    const response = await axios.post(`https://debtx.slt.lk:6500/Create_Cases_From_Incident`, {
+      Incident_Id,
+      // Proceed_By : user_id,
+    });
+    
     return response.data; // Returns the created cases
   } catch (error) {
     console.error("Error in Create_Case_for_incident service:", error.message);
@@ -143,16 +147,38 @@ export const Forward_CPE_Collect = async (Incident_Id) => {
   try {
      const user_id = await getLoggedUserId();
 
-    const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`,  { 
+    // const response = await axios.post(`https://124.43.177.52:7174/Create_Cases_From_Incident`, requestData);
+     const response = await axios.post(`https://debtx.slt.lk:6500/Create_Cases_From_Incident`,  { 
       Incident_Id, 
-      Proceed_By : user_id,
+      // Proceed_By : user_id,
     });
+    
+    // const response = await axios.post(`${INCIDENT_URL}/Forward_CPE_Collect`,  { 
+    //   Incident_Id, 
+    //   Proceed_By : user_id,
+    // });
+    
     return response; 
+    
+//     catch (error) {
+//   console.error("Network/Request error:", error);
+//   if (error.response) {
+//     console.log("Response:", error.response.data);
+//   } else if (error.request) {
+//     console.log("Request:", error.request);
+//   } else {
+//     console.log("Error Message:", error.message);
+//   }
+// }
+
   } catch (error) {
     console.error("Error forwarding CPE Collect incidents:", error.response?.data || error.message);
     throw error.response?.data || error; 
   }
 };
+
+
+
 export const getOpenTaskCountforCPECollect = async () => {
   try {
     const response = await axios.get(`${INCIDENT_URL}/Open_Task_Count_for_CPE_Collect`);
@@ -165,12 +191,23 @@ export const getOpenTaskCountforCPECollect = async () => {
 };
 
 
-export const Task_for_Download_Incidents = async (incidentData) => {
+export const Task_for_Download_Incidents = async (status1, status2,fromDate,toDate,createdBy) => {
+  
   try {
-      const response = await axios.post(`${INCIDENT_URL}/Task_for_Download_Incidents`, incidentData);
+      const response = await axios.post(`${INCIDENT_URL}/Task_for_Download_Incidents`, { 
+      
+        Incident_Status: status2,
+        Actions: status1,
+        From_Date: fromDate,
+        To_Date: toDate,
+        Created_By:createdBy,
+      
+      
+      });
       return response.data;
   } catch (error) {
       console.error("Error creating incident:", error.response?.data || error.message);
       throw error.response?.data || error;
   }
 };
+ 

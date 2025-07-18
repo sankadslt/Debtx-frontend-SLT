@@ -9,7 +9,7 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the Mediation Board case list Screen */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -40,11 +40,10 @@ const MediationBoardCaseList = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [drcNames, setDrcNames] = useState([]);
   const [selectedDrcId, setSelectedDrcId] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [caseId, setCaseId] = useState("");
   const [searchBy, setSearchBy] = useState("case_id");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +51,14 @@ const MediationBoardCaseList = () => {
   const [rtom, setRtom] = useState("");
   const [rtomList, setRtomList] = useState([]);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const hasMounted = useRef(false);
+  const [committedFilters, setCommittedFilters] = useState({
+    selectedDrcId: "",
+    rtom: "",
+    caseStatus: "",
+    fromDate: null,
+    toDate: null
+  });
 
   const rowsPerPage = 10;
 
@@ -132,7 +139,8 @@ const MediationBoardCaseList = () => {
 
         setDrcNames(names);
       } catch (error) {
-        console.error("Error fetching DRC names:", error);
+        setDrcNames([]);
+        // console.error("Error fetching DRC names:", error);
       }
     };
 
@@ -143,7 +151,8 @@ const MediationBoardCaseList = () => {
 
         setRtomList(rtom);
       } catch (error) {
-        console.error("Error fetching DRC names:", error);
+        setRtomList([]);
+        // console.error("Error fetching DRC names:", error);
       }
     };
 
@@ -152,51 +161,55 @@ const MediationBoardCaseList = () => {
     fetchRTOM();
   }, []);
 
-  // Fetch data from API
-  const fetchData = async () => {
-    try {
+  // validate the filter variables
+  const filterValidations = () => {
+    if (!caseStatus && !rtom && !selectedDrcId && !fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "No filter is selected. Please, select a filter.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
 
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Both From Date and To Date must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    return true;
+  }
+
+  // Call API to fetch data based on filters
+  const CallAPI = async (filter) => {
+    try {
       const formatDate = (date) => {
         if (!date) return null;
         const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
         return offsetDate.toISOString().split('T')[0];
       };
 
-      if (!caseStatus && !rtom && !selectedDrcId && !fromDate && !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "No filter is selected. Please, select a filter.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          confirmButtonColor: "#f1c40f"
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      if ((fromDate && !toDate) || (!fromDate && toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "Both From Date and To Date must be selected.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          confirmButtonColor: "#f1c40f"
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
       const filters = {
-        case_status: caseStatus,
-        From_DAT: formatDate(fromDate),
-        TO_DAT: formatDate(toDate),
-        RTOM: rtom,
-        DRC_ID: selectedDrcId,
-        pages: currentPage,
+        case_status: filter.caseStatus,
+        From_DAT: formatDate(filter.fromDate),
+        TO_DAT: formatDate(filter.toDate),
+        RTOM: filter.rtom,
+        DRC: filter.selectedDrcId,
+        pages: filter.page,
       };
       // console.log("Filters sent to api:", filters);
 
@@ -206,8 +219,13 @@ const MediationBoardCaseList = () => {
       if (response && response.data && response.status === "success") {
         // console.log("Valid data received:", response.data);
 
-        // Append the new data to the existing data
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data); // Set initial data for page 1
+        } else {
+          // Append the new data to the existing data
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
+
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
@@ -219,6 +237,8 @@ const MediationBoardCaseList = () => {
               allowEscapeKey: false,
               confirmButtonColor: "#f1c40f"
             });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no results found on page 2
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
@@ -235,11 +255,10 @@ const MediationBoardCaseList = () => {
         });
         setFilteredData([]);
       }
-
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: error.message || "Failed to fetch data.",
+        text: "Failed to fetch data.",
         icon: "error",
         confirmButtonText: "OK",
         confirmButtonColor: "#d33"
@@ -259,28 +278,14 @@ const MediationBoardCaseList = () => {
     validateDates(fromDate, date);
   };
 
+  // validate dates
   const validateDates = (from, to) => {
     if (from && to) {
 
-      if (from >= to) {
+      if (from > to) {
         Swal.fire({
           title: "Warning",
           text: "From date must be before to date",
-          icon: "warning",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#f1c40f",
-        });
-        setFromDate(null);
-        setToDate(null);
-        return false;
-      }
-      const oneMonthLater = new Date(from);
-      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
-
-      if (to > oneMonthLater) {
-        Swal.fire({
-          title: "Warning",
-          text: "Date range cannot exceed one month",
           icon: "warning",
           confirmButtonText: "OK",
           confirmButtonColor: "#f1c40f",
@@ -315,23 +320,46 @@ const MediationBoardCaseList = () => {
   }, [caseId]);
 
   useEffect(() => {
-    if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
-      fetchData(); // Call the function whenever currentPage changes
+      // CallAPI(); // Call the function whenever currentPage changes
+      CallAPI({
+        ...committedFilters,
+        page: currentPage,
+      })
     }
   }, [currentPage]);
 
   // Handle filter button click
   const handleFilterButton = () => {
-    setFilteredData([]); // Clear previous results
     setIsMoreDataAvailable(true); // Reset more data available state
     setMaxCurrentPage(0); // Reset max current page
-    if (currentPage === 1) {
-      fetchData();
+    setTotalPages(0); // Reset total pages
+    const isValid = filterValidations();
+    if (!isValid) {
+      return; // If validation fails, do not proceed
     } else {
-      setCurrentPage(1);
+      setCommittedFilters({
+        selectedDrcId,
+        rtom,
+        caseStatus,
+        fromDate,
+        toDate
+      })
+      setFilteredData([]); // Clear previous filtered data
+      if (currentPage === 1) {
+        CallAPI({
+          selectedDrcId,
+          rtom,
+          caseStatus,
+          fromDate,
+          toDate,
+          page: 1
+        });
+      } else {
+        setCurrentPage(1);
+      }
     }
-    setIsFilterApplied(true); // Set filter applied state to true
   }
 
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -341,7 +369,7 @@ const MediationBoardCaseList = () => {
   // console.log("Paginated data:", paginatedData);
 
   // Search Section
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -353,9 +381,7 @@ const MediationBoardCaseList = () => {
     if (isMoreDataAvailable) {
       setCurrentPage(currentPage + 1);
     } else {
-      const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-      setTotalPages(totalPages);
-      if (currentPage < totalPages) {
+      if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
         setCurrentPage(currentPage + 1);
       }
     }
@@ -376,10 +402,23 @@ const MediationBoardCaseList = () => {
     setToDate(null);
     setSelectedDrcId("");
     setSearchQuery("");
-    setCurrentPage(0); // Reset to the first page
-    setIsFilterApplied(false); // Reset filter applied state
     setTotalPages(0); // Reset total pages
     setFilteredData([]); // Clear filtered data
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setCommittedFilters({
+      selectedDrcId: "",
+      rtom: "",
+      caseStatus: "",
+      fromDate: null,
+      toDate: null
+    })
+    setMaxCurrentPage(0); // Reset max current page
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   };
 
   const navigate = useNavigate();
@@ -436,11 +475,16 @@ const MediationBoardCaseList = () => {
               style={{ color: selectedDrcId === "" ? "gray" : "black" }}
             >
               <option value="" hidden>DRC</option>
-              {drcNames.map((drc) => (
+              {drcNames.length > 0 ? (drcNames.map((drc) => (
                 <option key={drc.key} value={drc.id.toString()} style={{ color: "black" }}>
                   {drc.value}
                 </option>
-              ))}
+              ))
+              ) : (
+                <option value="" disabled style={{ color: "gray" }}>
+                  No DRCs available
+                </option>
+              )}
             </select>
           </div>
 
@@ -452,11 +496,16 @@ const MediationBoardCaseList = () => {
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
               <option value="" hidden>RTOM</option>
-              {Object.values(rtomList).map((rtom) => (
+              {rtomList.length > 0 ? (Object.values(rtomList).map((rtom) => (
                 <option key={rtom.rtom_id} value={rtom.rtom_id} style={{ color: "black" }}>
                   {rtom.rtom}
                 </option>
-              ))}
+              ))
+              ) : (
+                <option value="" disabled style={{ color: "gray" }}>
+                  No RTOMs available
+                </option>
+              )}
             </select>
           </div>
 
@@ -510,7 +559,10 @@ const MediationBoardCaseList = () => {
             type="text"
             className={GlobalStyle.inputSearch}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setCurrentPage(1); // Reset to page 1 on search
+              setSearchQuery(e.target.value);
+            }}
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
@@ -533,7 +585,7 @@ const MediationBoardCaseList = () => {
           </thead>
           <tbody>
             {filteredDataBySearch.length > 0 ? (
-              filteredDataBySearch.map((row, index) => (
+              filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                 <tr
                   key={index}
                   className={
@@ -618,9 +670,17 @@ const MediationBoardCaseList = () => {
               Page {currentPage}
             </span>
             <button
-              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+              className={`${GlobalStyle.navButton} ${(searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                  ? "cursor-not-allowed"
+                  : ""
+                }`}
               onClick={handleNextPage}
-              disabled={currentPage === totalPages}
+              disabled={
+                searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
             >
               <FaArrowRight />
             </button>

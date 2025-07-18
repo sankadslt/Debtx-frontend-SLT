@@ -277,7 +277,7 @@ export const List_CasesOwened_By_DRC = async (requestData) => {
 
     // Validate response structure
     if (response.data && response.data.status === "success") {
-      return response.data.Cases; // Return the cases data
+      return response.data; // Return the cases data
     } else {
       console.error(
         "Error in API response:",
@@ -549,13 +549,13 @@ export const Accept_Non_Settlement_Request_from_Mediation_Board = async (case_id
       throw new Error("case_id is required");
     }
 
-  
-    const user_id = await getLoggedUserId();
-    const recieved_by = user_id || "Unknown User"; 
 
-    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {  
-      case_id, 
-      recieved_by 
+    const user_id = await getLoggedUserId();
+    const recieved_by = user_id || "Unknown User";
+
+    const response = await axios.put(`${URL}/Accept_Non_Settlement_Request_from_Mediation_Board`, {
+      case_id,
+      recieved_by
     });
 
     return response.status;
@@ -631,8 +631,8 @@ export const ListAllRequestLogFromRecoveryOfficersWithoutUserID = async (
 export const fetchCaseDetails = async (caseId) => {
   try {
     const response = await axios.get(`${URL}/listdownCaseDetailsByCaseId/${caseId}`, {
-      },);
-  
+    },);
+
     return response.data;
   } catch (error) {
     console.error('Error fetching case details:', error);
@@ -640,3 +640,125 @@ export const fetchCaseDetails = async (caseId) => {
   }
 };
 
+export const GetFilteredCaseLists = async ({
+  case_current_status,
+  From_DAT,
+  TO_DAT,
+  RTOM,
+  DRC,
+  arrears_band: selectedBand,
+  service_type,
+  pages
+}) => {
+  try {
+    const payload = {
+      case_current_status,
+      From_DAT,
+      TO_DAT,
+      RTOM,
+      DRC,
+      arrears_band: selectedBand,
+      service_type,
+      pages
+    };
+
+
+
+    const response = await axios.post(`${URL}/List_All_Cases`, payload);
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+
+    return {
+      status: "success",
+      data: response.data.data.map(item => ({
+        caseid: item.case_id,
+        casecurrentstatus: item.status,
+        accountno: item.account_no,
+        amount: item.current_arrears_amount,
+        servicetype: item.service_type,
+        Agent: item.drc_name,
+        drccommisionrule: item.service_type,
+        currentarrearsamount: item.current_arrears_amount,
+        rtom: item.rtom,
+        area: item.area,
+        Created_On: item.date,
+        Lastpaymentdate: item.last_payment_date
+      }))
+    };
+  } catch (error) {
+    console.error("Case list error:", error);
+    if (error.response?.status === 404) {
+      return { data: [] };
+    }
+    throw error;
+  }
+};
+
+export const getCaseStatusList = async () => {
+  try {
+    const response = await axios.get(`${URL}/CaseStatus`);
+
+    if (response.data.status === "success") {
+
+      return response.data.data.map((status) => ({
+        key: status._id,
+        value: status.case_status
+      }));
+    }
+    throw new Error(response.data.message || "Failed to fetch case statuses");
+  } catch (error) {
+    console.error("Error fetching case statuses:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const List_Rejected_Batch_Summary_Case_Distribution_Batch_Id = async (case_distribution_batch_id) => {
+  try {
+    const response = await axios.post(`${URL}/List_Rejected_Batch_Summary_Case_Distribution_Batch_Id`, 
+      {
+        case_distribution_batch_id: case_distribution_batch_id
+      }
+    );
+
+    if (response.status === 200) {
+      return response.data.data;
+    } else {
+      throw new Error(response.data.message || "Failed to retriecve rejected batch summary");
+    }
+  } catch (error) {
+    console.error("Error fetching rejected batch summary:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const List_DRC_Distribution_Rejected_Batches = async () => {
+  try {
+    const response = await axios.get(`${URL}/List_DRC_Distribution_Rejected_Batches`);
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to retriecve rejected batch details");
+    }
+  } catch (error) {
+    console.error("Failed to retriecve rejected batch details:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const Validate_Existing_Batch_Task = async (case_distribution_batch_id) => {
+  try {
+    console.log("Validating case distribution batch ID:", case_distribution_batch_id);
+    const response = await axios.post(`${URL}/Validate_Existing_Batch_Task`, {
+        case_distribution_batch_id
+      }
+    );
+    console.log("Validation response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Already has tasks with this case distribution batch id", error.message);
+    throw error;
+  }
+};

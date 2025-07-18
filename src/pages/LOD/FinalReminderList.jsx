@@ -12,7 +12,7 @@ Related Files:
 Notes: This template uses Tailwind CSS */
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/fa";
@@ -21,7 +21,7 @@ import Swal from "sweetalert2";
 import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
 
 const LOD_Log = () => {
-    const [currentPage, setCurrentPage] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
@@ -35,13 +35,30 @@ const LOD_Log = () => {
     const [isFilterApplied, setIsFilterApplied] = useState(false); // Track if filter is applied
     const rowsPerPage = 10; // Number of rows per page
     const navigate = useNavigate();
+    const hasMounted = useRef(false);
+    const [committedFilters, setCommittedFilters] = useState({
+        LODStatus: "",
+        DateType: "",
+        fromDate: null,
+        toDate: null,
+    });
 
     // validation for date
     const handleFromDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "error");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'Date Type' must be selected before choosing a date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else if (toDate && date > toDate) {
-            Swal.fire("Invalid Input", "'From' date cannot be later than the 'To' date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'From' date cannot be later than the 'To' date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else {
             setFromDate(date);
         }
@@ -51,9 +68,19 @@ const LOD_Log = () => {
     // validation for date
     const handleToDateChange = (date) => {
         if (!DateType) {
-            Swal.fire("Invalid Input", "'Date Type' must be selected before choosing a date.", "error");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "'Date Type' must be selected before choosing a date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else if (fromDate && date < fromDate) {
-            Swal.fire("Invalid Input", "The 'To' date cannot be earlier than the 'From' date.", "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: "The 'To' date cannot be earlier than the 'From' date.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         } else {
             setToDate(date);
         }
@@ -61,28 +88,81 @@ const LOD_Log = () => {
 
     // Handle filter button
     const handleFilter = () => {
-        if (!LODStatus && !DateType && !fromDate && !toDate) {
-            Swal.fire("Invalid Input", "Please select at least one filter.", "warning");
-            return;
-        }
-        setFinalReminderData([]); // Reset LOD data before fetching new data
-        setIsMoreDataAvailable(true); // Reset more data available state
-        setMaxCurrentPage(0); // Reset max current page
         // setTotalAPIPages(1); // Reset total API pages
-        if (currentPage === 1) {
-            fetchData();
+        const isValid = filterValidate(); // Validate filters before fetching data
+        if (!isValid) {
+            return; // If validation fails, do not proceed
         } else {
-            setCurrentPage(1);
+            setCommittedFilters({
+                LODStatus: LODStatus,
+                DateType: DateType,
+                fromDate: fromDate,
+                toDate: toDate,
+            });
+            setIsMoreDataAvailable(true); // Reset more data available state
+            setMaxCurrentPage(0); // Reset max current page
+            setFinalReminderData([]); // Reset LOD data before fetching new data
+            if (currentPage === 1) {
+                fetchData({
+                    LODStatus: LODStatus,
+                    DateType: DateType,
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    currentPage: 1
+                });
+            } else {
+                setCurrentPage(1);
+            }
+            setIsFilterApplied(true); // Set filter applied state to true
         }
-        setIsFilterApplied(true); // Set filter applied state to true
+    }
+
+    const filterValidate = () => {
+        if (!LODStatus && !DateType && !fromDate && !toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select at least one filter.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        if (DateType && !fromDate && !toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select a date range when 'Date Type' is selected.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        if (fromDate && !toDate || !fromDate && toDate) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please select both 'From' and 'To' dates.",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
+            return false;
+        }
+
+        return true;
     }
 
     // Fetch list of LOD cases
-    const fetchData = async () => {
+    const fetchData = async (filters) => {
         setIsLoading(true);
         try {
-            const LOD = await List_Final_Reminder_Lod_Cases(LODStatus, DateType, fromDate, toDate, "Final Reminder", currentPage);
-            setFinalReminderData((prevData) => [...prevData, ...LOD]);
+            const LOD = await List_Final_Reminder_Lod_Cases(filters.LODStatus, filters.DateType, filters.fromDate, filters.toDate, "Final Reminder", filters.currentPage);
+
+            if (currentPage === 1) {
+                setFinalReminderData(LOD);
+            } else {
+                setFinalReminderData((prevData) => [...prevData, ...LOD]);
+            }
+
             if (LOD.length === 0) {
                 setIsMoreDataAvailable(false);
                 if (currentPage === 1) {
@@ -91,8 +171,11 @@ const LOD_Log = () => {
                         text: "No matching data found for the selected filters.",
                         icon: "warning",
                         allowOutsideClick: false,
-                        allowEscapeKey: false
+                        allowEscapeKey: false,
+                        confirmButtonColor: "#f1c40f"
                     });
+                } if (currentPage === 2) {
+                    setCurrentPage(1); // Reset to page 1 if no data found on page 2
                 }
             } else {
                 const maxData = currentPage === 1 ? 10 : 30;
@@ -101,7 +184,12 @@ const LOD_Log = () => {
                 }
             }
         } catch (error) {
-            Swal.fire("No Results", "Error fetching data.", "error");
+            Swal.fire({
+                title: "No Results",
+                text: "Error fetching data.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
             setFinalReminderData([]);
         } finally {
             setIsLoading(false);
@@ -110,9 +198,12 @@ const LOD_Log = () => {
 
     // fetching case details everytime currentpage changes
     useEffect(() => {
-        if (isFilterApplied && isMoreDataAvailable && currentPage > maxCurrentPage) {
+        if (isMoreDataAvailable && currentPage > maxCurrentPage) {
             setMaxCurrentPage(currentPage); // Update max current page
-            fetchData(); // Call the function whenever currentPage changes
+            fetchData({
+                ...committedFilters,
+                currentPage: currentPage
+            }); // Call the function whenever currentPage changes
         }
     }, [currentPage]);
 
@@ -122,13 +213,24 @@ const LOD_Log = () => {
         setDateType("");
         setFromDate("");
         setToDate("");
+        setSearchQuery("");
         setFinalReminderData([]);
         setIsFilterApplied(false); // Reset filter applied state
         setIsMoreDataAvailable(true); // Reset more data available state    
         setTotalPages(0); // Reset total pages
         setMaxCurrentPage(0); // Reset max current page
-        setCurrentPage(0); // Reset current page
-        filteredData([]); // Reset filtered data
+        setCommittedFilters({
+            LODStatus: "",
+            DateType: "",
+            fromDate: null,
+            toDate: null,
+        })
+        if (currentPage != 1) {
+            setCurrentPage(1); // Reset to page 1
+        } else {
+            setCurrentPage(0); // Temp set to 0
+            setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+        }
     };
 
     // display loading animation when data is loading
@@ -144,7 +246,7 @@ const LOD_Log = () => {
     const paginatedData = FinalReminderdata.slice(startIndex, startIndex + rowsPerPage);
 
     // handle search
-    const filteredData = paginatedData.filter((row) =>
+    const filteredData = FinalReminderdata.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -161,9 +263,9 @@ const LOD_Log = () => {
         if (isMoreDataAvailable) {
             setCurrentPage(currentPage + 1);
         } else {
-            const totalPages = Math.ceil(FinalReminderdata.length / rowsPerPage);
-            setTotalPages(totalPages);
-            if (currentPage < totalPages) {
+            // const totalPages = Math.ceil(FinalReminderdata.length / rowsPerPage);
+            // setTotalPages(totalPages);
+            if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
                 setCurrentPage(currentPage + 1);
             }
         }
@@ -199,6 +301,11 @@ const LOD_Log = () => {
         navigate("/pages/LOD/CustomerResponseReview", { state: { caseId } });
     };
 
+    // Function to navigate to the case ID page
+    const naviCaseID = (caseId) => {
+        navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
+    }
+
     return (
         <div className={GlobalStyle.fontPoppins}>
             {/* Title */}
@@ -207,39 +314,39 @@ const LOD_Log = () => {
             {/* filters */}
             <div className={`${GlobalStyle.cardContainer} w-full`}>
 
-                <div className="flex items-center justify-end w-full space-x-6">
+                <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3 gap-3">
                     <select value={LODStatus} onChange={(e) => setLODStatus(e.target.value)} style={{ color: LODStatus === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Status</option>
-                        <option value="Final Reminder">Final Reminder</option>
-                        <option value="Final Reminder Settle Pending">Final Reminder Settle Pending</option>
-                        <option value="Final Reminder Settle Open-Pending">Final Reminder Settle Open-Pending</option>
-                        <option value="Final Reminder Settle Active">Final Reminder Settle Active</option>
+                        <option value="Final Reminder" style={{ color: "black" }}>Final Reminder</option>
+                        <option value="Final Reminder Settle Pending" style={{ color: "black" }}>Final Reminder Settle Pending</option>
+                        <option value="Final Reminder Settle Open-Pending" style={{ color: "black" }}>Final Reminder Settle Open-Pending</option>
+                        <option value="Final Reminder Settle Active" style={{ color: "black" }}>Final Reminder Settle Active</option>
                     </select>
 
                     <select value={DateType} onChange={(e) => setDateType(e.target.value)} style={{ color: DateType === "" ? "gray" : "black" }} className={GlobalStyle.selectBox}>
                         <option value="" hidden>Date Type</option>
-                        <option value="created_date">Created Date</option>
-                        <option value="expire_date">Expire Date</option>
-                        <option value="last_response_date">Last Response Date</option>
+                        <option value="created_date" style={{ color: "black" }}>Created Date</option>
+                        <option value="expire_date" style={{ color: "black" }}>Expire Date</option>
+                        <option value="last_response_date" style={{ color: "black" }}>Last Response Date</option>
                     </select>
 
                     <label className={GlobalStyle.dataPickerDate}>Date</label>
-                    <div className={GlobalStyle.datePickerContainer}>
-                        <DatePicker
-                            selected={fromDate}
-                            onChange={handleFromDateChange}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="From Date"
-                            className={GlobalStyle.inputText}
-                        />
-                        <DatePicker
-                            selected={toDate}
-                            onChange={handleToDateChange}
-                            dateFormat="dd/MM/yyyy"
-                            placeholderText="To Date"
-                            className={GlobalStyle.inputText}
-                        />
-                    </div>
+                    {/* <div className={GlobalStyle.datePickerContainer}> */}
+                    <DatePicker
+                        selected={fromDate}
+                        onChange={handleFromDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="From"
+                        className={GlobalStyle.inputText}
+                    />
+                    <DatePicker
+                        selected={toDate}
+                        onChange={handleToDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="To"
+                        className={GlobalStyle.inputText}
+                    />
+                    {/* </div> */}
 
                     <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
                     <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
@@ -254,7 +361,10 @@ const LOD_Log = () => {
                         type="text"
                         placeholder=""
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setCurrentPage(1); // Reset to page 1 on new search
+                            setSearchQuery(e.target.value);
+                        }}
                         className={GlobalStyle.inputSearch}
                     />
                     <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -262,7 +372,7 @@ const LOD_Log = () => {
             </div>
 
             {/* table */}
-            <div className={GlobalStyle.tableContainer}>
+            <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -278,7 +388,7 @@ const LOD_Log = () => {
                     </thead>
                     <tbody>
                         {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
+                            filteredData.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
@@ -286,7 +396,12 @@ const LOD_Log = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.LODID}</td>
+                                    <td
+                                        className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                                        onClick={() => naviCaseID(log.LODID)}
+                                    >
+                                        {log.LODID.toString().padStart(3, '0')}
+                                    </td>
                                     <td className={GlobalStyle.tableData}>{log.Status}</td>
                                     <td className={GlobalStyle.tableData}>{log.LODBatchNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.NotificationCount}</td>
@@ -364,17 +479,26 @@ const LOD_Log = () => {
             </div>
 
             {/* Page nevigation buttons */}
-            <div className={GlobalStyle.navButtonContainer}>
-                <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage <= 1}>
-                    <FaArrowLeft />
-                </button>
-                <span className="text-gray-700">
-                    Page {currentPage}
-                </span>
-                <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === totalPages}>
-                    <FaArrowRight />
-                </button>
-            </div>
+            {filteredData.length > 0 && (
+                <div className={GlobalStyle.navButtonContainer}>
+                    <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage <= 1}>
+                        <FaArrowLeft />
+                    </button>
+                    <span className="text-gray-700">
+                        Page {currentPage}
+                    </span>
+                    <button
+                        className={GlobalStyle.navButton}
+                        onClick={handleNextPage}
+                        disabled={searchQuery
+                            ? currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+                            : !isMoreDataAvailable && currentPage >= Math.ceil(FinalReminderdata.length / rowsPerPage)
+                        }
+                    >
+                        <FaArrowRight />
+                    </button>
+                </div>
+            )}
         </div>
     );
 

@@ -31,13 +31,17 @@ export const fetchRTOMs = async (filters = {}) => {
       response: error.response?.data,
       status: error.response?.status,
     });
+
+    if (error.response?.status === 404) {
+      return [];
+    }
     throw error.response?.data?.message || "An error occurred while fetching RTOMs";
   }
 };
 
 
 
-export const fetchRTOMDetails = async (rtomId) => {
+export const fetchRTOMDetailsById = async (rtomId) => {
   try {
     const response = await axios.post(`${RTOM_URL}/List_RTOM_Details_By_RTOM_ID`, {
       rtom_id: rtomId
@@ -71,11 +75,15 @@ export const createRTOM = async (rtomData) => {
       rtom_telephone_no: rtomData.telephone,
       created_by: rtomData.createdBy 
     });
-    
+
     if (response.data.status === "success") {
       return response.data;
     } else {
-      throw new Error(response.data.message || "Failed to create RTOM");
+      throw {
+        message: response.data.message || "Failed to create RTOM",
+        status: 400,
+        response: response.data,
+      };
     }
   } catch (error) {
     console.error("Error creating RTOM:", {
@@ -83,9 +91,11 @@ export const createRTOM = async (rtomData) => {
       response: error.response?.data,
       status: error.response?.status,
     });
-    throw error.response?.data?.message || "An error occurred while creating RTOM";
+
+    throw error;
   }
 };
+
 
 
 
@@ -105,5 +115,17 @@ export const updateRTOMDetails = async (rtomData) => {
       status: error.response?.status,
     });
     throw error.response?.data?.message || "An error occurred while updating RTOM details";
+  }
+};
+
+
+// Terminate RTOM
+export const terminateRTOM = async (terminateData) => {
+  try {
+    const response = await axios.patch(`${RTOM_URL}/Terminate_RTOM`, terminateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error terminating RTOM:', error);
+    throw new Error(error.response?.data?.message || 'Failed to terminate RTOM');
   }
 };
