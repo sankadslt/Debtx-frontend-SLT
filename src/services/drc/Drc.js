@@ -148,6 +148,7 @@ export const getDebtCompanyByDRCID = async (drcId) => {
     const response = await axios.post(`${URL}/List_DRC_Details_By_DRC_ID`, {
       drc_id: drcId,
     });
+    console.log("Response from getDebtCompanyByDRCID:", response.data);
     const data = response.data.data;
     return data;
   } catch (error) {
