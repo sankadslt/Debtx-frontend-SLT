@@ -1,14 +1,13 @@
 /*Purpose:
-Created Date: 2025-01-09
-Created By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
-Last Modified Date: 2025-01-09
-Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
-Last Modified Date: 2025-01-20
-Modified By: Dilmith Siriwardena (jtdsiriwardena@gmail.com)
-             Vihanga Jayawardena (vihangaeshan2002@gmail.com)
-             Janendra Chamodi (apjanendra@gmail.com)
-             Update 2025-06-28
-             Update 2025-07-17 - Added Account Number filter
+Created Date: 2025-07-17
+Created By: Yugani Gunarathna (jtdsiriwardena@gmail.com)
+Last Modified Date: 2025-07-18
+Modified By: Sathmi Peiris (jtdsiriwardena@gmail.com)
+Last Modified Date: 2025-07-20
+Modified By:  Yugani Gunarathna 
+              Sathmi Peiris
+             Update 2025-07-20
+             
 Version: React v18
 ui number : 1.1
 Dependencies: Tailwind CSS
@@ -30,6 +29,9 @@ import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
 import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
 import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
 import errorincident from "/src/assets/images/incidents/Incident_Error.png";
+import Open_CPE_Collect from "../../assets/images/incidents/Only_CPE_Collect.png";
+import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
+import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
 
 const Incident = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -109,6 +111,16 @@ const Incident = () => {
       case "incident inprogress":
       case "incident error":
         return errorincident;
+
+      case "open cpe collect":
+        return Open_CPE_Collect;
+
+      case "reject pending":
+        return Reject_Pending;
+        
+      case "incident reject":
+        return Incident_Reject;
+
       case "complete":
       case "completed":
         return incidentDone;
@@ -245,9 +257,6 @@ const Incident = () => {
   // UPDATED: Added Account_Num to the API payload
   const callAPI = async (filters) => {
     try {
-      console.log("=== Frontend API Call ===");
-      console.log("Starting API call with filters:", filters);
-
       const formatDate = (date) => {
         if (!date) return null;
         const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -255,28 +264,20 @@ const Incident = () => {
       };
 
       const payload = {
-        Actions: filters.status1 || undefined,
-        Incident_Status: filters.status2 || undefined,
-        Source_Type: filters.status3 || undefined,
+        Actions: filters.status1 ,
+        Incident_Status: filters.status2 ,
+        Source_Type: filters.status3 ,
         From_Date: formatDate(filters.fromDate),
         To_Date: formatDate(filters.toDate),
-        Account_Num: filters.accountNumber || undefined,
-        pages: filters.page || 1, // ADDED: Missing pages parameter
+        Account_Num: filters.accountNumber,
+        pages: filters.page , 
       };
 
-      // Remove undefined values
-      Object.keys(payload).forEach(key => {
-        if (payload[key] === undefined) {
-          delete payload[key];
-        }
-      });
 
-      console.log("Final payload:", payload);
       setIsLoading(true);
       
       const response = await New_List_Incidents(payload);
-      console.log("=== API Response ===");
-      console.log("Full response:", response);
+     
 
       if (response && response.status === "success") {
         if (response.incidents && Array.isArray(response.incidents)) {
@@ -284,22 +285,22 @@ const Incident = () => {
           
           // Map backend MongoDB fields to frontend format
           const mappedData = response.incidents.map((incident, index) => ({
-            incidentID: incident.Incident_Id || `temp-${index}`,
-            status: incident.Incident_Status || "Unknown",
-            accountNo: incident.Account_Num || "N/A",
-            action: incident.Actions || "N/A", // FIXED: Use Actions field
-            sourceType: incident.Source_Type || "N/A",
+            incidentID: incident.Incident_Id ,
+            status: incident.Incident_Status ,
+            accountNo: incident.Account_Num ,
+            action: incident.Actions,
+            sourceType: incident.Source_Type ,
             created_dtm: incident.Created_Dtm || incident.createdAt || new Date(),
             
             // Additional fields from the Incident collection
-            arrears: incident.Arrears || 0,
-            arearsBand: incident.Arrears_Band || "N/A",
-            createdBy: incident.Created_By || "Unknown",
-            batchId: incident.Batch_Id || "N/A",
-            filteredReason: incident.Filtered_Reason || "N/A",
-            customerName: incident.Customer_Details?.Customer_Name || "N/A",
-            proceedBy: incident.Proceed_By || null,
-            proceedDtm: incident.Proceed_Dtm || null,
+            arrears: incident.Arrears ,
+            arearsBand: incident.Arrears_Band ,
+            createdBy: incident.Created_By ,
+            batchId: incident.Batch_Id ,
+            filteredReason: incident.Filtered_Reason ,
+            customerName: incident.Customer_Details?.Customer_Name ,
+            proceedBy: incident.Proceed_By ,
+            proceedDtm: incident.Proceed_Dtm ,
           }));
 
           console.log("Mapped data sample:", mappedData[0]);
@@ -413,15 +414,14 @@ const Incident = () => {
     }
   };
 
-  // UPDATED: Include accountNumber in clear function
   const handleClear = () => {
     setStatus1("");
     setStatus2("");
     setStatus3("");
-    setAccountNumber(""); // NEW: Clear account number
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
+    //setTotalPages(0);
     setFilteredData([]);
     setMaxCurrentPage(0);
     setIsMoreDataAvailable(true);
@@ -430,8 +430,7 @@ const Incident = () => {
       status2: "",
       status3: "",
       fromDate: null,
-      toDate: null,
-      accountNumber: ""
+      toDate: null
     });
     if (currentPage != 1) {
       setCurrentPage(1);
@@ -441,7 +440,9 @@ const Incident = () => {
     }
   };
 
+
   const HandleCreateTask = async () => {
+
     const userData = await getLoggedUserId();
 
     if (!fromDate || !toDate) {
@@ -456,9 +457,14 @@ const Incident = () => {
       return;
     }
 
+
     setIsCreatingTask(true);
 
     try {
+
+
+
+
       const response = await Task_for_Download_Incidents(status1, status2, fromDate, toDate, userData);
       if (response && response.message === "Task created successfully") {
         Swal.fire({
@@ -480,7 +486,15 @@ const Incident = () => {
     }
   };
 
+
+
+
   const HandleAddIncident = () => navigate("/incident/register");
+
+
+
+
+
 
   if (isLoading) {
     return (
@@ -503,11 +517,15 @@ const Incident = () => {
             </button>
           </div>
 
-          {/* UPDATED: Filters Section with Account Number */}
+
+          {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
             <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
+              
+              
 
               <div className="flex items-center">
+
                 <select
                   value={status1}
                   onChange={(e) => setStatus1(e.target.value)}
@@ -518,7 +536,6 @@ const Incident = () => {
                   <option value="collect arrears" style={{ color: "black" }}>collect arrears</option>
                   <option value="collect arrears and CPE" style={{ color: "black" }}>collect arrears and CPE</option>
                   <option value="collect CPE" style={{ color: "black" }}>collect CPE</option>
-                  <option value="aaa" style={{ color: "black" }}>aaa</option>
                 </select>
               </div>
 
@@ -531,14 +548,9 @@ const Incident = () => {
                 >
                   <option value="" hidden>Status</option>
                   <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
-                  <option value="Open No Agent" style={{ color: "black" }}>Open No Agent</option>
-                  <option value="Direct LOD" style={{ color: "black" }}>Direct LOD</option>
-                  <option value="Open CPE Collect" style={{ color: "black" }}>Open CPE Collect</option>
                   <option value="Complete" style={{ color: "black" }}>Complete</option>
                   <option value="Incident Error" style={{ color: "black" }}>Incident Error</option>
                   <option value="Incident InProgress" style={{ color: "black" }}>Incident InProgress</option>
-                  <option value="Reject Pending" style={{ color: "black" }}>Reject Pending</option>
-                  <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
                 </select>
               </div>
 
@@ -556,6 +568,8 @@ const Incident = () => {
                 </select>
               </div>
 
+              
+
               {/* NEW: Account Number Input Field */}
               <div className="flex items-center">
                 <input
@@ -567,6 +581,7 @@ const Incident = () => {
                   style={{ minWidth: '150px' }}
                 />
               </div>
+
 
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               <DatePicker
@@ -611,7 +626,7 @@ const Incident = () => {
                 className={GlobalStyle.inputSearch}
                 value={searchQuery}
                 onChange={(e) => {
-                  setCurrentPage(1);
+                  setCurrentPage(1); // Reset to page 1 on search
                   setSearchQuery(e.target.value)
                 }}
               />
@@ -624,15 +639,12 @@ const Incident = () => {
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
-                  <th className={GlobalStyle.tableHeader}>Incident ID</th>
+                  <th className={GlobalStyle.tableHeader}>ID</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
                   <th className={GlobalStyle.tableHeader}>Account No</th>
-                  <th className={GlobalStyle.tableHeader}>Actions</th>
+                  <th className={GlobalStyle.tableHeader}>Action</th>
                   <th className={GlobalStyle.tableHeader}>Source Type</th>
-                  <th className={GlobalStyle.tableHeader}>Arrears</th>
-                  <th className={GlobalStyle.tableHeader}>Arrears Band</th>
-                  <th className={GlobalStyle.tableHeader}>Created Date</th>
-                  <th className={GlobalStyle.tableHeader}>Created By</th>
+                  <th className={GlobalStyle.tableHeader}>Created DTM</th>
                 </tr>
               </thead>
 
@@ -654,28 +666,20 @@ const Incident = () => {
                       <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
                       <td className={GlobalStyle.tableData}>{row.action || ""}</td>
                       <td className={GlobalStyle.tableData}>{row.sourceType || ""}</td>
-                      <td className={GlobalStyle.tableData}>
-                        {row.arrears ? `Rs. ${row.arrears.toLocaleString()}` : "Rs. 0"}
-                      </td>
-                      <td className={GlobalStyle.tableData}>{row.arearsBand || ""}</td>
-                      <td className={GlobalStyle.tableData}>
-                        {row.created_dtm ? new Date(row.created_dtm).toLocaleString("en-GB", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true
-                        }) : ""}
-                      </td>
-                      <td className={GlobalStyle.tableData}>{row.createdBy || ""}</td>
+                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleString("en-GB", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true
+                      }) || ""}</td>
+
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={9} className={`${GlobalStyle.tableData} text-center`}>
-                      {isLoading ? "Loading..." : "No incidents available"}
-                    </td>
+                    <td colSpan={9} className={`${GlobalStyle.tableData} text-center`}>No cases available</td>
                   </tr>
                 )}
               </tbody>
@@ -683,30 +687,28 @@ const Incident = () => {
           </div>
 
           {/* Pagination Section */}
-          {filteredDataBySearch.length > 0 && (
-            <div className={GlobalStyle.navButtonContainer}>
-              <button
-                onClick={() => handlePrevNext("prev")}
-                disabled={currentPage <= 1}
-                className={`${GlobalStyle.navButton}`}
-              >
-                <FaArrowLeft />
-              </button>
-              <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-                Page {currentPage}
-              </span>
-              <button
-                onClick={() => handlePrevNext("next")}
-                disabled={
-                  searchQuery
-                    ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                    : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
-                className={`${GlobalStyle.navButton}`}
-              >
-                <FaArrowRight />
-              </button>
-            </div>
-          )}
+          {filteredDataBySearch.length > 0 && (<div className={GlobalStyle.navButtonContainer}>
+            <button
+              onClick={() => handlePrevNext("prev")}
+              disabled={currentPage <= 1}
+              className={`${GlobalStyle.navButton}`}
+            >
+              <FaArrowLeft />
+            </button>
+            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+              Page {currentPage}
+            </span>
+            <button
+              onClick={() => handlePrevNext("next")}
+              disabled={
+                searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+              className={`${GlobalStyle.navButton}`}
+            >
+              <FaArrowRight />
+            </button>
+          </div>)}
 
           {/* Create Task Button */}
           {["admin", "superadmin", "slt"].includes(userRole) && filteredDataBySearch.length > 0 && (
@@ -726,5 +728,6 @@ const Incident = () => {
     </div>
   );
 };
+
 
 export default Incident;
