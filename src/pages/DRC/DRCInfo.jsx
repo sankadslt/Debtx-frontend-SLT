@@ -229,6 +229,7 @@ const DRCInfo = () => {
         setLoading(true);
         const drcIdToUse = drcId;
         const data = await getDebtCompanyByDRCID(drcIdToUse);
+        console.log("Fetched DRC Data:", data);
 
         // Fetch SLT coordinator details for dropdown
         const coordinatorsResponse = await getSLTCoordinators();
@@ -451,6 +452,7 @@ const DRCInfo = () => {
       terminate_by,
       endDate
     );
+    console.log("Termination response:", response);
 
     Swal.close();
 
@@ -687,6 +689,8 @@ const DRCInfo = () => {
       companyData.status
     );
 
+    console.log("response", response);
+
     Swal.fire({
       icon: "success",
       title: "Success!",
@@ -832,12 +836,13 @@ const DRCInfo = () => {
       : null;
 
   // Add this above both return statements to get current agreement
-  const currentAgreement = companyData.drc_agreement_details && 
-                          companyData.drc_agreement_details.length > 0
-    ? companyData.drc_agreement_details[
-        companyData.drc_agreement_details.length - 1
-      ]
-    : null;
+  const currentAgreement =
+    companyData.drc_agreement_details &&
+    companyData.drc_agreement_details.agreement_start_dtm &&
+    companyData.drc_agreement_details.agreement_end_dtm
+      ? companyData.drc_agreement_details
+      : null;
+
 
   // Loading state
   if (loading) {
