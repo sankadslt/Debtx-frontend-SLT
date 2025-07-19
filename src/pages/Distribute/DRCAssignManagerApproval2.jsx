@@ -55,7 +55,7 @@ export default function DRCAssignManagerApproval2() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 4;
+  const recordsPerPage = 10;
 
   const fetchData = async () => {
 
