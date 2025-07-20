@@ -133,6 +133,12 @@ const Sidebar = ({ onHoverChange }) => {
           link: "/Distribution/reject-incident-log",
           roles: ["superadmin", "admin"],
         },
+        {
+          icon: CgEditFade,
+          label: "Incident log",
+          link: "/Incident/Incident",
+          roles: ["superadmin", "admin"],
+        },
       ],
     },
 
