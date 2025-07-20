@@ -41,7 +41,7 @@ const Incident = () => {
   const [status1, setStatus1] = useState("");
   const [status2, setStatus2] = useState("");
   const [status3, setStatus3] = useState("");
-  const [accountNumber, setAccountNumber] = useState(""); // NEW: Account Number state
+  const [accountNo, setAccountNo] = useState(""); // NEW: Account Number state
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [userRole, setUserRole] = useState(null);
@@ -63,23 +63,10 @@ const Incident = () => {
     status3: "",
     fromDate: null,
     toDate: null,
-    accountNumber: ""
+    accountNo: ""
   });
 
-  // Load initial data when component mounts
-  useEffect(() => {
-    if (filteredData.length === 0) {
-      callAPI({
-        status1: "",
-        status2: "",
-        status3: "",
-        fromDate: null,
-        toDate: null,
-        accountNumber: "",
-        page: 1
-      });
-    }
-  }, []);
+
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -103,7 +90,7 @@ const Incident = () => {
     }
   }, []);
 
-  const getStatusIcon = (status) => {
+ const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
       case "incident open":
       case "open no agent":
@@ -130,7 +117,7 @@ const Incident = () => {
         return null;
     }
   };
-
+// render status icon with tooltip
   const renderStatusIcon = (status, index) => {
     const iconPath = getStatusIcon(status);
     if (!iconPath) {
@@ -143,60 +130,28 @@ const Incident = () => {
       <div className="flex items-center gap-2">
         <img src={iconPath}
           alt={status}
+
           className="w-6 h-6"
           data-tooltip-id={tooltipId} />
+
         <Tooltip id={tooltipId} place="bottom" effect="solid">
           {status}
         </Tooltip>
       </div>
     );
   };
-
   const navigate = useNavigate();
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
+
   };
 
   const handleenddatechange = (date) => {
     setToDate(date);
-  };
 
-  const CheckDateDifference = (fromDate, toDate) => {
-    const start = new Date(fromDate).getTime();
-    const end = new Date(toDate).getTime();
-    const diffInMs = end - start;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-    const diffInMonths = diffInDays / 30;
-
-    if (diffInMonths > 1) {
-      Swal.fire({
-        title: "Date Range Exceeded",
-        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        confirmButtonColor: "#28a745",
-        cancelButtonText: "No",
-        cancelButtonColor: "#d33",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          callAPI({
-            status1: committedFilters.status1,
-            status2: committedFilters.status2,
-            status3: committedFilters.status3,
-            fromDate,
-            toDate,
-            accountNumber: committedFilters.accountNumber,
-            page: 1
-          });
-        } else {
-          setToDate(null);
-          console.log("EndDate cleared");
-        }
-      });
-    }
   };
+ 
 
   useEffect(() => {
     if (fromDate && toDate) {
@@ -212,11 +167,11 @@ const Incident = () => {
         setToDate(null);
         setFromDate(null);
         return;
-      } else {
-        CheckDateDifference(fromDate, toDate);
-      }
+      } 
     }
   }, [fromDate, toDate]);
+
+
 
   const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
@@ -225,16 +180,20 @@ const Incident = () => {
       .includes(searchQuery.toLowerCase())
   );
 
-  // UPDATED: Added accountNumber to validation check
+
   const filterValidations = () => {
-    if (!status1 && !status2 && !status3 && !fromDate && !toDate && !accountNumber) {
+    if (!status1 && !status2 && !status3 && !fromDate && !toDate && !accountNo) {
       Swal.fire({
-        title: "Info",
-        text: "No filters selected. Showing recent incidents.",
-        icon: "info",
-        confirmButtonColor: "#3085d6"
+        title: "Warning",
+        text: "No filter is selected. Please, select a filter.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
-      return true;
+      setToDate(null);
+      setFromDate(null);
+      return false;
     }
 
     if ((fromDate && !toDate) || (!fromDate && toDate)) {
@@ -253,136 +212,92 @@ const Incident = () => {
 
     return true;
   };
+const callAPI = async (filters) => {
+  try {
+    const formatDate = (date) => {
+      if (!date) return null;
+      const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return offsetDate.toISOString().split("T")[0];
+    };
 
-  // UPDATED: Added Account_Num to the API payload
-  const callAPI = async (filters) => {
-    try {
-      const formatDate = (date) => {
-        if (!date) return null;
-        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-        return offsetDate.toISOString().split('T')[0];
-      };
+    const payload = {
+      Actions: filters.status1,
+      Incident_Status: filters.status2,
+      Source_Type: filters.status3,
+      From_Date: formatDate(filters.fromDate),
+      To_Date: formatDate(filters.toDate),
+      Account_Num: filters.accountNo,
+      pages: filters.page 
+    };
 
-      const payload = {
-        Actions: filters.status1 ,
-        Incident_Status: filters.status2 ,
-        Source_Type: filters.status3 ,
-        From_Date: formatDate(filters.fromDate),
-        To_Date: formatDate(filters.toDate),
-        Account_Num: filters.accountNumber,
-        pages: filters.page , 
-      };
+    setIsLoading(true);
+    const response = await New_List_Incidents(payload);
+    setIsLoading(false);
 
+    if (response && response.incidents && Array.isArray(response.incidents)) {
+      const newData = response.incidents;
 
-      setIsLoading(true);
-      
-      const response = await New_List_Incidents(payload);
-     
-
-      if (response && response.status === "success") {
-        if (response.incidents && Array.isArray(response.incidents)) {
-          console.log("Sample incident data:", response.incidents[0]);
-          
-          // Map backend MongoDB fields to frontend format
-          const mappedData = response.incidents.map((incident, index) => ({
-            incidentID: incident.Incident_Id ,
-            status: incident.Incident_Status ,
-            accountNo: incident.Account_Num ,
-            action: incident.Actions,
-            sourceType: incident.Source_Type ,
-            created_dtm: incident.Created_Dtm || incident.createdAt || new Date(),
-            
-            // Additional fields from the Incident collection
-            arrears: incident.Arrears ,
-            arearsBand: incident.Arrears_Band ,
-            createdBy: incident.Created_By ,
-            batchId: incident.Batch_Id ,
-            filteredReason: incident.Filtered_Reason ,
-            customerName: incident.Customer_Details?.Customer_Name ,
-            proceedBy: incident.Proceed_By ,
-            proceedDtm: incident.Proceed_Dtm ,
-          }));
-
-          console.log("Mapped data sample:", mappedData[0]);
-
-          if (currentPage === 1) {
-            setFilteredData(mappedData);
-          } else {
-            setFilteredData((prevData) => [...prevData, ...mappedData]);
-          }
-
-          // FIXED: Set pagination based on data length
-          setIsMoreDataAvailable(mappedData.length >= 10);
-
-          if (mappedData.length === 0 && currentPage === 1) {
-            Swal.fire({
-              title: "No Results",
-              text: response.message || "No incidents found matching the criteria.",
-              icon: "info"
-            });
-          }
-        } else {
-          console.log("No incidents array in response");
-          setFilteredData([]);
-          setIsMoreDataAvailable(false);
-        }
+      if (filters.page === 1) {
+        setFilteredData(newData); // RESET page 1
       } else {
-        console.log("Response status not success:", response?.status);
-        setFilteredData([]);
-        setIsMoreDataAvailable(false);
-        
-        if (response?.message) {
-          Swal.fire({
-            title: "Info",
-            text: response.message,
-            icon: "info"
-          });
-        }
+        setFilteredData((prev) => [...prev, ...newData]); // ADD page 2+
       }
-    } catch (error) {
-      console.error("=== Frontend Error ===");
-      console.error("Full error:", error);
-      
-      setFilteredData([]);
-      setIsMoreDataAvailable(false);
-      
-      Swal.fire({
-        title: "Error",
-        text: error.message || "Failed to fetch data. Please try again.",
-        icon: "error",
-        confirmButtonColor: "#d33"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  // UPDATED: Include accountNumber in pagination
+      if (newData.length < 10) {
+        setIsMoreDataAvailable(false);
+      }
+    } else {
+      throw new Error("Invalid or missing incidents data.");
+    }
+  } catch (error) {
+    console.error("API call failed:", error);
+    Swal.fire({
+      title: "Error",
+      text: "Failed to fetch filtered data.",
+      icon: "error"
+    });
+    setFilteredData([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
   useEffect(() => {
+
+
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI({
         ...committedFilters,
-        accountNumber: committedFilters.accountNumber,
         page: currentPage
       });
     }
   }, [currentPage]);
 
+
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (
-      direction === "next" &&
-      (isMoreDataAvailable || currentPage < Math.ceil(filteredData.length / rowsPerPage))
-    ) {
-      setCurrentPage(currentPage + 1);
+      // console.log("Current Page:", currentPage);
+    } else if (direction === "next") {
+      if (isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      } else {
+        if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
+          setCurrentPage(currentPage + 1);
+        }
+      }
+      // console.log("Current Page:", currentPage);
     }
   };
 
-  // UPDATED: Include accountNumber in filter handling
+
+
+
   const handleFilterButton = () => {
     setIsMoreDataAvailable(true);
+    //setTotalPages(0);
     setMaxCurrentPage(0);
     const isValid = filterValidations();
     if (!isValid) {
@@ -394,7 +309,7 @@ const Incident = () => {
         status3,
         fromDate,
         toDate,
-        accountNumber
+        accountNo
       });
       setFilteredData([]);
 
@@ -405,14 +320,16 @@ const Incident = () => {
           status3,
           fromDate,
           toDate,
-          accountNumber,
+          accountNo,
           page: 1
         });
       } else {
         setCurrentPage(1);
+
       }
     }
-  };
+
+  }
 
   const handleClear = () => {
     setStatus1("");
@@ -421,7 +338,7 @@ const Incident = () => {
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
-    //setTotalPages(0);
+    setAccountNo("");
     setFilteredData([]);
     setMaxCurrentPage(0);
     setIsMoreDataAvailable(true);
@@ -429,6 +346,7 @@ const Incident = () => {
       status1: "",
       status2: "",
       status3: "",
+      accountNo: "",
       fromDate: null,
       toDate: null
     });
@@ -485,9 +403,9 @@ const Incident = () => {
       setIsCreatingTask(false);
     }
   };
+ 
 
-
-
+  
 
   const HandleAddIncident = () => navigate("/incident/register");
 
@@ -517,12 +435,9 @@ const Incident = () => {
             </button>
           </div>
 
-
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
             <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
-              
-              
 
               <div className="flex items-center">
 
@@ -566,22 +481,19 @@ const Incident = () => {
                   <option value="Product Terminate" style={{ color: "black" }}>Product Terminate</option>
                   <option value="Special" style={{ color: "black" }}>Special</option>
                 </select>
-              </div>
-
+              </div>  
               
-
-              {/* NEW: Account Number Input Field */}
+                  {/* NEW: Account Number Input Field */}
               <div className="flex items-center">
                 <input
                   type="text"
-                  value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value)}
+                  value={accountNo}
+                  onChange={(e) => setAccountNo(e.target.value)}
                   placeholder="Account Number"
                   className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                   style={{ minWidth: '150px' }}
                 />
               </div>
-
 
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               <DatePicker
@@ -691,9 +603,9 @@ const Incident = () => {
             <button
               onClick={() => handlePrevNext("prev")}
               disabled={currentPage <= 1}
-              className={`${GlobalStyle.navButton}`}
+              className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
             >
-              <FaArrowLeft />
+                <FaArrowLeft />
             </button>
             <span className={`${GlobalStyle.pageIndicator} mx-4`}>
               Page {currentPage}
@@ -703,8 +615,14 @@ const Incident = () => {
               disabled={
                 searchQuery
                   ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
-              className={`${GlobalStyle.navButton}`}
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage
+                  )}
+              className={`${GlobalStyle.navButton} ${(searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                  ? "cursor-not-allowed"
+                  : ""
+                }`}
             >
               <FaArrowRight />
             </button>
