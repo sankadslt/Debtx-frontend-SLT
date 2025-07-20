@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import signUpImage from "../../assets/images/User/SignUp.jpeg";
 import { getAzureUserData, getLoggedUserId } from "../../services/auth/authService";
 import { createUser } from "../../services/user/user_services";
 import Swal from "sweetalert2";
+import { Active_DRC_Details } from "../../services/drc/Drc";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
+  const navigate =useNavigate();
   const [userType, setUserType] = useState("");
   const [loggedUserData, setLoggedUserData] =useState("");
   const [formData, setFormData] = useState({
@@ -18,6 +21,8 @@ const SignUp = () => {
     role: "",
     drcId: ""
   });
+
+  const [drcList, setDrcList] =useState([]);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,11 +49,28 @@ const SignUp = () => {
 
     loadUser();
   }, []);
+  
 
   //Reset form data on user type change
   useEffect(() => {
     clearFormData();
   }, [userType]);
+
+  // Fetch active DRC list
+  useEffect(() => {
+    const fetchActiveDrcList = async () => {
+      try {
+        const fetchedDrcList = await Active_DRC_Details();
+        console.log(fetchedDrcList);
+        setDrcList(fetchedDrcList);
+      } catch (error) {
+        console.error("Failed to fetch DRC list:", error);
+      }
+    };
+
+    fetchActiveDrcList();
+  }, []);
+
 
   //Clear form data
   const clearFormData = () => {
@@ -125,6 +147,7 @@ const SignUp = () => {
       const result = await createUser(payload);
 
       if (result.status === "success") {
+        goBack();
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -172,6 +195,10 @@ const SignUp = () => {
       setError(err.message || "Failed to fetch user data");
     }
     setLoading(false);
+  };
+
+  const goBack = () => {
+    navigate(-1); 
   };
 
   return (
@@ -243,8 +270,11 @@ const SignUp = () => {
                 <option value="" disabled hidden>
                 Select DRC
                 </option>
-                <option value="4512">Option 1</option>
-                <option value="2">Option 2</option>
+                {drcList.map((drc) => (
+                  <option key={drc.key} value={drc.id}>
+                    {drc.value}
+                  </option>
+                ))}
               </select>
               <input
                 type="text"
