@@ -26,7 +26,7 @@ import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 import Incident from "../pages/Incident/Incident";
 
 //import for the case details page
-import CaseDetails from "../pages/Incident/Case_Details"
+import CaseDetails from "../pages/Incident/Case_Details";
 import Case_List from "../pages/Incident/Case_List";
 
 //DISTRIBUTION
@@ -64,7 +64,7 @@ import MediationBoardCaseList from "../pages/Mediation_Board/MediationBoardCaseL
 import MediationBoardResponse from "../pages/Mediation_Board/MediationBoardResponse";
 
 //Dispute
-import Dispute from "../pages/Dispute/Dispute";
+
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
 import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
 import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
@@ -101,8 +101,6 @@ import SettlementPreview from "../pages/Settlement/SettlementPreview";
 import PaymentPreview from "../pages/Money_Transaction/PaymentPreview";
 import CommissionPreview from "../pages/Commission/Commission_Details";
 
-
-
 // DRC
 import Add_DRC from "../pages/DRC/Add_DRC";
 import DRCList from "../pages/DRC/DRCList";
@@ -121,14 +119,13 @@ import RtomInfoEnd from "../pages/Rtom/RtomInfoEnd";
 import ListofServicetype from "../pages/Rtom/ListofServicetype";
 import RtomInfoNew from "../pages/Rtom/RtomInfoNew";
 
-//USER  
+//USER
 import UserList from "../pages/User/UserList";
 import UserInfo from "../pages/User/UserInfo";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
 import ServiceTypeList from "../pages/Service/ServiceTypeList";
-
 
 const Routers = () => {
   return (
@@ -397,7 +394,6 @@ const Routers = () => {
         element={<AssignDRCCaseList />}
       />
 
-      
       {/* Distribute Routes */}
       <Route
         path="/pages/Distribute/AssignDRC"
@@ -524,9 +520,7 @@ const Routers = () => {
         element={<AssignDRCCaseList />}
       />
 
-      
-
-     {/* //INCIDENT */}
+      {/* //INCIDENT */}
       <Route
         path="/Incident/Incident_List"
         element={
@@ -536,16 +530,15 @@ const Routers = () => {
           />
         }
       />
-<Route
+      <Route
         path="/Incident/Incident"
         element={
           <ProtectedRoute
-            element={<Incident/>}
+            element={<Incident />}
             allowedRoles={["superadmin"]}
           />
         }
       />
-
 
       <Route
         path="/Incident/Case_Details"
@@ -631,18 +624,9 @@ const Routers = () => {
         }
       />
 
-
       {/* //Dispute */}
+
       <Route
-        path="/Dispute/Dispute"
-        element={
-          <ProtectedRoute
-            element={<Dispute />}
-            allowedRoles={["superadmin"]}
-          />
-        }
-      />
-        <Route
         path="/Dispute/Dispute_Letter_creation"
         element={
           <ProtectedRoute
@@ -651,7 +635,7 @@ const Routers = () => {
           />
         }
       />
-        <Route
+      <Route
         path="/Dispute/Dispute_Settlement_Letter_Creation"
         element={
           <ProtectedRoute
@@ -661,7 +645,7 @@ const Routers = () => {
         }
       />
 
-         <Route
+      <Route
         path="/Dispute/Dispute_Settlement_Letter_Preview"
         element={
           <ProtectedRoute
@@ -671,7 +655,6 @@ const Routers = () => {
         }
       />
 
-        
       {/* //MONEY TRANSACTIONS */}
       <Route
         path="pages/Money_Transaction/MoneyTransaction"
@@ -682,15 +665,55 @@ const Routers = () => {
           />
         }
       />
-      <Route path="/pages/Money_Transaction/payment/preview" element={<ProtectedRoute element={<PaymentPreview />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/pages/Money_Transaction/payment/preview"
+        element={
+          <ProtectedRoute
+            element={<PaymentPreview />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //COMMISSION */}
-      <Route path="/Commission/CommissionCaseList" element={<ProtectedRoute element={<CommissionCaseList />} allowedRoles={['superadmin']} />} />
-      <Route path="/Commission/preview" element={<ProtectedRoute element={<CommissionPreview />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/Commission/CommissionCaseList"
+        element={
+          <ProtectedRoute
+            element={<CommissionCaseList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/Commission/preview"
+        element={
+          <ProtectedRoute
+            element={<CommissionPreview />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //SETTLEMENT */}
-      <Route path="/pages/Settlement/MonitorSettlement" element={<ProtectedRoute element={<MonitorSettlement />} allowedRoles={['superadmin']} />} />
-      <Route path="/lod/ftl-log/preview" element={<ProtectedRoute element={<SettlementPreview />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/pages/Settlement/MonitorSettlement"
+        element={
+          <ProtectedRoute
+            element={<MonitorSettlement />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/lod/ftl-log/preview"
+        element={
+          <ProtectedRoute
+            element={<SettlementPreview />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
       {/* <Route path="/pages/Settlement/MoneyTransactions" element={<ProtectedRoute element={<MoneyTransactions />} allowedRoles={['superadmin']} />} /> */}
       {/* //Create SETTLEMENT */}
       <Route
@@ -704,13 +727,69 @@ const Routers = () => {
       />
 
       {/* Litigation */}
-      <Route path="/pages/Litigation/Litigation_List" element={<ProtectedRoute element={<Litigation_List />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Litigation/Litigation_Documentation" element={<ProtectedRoute element={<Litigation_Documentation />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Litigation/Litigation_Submission_Document_Summary" element={<ProtectedRoute element={<Litigation_Submission_Document_Summary />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Litigation/Change_Litigation_Submission_Document_Summary" element={<ProtectedRoute element={<Change_Litigation_Submission_Document_Summary />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Litigation/Litigation_Submission" element={<ProtectedRoute element={<Litigation_Submission />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Litigation/Litigation_Court_Details_Update" element={<ProtectedRoute element={<Litigation_Court_Details_Update />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Litigation/Litigation_Case_Details" element={<ProtectedRoute element={<Litigation_Case_Details />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/pages/Litigation/Litigation_List"
+        element={
+          <ProtectedRoute
+            element={<Litigation_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Litigation/Litigation_Documentation"
+        element={
+          <ProtectedRoute
+            element={<Litigation_Documentation />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Litigation/Litigation_Submission_Document_Summary"
+        element={
+          <ProtectedRoute
+            element={<Litigation_Submission_Document_Summary />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Litigation/Change_Litigation_Submission_Document_Summary"
+        element={
+          <ProtectedRoute
+            element={<Change_Litigation_Submission_Document_Summary />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Litigation/Litigation_Submission"
+        element={
+          <ProtectedRoute
+            element={<Litigation_Submission />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Litigation/Litigation_Court_Details_Update"
+        element={
+          <ProtectedRoute
+            element={<Litigation_Court_Details_Update />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Litigation/Litigation_Case_Details"
+        element={
+          <ProtectedRoute
+            element={<Litigation_Case_Details />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //LOD */}
       <Route
@@ -725,10 +804,7 @@ const Routers = () => {
       <Route
         path="/pages/LOD/LODLog"
         element={
-          <ProtectedRoute
-            element={<LOD_Log />}
-            allowedRoles={["superadmin"]}
-          />
+          <ProtectedRoute element={<LOD_Log />} allowedRoles={["superadmin"]} />
         }
       />
       <Route
@@ -766,25 +842,98 @@ const Routers = () => {
             allowedRoles={["superadmin"]}
           />
         }
-
       />
 
-      
-     
       {/* RTOM      */}
-      <Route path="/pages/Rtom/RtomList" element={<ProtectedRoute element={<RtomList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfo" element={<ProtectedRoute element={<RtomInfo />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfoEnd/:rtomId" element={<ProtectedRoute element={<RtomInfoEnd />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/AddRtom" element={<ProtectedRoute element={<AddRtom />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/ListofServiceType" element={<ProtectedRoute element={<ListofServicetype />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfoEdit/:rtomId" element={<ProtectedRoute element={<RtomInfoEdit />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/Rtom/RtomInfoNew" element={<ProtectedRoute element={<RtomInfoNew />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/pages/Rtom/RtomList"
+        element={
+          <ProtectedRoute
+            element={<RtomList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Rtom/RtomInfo"
+        element={
+          <ProtectedRoute
+            element={<RtomInfo />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Rtom/RtomInfoEnd/:rtomId"
+        element={
+          <ProtectedRoute
+            element={<RtomInfoEnd />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Rtom/AddRtom"
+        element={
+          <ProtectedRoute element={<AddRtom />} allowedRoles={["superadmin"]} />
+        }
+      />
+      <Route
+        path="/pages/Rtom/ListofServiceType"
+        element={
+          <ProtectedRoute
+            element={<ListofServicetype />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Rtom/RtomInfoEdit/:rtomId"
+        element={
+          <ProtectedRoute
+            element={<RtomInfoEdit />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/Rtom/RtomInfoNew"
+        element={
+          <ProtectedRoute
+            element={<RtomInfoNew />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //MASTER DRC */}
-      <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/DRC/DRCDetails" element={<ProtectedRoute element={<DRCDetails />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/DRC/DRCInfo" element={<ProtectedRoute element={<DRCInfo />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/pages/DRC/Add_DRC"
+        element={
+          <ProtectedRoute element={<Add_DRC />} allowedRoles={["superadmin"]} />
+        }
+      />
+      <Route
+        path="/pages/DRC/DRCList"
+        element={
+          <ProtectedRoute element={<DRCList />} allowedRoles={["superadmin"]} />
+        }
+      />
+      <Route
+        path="/pages/DRC/DRCDetails"
+        element={
+          <ProtectedRoute
+            element={<DRCDetails />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/DRC/DRCInfo"
+        element={
+          <ProtectedRoute element={<DRCInfo />} allowedRoles={["superadmin"]} />
+        }
+      />
       <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} />
 
       {/* //MASTER DRC
@@ -794,17 +943,45 @@ const Routers = () => {
     <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} /> */}
 
       {/* User */}
-      <Route path="/pages/User/UserList" element={<ProtectedRoute element={<UserList />} allowedRoles={['superadmin']} />} />
-      <Route path="/pages/User/UserInfo" element={<ProtectedRoute element={<UserInfo />} allowedRoles={['superadmin']} />} />
+      <Route
+        path="/pages/User/UserList"
+        element={
+          <ProtectedRoute
+            element={<UserList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/pages/User/UserInfo"
+        element={
+          <ProtectedRoute
+            element={<UserInfo />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* RO */}
-      <Route path="/pages/ro/ro-list" element={<ProtectedRoute element={<ROList />} allowedRoles={['superadmin']} />} />
-    
+      <Route
+        path="/pages/ro/ro-list"
+        element={
+          <ProtectedRoute element={<ROList />} allowedRoles={["superadmin"]} />
+        }
+      />
 
       {/* Service */}
-      <Route path="/pages/Service/ServiceTypeList" element={<ProtectedRoute element={<ServiceTypeList />} allowedRoles={['superadmin']} />} />
-{/* Dispute */}
- <Route
+      <Route
+        path="/pages/Service/ServiceTypeList"
+        element={
+          <ProtectedRoute
+            element={<ServiceTypeList />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      {/* Dispute */}
+      <Route
         path="/Dispute/Dispute_Letter_creation"
         element={
           <ProtectedRoute
@@ -814,10 +991,6 @@ const Routers = () => {
         }
       />
     </Routes>
-
-
-
-
   );
 };
 

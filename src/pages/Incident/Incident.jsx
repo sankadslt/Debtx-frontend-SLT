@@ -2,7 +2,7 @@
 Created Date: 2025-07-17
 Created By: Yugani Gunarathna (jtdsiriwardena@gmail.com)
 Last Modified Date: 2025-07-18
-Modified By: Sathmi Peiris (jtdsiriwardena@gmail.com)
+Modified By: Sathmi Peiris (sathmipeiris@gmail.com)
 Last Modified Date: 2025-07-20
 Modified By:  Yugani Gunarathna 
               Sathmi Peiris
@@ -17,17 +17,26 @@ Notes: This template uses Tailwind CSS and connects to Incident collection with 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload, FaPlus } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaArrowRight,
+  FaSearch,
+  FaDownload,
+  FaPlus,
+} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
-import { New_List_Incidents, Task_for_Download_Incidents } from "../../services/Incidents/incidentService.js";
+import {
+  New_List_Incidents,
+  Task_for_Download_Incidents,
+} from "../../services/Incidents/incidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService.js";
 import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
 import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
-import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
+import incidentDone from "/src/assets/images/incidents/Incident_Done.png";
 import errorincident from "/src/assets/images/incidents/Incident_Error.png";
 import Open_CPE_Collect from "../../assets/images/incidents/Only_CPE_Collect.png";
 import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
@@ -63,10 +72,8 @@ const Incident = () => {
     status3: "",
     fromDate: null,
     toDate: null,
-    accountNo: ""
+    accountNo: "",
   });
-
-
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -90,7 +97,7 @@ const Incident = () => {
     }
   }, []);
 
- const getStatusIcon = (status) => {
+  const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
       case "incident open":
       case "open no agent":
@@ -104,7 +111,7 @@ const Incident = () => {
 
       case "reject pending":
         return Reject_Pending;
-        
+
       case "incident reject":
         return Incident_Reject;
 
@@ -117,7 +124,7 @@ const Incident = () => {
         return null;
     }
   };
-// render status icon with tooltip
+  // render status icon with tooltip
   const renderStatusIcon = (status, index) => {
     const iconPath = getStatusIcon(status);
     if (!iconPath) {
@@ -128,11 +135,12 @@ const Incident = () => {
 
     return (
       <div className="flex items-center gap-2">
-        <img src={iconPath}
+        <img
+          src={iconPath}
           alt={status}
-
           className="w-6 h-6"
-          data-tooltip-id={tooltipId} />
+          data-tooltip-id={tooltipId}
+        />
 
         <Tooltip id={tooltipId} place="bottom" effect="solid">
           {status}
@@ -144,14 +152,11 @@ const Incident = () => {
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
-
   };
 
   const handleenddatechange = (date) => {
     setToDate(date);
-
   };
- 
 
   useEffect(() => {
     if (fromDate && toDate) {
@@ -162,16 +167,14 @@ const Incident = () => {
           icon: "warning",
           allowOutsideClick: false,
           allowEscapeKey: false,
-          confirmButtonColor: "#f1c40f"
+          confirmButtonColor: "#f1c40f",
         });
         setToDate(null);
         setFromDate(null);
         return;
-      } 
+      }
     }
   }, [fromDate, toDate]);
-
-
 
   const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
@@ -180,16 +183,22 @@ const Incident = () => {
       .includes(searchQuery.toLowerCase())
   );
 
-
   const filterValidations = () => {
-    if (!status1 && !status2 && !status3 && !fromDate && !toDate && !accountNo) {
+    if (
+      !status1 &&
+      !status2 &&
+      !status3 &&
+      !fromDate &&
+      !toDate &&
+      !accountNo
+    ) {
       Swal.fire({
         title: "Warning",
         text: "No filter is selected. Please, select a filter.",
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        confirmButtonColor: "#f1c40f"
+        confirmButtonColor: "#f1c40f",
       });
       setToDate(null);
       setFromDate(null);
@@ -203,7 +212,7 @@ const Incident = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        confirmButtonColor: "#f1c40f"
+        confirmButtonColor: "#f1c40f",
       });
       setToDate(null);
       setFromDate(null);
@@ -212,69 +221,95 @@ const Incident = () => {
 
     return true;
   };
-const callAPI = async (filters) => {
-  try {
-    const formatDate = (date) => {
-      if (!date) return null;
-      const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-      return offsetDate.toISOString().split("T")[0];
-    };
+  const callAPI = async (filters) => {
+    try {
+      const formatDate = (date) => {
+        if (!date) return null;
+        const offsetDate = new Date(
+          date.getTime() - date.getTimezoneOffset() * 60000
+        );
+        return offsetDate.toISOString().split("T")[0];
+      };
 
-    const payload = {
-      Actions: filters.status1,
-      Incident_Status: filters.status2,
-      Source_Type: filters.status3,
-      From_Date: formatDate(filters.fromDate),
-      To_Date: formatDate(filters.toDate),
-      Account_Num: filters.accountNo,
-      pages: filters.page 
-    };
+      const payload = {
+        Actions: filters.status1,
+        Incident_Status: filters.status2,
+        Source_Type: filters.status3,
+        From_Date: formatDate(filters.fromDate),
+        To_Date: formatDate(filters.toDate),
+        Account_Num: filters.accountNo,
+        pages: filters.page,
+      };
 
-    setIsLoading(true);
-    const response = await New_List_Incidents(payload);
-    setIsLoading(false);
+      setIsLoading(true);
+      const response = await New_List_Incidents(payload);
+      setIsLoading(false);
 
-    if (response && response.incidents && Array.isArray(response.incidents)) {
-      const newData = response.incidents;
+      if (response && response.incidents && Array.isArray(response.incidents)) {
+        const newData = response.incidents;
 
-      if (filters.page === 1) {
-        setFilteredData(newData); // RESET page 1
+        if (currentPage === 1) {
+          setFilteredData(newData); // RESET page 1
+        } else {
+          setFilteredData((prev) => [...prev, ...newData]); // ADD page 2+
+        }
+
+        // if (newData.length < 10) {
+        //   setIsMoreDataAvailable(false);
+        // }
+
+        if (newData.length === 0) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f",
+            });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (newData.length < maxData) {
+            console.log("No more data available", newData.length);
+            setIsMoreDataAvailable(false); // No more data available
+          }
+        }
       } else {
-        setFilteredData((prev) => [...prev, ...newData]); // ADD page 2+
+        Swal.fire({
+          title: "Error",
+          text: "No valid Incident data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+        setFilteredData([]);
       }
-
-      if (newData.length < 10) {
-        setIsMoreDataAvailable(false);
-      }
-    } else {
-      throw new Error("Invalid or missing incidents data.");
+    } catch (error) {
+      console.error("API call failed:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch filtered data.",
+        icon: "error",
+      });
+      setFilteredData([]);
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error("API call failed:", error);
-    Swal.fire({
-      title: "Error",
-      text: "Failed to fetch filtered data.",
-      icon: "error"
-    });
-    setFilteredData([]);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
-
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
       callAPI({
         ...committedFilters,
-        page: currentPage
+        page: currentPage,
       });
     }
   }, [currentPage]);
-
 
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
@@ -292,9 +327,6 @@ const callAPI = async (filters) => {
     }
   };
 
-
-
-
   const handleFilterButton = () => {
     setIsMoreDataAvailable(true);
     //setTotalPages(0);
@@ -309,7 +341,7 @@ const callAPI = async (filters) => {
         status3,
         fromDate,
         toDate,
-        accountNo
+        accountNo,
       });
       setFilteredData([]);
 
@@ -321,15 +353,13 @@ const callAPI = async (filters) => {
           fromDate,
           toDate,
           accountNo,
-          page: 1
+          page: 1,
         });
       } else {
         setCurrentPage(1);
-
       }
     }
-
-  }
+  };
 
   const handleClear = () => {
     setStatus1("");
@@ -348,7 +378,7 @@ const callAPI = async (filters) => {
       status3: "",
       accountNo: "",
       fromDate: null,
-      toDate: null
+      toDate: null,
     });
     if (currentPage != 1) {
       setCurrentPage(1);
@@ -358,9 +388,7 @@ const callAPI = async (filters) => {
     }
   };
 
-
   const HandleCreateTask = async () => {
-
     const userData = await getLoggedUserId();
 
     if (!fromDate || !toDate) {
@@ -370,26 +398,28 @@ const callAPI = async (filters) => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        confirmButtonColor: "#f1c40f"
+        confirmButtonColor: "#f1c40f",
       });
       return;
     }
 
-
     setIsCreatingTask(true);
 
     try {
-
-
-
-
-      const response = await Task_for_Download_Incidents(status1, status2, fromDate, toDate, userData);
+      const response = await Task_for_Download_Incidents(
+        status1,
+        status2,
+        fromDate,
+        toDate,
+        // accountNo,
+        userData
+      );
       if (response && response.message === "Task created successfully") {
         Swal.fire({
           title: "Success",
           text: `Task created successfully!`,
           icon: "success",
-          confirmButtonColor: "#28a745"
+          confirmButtonColor: "#28a745",
         });
       }
     } catch (error) {
@@ -403,16 +433,8 @@ const callAPI = async (filters) => {
       setIsCreatingTask(false);
     }
   };
- 
-
-  
 
   const HandleAddIncident = () => navigate("/incident/register");
-
-
-
-
-
 
   if (isLoading) {
     return (
@@ -429,7 +451,10 @@ const callAPI = async (filters) => {
           <h1 className={GlobalStyle.headingLarge}>Incident </h1>
 
           <div className="flex justify-end mt-6">
-            <button onClick={HandleAddIncident} className={`${GlobalStyle.buttonPrimary} flex items-center`}>
+            <button
+              onClick={HandleAddIncident}
+              className={`${GlobalStyle.buttonPrimary} flex items-center`}
+            >
               <FaPlus className="mr-2" />
               Add Incident
             </button>
@@ -438,19 +463,28 @@ const callAPI = async (filters) => {
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
             <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
-
               <div className="flex items-center">
-
                 <select
                   value={status1}
                   onChange={(e) => setStatus1(e.target.value)}
                   className={`${GlobalStyle.selectBox}`}
                   style={{ color: status1 === "" ? "gray" : "black" }}
                 >
-                  <option value="" hidden>Action Type</option>
-                  <option value="collect arrears" style={{ color: "black" }}>collect arrears</option>
-                  <option value="collect arrears and CPE" style={{ color: "black" }}>collect arrears and CPE</option>
-                  <option value="collect CPE" style={{ color: "black" }}>collect CPE</option>
+                  <option value="" hidden>
+                    Action Type
+                  </option>
+                  <option value="collect arrears" style={{ color: "black" }}>
+                    collect arrears
+                  </option>
+                  <option
+                    value="collect arrears and CPE"
+                    style={{ color: "black" }}
+                  >
+                    collect arrears and CPE
+                  </option>
+                  <option value="collect CPE" style={{ color: "black" }}>
+                    collect CPE
+                  </option>
                 </select>
               </div>
 
@@ -461,11 +495,24 @@ const callAPI = async (filters) => {
                   className={`${GlobalStyle.selectBox}`}
                   style={{ color: status2 === "" ? "gray" : "black" }}
                 >
-                  <option value="" hidden>Status</option>
-                  <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
-                  <option value="Complete" style={{ color: "black" }}>Complete</option>
-                  <option value="Incident Error" style={{ color: "black" }}>Incident Error</option>
-                  <option value="Incident InProgress" style={{ color: "black" }}>Incident InProgress</option>
+                  <option value="" hidden>
+                    Status
+                  </option>
+                  <option value="Incident Open" style={{ color: "black" }}>
+                    Incident Open
+                  </option>
+                  <option value="Complete" style={{ color: "black" }}>
+                    Complete
+                  </option>
+                  <option value="Incident Error" style={{ color: "black" }}>
+                    Incident Error
+                  </option>
+                  <option
+                    value="Incident InProgress"
+                    style={{ color: "black" }}
+                  >
+                    Incident InProgress
+                  </option>
                 </select>
               </div>
 
@@ -476,14 +523,22 @@ const callAPI = async (filters) => {
                   className={`${GlobalStyle.selectBox}`}
                   style={{ color: status3 === "" ? "gray" : "black" }}
                 >
-                  <option value="" hidden>Source Type</option>
-                  <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>
-                  <option value="Product Terminate" style={{ color: "black" }}>Product Terminate</option>
-                  <option value="Special" style={{ color: "black" }}>Special</option>
+                  <option value="" hidden>
+                    Source Type
+                  </option>
+                  <option value="Pilot Suspended" style={{ color: "black" }}>
+                    Pilot Suspended
+                  </option>
+                  <option value="Product Terminate" style={{ color: "black" }}>
+                    Product Terminate
+                  </option>
+                  <option value="Special" style={{ color: "black" }}>
+                    Special
+                  </option>
                 </select>
-              </div>  
-              
-                  {/* NEW: Account Number Input Field */}
+              </div>
+
+              {/* NEW: Account Number Input Field */}
               <div className="flex items-center">
                 <input
                   type="text"
@@ -491,7 +546,7 @@ const callAPI = async (filters) => {
                   onChange={(e) => setAccountNo(e.target.value)}
                   placeholder="Account Number"
                   className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  style={{ minWidth: '150px' }}
+                  style={{ minWidth: "150px" }}
                 />
               </div>
 
@@ -539,7 +594,7 @@ const callAPI = async (filters) => {
                 value={searchQuery}
                 onChange={(e) => {
                   setCurrentPage(1); // Reset to page 1 on search
-                  setSearchQuery(e.target.value)
+                  setSearchQuery(e.target.value);
                 }}
               />
               <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -547,7 +602,9 @@ const callAPI = async (filters) => {
           </div>
 
           {/* Table */}
-          <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
+          <div
+            className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}
+          >
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -561,37 +618,55 @@ const callAPI = async (filters) => {
               </thead>
 
               <tbody>
-                {filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
-                    <tr
-                      key={row.incidentID || index}
-                      className={
-                        index % 2 === 0
-                          ? GlobalStyle.tableRowEven
-                          : GlobalStyle.tableRowOdd
-                      }
-                    >
-                      <td className={GlobalStyle.tableData}>{row.incidentID || ""}</td>
-                      <td className={`${GlobalStyle.tableData} flex justify-center`}>
-                        {renderStatusIcon(row.status, index)}
-                      </td>
-                      <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
-                      <td className={GlobalStyle.tableData}>{row.action || ""}</td>
-                      <td className={GlobalStyle.tableData}>{row.sourceType || ""}</td>
-                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleString("en-GB", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true
-                      }) || ""}</td>
-
-                    </tr>
-                  ))
+                {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
+                  filteredDataBySearch
+                    .slice(startIndex, startIndex + rowsPerPage)
+                    .map((row, index) => (
+                      <tr
+                        key={row.incidentID || index}
+                        className={
+                          index % 2 === 0
+                            ? GlobalStyle.tableRowEven
+                            : GlobalStyle.tableRowOdd
+                        }
+                      >
+                        <td className={GlobalStyle.tableData}>
+                          {row.Incident_Id || ""}
+                        </td>
+                        <td
+                          className={`${GlobalStyle.tableData} flex justify-center`}
+                        >
+                          {renderStatusIcon(row.Incident_Status, index)}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {row.Account_Num || ""}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {row.Actions || ""}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {row.Source_Type || ""}
+                        </td>
+                        <td className={GlobalStyle.tableData}>
+                          {new Date(row.Created_Dtm).toLocaleString("en-GB", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          }) || ""}
+                        </td>
+                      </tr>
+                    ))
                 ) : (
                   <tr>
-                    <td colSpan={9} className={`${GlobalStyle.tableData} text-center`}>No cases available</td>
+                    <td
+                      colSpan={9}
+                      className={`${GlobalStyle.tableData} text-center`}
+                    >
+                      No cases available
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -599,53 +674,113 @@ const callAPI = async (filters) => {
           </div>
 
           {/* Pagination Section */}
-          {filteredDataBySearch.length > 0 && (<div className={GlobalStyle.navButtonContainer}>
-            <button
-              onClick={() => handlePrevNext("prev")}
-              disabled={currentPage <= 1}
-              className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
-            >
-                <FaArrowLeft />
-            </button>
-            <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-              Page {currentPage}
-            </span>
-            <button
-              onClick={() => handlePrevNext("next")}
-              disabled={
-                searchQuery
-                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage
-                  )}
-              className={`${GlobalStyle.navButton} ${(searchQuery
-                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
-                  ? "cursor-not-allowed"
-                  : ""
-                }`}
-            >
-              <FaArrowRight />
-            </button>
-          </div>)}
-
-          {/* Create Task Button */}
-          {["admin", "superadmin", "slt"].includes(userRole) && filteredDataBySearch.length > 0 && (
-            <div className="flex justify-end mt-6">
+          {/* {filteredDataBySearch.length > 0 && (
+            <div className={GlobalStyle.navButtonContainer}>
               <button
-                onClick={HandleCreateTask}
-                className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
-                disabled={isCreatingTask}
+                onClick={() => handlePrevNext("prev")}
+                disabled={currentPage <= 1}
+                className={`${GlobalStyle.navButton} ${
+                  currentPage <= 1 ? "cursor-not-allowed" : ""
+                }`}
               >
-                {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-                {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                <FaArrowLeft />
+              </button>
+              <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+                Page {currentPage}
+              </span>
+              <button
+                onClick={() => handlePrevNext("next")}
+                disabled={
+                  searchQuery
+                    ? currentPage >=
+                      Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    : !isMoreDataAvailable &&
+                      currentPage >=
+                        Math.ceil(filteredData.length / rowsPerPage)
+                }
+                className={`${GlobalStyle.navButton} ${
+                  (
+                    searchQuery
+                      ? currentPage >=
+                        Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                      : !isMoreDataAvailable &&
+                        currentPage >=
+                          Math.ceil(filteredData.length / rowsPerPage)
+                  )
+                    ? "cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                <FaArrowRight />
+              </button>
+            </div>
+          )} */}
+          {filteredDataBySearch.length > 0 && (
+            <div className={GlobalStyle.navButtonContainer}>
+              <button
+                onClick={() => handlePrevNext("prev")}
+                disabled={currentPage <= 1}
+                className={`${GlobalStyle.navButton} ${
+                  currentPage <= 1 ? "cursor-not-allowed" : ""
+                }`}
+              >
+                <FaArrowLeft />
+              </button>
+              <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+                Page {currentPage}
+              </span>
+              <button
+                onClick={() => handlePrevNext("next")}
+                disabled={
+                  searchQuery
+                    ? currentPage >=
+                      Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    : !isMoreDataAvailable &&
+                      currentPage >=
+                        Math.ceil(filteredData.length / rowsPerPage)
+                }
+                className={`${GlobalStyle.navButton} ${
+                  (
+                    searchQuery
+                      ? currentPage >=
+                        Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                      : !isMoreDataAvailable &&
+                        currentPage >=
+                          Math.ceil(filteredData.length / rowsPerPage)
+                  )
+                    ? "cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                <FaArrowRight />
               </button>
             </div>
           )}
+
+          {/* Create Task Button */}
+          {["admin", "superadmin", "slt"].includes(userRole) &&
+            filteredDataBySearch.length > 0 && (
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={HandleCreateTask}
+                  className={`${GlobalStyle.buttonPrimary} flex items-center ${
+                    isCreatingTask ? "opacity-50" : ""
+                  }`}
+                  disabled={isCreatingTask}
+                >
+                  {!isCreatingTask && (
+                    <FaDownload style={{ marginRight: "8px" }} />
+                  )}
+                  {isCreatingTask
+                    ? "Creating Tasks..."
+                    : "Create task and let me know"}
+                </button>
+              </div>
+            )}
         </main>
       </div>
     </div>
   );
 };
-
 
 export default Incident;
