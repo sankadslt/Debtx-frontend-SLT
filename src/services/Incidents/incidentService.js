@@ -268,3 +268,32 @@ export const Task_for_Download_Incidents = async (
     throw error.response?.data || error;
   }
 };
+
+export const Task_for_Download_Incidents_Full_List = async (
+  status1,
+  status2,
+  fromDate,
+  toDate,
+  createdBy
+) => {
+  try {
+    const response = await axios.post(
+      `${INCIDENT_URL}/Task_for_Download_Incidents_Full_List`,
+      {
+        Incident_Status: status2,
+        Actions: status1,
+        From_Date: fromDate,
+        To_Date: toDate,
+        // Account_Num: accountNo,
+        Created_By: createdBy,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating incident:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
