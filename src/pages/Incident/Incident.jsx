@@ -28,7 +28,7 @@ import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import {
   New_List_Incidents,
-  Task_for_Download_Incidents,
+  Task_for_Download_Incidents_Full_List,
 } from "../../services/Incidents/incidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { Tooltip } from "react-tooltip";
@@ -406,7 +406,7 @@ const Incident = () => {
     setIsCreatingTask(true);
 
     try {
-      const response = await Task_for_Download_Incidents(
+      const response = await Task_for_Download_Incidents_Full_List(
         status1,
         status2,
         fromDate,
