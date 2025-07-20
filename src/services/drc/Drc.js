@@ -150,6 +150,7 @@ export const getDebtCompanyByDRCID = async (drcId) => {
     const response = await axios.post(`${URL}/List_DRC_Details_By_DRC_ID`, {
       drc_id: drcId,
     });
+    console.log("Response from getDebtCompanyByDRCID:", response.data);
     const data = response.data.data;
     return data;
   } catch (error) {
@@ -172,8 +173,8 @@ export const terminateCompanyByDRCID = async (
     const response = await axios.patch(`${URL}/Terminate_Company_By_DRC_ID`, {
       drc_id: drcId,
       remark: remark,
-      remark_by: remarkBy,
-      remark_dtm: terminatedDate.toISOString(), // Ensure proper date format
+      terminate_by: remarkBy,
+      terminate_dtm: terminatedDate.toISOString(), // Ensure proper date format
     });
 
     if (response.data.status === "error") {
@@ -218,6 +219,7 @@ export const updateDRCInfo = async (
         rtom_id: rtomItem.rtom_id,
         rtom_name: rtomItem.rtom_name,
         rtom_status: rtomItem.rtom_status,
+         rtom_billing_center_code: rtomItem.rtom_billing_center_code,
         handling_type: rtomItem.handling_type,
         status_update_dtm: rtomItem.status_update_dtm || new Date().toISOString(),
         status_update_by: rtomItem.status_update_by || updated_by
@@ -234,22 +236,43 @@ export const updateDRCInfo = async (
     if (contactNo) {
       requestData.drc_contact_no = contactNo;
     }
+    
 
     const response = await axios.patch(
       `${URL}/Update_DRC_With_Services_and_SLT_Cordinator`,
-      requestData
+      requestData,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
     );
+
+    // Check for error in response
+    if (response.data.status === 'error') {
+      throw new Error(response.data.message || 'Failed to update DRC');
+    }
 
     return response.data;
   } catch (error) {
     console.error(
-      "Error updating DRC information:",
-      error.response?.data || error.message
+      "Detailed error updating DRC:",
+      {
+        message: error.message,
+        responseData: error.response?.data,
+        requestData: error.config?.data,
+        stack: error.stack
+      }
     );
-    throw new Error(error.response?.data?.message || "Failed to update DRC");
+    
+    throw new Error(
+      error.response?.data?.message || 
+      error.response?.data?.errors?.exception || 
+      error.message || 
+      'Failed to update DRC'
+    );
   }
 };
-
 
 export const getActiveRTOMDetails = async () => {
   try {

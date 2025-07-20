@@ -5,7 +5,7 @@ import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import moreImg from "../../assets/images/more.svg";
 import ListImg from "../../assets/images/ConfigurationImg/list.png";
-import Checklist from "../../assets/images/ConfigurationImg/checklist.png";
+import pendingIcon from "../../assets/images/DRC_Pending_Approval.png";
 import activeIcon from "../../assets/images/ConfigurationImg/Active.png";
 import inactiveIcon from "../../assets/images/ConfigurationImg/Inactive.png";
 import terminatedIcon from "../../assets/images/ConfigurationImg/Terminate.png";
@@ -48,6 +48,8 @@ const DRCList = () => {
             return inactiveIcon;
         case "terminate":
             return terminatedIcon;
+        case "pending":
+            return pendingIcon;
         default:
             return null;
     }
@@ -279,6 +281,7 @@ const showNoDataMessage = (status = "") => {
                                 <option value="" disabled hidden>All Status</option>
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
+                                <option value="Pending">Pending</option>
                                 <option value="Terminate">Terminated</option>
                             </select>
 
@@ -404,7 +407,7 @@ const showNoDataMessage = (status = "") => {
                                     </button>
 
                                     <button
-                                            onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID } })}
+                                            onClick={() => navigate('/pages/Distribute/AssignDRCCaseList', { state: { drc_id: log.DRCID ,  drcname: log.DRCName} })}
                                             className="p-1 hover:bg-gray-100 rounded"
                                         >
                                             <img src={ListImg} alt="Case List" className="h-auto w-5 max-w-[24px]" data-tooltip-id={`case-list-tooltip`} />
