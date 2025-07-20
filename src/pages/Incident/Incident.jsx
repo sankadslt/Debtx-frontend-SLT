@@ -295,7 +295,7 @@ const Incident = () => {
         text: "Failed to fetch filtered data.",
         icon: "error",
       });
-      setFilteredData([]);
+      // setFilteredData([]);
     } finally {
       setIsLoading(false);
     }
