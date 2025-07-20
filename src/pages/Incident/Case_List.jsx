@@ -931,7 +931,7 @@ const Case_List = () => {
             >
               <option value="" hidden>Service Type</option>
               {serviceTypes.length > 0 ? (serviceTypes.map((service) => (
-                <option key={service.id} value={service.id} style={{ color: "black" }}>
+                <option key={service.id} value={service.service_type} style={{ color: "black" }}>
                   {service.value}
                 </option>
               ))) : (
