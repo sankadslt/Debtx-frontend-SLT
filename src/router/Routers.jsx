@@ -19,6 +19,7 @@ import ValidityPeriodExtension from "../pages/Request/ValidityPeriodExtension";
 import RequestResponseLog from "../pages/Request/RequestResponseLog";
 
 import Incident_List from "../pages/Incident/Incident_List";
+import Incident from "../pages/Incident/Incident";
 import Incident_Register_Individual from "../pages/Incident/Incident_Register_Individual";
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
@@ -606,6 +607,15 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<Incident_File_Download />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      <Route
+        path="/Incident/Incident"
+        element={
+          <ProtectedRoute
+            element={<Incident />}
             allowedRoles={["superadmin"]}
           />
         }
