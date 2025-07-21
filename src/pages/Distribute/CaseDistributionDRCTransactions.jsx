@@ -671,7 +671,7 @@ export default function AssignPendingDRCSummary() {
 
   return (
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
-      <h1 className={`${GlobalStyle.headingLarge}`}>Case distribution </h1>
+      <h1 className={`${GlobalStyle.headingLarge}`}>DRC Transactions</h1>
 
 
       {/* Filter Section */}
