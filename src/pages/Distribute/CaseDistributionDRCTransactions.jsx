@@ -564,9 +564,21 @@ export default function AssignPendingDRCSummary() {
               title: "Success",
               text: "Forwarded for Proceed successfully.",
               confirmButtonColor: "#28a745",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                // Reload the data when user clicks OK
+                if (currentPage1 === 1) {
+                  fetchDataAPI({
+                    ...committedFilters,
+                    currentPage1: 1
+                  });
+                } else {
+                  setCurrentPage1(1);
+                }
+              }
             });
-
-            applyFilters(); // Refresh the data after forwarding
 
           } catch (error) {
             console.error(error)
@@ -861,7 +873,7 @@ export default function AssignPendingDRCSummary() {
                         )}
                         {item.current_batch_distribution_status === "batch_forword_approval" && (
                           <>
-                            <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content={`Open - ${new Date(item.Forward_For_Approvals_On).toLocaleDateString('en-GB')}`} src={Batch_Forward_Approved} width={20} height={15} alt="Batch Forward Approval" />
+                            <img data-tooltip-id={`tooltip-progress-${index}`} data-tooltip-content={`Batch Forword Approval`} src={Batch_Forward_Approved} width={20} height={15} alt="Batch Forward Approval" />
                             <Tooltip id={`tooltip-progress-${index}`} place="bottom" />
                           </>
                         )}
