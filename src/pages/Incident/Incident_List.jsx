@@ -259,17 +259,17 @@ const Incident_List = () => {
       setIsLoading(true);
       const response = await fetchIncidents(payload);
       setIsLoading(false);
-      console.log("API Response:", response);
+      console.log("API Response:", response.incidents);
 
-      if (response && response.data) {
+      if (response && response.incidents) {
         if (currentPage === 1) {
-          setFilteredData(response.data);
+          setFilteredData(response.incidents);
         } else {
-          setFilteredData((prevData) => [...prevData, ...response.data]);
+          setFilteredData((prevData) => [...prevData, ...response.incidents]);
         }
 
 
-        if (response.data.length === 0) {
+        if (response.incidents.length === 0) {
           setIsMoreDataAvailable(false);
           if (currentPage === 1) {
             Swal.fire({
@@ -285,7 +285,7 @@ const Incident_List = () => {
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
-          if (response.data.length < maxData) {
+          if (response.incidents.length < maxData) {
             setIsMoreDataAvailable(false);
           }
         }
@@ -600,14 +600,14 @@ const Incident_List = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td className={GlobalStyle.tableData}>{row.incidentID || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.Incident_Log_Id || ""}</td>
                       <td className={`${GlobalStyle.tableData} flex justify-center`}>
-                        {renderStatusIcon(row.status, index)}
+                        {renderStatusIcon(row.Incident_Status, index)}
                       </td>
-                      <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
-                      <td className={GlobalStyle.tableData}>{row.action || ""}</td>
-                      <td className={GlobalStyle.tableData}>{row.sourceType || ""}</td>
-                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleString("en-GB", {
+                      <td className={GlobalStyle.tableData}>{row.Account_Num || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.Actions || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.Source_Type || ""}</td>
+                      <td className={GlobalStyle.tableData}>{new Date(row.Created_Dtm).toLocaleString("en-GB", {
                         year: "numeric",
                         month: "2-digit",
                         day: "2-digit",

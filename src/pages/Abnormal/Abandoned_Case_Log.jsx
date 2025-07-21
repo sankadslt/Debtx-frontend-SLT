@@ -85,7 +85,7 @@ const AbondonedCaseModal = ({ onSuccess, onClose }) => {
         remark_edit_by: userId,
         created_by: userId,
       };
-
+ 
       const response = await updateAbondonedCaseRemark(payload);
 
       if (response.success) {
