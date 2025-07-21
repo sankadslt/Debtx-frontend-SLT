@@ -259,17 +259,17 @@ const Incident_List = () => {
       setIsLoading(true);
       const response = await fetchIncidents(payload);
       setIsLoading(false);
-      console.log("API Response:", response.incidents);
+      console.log("API Response:", response);
 
-      if (response && response.incidents) {
+      if (response && response.data) {
         if (currentPage === 1) {
-          setFilteredData(response.incidents);
+          setFilteredData(response.data);
         } else {
-          setFilteredData((prevData) => [...prevData, ...response.incidents]);
+          setFilteredData((prevData) => [...prevData, ...response.data]);
         }
 
 
-        if (response.incidents.length === 0) {
+        if (response.data.length === 0) {
           setIsMoreDataAvailable(false);
           if (currentPage === 1) {
             Swal.fire({
@@ -285,7 +285,7 @@ const Incident_List = () => {
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
-          if (response.incidents.length < maxData) {
+          if (response.data.length < maxData) {
             setIsMoreDataAvailable(false);
           }
         }
@@ -467,7 +467,7 @@ const Incident_List = () => {
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          <h1 className={GlobalStyle.headingLarge}>Incident List</h1>
+          <h1 className={GlobalStyle.headingLarge}>User Created Account List</h1>
 
           <div className="flex justify-end mt-6">
             <button onClick={HandleAddIncident} className={`${GlobalStyle.buttonPrimary} flex items-center`}>
@@ -600,14 +600,14 @@ const Incident_List = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td className={GlobalStyle.tableData}>{row.Incident_Log_Id || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.incidentID || ""}</td>
                       <td className={`${GlobalStyle.tableData} flex justify-center`}>
-                        {renderStatusIcon(row.Incident_Status, index)}
+                        {renderStatusIcon(row.status, index)}
                       </td>
-                      <td className={GlobalStyle.tableData}>{row.Account_Num || ""}</td>
-                      <td className={GlobalStyle.tableData}>{row.Actions || ""}</td>
-                      <td className={GlobalStyle.tableData}>{row.Source_Type || ""}</td>
-                      <td className={GlobalStyle.tableData}>{new Date(row.Created_Dtm).toLocaleString("en-GB", {
+                      <td className={GlobalStyle.tableData}>{row.accountNo || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.action || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.sourceType || ""}</td>
+                      <td className={GlobalStyle.tableData}>{new Date(row.created_dtm).toLocaleString("en-GB", {
                         year: "numeric",
                         month: "2-digit",
                         day: "2-digit",
