@@ -6,6 +6,7 @@ import { createUser } from "../../services/user/user_services";
 import Swal from "sweetalert2";
 import { Active_DRC_Details } from "../../services/drc/Drc";
 import { useNavigate } from "react-router-dom";
+import { FaSearch } from "react-icons/fa";
 
 const SignUp = () => {
   const navigate =useNavigate();
@@ -337,11 +338,18 @@ const SignUp = () => {
                   onChange={handleInputChange}
                   className={`${GlobalStyle.selectBox} w-full text-blue-900 placeholder-blue-900 pl-2`}
                 />
-                <button
+                {/* <button
                   onClick={handleSearch}
                   className="ml-2 bg-blue-600 text-white px-4 rounded"
                 >
                   {loading ? "Loading..." : "Search"}
+                </button> */}
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
+                >
+                  <FaSearch style={{ width: 20, height: 20 }} />
                 </button>
               </div>
               {error && <p className="text-red-500 mb-2">{error}</p>}
