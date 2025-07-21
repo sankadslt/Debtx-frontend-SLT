@@ -176,12 +176,34 @@ const Incident = () => {
     }
   }, [fromDate, toDate]);
 
-  const filteredDataBySearch = filteredData.filter((row) =>
-    Object.values(row)
+  const filteredDataBySearch = filteredData.filter((row) => {
+    // Object.values(row)
+    //   .join(" ")
+    //   .toLowerCase()
+    //   .includes(searchQuery.toLowerCase())
+    const searchableValues = [
+      row.Incident_Id,
+      row.Incident_Status,
+      row.Account_Num,
+      row.Actions,
+      row.Source_Type,
+      row.Arrears,
+      new Date(row.Created_Dtm).toLocaleString("en-GB", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    ];
+
+    return searchableValues
       .join(" ")
       .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+      .includes(searchQuery.toLowerCase());
+  });
+
 
   const filterValidations = () => {
     if (
@@ -602,6 +624,7 @@ const Incident = () => {
                   <th className={GlobalStyle.tableHeader}>Account No</th>
                   <th className={GlobalStyle.tableHeader}>Action</th>
                   <th className={GlobalStyle.tableHeader}>Source Type</th>
+                  <th className={GlobalStyle.tableHeader}>Arrears Amount (LKR)</th>
                   <th className={GlobalStyle.tableHeader}>Created DTM</th>
                 </tr>
               </thead>
@@ -635,6 +658,9 @@ const Incident = () => {
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {row.Source_Type || ""}
+                        </td>
+                        <td className={GlobalStyle.tableCurrency}>
+                          {row.Arrears || ""}
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {new Date(row.Created_Dtm).toLocaleString("en-GB", {
@@ -728,15 +754,15 @@ const Incident = () => {
                     Math.ceil(filteredData.length / rowsPerPage)
                 }
                 className={`${GlobalStyle.navButton} ${(
-                    searchQuery
-                      ? currentPage >=
-                      Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                      : !isMoreDataAvailable &&
-                      currentPage >=
-                      Math.ceil(filteredData.length / rowsPerPage)
-                  )
-                    ? "cursor-not-allowed"
-                    : ""
+                  searchQuery
+                    ? currentPage >=
+                    Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    : !isMoreDataAvailable &&
+                    currentPage >=
+                    Math.ceil(filteredData.length / rowsPerPage)
+                )
+                  ? "cursor-not-allowed"
+                  : ""
                   }`}
               >
                 <FaArrowRight />
