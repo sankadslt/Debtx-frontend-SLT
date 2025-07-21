@@ -417,7 +417,7 @@ export default function AmendAssignedDRC() {
             {/* textbox */}
             <div className="flex gap-7 flex-wrap">
               <h1 className={GlobalStyle.headingMedium}>
-                Assigned case count:{assignedCaseCount}
+                Assigned case count : {assignedCaseCount}
 
               </h1>
               <input
