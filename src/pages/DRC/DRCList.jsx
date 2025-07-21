@@ -281,6 +281,7 @@ const showNoDataMessage = (status = "") => {
                                 <option value="" disabled hidden>All Status</option>
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
+                                <option value="Pending">Pending</option>
                                 <option value="Terminate">Terminated</option>
                             </select>
 
