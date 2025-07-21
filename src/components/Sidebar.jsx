@@ -156,7 +156,7 @@ const Sidebar = ({ onHoverChange }) => {
         },
         {
           icon: CgEditFade,
-          label: "Pending Distribution",
+          label: "DRC Transactions",
           link: "/pages/Distribute/AssignedDRCSummary",
           roles: ["superadmin", "admin"],
         },
