@@ -360,19 +360,19 @@ const showNoDataMessage = (status = "") => {
                                     <td className={GlobalStyle.tableData}>{log.ContactNo}</td>
 
                                     <td className={`${GlobalStyle.tableData} cursor-pointer text-center `} 
-                                     onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" } })}>
+                                     onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Services" , drcName: log.DRCName  } })}>
                                                 {log.ServiceCount}
                                     </td>
 
 
                                     <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
-                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RO" } })}>
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "RO" , drcName: log.DRCName } })}>
                                                {log.ROCount}
                                     </td>
 
 
                                     <td className={`${GlobalStyle.tableData} cursor-pointer  text-center`} 
-                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Billing Center" } })}>
+                                        onClick={() => navigate('/pages/DRC/DRCDetails', { state: { drcId: log.DRCID, activeTab: "Billing Center", drcName: log.DRCName  } })}>
                                                  {log.BillingCenterCount}
                                     </td>
 
