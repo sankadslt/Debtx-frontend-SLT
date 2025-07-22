@@ -263,7 +263,7 @@ const SettlementPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Status Reason</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.status_reason}</div>
+                            <div className="table-cell px-4 py-2">{Settlementdata.settlement_status_reason}</div>
                         </div>
                     </div>
                 </div>
@@ -294,7 +294,7 @@ const SettlementPreview = () => {
                                 >
                                     <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
                                     <td className={GlobalStyle.tableCurrency}>{log.Installment_Settle_Amount}</td>
-                                    <td className={GlobalStyle.tableCurrency}>{log.Cumulative_Settle_Amount}</td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.cumulative_Settle_Amount}</td>
                                     <td className={GlobalStyle.tableData}>
                                         {log?.Plan_Date &&
                                             new Date(log.Plan_Date).toLocaleString("en-GB", {
@@ -343,7 +343,7 @@ const SettlementPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Phase</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.settlement_phase}</div>
+                            <div className="table-cell px-4 py-2">{Settlementdata.case_phase}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Type</div>
