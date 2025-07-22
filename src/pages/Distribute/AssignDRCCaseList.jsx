@@ -340,7 +340,31 @@ import { getLoggedUserId } from "/src/services/auth/authService.js";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 
+
+import RO_Negotiation from "/src/assets/images/Negotiation/RO_Negotiation.png";
+import Negotiation_Settle_Pending from "/src/assets/images/Negotiation/RO_Settle_Pending.png";
+import Negotiation_Settle_Open_Pending from "/src/assets/images/Negotiation/RO_Settle_Open_Pending.png";
+import Negotiation_Settle_Active from "/src/assets/images/Negotiation/RO_Settle_Active.png";
+import RO_Negotiation_Extension_Pending from "/src/assets/images/Negotiation/RO Negotiation extend pending.png";
+import RO_Negotiation_Extended from "/src/assets/images/Negotiation/RO Negotiation extended.png";
+import RO_Negotiation_FMB_Pending from "/src/assets/images/Negotiation/RO_Negotiation_FMB_Pending.png";
+
+import Forward_Mediation_Board from "/src/assets/images/Mediation_Board/Forward_To_Mediation_Board.png";
+import MB_Negotiation from "/src/assets/images/Mediation_Board/MB_Negotiation.png";
+import MB_Request_Customer_Info from "/src/assets/images/Mediation_Board/MB Request Customer-Info.png";
+import MB_Handover_Customer_Info from "/src/assets/images/Mediation_Board/MB Handover Customer-Info.png";
+import MB_Settle_Pending from "/src/assets/images/Mediation_Board/MB Settle Pending.png";
+import MB_Settle_Open_Pending from "/src/assets/images/Mediation_Board/MB Settle Open Pending.png";
+import MB_Settle_Active from "/src/assets/images/Mediation_Board/MB Settle Active.png";
+import MB_Fail_With_Pending_Non_Settlement from "/src/assets/images/Mediation_Board/MB Fail with Pending Non Settlement.png";
+import MB_Fail_With_Non_Settlement from "/src/assets/images/Mediation_Board/MB Fail with non settlement.png";
+
+import Open_Assign_Agent from "/src/assets/images/distribution/Open_Assign_Agent.png";
+import Open_With_Agent from "/src/assets/images/distribution/Open_With_Agent.png";
+
+
 import { jwtDecode } from "jwt-decode";
+
 import { refreshAccessToken } from "../../services/auth/authService";
 
 
@@ -369,6 +393,89 @@ export default function AssignDRCsLOG() {
     startDate: null,
     endDate: null
   });
+
+
+const getStatusIcon = (status) => {
+    const statusStr = String(status || '').toLowerCase();
+
+    switch (statusStr) {
+       
+        // Negotiation icons
+        case "ro negotiation":
+            return RO_Negotiation;
+        case "ro settle pending":
+            return Negotiation_Settle_Pending;
+        case "ro settle open pending":
+            return Negotiation_Settle_Open_Pending;
+        case "ro settle active":
+            return Negotiation_Settle_Active;
+        case "ro negotiation extension pending":
+            return RO_Negotiation_Extension_Pending;
+        case "ro negotiation extended":
+            return RO_Negotiation_Extended;
+        case "ro negotiation fmb pending":
+            return RO_Negotiation_FMB_Pending;
+
+        // Mediation board icons
+        case "forward to mediation board":
+            return Forward_Mediation_Board;
+        case "mb negotiation":
+            return MB_Negotiation;
+        case "mb request customer-info":
+            return MB_Request_Customer_Info;
+        case "mb handover customer-info":
+            return MB_Handover_Customer_Info;
+        case "mb settle pending":
+            return MB_Settle_Pending;
+        case "mb settle open pending":
+            return MB_Settle_Open_Pending;
+        case "mb settle active":
+            return MB_Settle_Active;
+        case "mb fail with pending non settlement":
+            return MB_Fail_With_Pending_Non_Settlement;
+        case "mb fail with non settlement":
+            return MB_Fail_With_Non_Settlement;
+
+        // Distribution
+        case "open assign agent":
+            return Open_Assign_Agent;
+        case "open with agent":
+            return Open_With_Agent;
+        
+        default:
+            return null;
+    }
+};
+
+
+
+    const renderStatusIcon = (status) => {
+        if (status === undefined || status === null) {
+            return <span className="capitalize">Unknown</span>;
+        }
+
+        const iconPath = getStatusIcon(status);
+
+        if (!iconPath) {
+            return <span className="capitalize">{String(status)}</span>;
+        }
+
+        return (
+            <img
+                src={iconPath}
+                alt={String(status)}
+                className="w-6 h-6 mx-auto"
+                data-tooltip-id={`status-tooltip-${status}`}
+                data-tooltip-content={status}
+                //title={status}
+            />
+        );
+    };
+
+
+
+
+
 
   // Role-Based Buttons
   useEffect(() => {
@@ -693,7 +800,7 @@ export default function AssignDRCsLOG() {
 
   const fetchCasesWithPagination = async ({ page, filterType, filterValue, startDate, endDate }) => {
   const payload = {
-    drc_id: drc_id, // Use actual drc_id from context/state
+    drc_id: 11, // Use actual drc_id from context/state
     pages: page,
   };
 
@@ -741,14 +848,14 @@ export default function AssignDRCsLOG() {
           icon: "warning",
           confirmButtonColor: "#f1c40f",
         });
-      } else {
-        // If second page or later yields no results, roll back page
-        setCurrentPage((prev) => Math.max(1, prev - 1));
+      } else if (page === 2) {
+       setCurrentPage(1); // Reset to page 1 if no data found on page 2
       }
-    } else if (data.length < maxData) {
-      setIsMoreDataAvailable(false); // No more data available
-    } else {
-      setIsMoreDataAvailable(true); // More data available
+      else {
+        if (data.length < maxData) {
+          setIsMoreDataAvailable(false)
+        }
+      }
     }
 
   } catch (err) {
@@ -804,6 +911,7 @@ export default function AssignDRCsLOG() {
 
 const handleclearfilter = () => {
   setStartDate(null);
+
   setEndDate(null);
   setFilterType("");
   setFilterValue("");
@@ -819,6 +927,12 @@ const handleclearfilter = () => {
     startDate: null,
     endDate: null
   });
+  if ( currentPage != 1){
+    setCurrentPage(1);
+  } else {
+    setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+  }
 };
 
 
@@ -1079,7 +1193,15 @@ const handleclearfilter = () => {
                       </button>
 
                     </td>
-                    <td className={GlobalStyle.tableData}>{caseItem.case_current_status}</td>
+                    <td className={GlobalStyle.tableData}>{renderStatusIcon(caseItem.case_current_status)}
+
+                                        <Tooltip
+                                            id={`status-tooltip-${caseItem.case_current_status}`}
+                                            place="bottom"
+                                            content={caseItem.case_current_status}
+                                        />
+                                    </td>
+                    {/* <td className={GlobalStyle.tableData}>{caseItem.case_current_status}</td> */}
                     <td className={GlobalStyle.tableData}>{caseItem.account_no}</td>
                     <td className={GlobalStyle.tableCurrency}>{caseItem.current_arrears_amount}</td>
                     <td className={GlobalStyle.tableData}>
