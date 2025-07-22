@@ -800,7 +800,7 @@ const getStatusIcon = (status) => {
 
   const fetchCasesWithPagination = async ({ page, filterType, filterValue, startDate, endDate }) => {
   const payload = {
-    drc_id: 11, // Use actual drc_id from context/state
+    drc_id: drc_id, // Use actual drc_id from context/state
     pages: page,
   };
 
