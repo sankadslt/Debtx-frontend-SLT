@@ -268,6 +268,12 @@ const Sidebar = ({ onHoverChange }) => {
           link: "/pages/Distribute/DRCAssignManagerApproval3",
           roles: ["superadmin", "admin"],
         },
+        {
+          icon: CgEditFade,
+          label: "User Approval",
+          link: "/pages/User/UserApproval",
+          roles: ["superadmin", "admin"],
+        },
       ],
     },
 
