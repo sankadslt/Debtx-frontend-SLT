@@ -28,19 +28,24 @@ import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import {
   New_List_Incidents,
-  Task_for_Download_Incidents,
+  Task_for_Download_Incidents_Full_List,
 } from "../../services/Incidents/incidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService.js";
-import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
-import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
-import incidentDone from "/src/assets/images/incidents/Incident_Done.png";
-import errorincident from "/src/assets/images/incidents/Incident_Error.png";
-import Open_CPE_Collect from "../../assets/images/incidents/Only_CPE_Collect.png";
-import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
+// import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
+// import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
+// import incidentDone from "/src/assets/images/incidents/Incident_Done.png";
+// import errorincident from "/src/assets/images/incidents/Incident_Error.png";
+// import Open_CPE_Collect from "../../assets/images/incidents/Only_CPE_Collect.png";
+// import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
 import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
+import Direct_LOD from "/src/assets/images/incidents/Direct_LOD.png";
+import Reject_Pending from "/src/assets/images/incidents/Reject_Pending.png";
+import Open_No_Agent from "/src/assets/images/incidents/Open_No_Agent.png";
+import Only_CPE_Collect from "/src/assets/images/incidents/Only_CPE_Collect.png";
+import Incident_InProgress from "/src/assets/images/incidents/Incident_InProgress.png";
 
 const Incident = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -99,29 +104,20 @@ const Incident = () => {
 
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
-      case "incident open":
-      case "open no agent":
-        return opeanincident;
-      case "incident inprogress":
-      case "incident error":
-        return errorincident;
-
-      case "open cpe collect":
-        return Open_CPE_Collect;
-
-      case "reject pending":
-        return Reject_Pending;
-
+      case "direct lod":
+        return Direct_LOD;
       case "incident reject":
         return Incident_Reject;
-
-      case "complete":
-      case "completed":
-        return incidentDone;
-      case "direct lod":
-        return inprogressincident;
+      case "reject pending":
+        return Reject_Pending;
+      case "open no agent":
+        return Open_No_Agent;
+      case "open cpe collect":
+        return Only_CPE_Collect;
+      case "incident inprogress":
+        return Incident_InProgress;
       default:
-        return null;
+      return null;
     }
   };
   // render status icon with tooltip
@@ -176,12 +172,34 @@ const Incident = () => {
     }
   }, [fromDate, toDate]);
 
-  const filteredDataBySearch = filteredData.filter((row) =>
-    Object.values(row)
+  const filteredDataBySearch = filteredData.filter((row) => {
+    // Object.values(row)
+    //   .join(" ")
+    //   .toLowerCase()
+    //   .includes(searchQuery.toLowerCase())
+    const searchableValues = [
+      row.Incident_Id,
+      row.Incident_Status,
+      row.Account_Num,
+      row.Actions,
+      row.Source_Type,
+      row.Arrears,
+      new Date(row.Created_Dtm).toLocaleString("en-GB", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    ];
+
+    return searchableValues
       .join(" ")
       .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+      .includes(searchQuery.toLowerCase());
+  });
+
 
   const filterValidations = () => {
     if (
@@ -406,7 +424,7 @@ const Incident = () => {
     setIsCreatingTask(true);
 
     try {
-      const response = await Task_for_Download_Incidents(
+      const response = await Task_for_Download_Incidents_Full_List(
         status1,
         status2,
         fromDate,
@@ -416,8 +434,8 @@ const Incident = () => {
       );
       if (response && response.message === "Task created successfully") {
         Swal.fire({
-          title: "Success",
-          text: `Task created successfully!`,
+          title: "Task created successfully!",
+          text: "Task ID: " + response.ResponseData.data.Task_Id,
           icon: "success",
           confirmButtonColor: "#28a745",
         });
@@ -434,8 +452,6 @@ const Incident = () => {
     }
   };
 
-  const HandleAddIncident = () => navigate("/incident/register");
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -448,107 +464,98 @@ const Incident = () => {
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          <h1 className={GlobalStyle.headingLarge}>Incident </h1>
-
-          <div className="flex justify-end mt-6">
-            <button
-              onClick={HandleAddIncident}
-              className={`${GlobalStyle.buttonPrimary} flex items-center`}
-            >
-              <FaPlus className="mr-2" />
-              Add Incident
-            </button>
-          </div>
+          <h1 className={GlobalStyle.headingLarge}>Incident Log</h1>
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
-            <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
-              <div className="flex items-center">
-                <select
-                  value={status1}
-                  onChange={(e) => setStatus1(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
-                  style={{ color: status1 === "" ? "gray" : "black" }}
-                >
-                  <option value="" hidden>
-                    Action Type
-                  </option>
-                  <option value="collect arrears" style={{ color: "black" }}>
-                    collect arrears
-                  </option>
-                  <option
-                    value="collect arrears and CPE"
-                    style={{ color: "black" }}
-                  >
-                    collect arrears and CPE
-                  </option>
-                  <option value="collect CPE" style={{ color: "black" }}>
-                    collect CPE
-                  </option>
-                </select>
-              </div>
+            <div className="flex flex-wrap items-center justify-end w-full gap-3">
 
-              <div className="flex items-center">
-                <select
-                  value={status2}
-                  onChange={(e) => setStatus2(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
-                  style={{ color: status2 === "" ? "gray" : "black" }}
+              <select
+                value={status1}
+                onChange={(e) => setStatus1(e.target.value)}
+                className={`${GlobalStyle.selectBox}`}
+                style={{ color: status1 === "" ? "gray" : "black" }}
+              >
+                <option value="" hidden>
+                  Action Type
+                </option>
+                <option value="collect arrears" style={{ color: "black" }}>
+                  collect arrears
+                </option>
+                <option
+                  value="collect arrears and CPE"
+                  style={{ color: "black" }}
                 >
-                  <option value="" hidden>
-                    Status
-                  </option>
-                  <option value="Incident Open" style={{ color: "black" }}>
-                    Incident Open
-                  </option>
-                  <option value="Complete" style={{ color: "black" }}>
-                    Complete
-                  </option>
-                  <option value="Incident Error" style={{ color: "black" }}>
-                    Incident Error
-                  </option>
-                  <option
-                    value="Incident InProgress"
-                    style={{ color: "black" }}
-                  >
-                    Incident InProgress
-                  </option>
-                </select>
-              </div>
+                  collect arrears and CPE
+                </option>
+                <option value="collect CPE" style={{ color: "black" }}>
+                  collect CPE
+                </option>
+              </select>
 
-              <div className="flex items-center">
-                <select
-                  value={status3}
-                  onChange={(e) => setStatus3(e.target.value)}
-                  className={`${GlobalStyle.selectBox}`}
-                  style={{ color: status3 === "" ? "gray" : "black" }}
+              <select
+                value={status2}
+                onChange={(e) => setStatus2(e.target.value)}
+                className={`${GlobalStyle.selectBox}`}
+                style={{ color: status2 === "" ? "gray" : "black" }}
+              >
+                <option value="" hidden>
+                  Status
+                </option>
+                <option value="Direct LOD" style={{ color: "black" }}>
+                  Direct LOD
+                </option>
+                <option value="Incident Reject" style={{ color: "black" }}>
+                  Incident Reject
+                </option>
+                <option value="Reject Pending" style={{ color: "black" }}>
+                  Reject Pending
+                </option>
+                <option value="Open No Agent" style={{ color: "black" }}>
+                  Open No Agent
+                </option>
+                <option value="Open CPE Collect" style={{ color: "black" }}>
+                  Open CPE Collect
+                </option>
+                <option
+                  value="Incident InProgress"
+                  style={{ color: "black" }}
                 >
-                  <option value="" hidden>
-                    Source Type
-                  </option>
-                  <option value="Pilot Suspended" style={{ color: "black" }}>
-                    Pilot Suspended
-                  </option>
-                  <option value="Product Terminate" style={{ color: "black" }}>
-                    Product Terminate
-                  </option>
-                  <option value="Special" style={{ color: "black" }}>
-                    Special
-                  </option>
-                </select>
-              </div>
+                  Incident InProgress
+                </option>
+              </select>
+
+              <select
+                value={status3}
+                onChange={(e) => setStatus3(e.target.value)}
+                className={`${GlobalStyle.selectBox}`}
+                style={{ color: status3 === "" ? "gray" : "black" }}
+              >
+                <option value="" hidden>
+                  Source Type
+                </option>
+                <option value="Pilot Suspended" style={{ color: "black" }}>
+                  Pilot Suspended
+                </option>
+                <option value="Product Terminate" style={{ color: "black" }}>
+                  Product Terminate
+                </option>
+                <option value="Special" style={{ color: "black" }}>
+                  Special
+                </option>
+              </select>
+
 
               {/* NEW: Account Number Input Field */}
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  value={accountNo}
-                  onChange={(e) => setAccountNo(e.target.value)}
-                  placeholder="Account Number"
-                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                  style={{ minWidth: "150px" }}
-                />
-              </div>
+              <input
+                type="text"
+                value={accountNo}
+                onChange={(e) => setAccountNo(e.target.value)}
+                placeholder="Account Number"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                style={{ minWidth: "150px" }}
+              />
+
 
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               <DatePicker
@@ -608,11 +615,12 @@ const Incident = () => {
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
-                  <th className={GlobalStyle.tableHeader}>ID</th>
+                  <th className={GlobalStyle.tableHeader}>Incident ID</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
                   <th className={GlobalStyle.tableHeader}>Account No</th>
                   <th className={GlobalStyle.tableHeader}>Action</th>
                   <th className={GlobalStyle.tableHeader}>Source Type</th>
+                  <th className={GlobalStyle.tableHeader}>Arrears Amount (LKR)</th>
                   <th className={GlobalStyle.tableHeader}>Created DTM</th>
                 </tr>
               </thead>
@@ -646,6 +654,9 @@ const Incident = () => {
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {row.Source_Type || ""}
+                        </td>
+                        <td className={GlobalStyle.tableCurrency}>
+                          {row.Arrears || ""}
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {new Date(row.Created_Dtm).toLocaleString("en-GB", {
@@ -720,9 +731,8 @@ const Incident = () => {
               <button
                 onClick={() => handlePrevNext("prev")}
                 disabled={currentPage <= 1}
-                className={`${GlobalStyle.navButton} ${
-                  currentPage <= 1 ? "cursor-not-allowed" : ""
-                }`}
+                className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""
+                  }`}
               >
                 <FaArrowLeft />
               </button>
@@ -734,23 +744,22 @@ const Incident = () => {
                 disabled={
                   searchQuery
                     ? currentPage >=
-                      Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    Math.ceil(filteredDataBySearch.length / rowsPerPage)
                     : !isMoreDataAvailable &&
-                      currentPage >=
-                        Math.ceil(filteredData.length / rowsPerPage)
+                    currentPage >=
+                    Math.ceil(filteredData.length / rowsPerPage)
                 }
-                className={`${GlobalStyle.navButton} ${
-                  (
-                    searchQuery
-                      ? currentPage >=
-                        Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                      : !isMoreDataAvailable &&
-                        currentPage >=
-                          Math.ceil(filteredData.length / rowsPerPage)
-                  )
-                    ? "cursor-not-allowed"
-                    : ""
-                }`}
+                className={`${GlobalStyle.navButton} ${(
+                  searchQuery
+                    ? currentPage >=
+                    Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    : !isMoreDataAvailable &&
+                    currentPage >=
+                    Math.ceil(filteredData.length / rowsPerPage)
+                )
+                  ? "cursor-not-allowed"
+                  : ""
+                  }`}
               >
                 <FaArrowRight />
               </button>
@@ -763,9 +772,8 @@ const Incident = () => {
               <div className="flex justify-end mt-6">
                 <button
                   onClick={HandleCreateTask}
-                  className={`${GlobalStyle.buttonPrimary} flex items-center ${
-                    isCreatingTask ? "opacity-50" : ""
-                  }`}
+                  className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? "opacity-50" : ""
+                    }`}
                   disabled={isCreatingTask}
                 >
                   {!isCreatingTask && (
