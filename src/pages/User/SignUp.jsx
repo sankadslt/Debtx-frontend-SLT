@@ -38,7 +38,7 @@ const SignUp = () => {
     { value: "slt_coordinator", label: "SLT Coordinator" },
     { value: "DRC_user", label: "DRC User" },
     { value: "recovery_staff", label: "Recovery Staff" },
-    { value: "rtom", label: "RTOM" }
+    { value: "superadmin", label: "Super Admin" }
   ];
 
   //Get system user on mount
@@ -109,7 +109,7 @@ const SignUp = () => {
         });
         return;
       }
-
+ 
       const basePayload = {
         user_type: userType,
         role: formData.role,
@@ -124,13 +124,14 @@ const SignUp = () => {
         userType === "Slt"
           ? {
               ...basePayload,
-              // user_id: formData.serviceNo,
+              user_id: formData.serviceNo + "@intranet.slt.com.lk", // Use service number as user_id
             }
           : userType === "Drcuser"
           ? {
               ...basePayload,
               drc_id: formData.drcId,
               nic: formData.nic,
+              user_id: formData.email || formData.contactNo, // Use email or contact number as user_id
             }
           : null;
 
