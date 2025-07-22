@@ -38,7 +38,7 @@ const SignUp = () => {
     { value: "slt_coordinator", label: "SLT Coordinator" },
     { value: "DRC_user", label: "DRC User" },
     { value: "recovery_staff", label: "Recovery Staff" },
-    { value: "rtom", label: "RTOM" }
+    { value: "superadmin", label: "Super Admin" }
   ];
 
   //Get system user on mount
