@@ -34,13 +34,18 @@ import { getLoggedUserId } from "../../services/auth/authService.js";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService.js";
-import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
-import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
-import incidentDone from "/src/assets/images/incidents/Incident_Done.png";
-import errorincident from "/src/assets/images/incidents/Incident_Error.png";
-import Open_CPE_Collect from "../../assets/images/incidents/Only_CPE_Collect.png";
-import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
+// import opeanincident from "/src/assets/images/incidents/Incident_Open.png";
+// import inprogressincident from "/src/assets/images/incidents/Incident_InProgress.png";
+// import incidentDone from "/src/assets/images/incidents/Incident_Done.png";
+// import errorincident from "/src/assets/images/incidents/Incident_Error.png";
+// import Open_CPE_Collect from "../../assets/images/incidents/Only_CPE_Collect.png";
+// import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
 import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
+import Direct_LOD from "/src/assets/images/incidents/Direct_LOD.png";
+import Reject_Pending from "/src/assets/images/incidents/Reject_Pending.png";
+import Open_No_Agent from "/src/assets/images/incidents/Open_No_Agent.png";
+import Only_CPE_Collect from "/src/assets/images/incidents/Only_CPE_Collect.png";
+import Incident_InProgress from "/src/assets/images/incidents/Incident_InProgress.png";
 
 const Incident = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -99,29 +104,20 @@ const Incident = () => {
 
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
-      case "incident open":
-      case "open no agent":
-        return opeanincident;
-      case "incident inprogress":
-      case "incident error":
-        return errorincident;
-
-      case "open cpe collect":
-        return Open_CPE_Collect;
-
-      case "reject pending":
-        return Reject_Pending;
-
+      case "direct lod":
+        return Direct_LOD;
       case "incident reject":
         return Incident_Reject;
-
-      case "complete":
-      case "completed":
-        return incidentDone;
-      case "direct lod":
-        return inprogressincident;
+      case "reject pending":
+        return Reject_Pending;
+      case "open no agent":
+        return Open_No_Agent;
+      case "open cpe collect":
+        return Only_CPE_Collect;
+      case "incident inprogress":
+        return Incident_InProgress;
       default:
-        return null;
+      return null;
     }
   };
   // render status icon with tooltip
@@ -176,12 +172,34 @@ const Incident = () => {
     }
   }, [fromDate, toDate]);
 
-  const filteredDataBySearch = filteredData.filter((row) =>
-    Object.values(row)
+  const filteredDataBySearch = filteredData.filter((row) => {
+    // Object.values(row)
+    //   .join(" ")
+    //   .toLowerCase()
+    //   .includes(searchQuery.toLowerCase())
+    const searchableValues = [
+      row.Incident_Id,
+      row.Incident_Status,
+      row.Account_Num,
+      row.Actions,
+      row.Source_Type,
+      row.Arrears,
+      new Date(row.Created_Dtm).toLocaleString("en-GB", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    ];
+
+    return searchableValues
       .join(" ")
       .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+      .includes(searchQuery.toLowerCase());
+  });
+
 
   const filterValidations = () => {
     if (
@@ -446,7 +464,7 @@ const Incident = () => {
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          <h1 className={GlobalStyle.headingLarge}>Incident </h1>
+          <h1 className={GlobalStyle.headingLarge}>Incident Log</h1>
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
@@ -484,20 +502,20 @@ const Incident = () => {
                 <option value="" hidden>
                   Status
                 </option>
-                <option value="Incident Done" style={{ color: "black" }}>
-                  Incident Done
+                <option value="Direct LOD" style={{ color: "black" }}>
+                  Direct LOD
                 </option>
                 <option value="Incident Reject" style={{ color: "black" }}>
                   Incident Reject
+                </option>
+                <option value="Reject Pending" style={{ color: "black" }}>
+                  Reject Pending
                 </option>
                 <option value="Open No Agent" style={{ color: "black" }}>
                   Open No Agent
                 </option>
                 <option value="Open CPE Collect" style={{ color: "black" }}>
                   Open CPE Collect
-                </option>
-                <option value="Direct LOD" style={{ color: "black" }}>
-                  Direct LOD
                 </option>
                 <option
                   value="Incident InProgress"
@@ -597,11 +615,12 @@ const Incident = () => {
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
-                  <th className={GlobalStyle.tableHeader}>ID</th>
+                  <th className={GlobalStyle.tableHeader}>Incident ID</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
                   <th className={GlobalStyle.tableHeader}>Account No</th>
                   <th className={GlobalStyle.tableHeader}>Action</th>
                   <th className={GlobalStyle.tableHeader}>Source Type</th>
+                  <th className={GlobalStyle.tableHeader}>Arrears Amount (LKR)</th>
                   <th className={GlobalStyle.tableHeader}>Created DTM</th>
                 </tr>
               </thead>
@@ -635,6 +654,9 @@ const Incident = () => {
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {row.Source_Type || ""}
+                        </td>
+                        <td className={GlobalStyle.tableCurrency}>
+                          {row.Arrears || ""}
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {new Date(row.Created_Dtm).toLocaleString("en-GB", {
@@ -728,15 +750,15 @@ const Incident = () => {
                     Math.ceil(filteredData.length / rowsPerPage)
                 }
                 className={`${GlobalStyle.navButton} ${(
-                    searchQuery
-                      ? currentPage >=
-                      Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                      : !isMoreDataAvailable &&
-                      currentPage >=
-                      Math.ceil(filteredData.length / rowsPerPage)
-                  )
-                    ? "cursor-not-allowed"
-                    : ""
+                  searchQuery
+                    ? currentPage >=
+                    Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    : !isMoreDataAvailable &&
+                    currentPage >=
+                    Math.ceil(filteredData.length / rowsPerPage)
+                )
+                  ? "cursor-not-allowed"
+                  : ""
                   }`}
               >
                 <FaArrowRight />
