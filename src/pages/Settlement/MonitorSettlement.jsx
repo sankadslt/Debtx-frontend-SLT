@@ -333,7 +333,7 @@ const Monitor_settlement = () => {
       // const payload = {
       //   case_id: caseId,
       //   account_no: accountNo,
-      //   settlement_phase: phase,
+      //   case_phase: phase,
       //   settlement_status: status,
       //   from_date: formatDate(fromDate),
       //   to_date: formatDate(toDate),
@@ -342,7 +342,7 @@ const Monitor_settlement = () => {
       const payload = {
         case_id: filters.caseId,
         account_no: filters.accountNo,
-        settlement_phase: filters.phase,
+        case_phase: filters.phase,
         settlement_status: filters.status,
         from_date: formatDate(filters.fromDate),
         to_date: formatDate(filters.toDate),
@@ -723,10 +723,10 @@ const Monitor_settlement = () => {
                         {item.case_id || "N/A"}
                       </td>
                       <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                        {renderStatusIcon(item.settlement_phase, item.settlement_status, index)}
+                        {renderStatusIcon(item.case_phase, item.settlement_status, index)}
                       </td>
                       <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}> {item.settlement_phase || "N/A"} </td>
+                      <td className={GlobalStyle.tableData}> {item.case_phase || "N/A"} </td>
                       <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-GB") || "N/A"}</td>
                       <td className={GlobalStyle.tableData}>
                         <img
