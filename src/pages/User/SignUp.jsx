@@ -109,7 +109,7 @@ const SignUp = () => {
         });
         return;
       }
-
+ 
       const basePayload = {
         user_type: userType,
         role: formData.role,
@@ -124,13 +124,14 @@ const SignUp = () => {
         userType === "Slt"
           ? {
               ...basePayload,
-              // user_id: formData.serviceNo,
+              user_id: formData.serviceNo + "@intranet.slt.com.lk", // Use service number as user_id
             }
           : userType === "Drcuser"
           ? {
               ...basePayload,
               drc_id: formData.drcId,
               nic: formData.nic,
+              user_id: formData.email || formData.contactNo, // Use email or contact number as user_id
             }
           : null;
 
