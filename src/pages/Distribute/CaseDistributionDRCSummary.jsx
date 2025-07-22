@@ -311,11 +311,15 @@ const CaseDistributionDRCSummary = () => {
             <option value="" hidden>
               DRC
             </option>
-            {drcNames.map(({ drc_id, drc_name  }) => (
+            {drcNames.length > 0 ? (drcNames.map(({ drc_id, drc_name  }) => (
               <option key={drc_id} value={drc_name } style={{ color: "black" }}>
                 {drc_name}
               </option>
-            ))}
+            ))) : (
+              <option value="" disabled style={{ color: "gray" }}>
+                No DRCs available
+              </option>
+            )}
 
           </select>
 
