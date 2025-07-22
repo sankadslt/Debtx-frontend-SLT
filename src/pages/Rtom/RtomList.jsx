@@ -262,7 +262,7 @@ const RtomList = () => {
                   Name
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  Telephone No
+                  Mobile No
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Action
