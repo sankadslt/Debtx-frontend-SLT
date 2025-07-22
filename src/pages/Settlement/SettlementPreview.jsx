@@ -204,7 +204,7 @@ const SettlementPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Account no</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.account_no}</div>
+                            <div className="table-cell px-4 py-2">{Settlementdata.account_num}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
