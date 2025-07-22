@@ -997,7 +997,7 @@ const Case_List = () => {
           <thead className={GlobalStyle.thead}>
             <tr>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                ID
+                Case ID
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
                 Status
