@@ -42,6 +42,8 @@ const DRCDetails = () => {
   const location = useLocation();
   const { state } = location;
   const drcId = state?.drcId;
+  const drcName = state?.drcName || ""; 
+
   //const drcId = 1;
 
   const initialTab = state?.activeTab || "RO";
@@ -61,6 +63,7 @@ const DRCDetails = () => {
   const [rtomListData, setRtomListData] = useState([]);
   const [servicesListData, setServicesListData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
 
   // Icons for status
   const getStatusIcon = (status) => {
@@ -103,13 +106,21 @@ const DRCDetails = () => {
 
   // Update active tab from location state if it exists
   useEffect(() => {
-    if (state?.activeTab && state.activeTab !== activeTab) {
-      setActiveTab(state.activeTab);
-    }
-  }, [location.state]);
+    const fetchDrcName = async () => {
+      try {
+        const response = await listAllDRCDetails({});
+        const drc = response.data.find(d => d.drc_id === drcId);
+        if (drc) {
+          setDrcName(drc.drc_name);
+        }
+      } catch (error) {
+        console.error("Error fetching DRC name:", error);
+      }
+    };
 
-  // Reset current page when active tab changes
-  useEffect(() => {
+    fetchDrcName();
+
+    // Reset filters and data when tab changes
     setStatus("");
     setRtomFilter("");
     setServiceFilter("");
@@ -119,19 +130,19 @@ const DRCDetails = () => {
       rtom: "",
       service: ""
     });
-    setApiData([]); // Clear previous data
+    setApiData([]);
+    
     if (currentPage === 1) {
       callAPI({
         pages: 1,
         status: "",
         rtom: "",
         service: ""
-      })
+      });
     } else {
       setCurrentPage(1);
     }
-    console.log(currentPage);
-  }, [activeTab]);
+  }, [activeTab, drcId]);
 
   const callAPI = async (filters) => {
     try {
@@ -517,7 +528,7 @@ const DRCDetails = () => {
   return (
     <div className={GlobalStyle.fontPoppins}>
       <div className="flex justify-between items-center mb-8">
-        <h1 className={GlobalStyle.headingLarge}>Sensus - Sensus BPO Services (Pvt) Ltd</h1>
+  <h1 className={GlobalStyle.headingLarge}>{drcName || "Loading DRC Name..."}</h1>
       </div>
 
       {/* Filter Section */}

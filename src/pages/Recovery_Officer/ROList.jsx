@@ -396,8 +396,10 @@ export default function ROList() {
     } catch (error) {
       console.error("Error fetching RO list:", error);
       Swal.fire({
-        title: "Error",
-        text: "Failed to fetch RO data. Please try again.",
+        // title: "Error",
+        // text: "Failed to fetch RO data. Please try again.",
+        title: "Not available any data.",
+        text: "Please choose a different DRC with available data.",
         icon: "error"
       });
     } finally {
