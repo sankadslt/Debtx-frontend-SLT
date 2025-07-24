@@ -331,7 +331,7 @@ export default function ReAssignDRC() {
       </div>
 
       <div className=" mb -6">
-        <h2 className={`${GlobalStyle.headingMedium} mb-5`}>RO Details : </h2>
+        <h2 className={`${GlobalStyle.headingMedium} mb-5`}>DRC Details : </h2>
         <div className="flex flex-col">
           <div className="flex justify-start mb-4">
             <div className={GlobalStyle.searchBarContainer}>
@@ -376,8 +376,8 @@ export default function ReAssignDRC() {
                     >
                       <td className={GlobalStyle.tableData}>{detail.drc_name}</td>
                       <td className={GlobalStyle.tableData}>{detail.recovery_officers.length}</td>
-                      <td className={GlobalStyle.tableData}>{new Date(detail.created_dtm).toLocaleDateString()}</td>
-                      <td className={GlobalStyle.tableData}>{new Date(detail.removed_dtm).toLocaleDateString()}</td>
+                      <td className={GlobalStyle.tableData}>{detail.created_dtm ? new Date(detail.created_dtm).toLocaleDateString() : ""}</td>
+                      <td className={GlobalStyle.tableData}>{detail.removed_dtm ? new Date(detail.removed_dtm).toLocaleDateString() : ""}</td>
                     </tr>
                   ))
                 ) : (
