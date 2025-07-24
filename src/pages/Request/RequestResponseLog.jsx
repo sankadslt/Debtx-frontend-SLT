@@ -540,7 +540,7 @@ const RequestResponseLog = () => {
 
       <h1 className={`${GlobalStyle.headingLarge} mb-8`}>Request Response Log</h1>
       <div className="flex justify-end">
-        <div className={`${GlobalStyle.cardContainer} w-[70vw] flex justify-end gap-4 items-center mb-8 mt-8`}>
+        <div className={`${GlobalStyle.cardContainer} w-[75vw] flex justify-end gap-4 items-center mb-8 mt-8`}>
 
 
           <div className="flex flex-wrap gap-4 justify-end">
@@ -610,7 +610,7 @@ const RequestResponseLog = () => {
               </option>
             </select>
 
-            <label className={GlobalStyle.dataPickerDate} style={{ marginTop: '5px', display: 'block' }} >Date:  </label>
+            <label className={GlobalStyle.dataPickerDate} style={{ marginTop: '5px', display: 'block' }} >Approved Date:  </label>
             <DatePicker
               selected={fromDate}
               // onChange={(date) => setFromDate(date)}
@@ -666,7 +666,7 @@ const RequestResponseLog = () => {
               <th className={GlobalStyle.tableHeader}>Approved By</th>
               <th className={GlobalStyle.tableHeader}>Remark</th>
               <th className={GlobalStyle.tableHeader}>Created DTM</th>
-              <th className={GlobalStyle.tableHeader}> Letter Issued on </th>
+              <th className={GlobalStyle.tableHeader}>Letter Issued on </th>
               <th className={GlobalStyle.tableHeader}>Approved On</th>
             </tr>
           </thead>
@@ -705,20 +705,36 @@ const RequestResponseLog = () => {
                 </td>
                 <td className={GlobalStyle.tableData}>{row.created_by}</td>
                 <td className={GlobalStyle.tableData}>{row.Remark}</td>
-                <td className={GlobalStyle.tableData}></td>
                 <td className={GlobalStyle.tableData}>
-                  {new Date(row.Letter_Issued_on).toLocaleDateString("en-GB", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
+                  {row.request_created_dtm ?
+                    new Date(row.request_created_dtm).toLocaleString("en-GB", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                      hour12: true
+                    })
+                    : ""}
                 </td>
                 <td className={GlobalStyle.tableData}>
-                  {new Date(row.created_dtm).toLocaleDateString("en-GB", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
+                  {row.Letter_Issued_on ?
+                    new Date(row.Letter_Issued_on).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })
+                    : ""}
+                </td>
+                <td className={GlobalStyle.tableData}>
+                  {row.created_dtm ?
+                    new Date(row.created_dtm).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })
+                    : ""}
                 </td>
               </tr>
             ))}
