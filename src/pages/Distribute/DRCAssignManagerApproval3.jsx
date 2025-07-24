@@ -729,7 +729,7 @@ export default function DRCAssignManagerApproval3() {
 
             </select>
 
-            <select
+            {/* <select
               className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
               value={approverstatus}
               onChange={(e) => setApproverStatus(e.target.value)}
@@ -743,7 +743,7 @@ export default function DRCAssignManagerApproval3() {
               <option value="Reject" style={{ color: "black" }}>Reject</option>
 
 
-            </select>
+            </select> */}
 
 
 

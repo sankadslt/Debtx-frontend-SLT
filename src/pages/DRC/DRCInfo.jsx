@@ -24,10 +24,10 @@ import {
   getSLTCoordinators,
   getActiveServiceDetails,
   getActiveRTOMDetails,
+  getUserDetailsByIdforDRC,
   
 } from "../../services/drc/Drc";
 import { getLoggedUserId } from "../../services/auth/authService";
-import { getUserDetailsById } from "../../services/user/user_services";
 
 const DRCInfo = () => {
   // Navigation 
@@ -150,7 +150,7 @@ const DRCInfo = () => {
       try {
   
         // Fetch user details
-        const response = await getUserDetailsById(ServiceNo);
+        const response = await getUserDetailsByIdforDRC(ServiceNo);
         
         // Handle different response structures:
         const userData = response.data || response; // Check for nested data
@@ -1354,7 +1354,8 @@ console.log("Company RTOM data:", {
 
 
                     <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                      End Date
+                      End Date  <span className="text-red-500">*</span>
+
                     </td>
                     <td className="w-4 text-left hidden sm:table-cell">:</td>
                     <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1400,7 +1401,8 @@ console.log("Company RTOM data:", {
 
 
                     <td className={`${GlobalStyle.tableData} font-semibold whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                      Remark
+                      Remark    <span className="text-red-500">*</span>
+
                     </td>
                     <td className="w-4 text-left hidden sm:table-cell">:</td>
                     <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1678,7 +1680,7 @@ console.log("Company RTOM data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Address<span className="sm:hidden">:</span>
+                    Address <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1693,7 +1695,7 @@ console.log("Company RTOM data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Contact Number<span className="sm:hidden">:</span>
+                    Contact Number  <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1708,7 +1710,7 @@ console.log("Company RTOM data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Email<span className="sm:hidden">:</span>
+                    Email  <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1796,8 +1798,10 @@ console.log("Company RTOM data:", {
             <table className={`${GlobalStyle.table} min-w-full text-left`}>
               <tbody>
                 <tr className="block sm:table-row">
-                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Service No<span className="sm:hidden">:</span>
+                 <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                  Service No
+                    {editingCoordinator && <span className="text-red-500">*</span>}
+                      <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                           <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
@@ -1964,24 +1968,24 @@ console.log("Company RTOM data:", {
 
             <div className="flex items-center mb-4 ">
               <select
-                onClick={handleDropdownClick}
-                value={selectedServiceType}
-                onChange={(e) => setSelectedServiceType(e.target.value)}
-                className={`${GlobalStyle.selectBox} mr-2`}
-              >
-                <option value="">Select Service Type</option>
-                {serviceLoading ? (
-                  <option disabled>Loading...</option>
-                ) : (
-                  serviceTypes
-                    .filter((service) => !service.selected)
-                    .map((service) => (
-                      <option key={service.id} value={service.name}>
-                        {service.name}
-                      </option>
-                    ))
-                )}
-              </select>
+                  onClick={handleDropdownClick}
+                  value={selectedServiceType}
+                  onChange={(e) => setSelectedServiceType(e.target.value)}
+                  className={`${GlobalStyle.selectBox} mr-2`}
+                >
+                  <option value="" disabled hidden>Select Service Type</option>
+                  {serviceLoading ? (
+                    <option disabled>Loading...</option>
+                  ) : (
+                    serviceTypes
+                      .filter((service) => !service.selected)
+                      .map((service) => (
+                        <option key={service.id} value={service.name}>
+                          {service.name}
+                        </option>
+                      ))
+                  )}
+                </select>
               <button
                 type="button"
                 onClick={handleAddServiceType}
@@ -2112,7 +2116,7 @@ console.log("Company RTOM data:", {
                 onChange={(e) => setSelectedRTOM(e.target.value)}
                 className={`${GlobalStyle.selectBox} mr-2`}
               >
-                <option value="">Select Billing Center Area</option>
+                <option value=""  disabled hidden >Select Billing Center Area</option>
                 {rtomLoading ? (
                   <option disabled>Loading...</option>
                 ) : (
@@ -2130,7 +2134,7 @@ console.log("Company RTOM data:", {
                 onChange={(e) => Setselectedhandlingtype(e.target.value)}
                 className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
               >
-                    <option value="">Select Handling Type</option>
+                    <option value="" disabled hidden >Select Handling Type</option>
                     <option value="CPE">CPE</option>
                     <option value="Arrears">Arrears</option>
                     <option value="All-Type">All Type</option>
@@ -2259,9 +2263,9 @@ console.log("Company RTOM data:", {
             <tbody>
               <tr>
                 <td
-                  className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
+                  className={`${GlobalStyle.tableData}  whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
                 >
-                  Remark
+                  Remark  <span className="text-red-500">*</span>
                 </td>
               </tr>
               <tr>

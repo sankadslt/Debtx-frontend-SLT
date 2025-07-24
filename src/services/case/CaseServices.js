@@ -377,7 +377,7 @@ export const List_DRC_Assign_Manager_Approval = async (payload) => {
 export const Approve_DRC_Assign_Manager_Approval = async (payload) => {
   try {
     const response = await axios.post(
-      `${URL}/Approve_DRC_Assign_Manager_Approval`,
+      `${URL}/Aprove_DRC_Assign_Manager_Approval`,
       payload
     );
     return response.data;
