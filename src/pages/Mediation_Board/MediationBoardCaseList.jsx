@@ -605,7 +605,7 @@ const MediationBoardCaseList = () => {
                   </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{row.ro_name}</td>
-                  <td className={GlobalStyle.tableData}>{row.area}</td>
+                  <td className={GlobalStyle.tableData}>{row.rtom}</td>
                   <td className={GlobalStyle.tableData}>{row.calling_round}</td>
                   <td className={GlobalStyle.tableData}>
                     {row.date &&
