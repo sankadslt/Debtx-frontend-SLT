@@ -167,12 +167,14 @@ const RequestResponseLog = () => {
       const response = await List_Request_Response_log(payload);
       console.log("Response from fetching cases:", response.data.data);
 
-      if (response && response.data) {
+      if (response) {
         // console.log("Valid data received:", response.data);
-        if (currentPage === 1) {
-          setFilteredData(response.data.data)
-        } else {
-          setFilteredData((prevData) => [...prevData, ...response.data.data]);
+        if (response.status === 200 && response.data && response.data.data && Array.isArray(response.data.data)) {
+          if (currentPage === 1) {
+            setFilteredData(response.data.data)
+          } else {
+            setFilteredData((prevData) => [...prevData, ...response.data.data]);
+          }
         }
 
         if (response.status === 204) {
