@@ -37,13 +37,22 @@ const RequestResponseLog = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [requestType, setRequestType] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0);
+  const [committedFilters, setCommittedFilters] = useState({
+    case_current_status: "",
+    date_from: null,
+    date_to: null,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
 
   const statuses = [];
-  const rowsPerPage = 5;
+  const rowsPerPage = 10;
 
   const navigate = useNavigate();
 
@@ -116,10 +125,7 @@ const RequestResponseLog = () => {
     }
   }, []);
 
-
-  // Filtering logic
-  const handleFilter = async () => {
-
+  const filterValidations = () => {
     if (!requestType && !fromDate && !toDate) {
       Swal.fire({
         title: "Warning",
@@ -127,40 +133,125 @@ const RequestResponseLog = () => {
         icon: "warning",
         confirmButtonColor: "#f1c40f",
       });
-      return;
+      return false;
     }
 
-    if (!requestType || !fromDate || !toDate) {
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
       Swal.fire({
         title: "Warning",
-        text: "Please select all filter options: Request Type, From Date, and To Date.",
+        text: "Both From Date and To Date must be selected.",
         icon: "warning",
-        confirmButtonColor: "#f1c40f",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
       });
-      return;
+      setToDate(null);
+      setFromDate(null);
+      return false;
     }
 
+    return true;
+  };
+
+  // Filtering logic
+  const callAPI = async (filters) => {
     const payload = {
-      case_current_status: requestType,
-      date_from: fromDate,
-      date_to: toDate,
+      case_current_status: filters.case_current_status,
+      date_from: filters.date_from,
+      date_to: filters.date_to,
+      pages: filters.page, // Default to page 1 if not provided
     };
     console.log("Payload for fetching cases:", payload);
     try {
+      setIsLoading(true);
       const response = await List_Request_Response_log(payload);
-      console.log("Response from fetching cases:", response.data);
-      console.log("Filtered data:", response.data);
+      console.log("Response from fetching cases:", response.data.data);
 
-      const data = Array.isArray(response.data) ? response.data : [];
-      setFilteredData(data);
-      setCurrentPage(0);
+      if (response && response.data) {
+        // console.log("Valid data received:", response.data);
+        if (currentPage === 1) {
+          setFilteredData(response.data.data)
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data.data]);
+        }
+
+        if (response.status === 204) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found for the selected filters.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
+            });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.data.data.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
+          }
+        }
+
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid request response data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+        setFilteredData([]);
+      }
 
     } catch (error) {
-
       console.error("Error fetching cases:", error);
-
+      Swal.fire({
+        title: "Error",
+        text: error?.response?.data?.message || error.message || "An error occurred while fetching cases.",
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
       setFilteredData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      callAPI({
+        ...committedFilters,
+        page: currentPage
+      });
+    }
+  }, [currentPage]);
+
+  const handleFilter = () => {
+    setIsMoreDataAvailable(true);
+    setMaxCurrentPage(0);
+    if (!filterValidations()) {
+      return; // If validation fails, do not proceed
+    } else {
+      setCommittedFilters({
+        case_current_status: requestType,
+        date_from: fromDate,
+        date_to: toDate,
+      });
+      setFilteredData([]);
+      if (currentPage === 1) {
+        callAPI({
+          case_current_status: requestType,
+          date_from: fromDate,
+          date_to: toDate,
+          page: 1
+        });
+      } else {
+        setCurrentPage(1);
+      }
     }
   };
 
@@ -292,12 +383,10 @@ const RequestResponseLog = () => {
   };
 
   // Pagination setup
-  const pages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
-  const startIndex = currentPage * rowsPerPage;
+  // const pages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
+  const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
-
-
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
@@ -306,15 +395,13 @@ const RequestResponseLog = () => {
   };
 
   const handleNextPage = () => {
-    if (currentPage < pages - 1) {
-      setCurrentPage(currentPage + 1);
-    }
+    setCurrentPage(currentPage + 1);
   };
 
   // Task creation function
   const handleTask = async () => {
 
-    if (!startDate || !endDate) {
+    if (!fromDate || !toDate) {
       Swal.fire({
         title: "warning",
         text: "Please select both start and end dates.",
@@ -341,14 +428,15 @@ const RequestResponseLog = () => {
     };
     console.log("Payload for creating task:", payload);
     try {
+      setIsCreatingTask(true);
       const response = await Create_Task_For_Request_Responce_Log_Download(
         payload
       );
       console.log("Response from creating task:", response);
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Task created successfully.",
+        title: "Task Created Successfully!",
+        text: "Task ID: " + response.data.data.Task_Id,
         confirmButtonColor: "#28a745",
       });
     } catch (error) {
@@ -364,6 +452,8 @@ const RequestResponseLog = () => {
         confirmButtonColor: "#d33",
       });
 
+    } finally {
+      setIsCreatingTask(false);
     }
   };
 
@@ -380,8 +470,19 @@ const RequestResponseLog = () => {
     setFromDate(null);
     setToDate(null);
     setFilteredData([]);
-    setCurrentPage(0);
-
+    setIsMoreDataAvailable(true);
+    setCommittedFilters({
+      case_current_status: "",
+      date_from: null,
+      date_to: null,
+    });
+    setMaxCurrentPage(0);
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   }
 
   // if (batchIds.length === 0) {
@@ -426,22 +527,30 @@ const RequestResponseLog = () => {
   //   }
   // };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className={GlobalStyle.fontPoppins}>
 
       <h1 className={`${GlobalStyle.headingLarge} mb-8`}>Request Response Log</h1>
       <div className="flex justify-end">
-        <div className={`${GlobalStyle.cardContainer}  w-[75vw] flex justify-end gap-4 items-center mb-8 mt-8`}>
+        <div className={`${GlobalStyle.cardContainer} w-[70vw] flex justify-end gap-4 items-center mb-8 mt-8`}>
 
 
-          <div className="flex gap-4 justify-end">
-            <select
+          <div className="flex flex-wrap gap-4 justify-end">
+            {/* <select
               value={requestType}
               onChange={(e) => setRequestType(e.target.value)}
               className={GlobalStyle.selectBox}
               style={{ color: requestType === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>Select Status</option>
+              <option value="" hidden>Request Type</option>
               <option value="RO Negotiation Extended" style={{ color: "black" }}>
                 RO Negotiation Extended
               </option>
@@ -453,14 +562,52 @@ const RequestResponseLog = () => {
               <option value="MB Settle Pending" style={{ color: "black" }}>
                 MB Settle Pending
               </option>
-              <option value="Forward to Mediation Board" style={{ color: "black" }}>Forward to Mediation Board</option>
-              {/* <option value="FMB"  style={{ color: "black" }}>FMB</option> */}
+              <option value="Forward to Mediation Board" style={{ color: "black" }}>Forward to Mediation Board</option> */}
+            {/* <option value="FMB"  style={{ color: "black" }}>FMB</option> */}
 
-              {statuses.map((statusOption, index) => (
+            {/* {statuses.map((statusOption, index) => (
                 <option key={index} value={statusOption}>
                   {statusOption}
                 </option>
               ))}
+            </select> */}
+
+            <select
+              value={requestType}
+              onChange={(e) => setRequestType(e.target.value)}
+              className={`${GlobalStyle.selectBox}   `}
+              style={{ color: requestType === "" ? "gray" : "black" }}
+            >
+              <option value="" hidden>
+                Request Type
+              </option>
+              <option value="Mediation board forward request letter" style={{ color: "black" }}>
+                Mediation board forward request letter
+              </option>
+              <option value="Negotiation Settlement plan Request" style={{ color: "black" }}>
+                Negotiation Settlement plan Request
+              </option>
+              <option value="Negotiation period extend Request" style={{ color: "black" }}>
+                Negotiation period extend Request
+              </option>
+              <option value="Negotiation customer further information Request" style={{ color: "black" }}>
+                Negotiation customer further information Request
+              </option>
+              <option value="Negotiation Customer request service" style={{ color: "black" }}>
+                Negotiation Customer request service
+              </option>
+              <option value="Mediation Board Settlement plan Request" style={{ color: "black" }}>
+                Mediation Board Settlement plan Request
+              </option>
+              <option value="Mediation Board period extend Request" style={{ color: "black" }}>
+                Mediation Board period extend Request
+              </option>
+              <option value="Mediation Board customer further information request" style={{ color: "black" }}>
+                Mediation Board customer further information request
+              </option>
+              <option value="Mediation Board Customer request service" style={{ color: "black" }}>
+                Mediation Board Customer request service
+              </option>
             </select>
 
             <label className={GlobalStyle.dataPickerDate} style={{ marginTop: '5px', display: 'block' }} >Date:  </label>
@@ -504,27 +651,34 @@ const RequestResponseLog = () => {
       </div>
 
 
-      
-         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-          <table className={GlobalStyle.table}>
-            <thead className={GlobalStyle.thead}>
+
+      <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+        <table className={GlobalStyle.table}>
+          <thead className={GlobalStyle.thead}>
 
             <tr>
               <th className={GlobalStyle.tableHeader}>Case ID</th>
-              <th className={GlobalStyle.tableHeader}>Status</th>
-              <th className={GlobalStyle.tableHeader}>Request Status</th>
-              <th className={GlobalStyle.tableHeader}>Validity Period</th>
+              {/* <th className={GlobalStyle.tableHeader}>Status</th> */}
+              <th className={GlobalStyle.tableHeader}>Request Acceptance</th>
+              {/* <th className={GlobalStyle.tableHeader}>Validity Period</th> */}
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>Request Details</th>
-              <th className={GlobalStyle.tableHeader}> Letter Issued on </th>
-              <th className={GlobalStyle.tableHeader}>Approved On</th>
               <th className={GlobalStyle.tableHeader}>Approved By</th>
               <th className={GlobalStyle.tableHeader}>Remark</th>
+              <th className={GlobalStyle.tableHeader}>Created DTM</th>
+              <th className={GlobalStyle.tableHeader}> Letter Issued on </th>
+              <th className={GlobalStyle.tableHeader}>Approved On</th>
             </tr>
           </thead>
           <tbody>
             {paginatedData.map((row, index) => (
-              <tr key={index} className="border-b bg-gray-50">
+              <tr
+                key={index}
+                className={`${index % 2 === 0
+                  ? "bg-white bg-opacity-75"
+                  : "bg-gray-50 bg-opacity-50"
+                  } border-b`}
+              >
                 <td className={GlobalStyle.tableData}>
                   <button
                     onClick={() => onhoverbuttonclick(row.case_id)}
@@ -535,21 +689,23 @@ const RequestResponseLog = () => {
 
                   </button>
                 </td>
-                <td className={GlobalStyle.tableData}>
-                  {/* {row.case_current_status} */}
+                {/* <td className={GlobalStyle.tableData}>
                   {renderStatusIcon(row.case_current_status, index)}
-                </td>
+                </td> */}
                 <td className={GlobalStyle.tableData}>
                   {row.User_Interaction_Status}
                 </td>
-                <td className={GlobalStyle.tableData}>
+                {/* <td className={GlobalStyle.tableData}>
                   {row.Validity_Period}
-                </td>
+                </td> */}
 
                 <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                 <td className={GlobalStyle.tableData}>
                   {row.Request_Description}
                 </td>
+                <td className={GlobalStyle.tableData}>{row.created_by}</td>
+                <td className={GlobalStyle.tableData}>{row.Remark}</td>
+                <td className={GlobalStyle.tableData}></td>
                 <td className={GlobalStyle.tableData}>
                   {new Date(row.Letter_Issued_on).toLocaleDateString("en-GB", {
                     year: "numeric",
@@ -564,9 +720,6 @@ const RequestResponseLog = () => {
                     day: "2-digit",
                   })}
                 </td>
-
-                <td className={GlobalStyle.tableData}>{row.created_by}</td>
-                <td className={GlobalStyle.tableData}>{row.Remark}</td>
               </tr>
             ))}
             {paginatedData.length === 0 && (
@@ -581,10 +734,10 @@ const RequestResponseLog = () => {
       </div>
 
 
-      {filteredData.length > rowsPerPage && (
+      {filteredData.length > 0 && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
-            className={GlobalStyle.navButton}
+            className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
             onClick={handlePrevPage}
             disabled={currentPage === 0}
           >
@@ -592,10 +745,23 @@ const RequestResponseLog = () => {
           </button>
 
           <span>
-            Page {currentPage + 1} of {pages}
+            Page {currentPage}
           </span>
 
-          <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === pages - 1}>
+          <button
+            onClick={handleNextPage}
+            disabled={
+              searchQuery
+                ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage
+                )}
+            className={`${GlobalStyle.navButton} ${(searchQuery
+              ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+              ? "cursor-not-allowed"
+              : ""
+              }`}
+          >
             <FaArrowRight />
           </button>
         </div>
@@ -605,9 +771,14 @@ const RequestResponseLog = () => {
         {paginatedData.length > 0 && (
           <div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
-              <button className={`${GlobalStyle.buttonPrimary} h-[35px] mt-2 flex items-center`} onClick={handleTask}>
-                <FaDownload className="mr-2" />
-                Create task and let me know
+              <button
+                onClick={handleTask}
+                className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                disabled={isCreatingTask}
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+                {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
               </button>
             )}
           </div>
