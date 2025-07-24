@@ -305,7 +305,7 @@ export default function ReAssignDRC() {
 
               <td className="py-2"> <strong> : </strong> </td>
 
-              <td className="py-2"> {new Date(caseDetails.last_payment_date).toLocaleDateString()} </td>
+              <td className="py-2">{caseDetails.last_payment_date ? new Date(caseDetails.last_payment_date).toLocaleDateString() : ""}</td>
             </tr>
 
           </tbody>
