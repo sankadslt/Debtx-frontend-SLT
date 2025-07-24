@@ -808,29 +808,22 @@ const Case_List = () => {
     setIsCreatingTask(true);
     try {
       const response = await Create_Task_for_Download_Case_List(filter);
-      if (response === "success") {
-        Swal.fire({
-          title: response,
-          text: `Task created successfully!`,
-          icon: "success",
-          confirmButtonColor: "#28a745"
-        });
-      } else {
-        Swal.fire({
-          title: "Error",
-          text: "Failed to create task.",
-          icon: "error",
-          confirmButtonColor: "#d33"
-        });
-      }
+      
+      Swal.fire({
+        icon: "success",
+        title: "Task Created Successfully!",
+        text: "Task ID: " + response.Task_Id,
+        confirmButtonColor: "#28a745",
+      });
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: error.message || "Failed to create task.",
+        text: "Failed to create task.",
         icon: "error",
-        confirmButtonColor: "#d33"
+        confirmButtonColor: "#dc3545"
       });
-    } finally {
+    }
+     finally {
       setIsCreatingTask(false);
     }
   };
@@ -863,7 +856,7 @@ const Case_List = () => {
               className={`${GlobalStyle.selectBox} mt-3`}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>RTOM</option>
+              <option value="" hidden>Billing Center</option>
               {rtomList.length > 0 ? (
                 rtomList.map((rtom) => (
                   <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
@@ -938,7 +931,7 @@ const Case_List = () => {
                 <option disabled>No Service Type available</option>)}
             </select>
 
-            {/* <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2"> */}
+            <div className="flex flex-wrap items-center justify-end space-x-3 w-full mt-2">
             <label className={GlobalStyle.dataPickerDate}>Date:</label>
 
             <DatePicker
@@ -956,7 +949,7 @@ const Case_List = () => {
               placeholderText="To"
               className={`${GlobalStyle.inputText} w-full sm:w-auto`}
             />
-
+</div>
             {["admin", "superadmin", "slt"].includes(userRole) && (
               <button
                 className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
@@ -1015,7 +1008,7 @@ const Case_List = () => {
                 Agent
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
-                RTOM
+              Billing Center
               </th>
               <th scope="col" className={GlobalStyle.tableHeader}>
                 Created Date
@@ -1050,16 +1043,16 @@ const Case_List = () => {
                       className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
                       onClick={() => naviCaseID(row.caseid)}
                     >
-                      {row.caseid || "N/A"}
+                      {row.caseid || ""}
                     </td>
                     {/* <td className={GlobalStyle.tableData}>{row.casecurrentstatus || "N/A"}</td> */}
                     <td className={`${GlobalStyle.tableData} flex items-center justify-center`}>
-                      {renderStatusIcon(row.casecurrentstatus || "N/A")}</td>
-                    <td className={GlobalStyle.tableData}>{row.accountno || "N/A"}</td>
-                    <td className={GlobalStyle.tableData}>{row.servicetype || "N/A"}</td>
+                      {renderStatusIcon(row.casecurrentstatus || "")}</td>
+                    <td className={GlobalStyle.tableData}>{row.accountno || ""}</td>
+                    <td className={GlobalStyle.tableData}>{row.servicetype || ""}</td>
                     <td className={GlobalStyle.tableCurrency}>{row.amount}</td>
-                    <td className={GlobalStyle.tableData}>{row.Agent || "N/A"}</td>
-                    <td className={GlobalStyle.tableData}>{row.area || "N/A"}</td>
+                    <td className={GlobalStyle.tableData}>{row.Agent || ""}</td>
+                    <td className={GlobalStyle.tableData}>{row.area || ""}</td>
                     <td className={GlobalStyle.tableData}>{row.Created_On &&
                       new Date(row.Created_On).toLocaleString("en-GB", {
                         year: "numeric",

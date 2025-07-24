@@ -252,7 +252,9 @@ export const Create_Task_for_Download_Case_List = async (filteredParams) => {
 
     const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
     if (response.status === 201) {
-      return "success"; // Return the data if the request was successful
+     
+      return response.data;
+      
     } else {
       throw new Error("Failed to create task, status code: " + response.status);
     }
