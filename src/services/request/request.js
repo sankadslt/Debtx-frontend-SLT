@@ -44,7 +44,7 @@ export const ListAllRequestLogFromRecoveryOfficers = async (payload) => {
       `${URL}/ListAllRequestLogFromRecoveryOfficers`,
       payload
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error(
       "Error fetching all request log from recovery officers: ",

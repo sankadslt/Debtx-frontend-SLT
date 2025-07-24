@@ -108,7 +108,7 @@ export const Create_Task_For_Downloard_Settlement_Details_By_Case_ID = async (cr
 // The python API endpoint for creating a settlement plan
 export const Create_Settlement_Plan = async (payload) => {
   try {
-    const response = await axios.post("http://124.43.177.52:6000/app3/api/v1/Create_Settlement_Plan", payload);
+    const response = await axios.post("https://debtx.slt.lk:6500/api/v1/Create_Settlement_Plan", payload);
     console.log("Response from Create_Settlement_Plan:", response);
     return response.data;
   } catch (error) {
