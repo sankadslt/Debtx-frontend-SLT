@@ -723,11 +723,23 @@ const Monitor_settlement = () => {
                         {item.case_id || "N/A"}
                       </td>
                       <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                        {renderStatusIcon(item.settlement_phase, item.settlement_status, index)}
+                        {/* {renderStatusIcon(item.settlement_phase, item.settlement_status, index)} */}
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={RO_Settle_Open_Pending}
+                            alt={status}
+                            className="w-6 h-6"
+                            data-tooltip-id="open" // Add tooltip ID to image
+                          />
+                          {/* Tooltip component */}
+                          <Tooltip id="open" place="bottom" effect="solid">
+                            Open
+                          </Tooltip>
+                        </div>
                       </td>
-                      <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}> {item.settlement_phase || "N/A"} </td>
-                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-GB") || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.settlement_id || ""}</td>
+                      <td className={GlobalStyle.tableData}> {item.settlement_phase || ""} </td>
+                      <td className={GlobalStyle.tableData}>{new Date(item.created_dtm).toLocaleDateString("en-GB") || ""}</td>
                       <td className={GlobalStyle.tableData}>
                         <img
                           src={more}
@@ -771,10 +783,10 @@ const Monitor_settlement = () => {
                   : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage
                   )}
               className={`${GlobalStyle.navButton} ${(searchQuery
-                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
-                  ? "cursor-not-allowed"
-                  : ""
+                ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                ? "cursor-not-allowed"
+                : ""
                 }`}
             >
               <FaArrowRight />
