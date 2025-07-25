@@ -21,7 +21,7 @@ export const listAllSettlementCases = async (payload) => {
       `${URL}/List_All_Settlement_Cases`,
       payload
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error(
       "Error withdrawing Settlement cases :",
@@ -61,7 +61,7 @@ export const Create_Task_For_Downloard_Settlement_List = async (createdBy, Phase
     });
 
     // return the response status
-    return response.data.status;
+    return response;
   } catch (error) {
     console.error("Error creating task:", error.response?.data || error.message);
     throw error.response?.data || error;

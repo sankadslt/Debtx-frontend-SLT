@@ -286,9 +286,9 @@ const RequestResponseLog = () => {
     }
     else {
       // setError("");
-      if (toDate) {
-        CheckDateDifference(date, toDate);
-      }
+      // if (toDate) {
+      //   CheckDateDifference(date, toDate);
+      // }
       setFromDate(date);
     }
   };
@@ -303,86 +303,86 @@ const RequestResponseLog = () => {
       });
     } else {
       //setError("");
-      if (fromDate) {
-        CheckDateDifference(fromDate, date);
-      }
+      // if (fromDate) {
+      //   CheckDateDifference(fromDate, date);
+      // }
       setToDate(date);
     }
   };
 
 
-  const CheckDateDifference = (fromDate, toDate) => {
-    const start = new Date(fromDate).getTime();
-    const end = new Date(toDate).getTime();
-    const diffInMs = end - start;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-    const diffInMonths = diffInDays / 30;
+  // const CheckDateDifference = (fromDate, toDate) => {
+  //   const start = new Date(fromDate).getTime();
+  //   const end = new Date(toDate).getTime();
+  //   const diffInMs = end - start;
+  //   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  //   const diffInMonths = diffInDays / 30;
 
-    if (diffInMonths > 1) {
-      Swal.fire({
-        title: "Date Range Exceeded",
-        text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        confirmButtonColor: "#28a745",
-        cancelButtonText: "No",
-        cancelButtonColor: "#d33",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          endDate = toDate;
-          handleApicall(fromDate, toDate); // Proceed with the API call
-        } else {
-          setToDate(null); // Clear the end date if the user chooses not to proceed
-          console.log("EndDate cleared");
-        }
-      });
-    }
-  };
+  //   if (diffInMonths > 1) {
+  //     Swal.fire({
+  //       title: "Date Range Exceeded",
+  //       text: "The selected dates have more than a 1-month gap. Do you want to proceed?",
+  //       icon: "warning",
+  //       showCancelButton: true,
+  //       confirmButtonText: "Yes",
+  //       confirmButtonColor: "#28a745",
+  //       cancelButtonText: "No",
+  //       cancelButtonColor: "#d33",
+  //     }).then((result) => {
+  //       if (result.isConfirmed) {
+  //         endDate = toDate;
+  //         handleApicall(fromDate, toDate); // Proceed with the API call
+  //       } else {
+  //         setToDate(null); // Clear the end date if the user chooses not to proceed
+  //         console.log("EndDate cleared");
+  //       }
+  //     });
+  //   }
+  // };
 
-  const handleApicall = async (fromDate, toDate) => {
+  // const handleApicall = async (fromDate, toDate) => {
 
-    const case_current_status = filteredData.map(
-      (row) => row.case_current_status
-    );
+  //   const case_current_status = filteredData.map(
+  //     (row) => row.case_current_status
+  //   );
 
-    const date_from = fromDate;
-    const date_to = toDate;
-    const userID = await getLoggedUserId();
-    const Created_By = userID;
-    const payload = {
-      case_current_status,
-      date_from,
-      date_to,
-      Created_By,
-    };
-    console.log("Payload for creating task:", payload);
+  //   const date_from = fromDate;
+  //   const date_to = toDate;
+  //   const userID = await getLoggedUserId();
+  //   const Created_By = userID;
+  //   const payload = {
+  //     case_current_status,
+  //     date_from,
+  //     date_to,
+  //     Created_By,
+  //   };
+  //   console.log("Payload for creating task:", payload);
 
-    try {
-      const response = await Create_Task_For_Request_Responce_Log_Download(
-        payload
-      );
-      console.log("Response from creating task:", response);
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Task created successfully.",
-        confirmButtonColor: "#28a745",
-      });
-    } catch (error) {
-      console.error("Error creating task:", error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "An error occurred. Please try again.";
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: errorMessage,
-        confirmButtonColor: "#d33",
-      });
-    }
-  };
+  //   try {
+  //     const response = await Create_Task_For_Request_Responce_Log_Download(
+  //       payload
+  //     );
+  //     console.log("Response from creating task:", response);
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Success",
+  //       text: "Task created successfully.",
+  //       confirmButtonColor: "#28a745",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error creating task:", error);
+  //     const errorMessage =
+  //       error?.response?.data?.message ||
+  //       error?.message ||
+  //       "An error occurred. Please try again.";
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: errorMessage,
+  //       confirmButtonColor: "#d33",
+  //     });
+  //   }
+  // };
 
   // Pagination setup
   // const pages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
