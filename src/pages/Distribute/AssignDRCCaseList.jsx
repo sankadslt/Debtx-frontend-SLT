@@ -369,6 +369,7 @@ import { refreshAccessToken } from "../../services/auth/authService";
 
 
 
+
 export default function AssignDRCsLOG() {
   const navigate = useNavigate(); // Initialize navigate for routing
   const [filters, setFilters] = useState({}); // State for filters and table
@@ -766,6 +767,16 @@ const getStatusIcon = (status) => {
     return;
   }
 
+  if (filterType === "Case ID" && !/^\d*$/.test(filterValue)) {
+    Swal.fire({
+      title: "Warning",
+      text: "Invalid input. Only numbers are allowed for Case ID.",
+      icon: "warning",
+      confirmButtonColor: "#f1c40f"
+    });
+    return;
+  }
+
     if (!filterValue.trim()) {
       Swal.fire({
         title: "Warning",
@@ -818,7 +829,7 @@ const getStatusIcon = (status) => {
   if (filterType === "Account No") {
     payload.account_no = filterValue;
   } else if (filterType === "Case ID") {
-    payload.case_id = filterValue;
+    payload.case_id = Number(filterValue);
   }
 
   try {
@@ -828,6 +839,7 @@ const getStatusIcon = (status) => {
     const response = await List_CasesOwened_By_DRC(payload);
     const data = Array.isArray(response?.data) ? response.data : [];
     console.log("Filtered Response Data:", data);
+    setIsLoading(false); // Reset loading state
 
     const maxData = page === 1 ? 10 : 30;
 
@@ -911,7 +923,6 @@ const getStatusIcon = (status) => {
 
 const handleclearfilter = () => {
   setStartDate(null);
-
   setEndDate(null);
   setFilterType("");
   setFilterValue("");
