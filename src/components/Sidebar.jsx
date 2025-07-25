@@ -133,6 +133,12 @@ const Sidebar = ({ onHoverChange }) => {
           link: "/Distribution/reject-incident-log",
           roles: ["superadmin", "admin"],
         },
+        {
+          icon: CgEditFade,
+          label: "Incident log",
+          link: "/Incident/Incident",
+          roles: ["superadmin", "admin"],
+        },
       ],
     },
 
@@ -150,7 +156,7 @@ const Sidebar = ({ onHoverChange }) => {
         },
         {
           icon: CgEditFade,
-          label: "Pending Distribution",
+          label: "DRC Transactions",
           link: "/pages/Distribute/AssignedDRCSummary",
           roles: ["superadmin", "admin"],
         },
@@ -260,6 +266,12 @@ const Sidebar = ({ onHoverChange }) => {
           icon: CgEditFade,
           label: "Other Approval",
           link: "/pages/Distribute/DRCAssignManagerApproval3",
+          roles: ["superadmin", "admin"],
+        },
+        {
+          icon: CgEditFade,
+          label: "User Approval",
+          link: "/pages/User/UserApproval",
           roles: ["superadmin", "admin"],
         },
       ],

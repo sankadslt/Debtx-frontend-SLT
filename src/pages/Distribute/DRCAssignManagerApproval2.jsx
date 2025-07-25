@@ -29,6 +29,10 @@ export default function DRCAssignManagerApproval2() {
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [filteredData, setFilteredData] = useState([]);
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Track the maximum current page
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 10;
 
   // Role-Based Buttons
   useEffect(() => {
@@ -53,9 +57,13 @@ export default function DRCAssignManagerApproval2() {
     }
   }, []);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 4;
+  useEffect(() => {
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      // callAPI(); // Call the function whenever currentPage changes
+      fetchData();
+    }
+  }, [currentPage]);
 
   const fetchData = async () => {
 
@@ -63,20 +71,58 @@ export default function DRCAssignManagerApproval2() {
     // console.log("Logged in user ID:", userId);
     const payload = {
       approved_deligated_by: userId,
+      pages: currentPage,
     };
     // console.log("Payload:", payload);
     try {
       const response = await List_All_Batch_Details(payload);
-      if (response.length > 0) {
-        setFilteredData(response);
+      if (response) {
+        // console.log("Valid data received:", response.data);
+        if (currentPage === 1) {
+          setFilteredData(response)
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response]);
+        }
+
+        if (response.length === 0) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No data available.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
+            });
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
+          }
+        }
       } else {
         Swal.fire({
-          icon: "warning",
-          title: "No Data Found",
-          text: "There are no batch details available for approval.",
-          confirmButtonColor: "#f1c40f",
-        })
+          title: "Error",
+          text: "No valid Approval data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+        setFilteredData([]);
       }
+      // if (response.length > 0) {
+      //   setFilteredData(response);
+      // } else {
+      //   Swal.fire({
+      //     icon: "warning",
+      //     title: "No Data Found",
+      //     text: "There are no batch details available for approval.",
+      //     confirmButtonColor: "#f1c40f",
+      //   })
+      // }
       // console.log("All batch details:", response);
     } catch (error) {
       //console.error("Error fetching all batch details:", error);
@@ -112,14 +158,14 @@ export default function DRCAssignManagerApproval2() {
 
 
   const currentData = filteredDataBySearch.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
+  // const totalPages = Math.ceil(filteredDataBySearch.length / recordsPerPage);
 
 
   // Handle pagination
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === "next" && currentPage < totalPages) {
+    } else if (direction === "next") {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -220,12 +266,15 @@ export default function DRCAssignManagerApproval2() {
         }).then(() => {
           // Reset selected rows and pagination after approval
           setSelectedRows(new Set());
-          setCurrentPage(1);
           setSearchQuery(""); // Clear search query
-          fetchData(); // Refresh data
+          if (currentPage === 1) {
+            fetchData(); // Refresh data
+          } else {
+            setCurrentPage(1); // Reset to first page
+          }
         });
 
-      } else {
+      } else if (IsApproved === "Reject") {
         Swal.fire({
           icon: "success",
           title: "Rejected",
@@ -234,9 +283,19 @@ export default function DRCAssignManagerApproval2() {
         }).then(() => {
           // Reset selected rows and pagination after approval
           setSelectedRows(new Set());
-          setCurrentPage(1);
           setSearchQuery(""); // Clear search query
-          fetchData(); // Refresh data
+          if (currentPage === 1) {
+            fetchData(); // Refresh data
+          } else {
+            setCurrentPage(1); // Reset to first page
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Invalid approval status.",
+          confirmButtonColor: "#d33",
         });
       }
 
@@ -424,12 +483,20 @@ export default function DRCAssignManagerApproval2() {
             <FaArrowLeft />
           </button>
           <span className={`${GlobalStyle.pageIndicator} mx-4`}>
-            Page {currentPage} of {totalPages}
+            Page {currentPage}
           </span>
           <button
             onClick={() => handlePrevNext("next")}
-            disabled={currentPage === totalPages}
-            className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+            disabled={
+              searchQuery
+                ? currentPage >= Math.ceil(filteredDataBySearch.length / recordsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / recordsPerPage
+                )}
+            className={`${GlobalStyle.navButton} ${(searchQuery
+              ? currentPage >= Math.ceil(filteredDataBySearch.length / recordsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / recordsPerPage))
+              ? "cursor-not-allowed"
+              : ""
               }`}
           >
             <FaArrowRight />
