@@ -96,9 +96,9 @@ export const Create_Task_For_Downloard_Settlement_Details_By_Case_ID = async (cr
       Case_ID: Case_ID,
       Settlement_ID: Settlement_ID
     });
-    console.log("Response from Create_Task_For_Downloard_Settlement_Details_By_Case_ID:", response);
+    // console.log("Response from Create_Task_For_Downloard_Settlement_Details_By_Case_ID:", response);
     // return the response status
-    return response.data.status;
+    return response;
   } catch (error) {
     console.error("Error creating task:", error.response?.data || error.message);
     throw error.response?.data || error;
