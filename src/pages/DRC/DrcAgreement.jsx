@@ -107,7 +107,7 @@ const DrcAgreement = () => {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
 
-          const disabled = latestEndDate > today;
+          const disabled = latestEndDate >= today;
           setIsRenewDisabled(disabled);
           setButtonLabel("Renew Agreement");
 
