@@ -495,7 +495,7 @@ const MediationBoardCaseList = () => {
               className={`${GlobalStyle.selectBox}`}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>RTOM</option>
+              <option value="" hidden>Billing Center</option>
               {rtomList.length > 0 ? (Object.values(rtomList).map((rtom) => (
                 <option key={rtom.rtom_id} value={rtom.rtom_id} style={{ color: "black" }}>
                   {rtom.rtom}
@@ -503,7 +503,7 @@ const MediationBoardCaseList = () => {
               ))
               ) : (
                 <option value="" disabled style={{ color: "gray" }}>
-                  No RTOMs available
+                  No Billing Centers available
                 </option>
               )}
             </select>
@@ -576,7 +576,7 @@ const MediationBoardCaseList = () => {
               <th className={GlobalStyle.tableHeader}>Status</th>
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>RO Name</th>
-              <th className={GlobalStyle.tableHeader}>RTOM</th>
+              <th className={GlobalStyle.tableHeader}>Billing Center</th>
               <th className={GlobalStyle.tableHeader}>Calling Round</th>
               <th className={GlobalStyle.tableHeader}>Created Date</th>
               <th className={GlobalStyle.tableHeader}>Next Calling Date</th>
@@ -605,7 +605,7 @@ const MediationBoardCaseList = () => {
                   </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{row.ro_name}</td>
-                  <td className={GlobalStyle.tableData}>{row.area}</td>
+                  <td className={GlobalStyle.tableData}>{row.rtom}</td>
                   <td className={GlobalStyle.tableData}>{row.calling_round}</td>
                   <td className={GlobalStyle.tableData}>
                     {row.date &&
