@@ -435,11 +435,13 @@ const RecoveryOfficerRequests = () => {
       console.log("the response given by the api", response.data.data);
 
       if (response) {
-        if (currentPage === 1) {
-          setRequestsData(response.data.data);
-          setcount(response.data.count);
-        } else {
-          setRequestsData((prevData) => [...prevData, ...response.data.data]);
+        if (response.status === 200 && response.data && Array.isArray(response.data.data)) {
+          if (currentPage === 1) {
+            setRequestsData(response.data.data);
+            setcount(response.data.count);
+          } else {
+            setRequestsData((prevData) => [...prevData, ...response.data.data]);
+          }
         }
 
         if (response.status === 204) {
@@ -736,7 +738,8 @@ const RecoveryOfficerRequests = () => {
               value={searchQuery}
               onChange={(e) => {
                 setCurrentPage(1); // Reset to first page when search query changes
-                setSearchQuery(e.target.value)}
+                setSearchQuery(e.target.value)
+              }
               }
               className={GlobalStyle.inputSearch}
             />
