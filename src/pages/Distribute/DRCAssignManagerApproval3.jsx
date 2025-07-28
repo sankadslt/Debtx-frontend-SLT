@@ -663,7 +663,7 @@ export default function DRCAssignManagerApproval3() {
   const onTableIconClick = (item) => {
 
     const formattedParameters = Object.entries(item.parameters)
-      .map(([key, value]) => `  "${key}": ${JSON.stringify(value)}`)
+      .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
       .join('\n');
 
     Swal.fire({
@@ -891,7 +891,7 @@ export default function DRCAssignManagerApproval3() {
                   <td className={GlobalStyle.tableData}>
                     {item.remark.length > 0
                       ? item.remark[item.remark.length - 1].remark
-                      : "N/A"}
+                      : ""}
                   </td>
 
                   <td className={GlobalStyle.tableData}>{item.created_by}</td>

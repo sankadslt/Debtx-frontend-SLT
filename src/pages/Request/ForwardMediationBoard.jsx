@@ -235,6 +235,43 @@ const ForwardMediationBoard = () => {
   const handleSubmit = async () => {
     const loggedUserId = await getLoggedUserId();
 
+    if (!acceptRequest) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please select whether to accept the request or not.",
+        confirmButtonColor: "#ffc107",
+      });
+      return;
+    }
+
+    if (requestType === "Mediation board forward request letter"
+      && acceptRequest === "No" && !remarkText.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please provide a remark if you are not accepting the request.",
+        confirmButtonColor: "#ffc107",
+      });
+      return;
+    } else if ((requestType === "Negotiation period extend Request" ||
+      requestType === "Mediation Board period extend Request" ||
+      requestType === "Negotiation customer further information Request" ||
+      requestType === "Negotiation Settlement plan Request" ||
+      requestType === "Negotiation Customer request service" ||
+      requestType === "Mediation Board Settlement plan Request" ||
+      requestType === "Mediation Board customer further information request" ||
+      requestType === "Mediation Board Customer request service"
+    ) && !remarkText.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please provide a remark.",
+        confirmButtonColor: "#ffc107",
+      });
+      return;
+    }
+
     const payload = {
       create_by: loggedUserId,
       Interaction_Log_ID: INteraction_Log_ID,
@@ -243,7 +280,7 @@ const ForwardMediationBoard = () => {
       // Request_Mode: request_mode,
       Interaction_ID: interationid,
       requestAccept: acceptRequest,
-      Reamrk: remarkText,
+      Reamrk: remarkText.trim(),
       No_of_Calendar_Month: calendarMonth,
       Letter_Send: letterSent
     };
@@ -656,14 +693,14 @@ const ForwardMediationBoard = () => {
             )}
 
             <div className="flex gap-4">
-              {acceptRequest !== "Yes" && (
+              {/* {acceptRequest !== "Yes" && (
                 <button
                   className={GlobalStyle.buttonPrimary}
                 // onClick={handleWithdraw}
                 >
                   Withdraw
                 </button>
-              )}
+              )} */}
               <button
                 className={GlobalStyle.buttonPrimary}
                 onClick={handleSubmit}
@@ -739,12 +776,12 @@ const ForwardMediationBoard = () => {
             </div>
 
             <div className="flex gap-4">
-              <button
+              {/* <button
                 className={GlobalStyle.buttonPrimary}
               // onClick={handleWithdraw}
               >
                 Withdraw
-              </button>
+              </button> */}
               <button
                 className={GlobalStyle.buttonPrimary}
                 onClick={handleSubmit}
