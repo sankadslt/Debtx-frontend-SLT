@@ -387,18 +387,18 @@ const Add_DRC = () => {
 
     // Format the selected RTOMs
     const selectedRTOMs = rtomAreas
-      .filter((r) => r.selected)
-      .map((r) => ({
-        rtom_id: parseInt(r.id),
-        rtom_name: r.name,
-        rtom_status: "Active",
-        rtom_billing_center_code: "DEFAULT",
-        handling_type: r.handlingtype,
-        create_by: user_id,
-        create_dtm: new Date().toISOString(),
-        status_update_by: user_id,
-        status_update_dtm: new Date().toISOString(),
-    }));
+  .filter((r) => r.selected)
+  .map((r) => ({
+    rtom_id: parseInt(r.id),
+    rtom_name: r.name,
+    rtom_status: "Active",
+    rtom_billing_center_code: r.code, 
+    handling_type: r.handlingtype,
+    create_by: user_id,
+    create_dtm: new Date().toISOString(),
+    status_update_by: user_id,
+    status_update_dtm: new Date().toISOString(),
+  }));
 
     // Format the coordinator data
     const coordinatorData = {
