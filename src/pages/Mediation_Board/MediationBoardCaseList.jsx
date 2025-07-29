@@ -497,7 +497,7 @@ const MediationBoardCaseList = () => {
             >
               <option value="" hidden>Billing Center</option>
               {rtomList.length > 0 ? (Object.values(rtomList).map((rtom) => (
-                <option key={rtom.rtom_id} value={rtom.rtom_id} style={{ color: "black" }}>
+                <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
                   {rtom.rtom}
                 </option>
               ))
