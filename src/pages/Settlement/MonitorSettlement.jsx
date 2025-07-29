@@ -147,7 +147,7 @@ const Monitor_settlement = () => {
         <img
           src={iconPath}
           alt={status}
-          className="w-6 h-6"
+          className="w-7 h-7"
           data-tooltip-id={tooltipId} // Add tooltip ID to image
         />
         {/* Tooltip component */}
