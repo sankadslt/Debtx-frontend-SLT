@@ -276,17 +276,9 @@ export const List_CasesOwened_By_DRC = async (requestData) => {
     );
 
     // Validate response structure
-    if (response.data && response.data.status === "success") {
-      return response.data.Cases; // Return the cases data
-    } else {
-      console.error(
-        "Error in API response:",
-        response.data?.message || "Unknown error"
-      );
-      throw new Error(
-        response.data?.message || "Failed to retrieve case details."
-      );
-    }
+   
+      return response.data; // Return the cases data
+    
   } catch (error) {
     console.error(
       "Error fetching cases owned by DRC:",
@@ -377,7 +369,7 @@ export const List_DRC_Assign_Manager_Approval = async (payload) => {
 export const Approve_DRC_Assign_Manager_Approval = async (payload) => {
   try {
     const response = await axios.post(
-      `${URL}/Approve_DRC_Assign_Manager_Approval`,
+      `${URL}/Aprove_DRC_Assign_Manager_Approval`,
       payload
     );
     return response.data;

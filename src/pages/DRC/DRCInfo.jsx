@@ -15,6 +15,8 @@ import Swal from "sweetalert2";
 import Edit from "../../assets/images/edit-info.svg";
 import addIcon from "../../assets/images/add.svg";
 import { FaArrowLeft, FaSearch, FaArrowRight } from "react-icons/fa";
+import ActiveStatus from "../../assets/images/complete.png";
+import InactiveStatus from "../../assets/images/Cross.png";
 import {
   getDebtCompanyByDRCID,
   terminateCompanyByDRCID,
@@ -22,6 +24,7 @@ import {
   getSLTCoordinators,
   getActiveServiceDetails,
   getActiveRTOMDetails,
+  getUserDetailsByIdforDRC,
   
 } from "../../services/drc/Drc";
 import { getLoggedUserId } from "../../services/auth/authService";
@@ -40,7 +43,7 @@ const DRCInfo = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [terminationRemark, setTerminationRemark] = useState("");
   const [terminationRemarkError, setTerminationRemarkError] = useState(false);
-
+  
   // Edit mode state
   const [editMode, setEditMode] = useState(false);
 
@@ -48,6 +51,8 @@ const DRCInfo = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  
 
   // DRC company data 
   
@@ -61,6 +66,7 @@ const DRCInfo = () => {
     drc_email: "",
     drc_status: "",
     slt_coordinator: [],
+    drc_agreement_details: [],
     services: [],
     rtom: [],
     remark: [],
@@ -85,12 +91,20 @@ const DRCInfo = () => {
     slt_coordinator_name: "",
     slt_coordinator_email: "",
   });
+  // const [currentAgreement, setCurrentAgreement] = useState({
+  //   agreement_start_dtm: "",
+  //   agreement_end_dtm: "",
+  // });
   const [serviceOptions, setServiceOptions] = useState([]);
   const [editingServiceIds, setEditingServiceIds] = useState([]);
   const [editingRtomIds, setEditingRtomIds] = useState([]);
   const [selectedhandlingtype, Setselectedhandlingtype] = useState("");
   const [remark, setRemark] = useState("");
   const [remarkHistory, setRemarkHistory] = useState([]);
+  const [ServiceNo, setServiceNo] = useState("");
+  const [C_Name, setCName] = useState("");
+  const [C_Email, setCEmail] = useState("");
+  const [errors, setErrors] = useState({});
 
   //loghistory
   const [showPopup, setShowPopup] = useState(false);
@@ -124,6 +138,38 @@ const DRCInfo = () => {
   const handlePrevPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 0));
   };
+
+    const handleSearchUsers = async (e) => {
+      e.preventDefault();
+      
+      if (!ServiceNo || ServiceNo.trim() === "") {
+        Swal.fire("Error", "Please provide a valid service number.", "error");
+        return;
+      }
+  
+      try {
+  
+        // Fetch user details
+        const response = await getUserDetailsByIdforDRC(ServiceNo);
+        
+        // Handle different response structures:
+        const userData = response.data || response; // Check for nested data
+        
+        // Extract name - try multiple possible fields
+        const userName = userData.username || userData.name || userData.fullName || "";
+        
+        // Extract email
+        const userEmail = userData.email || "";
+        setCName(userName);
+        setCEmail(userEmail);
+  
+      } catch (error) {
+        Swal.close();
+        Swal.fire("Error", "Coordinator not found", error);
+        setCName("");
+        setCEmail("");
+      }
+    };
 
   //next page
   const handleNextPage = () => {
@@ -183,6 +229,7 @@ const DRCInfo = () => {
         setLoading(true);
         const drcIdToUse = drcId;
         const data = await getDebtCompanyByDRCID(drcIdToUse);
+        console.log("Fetched DRC Data:", data);
 
         // Fetch SLT coordinator details for dropdown
         const coordinatorsResponse = await getSLTCoordinators();
@@ -263,36 +310,36 @@ const DRCInfo = () => {
 
   // Fetch active service types from the API
   const fetchActiveServices = async () => {
-    try {
-      setLoading(true);
-      const response = await getActiveServiceDetails();
-      console.log("API Response:", response);
+  try {
+    setLoading(true);
+    const response = await getActiveServiceDetails();
+    console.log("API Response:", response);
 
-      if (response && Array.isArray(response)) {
-        const formatted = response.map((service) => ({
-          id: service.service_id,
-          code: service.service_id.toString(),
-          name: service.service_type,
-          selected: false,
-        }));
+    if (response && Array.isArray(response)) {
+      const formatted = response.map((service) => ({
+        id: service.service_id,
+        code: service.service_id.toString(),
+        name: service.service_type,
+        selected: companyData.services?.some(s => s.service_type === service.service_type),
+      }));
 
-        setServiceTypes(formatted);
-      } else {
-        console.error("Unexpected API response format:", response);
-        setServiceTypes([]);
-      }
-    } catch (error) {
-      console.error("Error loading service types:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load active service types.",
-      });
+      setServiceTypes(formatted);
+    } else {
+      console.error("Unexpected API response format:", response);
       setServiceTypes([]);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Error loading service types:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to load active service types.",
+    });
+    setServiceTypes([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Function to fetch RTOM data
   const fetchRTOMData = async () => {
@@ -405,6 +452,7 @@ const DRCInfo = () => {
       terminate_by,
       endDate
     );
+    console.log("Termination response:", response);
 
     Swal.close();
 
@@ -487,10 +535,11 @@ const DRCInfo = () => {
     if (selectedRtomItem) {
       const newRtom = {
         rtom_id: selectedRtomItem.id,
+         rtom_billing_center_code: selectedRtomItem.code,
         rtom_name: selectedRtomItem.name,
         rtom_status: "Active",
         handling_type: selectedhandlingtype, // Add handling type here
-        status_update_dtm: new Date().toISOString(),
+        last_update_dtm: new Date().toISOString(),
       };
 
       setCompanyData({
@@ -553,134 +602,138 @@ const DRCInfo = () => {
   };
 
   const handleSave = async () => {
-    try {
-      let remarkBy = userData
-        ? userData.id || userData.userId || userData
-        : "system";
+  try {
+    let remarkBy = userData
+      ? userData.id || userData.userId || userData
+      : "system";
 
-      // Validate contact number
-      if (contactNo && !isValidPhoneNumber(contactNo)) {
-        Swal.fire({
-          icon: "error",
-          title: "Invalid Contact Number",
-          text: "Please enter a valid contact number.",
-        });
-        return;
-      }
-
-      // Validate email
-      if (email && !isValidEmail(email)) {
-        Swal.fire({
-          icon: "error",
-          title: "Invalid Email",
-          text: "Please enter a valid email address.",
-        });
-        return;
-      }
-
-      // Validate remark field
-      if (!remark.trim()) {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Please add a remark before saving",
-        });
-        return;
-      }
-
-      // Validate coordinator fields if in editing mode
-      if (editingCoordinator) {
-        if (
-          !coordinatorFields.service_no ||
-          !coordinatorFields.slt_coordinator_name ||
-          !coordinatorFields.slt_coordinator_email
-        ) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "All SLT Coordinator fields are required",
-          });
-          return;
-        }
-      }
-
-      // Get updated services and RTOM data
-      const updatedServices = companyData.services.map((service) => ({
-        ...service,
-        status_update_dtm: new Date().toISOString(),
-      }));
-
-      const updatedRtom = companyData.rtom.map((rtom) => ({
-        ...rtom,
-        status_update_dtm: new Date().toISOString(),
-      }));
-
-      // Prepare the coordinator data
-      let coordinatorData = currentCoordinator;
-      if (editingCoordinator) {
-        coordinatorData = coordinatorFields;
-      }
-
-      // Current date for remark timestamp
-      const currentDate = new Date().toISOString();
-
-      const response = await updateDRCInfo(
-        companyData.drc_id,
-        coordinatorData,
-        updatedServices,
-        updatedRtom,
-        remark,
-        remarkBy,
-        currentDate,
-        address,
-        contactNo,
-        email,
-        companyData.drc_status
-      );
-
+    // Validate contact number
+    if (contactNo && !isValidPhoneNumber(contactNo)) {
       Swal.fire({
-        icon: "success",
-        title: "Success!",
-        html: `
-          <div class="flex flex-col items-center">
-            <p class="text-lg font-bold">DRC information updated successfully</p>
-            <p class="text-sm text-gray-600 mt-2">Changes have been saved to the database</p>
-          </div>
-        `,
-        showConfirmButton: true,
-        confirmButtonText: "Continue",
-        confirmButtonColor: "#3B82F6",
-      }).then(() => {
-        setEditMode(false);
-        // Refresh the data
-        const fetchCompanyData = async () => {
-          try {
-            setLoading(true);
-            const drcIdToUse = drcId;
-            const data = await getDebtCompanyByDRCID(drcIdToUse);
-            if (data) {
-              setCompanyData(data);
-            }
-            setLoading(false);
-          } catch (err) {
-            console.error("Failed to fetch DRC data:", err);
-            setLoading(false);
-          }
-        };
-        fetchCompanyData();
+        icon: "error",
+        title: "Invalid Contact Number",
+        text: "Please enter a valid contact number.",
       });
+      return;
+    }
 
-      // Reset coordinator editing state
-      setEditingCoordinator(false);
-    } catch (err) {
-      console.error("Failed to update DRC data:", err);
+    // Validate email
+    if (email && !isValidEmail(email)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Email",
+        text: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    // Validate remark field
+    if (!remark.trim()) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Failed to update DRC information",
+        text: "Please add a remark before saving",
       });
+      return;
     }
-  };
+
+    // Prepare coordinator data - either new data or existing
+    let coordinatorData = currentCoordinator;
+    if (editingCoordinator) {
+      if (!ServiceNo || !C_Name || !C_Email) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "All SLT Coordinator fields are required",
+        });
+        return;
+      }
+      
+      coordinatorData = [{
+        service_no: ServiceNo,
+        slt_coordinator_name: C_Name,
+        slt_coordinator_email: C_Email
+      }];
+    }
+
+    // Get updated services and RTOM data
+    const updatedServices = companyData.services.map((service) => {
+      const matchedService = serviceTypes.find(st => st.name === service.service_type);
+      return {
+        service_id: matchedService?.id || service.service_id,
+        service_type: service.service_type,
+        service_status: service.service_status,
+        status_update_dtm: new Date().toISOString(),
+      };
+    });
+
+    const updatedRtom = companyData.rtom.map((rtom) => ({
+      ...rtom,
+      status_update_dtm: new Date().toISOString(),
+    }));
+
+    // Current date for remark timestamp
+    const currentDate = new Date().toISOString();
+
+    const response = await updateDRCInfo(
+      companyData.drc_id,
+      coordinatorData,
+      updatedServices,
+      updatedRtom,
+      remark,
+      remarkBy,
+      currentDate,
+      address,
+      contactNo,
+      email,
+      companyData.status
+    );
+
+    console.log("response", response);
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      html: `
+        <div class="flex flex-col items-center">
+          <p class="text-lg font-bold">DRC information updated successfully</p>
+          <p class="text-sm text-gray-600 mt-2">Changes have been saved to the database</p>
+        </div>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: "Continue",
+      confirmButtonColor: "#3B82F6",
+    }).then(() => {
+      setEditMode(false);
+      setEditingCoordinator(false);
+      
+      // Refresh the data
+      const fetchCompanyData = async () => {
+        try {
+          setLoading(true);
+          const drcIdToUse = drcId;
+          const data = await getDebtCompanyByDRCID(drcIdToUse);
+          if (data) {
+            setCompanyData(data);
+          }
+          setLoading(false);
+        } catch (err) {
+          console.error("Failed to fetch DRC data:", err);
+          setLoading(false);
+        }
+      };
+      fetchCompanyData();
+    });
+
+  } catch (err) {
+    console.error("Failed to update DRC data:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to update DRC information",
+    });
+  }
+};
 
   const handleCoordinatorChange = (e) => {
     const { name, value } = e.target;
@@ -773,11 +826,23 @@ const DRCInfo = () => {
   };
   console.log("Log History Data:", remarkHistory);
 
+
+
+
   // Get current coordinator (last one in array)
   const currentCoordinator =
     companyData.slt_coordinator && companyData.slt_coordinator.length > 0
       ? companyData.slt_coordinator[companyData.slt_coordinator.length - 1]
       : null;
+
+  // Add this above both return statements to get current agreement
+  const currentAgreement =
+    companyData.drc_agreement_details &&
+    companyData.drc_agreement_details.agreement_start_dtm &&
+    companyData.drc_agreement_details.agreement_end_dtm
+      ? companyData.drc_agreement_details
+      : null;
+
 
   // Loading state
   if (loading) {
@@ -806,15 +871,47 @@ const DRCInfo = () => {
 console.log("DRC Status Data:", {
   currentStatus: currentStatus,
 
-  
+ });
+
+console.log("latest Status History:", companyData.status || []);
+
+console.log("Service Details with IDs:");
+if (companyData.services && Array.isArray(companyData.services)) {
+  companyData.services.forEach((service, index) => {
+    // Find the matching service in serviceTypes to get the ID
+    const matchedService = serviceTypes.find(st => st.name === service.service_type);
+    
+    console.log(`Service ${index + 1}:`, {
+      id: matchedService?.id || 'Unknown ID',
+      type: service.service_type || 'Unknown Type',
+      status: service.service_status || 'Unknown Status',
+      // Include the raw service object for debugging
+      rawService: service
+    });
+  });
+} else {
+  console.log("No services found or services is not an array");
+}
+
+
+console.log("Company RTOM data:", {
+  rawRtomData: companyData.rtom,
+  mappedData: companyData.rtom?.map(r => ({
+    id: r.rtom_id,
+    code: r.rtom_billing_center_code,
+    name: r.rtom_name,
+    status: r.rtom_status,
+    handling_type: r.handling_type
+  }))
 });
+
 
   if (!editMode) {
     // View mode
     return (
       <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 md:px-8 max-w-7xl mx-auto`}>
         <h2 className={`${GlobalStyle.headingLarge} text-center sm:text-left mb-4 sm:mb-6`}>
-          {companyData.drc_id} - {companyData.drc_name}
+          {companyData.drc_name}
         </h2>
 
         {/* Main Content Card */}
@@ -825,12 +922,12 @@ console.log("DRC Status Data:", {
             <img
               src={Edit}
               onClick={() => {
-                if (companyData.status !== "Terminate") {  
+                if (companyData.status !== "Terminate" || companyData.status !== "Pending") {  
                   handleNavigateToEdit();
                 }
               }}
               className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14 ${
-                companyData.status === "Terminate"  
+                companyData.status === "Terminate" || companyData.status === "Pending" 
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
               }`}
@@ -871,22 +968,18 @@ console.log("DRC Status Data:", {
                     value: companyData.drc_email || "Not specified"
                   }, 
                     companyData.status === "Terminate" && {
-                     label: "Terminate Date",
+                      label: "Terminate Date",
                       value: companyData.drc_terminate_dtm
-                        ? new Date(companyData.drc_terminate_dtm).toLocaleDateString()
-                        : "Not specified"
+                        ? new Date(companyData.drc_terminate_dtm).toLocaleDateString() : "Not specified"
                     }
                 ].map((item, index) => (
                   <tr key={index} className="block sm:table-row">
-
-                    <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                    {/* <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
                       {item.label}:
                     </td>
                     <td className={`${GlobalStyle.tableData} text-gray-500 block sm:hidden pl-4`}>
                       {item.value}
-                    </td>
-
-
+                    </td> */}
                     <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
                       {item.label}
                     </td>
@@ -899,6 +992,51 @@ console.log("DRC Status Data:", {
               </tbody>
             </table>
 
+            {/* Current Agreement Section */}
+            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+              Current Agreement Details
+            </h2>
+
+            <div className={`${GlobalStyle} overflow-x-auto`}>
+              <table className={`${GlobalStyle.table} min-w-full text-left`}>
+                <tbody>
+                  {currentAgreement ? (
+                    <>
+                      <tr>
+                        <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                          Start Date
+                        </td>
+                        <td className="w-4 text-left">:</td>
+                        <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                          {currentAgreement.agreement_start_dtm
+                            ? new Date(currentAgreement.agreement_start_dtm).toLocaleDateString()
+                            : "Not specified"}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-1/3 sm:w-1/4`}>
+                          End Date
+                        </td>
+                        <td className="w-4 text-left">:</td>
+                        <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left`}>
+                          {currentAgreement.agreement_end_dtm
+                            ? new Date(currentAgreement.agreement_end_dtm).toLocaleDateString()
+                            : "Not specified"}
+                        </td>
+                      </tr>
+                    </>
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="text-center py-4 text-gray-500">
+                        No agreement details available
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            
             {/* SLT Coordinator Section */}
 
             <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
@@ -1047,10 +1185,10 @@ console.log("DRC Status Data:", {
                       Service Type
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Changed On
+                      Status
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Status
+                      Changed On
                     </th>
                   </tr>
                 </thead>
@@ -1066,22 +1204,21 @@ console.log("DRC Status Data:", {
                       <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                         {service.service_type}
                       </td>
+                      <td className={`${GlobalStyle.tableData} text-center`}>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <img
+                              src={service.service_status === "Active" ? ActiveStatus : InactiveStatus}
+                              alt={service.service_status === "Active" ? "Active" : "Inactive"}
+                              title={service.service_status === "Active" ? "Active" : "Inactive"}
+                              className="w-6 h-6 mx-auto"
+                              onClick={() => handleServiceStatusToggle(index)}
+                            />
+                          </label>
+                      </td>
                       <td className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}>
                         {service.status_update_dtm
                           ? new Date(service.status_update_dtm).toLocaleDateString()
                           : ""}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} text-left`}>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={service.service_status === "Active"}
-                            readOnly
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                          after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                        </label>
                       </td>
                     </tr>
                   ))}
@@ -1112,10 +1249,10 @@ console.log("DRC Status Data:", {
                       Handling Type
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Changed On
+                      Status
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Status
+                      Changed On
                     </th>
                   </tr>
                 </thead>
@@ -1136,23 +1273,20 @@ console.log("DRC Status Data:", {
                         <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
                           {rtom.handling_type}
                         </td>
-                        <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
-                          {rtom.status_update_dtm
-                            ? new Date(rtom.status_update_dtm).toLocaleDateString()
-                            : ""}
-                        </td>
-                        <td className={`${GlobalStyle.tableData} text-left`}>
+                        <td className={`${GlobalStyle.tableData} text-center`}>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="sr-only peer"
-                              checked={rtom.rtom_status === "Active"}
-                              readOnly
+                            <img
+                              src={rtom.rtom_status === "Active" ? ActiveStatus : InactiveStatus}
+                              alt={rtom.rtom_status === "Active" ? "Active" : "Inactive"}
+                              title={rtom.rtom_status === "Active" ? "Active" : "Inactive"}
+                              className="w-6 h-6 mx-auto"
                             />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full 
-                            peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
-                            after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                           </label>
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal text-left`}>
+                          {rtom.last_update_dtm
+                            ? new Date(rtom.last_update_dtm).toLocaleDateString()
+                            : ""}
                         </td>
                       </tr>
                     ))
@@ -1202,7 +1336,7 @@ console.log("DRC Status Data:", {
                   {/* End Date Row */}
                   <tr className="block sm:table-row">
 
-                    <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
+                    {/* <td className={`${GlobalStyle.tableData} font-medium block sm:hidden`}>
                       End Date:
                     </td>
                     <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
@@ -1216,11 +1350,12 @@ console.log("DRC Status Data:", {
                           minDate={new Date()}
                         />
                       </div>
-                    </td>
+                    </td> */}
 
 
                     <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                      End Date
+                      End Date  <span className="text-red-500">*</span>
+
                     </td>
                     <td className="w-4 text-left hidden sm:table-cell">:</td>
                     <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1230,7 +1365,6 @@ console.log("DRC Status Data:", {
                           onChange={(date) => setEndDate(date)}
                           dateFormat="dd/MM/yyyy"
                           className={`${GlobalStyle.inputText} w-full text-left`}
-                          maxDate={new Date()}
                           minDate={new Date()}
                         />
                       </div>
@@ -1240,7 +1374,7 @@ console.log("DRC Status Data:", {
                   {/* Remark Row */}
                   <tr className="block sm:table-row">
 
-                    <td className={`${GlobalStyle.tableData} font-semibold block sm:hidden`}>
+                    {/* <td className={`${GlobalStyle.tableData} font-semibold block sm:hidden`}>
                       Remark:
                     </td>
                     <td className={`${GlobalStyle.tableData} block sm:hidden pl-4`}>
@@ -1263,11 +1397,12 @@ console.log("DRC Status Data:", {
                           Remark is required
                         </p>
                       )}
-                    </td>
+                    </td> */}
 
 
                     <td className={`${GlobalStyle.tableData} font-semibold whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                      Remark
+                      Remark    <span className="text-red-500">*</span>
+
                     </td>
                     <td className="w-4 text-left hidden sm:table-cell">:</td>
                     <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1348,16 +1483,16 @@ console.log("DRC Status Data:", {
             <div>
               <button
                 onClick={() => {
-                  if (companyData.status !== "Terminate") {  
+                  if (companyData.status !== "Terminate" || companyData.status !== "Pending") {  
                     setShowEndFields(true);
                   }
                 }}
                 className={`${GlobalStyle.buttonPrimary} ${
-                  companyData.status === "Terminate" 
+                  companyData.status === "Terminate" || companyData.status === "Pending"
                     ? "opacity-50 cursor-not-allowed"
                     : ""
                 }`}
-                disabled={companyData.status === "Terminate"}  
+                disabled={companyData.status === "Terminate" || companyData.status === "Pending"}  
               >
                 End
               </button>
@@ -1472,7 +1607,7 @@ console.log("DRC Status Data:", {
       <h2
         className={`${GlobalStyle.headingLarge} text-center sm:text-left mb-4 sm:mb-6`}
       >
-        {companyData.drc_id} - {companyData.drc_name}
+        {companyData.drc_name}
       </h2>
 
       <div className="w-full justify-center">
@@ -1480,39 +1615,34 @@ console.log("DRC Status Data:", {
           className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}
         >
           {/* DRC Status Toggle Button - Top Right Corner */}
-          <div className="absolute top-4 right-4 flex items-center">
+         <div className="absolute top-4 right-4 flex items-center">
+          <button
+            onClick={() => {
+              const newStatus = companyData.status === "Active" ? "Inactive" : "Active";
+              setCompanyData((prev) => ({
+                ...prev,
+                status: newStatus,
+              }));
+            }}
+            className="relative inline-flex items-center cursor-pointer"
+            aria-label={companyData.status === "Active" ? "Active" : "Inactive"}
+          >
+            <div
+              className={`w-11 h-6 rounded-full transition-colors ${
+                companyData.status === "Active" ? "bg-green-500" : "bg-gray-300"
+              }`}
+            ></div>
+            <div
+              className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full shadow transform transition-transform ${
+                companyData.status === "Active" ? "translate-x-5" : ""
+              }`}
+            ></div>
+            <span className="ml-3 text-sm font-medium">
+              {companyData.status === "Active" ? "Active" : "Inactive"}
+            </span>
+          </button>
+        </div>
 
-            <button
-              onClick={() => {
-                const newStatus =
-                  companyData.drc_status === "Active" ? "Inactive" : "Active";
-                setCompanyData({
-                  ...companyData,
-                  drc_status: newStatus,
-                });
-
-
-              }}
-              className="relative inline-flex items-center cursor-pointer"
-              aria-label={
-                companyData.drc_status === "Active" ? "Active" : "Inactive"
-              }
-            >
-              <div
-                className={`w-11 h-6 rounded-full transition-colors ${companyData.drc_status === "Active"
-                  ? "bg-green-500"
-                  : "bg-gray-300"
-                  }`}
-              ></div>
-              <div
-                className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full shadow transform transition-transform ${companyData.drc_status === "Active" ? "translate-x-5" : ""
-                  }`}
-              ></div>
-              <span className="ml-3 text-sm font-medium">
-                {companyData.drc_status === "Active" ? "Active" : "Inactive"}
-              </span>
-            </button>
-          </div>
 
           {/* Company Details Section */}
           <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-6 mt-6 sm:mt-8 underline text-left font-semibold`}>
@@ -1550,7 +1680,7 @@ console.log("DRC Status Data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Address<span className="sm:hidden">:</span>
+                    Address <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1565,7 +1695,7 @@ console.log("DRC Status Data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Contact Number<span className="sm:hidden">:</span>
+                    Contact Number  <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1580,7 +1710,7 @@ console.log("DRC Status Data:", {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                    Email<span className="sm:hidden">:</span>
+                    Email  <span className="text-red-500">*</span> <span className="sm:hidden">:</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
@@ -1596,103 +1726,170 @@ console.log("DRC Status Data:", {
             </table>
           </div>
 
-
-          {/* SLT Coordinator Section */}
-          <div className="flex flex-col sm:flex-row justify-between  underline items-start sm:items-center">
-            <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
-              SLT Coordinator Details
-            </h2>
-            <div className="w-full flex justify-end sm:block sm:w-auto">
-              <button
-                onClick={() => setEditingCoordinator(!editingCoordinator)}
-                className={`${GlobalStyle.buttonPrimary} px-3 py-1 mb-4 sm:mb-0`}
-              >
-                {editingCoordinator ? "Cancel" : "Change"}
-              </button>
-            </div>
-          </div>
+          {/* Current Agreement Section */}
+          <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 underline text-left font-semibold`}>
+            Current Agreement Details
+          </h2>
 
           <div className={`overflow-x-auto`}>
-            {currentCoordinator || editingCoordinator ? (
-              <table className={`${GlobalStyle.table} min-w-full text-left`}>
-                <tbody>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Service No<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
-                      {editingCoordinator ? (
-                        <select
-                          name="service_no"
-                          value={coordinatorFields.service_no}
-                          onChange={handleServiceSelection}
-                          className="border border-gray-300 rounded px-2 py-1 w-full max-w-xs"
-                        >
-                          <option value="">Select a service</option>
-                          {serviceOptions.map((option, idx) => (
-                            <option key={idx} value={option.service_no}>
-                              {option.service_no}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.service_no || "Not specified"}
-                        </span>
-                      )}
+            <table className={`${GlobalStyle.table} min-w-full text-left`}>
+              <tbody>
+                {currentAgreement ? (
+                  <>
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                        Start Date<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left block sm:table-cell`}>
+                        {currentAgreement.agreement_start_dtm
+                          ? new Date(currentAgreement.agreement_start_dtm).toLocaleDateString()
+                          : "Not specified"}
+                      </td>
+                    </tr>
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                        End Date<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 break-words text-left block sm:table-cell`}>
+                        {currentAgreement.agreement_end_dtm
+                          ? new Date(currentAgreement.agreement_end_dtm).toLocaleDateString()
+                          : "Not specified"}
+                      </td>
+                    </tr>
+                  </>
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="text-center py-4 text-gray-500">
+                      No agreement details available
                     </td>
                   </tr>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Name<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
-                      {editingCoordinator ? (
+                )}
+              </tbody>
+            </table>
+          </div>
+
+
+          {/* SLT Coordinator Section */}
+      <div className="flex flex-col sm:flex-row justify-between underline items-start sm:items-center">
+        <h2 className={`${GlobalStyle.headingMedium} mt-6 mb-4 sm:mt-8 sm:mb-6 text-left font-semibold`}>
+          SLT Coordinator Details
+        </h2>
+        <div className="w-full flex justify-end sm:block sm:w-auto">
+          <button
+            onClick={() => {
+              setEditingCoordinator(!editingCoordinator);
+              if (!editingCoordinator) {
+                setServiceNo(currentCoordinator?.service_no || "");
+                setCName(currentCoordinator?.slt_coordinator_name || "");
+                setCEmail(currentCoordinator?.slt_coordinator_email || "");
+              }
+            }}
+            className={`${GlobalStyle.buttonPrimary} px-3 py-1 mb-4 sm:mb-0`}
+          >
+            {editingCoordinator ? "Cancel" : "Change"}
+          </button>
+        </div>
+      </div>
+
+        <div className={`overflow-x-auto`}>
+          {currentCoordinator || editingCoordinator ? (
+            <table className={`${GlobalStyle.table} min-w-full text-left`}>
+              <tbody>
+                <tr className="block sm:table-row">
+                 <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                  Service No
+                    {editingCoordinator && <span className="text-red-500">*</span>}
+                      <span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                          <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+
+                    {editingCoordinator ? (
+                      <>
+                      
                         <input
                           type="text"
-                          name="slt_coordinator_name"
-                          value={coordinatorFields.slt_coordinator_name}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
+                          value={ServiceNo}
+                          onChange={(e) => {
+                            setServiceNo(e.target.value);
+                            // Clear other fields when service number changes
+                            if (e.target.value !== currentCoordinator?.service_no) {
+                              setCName("");
+                              setCEmail("");
+                            }
+                          }}
+                          className={`${GlobalStyle.inputText} w-100`}
                         />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_name || "Not specified"}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                  <tr className="block sm:table-row">
-                    <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
-                      Email<span className="sm:hidden">:</span>
-                    </td>
-                    <td className="w-4 text-left hidden sm:table-cell">:</td>
-                    <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
-                      {editingCoordinator ? (
-                        <input
-                          type="email"
-                          name="slt_coordinator_email"
-                          value={coordinatorFields.slt_coordinator_email}
-                          readOnly
-                          className="border border-gray-200 bg-gray-100 rounded px-2 py-1 w-full max-w-xs cursor-not-allowed"
-                        />
-                      ) : (
-                        <span className="text-gray-500">
-                          {currentCoordinator.slt_coordinator_email || "Not specified"}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                No coordinator assigned
-              </div>
-            )}
-          </div>
+                        <button
+                          type="button"
+                          onClick={handleSearchUsers}
+                          className={`${GlobalStyle.buttonCircle} md:ml-2 self-end md:self-auto`}
+                        >
+                          <FaSearch style={{ width: 20, height: 20 }} />
+                        </button>
+                        {errors.ServiceNo && (
+                          <p className="text-red-500">{errors.ServiceNo}</p>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.service_no || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Name<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="text"
+                        value={C_Name}
+                         readOnly
+                        onFocus={(e) => e.target.blur()}
+                        className={`${GlobalStyle.inputText} w-2/4 cursor-not-allowed `}
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.slt_coordinator_name || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+                <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 sm:w-1/4 block sm:table-cell`}>
+                    Email<span className="sm:hidden">:</span>
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} break-words text-left block sm:table-cell`}>
+                    {editingCoordinator ? (
+                      <input
+                        type="email"
+                        value={C_Email}
+                        readOnly
+                        onFocus={(e) => e.target.blur()}
+                        className={`${GlobalStyle.inputText} w-2/4 bg-gray-100 cursor-not-allowed`}
+                      />
+                    ) : (
+                      <span className="text-gray-500">
+                        {currentCoordinator?.slt_coordinator_email || "Not specified"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-center py-4 text-gray-500">
+              No coordinator assigned
+            </div>
+          )}
+        </div>
 
 
           {/*DRC coordinator*/}
@@ -1713,43 +1910,52 @@ console.log("DRC Status Data:", {
                       Name
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                     NIC
+                      NIC
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
                       Email
                     </th>
                     <th className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}>
-                      Contact no
+                      Contact No
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {currentCoordinator ? (
-                    <tr className="bg-white bg-opacity-75 border-b">
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.service_no || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_name || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_email || "Not specified"}
-                      </td>
-                      <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
-                        {currentCoordinator.slt_coordinator_email || "Not specified"}
-                      </td>
-                    </tr>
+                  {paginatedCoordinators.length > 0 ? (
+                    paginatedCoordinators.map((coordinator, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0
+                            ? "bg-white bg-opacity-75"
+                            : "bg-gray-50 bg-opacity-50"
+                        } border-b`}
+                      >
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_name || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_nic || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_email || "N/A"}
+                        </td>
+                        <td className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}>
+                          {coordinator.user_contact_no?.[0]?.contact_number || "N/A"}
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
-                      <td colSpan="3" className="text-center py-4 text-gray-500">
-                        No coordinator assigned
+                      <td colSpan="4" className="text-center py-4 text-gray-500">
+                        No DRC Coordinators found
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
-            </div>
-          </div>
+              </div>
+              </div>
 
           {/* Services Section  */}
 
@@ -1762,24 +1968,24 @@ console.log("DRC Status Data:", {
 
             <div className="flex items-center mb-4 ">
               <select
-                onClick={handleDropdownClick}
-                value={selectedServiceType}
-                onChange={(e) => setSelectedServiceType(e.target.value)}
-                className={`${GlobalStyle.selectBox} mr-2`}
-              >
-                <option value="">Select Service Type</option>
-                {serviceLoading ? (
-                  <option disabled>Loading...</option>
-                ) : (
-                  serviceTypes
-                    .filter((service) => !service.selected)
-                    .map((service) => (
-                      <option key={service.id} value={service.name}>
-                        {service.name}
-                      </option>
-                    ))
-                )}
-              </select>
+                  onClick={handleDropdownClick}
+                  value={selectedServiceType}
+                  onChange={(e) => setSelectedServiceType(e.target.value)}
+                  className={`${GlobalStyle.selectBox} mr-2`}
+                >
+                  <option value="" disabled hidden>Select Service Type</option>
+                  {serviceLoading ? (
+                    <option disabled>Loading...</option>
+                  ) : (
+                    serviceTypes
+                      .filter((service) => !service.selected)
+                      .map((service) => (
+                        <option key={service.id} value={service.name}>
+                          {service.name}
+                        </option>
+                      ))
+                  )}
+                </select>
               <button
                 type="button"
                 onClick={handleAddServiceType}
@@ -1812,12 +2018,12 @@ console.log("DRC Status Data:", {
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      Changed On
+                      Status
                     </th>
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      Status
+                      Changed On
                     </th>
                   </tr>
                 </thead>
@@ -1835,15 +2041,6 @@ console.log("DRC Status Data:", {
                           className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
                         >
                           {service.service_type}
-                        </td>
-                        <td
-                          className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}
-                        >
-                          {service.status_update_dtm
-                            ? new Date(
-                              service.status_update_dtm
-                            ).toLocaleDateString()
-                            : ""}
                         </td>
                         <td className={`${GlobalStyle.tableData} text-center`}>
                           <button
@@ -1873,6 +2070,15 @@ console.log("DRC Status Data:", {
                                 : "Inactive"}
                             </span>
                           </button>
+                        </td>
+                        <td
+                          className={`${GlobalStyle.tableData} whitespace-nowrap text-left`}
+                        >
+                          {service.status_update_dtm
+                            ? new Date(
+                              service.status_update_dtm
+                            ).toLocaleDateString()
+                            : ""}
                         </td>
                       </tr>
                     ))}
@@ -1910,7 +2116,7 @@ console.log("DRC Status Data:", {
                 onChange={(e) => setSelectedRTOM(e.target.value)}
                 className={`${GlobalStyle.selectBox} mr-2`}
               >
-                <option value="">Select Billing Center Area</option>
+                <option value=""  disabled hidden >Select Billing Center Area</option>
                 {rtomLoading ? (
                   <option disabled>Loading...</option>
                 ) : (
@@ -1928,7 +2134,7 @@ console.log("DRC Status Data:", {
                 onChange={(e) => Setselectedhandlingtype(e.target.value)}
                 className={`${GlobalStyle.selectBox} w-full sm:flex-1`}
               >
-                    <option value="">Select Handling Type</option>
+                    <option value="" disabled hidden >Select Handling Type</option>
                     <option value="CPE">CPE</option>
                     <option value="Arrears">Arrears</option>
                     <option value="All-Type">All Type</option>
@@ -1968,12 +2174,12 @@ console.log("DRC Status Data:", {
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      Changed On
+                      Status
                     </th>
                     <th
                       className={`${GlobalStyle.tableHeader} whitespace-nowrap text-left`}
                     >
-                      Status
+                      Changed On
                     </th>
                   </tr>
                 </thead>
@@ -1996,15 +2202,6 @@ console.log("DRC Status Data:", {
                           className={`${GlobalStyle.tableData} whitespace-normal break-words text-left`}
                         >
                           {rtom.handling_type}
-                        </td>
-                        <td
-                          className={`${GlobalStyle.tableData} whitespace-normal text-left`}
-                        >
-                          {rtom.status_update_dtm
-                            ? new Date(
-                              rtom.status_update_dtm
-                            ).toLocaleDateString()
-                            : ""}
                         </td>
                         <td className={`${GlobalStyle.tableData} text-center`}>
                           <button
@@ -2035,6 +2232,15 @@ console.log("DRC Status Data:", {
                             </span>
                           </button>
                         </td>
+                        <td
+                          className={`${GlobalStyle.tableData} whitespace-normal text-left`}
+                        >
+                          {rtom.last_update_dtm
+                            ? new Date(
+                              rtom.last_update_dtm
+                            ).toLocaleDateString()
+                            : ""}
+                        </td>
                       </tr>
                     ))}
                   {(!companyData.rtom || companyData.rtom.length === 0) && (
@@ -2057,9 +2263,9 @@ console.log("DRC Status Data:", {
             <tbody>
               <tr>
                 <td
-                  className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
+                  className={`${GlobalStyle.tableData}  whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
                 >
-                  Remark
+                  Remark  <span className="text-red-500">*</span>
                 </td>
               </tr>
               <tr>

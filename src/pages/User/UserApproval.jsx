@@ -21,7 +21,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Link } from "react-router-dom";
 import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
-import { getAllUserApprovals } from "../../services/user/user_services";
+import { getAllUserApprovals, Approve_DRC_Agreement_Approval , Reject_DRC_Agreement_Approval , Download_User_Approval_List}  from "../../services/user/user_services";
+import moreImg from "../../assets/images/more.svg";
+import { Tooltip } from "react-tooltip";
+import { getLoggedUserId } from "../../services/auth/authService";
 
 const UserApproval = () => {
 	// Search
@@ -68,13 +71,17 @@ const UserApproval = () => {
 	const fetchUserApprovals =async(filters) => {
 		setIsLoading(true);
 		setError(null);
+
+				const formatDate = (date) => {
+		return date instanceof Date ? date.toISOString().split('T')[0] : '';
+		};
 		
 		try {
 			const requestData = {
-				page : filters.page,
+				pages : filters.page,
 				user_type: filters.userType,
-				from_date: filters.fromDate,
-				to_date: filters.toDate,
+				from_date: formatDate(filters.fromDate),
+				to_date: formatDate(filters.toDate),
 			}
 
 			console.log("Payload sent to API: ", requestData);
@@ -103,17 +110,28 @@ const UserApproval = () => {
 				} else {
 					const maxData = currentPage === 1 ? 10 : 30;
 					// Append new users to existing data
+					// setFilteredData((prevData) => [
+					// 	...prevData,
+					// 	...response.data.map(approval => ({
+					// 		approval_id: approval.user_approver_id,
+					// 		user_type: approval.user_type?.toUpperCase() || "",
+					// 		user_name: approval.user_name,
+					// 		user_email: approval.login_email,
+					// 		created_on: new Date(approval.created_dtm).toLocaleDateString("en-CA"),
+					// 	})),
+					// ]);
 					setFilteredData((prevData) => [
-						...prevData,
+					...prevData,
 						...response.data.map(approval => ({
-							approval_id: approval.approval_id,
-							user_type: approval.user_type?.toUpperCase() || "",
-							user_name: approval.user_name,
-							user_email: approval.login_email,
-							created_on: new Date(approval.created_dtm).toLocaleDateString("en-CA"),
+							approval_id: approval.user_approver_id,
+							user_type: approval.User_Type || "",
+							user_name: approval.user_data?.username || "",
+							user_email: approval.user_data?.email || "",
+							created_on: new Date(approval.created_on).toLocaleDateString("en-GB"), // YYYY-MM-DD
+							drc_id: approval.DRC_id,
 						})),
-					]);
-			
+						]);
+					console.log("Filtered Data after API call:", filteredData);
 					// If fewer than max data returned, no more data available
 					if (response.data.length < maxData) {
 						setIsMoreDataAvailable(false);
@@ -248,23 +266,26 @@ const UserApproval = () => {
 				icon: "warning",
 				confirmButtonColor: "#f1c40f",
 			});
-		} else if (toDate) {
-			// Calculate month gap
-			const diffInMs = toDate - date;
-			const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+		} 
+		// else if (toDate) {
+		// 	// Calculate month gap
+		// 	const diffInMs = toDate - date;
+		// 	const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
-			if (diffInDays > 31) {
-				Swal.fire({
-					title: "Warning",
-					text: "The selected range is more than 1 month.",
-					icon: "warning",
-					confirmButtonColor: "#f1c40f",
-				});
+		// 	if (diffInDays > 31) {
+		// 		Swal.fire({
+		// 			title: "Warning",
+		// 			text: "The selected range is more than 1 month.",
+		// 			icon: "warning",
+		// 			confirmButtonColor: "#f1c40f",
+		// 		});
 
-				return;
-			}
-			setFromDate(date);
-		} else {
+		// 		return;
+		// 	}
+		// 	setFromDate(date);
+		// } 
+		else
+		 {
 			setFromDate(date);
 		}
 	};
@@ -277,23 +298,25 @@ const UserApproval = () => {
 				icon: "warning",
 				confirmButtonColor: "#f1c40f",
 			});
-		} else if (fromDate) {
-			// Calculate month gap
-			const diffInMs = date - fromDate;
-			const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+		} 
+		// else if (fromDate) {
+		// 	// Calculate month gap
+		// 	const diffInMs = date - fromDate;
+		// 	const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
-			if (diffInDays > 31) {
-				Swal.fire({
-					title: "Warning",
-					text: "The selected range is more than 1 month.",
-					icon: "warning",
-					confirmButtonColor: "#f1c40f",
-				});
+		// 	if (diffInDays > 31) {
+		// 		Swal.fire({
+		// 			title: "Warning",
+		// 			text: "The selected range is more than 1 month.",
+		// 			icon: "warning",
+		// 			confirmButtonColor: "#f1c40f",
+		// 		});
 
-				return;
-			}
-			setToDate(date);
-		} else {
+		// 		return;
+		// 	}
+		// 	setToDate(date);
+		// } 
+		else {
 			setToDate(date);
 		}
 	};
@@ -356,31 +379,138 @@ const UserApproval = () => {
 		}
 	};
 
-	const approveSelectedUsers = () => {
-		if (selectedUsers.length === 0) {
-			Swal.fire(
-				"No Users Selected",
-				"Please select users to approve.",
-				"warning"
-			);
+	const approveSelectedUsers = async(approval_id , drc_id) => {
+		console.log("Approving User ID:", approval_id);
+		console.log("DRC ID:", drc_id);
+
+		
+		const user = await getLoggedUserId();
+		
+		//const loggedUserId = getLoggedUserId();
+		console.log("Logged User ID:", user);
+
+		if (!user) {
+			Swal.fire({
+				title: "Error",
+				text: "Unable to retrieve logged user ID.",
+				icon: "error",
+				confirmButtonColor: "#d33",
+			});
 			return;
 		}
 
-		console.log("Approving Users:", selectedUsers);
+		// Call the API to approve the user
 
-		Swal.fire(
-			"Users Approved",
-			`Successfully approved ${selectedUsers.length} user(s).`,
-			"success"
-		);
+		 const requestData = {
+				drc_id: drc_id,
+				user_approver_id: approval_id,
+				approved_by: user,
+
+			};
+
+			console.log("Payload sent to API: ", requestData);
+
+		try {
+			const response = await Approve_DRC_Agreement_Approval(requestData);
+			console.log("API Response:", response);
+
+		// if (selectedUsers.length === 0) {
+		// 	Swal.fire({
+		// 		title: "Warning",
+		// 		text: "Please select at least one user to approve.",
+		// 		icon: "warning",
+		// 		confirmButtonColor: "#f1c40f",
+		// 	});
+		// 	return;
+		// }
+
+		//console.log("Approving Users:", selectedUsers);
+
+		Swal.fire({
+			title: "Approved",
+			text: `User approval ${approval_id} processed successfully.`,
+			icon: "success",
+			 confirmButtonColor: "#28a745"
+		});
+			//reload the page to reflect changes
+			window.location.reload();
+		
+			// Clear selected users after approval
+			//setSelectedUsers([]);
+			//setSelectAll(false);
+
+		} catch (error) {
+			console.error("Error approving user:", error);
+			Swal.fire({
+				title: "Error",
+				text:  error?.response?.data?.message || "Failed to approve user.",
+				icon: "error",
+				confirmButtonColor: "#d33",
+			});
+		}
+
+
 
 		// Clear selection after approval
-		setSelectedUsers([]);
-		setSelectAll(false);
+		//setSelectedUsers([]);
+		//setSelectAll(false);
 	};
+
+
+	const rejectSelectedUsers = async(approval_id , drc_id) => {
+		console.log("Rejecting User ID:", approval_id);
+		console.log("DRC ID:", drc_id);
+
+		const user = await getLoggedUserId();
+		console.log("Logged User ID:", user);
+
+		if (!user) {
+			Swal.fire({
+				title: "Error",
+				text: "Unable to retrieve logged user ID.",
+				icon: "error",
+				confirmButtonColor: "#d33",
+			});
+			return;
+		}
+		// Call the API to reject the user
+		const requestData = {
+			drc_id: drc_id,
+			user_approver_id: approval_id,
+			approved_by: user,
+		};
+		console.log("Payload sent to API for reject: ", requestData);
+		try {
+			const response = await Reject_DRC_Agreement_Approval(requestData);
+			console.log("API Response:", response);
+
+			Swal.fire({
+				title: "Success",
+				text: `User approval ${approval_id} rejected successfully.`,
+				icon: "success",
+				confirmButtonColor: "#28a745",
+			});
+			//reload the page to reflect changes
+			window.location.reload();
+		
+		}
+		catch (error) {
+			console.error("Error rejecting user:", error);
+			Swal.fire({
+				title: "Error",
+				text: error?.response?.data?.message || "Failed to reject user.",
+				icon: "error",
+				confirmButtonColor: "#d33",
+			});
+		}
+
+
+	}
 
 	// Function to handle the creation of a task for downloading incidents
 	const HandleCreateTask = async () => {
+
+
 		if (!fromDate || !toDate) {
 			Swal.fire({
 				title: "Warning",
@@ -390,15 +520,43 @@ const UserApproval = () => {
 			});
 			return;
 		}
-		if (!isFiltered) {
+
+		const user = await getLoggedUserId();
+		console.log("Logged User ID:", user);
+		
+		setIsCreatingTask(true);
+
+		const requestData = {
+			from_date: fromDate,
+			to_date: toDate,
+			user_type: userType,
+			create_by: user,
+		};
+		console.log("Payload sent to API for task creation: ", requestData);
+		try {
+			const response = await Download_User_Approval_List(requestData);
+			console.log("API Response for task creation:", response);
+
+			if (response) {
+				Swal.fire({
+					title: "Success",
+					text: "Task created successfully.",
+					icon: "success",
+					confirmButtonColor: "#28a745",
+				});
+			}
+			setIsCreatingTask(false);
+		} catch (error) {
+			console.error("Error creating task:", error);
 			Swal.fire({
-				title: "Warning",
-				text: "Please apply filters that return data before creating a task.",
-				icon: "warning",
-				confirmButtonColor: "#f1c40f",
+				title: "Error",
+				text: error?.response?.data?.message || "Failed to create task.",
+				icon: "error",
+				confirmButtonColor: "#d33",
 			});
-			return;
+			setIsCreatingTask(false);
 		}
+
 	};
 
 	// Display loading animation when data is loading
@@ -410,23 +568,23 @@ const UserApproval = () => {
 		);
 	}
 
-	if (error) return <div>Error: {error}</div>;
+	// if (error) return <div>Error: {error}</div>;
 
 	return (
 		<div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
 			{/* Header Section - Responsive */}
 			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
 				<h1
-					className={`${GlobalStyle.headingLarge} text-xl sm:text-2xl lg:text-3xl`}
+					className={`${GlobalStyle.headingLarge}  `}
 				>
 					User Approval
 				</h1>
 			</div>
 
 			{/* Search and Filters - Responsive */}
-			<div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
+			<div className="flex flex-col lg:flex-row lg:justify-end lg:items-center mb-6 gap-4">
 				{/* Search Bar */}
-				<div className={GlobalStyle.searchBarContainer} >
+				{/* <div className={GlobalStyle.searchBarContainer} >
 				<input
 					type="text"
 					value={searchQuery}
@@ -434,7 +592,7 @@ const UserApproval = () => {
 					className={`${GlobalStyle.inputSearch} w-full`}
 				/>
 				<FaSearch className={GlobalStyle.searchBarIcon} />
-				</div>
+				</div> */}
 
 				{/* Filters */}
 				<div className={`${GlobalStyle.cardContainer} w-full lg:w-auto`}>
@@ -491,23 +649,37 @@ const UserApproval = () => {
 				</div>
 			</div>
 
+
+			{/* Search Bar */}
+			<div className="mb-4 flex justify-start mt-10">
+				<div className={GlobalStyle.searchBarContainer} >
+				<input
+					type="text"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className={`${GlobalStyle.inputSearch} w-full`}
+				/>
+				<FaSearch className={GlobalStyle.searchBarIcon} />
+				</div>
+				</div>
+
 			{/* Table Container - Responsive */}
-			<div className="overflow-x-auto -mx-4 sm:mx-0">
+			<div className="overflow-x-auto sm:mx-0">
 				<div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
 					{/* Desktop Table View */}
 					<table
-						className={`${GlobalStyle.table} hidden md:table min-w-full overflow-x-scroll`}
+						className={`${GlobalStyle.table}  md:table min-w-full overflow-x-scroll`}
 					>
 						<thead className={GlobalStyle.thead}>
 							<tr>
-								<th scope="col" className={`${GlobalStyle.tableHeader}`}>
+								{/* <th scope="col" className={`${GlobalStyle.tableHeader}`}>
 									<input
 										type="checkbox"
 										checked={selectAll}
 										onChange={handleSelectAll}
 										className="cursor-pointer"
 									/>
-								</th>
+								</th> */}
 								<th scope="col" className={`${GlobalStyle.tableHeader}`}>
 									USER ID
 								</th>
@@ -520,12 +692,19 @@ const UserApproval = () => {
 								<th scope="col" className={`${GlobalStyle.tableHeader}`}>
 									USER EMAIL
 								</th>
-								<th scope="col" className={`${GlobalStyle.tableHeader}`}>
+								{/* <th scope="col" className={`${GlobalStyle.tableHeader}`}>
 									LOGIN METHOD
-								</th>
+								</th> */}
 								<th scope="col" className={`${GlobalStyle.tableHeader}`}>
 									CREATED DATE
 								</th>
+								<th scope="col" className={`${GlobalStyle.tableHeader}`}>
+									
+								</th>
+								<th scope="col" className={`${GlobalStyle.tableHeader}`}>
+									
+								</th>
+
 							</tr>
 						</thead>
 						<tbody>
@@ -538,14 +717,14 @@ const UserApproval = () => {
 											: GlobalStyle.tableRowOdd
 									}`}
 								>
-									<td className={`${GlobalStyle.tableData} text-center`}>
+									{/* <td className={`${GlobalStyle.tableData} text-center`}>
 										<input
 											type="checkbox"
 											checked={selectedUsers.includes(approval.approval_id)}
 											className="cursor-pointer"
 											onChange={() => handleCheckboxChange(approval.approval_id)}
 										/>
-									</td>
+									</td> */}
 									<td className={`${GlobalStyle.tableData}`}>{approval.approval_id}</td>
 									<td className={`${GlobalStyle.tableData}`}>
 										{approval.user_name}
@@ -556,12 +735,51 @@ const UserApproval = () => {
 									<td className={`${GlobalStyle.tableData} break-all`}>
 										{approval.user_email}
 									</td>
-									<td className={`${GlobalStyle.tableData} break-all`}>
+									{/* <td className={`${GlobalStyle.tableData} break-all`}>
 										{approval.login_method || "N/A"}
-									</td>
+									</td> */}
 									<td className={`${GlobalStyle.tableData}`}>
 										{approval.created_on}
 									</td>
+
+									<td className={`${GlobalStyle.tableData} flex justify-center space-x-2`}>
+                                    <button 
+                                       // onClick={() => navigateToDRCInfo(log.DRCID)}
+                                        className="p-2  rounded flex items-center justify-center"
+                                        //title="More Info"
+                                        
+                                    >
+                                        <img src={moreImg} alt="More Info" className="h-auto w-5 max-w-[24px]" data-tooltip-id="more-info-tooltip" />
+                                        <Tooltip
+                                            id="more-info-tooltip"
+                                            place="bottom"
+                                            content="More Info"
+                                        />
+                                    </button>
+									</td>
+									
+									<td className="text-center">
+										<div className="flex justify-center gap-2">
+											<button
+												onClick={() => approveSelectedUsers(approval.approval_id , approval.drc_id)}
+												className={GlobalStyle.buttonPrimary}
+												
+											>
+										Approve
+										</button>
+
+										<button
+											onClick={() => rejectSelectedUsers(approval.approval_id , approval.drc_id)}
+											className={GlobalStyle.buttonRemove}
+											
+										>
+											Reject
+										</button>
+
+									</div>
+								</td>
+
+
 								</tr>
 							))}
 							{filteredDataBySearch.length === 0 && (
@@ -653,7 +871,7 @@ const UserApproval = () => {
 				</div>
 			)}
 
-			{filteredDataBySearch.length > 0 && (
+			{/* {filteredDataBySearch.length > 0 && (
 				<div className="flex justify-end mt-4">
 					<button
 						onClick={approveSelectedUsers}
@@ -662,7 +880,7 @@ const UserApproval = () => {
 						Approve
 					</button>
 				</div>
-			)}
+			)} */}
 
 			{/* Create Task Button */}
 			<div className="flex justify mt-4">

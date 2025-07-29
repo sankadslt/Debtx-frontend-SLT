@@ -44,7 +44,7 @@ export const ListAllRequestLogFromRecoveryOfficers = async (payload) => {
       `${URL}/ListAllRequestLogFromRecoveryOfficers`,
       payload
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error(
       "Error fetching all request log from recovery officers: ",
@@ -123,16 +123,16 @@ export const List_Request_Response_log = async (payload) => {
   try {
     const response = await axios.post(
       `${URL}/List_Request_Response_log`,
-      {
-        case_current_status: payload.case_current_status,
-        date_from: payload.date_from,
-        date_to: payload.date_to
-      }
-     
+      // {
+      //   case_current_status: payload.case_current_status,
+      //   date_from: payload.date_from,
+      //   date_to: payload.date_to
+      // }
+      payload
     );
     console.log("Payload for List_Request_Response_log:", response);
     console.log("Response from List_Request_Response_log:", response.data);
-    return response.data;
+    return response;
     
   } catch (error) {
     console.error(
