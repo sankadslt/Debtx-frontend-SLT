@@ -24,26 +24,32 @@ import Swal from 'sweetalert2';
 import { Tooltip } from "react-tooltip";
 import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
 import { getLoggedUserId } from "../../services/auth/authService";
-import RO_Settle_Pending from "/src/assets/images/Settlement/RO_Settle_Pending.png";
-import RO_Settle_Open_Pending from "/src/assets/images/Settlement/RO_Settle_Open_Pending.png";
-import RO_Settle_Active from "/src/assets/images/Settlement/RO_Settle_Active.png";
-import MB_Settle_Pending from "/src/assets/images/Settlement/MB Settle Pending.png";
-import MB_Settle_Open_Pending from "/src/assets/images/Settlement/MB Settle Open Pending.png"
-import MB_Settle_Active from "/src/assets/images/Settlement/MB Settle Active.png";
-import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation Settle Pending.png";
-import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
-import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
-import LOD_Settle_Active from "/src/assets/images/Settlement/LOD_Settle_Active.png";
-import LOD_Settle_Pending from "/src/assets/images/Settlement/LOD_Settle_Pending.png";
-import LOD_Settle_Open_Pending from "/src/assets/images/Settlement/LOD_Settle_Open_Pending.png";
-import WRIT_Settle_Pending from "/src/assets/images/Settlement/WRIT_Settle_Pending.png";
-import WRIT_Settle_Open_Pending from "/src/assets/images/Settlement/WRIT_Settle_Open-Pending.png";
-import WRIT_Settle_Active from "/src/assets/images/Settlement/WRIT_Settle_Active.png";
-import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle_Pending.png";
-import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
-import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
+// import RO_Settle_Pending from "/src/assets/images/Settlement/RO_Settle_Pending.png";
+// import RO_Settle_Open_Pending from "/src/assets/images/Settlement/RO_Settle_Open_Pending.png";
+// import RO_Settle_Active from "/src/assets/images/Settlement/RO_Settle_Active.png";
+// import MB_Settle_Pending from "/src/assets/images/Settlement/MB Settle Pending.png";
+// import MB_Settle_Open_Pending from "/src/assets/images/Settlement/MB Settle Open Pending.png"
+// import MB_Settle_Active from "/src/assets/images/Settlement/MB Settle Active.png";
+// import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation Settle Pending.png";
+// import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
+// import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
+// import LOD_Settle_Active from "/src/assets/images/Settlement/LOD_Settle_Active.png";
+// import LOD_Settle_Pending from "/src/assets/images/Settlement/LOD_Settle_Pending.png";
+// import LOD_Settle_Open_Pending from "/src/assets/images/Settlement/LOD_Settle_Open_Pending.png";
+// import WRIT_Settle_Pending from "/src/assets/images/Settlement/WRIT_Settle_Pending.png";
+// import WRIT_Settle_Open_Pending from "/src/assets/images/Settlement/WRIT_Settle_Open-Pending.png";
+// import WRIT_Settle_Active from "/src/assets/images/Settlement/WRIT_Settle_Active.png";
+// import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle_Pending.png";
+// import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
+// import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import Open from "/src/assets/images/settlement_status/Open .png";
+import Open_Pending  from "/src/assets/images/settlement_status/Open_Pending .png";
+import Compleate from "/src/assets/images/settlement_status/Compleate .png";
+import Active from "/src/assets/images/settlement_status/Active .png";
+import Abandaned from "/src/assets/images/settlement_status/Abandaned .png";
+import Withdraw from "/src/assets/images/settlement_status/Withdraw.png";
 
 const Monitor_settlement = () => {
   // State Variables
@@ -107,82 +113,28 @@ const Monitor_settlement = () => {
   }, []);
 
   // return Icon based on settlement status and settlement phase
-  const getStatusIcon = (phase, status) => {
-    switch (phase?.toLowerCase()) {
-      case "negotiation":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return RO_Settle_Pending;
-          case "open_pending":
-            return RO_Settle_Open_Pending;
-          case "active":
-            return RO_Settle_Active;
-          default:
-            return null;
-        }
-      case "mediation board":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return MB_Settle_Pending;
-          case "open_pending":
-            return MB_Settle_Open_Pending;
-          case "active":
-            return MB_Settle_Active;
-          default:
-            return null;
-        }
-      case "litigation":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return Litigation_Settle_Pending;
-          case "open_pending":
-            return Litigation_Settle_Open_Pending;
-          case "active":
-            return Litigation_Settle_Active;
-          default:
-            return null;
-        }
-      case "lod":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return LOD_Settle_Pending;
-          case "open_pending":
-            return LOD_Settle_Open_Pending;
-          case "active":
-            return LOD_Settle_Active;
-          default:
-            return null;
-        }
-      case "writ":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return WRIT_Settle_Pending;
-          case "open_pending":
-            return WRIT_Settle_Open_Pending;
-          case "active":
-            return WRIT_Settle_Active;
-          default:
-            return null;
-        }
-      case "dispute":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return Dispute_Settle_Pending;
-          case "open_pending":
-            return Dispute_Settle_Open_Pending;
-          case "active":
-            return Dispute_Settle_Active;
-          default:
-            return null;
-        }
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case "open":
+        return Open;
+      case "open_pending":
+        return Open_Pending;
+      case "active":
+        return Active;
+      case "withdraw":
+        return Withdraw;
+      case "completed":
+        return Compleate;
+      case "abondant":
+        return Abandaned;
       default:
         return null;
     }
   };
 
   // render status icon with tooltip
-  const renderStatusIcon = (phase, status, index) => {
-    const iconPath = getStatusIcon(phase, status);
+  const renderStatusIcon = (status, index) => {
+    const iconPath = getStatusIcon(status);
 
     if (!iconPath) {
       return <span>{status}</span>;
@@ -200,7 +152,7 @@ const Monitor_settlement = () => {
         />
         {/* Tooltip component */}
         <Tooltip id={tooltipId} place="bottom" effect="solid">
-          {`${phase} Settle ${status}`} {/* Tooltip text is the phase and status */}
+          {`${status}`} {/* Tooltip text is the phase and status */}
         </Tooltip>
       </div>
     );
@@ -722,8 +674,8 @@ const Monitor_settlement = () => {
                         {item.case_id || "N/A"}
                       </td>
                       <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                        {/* {renderStatusIcon(item.settlement_status, index)} */}
-                        {item.settlement_status}
+                        {renderStatusIcon(item.settlement_status, index)}
+                        {/* {item.settlement_status} */}
                       </td>
                       <td className={GlobalStyle.tableData}>{item.settlement_id || ""}</td>
                       <td className={GlobalStyle.tableData}> {item.settlement_phase || ""} </td>
