@@ -17,7 +17,8 @@ import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
 import { Case_Details_Settlement_Phase, Create_Settlement_Plan } from "../../services/settlement/SettlementServices";
-
+import { FaSearch , FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -29,7 +30,7 @@ export default function CreateSettlementPlan() {
   const [calendarMonth, setCalendarMonth] = useState();
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
-
+  const navigate = useNavigate();
   const [phase, setPhase] = useState("");
   const [initialAmount, setInitialAmount] = useState("");
   const [remark, setRemark] = useState("");
@@ -47,7 +48,7 @@ export default function CreateSettlementPlan() {
   };
 
   const caseId = location.state?.case_Id;
-  const PlanType = location.state?.PlanType;
+  const PlanType = location.state?.PlanType ; // Default to "Type A" if not provided
 
   const drcid = location.state?.DRC;
   console.log("Case ID from URL:", caseId);
@@ -200,6 +201,14 @@ export default function CreateSettlementPlan() {
       });
     }
   }
+
+  const handlebackbuttonclick = () => {
+  if (PlanType === "Type A") {
+    navigate("/additional_request_log");
+  } else if (PlanType === "Type B") {
+   // navigate("/pages/Settlement/SettlementPlanB");
+  }
+  };
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -497,6 +506,8 @@ export default function CreateSettlementPlan() {
           ))}
         </div>
 
+
+
         {/* { caseDetails?.setSettlementCount && (
         <div className="mt-6">
           {settlementdata?.map((settlement, index) => (
@@ -549,6 +560,12 @@ export default function CreateSettlementPlan() {
           ))}
         </div>
       )} */}
+        {/* Back Button */}
+
+         <button className={GlobalStyle.buttonPrimary} onClick={handlebackbuttonclick} >
+         <FaArrowLeft className="mr-2" />
+        </button>
+
       </div>
     </div>
   );
