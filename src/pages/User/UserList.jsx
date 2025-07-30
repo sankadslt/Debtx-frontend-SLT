@@ -13,6 +13,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import activeIcon from "../../assets/images/User/User_Active.png";
 import deactiveIcon from "../../assets/images/User/User_Inactive.png";
 import terminateIcon from "../../assets/images/User/User_Terminate.png";
+import User_Pending_Approval from "../../assets/images/status/RO_DRC_Status_Icons/RO_Pending_Approval.png";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
@@ -322,6 +323,23 @@ const UserList = () => {
           )}
         </div>
       );
+      } else if (user.status === "Pending_approval") {
+      return (
+        <div className="relative">
+          <img 
+            src={User_Pending_Approval} 
+            alt="User_Pending_Approval" 
+            className="h-5 w-5 lg:h-6 lg:w-6"
+            onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
+            onMouseLeave={hideTooltip}
+          />
+          {tooltipVisible === `status-${user.user_id}` && (
+            <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
+              User_Pending_Approval 
+            </div>
+          )}
+        </div>
+      );
     }
     return null;
   };
@@ -477,14 +495,18 @@ const UserList = () => {
                               ? activeIcon
                               : user.status === "Inactive"
                               ? deactiveIcon
-                              : terminateIcon
+                              : user.status === "Terminate"
+                              ? terminateIcon
+                              : User_Pending_Approval
                           }
                           alt={
                             user.status === "Active"
                               ? "Active"
                               : user.status === "Inactive"
                               ? "Inactive"
-                              : "Terminated"
+                              : user.status === "Terminate"
+                              ? "Terminated"
+                              : "Pending Approval"
                           }
                           data-tooltip-id={`status-${user.user_id}`}
                           data-tooltip-content={
@@ -492,7 +514,9 @@ const UserList = () => {
                               ? "Active"
                               : user.status === "Inactive"
                               ? "Inactive"
-                              : "Terminated"
+                              : user.status === "Terminate"
+                              ? "Terminated"
+                              : "Pending Approval"
                           }
 
                           className="h-5 w-5 lg:h-6 lg:w-6"
