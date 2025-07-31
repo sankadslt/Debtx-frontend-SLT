@@ -527,6 +527,7 @@ const Monitor_settlement = () => {
     }
 
     setIsCreatingTask(true);
+    
     try {
       const response = await Create_Task_For_Downloard_Settlement_List(userData, phase, status, fromDate, toDate, caseId, accountNo);
       if (response === "success") {
