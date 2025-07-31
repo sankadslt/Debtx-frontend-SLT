@@ -459,8 +459,8 @@ const MediationBoardCaseList = () => {
               <option value="" hidden>Status</option>
               <option value="Forward to Mediation Board" style={{ color: "black" }}>Forward to Mediation Board</option>
               <option value="MB Negotiation" style={{ color: "black" }}>MB Negotiation</option>
-              <option value="MB Request Customer-Info" style={{ color: "black" }}>MB Request Customer-Info</option>
-              <option value="MB Handover Customer-Info" style={{ color: "black" }}>MB Handover Customer-Info</option>
+              {/* <option value="MB Request Customer-Info" style={{ color: "black" }}>MB Request Customer-Info</option> */}
+              {/* <option value="MB Handover Customer-Info" style={{ color: "black" }}>MB Handover Customer-Info</option> */}
               <option value="MB Settle Pending" style={{ color: "black" }}>MB Settle Pending</option>
               <option value="MB Settle Open-Pending" style={{ color: "black" }}>MB Settle Open-Pending</option>
               <option value="MB Fail with Pending Non-Settlement" style={{ color: "black" }}>MB Fail with Pending Non-Settlement</option>
