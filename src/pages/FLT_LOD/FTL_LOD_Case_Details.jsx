@@ -125,7 +125,7 @@ const FTL_LOD_Case_Details = () => {
 
       {/* Case details card */}
       <div className="flex gap-4 mt-4 justify-center">
-        <div className={`${GlobalStyle.cardContainer}`}>
+        <div className={`${GlobalStyle.cardContainer} w-full max-w-lg`}>
           <div className="table">
             <div className="table-row">
               <div className="table-cell px-4 py-2 font-bold">Case ID</div>
@@ -182,7 +182,7 @@ const FTL_LOD_Case_Details = () => {
         <b>Response History</b>
       </h2>
 
-      <div className={`${GlobalStyle.tableContainer} mt-4`}>
+      <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -229,6 +229,7 @@ const FTL_LOD_Case_Details = () => {
         </table>
       </div>
 
+    {dataInPageResponseHistory.length > 0 && (
       <div className={GlobalStyle.navButtonContainer}>
         <button
           className={GlobalStyle.navButton}
@@ -248,6 +249,8 @@ const FTL_LOD_Case_Details = () => {
           <FaArrowRight />
         </button>
       </div>
+      )}
+
 
       {/* Settilement Plan table */}
       <h2 className={`${GlobalStyle.headingMedium} mt-4`}>
@@ -274,17 +277,17 @@ const FTL_LOD_Case_Details = () => {
         </h2>
       </div>
 
-      <div className={`${GlobalStyle.tableContainer} mt-4`}>
+      <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>Seq. No</th>
               <th className={GlobalStyle.tableHeader}>
-                Installment Settle Amount
+                Installment Settle Amount 
               </th>
               <th className={GlobalStyle.tableHeader}>Plan Date</th>
               <th className={GlobalStyle.tableHeader}>
-                Installment Paid Amount
+                Installment Paid Amount 
               </th>
             </tr>
           </thead>
@@ -374,7 +377,7 @@ const FTL_LOD_Case_Details = () => {
         <b>Payment Details</b>
       </h2>
 
-      <div className={`${GlobalStyle.tableContainer} mt-4`}>
+      <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
         <table className={GlobalStyle.table}>
           <thead className={GlobalStyle.thead}>
             <tr>
@@ -465,6 +468,7 @@ const FTL_LOD_Case_Details = () => {
         </table>
       </div>
 
+{dataInPagePaymentDetails.length > 0 && (
       <div className={GlobalStyle.navButtonContainer}>
         <button
           className={GlobalStyle.navButton}
@@ -484,7 +488,7 @@ const FTL_LOD_Case_Details = () => {
           <FaArrowRight />
         </button>
       </div>
-
+)}
       <div>
         <button
           onClick={() => navigate(-1)}
@@ -494,7 +498,8 @@ const FTL_LOD_Case_Details = () => {
         </button>
       </div>
     </div>
-  );
+  )
+  
 };
 
 export default FTL_LOD_Case_Details;
