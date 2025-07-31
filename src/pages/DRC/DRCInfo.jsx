@@ -509,14 +509,35 @@ const DRCInfo = () => {
       fetchActiveServices();
       setDropdownClicked(true);
     }
-  };
+      const availableServices = serviceTypes.filter(service => !service.selected);
+  if (availableServices.length === 0 && !serviceLoading) {
+    Swal.fire({
+      icon: 'info',
+      title: 'No More Service Types',
+      iconColor:"#ff9999",
+      text: 'All available service types have already been added.',
+      confirmButtonColor: '#ff9999',
+    });
+  }
+};
+  
 
   const handleRtomDropdownClick = () => {
     if (!rtomDropdownClicked) {
       fetchRTOMData();
       setRtomDropdownClicked(true);
     }
-  };
+   const availableBillingCenters = rtomAreas.filter(area => !area.selected);
+  if (availableBillingCenters.length === 0 && !rtomLoading) {
+    Swal.fire({
+      icon: 'info',
+      iconColor:"#ff9999",
+      title: 'No More Billing Center Areas',
+      text: 'All available billing center areas have already been added.',
+      confirmButtonColor: '#ff9999',
+    });
+  }
+};
 
   const handleAddServiceType = () => {
     if (
