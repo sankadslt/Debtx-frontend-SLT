@@ -149,7 +149,7 @@ const MediationBoardResponse = () => {
     };
 
     // variables need for response history table
-    const MBNegotiationHistory = Casedata.mediation_board || [];
+    const MBNegotiationHistory = (Casedata.mediation_board || []).sort((a, b) => new Date(b.mediation_board_calling_dtm) - new Date(a.mediation_board_calling_dtm));
     const pagesMBNegotiationHistory = Math.ceil(MBNegotiationHistory.length / rowsPerPage);
     const startIndex = currentPage * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
@@ -168,7 +168,7 @@ const MediationBoardResponse = () => {
     };
 
     // variables need for payment  details table
-    const paymentDetails = Casedata.money_transactions || [];
+    const paymentDetails = (Casedata.money_transactions || []).sort((a, b) => new Date(b.payment_Dtm) - new Date(a.payment_Dtm));
     const pagesPaymentDetails = Math.ceil(paymentDetails.length / rowsPerPage);
     const startIndexPaymentDetails = currentPagePaymentDetails * rowsPerPage;
     const endIndexPaymentDetails = startIndexPaymentDetails + rowsPerPage;
@@ -187,7 +187,7 @@ const MediationBoardResponse = () => {
     };
 
     // varibles need for settlement plane table
-    const roRequests = Casedata.ro_requests || [];
+    const roRequests = (Casedata.ro_requests || []).sort((a, b) => new Date(b.created_dtm) - new Date(a.created_dtm));
     const pagesroRequests = Math.ceil(roRequests.length / rowsPerPage);
     const startIndexroRequests = currentPageroRequests * rowsPerPage;
     const endIndexroRequests = startIndexroRequests + rowsPerPage;
