@@ -233,8 +233,8 @@ const MediationBoardResponse = () => {
                             <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {Casedata?.arrears_amount &&
-                                    Casedata.arrears_amount.toLocaleString("en-LK", {
+                                {Casedata?.current_arrears_amount &&
+                                    Casedata.current_arrears_amount.toLocaleString("en-LK", {
                                         style: "currency",
                                         currency: "LKR",
                                     })
