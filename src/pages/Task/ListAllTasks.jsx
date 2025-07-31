@@ -94,9 +94,11 @@ const ListAllTasks = () => {
       case "open":
         return Task_List_Open;
       case "complete":
+
         return Task_List_Success;
       case "success":
         return Task_List_Success;
+
       case "inprogress":
         return Task_List_In_Progress;
       default:

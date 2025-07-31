@@ -1,7 +1,18 @@
 import React from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function FTL_LOD_creation() {
+  const navigate = useNavigate();
+  // Function to handle navigation to change details form
+  const handleChangeDetails = () => {
+    navigate("/pages/flt-lod/ftl-lod-change-details-form");
+  };
+  // Function to handle PDF creation
+  const handleCreatePDF = () => {
+    // Logic for creating PDF goes here
+    console.log("Creating PDF...");
+  };
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
@@ -29,7 +40,9 @@ export default function FTL_LOD_creation() {
         </div>
       </div>
       <div className="flex items-center justify-end gap-4 mt-4 mb-4">
-        <button className={`${GlobalStyle.buttonPrimary}`}>
+        <button 
+        onClick= {() => navigate("/pages/flt-lod/ftl-lod-change-details-form")}
+        className={`${GlobalStyle.buttonPrimary}`}>
           Change Details
         </button>
 
