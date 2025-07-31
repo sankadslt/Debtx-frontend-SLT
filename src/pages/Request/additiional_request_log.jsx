@@ -316,7 +316,9 @@ const RecoveryOfficerRequests = () => {
     delegate_user_id,
     Interaction_Log_ID,
     Interaction_ID,
-    drc_id
+    drc_id,
+    ro_id,
+    case_current_phase
   ) => {
     console.log("case_id", case_id);
     console.log("User_Interaction_Type", User_Interaction_Type);
@@ -324,6 +326,8 @@ const RecoveryOfficerRequests = () => {
     console.log("Interaction_Log_ID", Interaction_Log_ID);
     console.log("Interaction_ID", Interaction_ID);
     console.log("drc_id", drc_id);
+    console.log("ro_id", ro_id);
+    console.log("case_current_phase", case_current_phase);
     if (User_Interaction_Type === "Mediation Board Settlement plan Request" || User_Interaction_Type === "Negotiation Settlement plan Request") {
       navigate("/pages/CreateSettlement/CreateSettlementPlan", {
         state: {
@@ -333,7 +337,8 @@ const RecoveryOfficerRequests = () => {
           INteraction_Log_ID: Interaction_Log_ID,
           PlanType: "Type A",
           DRC: drc_id,
-
+          RO_ID: ro_id,
+          Case_Current_Phase: case_current_phase,
         },
       });
     } else {
@@ -435,11 +440,13 @@ const RecoveryOfficerRequests = () => {
       console.log("the response given by the api", response.data.data);
 
       if (response) {
-        if (currentPage === 1) {
-          setRequestsData(response.data.data);
-          setcount(response.data.count);
-        } else {
-          setRequestsData((prevData) => [...prevData, ...response.data.data]);
+        if (response.status === 200 && response.data && Array.isArray(response.data.data)) {
+          if (currentPage === 1) {
+            setRequestsData(response.data.data);
+            setcount(response.data.count);
+          } else {
+            setRequestsData((prevData) => [...prevData, ...response.data.data]);
+          }
         }
 
         if (response.status === 204) {
@@ -736,7 +743,8 @@ const RecoveryOfficerRequests = () => {
               value={searchQuery}
               onChange={(e) => {
                 setCurrentPage(1); // Reset to first page when search query changes
-                setSearchQuery(e.target.value)}
+                setSearchQuery(e.target.value)
+              }
               }
               className={GlobalStyle.inputSearch}
             />
@@ -861,7 +869,9 @@ const RecoveryOfficerRequests = () => {
                           row.delegate_user_id,
                           row.Interaction_Log_ID,
                           row.Interaction_ID,
-                          row.drc_id
+                          row.drc_id,
+                          row.ro_id,
+                          row.case_current_phase
                         )
                       }
                     >

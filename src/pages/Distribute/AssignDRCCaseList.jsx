@@ -369,6 +369,7 @@ import { refreshAccessToken } from "../../services/auth/authService";
 
 
 
+
 export default function AssignDRCsLOG() {
   const navigate = useNavigate(); // Initialize navigate for routing
   const [filters, setFilters] = useState({}); // State for filters and table
@@ -395,82 +396,82 @@ export default function AssignDRCsLOG() {
   });
 
 
-const getStatusIcon = (status) => {
+  const getStatusIcon = (status) => {
     const statusStr = String(status || '').toLowerCase();
 
     switch (statusStr) {
-       
-        // Negotiation icons
-        case "ro negotiation":
-            return RO_Negotiation;
-        case "ro settle pending":
-            return Negotiation_Settle_Pending;
-        case "ro settle open pending":
-            return Negotiation_Settle_Open_Pending;
-        case "ro settle active":
-            return Negotiation_Settle_Active;
-        case "ro negotiation extension pending":
-            return RO_Negotiation_Extension_Pending;
-        case "ro negotiation extended":
-            return RO_Negotiation_Extended;
-        case "ro negotiation fmb pending":
-            return RO_Negotiation_FMB_Pending;
 
-        // Mediation board icons
-        case "forward to mediation board":
-            return Forward_Mediation_Board;
-        case "mb negotiation":
-            return MB_Negotiation;
-        case "mb request customer-info":
-            return MB_Request_Customer_Info;
-        case "mb handover customer-info":
-            return MB_Handover_Customer_Info;
-        case "mb settle pending":
-            return MB_Settle_Pending;
-        case "mb settle open pending":
-            return MB_Settle_Open_Pending;
-        case "mb settle active":
-            return MB_Settle_Active;
-        case "mb fail with pending non settlement":
-            return MB_Fail_With_Pending_Non_Settlement;
-        case "mb fail with non settlement":
-            return MB_Fail_With_Non_Settlement;
+      // Negotiation icons
+      case "ro negotiation":
+        return RO_Negotiation;
+      case "ro settle pending":
+        return Negotiation_Settle_Pending;
+      case "ro settle open pending":
+        return Negotiation_Settle_Open_Pending;
+      case "ro settle active":
+        return Negotiation_Settle_Active;
+      case "ro negotiation extension pending":
+        return RO_Negotiation_Extension_Pending;
+      case "ro negotiation extended":
+        return RO_Negotiation_Extended;
+      case "ro negotiation fmb pending":
+        return RO_Negotiation_FMB_Pending;
 
-        // Distribution
-        case "open assign agent":
-            return Open_Assign_Agent;
-        case "open with agent":
-            return Open_With_Agent;
-        
-        default:
-            return null;
+      // Mediation board icons
+      case "forward to mediation board":
+        return Forward_Mediation_Board;
+      case "mb negotiation":
+        return MB_Negotiation;
+      case "mb request customer-info":
+        return MB_Request_Customer_Info;
+      case "mb handover customer-info":
+        return MB_Handover_Customer_Info;
+      case "mb settle pending":
+        return MB_Settle_Pending;
+      case "mb settle open pending":
+        return MB_Settle_Open_Pending;
+      case "mb settle active":
+        return MB_Settle_Active;
+      case "mb fail with pending non settlement":
+        return MB_Fail_With_Pending_Non_Settlement;
+      case "mb fail with non settlement":
+        return MB_Fail_With_Non_Settlement;
+
+      // Distribution
+      case "open assign agent":
+        return Open_Assign_Agent;
+      case "open with agent":
+        return Open_With_Agent;
+
+      default:
+        return null;
     }
-};
+  };
 
 
 
-    const renderStatusIcon = (status) => {
-        if (status === undefined || status === null) {
-            return <span className="capitalize">Unknown</span>;
-        }
+  const renderStatusIcon = (status) => {
+    if (status === undefined || status === null) {
+      return <span className="capitalize">Unknown</span>;
+    }
 
-        const iconPath = getStatusIcon(status);
+    const iconPath = getStatusIcon(status);
 
-        if (!iconPath) {
-            return <span className="capitalize">{String(status)}</span>;
-        }
+    if (!iconPath) {
+      return <span className="capitalize">{String(status)}</span>;
+    }
 
-        return (
-            <img
-                src={iconPath}
-                alt={String(status)}
-                className="w-6 h-6 mx-auto"
-                data-tooltip-id={`status-tooltip-${status}`}
-                data-tooltip-content={status}
-                //title={status}
-            />
-        );
-    };
+    return (
+      <img
+        src={iconPath}
+        alt={String(status)}
+        className="w-6 h-6 mx-auto"
+        data-tooltip-id={`status-tooltip-${status}`}
+        data-tooltip-content={status}
+      //title={status}
+      />
+    );
+  };
 
 
 
@@ -546,12 +547,12 @@ const getStatusIcon = (status) => {
       .includes(searchQuery.toLowerCase())
   );
 
-// when the search query changes, reset the current page to 1
+  // when the search query changes, reset the current page to 1
   useEffect(() => {
-  if (searchQuery) {
-    setCurrentPage(1);
-  }
-}, [searchQuery]);
+    if (searchQuery) {
+      setCurrentPage(1);
+    }
+  }, [searchQuery]);
 
 
   const itemsPerPage = 10;
@@ -742,8 +743,15 @@ const getStatusIcon = (status) => {
 
   const handleFilter = () => {
 
-
-
+    if (!startDate && !endDate && !filterType && !filterValue.trim()) {
+      Swal.fire({
+        title: "Warning",
+        text: "No filters applied.",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
 
     if ((startDate && !endDate) || (!startDate && endDate)) {
       Swal.fire({
@@ -755,26 +763,55 @@ const getStatusIcon = (status) => {
       return;
     }
 
-    
-    if (!filterType) {
-    Swal.fire({
-      title: "Warning",
-      text: "Please select a filter type (Account No or Case ID).",
-      icon: "warning",
-      confirmButtonColor: "#f1c40f"
-    });
-    return;
-  }
-
-    if (!filterValue.trim()) {
+    if (filterType && !filterValue.trim()) {
       Swal.fire({
         title: "Warning",
-        text: "Please enter either a Case ID or Account No.",
+        text: `Please enter a value for ${filterType}.`,
         icon: "warning",
         confirmButtonColor: "#f1c40f"
       });
       return;
     }
+
+    if (filterValue.trim() && !filterType) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select a filter type (Account No or Case ID).",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
+
+    // if (!filterType) {
+    //   Swal.fire({
+    //     title: "Warning",
+    //     text: "Please select a filter type (Account No or Case ID).",
+    //     icon: "warning",
+    //     confirmButtonColor: "#f1c40f"
+    //   });
+    //   return;
+    // }
+
+    if (filterType === "Case ID" && !/^\d*$/.test(filterValue)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Invalid input. Only numbers are allowed for Case ID.",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f"
+      });
+      return;
+    }
+
+    // if (!filterValue.trim()) {
+    //   Swal.fire({
+    //     title: "Warning",
+    //     text: "Please enter either a Case ID or Account No.",
+    //     icon: "warning",
+    //     confirmButtonColor: "#f1c40f"
+    //   });
+    //   return;
+    // }
 
     setCurrentPage(1);
     setCases([]);
@@ -799,91 +836,92 @@ const getStatusIcon = (status) => {
 
 
   const fetchCasesWithPagination = async ({ page, filterType, filterValue, startDate, endDate }) => {
-  const payload = {
-    drc_id: drc_id, // Use actual drc_id from context/state
-    pages: page,
-  };
+    const payload = {
+      drc_id: drc_id, // Use actual drc_id from context/state
+      pages: page,
+    };
 
-  const formatDate = (date) => {
-    if (!date) return null;
-    const offset = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-    return offset.toISOString().split("T")[0];
-  };
+    const formatDate = (date) => {
+      if (!date) return null;
+      const offset = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return offset.toISOString().split("T")[0];
+    };
 
-  if (startDate && endDate) {
-    payload.from_date = formatDate(startDate);
-    payload.to_date = formatDate(endDate);
-  }
-
-  if (filterType === "Account No") {
-    payload.account_no = filterValue;
-  } else if (filterType === "Case ID") {
-    payload.case_id = filterValue;
-  }
-
-  try {
-    console.log("Filtered Request Payload:", payload);
-    setIsLoading(true); // If using loading indicator
-
-    const response = await List_CasesOwened_By_DRC(payload);
-    const data = Array.isArray(response?.data) ? response.data : [];
-    console.log("Filtered Response Data:", data);
-
-    const maxData = page === 1 ? 10 : 30;
-
-    if (page === 1) {
-      setCases(data);
-    } else {
-      setCases((prev) => [...prev, ...data]);
+    if (startDate && endDate) {
+      payload.from_date = formatDate(startDate);
+      payload.to_date = formatDate(endDate);
     }
 
-    //console.log("Cases after fetching:", cases);
-    if (data.length === 0) {
-      setIsMoreDataAvailable(false);
+    if (filterType === "Account No") {
+      payload.account_no = filterValue;
+    } else if (filterType === "Case ID") {
+      payload.case_id = Number(filterValue);
+    }
+
+    try {
+      console.log("Filtered Request Payload:", payload);
+      setIsLoading(true); // If using loading indicator
+
+      const response = await List_CasesOwened_By_DRC(payload);
+      const data = Array.isArray(response?.data) ? response.data : [];
+      console.log("Filtered Response Data:", data);
+      setIsLoading(false); // Reset loading state
+
+      const maxData = page === 1 ? 10 : 30;
 
       if (page === 1) {
+        setCases(data);
+      } else {
+        setCases((prev) => [...prev, ...data]);
+      }
+
+      //console.log("Cases after fetching:", cases);
+      if (data.length === 0) {
+        setIsMoreDataAvailable(false);
+
+        if (page === 1) {
+          Swal.fire({
+            title: "No Results",
+            text: "No matching cases found for the selected filters.",
+            icon: "warning",
+            confirmButtonColor: "#f1c40f",
+          });
+        } else if (page === 2) {
+          setCurrentPage(1); // Reset to page 1 if no data found on page 2
+        }
+        else {
+          if (data.length < maxData) {
+            setIsMoreDataAvailable(false)
+          }
+        }
+      }
+
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err?.message || "An unknown error occurred";
+
+      if (errorMessage.includes("No matching cases found")) {
+        setCases([]);
+        setIsMoreDataAvailable(false);
         Swal.fire({
           title: "No Results",
           text: "No matching cases found for the selected filters.",
           icon: "warning",
           confirmButtonColor: "#f1c40f",
         });
-      } else if (page === 2) {
-       setCurrentPage(1); // Reset to page 1 if no data found on page 2
+      } else {
+        setError(errorMessage);
+        setCases([]);
+        Swal.fire({
+          title: "Error",
+          text: errorMessage,
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
       }
-      else {
-        if (data.length < maxData) {
-          setIsMoreDataAvailable(false)
-        }
-      }
+    } finally {
+      setIsLoading(false); // Always reset loading state
     }
-
-  } catch (err) {
-    const errorMessage = err?.response?.data?.message || err?.message || "An unknown error occurred";
-
-    if (errorMessage.includes("No matching cases found")) {
-      setCases([]);
-      setIsMoreDataAvailable(false);
-      Swal.fire({
-        title: "No Results",
-        text: "No matching cases found for the selected filters.",
-        icon: "warning",
-        confirmButtonColor: "#f1c40f",
-      });
-    } else {
-      setError(errorMessage);
-      setCases([]);
-      Swal.fire({
-        title: "Error",
-        text: errorMessage,
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-    }
-  } finally {
-    setIsLoading(false); // Always reset loading state
-  }
-};
+  };
 
 
 
@@ -909,31 +947,30 @@ const getStatusIcon = (status) => {
 
 
 
-const handleclearfilter = () => {
-  setStartDate(null);
-
-  setEndDate(null);
-  setFilterType("");
-  setFilterValue("");
-  setSearchQuery("");
-  setCases([]);
-  setError(null);
-  setCurrentPage(1);
-  setMaxCurrentPage(0);
-  setIsMoreDataAvailable(true);
-  setCommittedFilters({
-    filterType: "",
-    filterValue: "",
-    startDate: null,
-    endDate: null
-  });
-  if ( currentPage != 1){
+  const handleclearfilter = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setFilterType("");
+    setFilterValue("");
+    setSearchQuery("");
+    setCases([]);
+    setError(null);
     setCurrentPage(1);
-  } else {
-    setCurrentPage(0); // Temp set to 0
+    setMaxCurrentPage(0);
+    setIsMoreDataAvailable(true);
+    setCommittedFilters({
+      filterType: "",
+      filterValue: "",
+      startDate: null,
+      endDate: null
+    });
+    if (currentPage != 1) {
+      setCurrentPage(1);
+    } else {
+      setCurrentPage(0); // Temp set to 0
       setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
-  }
-};
+    }
+  };
 
 
 
@@ -1075,7 +1112,20 @@ const handleclearfilter = () => {
             <input
               type="text"
               value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (filterType === "Case ID" && !/^\d*$/.test(value)) {
+                  Swal.fire({
+                    title: "Warning",
+                    text: "Invalid input. Only numbers are allowed for Case ID.",
+                    icon: "warning",
+                    confirmButtonColor: "#f1c40f",
+                  });
+                  return; // do not update input
+                }
+                setFilterValue(value);
+              }}
+
               placeholder={`Enter ${filterType}`}
               className={`${GlobalStyle.inputText}  w-full sm:w-auto`}
             />
@@ -1195,12 +1245,12 @@ const handleclearfilter = () => {
                     </td>
                     <td className={GlobalStyle.tableData}>{renderStatusIcon(caseItem.case_current_status)}
 
-                                        <Tooltip
-                                            id={`status-tooltip-${caseItem.case_current_status}`}
-                                            place="bottom"
-                                            content={caseItem.case_current_status}
-                                        />
-                                    </td>
+                      <Tooltip
+                        id={`status-tooltip-${caseItem.case_current_status}`}
+                        place="bottom"
+                        content={caseItem.case_current_status}
+                      />
+                    </td>
                     {/* <td className={GlobalStyle.tableData}>{caseItem.case_current_status}</td> */}
                     <td className={GlobalStyle.tableData}>{caseItem.account_no}</td>
                     <td className={GlobalStyle.tableCurrency}>{caseItem.current_arrears_amount}</td>
@@ -1287,12 +1337,12 @@ const handleclearfilter = () => {
                 : !isMoreDataAvailable && currentPage >= Math.ceil(cases.length / itemsPerPage)
             }
             className={`${GlobalStyle.navButton} ${(
-                searchQuery
-                  ? currentPage >= Math.ceil(filteredCases.length / itemsPerPage)
-                  : !isMoreDataAvailable && currentPage >= Math.ceil(cases.length / itemsPerPage)
-              )
-                ? "cursor-not-allowed"
-                : ""
+              searchQuery
+                ? currentPage >= Math.ceil(filteredCases.length / itemsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(cases.length / itemsPerPage)
+            )
+              ? "cursor-not-allowed"
+              : ""
               }`}
           >
             <FaArrowRight />
