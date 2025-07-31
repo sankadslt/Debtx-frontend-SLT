@@ -393,13 +393,38 @@ const DRCInfo = () => {
   };
 
   // Navigation (Back btn)
-  const goBack = () => {
-    if (editMode) {
-      setEditMode(false);
-    } else {
-      navigate(-1);
-    }
-  };
+ const goBack = () => {
+  if (editMode) {
+    // Reset any unsaved changes when going back in edit mode
+    const fetchCompanyData = async () => {
+      try {
+        setLoading(true);
+        const drcIdToUse = drcId;
+        const data = await getDebtCompanyByDRCID(drcIdToUse);
+        if (data) {
+          setCompanyData(data);
+          setContactNo(data.drc_contact_no || "");
+          setAddress(data.drc_address || "");
+          setEmail(data.drc_email || "");
+          setRemark("");
+          
+          // Reset service and RTOM areas
+          fetchActiveServices();
+          fetchRTOMData();
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch DRC data:", err);
+        setLoading(false);
+      }
+    };
+    fetchCompanyData();
+    
+    setEditMode(false);
+  } else {
+    navigate(-1);
+  }
+};
 
   // Handle DRC End
   const handleEndSubmit = async () => {
