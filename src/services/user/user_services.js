@@ -9,6 +9,9 @@ export const getUserDetailsById = async (user_id) => {
     const response = await axios.post(`${USER_URL}/List_All_User_Details_By_ID`, {
       user_id,
     });
+    // const response = await axios.post(`https://debtx.slt.lk:6500/users/details/by-id`, {
+    //   user_id,
+    // });
 
     return response.data;
   } catch (error) {
