@@ -59,6 +59,7 @@ export default function CreateSettlementPlan() {
 
   const interactionlogid = location.state?.INteraction_Log_ID;
   const interactiontype = location.state?.User_Interaction_TYPE;
+  const interationid = location.state?.INteraction_ID;
 
   //console.log("Interaction Log ID from URL:", interactionlogid);
   // console.log("Interaction Type from URL:", interactiontype);
@@ -191,9 +192,9 @@ export default function CreateSettlementPlan() {
         const payload = {
           case_id: caseId,
           Interaction_Log_ID: interactionlogid,
-          created_by: userId,
+          create_by: userId,
           User_Interaction_Type: interactiontype,
-          //Interaction_ID: , Not shure what to put here
+          Interaction_ID: interationid,
           requestAccept: "Yes",
           Remark: remark,
           //  Letter_Send:   // what is this for ??
@@ -261,7 +262,7 @@ export default function CreateSettlementPlan() {
           Interaction_Log_ID: interactionlogid,
           case_id: caseId,
           User_Interaction_Type: interactiontype,
-          //Interaction_ID:  ,  // not sure what to put here
+          Interaction_ID: interationid,
           requestAccept: "No",
           Reamrk: remark1,
         };
