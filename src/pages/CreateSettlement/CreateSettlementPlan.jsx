@@ -16,8 +16,9 @@ Related Files: (routes)
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
-import { Case_Details_Settlement_Phase, Create_Settlement_Plan } from "../../services/settlement/SettlementServices";
-import { FaSearch , FaArrowLeft } from "react-icons/fa";
+import { Case_Details_Settlement_Phase } from "../../services/settlement/SettlementServices";
+import { Submit_Mediation_Board_Acceptance, Settelment_plan_request_acceptence_type_A } from "../../services/request/request.js";
+import { FaSearch, FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -34,9 +35,11 @@ export default function CreateSettlementPlan() {
   const [phase, setPhase] = useState("");
   const [initialAmount, setInitialAmount] = useState("");
   const [remark, setRemark] = useState("");
+  const [remark1, setRemark1] = useState("");
   const [visibleTables, setVisibleTables] = useState({});
   const [error, setError] = useState("");
   const [settlementCount, setSettlementCount] = useState(0);
+  const [acceptRequest, setAcceptRequest] = useState("");
   const [caseDetails, setCaseDetails] = useState([]);
   //const { caseId } = useParams(); // Get caseId from URL
   const [settlementdata, setSettlementdata] = useState([]);
@@ -47,8 +50,20 @@ export default function CreateSettlementPlan() {
     }));
   };
 
+
+
   const caseId = location.state?.case_Id;
-  const PlanType = location.state?.PlanType ; // Default to "Type A" if not provided
+  const PlanType = location.state?.PlanType; // Default to "Type A" if not provided
+  const Roid = location.state?.RO_ID;
+  const casecurrentphase = location.state?.Case_Current_Phase;
+
+  const interactionlogid = location.state?.INteraction_Log_ID;
+  const interactiontype = location.state?.User_Interaction_TYPE;
+
+  //console.log("Interaction Log ID from URL:", interactionlogid);
+  // console.log("Interaction Type from URL:", interactiontype);
+  //console.log("CASE current phase from URL:", casecurrentphase);
+
 
   const drcid = location.state?.DRC;
   console.log("Case ID from URL:", caseId);
@@ -115,99 +130,175 @@ export default function CreateSettlementPlan() {
   };
 
 
+
   const handlesubmit = async () => {
-    if (!phase) {
+    // if (!phase) {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Warning",
+    //     text: "Please enter the phase.",
+    //     confirmButtonColor: "#ffc107",
+    //   });
+    //   return;
+    // }
+    if (!acceptRequest) {
       Swal.fire({
         icon: "warning",
         title: "Warning",
-        text: "Please enter the phase.",
+        text: "Please select Accept Request: Yes or No.",
         confirmButtonColor: "#ffc107",
       });
       return;
     }
 
-    if (!initialAmount) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please enter the initial amount.",
-        confirmButtonColor: "#ffc107",
-      });
-      return;
-    }
+    if (acceptRequest === "Yes") {
 
-    if (!calendarMonth) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please enter the calendar month.",
-        confirmButtonColor: "#ffc107",
-      });
-      return;
-    }
 
-    if (!remark) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please enter a remark.",
-        confirmButtonColor: "#ffc107",
-      });
-      return;
-    }
 
-    try {
-      const userId = await getLoggedUserId();
-      console.log("User ID:", userId);
-      const payload = {
-        case_id: caseId,
-        created_by: userId,
-        // case_phase : phase,
-        // case_status : caseDetails?.case_current_status,
-        settlement_type: PlanType, // currently goes as plan 1 ask about this
-        //settlement_amount : caseDetails?.current_arrears_amount, // should change this 
-        // drc_id : drcid,
-        settlement_plan_received: [Number(initialAmount), Number(calendarMonth)],
-
-        remark: remark,
+      if (!initialAmount) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Please enter the initial amount.",
+          confirmButtonColor: "#ffc107",
+        });
+        return;
       }
 
-      console.log("Payload for settlement plan submission:", payload);
+      if (!calendarMonth) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Please enter the calendar month.",
+          confirmButtonColor: "#ffc107",
+        });
+        return;
+      }
 
-      const response = await Create_Settlement_Plan(payload);
-      console.log("Response from settlement plan submission:", response);
+      if (!remark) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Please enter a remark.",
+          confirmButtonColor: "#ffc107",
+        });
+        return;
+      }
 
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Settlement plan submitted successfully.",
-        confirmButtonColor: "#28a745"
-      });
+      try {
+        const userId = await getLoggedUserId();
+        console.log("User ID:", userId);
+        const payload = {
+          case_id: caseId,
+          Interaction_Log_ID: interactionlogid,
+          created_by: userId,
+          User_Interaction_Type: interactiontype,
+          //Interaction_ID: , Not shure what to put here
+          requestAccept: "Yes",
+          Remark: remark,
+          //  Letter_Send:   // what is this for ??
+          calendar_month: Number(calendarMonth),
+          initial_amount: Number(initialAmount),
 
-      setCalendarMonth("");
-      setInitialAmount("");
-      setFromDate(null);
-      setToDate(null);
-      setRemark("");
-      setPhase("");
+          // case_phase : phase,
+          // case_status : caseDetails?.case_current_status,
+          //settlement_type: PlanType, // currently goes as plan 1 ask about this
+          //settlement_amount : caseDetails?.current_arrears_amount, // should change this 
+          // drc_id : drcid,
+          // settlement_plan_received: [Number(initialAmount), Number(calendarMonth)],
+
+          remark: remark,
+        }
+
+        console.log("Payload for settlement plan submission:", payload);
+
+        const response = await Settelment_plan_request_acceptence_type_A(payload);
+        console.log("Response from settlement plan submission:", response);
+
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Settlement plan submitted successfully.",
+          confirmButtonColor: "#28a745"
+        });
+
+        setCalendarMonth("");
+        setInitialAmount("");
+        setFromDate(null);
+        setToDate(null);
+        setRemark("");
+        setPhase("");
 
 
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "An error occurred while submitting the settlement plan.",
-        confirmButtonColor: "#d33",
-      });
+      } catch (error) {
+
+        const errorMessage = error.response?.data?.message || error.message || "An error occurred while submitting the settlement plan.";
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+        });
+      }
+    } else if (acceptRequest === "No") {
+      if (!remark1) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Please enter a remark.",
+          confirmButtonColor: "#ffc107",
+        });
+        return;
+      }
+
+      try {
+
+        const userId = await getLoggedUserId();
+        console.log("User ID:", userId);
+        const payload = {
+
+          create_by: userId,
+          Interaction_Log_ID: interactionlogid,
+          case_id: caseId,
+          User_Interaction_Type: interactiontype,
+          //Interaction_ID:  ,  // not sure what to put here
+          requestAccept: "No",
+          Reamrk: remark1,
+        };
+
+        console.log("Payload for settlement rejection:", payload);
+
+        const response = await Submit_Mediation_Board_Acceptance(payload);
+        console.log("Response from settlement rejection:", response);
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Settlement request rejected successfully.",
+          confirmButtonColor: "#28a745"
+        });
+        setRemark("");
+      } catch (error) {
+
+        const errorMessage =
+          error.response?.data?.message || error.message || "An error occurred while rejecting the settlement request.";
+
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+        });
+      }
     }
-  }
+  };
+
 
   const handlebackbuttonclick = () => {
-  if (PlanType === "Type A") {
-    navigate("/additional_request_log");
-  } else if (PlanType === "Type B") {
-   // navigate("/pages/Settlement/SettlementPlanB");
-  }
+    if (PlanType === "Type A") {
+      navigate("/additional_request_log");
+    } else if (PlanType === "Type B") {
+      // navigate("/pages/Settlement/SettlementPlanB");
+    }
   };
 
   return (
@@ -266,7 +357,11 @@ export default function CreateSettlementPlan() {
                 <tr>
                   <td className="py-2"><strong>Last Payment Date</strong></td>
                   <td className="py-2"> <strong> : </strong> </td>
-                  <td className="py-2">  {new Date(caseDetails?.last_payment_date).toLocaleDateString()}</td>
+                  <td className="py-2">
+                    {caseDetails?.last_payment_date
+                      ? new Date(caseDetails.last_payment_date).toLocaleDateString()
+                      : ""}
+                  </td>
                 </tr>
 
               </tbody>
@@ -279,120 +374,153 @@ export default function CreateSettlementPlan() {
         <div
           className={`${GlobalStyle.tableContainer}  bg-white bg-opacity-50 p-8 max-w-3xl mx-auto `}
         >
-          <div className="flex gap-4">
-            <h1 className={GlobalStyle.remarkTopic}>Phase:</h1>
-            <input
+
+          <div className="mb-6 flex items-center gap-6">
+            <label className={GlobalStyle.remarkTopic}>Accept Request:</label>
+            <div className="flex items-center gap-6">
+              <label className="flex items-center mb-1">
+                <input
+                  type="radio"
+                  value="Yes"
+                  name="acceptRequest"
+                  //checked={acceptRequest === "Yes"}
+                  //className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                Yes
+              </label>
+              <label className="flex items-center mb-1">
+                <input
+                  type="radio"
+                  value="No"
+                  name="acceptRequest"
+                  //checked={acceptRequest === "No"}
+                  //className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                No
+              </label>
+            </div>
+          </div>
+
+          {acceptRequest === "Yes" && (
+            <>
+
+              <div className="flex gap-4">
+                <h1 className={GlobalStyle.remarkTopic}>Case Phase:</h1>
+                {/* <input
               type="text"
               placeholder="Text here"
               value={phase}
               onChange={(e) => setPhase(e.target.value)}
               className={GlobalStyle.inputText}
-            />
-          </div>
-          <br />
+            /> */}
+                {casecurrentphase}
+              </div>
+              <br />
 
-          <div className="flex gap-4">
-            <h1 className={GlobalStyle.remarkTopic}>Case Status:</h1>
-            <div> {caseDetails?.case_current_status}</div>
-          </div>
-          <br />
+              <div className="flex gap-4">
+                <h1 className={GlobalStyle.remarkTopic}>Case Status:</h1>
+                <div> {caseDetails?.case_current_status}</div>
+              </div>
+              <br />
 
-          <div className="flex gap-4">
-            <h1 className={GlobalStyle.remarkTopic}>Settlement Count:</h1>
-            <div> {caseDetails?.settlement_count}</div>
-          </div>
-          <br />
+              <div className="flex gap-4">
+                <h1 className={GlobalStyle.remarkTopic}>Settlement Count:</h1>
+                <div> {caseDetails?.settlement_count}</div>
+              </div>
+              <br />
 
-          <div className="flex gap-4">
-            <h1 className={GlobalStyle.remarkTopic}>Settlement plan:</h1>
-            <input
-              className={GlobalStyle.inputText}
-              value={PlanType}
-              // onChange={(e) => setSelectedPlan(e.target.value)}
-              readOnly
-              style={{ color: "black" }}
-            >
+              <div className="flex gap-4">
+                <h1 className={GlobalStyle.remarkTopic}>Settlement plan:</h1>
+                <input
+                  className={GlobalStyle.inputText}
+                  value={PlanType}
+                  // onChange={(e) => setSelectedPlan(e.target.value)}
+                  readOnly
+                  style={{ color: "black" }}
+                >
 
-              {/* <option value="" hidden>
+                  {/* <option value="" hidden>
               Select plan
             </option>
             <option value="plan1">Plan 1</option>
             <option value="plan2">Plan 2</option> */}
-            </input>
-          </div>
-          <br />
-
-          {PlanType === "Type A" && (
-            <>
-              <div className="flex gap-4 mt-4">
-                <h1 className={GlobalStyle.remarkTopic}>Initial Amount:</h1>
-                <input
-                  type="text"
-                  placeholder="Enter Amount"
-                  className={GlobalStyle.inputText}
-                  value={initialAmount}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (/^\d*\.?\d*$/.test(value)) {
-                      setInitialAmount(value);
-                    }
-                  }}
-                />
+                </input>
               </div>
               <br />
 
-              <div className="mb-6 flex items-center gap-3">
-                <label className={GlobalStyle.remarkTopic}>Calendar month:</label>
-                <input
-                  type="number"
-                  className={`${GlobalStyle.inputText}`}
-                  min="1"
-                  max="12"
-                  onChange={(e) => setCalendarMonth(e.target.value)}
-                  value={calendarMonth}
-                  onKeyDown={(e) => e.preventDefault()}
-                />
-              </div>
+              {PlanType === "Type A" && (
+                <>
+                  <div className="flex gap-4 mt-4">
+                    <h1 className={GlobalStyle.remarkTopic}>Initial Amount:</h1>
+                    <input
+                      type="text"
+                      placeholder="Enter Amount"
+                      className={GlobalStyle.inputText}
+                      value={initialAmount}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d*\.?\d*$/.test(value)) {
+                          setInitialAmount(value);
+                        }
+                      }}
+                    />
+                  </div>
+                  <br />
 
-              <div className="flex  flex-col sm:flex-row items-start gap-4">
-                <label className={`${GlobalStyle.remarkTopic} `}>Duration:</label>
-                {/* <h1 className={GlobalStyle.remarkTopic}>Duration:</h1> */}
+                  <div className="mb-6 flex items-center gap-3">
+                    <label className={GlobalStyle.remarkTopic}>Calendar month:</label>
+                    <input
+                      type="number"
+                      className={`${GlobalStyle.inputText}`}
+                      min="1"
+                      max="12"
+                      onChange={(e) => setCalendarMonth(e.target.value)}
+                      value={calendarMonth}
+                      onKeyDown={(e) => e.preventDefault()}
+                    />
+                  </div>
 
-                {/* <div className={GlobalStyle.datePickerContainer}> */}
-                <div className="flex flex-wrap items-center gap-4 ">
-                  <label className={GlobalStyle.remarkTopic}>From:</label>
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={handleFromDateChange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="dd/mm/yyyy"
-                    className={GlobalStyle.inputText}
-                    readOnly
-                  />
-                  <label className={GlobalStyle.remarkTopic}>To:</label>
-                  <DatePicker
-                    selected={toDate}
-                    onChange={handleToDateChange}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="dd/mm/yyyy"
-                    className={GlobalStyle.inputText}
-                    readOnly
-                  />
-                </div>
-              </div>
-              <br />
+                  <div className="flex  flex-col sm:flex-row items-start gap-4">
+                    <label className={`${GlobalStyle.remarkTopic} `}>Duration:</label>
+                    {/* <h1 className={GlobalStyle.remarkTopic}>Duration:</h1> */}
 
-              <div className="flex  flex-col sm:flex-row items-start gap-4">
-                <label className={GlobalStyle.remarkTopic}>Remark : </label>
-                <textarea className={`${GlobalStyle.remark}`} rows="5"
-                  value={remark}
-                  onChange={(e) => setRemark(e.target.value)}
-                ></textarea>
-              </div>
-              <br />
+                    {/* <div className={GlobalStyle.datePickerContainer}> */}
+                    <div className="flex flex-wrap items-center gap-4 ">
+                      <label className={GlobalStyle.remarkTopic}>From:</label>
+                      <DatePicker
+                        selected={fromDate}
+                        onChange={handleFromDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="dd/mm/yyyy"
+                        className={GlobalStyle.inputText}
+                        readOnly
+                      />
+                      <label className={GlobalStyle.remarkTopic}>To:</label>
+                      <DatePicker
+                        selected={toDate}
+                        onChange={handleToDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="dd/mm/yyyy"
+                        className={GlobalStyle.inputText}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <br />
 
-              {/* Dynamically Render Tables Based on Settlement Count */}
-              {/* {caseDetails?.settlement_plans?.map((plan, index) => (
+                  <div className="flex  flex-col sm:flex-row items-start gap-4">
+                    <label className={GlobalStyle.remarkTopic}>Remark : </label>
+                    <textarea className={`${GlobalStyle.remark}`} rows="5"
+                      value={remark}
+                      onChange={(e) => setRemark(e.target.value)}
+                    ></textarea>
+                  </div>
+                  <br />
+
+                  {/* Dynamically Render Tables Based on Settlement Count */}
+                  {/* {caseDetails?.settlement_plans?.map((plan, index) => (
               <div
                 key={plan.settlement_id}
                 className={GlobalStyle.tableContainer}
@@ -402,7 +530,7 @@ export default function CreateSettlementPlan() {
                 </h2>
                 <div>
                   {/* Table */}
-              {/* <div className={GlobalStyle.tableContainer}>
+                  {/* <div className={GlobalStyle.tableContainer}>
                     <table className={GlobalStyle.table}>
                       <thead className={GlobalStyle.thead}>
                         <tr>
@@ -442,18 +570,52 @@ export default function CreateSettlementPlan() {
                     </table>
                   </div>
                 </div> */}
-              {/* </div> */}
-              {/* ))}
+                  {/* </div> */}
+                  {/* ))}
             <br /> */}
 
+
+                  <div className="flex gap-4 justify-end">
+                    {/* <button className={GlobalStyle.buttonRemove}
+                  onClick={handlereject}
+                >Reject</button> */}
+
+                    <button className={GlobalStyle.buttonPrimary}
+                      onClick={handlesubmit}
+                    >Submit</button>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {acceptRequest === "No" && (
+            <>
+
+              <div className="flex  flex-col sm:flex-row items-start gap-4">
+                <label className={GlobalStyle.remarkTopic}>Remark : </label>
+                <textarea className={`${GlobalStyle.remark}`} rows="5"
+                  value={remark1}
+                  onChange={(e) => setRemark1(e.target.value)}
+                ></textarea>
+              </div>
+
               <div className="flex gap-4 justify-end">
+                {/* <button className={GlobalStyle.buttonRemove}
+                  onClick={handlereject}
+                >Reject</button> */}
+
                 <button className={GlobalStyle.buttonPrimary}
                   onClick={handlesubmit}
                 >Submit</button>
               </div>
+
+
             </>
           )}
+
         </div>
+
         <br />
         <div className="mt-6">
           {settlementdata?.map((settlement, index) => (
@@ -562,8 +724,8 @@ export default function CreateSettlementPlan() {
       )} */}
         {/* Back Button */}
 
-         <button className={GlobalStyle.buttonPrimary} onClick={handlebackbuttonclick} >
-         <FaArrowLeft className="mr-2" />
+        <button className={GlobalStyle.buttonPrimary} onClick={handlebackbuttonclick} >
+          <FaArrowLeft className="mr-2" />
         </button>
 
       </div>
