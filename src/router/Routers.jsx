@@ -565,9 +565,9 @@ const Routers = () => {
           />
         }
       />
-      <Route
-        path="
-		"
+        {/* //INCIDENT */}
+        <Route
+        path="/Incident/Incident_List"
         element={
           <ProtectedRoute
             element={<Incident_List />}
