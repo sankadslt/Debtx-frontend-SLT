@@ -160,3 +160,20 @@ export const Create_Task_For_Request_Responce_Log_Download = async (
     throw error;
   }
 };
+
+
+export const Settelment_plan_request_acceptence_type_A = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Settelment_plan_request_acceptence_type_A`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating settlement plan request acceptance type A:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};

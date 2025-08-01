@@ -335,6 +335,7 @@ const RecoveryOfficerRequests = () => {
           User_Interaction_TYPE: User_Interaction_Type,
           Delegate_User_id: delegate_user_id,
           INteraction_Log_ID: Interaction_Log_ID,
+          INteraction_ID: Interaction_ID,
           PlanType: "Type A",
           DRC: drc_id,
           RO_ID: ro_id,

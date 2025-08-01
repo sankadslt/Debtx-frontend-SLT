@@ -158,7 +158,7 @@ const Incident_File_Download = () => {
           <thead className={GlobalStyle.thead}>
             <tr>
               <th className={GlobalStyle.tableHeader}>Ref ID</th>
-              <th className={GlobalStyle.tableHeader}>Created By</th>
+              <th className={GlobalStyle.tableHeader}>File Name</th>
               <th className={GlobalStyle.tableHeader}>Created DTM</th>
               <th className={GlobalStyle.tableHeader}>Expire DTM</th>
               <th className={GlobalStyle.tableHeader}>Download</th>
@@ -171,7 +171,7 @@ const Incident_File_Download = () => {
                 className={index % 2 === 0 ? "bg-white border-b" : "bg-gray-50 border-b"}
               >
                 <td className={GlobalStyle.tableData}>{log.file_download_seq}</td>
-                <td className={GlobalStyle.tableData}>{log.Deligate_By}</td>
+                <td className={GlobalStyle.tableData}>{log.File_Name}</td>
                 <td className={GlobalStyle.tableData}>
                   {log.Created_On
                     ? new Date(log.Created_On.replace(" ", "T")).toLocaleString("en-GB")
