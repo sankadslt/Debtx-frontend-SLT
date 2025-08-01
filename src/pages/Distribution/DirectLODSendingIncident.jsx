@@ -743,7 +743,7 @@ export default function DirectLODSendingIncident() {
                   placeholder=""
                   value={searchQuery}
                   onChange={(e) => {
-                      setCurrentPage(1); // Reset to page 1 on search
+                    // setCurrentPage(1); // Reset to page 1 on search
                       setSearchQuery(e.target.value)
                   }}
                   className={GlobalStyle.inputSearch}
