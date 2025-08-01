@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchCaseDetails } from '../../services/case/CaseServices.js';
+import { fetchCaseDetails ,Create_Task_For_Download_Case_Details} from '../../services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { getLoggedUserId } from "../../services/auth/authService";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const CaseDetails = () => {
     const [caseData, setCaseData] = useState(null);
@@ -13,8 +16,33 @@ const CaseDetails = () => {
     const [currentIndices, setCurrentIndices] = useState({});
     const location = useLocation();
     const navigate = useNavigate();
+    const [isCreatingTask, setIsCreatingTask] = useState(false);
 
     const caseId = location.state?.CaseID ;
+
+
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
+
 
     useEffect(() => {
         const loadCaseDetails = async () => {
@@ -107,7 +135,7 @@ const CaseDetails = () => {
     };
 
     const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
+        if (!dateString) return '';
         try {
             return new Date(dateString).toLocaleDateString("en-GB") || "";
         } catch {
@@ -129,10 +157,10 @@ const CaseDetails = () => {
                             <div className="space-y-2">
                                 {[
                                     { label: 'ro_id', value: officer.ro_id },
-                                    { label: 'Assigned By', value: officer.assigned_by || 'N/A' },
+                                    { label: 'Assigned By', value: officer.assigned_by || '' },
                                     { label: 'Assigned Date', value: formatDate(officer.assigned_dtm) },
                                     { label: 'Removed Date', value: formatDate(officer.removed_dtm) },
-                                    { label: 'Removal Remark', value: officer.case_removal_remark || 'N/A' }
+                                    { label: 'Removal Remark', value: officer.case_removal_remark || '' }
                                 ].map((item, i) => (
                                     <div key={`officer-detail-${i}`} className="flex justify-between">
                                         <span className="text-sm text-gray-600">{item.label}:</span>
@@ -166,7 +194,7 @@ const CaseDetails = () => {
                                             {key.includes('date') || key.includes('dtm')
                                                 ? formatDate(value)
                                                 : (value === null || value === undefined
-                                                    ? 'N/A'
+                                                    ? ''
                                                     : value.toString())}
                                         </div>
                                     </div>
@@ -199,7 +227,7 @@ const CaseDetails = () => {
                                             {key.includes('date') || key.includes('dtm')
                                                 ? formatDate(value)
                                                 : (value === null || value === undefined
-                                                    ? 'N/A'
+                                                    ? ''
                                                     : value.toString())}
                                         </div>
                                     </div>
@@ -223,7 +251,7 @@ const CaseDetails = () => {
                                                         {key.includes('date') || key.includes('dtm')
                                                             ? formatDate(value)
                                                             : (value === null || value === undefined
-                                                                ? 'N/A'
+                                                                ? ''
                                                                 : value.toString())}
                                                     </div>
                                                 </div>
@@ -251,7 +279,7 @@ const CaseDetails = () => {
                                                         {key.includes('date') || key.includes('dtm')
                                                             ? formatDate(value)
                                                             : (value === null || value === undefined
-                                                                ? 'N/A'
+                                                                ? ''
                                                                 : value.toString())}
                                                     </div>
                                                 </div>
@@ -283,7 +311,7 @@ const CaseDetails = () => {
                                             {key.includes('date') || key.includes('dtm')
                                                 ? formatDate(value)
                                                 : (value === null || value === undefined
-                                                    ? 'N/A'
+                                                    ? ''
                                                     : value.toString())}
                                         </div>
                                     </div>
@@ -307,7 +335,7 @@ const CaseDetails = () => {
                                                         {key.includes('date') || key.includes('dtm')
                                                             ? formatDate(value)
                                                             : (value === null || value === undefined
-                                                                ? 'N/A'
+                                                                ? ''
                                                                 : value.toString())}
                                                     </div>
                                                 </div>
@@ -335,7 +363,7 @@ const CaseDetails = () => {
                                                         {key.includes('date') || key.includes('dtm')
                                                             ? formatDate(value)
                                                             : (value === null || value === undefined
-                                                                ? 'N/A'
+                                                                ? ''
                                                                 : value.toString())}
                                                     </div>
                                                 </div>
@@ -363,7 +391,7 @@ const CaseDetails = () => {
                                 {key.includes('date') || key.includes('dtm')
                                     ? formatDate(value)
                                     : (value === null || value === undefined
-                                        ? 'N/A'
+                                        ? ''
                                         : value.toString())}
                             </div>
                         </div>
@@ -377,28 +405,52 @@ const CaseDetails = () => {
         if (!basicInfo) return null;
 
         const infoFields = [
+             [
+                { label: 'Account No', value: basicInfo.accountNo || '' },
+                { label: 'Customer Ref', value: basicInfo.customerRef || '' },
+                { label: 'Incident ID', value: basicInfo.incidentId || '' },
+ 
+                { label: 'Customer Name', value: basicInfo.customerName || '' },
+                { label: 'Customer Type', value: basicInfo.customerType || '' },
+                { label: 'Arrears Band', value: basicInfo.arrearsBand || '' },
+                 
+                
+              ],
+              
+               [
+                { label: 'Rtom', value: basicInfo.rtom || '' },
+                { label: 'Arrears Amount', value: basicInfo.arrearsAmount || '' },
+                { label: 'Action Type', value: basicInfo.actionType || '' },
+                { label: 'Area', value: basicInfo.area || '' },
+                { label: 'Implemented Dtm', value: formatDate(basicInfo.implementedDtm) },
+                { label: 'Account Manager Code', value: basicInfo.accountManagerCode || '' },
+                
+               
+              ],
             [
-                { label: 'Account No', value: basicInfo.accountNo || 'N/A' },
-                { label: 'Customer Ref', value: basicInfo.customerRef || 'N/A' },
-                { label: 'Area', value: basicInfo.area || 'N/A' }
-            ],
-            [
-                { label: 'Rtom', value: basicInfo.rtom || 'N/A' },
-                { label: 'Arrears Amount', value: basicInfo.arrearsAmount || 'N/A' },
-                { label: 'Action Type', value: basicInfo.actionType || 'N/A' }
-            ],
-            [
-                { label: 'Current Status', value: basicInfo.currentStatus || 'N/A' },
-                { label: 'Last Payment Date', value: formatDate(basicInfo.lastPaymentDate) },
-                { label: 'Last BSS Reading Date', value: formatDate(basicInfo.lastBssReadingDate) }
-            ]
+              { label: 'DRC Commission Rule', value: basicInfo.drcCommissionRule || '' },
+              { label: 'Monitor Months', value: basicInfo.monitorMonths || '' },
+              { label: 'Commission', value: caseData.basicInfo.commission || '' },
+              { label: 'Case Distribution Batch ID', value: caseData.basicInfo.caseDistributionBatchId || '' },
+              { label: 'Filtered Reason', value: caseData.basicInfo.filteredReason || '' },
+              { label: 'BSS Arrears Amount', value: caseData.basicInfo.bssArrearsAmount || '' },
+               ],
+              [
+                { label: 'Current Status', value: caseData.caseInfo.currentStatus || '' },
+                { label: 'Last Payment Date', value: formatDate(caseData.basicInfo.lastPaymentDate) },
+                { label: 'Last BSS Reading Date', value: formatDate(caseData.basicInfo.lastBssReadingDate) },
+                { label: 'Remark', value: caseData.basicInfo.remark || '' },
+                { label: 'Region', value: basicInfo.region || '' },
+                
+              ],
+              
         ];
 
                 return (
             // <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-gray-200">
             <div className={`${GlobalStyle.cardContainer}p-6 mb-8`}>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                     {infoFields.map((column, colIndex) => (
                         <div key={`col-${colIndex}`} className="space-y-4">
                             {column.map((field, fieldIndex) => (
@@ -478,9 +530,35 @@ const CaseDetails = () => {
         navigate(-1);
     };
 
-    const handleDownloadClick = () => {
+    const handleDownloadClick = async () => {
+
+         const userData = await getLoggedUserId(); 
+         setIsCreatingTask(true);
+
+         try {
+            const response = await Create_Task_For_Download_Case_Details(userData);
+            if(response==="success"){
+                Swal.fire({
+                    title:response,
+                    text:'Task created successfully!',
+                    icon:"success",
+                    confirmButtonColor:"#28a745"
+                });
+            }
+        } catch(error){
+            Swal.fire({
+                title:"Error",
+                text:error.message || "Failed to create task.",
+                icon:"error",
+                confirmButtonColor:"#d33"
+            });
         
-    };
+        }finally{
+            setIsCreatingTask(false)
+        }
+            };
+        
+    
 
     if (loading) {
         return (
@@ -505,21 +583,41 @@ const CaseDetails = () => {
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Case Details</h1>
 
                     <div className="bg-white rounded-lg shadow-md p-6 min-w-64">
-                        <div className="space-y-2">
-                            {[
-                                { label: 'Case ID', value: caseData.caseInfo.caseId },
-                                { label: 'Created dtm', value: formatDate(caseData.caseInfo.createdDtm) },
-                                { label: 'Days count', value: caseData.caseInfo.daysCount }
-                            ].map((item, index) => (
-                                <div key={`case-info-${index}`} className="flex justify-between">
-                                    <span className="text-sm text-gray-600">{item.label}:</span>
-                                    <span className={`text-sm ${index === 0 ? 'font-bold' : ''} text-gray-900`}>
-                                        {item.value}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+  <div className="grid grid-cols-2 gap-x-8">
+    {/* Left column: first 4 items */}
+    <div className="space-y-2">
+      {[
+        { label: 'Case ID', value: caseData.caseInfo.caseId },
+        { label: 'Created dtm', value: formatDate(caseData.caseInfo.createdDtm) },
+        { label: 'Days count', value: caseData.caseInfo.daysCount },
+        { label: 'Current Arrears Band', value: caseData.caseInfo.currentArrearsBand },
+      ].map((item, index) => (
+        <div key={`left-case-info-${index}`} className="flex justify-between">
+          <span className="text-sm text-gray-600">{item.label}:</span>
+          <span className={`text-sm ${index === 0 ? 'font-bold' : ''} text-gray-900`}>
+            {item.value}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    {/* Right column: remaining items */}
+    <div className="space-y-2">
+      {[
+        { label: 'Proceed DTM', value: formatDate(caseData.caseInfo.proceedDtm) },
+        { label: 'Proceed By', value: caseData.caseInfo.ProceedBy },
+        { label: 'Current Status', value: caseData.caseInfo.currentStatus },
+        { label: 'Current Phase', value: caseData.caseInfo.caseCurrentPhase },
+      ].map((item, index) => (
+        <div key={`right-case-info-${index}`} className="flex justify-between">
+          <span className="text-sm text-gray-600">{item.label}:</span>
+          <span className="text-sm text-gray-900">{item.value}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
                 </div>
             </div>
 
