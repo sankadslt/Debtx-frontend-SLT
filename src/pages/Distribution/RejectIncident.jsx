@@ -99,11 +99,14 @@ export default function RejectIncident() {
         const rejectedDateStr = typeof item.Rejected_Dtm === "string" ? item.Rejected_Dtm.replace(" ", "T") : item.Rejected_Dtm;
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
         const rejectedDate = rejectedDateStr ? new Date(rejectedDateStr) : null;
+
         return {
           id: item.Incident_Id || "",
-          status: "Reject Pending4",
+          Incident_direction:item.Incident_direction||"",
+          drc_commision_rule: item.drc_commision_rule || "",
           account_no: item.Account_Num || "",
           filtered_reason: item.Filtered_Reason || "",
+          Arrears: item.Arrears || "",
           source_type: item?.Source_Type || "",
           rejected_on: rejectedDate instanceof Date && !isNaN(rejectedDate) ? rejectedDate.toLocaleString("en-GB") : "",
           created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? createdDate.toLocaleString("en-GB") : ""
@@ -828,8 +831,9 @@ export default function RejectIncident() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Id
                     </th>
+                  
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      Status
+                      Service Type
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Account No
@@ -837,8 +841,11 @@ export default function RejectIncident() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Filtered Reason
                     </th>
-                    <th scope="col" className={GlobalStyle.tableHeader}>
+                    {/* <th scope="col" className={GlobalStyle.tableHeader}>
                       Rejected On
+                    </th> */}
+                      <th scope="col" className={GlobalStyle.tableHeader}>
+                  Amount
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Source Type
@@ -871,27 +878,24 @@ export default function RejectIncident() {
                           {row.id}
                         </a>
                       </td>
-
+                     
                       <td
-                        className={`${GlobalStyle.tableData} flex items-center justify-center`}
-                      >
-                        {row.status === "Reject Pending4" && (
-                          <div data-tooltip-id="incident-tooltip">
-                            <img
-                              src={Reject_Pending}
-                              alt="Reject Pending"
-                              className="w-5 h-5"
-                            />
-                          </div>
-                        )}
-                        <Tooltip id="incident-tooltip" place="bottom" content="Reject Pending"/>
-                      </td>
+                        className= {GlobalStyle.tableData}>{row.drc_commision_rule}</td>
 
                       <td className={GlobalStyle.tableData}>{row.account_no}</td>
                       <td className={GlobalStyle.tableData}>
                         {row.filtered_reason}
                       </td>
-                      <td className={GlobalStyle.tableData}>{row.rejected_on}</td>
+                      {/* <td className={GlobalStyle.tableData}>{row.rejected_on}</td> */}
+                       
+                      <td className={GlobalStyle.tableCurrency}>
+  {typeof row.Arrears === 'number'
+    ? row.Arrears.toLocaleString("en-LK", {
+        style: "currency",
+        currency: "LKR",
+      })
+    : ""}
+</td>
                       <td className={GlobalStyle.tableData}>{row.source_type}</td>
                       <td className={GlobalStyle.tableData}>{row.created_dtm}</td>
                       <td
