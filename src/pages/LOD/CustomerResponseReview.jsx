@@ -435,7 +435,7 @@ const CustomerResponseReview = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={handleBackButton}
                 >
                     <FaArrowLeft />
