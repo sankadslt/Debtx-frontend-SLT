@@ -7,7 +7,6 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the User Info Screen */
 
-
 import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/edit-info.svg";
@@ -25,18 +24,16 @@ import { getLoggedUserId } from "../../services/auth/authService";
 const UserInfo = () => {
   const location = useLocation();
   const user_id = location.state?.user_id;
+  const navigate = useNavigate();
 
   const goBack = () => {
-        navigate(-1); 
-        };
+    navigate(-1); 
+  };
 
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
-
-  const [loggedUserData, setLoggedUserData] =useState("");
-
+  const [loggedUserData, setLoggedUserData] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
   const [endDate, setEndDate] = useState(null);
   const [remark, setRemark] = useState("");
@@ -45,6 +42,8 @@ const UserInfo = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // User info state
   const [userInfo, setUserInfo] = useState({
     username: "",
     user_type: "",
@@ -57,21 +56,11 @@ const UserInfo = () => {
     Approved_DTM: "",
     Approved_By: "",
     Remark: [],
+    user_status: "Active"
   });
 
-  const [formData, setFormData] = useState({
-    userType: "",
-    userMail: "",
-    contact_num: "",
-    loginMethod: "",
-    userRole: "",
-    createdOn: "",
-    createdBy: "",
-    approvedOn: "",
-    approvedBy: "",
-  });
-
-  const [isEditing, setIsEditing] = useState(false);
+  // Edit mode state
+  const [editMode, setEditMode] = useState(false);
   const [showEndSection, setShowEndSection] = useState(false);
 
   // Available roles dropdown
@@ -87,7 +76,6 @@ const UserInfo = () => {
     { value: "rtom", label: "RTOM" }
   ];
 
-
   // get system user
   const loadUser = async () => {
     const user = await getLoggedUserId();
@@ -101,27 +89,10 @@ const UserInfo = () => {
         const fetchedData = await getUserDetailsById(user_id);
         console.log(fetchedData);
         
-
         if (fetchedData) {
           setUserInfo(fetchedData.data);
           setIsActive(fetchedData.data.user_status === "Active");
-          // Set formData for editing
-          setFormData({
-            userType: fetchedData.data.user_type || "",
-            userMail: fetchedData.data.email || "",
-            contact_num: fetchedData.data.contact_num && fetchedData.data.contact_num.length > 0
-                ? fetchedData.data.contact_num[0].contact_number
-                : "N/A",
-            loginMethod: fetchedData.data.login_method || "",
-            userRole: fetchedData.data.role || "",
-            createdOn: fetchedData.data.Created_DTM || "",
-            createdBy: fetchedData.data.Created_BY || "",
-            approvedOn: fetchedData.data.Approved_DTM || "",
-            approvedBy: fetchedData.data.Approved_By || "",
-          });
-
           setSelectedRole(fetchedData.data.role);
-
         }
         setLoading(false);
       } catch (err) {
@@ -141,8 +112,8 @@ const UserInfo = () => {
     fetchUserInfoById();
   }, [user_id]);
 
-  const toggleEdit = () => {
-    setIsEditing(!isEditing);
+  const toggleEditMode = () => {
+    setEditMode(!editMode);
     setShowEndSection(false);
     setEmailError("");
   };
@@ -179,7 +150,7 @@ const UserInfo = () => {
         }
 
         setRemark("");
-        toggleEdit();
+        toggleEditMode();
 
         Swal.fire({
           icon: "success",
@@ -339,15 +310,13 @@ const UserInfo = () => {
         <span>{user_id} - {userInfo.username}</span>
       </div>
 
-      {/* Card box */}
       <div className="w-full flex justify-center">
-        <div className={`${GlobalStyle.cardContainer} relative  w-full max-w-4xl`}>
-          {/* Edit Mode UI */}
-          {isEditing ? (
+        <div className={`${GlobalStyle.cardContainer} relative w-3/4 max-w-4xl`}>
+          {editMode ? (
             <div className="space-y-4">
+              {/* Status Toggle */}
               <div className="flex justify-end items-center mb-4">
                 <div className="flex items-center">
-                  {/* Active or Inactive User */}
                   <label className="inline-flex relative items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -356,360 +325,184 @@ const UserInfo = () => {
                       onChange={() => setIsActive(!isActive)}
                     />
                     <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    <span className="ml-3 text-sm font-medium">
+                      {isActive ? "Active" : "Inactive"}
+                    </span>
                   </label>
                 </div>
               </div>
 
-              {/* Edit Table */}
-              <div className="overflow-x-auto">
-                <table className="mb-6 sm:mb-8 w-full">
-                  <tbody>
-                    {/* User type */}
-                    {/* <tr className="align-middle">
-                      <td className="w-[150px] sm:w-[164px] align-middle">
-                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
-                          User Type
-                        </p>
-                      </td>
-                      <td className="text-center w-4 sm:w-auto align-middle">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto align-middle">
-                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
-                          {formData.userType || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
+             <div >
+                <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 mt-6 ml-8 underline text-left font-semibold`}>
+                  User Profile
+                </h2>
+  
+          <table className="mb-6 w-full ml-14">
+            <tbody>
 
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User type<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.user_type ||
-                          "Not specified"}
-                      </td>
-                    </tr>
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  User Name<span className="sm:hidden  ">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {userInfo.username || "Not specified"}
+                </td>
+              </tr>
 
-                    {/* User Mail */}
-                    {/* <tr className="align-middle">
-                      <td className="w-1/3 sm:w-auto align-middle">
-                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
-                          User Mail
-                        </p>
-                      </td>
-                      <td className="text-center w-4 sm:w-auto align-middle">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto align-middle">
-                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
-                          {formData.userMail || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
-                    
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Mail<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.email ||
-                          "Not specified"}
-                      </td>
-                    </tr>
 
-                    {/* User Contact */}
-                    {/* <tr className="align-middle">
-                      <td className="w-1/3 sm:w-auto align-middle">
-                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
-                          Contact No.
-                        </p>
-                      </td>
-                      <td className="text-center w-4 sm:w-auto align-middle">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto align-middle">
-                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
-                          {formData.contact_num.contact_number || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  User Mail<span className="sm:hidden">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {userInfo.email || "Not specified"}
+                </td>
+              </tr>
 
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Contact No.<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                          {Array.isArray(userInfo.contact_num) && userInfo.contact_num.length > 0
-                            ? userInfo.contact_num[0].contact_number
-                            : "Not specified"}
-                      </td>
-                    </tr>
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  NIC<span className="sm:hidden  ">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {userInfo.usernic || "Not specified"}
+                </td>
+              </tr>
 
-                    {/* Login Method */}
-                    {/* <tr className="align-middle">
-                      <td className="w-1/3 sm:w-auto align-middle">
-                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
-                          Login Method
-                        </p>
-                      </td>
-                      <td className="text-center w-4 sm:w-auto align-middle">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto align-middle">
-                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
-                          {formData.loginMethod || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  Designation<span className="sm:hidden  ">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {userInfo.user_designation || "Not specified"}
+                </td>
+              </tr>
 
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Login Method<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.login_method ||
-                          "Not specified"}
-                      </td>
-                    </tr>
+            </tbody>
+          </table>
 
-                    {/* User Role */}
-                    {/* <tr className="align-middle">
-                        <td className="w-1/3 sm:w-auto align-middle">
-                          <label className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
-                            User Role
-                          </label>
-                        </td>
-                        <td className="text-center align-middle w-4 sm:w-auto">
-                          :
-                        </td>
-                        <td className="w-2/3 sm:w-auto">
-                          <div className="flex items-center space-x-2 my-2">
-                            <select
-                              value={selectedRole}
-                              onChange={(e) => setSelectedRole(e.target.value)}
-                              className={`${GlobalStyle.selectBox} w-full`}
-                              style={{ color: selectedRole === "" ? "gray" : "black" }}
-                            >
-                              {userRoles.map((role) => (
-                                <option
-                                  key={role.value}
-                                  value={role.value}
-                                  hidden={role.hidden}
-                                  style={{ color: "black" }}
-                                >
-                                  {role.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </td>
-                    </tr> */}
+          <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 mt-8 ml-8 underline text-left font-semibold`}>
+            Contact Details
+          </h2>
+          
+          <table className="mb-6 w-full ml-14 ">
+            <tbody>
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  Contact No 01<span className="sm:hidden">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {Array.isArray(userInfo.contact_num) && userInfo.contact_num.length > 0
+                    ? userInfo.contact_num[0].contact_number
+                    : "Not specified"}
+                </td>
+              </tr>
 
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Role<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        <div className="flex items-center space-x-2">
-                          <select
-                            value={selectedRole}
-                            onChange={(e) => setSelectedRole(e.target.value)}
-                            className={`${GlobalStyle.selectBox} w-full`}
-                            style={{ color: selectedRole === "" ? "gray" : "black" }}
-                          >
-                            {userRoles.map((role) => (
-                              <option
-                                key={role.value}
-                                value={role.value}
-                                hidden={role.hidden}
-                                style={{ color: "black" }}
-                              >
-                                {role.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </td>
-                    </tr>
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  Contact No 01<span className="sm:hidden">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {Array.isArray(userInfo.contact_num) && userInfo.contact_num.length > 0
+                    ? userInfo.contact_num[0].contact_number
+                    : "Not specified"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-                    <tr className="h-2"></tr>
+          <table className="mb-6 w-full ml-8">
+            <tbody>
 
-                    {/* Created On */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.paragraph} mb-2`}>
-                          Created On
-                        </label>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {formatDate(formData.createdOn) || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
+              <tr className="block sm:table-row ">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell `}>
+                  User type<span className="sm:hidden ">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {userInfo.user_type || "Not specified"}
+                </td>
+              </tr>
 
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Created On<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(userInfo.Created_DTM) ||
-                          "Not specified"}
-                      </td>
-                    </tr>
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  Login Method<span className="sm:hidden">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {userInfo.login_method || "Not specified"}
+                </td>
+              </tr>
 
-                    <tr className="h-2"></tr>
-
-                    {/* Created by */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.paragraph} mb-2`}>
-                          Created By
-                        </label>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {formData.createdBy || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Created By<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.Created_BY||
-                          "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    {/* Approved on */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.paragraph} mb-2`}>
-                          Approved On
-                        </label>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {formatDate(formData.approvedOn) || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Approved On<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(UserInfo.Approved_DTM)||
-                          "Not specified"}
-                      </td>
-                    </tr>
-                    
-                    <tr className="h-2"></tr>
-
-                    {/* Approved by */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <label className={`${GlobalStyle.paragraph}`}>
-                          Approved By
-                        </label>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {formData.approvedBy || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Approved By<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.Approved_By||
-                          "Not specified"}
-                      </td>
-                    </tr>
-
-                  </tbody>
-                </table>
-
-                {/* Remark */}
-                {/* <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-                  <label
-                    className={`${GlobalStyle.paragraph} sm:w-1/4 whitespace-nowrap`}
+              
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  User Role<span className="sm:hidden">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    className={`${GlobalStyle.selectBox} w-full`}
+                    style={{ color: selectedRole === "" ? "gray" : "black" }}
                   >
-                    Remark
-                  </label>
-                  <span className="hidden sm:inline-block">:</span>
-                  <textarea
-                    className={`${GlobalStyle.inputText} w-full h-40`}
-                    value={remark}
-                    onChange={(e) => setRemark(e.target.value)}
-                    placeholder="Enter remark for this update..."
-                  />
-                </div> */}
-
-                <table className={`${GlobalStyle.table} min-w-full mt-4`}>
-                  <tbody>
-                    <tr>
-                      <td
-                        className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}
+                    {userRoles.map((role) => (
+                      <option
+                        key={role.value}
+                        value={role.value}
+                        hidden={role.hidden}
+                        style={{ color: "black" }}
                       >
-                        Remark
-                      </td>
-                    </tr>
-                    <tr>
-                      <td
-                        className={`${GlobalStyle.tableData} break-words text-left`}
-                      >
-                        <textarea
-                          value={remark}
-                          onChange={(e) => setRemark(e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full min-h-[100px] resize-y"
-                          placeholder="Enter remarks here..."
-                        ></textarea>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                        {role.label}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+              </tr>
+              <br></br>
 
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  Created On<span className="sm:hidden">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {formatDate(userInfo.Created_DTM) || "Not specified"}
+                </td>
+              </tr>
 
-              </div>
+              <tr className="block sm:table-row">
+                <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                  Created By<span className="sm:hidden">:</span>
+                </td>
+                <td className="w-4 text-left hidden sm:table-cell">:</td>
+                <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                  {userInfo.Created_BY || "Not specified"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+      </div>
+
+               
+               
+             
 
               {/* Save button in edit mode */}
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end gap-4 mt-8">
+               
                 <button
                   onClick={handleSave}
-                  className={GlobalStyle.buttonPrimary}
+                  className={`${GlobalStyle.buttonPrimary} px-4 sm:px-6 py-2`}
                   disabled={loading}
                 >
-                  {loading ? "Saving..." : "Save"}
+                  {loading ? "Saving..." : "Save "}
                 </button>
               </div>
             </div>
@@ -720,7 +513,7 @@ const UserInfo = () => {
                 <button
                   onClick={() => {
                     if (userInfo.user_status !== "Terminate") {
-                      toggleEdit();
+                      toggleEditMode();
                     }
                   }}
                   className={`${
@@ -744,107 +537,39 @@ const UserInfo = () => {
                 <table className="mb-6 sm:mb-8 w-full">
                   <tbody>
                     {/* User type */}
-                    {/* <tr>
-                      <td className="w-[170px] lg:w-[164px] align-middle">
-                        <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          User Type
-                        </p>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {userInfo.user_type || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
-
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         User type<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.user_type ||
-                          "Not specified"}
+                        {userInfo.user_type || "Not specified"}
                       </td>
                     </tr>
 
                     {/* User Mail */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          User Mail
-                        </p>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {userInfo.email || "N/A"}
-                        </label>
-                      </td> */}
-                    
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         User Mail<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.email ||
-                          "Not specified"}
+                        {userInfo.email || "Not specified"}
                       </td>
                     </tr>
 
                     {/* User Contact */}
-                    {/* <tr className="align-middle">
-                      <td className="w-1/3 sm:w-auto align-middle">
-                        <p className={`${GlobalStyle.paragraph} mb-2 align-middle`}>
-                          Contact No.
-                        </p>
-                      </td>
-                      <td className="text-center w-4 sm:w-auto align-middle">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto align-middle">
-                        <label className={`${GlobalStyle.headingSmall} align-middle`}>
-                          {Array.isArray(userInfo.contact_num) && userInfo.contact_num.length > 0
-                            ? userInfo.contact_num[0].contact_number
-                            : "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
-
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         Contact No.<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                          {Array.isArray(userInfo.contact_num) && userInfo.contact_num.length > 0
-                            ? userInfo.contact_num[0].contact_number
-                            : "Not specified"}
+                        {Array.isArray(userInfo.contact_num) && userInfo.contact_num.length > 0
+                          ? userInfo.contact_num[0].contact_number
+                          : "Not specified"}
                       </td>
                     </tr>
-
-                    {/* Login Method */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          Login Method
-                        </p>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {userInfo.login_method || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
 
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
@@ -852,28 +577,9 @@ const UserInfo = () => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.login_method ||
-                          "Not specified"}
+                        {userInfo.login_method || "Not specified"}
                       </td>
                     </tr>
-
-
-                    {/* User Roles */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          User Role
-                        </p>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {formatRoleLabel(userInfo.role)}
-                        </label>
-                      </td>
-                    </tr> */}
 
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
@@ -881,54 +587,19 @@ const UserInfo = () => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatRoleLabel(userInfo.role) ||
-                          "Not specified"}
+                        {formatRoleLabel(userInfo.role) || "Not specified"}
                       </td>
                     </tr>
 
-                    {/* Created On */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          Created On
-                        </p>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {formatDate(userInfo.Created_DTM) || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         Created On<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(userInfo.Created_DTM) ||
-                          "Not specified"}
+                        {formatDate(userInfo.Created_DTM) || "Not specified"}
                       </td>
                     </tr>
-
-                    {/* Created by */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          Created By
-                        </p>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {userInfo.Created_BY || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
 
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
@@ -936,65 +607,31 @@ const UserInfo = () => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.Created_BY||
-                          "Not specified"}
+                        {userInfo.Created_BY || "Not specified"}
                       </td>
                     </tr>
 
-                    {/* Approved on */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          Approved On
-                        </p>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {formatDate(userInfo.Approved_DTM) || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
+                    
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         Approved On<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(UserInfo.Approved_DTM)||
-                          "Not specified"}
+                        {formatDate(userInfo.Approved_DTM) || "Not specified"}
                       </td>
                     </tr>
 
-                    {/* Approved by */}
-                    {/* <tr>
-                      <td className="w-1/3 sm:w-auto">
-                        <p className={`${GlobalStyle.paragraph} mb-2`}>
-                          Approved By
-                        </p>
-                      </td>
-                      <td className="text-center align-middle w-4 sm:w-auto">
-                        :
-                      </td>
-                      <td className="w-2/3 sm:w-auto">
-                        <label className={GlobalStyle.headingSmall}>
-                          {userInfo.Approved_By || "N/A"}
-                        </label>
-                      </td>
-                    </tr> */}
+                  
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         Approved By<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.Approved_By||
-                          "Not specified"}
+                        {userInfo.Approved_By || "Not specified"}
                       </td>
                     </tr>
-
                   </tbody>
                 </table>
               </div>
@@ -1005,53 +642,6 @@ const UserInfo = () => {
 
       {/* End Date and Remark Section */}
       {showEndSection && (
-      // <div className={`${GlobalStyle.flexCenter} px-2 sm:px-4 lg:px-8`}>
-      //   <div className={`${GlobalStyle.cardContainer} p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-full sm:max-w-2xl md:max-w-4xl mx-auto`}>
-      //       <div className="space-y-4">
-      //         {/* End Date Picker */}
-      //         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-      //           <label className={`${GlobalStyle.tableData} sm:w-1/4 whitespace-nowrap`}>
-      //             End date
-      //           </label>
-      //           <span className="hidden sm:inline-block">:</span>
-      //           <div className="w-full">
-      //             <DatePicker
-      //               selected={endDate}
-      //               onChange={(date) => setEndDate(date)}
-      //               dateFormat="dd/MM/yyyy"
-      //               placeholderText="dd/MM/yyyy"
-      //               className={`${GlobalStyle.inputText} w-full`}
-      //             />
-      //           </div>
-      //         </div>
-
-      //         {/* Remark Textarea */}
-      //         <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-      //           <label className={`${GlobalStyle.paragraph} sm:w-1/4 whitespace-nowrap`}>
-      //             Remark
-      //           </label>
-      //           <span className="hidden sm:inline-block">:</span>
-      //           <textarea
-      //             className={`${GlobalStyle.inputText} w-full h-40`}
-      //             value={remark}
-      //             onChange={(e) => setRemark(e.target.value)}
-      //           />
-      //         </div>
-
-      //         {/* Action Buttons */}
-      //         <div className="flex justify-end mt-4 space-x-2">
-      //           <button
-      //             onClick={handleEndUser}
-      //             disabled={loading}
-      //             className={`${GlobalStyle.buttonPrimary} ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
-      //           >
-      //             {loading ? "Saving..." : "Save"}
-      //           </button>
-      //         </div>
-      //       </div>
-      //     </div>
-      //   </div>
-
         <div className="w-full flex justify-center mt-6">
           <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl px-4 sm:px-6`}>
             <table className={`${GlobalStyle.table} w-full text-left`}>
@@ -1059,7 +649,7 @@ const UserInfo = () => {
                 {/* End Date Row */}
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                    End Date
+                    End Date <span className="text-red-500">*</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1078,15 +668,13 @@ const UserInfo = () => {
                 {/* Remark Row */}
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                    Remark
+                    Remark <span className="text-red-500">*</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
                     <textarea
                       value={remark}
-                      onChange={(e) => {
-                        setRemark(e.target.value);
-                      }}
+                      onChange={(e) => setRemark(e.target.value)}
                       rows="4"
                       className={`${GlobalStyle.inputText} w-full text-left`}
                       placeholder="Enter reason for terminating user"
@@ -1102,7 +690,7 @@ const UserInfo = () => {
                 onClick={handleEndUser}
                 className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
               >
-                Save
+                End
               </button>
             </div>
           </div>
@@ -1110,28 +698,29 @@ const UserInfo = () => {
       )}
 
       {/* Buttons */}
-      <div className="flex justify-between mx-8">
-        <div className="flex flex-col just-start">
+      <div className="flex justify-between mx-8 mt-6">
+        <div className="flex flex-col items-start">
           {/* Log History button */}
-          <div className="flex gap-4">
-            <button
-              className={`${GlobalStyle.buttonPrimary}`}
-              onClick={() => setShowPopup(true)}
-            >
-              Log History
-            </button>
-          </div>
+          <button
+            className={`${GlobalStyle.buttonPrimary}`}
+            onClick={() => setShowPopup(true)}
+          >
+            Log History
+          </button>
 
-          <div style={{ marginTop: '12px' }}>
-              <button className={GlobalStyle.buttonPrimary} onClick={goBack}>
-              <FaArrowLeft /> 
-              </button>
+          <div style={{ marginTop: '15px' }}>
+            <button 
+              className={`${GlobalStyle.buttonPrimary}`}
+              onClick={goBack}
+            >
+              <FaArrowLeft />
+            </button>
           </div>
         </div>
         
         {/* End button */}
         <div className="flex justify-end h-fit">
-          {!isEditing && !showEndSection && (
+          {!editMode && !showEndSection && (
             <button
               onClick={() => {
                 if (userInfo.user_status !== "Terminate") {
@@ -1149,35 +738,35 @@ const UserInfo = () => {
             </button>
           )}
         </div>
-
       </div>
 
-      {/* Log History Section - Updated as Popup with Working Search */}
+      {/* Log History Popup */}
       {showPopup && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-md shadow-lg w-3/4 max-h-[80vh] overflow-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">Log History</h2>
-                <button
-                  onClick={() => setShowPopup(false)}
-                  className="text-red-500 text-lg font-bold"
-                  title="Close"
-                >
+          <div className="bg-white p-6 rounded-md shadow-lg w-3/4 max-h-[80vh] overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Log History</h2>
+              <button
+                onClick={() => setShowPopup(false)}
+                className="text-red-500 text-lg font-bold"
+                title="Close"
+              >
                 ×
               </button>
-        </div>
+            </div>
 
-        <div className="mb-4 flex justify-start">
-          <div className={GlobalStyle.searchBarContainer}>
-            <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={GlobalStyle.inputSearch}
-            />
-            <FaSearch className={GlobalStyle.searchBarIcon} />
-          </div>
-          </div>
+            <div className="mb-4 flex justify-start">
+              <div className={GlobalStyle.searchBarContainer}>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={GlobalStyle.inputSearch}
+                />
+                <FaSearch className={GlobalStyle.searchBarIcon} />
+              </div>
+            </div>
+            
             {/* Modal Body */}
             <div className="p-6 overflow-auto max-h-[70vh]">
               <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
