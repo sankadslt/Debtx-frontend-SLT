@@ -94,7 +94,11 @@ const ListAllTasks = () => {
       case "open":
         return Task_List_Open;
       case "complete":
+
         return Task_List_Success;
+      case "success":
+        return Task_List_Success;
+
       case "inprogress":
         return Task_List_In_Progress;
       default:
@@ -482,7 +486,7 @@ const ListAllTasks = () => {
                     .slice(startIndex, endIndex)
                     .map((item, index) => (
                       <tr
-                        key={item.settlement_id || index}
+                        key={item.task_id || index}
                         className={
                           index % 2 === 0
                             ? GlobalStyle.tableRowEven
