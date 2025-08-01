@@ -63,6 +63,8 @@ const UserInfo = () => {
   const [editMode, setEditMode] = useState(false);
   const [showEndSection, setShowEndSection] = useState(false);
 
+   const [userRolesList, setUserRolesList] = useState([]);
+
   // Available roles dropdown
   const userRoles = [
     { value: "", label: "User Role", hidden: true },
@@ -404,7 +406,7 @@ const UserInfo = () => {
 
               <tr className="block sm:table-row">
                 <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                  Contact No 01<span className="sm:hidden">:</span>
+                  Contact No 02<span className="sm:hidden">:</span>
                 </td>
                 <td className="w-4 text-left hidden sm:table-cell">:</td>
                 <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
@@ -440,29 +442,66 @@ const UserInfo = () => {
               </tr>
 
               
-              <tr className="block sm:table-row">
+              <tr className="block sm:table-row mb-4">
                 <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                  User Role<span className="sm:hidden">:</span>
+                  User Role<span className="text-red-500">*</span><span className="sm:hidden">:</span>
                 </td>
                 <td className="w-4 text-left hidden sm:table-cell">:</td>
                 <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
-                  <select
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
-                    className={`${GlobalStyle.selectBox} w-full`}
-                    style={{ color: selectedRole === "" ? "gray" : "black" }}
-                  >
-                    {userRoles.map((role) => (
-                      <option
-                        key={role.value}
-                        value={role.value}
-                        hidden={role.hidden}
-                        style={{ color: "black" }}
-                      >
-                        {role.label}
+                  <div className="flex flex-col gap-2">
+                    <select
+                      value={selectedRole}
+                      onChange={(e) => {
+                        const newRole = e.target.value;
+                        if (newRole && !userRolesList.includes(newRole)) {
+                          setSelectedRole(newRole);
+                          setUserRolesList([...userRolesList, newRole]);
+                        }
+                      }}
+                      className={`${GlobalStyle.selectBox} w-full sm:w-3/4`}
+                      style={{ color: selectedRole === "" ? "gray" : "black" }}
+                    >
+                      <option value="" disabled hidden>
+                        Select Role
                       </option>
-                    ))}
-                  </select>
+                      {userRoles.map((role) => (
+                        <option
+                          key={role.value}
+                          value={role.value}
+                          hidden={role.hidden}
+                          style={{ color: "black" }}
+                          disabled={userRolesList.includes(role.value)}
+                        >
+                          {role.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {userRolesList.length > 0 && (
+                      <div className={`${GlobalStyle.inputText} w-full sm:w-3/4 flex flex-wrap items-center gap-2 mt-4 p-2`}>
+                        {userRolesList.map((role, index) => (
+                          <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                            <span className="text-blue-900 mr-2">
+                              {userRoles.find(r => r.value === role)?.label || role}
+                            </span>
+                            <button
+                              onClick={() => {
+                                setUserRolesList(userRolesList.filter(r => r !== role));
+                                if (selectedRole === role) {
+                                  setSelectedRole("");
+                                }
+                              }}
+                              className="text-blue-900 hover:text-red-600 font-bold"
+                              title="Remove role"
+                              type="button"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
               <br></br>
