@@ -69,7 +69,9 @@ export const New_List_Incidents = async (filters) => {
       `${INCIDENT_URL}/New_List_Incidents`,
       filters
     );
+    console.log("Response:", response.data);
     return response.data;
+    
   } catch (error) {
     console.error(
       "Error fetching incidents:",
@@ -272,18 +274,23 @@ export const Task_for_Download_Incidents = async (
 export const Task_for_Download_Incidents_Full_List = async (
   status1,
   status2,
+  selectedServiceType,
+  Incident_Direction,
   fromDate,
   toDate,
   createdBy
 ) => {
+  console.log("selected:",selectedServiceType)
   try {
     const response = await axios.post(
       `${INCIDENT_URL}/Task_for_Download_Incidents_Full_List`,
       {
         Incident_Status: status2,
         Actions: status1,
+        Service_Type:selectedServiceType,
         From_Date: fromDate,
         To_Date: toDate,
+        Incident_Direction: Incident_Direction,
         // Account_Num: accountNo,
         Created_By: createdBy,
       }

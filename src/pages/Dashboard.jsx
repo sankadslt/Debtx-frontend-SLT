@@ -70,7 +70,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 space-y-10">
+    <div className="min-h-screen bg-white p-6 space-y-10">
+      <div className="max-w-7xl mx-auto w-full space-y-10">
       <h1 className="text-3xl font-bold">DebtX Dashboard</h1>
 
       {/* Stats Cards */}
@@ -204,6 +205,7 @@ const Dashboard = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
+    </div>
     </div>
   );
 };
