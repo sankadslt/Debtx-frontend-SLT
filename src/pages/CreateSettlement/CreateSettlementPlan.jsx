@@ -192,7 +192,7 @@ export default function CreateSettlementPlan() {
         const payload = {
           case_id: caseId,
           Interaction_Log_ID: interactionlogid,
-          created_by: userId,
+          create_by: userId,
           User_Interaction_Type: interactiontype,
           Interaction_ID: interationid,
           requestAccept: "Yes",
@@ -262,7 +262,7 @@ export default function CreateSettlementPlan() {
           Interaction_Log_ID: interactionlogid,
           case_id: caseId,
           User_Interaction_Type: interactiontype,
-          //Interaction_ID:  ,  // not sure what to put here
+          Interaction_ID: interationid,
           requestAccept: "No",
           Reamrk: remark1,
         };
