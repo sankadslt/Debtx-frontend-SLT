@@ -18,6 +18,7 @@ const SignUp = () => {
     nic: "",
     email: "",
     contactNo: "",
+    designation: "",
     loginMethod: "",
     role: "",
     drcId: ""
@@ -81,6 +82,7 @@ const SignUp = () => {
       nic: "",
       email: "",
       contactNo: "",
+      designation: "",
       loginMethod: "",
       role: "",
       drcId: ""
@@ -112,6 +114,12 @@ const SignUp = () => {
  
       const basePayload = {
         user_type: userType,
+        user_login: userType === "Slt" ? [formData.serviceNo + "@intranet.slt.com.lk"] : userType === "Drcuser" ? [formData.email || formData.contactNo] : [],
+        'User_profile.username': formData.name,
+        'User_profile.nic': formData.nic,
+        'User_profile.email': formData.email,
+        user_contact_num: formData.contactNo,
+        'User_profile.designation': formData.designation,
         role: formData.role,
         email: formData.email,
         contact_no: formData.contactNo,
@@ -190,6 +198,7 @@ const SignUp = () => {
         name: data.name,
         email: data.email,
         contactNo: data.contactNo,
+        designation: data.designation,
         nic: data.nic,
       }));
     } catch (err) {
@@ -360,7 +369,6 @@ const SignUp = () => {
                 name="name"
                 placeholder="Name"
                 value={formData.name}
-                onChange={handleInputChange}
                 className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
               />
 
@@ -369,7 +377,6 @@ const SignUp = () => {
                 name="email"
                 placeholder="Email"
                 value={formData.email}
-                onChange={handleInputChange}
                 className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
               />
 
@@ -378,7 +385,14 @@ const SignUp = () => {
                 name="contactNo"
                 placeholder="Contact No"
                 value={formData.contactNo}
-                onChange={handleInputChange}
+                className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
+              />
+              
+              <input
+                type="text"
+                name="designation"
+                placeholder="Designation"
+                value={formData.designation}
                 className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
               />
               <select

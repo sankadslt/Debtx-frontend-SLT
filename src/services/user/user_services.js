@@ -123,7 +123,7 @@ export const Download_User_Approval_List = async (requestData) => {
 
 export const createUser = async (formData) => {
   try {
-    const res = await axios.post(`${USER_URL}/Create_User`, formData);
+    const res = await axios.post(`https://debtx.slt.lk:6500/users/create`, formData);
     return res.data;
   } catch (err) {
     return {
