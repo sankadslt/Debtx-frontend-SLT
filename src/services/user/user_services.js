@@ -166,3 +166,42 @@ export const updateUserStatus = async (requestData = {}) => {
 };
 
 
+export const updateUserRoles = async (user_id, roles, endDates = {}) => {
+  try {
+    const role_payload = roles.map(role => {
+      const roleObj = { role_name: role };
+      
+      if (endDates[role]) {
+        roleObj.end_dtm = endDates[role];
+      }
+      
+      return roleObj;
+    });
+
+    role_payload.push({});
+
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/roles",
+      {
+        user_id: Number(user_id),
+        role_payload
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user roles:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to update user roles",
+        errors: error?.response?.data?.errors || {}
+      }
+    );
+  }
+};

@@ -1249,14 +1249,13 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the User Info Screen */
 
-
 import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/edit-info.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
-import { endUser, getUserDetailsById, updateUserDetails , updateUserStatus  } from "../../services/user/user_services";
+import { endUser, getUserDetailsById, updateUserDetails, updateUserStatus, updateUserRoles } from "../../services/user/user_services";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaArrowLeft } from "react-icons/fa";
 import { getLoggedUserId } from "../../services/auth/authService";
@@ -1275,7 +1274,7 @@ const UserInfo = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [endDate, setEndDate] = useState(null);
   const [remark, setRemark] = useState("");
-  const [isActive, setIsActive] = useState(true);
+  const [isActive, setIsActive] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -1297,8 +1296,7 @@ const UserInfo = () => {
   });
 
   const [editMode, setEditMode] = useState(false);
-
-   const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     user_type: "",
     email: "",
     contact_numbers: "",
@@ -1312,7 +1310,7 @@ const UserInfo = () => {
   const [showEndSection, setShowEndSection] = useState(false);
   const [userRolesList, setUserRolesList] = useState([]);
 
- const userRoles = [
+  const userRoles = [
     { value: "", label: "User Role", hidden: true },
     { value: "GM", label: "GM" },
     { value: "DGM", label: "DGM" },
@@ -1322,11 +1320,9 @@ const UserInfo = () => {
     { value: "DRC_user", label: "DRC User" },
     { value: "recovery_staff", label: "Recovery Staff" },
     { value: "rtom", label: "RTOM" },
-    { value: "legal", label: "Legal" }, // Added to match response
-    { value: "analyst", label: "Analyst" }, // Added to match response
+    { value: "legal", label: "Legal" },
+    { value: "analyst", label: "Analyst" },
   ];
-
-  // Get system user
 
   const loadUser = async () => {
     try {
@@ -1337,7 +1333,7 @@ const UserInfo = () => {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     let isMounted = true;
 
     const fetchUserInfoById = async () => {
@@ -1354,7 +1350,6 @@ const UserInfo = () => {
         return;
       }
 
-      // Validate user_id is numeric
       if (!/^\d+$/.test(user_id)) {
         if (isMounted) {
           setError("Invalid user ID format. Please provide a numeric ID.");
@@ -1371,9 +1366,17 @@ const UserInfo = () => {
       try {
         setLoading(true);
         const fetchedData = await getUserDetailsById(user_id);
-        console.log("Fetched user data:", fetchedData);
-
+        
         if (isMounted && fetchedData && fetchedData.status === "Success") {
+          const statusHistory = fetchedData.user_status || [];
+          const latestStatus = statusHistory.length > 0 
+            ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
+            : 'inactive';
+
+          console.log("API Status:", latestStatus);
+          
+          setIsActive(latestStatus === "active");
+
           setUserInfo({
             username: fetchedData.username || "",
             user_type: fetchedData.user_type || "",
@@ -1385,11 +1388,12 @@ const UserInfo = () => {
             user_designation: fetchedData.user_designation || "",
             created_on: fetchedData.created_on || "",
             created_by: fetchedData.created_by || "",
-            status_on: fetchedData.user_status?.status_on || "",
-            status_by: fetchedData.user_status?.status_by || "",
-            Remark: fetchedData.Remark || [], // Handle missing Remark
+            status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
+            status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
+            Remark: fetchedData.Remark || [],
+            user_status: statusHistory 
           });
-          setIsActive(fetchedData.user_status?.status === "active");
+
           setFormData({
             user_type: fetchedData.user_type || "",
             email: fetchedData.email || "",
@@ -1401,8 +1405,8 @@ const UserInfo = () => {
             roles: fetchedData.roles && fetchedData.roles.length > 0 ? fetchedData.roles[0] : "",
             created_on: fetchedData.created_on || "",
             created_by: fetchedData.created_by || "",
-            status_on: fetchedData.user_status?.status_on || "",
-            status_by: fetchedData.user_status?.status_by || "",
+            status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
+            status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
           });
           setSelectedRole(fetchedData.roles && fetchedData.roles.length > 0 ? fetchedData.roles[0] : "");
         }
@@ -1431,6 +1435,9 @@ const UserInfo = () => {
     };
   }, [user_id]);
 
+  useEffect(() => {
+    console.log("Toggle state changed to:", isActive);
+  }, [isActive]);
 
   const toggleEditMode = () => {
     setEditMode(!editMode);
@@ -1438,63 +1445,94 @@ const UserInfo = () => {
   };
 
   const handleSave = async () => {
-    
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const updateData = {
-      user_id: Number(user_id),
-      status_payload: {
-        status: isActive ? "Active" : "Inactive", 
-        status_on: new Date().toISOString(), 
-        status_by: loggedUserData 
+      // Get the current status from userInfo
+      const statusHistory = userInfo.user_status || [];
+      const currentStatus = statusHistory.length > 0 
+        ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
+        : 'inactive';
+      
+      const statusChanged = 
+        (isActive && currentStatus !== "active") ||
+        (!isActive && currentStatus === "active");
+
+      const rolesChanged = 
+        userRolesList.length > 0 || 
+        (userInfo.roles?.length !== [...userInfo.roles, ...userRolesList].length);
+
+      if (!statusChanged && !rolesChanged) {
+        Swal.fire({
+          icon: "info",
+          title: "No Changes",
+          text: "No changes were made to save",
+        });
+        setEditMode(false);
+        return;
       }
-    };
 
-    console.log("Sending update payload:", updateData); 
+      const updatePromises = [];
 
-    const response = await updateUserStatus(updateData);
+      if (statusChanged) {
+        const updateData = {
+          user_id: Number(user_id),
+          status_payload: {
+            status: isActive ? "Active" : "Inactive", 
+            status_on: new Date().toISOString(), 
+            status_by: loggedUserData 
+          }
+        };
+        updatePromises.push(updateUserStatus(updateData));
+      }
 
-    if (response.status === "success") {
+      if (rolesChanged) {
+        const endDates = {};
+        const allRoles = [...userInfo.roles, ...userRolesList];
+        updatePromises.push(updateUserRoles(user_id, allRoles, endDates));
+      }
+
+      await Promise.all(updatePromises);
+
       const fetchedData = await getUserDetailsById(user_id);
       if (fetchedData && fetchedData.status === "Success") {
+        const updatedStatusHistory = fetchedData.user_status || [];
+        const updatedStatus = updatedStatusHistory.length > 0 
+          ? String(updatedStatusHistory[updatedStatusHistory.length - 1].status).toLowerCase()
+          : 'inactive';
+
+        setIsActive(updatedStatus === "active");
         setUserInfo({
           ...fetchedData,
-          Remark: fetchedData.Remark || []
+          Remark: fetchedData.Remark || [],
+          user_status: updatedStatusHistory
         });
-        setIsActive(fetchedData.user_status?.status === "active");
+        setUserRolesList([]);
       }
 
-      setEditMode(false); 
-
+      setEditMode(false);
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "User status updated successfully",
+        text: "User updated successfully",
       });
-    } else {
-      throw new Error(response.message || "Failed to update user status");
+    } catch (err) {
+      console.error("Error updating user:", err?.response?.data || err);
+      let errorMessage = "Failed to update user";
+      if (err?.response?.data?.detail) {
+        errorMessage = err.response.data.detail.map(d => d.msg).join(", ");
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+      });
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-console.error("Error updating user status:", error?.response?.data || error);
-    
-    let errorMessage = "Failed to update user status";
-    if (err?.response?.data?.detail) {
-      errorMessage = err.response.data.detail.map(d => d.msg).join(", ");
-    } else if (err?.message) {
-      errorMessage = err.message;
-    }
-    
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: errorMessage,
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
@@ -1602,6 +1640,37 @@ console.error("Error updating user status:", error?.response?.data || error);
     }
   };
 
+  const removeRole = (roleToRemove) => {
+    const isExistingRole = userInfo.roles?.includes(roleToRemove);
+    
+    if (isExistingRole) {
+      Swal.fire({
+        title: 'Remove Role?',
+        text: `Are you sure you want to remove the ${roleToRemove} role?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setUserInfo(prev => ({
+            ...prev,
+            roles: prev.roles.filter(role => role !== roleToRemove)
+          }));
+          
+          if (selectedRole === roleToRemove) {
+            setSelectedRole("");
+          }
+        }
+      });
+    } else {
+      setUserRolesList(userRolesList.filter(role => role !== roleToRemove));
+      if (selectedRole === roleToRemove) {
+        setSelectedRole("");
+      }
+    }
+  };
 
   const filteredLogHistory = userInfo.Remark?.filter((log) => {
     const searchLower = searchQuery.toLowerCase();
@@ -1615,6 +1684,36 @@ console.error("Error updating user status:", error?.response?.data || error);
   const formatRoleLabel = (value) => {
     return value ? value.split("_").map(word => word[0].toUpperCase() + word.slice(1)).join(" ") : "N/A";
   };
+
+  const StatusToggle = () => (
+    <div className="flex justify-end items-center mb-4">
+      <div className="flex items-center">
+        <label className="inline-flex relative items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="sr-only peer"
+            checked={isActive}
+            onChange={() => setIsActive(!isActive)}
+          />
+          <div className={`
+            w-11 h-6 rounded-full 
+            ${isActive ? 'bg-green-600' : 'bg-gray-500'}
+            peer peer-focus:ring-4 peer-focus:ring-green-300
+            relative transition-colors duration-200
+          `}>
+            <div className={`
+              absolute top-0.5 left-[2px] bg-white border-gray-300
+              border rounded-full h-5 w-5 transition-all
+              ${isActive ? 'transform translate-x-5' : ''}
+            `}></div>
+          </div>
+          <span className="ml-3 text-sm font-medium">
+            {isActive ? "Active" : "Inactive"}
+          </span>
+        </label>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -1639,27 +1738,11 @@ console.error("Error updating user status:", error?.response?.data || error);
       </div>
 
       <div className="w-full flex justify-center">
-        <div className={`${GlobalStyle.cardContainer} relative w-full  max-w-4xl`}>
+        <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
           {editMode ? (
             <div className="space-y-4">
-
-              <div className="flex justify-end items-center mb-4">
-                <div className="flex items-center">
-                  <label className="inline-flex relative items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={isActive}
-                      onChange={() => setIsActive(!isActive)}
-                    />
-                    <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                    <span className="ml-3 text-sm font-medium">
-                      {isActive ? "Active" : "Inactive"}
-                    </span>
-                  </label>
-                </div>
-              </div>
-
+              <StatusToggle />
+              
               <div>
                 <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 mt-6 ml-8 underline text-left font-semibold`}>
                   User Profile
@@ -1770,7 +1853,7 @@ console.error("Error updating user status:", error?.response?.data || error);
                             value={selectedRole}
                             onChange={(e) => {
                               const newRole = e.target.value;
-                              if (newRole && !userRolesList.includes(newRole)) {
+                              if (newRole && ![...userInfo.roles, ...userRolesList].includes(newRole)) {
                                 setSelectedRole(newRole);
                                 setUserRolesList([...userRolesList, newRole]);
                               }
@@ -1787,17 +1870,38 @@ console.error("Error updating user status:", error?.response?.data || error);
                                 value={role.value}
                                 hidden={role.hidden}
                                 style={{ color: "black" }}
-                                disabled={userRolesList.includes(role.value)}
+                                disabled={[...userInfo.roles, ...userRolesList].includes(role.value)}
                               >
                                 {role.label}
                               </option>
                             ))}
                           </select>
 
-                          {userRolesList.length > 0 && (
+                          {([...userInfo.roles, ...userRolesList].length > 0) && (
                             <div className={`${GlobalStyle.inputText} w-full sm:w-3/4 flex flex-wrap items-center gap-2 mt-4 p-2`}>
+                              {userInfo.roles?.map((role, index) => (
+                                <div key={`prev-${index}`} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                                  <span className="text-blue-900 mr-2">
+                                    {userRoles.find(r => r.value === role)?.label || formatRoleLabel(role)}
+                                  </span>
+                                  <button
+                                    onClick={() => {
+                                      setUserInfo(prev => ({
+                                        ...prev,
+                                        roles: prev.roles.filter(r => r !== role)
+                                      }));
+                                    }}
+                                    className="text-blue-900 hover:text-red-600 font-bold"
+                                    title="Remove role"
+                                    type="button"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                              
                               {userRolesList.map((role, index) => (
-                                <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                                <div key={`new-${index}`} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
                                   <span className="text-blue-900 mr-2">
                                     {userRoles.find(r => r.value === role)?.label || role}
                                   </span>
