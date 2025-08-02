@@ -23,8 +23,8 @@ const Dashboard = () => {
     const today = new Date();
     const isLaunchDay =
       today.getFullYear() === 2025 &&
-      today.getMonth() === 6 && // July (0-indexed)
-      today.getDate() === 31;
+      today.getMonth() === 7 && // Aug (0-indexed)
+      today.getDate() === 1;
 
     if (isLaunchDay) {
       setShowCelebration(true);

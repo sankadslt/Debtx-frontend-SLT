@@ -1,3 +1,14 @@
+/* 
+    Purpose: This template is used for the DRC Controllers.
+    Created Date: 2025-07-24
+    Created By: Sasindu Srinayaka (sasindusrinayaka@gmail.com)
+    Last Modified Date: 2025-07-24
+    Modified By: Sasindu Srinayaka (sasindusrinayaka@gmail.com)
+    Version: Node.js v20.11.1
+    Notes:  
+*/
+
+
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -24,7 +35,8 @@ export const getUserDetailsById = async (user_id) => {
 
 export const getAllUserDetails = async (requestData = {}) => {
   try {
-    const response = await axios.post(`${USER_URL}/List_All_User_Details`, requestData);
+    const response = await axios.post(`https://debtx.slt.lk:6500/users/list_login_paginated`, requestData);
+    console.log("Response from getAllUserDetails:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching all user details:", error);
