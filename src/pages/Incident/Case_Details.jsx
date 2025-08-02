@@ -14,7 +14,7 @@ const CaseDetails = () => {
     const [error, setError] = useState(null);
     const [openSections, setOpenSections] = useState({});
     const [currentIndices, setCurrentIndices] = useState({});
-    const location = useLocation();
+    const location = useLocation();  
     const navigate = useNavigate();
     const [isCreatingTask, setIsCreatingTask] = useState(false);
 

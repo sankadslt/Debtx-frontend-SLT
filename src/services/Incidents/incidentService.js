@@ -275,12 +275,21 @@ export const Task_for_Download_Incidents_Full_List = async (
   status1,
   status2,
   selectedServiceType,
-  Incident_Direction,
+  status3,
+  status4,
   fromDate,
   toDate,
-  createdBy
+  createdBy,
+   
 ) => {
-  console.log("selected:",selectedServiceType)
+  console.log("selected:"," Action",status1,
+    "Incident_Status",status2,
+    "Service_Type",selectedServiceType,
+    "Source_Type",status3,
+    "Incident_Direction",status4,
+    fromDate,
+    toDate,
+    createdBy,)
   try {
     const response = await axios.post(
       `${INCIDENT_URL}/Task_for_Download_Incidents_Full_List`,
@@ -290,17 +299,26 @@ export const Task_for_Download_Incidents_Full_List = async (
         Service_Type:selectedServiceType,
         From_Date: fromDate,
         To_Date: toDate,
-        Incident_Direction: Incident_Direction,
+         Incident_Direction: status4,
+        
         // Account_Num: accountNo,
         Created_By: createdBy,
+        Template_Task_Id:21,
+        task_type: "Create incident distribution download",
+        Source_Type: status3,
+
       }
     );
-    return response.data;
+    if (response.status === 201) {
+     
+      return response.data;
+      
+    } else {
+      throw new Error("Failed to create task, status code: " + response.status);
+    }
   } catch (error) {
-    console.error(
-      "Error creating incident:",
-      error.response?.data || error.message
-    );
+    console.error("Error creating task:", error.message || error);
     throw error.response?.data || error;
   }
+  
 };
