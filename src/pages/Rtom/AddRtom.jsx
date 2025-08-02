@@ -69,9 +69,9 @@ const AddRtom = () => {
       newErrors.name = "Name is required";
     }
 
-    if (!formData.areaCode.trim()) {
-      newErrors.areaCode = "Area Code is required";
-    }
+    // if (!formData.areaCode.trim()) {
+    //   newErrors.areaCode = "Area Code is required";
+    // }
 
     // Email: optional but must be valid if entered
     if (formData.email.trim()) {
@@ -185,9 +185,9 @@ const AddRtom = () => {
       processedValue = value.replace(/[^0-9]/g, "");
     }
 
-    // if (name === "areaCode") {
-    //   processedValue = value.replace(/[^a-zA-Z]/g, '');
-    // }
+    if (name === "areaCode") {
+      processedValue = value.replace(/[^0-9]/g, "");
+    }
 
     setFormData((prev) => ({
       ...prev,
@@ -275,7 +275,8 @@ const AddRtom = () => {
                     }}
                   >
                     <span>
-                      {field.label} <span className="text-red-500">*</span>
+                      {field.label} 
+                      {field.name !== "areaCode" && <span className="text-red-500">*</span>}
                     </span>
                     {!isMobile && <span>:</span>}
                   </div>
