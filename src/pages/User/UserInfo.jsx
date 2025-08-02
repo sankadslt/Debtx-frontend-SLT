@@ -1249,43 +1249,37 @@ Dependencies: tailwind css
 Related Files: (routes)
 Notes:The following page conatins the code for the User Info Screen */
 
+
 import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/edit-info.svg";
-import add from "../../assets/images/user-add.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
-import { endUser, getUserDetailsById, updateUserDetails } from "../../services/user/user_services";
-import completeIcon from "../../assets/images/complete.png";
-import remove from "../../assets/images/remove.svg";
+import { endUser, getUserDetailsById, updateUserDetails , updateUserStatus  } from "../../services/user/user_services";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSearch, FaArrowLeft } from "react-icons/fa";
 import { getLoggedUserId } from "../../services/auth/authService";
 
 const UserInfo = () => {
   const location = useLocation();
   const user_id = location.state?.user_id;
-  console.log("user_id from location.state:", user_id);
+  const navigate = useNavigate();
 
   const goBack = () => {
     navigate(-1);
   };
 
-  const [currentPage, setCurrentPage] = useState(0);
-  const rowsPerPage = 10;
-
   const [loggedUserData, setLoggedUserData] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
   const [endDate, setEndDate] = useState(null);
   const [remark, setRemark] = useState("");
   const [isActive, setIsActive] = useState(true);
-  const [emailError, setEmailError] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
   const [userInfo, setUserInfo] = useState({
     username: "",
     user_type: "",
@@ -1302,7 +1296,9 @@ const UserInfo = () => {
     Remark: [],
   });
 
-  const [formData, setFormData] = useState({
+  const [editMode, setEditMode] = useState(false);
+
+   const [formData, setFormData] = useState({
     user_type: "",
     email: "",
     contact_numbers: "",
@@ -1313,12 +1309,10 @@ const UserInfo = () => {
     status_on: "",
     status_by: "",
   });
-
-  const [isEditing, setIsEditing] = useState(false);
   const [showEndSection, setShowEndSection] = useState(false);
+  const [userRolesList, setUserRolesList] = useState([]);
 
-  // Available roles dropdown
-  const userRoles = [
+ const userRoles = [
     { value: "", label: "User Role", hidden: true },
     { value: "GM", label: "GM" },
     { value: "DGM", label: "DGM" },
@@ -1333,6 +1327,7 @@ const UserInfo = () => {
   ];
 
   // Get system user
+
   const loadUser = async () => {
     try {
       const user = await getLoggedUserId();
@@ -1342,7 +1337,7 @@ const UserInfo = () => {
     }
   };
 
-  useEffect(() => {
+   useEffect(() => {
     let isMounted = true;
 
     const fetchUserInfoById = async () => {
@@ -1436,87 +1431,75 @@ const UserInfo = () => {
     };
   }, [user_id]);
 
-  const toggleEdit = () => {
-    setIsEditing(!isEditing);
+
+  const toggleEditMode = () => {
+    setEditMode(!editMode);
     setShowEndSection(false);
-    setEmailError("");
   };
 
   const handleSave = async () => {
-    if (!remark.trim()) {
-      Swal.fire({
-        title: "Warning",
-        text: "Remark is required",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
-      return;
-    }
+    
+  try {
+    setLoading(true);
 
-    try {
-      setLoading(true);
-
-      const updateData = {
-        user_id: String(user_id),
-        updated_by: loggedUserData,
-        roles: [selectedRole],
-        user_status: isActive ? "active" : "inactive",
-        remark: remark,
-      };
-
-      const response = await updateUserDetails(updateData);
-
-      if (response.status === "success") {
-        const fetchedData = await getUserDetailsById(user_id);
-        if (fetchedData && fetchedData.status === "Success") {
-          setUserInfo({
-            username: fetchedData.username || "",
-            user_type: fetchedData.user_type || "",
-            email: fetchedData.email || "",
-            contact_numbers: fetchedData.contact_numbers || [],
-            can_user_login: fetchedData.can_user_login || "",
-            roles: fetchedData.roles || [],
-            user_nic: fetchedData.user_nic || "",
-            user_designation: fetchedData.user_designation || "",
-            created_on: fetchedData.created_on || "",
-            created_by: fetchedData.created_by || "",
-            status_on: fetchedData.user_status?.status_on || "",
-            status_by: fetchedData.user_status?.status_by || "",
-            Remark: fetchedData.Remark || [],
-          });
-        }
-
-        setRemark("");
-        toggleEdit();
-
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "User details updated successfully",
-        });
+    const updateData = {
+      user_id: Number(user_id),
+      status_payload: {
+        status: isActive ? "Active" : "Inactive", 
+        status_on: new Date().toISOString(), 
+        status_by: loggedUserData 
       }
-    } catch (err) {
-      console.error("Error updating user:", err);
+    };
+
+    console.log("Sending update payload:", updateData); 
+
+    const response = await updateUserStatus(updateData);
+
+    if (response.status === "success") {
+      const fetchedData = await getUserDetailsById(user_id);
+      if (fetchedData && fetchedData.status === "Success") {
+        setUserInfo({
+          ...fetchedData,
+          Remark: fetchedData.Remark || []
+        });
+        setIsActive(fetchedData.user_status?.status === "active");
+      }
+
+      setEditMode(false); 
+
       Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: err.message || "Failed to update user details",
+        icon: "success",
+        title: "Success",
+        text: "User status updated successfully",
       });
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error(response.message || "Failed to update user status");
     }
-  };
+  } catch (err) {
+console.error("Error updating user status:", error?.response?.data || error);
+    
+    let errorMessage = "Failed to update user status";
+    if (err?.response?.data?.detail) {
+      errorMessage = err.response.data.detail.map(d => d.msg).join(", ");
+    } else if (err?.message) {
+      errorMessage = err.message;
+    }
+    
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: errorMessage,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
-
     const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${year}/${month}/${day}`;
+    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
   const handleEndUser = async () => {
@@ -1619,22 +1602,18 @@ const UserInfo = () => {
     }
   };
 
+
   const filteredLogHistory = userInfo.Remark?.filter((log) => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      (log.remark && log.remark.toLowerCase().includes(searchLower)) ||
-      (log.remark_by && log.remark_by.toLowerCase().includes(searchLower)) ||
+      (log.remark?.toLowerCase().includes(searchLower)) ||
+      (log.remark_by?.toLowerCase().includes(searchLower)) ||
       (log.remark_dtm && formatDate(log.remark_dtm).toLowerCase().includes(searchLower))
     );
   }) || [];
 
   const formatRoleLabel = (value) => {
-    if (!value) return "N/A";
-
-    return value
-      .split("_")
-      .map((word) => word[0].toUpperCase() + word.slice(1))
-      .join(" ");
+    return value ? value.split("_").map(word => word[0].toUpperCase() + word.slice(1)).join(" ") : "N/A";
   };
 
   if (loading) {
@@ -1656,15 +1635,14 @@ const UserInfo = () => {
   return (
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
       <div className={`${GlobalStyle.headingLarge} mb-6 sm:mb-8`}>
-        <span>
-          {user_id} - {userInfo.username}
-        </span>
+        <span>{user_id} - {userInfo.username}</span>
       </div>
 
       <div className="w-full flex justify-center">
-        <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
-          {isEditing ? (
+        <div className={`${GlobalStyle.cardContainer} relative w-full  max-w-4xl`}>
+          {editMode ? (
             <div className="space-y-4">
+
               <div className="flex justify-end items-center mb-4">
                 <div className="flex items-center">
                   <label className="inline-flex relative items-center cursor-pointer">
@@ -1675,20 +1653,27 @@ const UserInfo = () => {
                       onChange={() => setIsActive(!isActive)}
                     />
                     <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    <span className="ml-3 text-sm font-medium">
+                      {isActive ? "Active" : "Inactive"}
+                    </span>
                   </label>
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="mb-6 sm:mb-8 w-full">
+              <div>
+                <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 mt-6 ml-8 underline text-left font-semibold`}>
+                  User Profile
+                </h2>
+  
+                <table className="mb-6 w-full ml-14">
                   <tbody>
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Type<span className="sm:hidden">:</span>
+                        User Name<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.user_type || "Not specified"}
+                        {userInfo.username || "Not specified"}
                       </td>
                     </tr>
 
@@ -1699,104 +1684,6 @@ const UserInfo = () => {
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
                         {userInfo.email || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Contact No.<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {Array.isArray(userInfo.contact_numbers) && userInfo.contact_numbers.length > 0
-                          ? userInfo.contact_numbers[0]
-                          : "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Login Method<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.can_user_login || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Role<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        <div className="flex items-center space-x-2">
-                          <select
-                            value={selectedRole}
-                            onChange={(e) => setSelectedRole(e.target.value)}
-                            className={`${GlobalStyle.selectBox} w-full`}
-                            style={{ color: selectedRole === "" ? "gray" : "black" }}
-                          >
-                            {userRoles.map((role) => (
-                              <option
-                                key={role.value}
-                                value={role.value}
-                                hidden={role.hidden}
-                                style={{ color: "black" }}
-                              >
-                                {role.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Created On<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(userInfo.created_on) || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Created By<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.created_by || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Status On<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(userInfo.status_on) || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Status By<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.status_by || "Not specified"}
                       </td>
                     </tr>
 
@@ -1822,31 +1709,146 @@ const UserInfo = () => {
                   </tbody>
                 </table>
 
-                <table className={`${GlobalStyle.table} min-w-full mt-4`}>
+                <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 mt-8 ml-8 underline text-left font-semibold`}>
+                  Contact Details
+                </h2>
+                
+                <table className="mb-6 w-full ml-14">
                   <tbody>
-                    <tr>
-                      <td className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}>
-                        Remark
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Contact No 01<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.contact_numbers?.[0] || "Not specified"}
                       </td>
                     </tr>
-                    <tr>
-                      <td className={`${GlobalStyle.tableData} break-words text-left`}>
-                        <textarea
-                          value={remark}
-                          onChange={(e) => setRemark(e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full min-h-[100px] resize-y"
-                          placeholder="Enter remarks here..."
-                        ></textarea>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Contact No 02<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.contact_numbers?.[1] || "Not specified"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <table className="mb-6 w-full ml-8">
+                  <tbody>
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        User type<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.user_type || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Login Method<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.can_user_login || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row mb-4">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        User Role<span className="text-red-500">*</span><span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                        <div className="flex flex-col gap-2">
+                          <select
+                            value={selectedRole}
+                            onChange={(e) => {
+                              const newRole = e.target.value;
+                              if (newRole && !userRolesList.includes(newRole)) {
+                                setSelectedRole(newRole);
+                                setUserRolesList([...userRolesList, newRole]);
+                              }
+                            }}
+                            className={`${GlobalStyle.selectBox} w-full sm:w-3/4`}
+                            style={{ color: selectedRole === "" ? "gray" : "black" }}
+                          >
+                            <option value="" disabled hidden>
+                              Select Role
+                            </option>
+                            {userRoles.map((role) => (
+                              <option
+                                key={role.value}
+                                value={role.value}
+                                hidden={role.hidden}
+                                style={{ color: "black" }}
+                                disabled={userRolesList.includes(role.value)}
+                              >
+                                {role.label}
+                              </option>
+                            ))}
+                          </select>
+
+                          {userRolesList.length > 0 && (
+                            <div className={`${GlobalStyle.inputText} w-full sm:w-3/4 flex flex-wrap items-center gap-2 mt-4 p-2`}>
+                              {userRolesList.map((role, index) => (
+                                <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                                  <span className="text-blue-900 mr-2">
+                                    {userRoles.find(r => r.value === role)?.label || role}
+                                  </span>
+                                  <button
+                                    onClick={() => {
+                                      setUserRolesList(userRolesList.filter(r => r !== role));
+                                      if (selectedRole === role) {
+                                        setSelectedRole("");
+                                      }
+                                    }}
+                                    className="text-blue-900 hover:text-red-600 font-bold"
+                                    title="Remove role"
+                                    type="button"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Created On<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {formatDate(userInfo.created_on) || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Created By<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.created_by || "Not specified"}
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end gap-4 mt-8">
                 <button
                   onClick={handleSave}
-                  className={GlobalStyle.buttonPrimary}
+                  className={`${GlobalStyle.buttonPrimary} px-4 sm:px-6 py-2`}
                   disabled={loading}
                 >
                   {loading ? "Saving..." : "Save"}
@@ -1859,7 +1861,7 @@ const UserInfo = () => {
                 <button
                   onClick={() => {
                     if (userInfo.user_status !== "terminate") {
-                      toggleEdit();
+                      setEditMode(true);
                     }
                   }}
                   className={`${userInfo.user_status === "terminate" ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -1879,7 +1881,7 @@ const UserInfo = () => {
                   <tbody>
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Type<span className="sm:hidden">:</span>
+                        User type<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
@@ -1903,9 +1905,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {Array.isArray(userInfo.contact_numbers) && userInfo.contact_numbers.length > 0
-                          ? userInfo.contact_numbers[0]
-                          : "Not specified"}
+                        {userInfo.contact_numbers?.[0] || "Not specified"}
                       </td>
                     </tr>
 
@@ -1925,9 +1925,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.roles && userInfo.roles.length > 0
-                          ? userInfo.roles.map((role) => formatRoleLabel(role)).join(", ")
-                          : "Not specified"}
+                        {userInfo.roles?.map(role => formatRoleLabel(role)).join(", ") || "Not specified"}
                       </td>
                     </tr>
 
@@ -2005,7 +2003,7 @@ const UserInfo = () => {
               <tbody className="space-y-4 sm:space-y-0">
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                    End Date
+                    End Date <span className="text-red-500">*</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -2023,7 +2021,7 @@ const UserInfo = () => {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                    Remark
+                    Remark <span className="text-red-500">*</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -2045,40 +2043,45 @@ const UserInfo = () => {
                 onClick={handleEndUser}
                 className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
               >
-                Save
+                End
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex justify-between mx-8">
-        <div className="flex flex-col just-start">
-          <div className="flex gap-4">
-            <button
-              className={`${GlobalStyle.buttonPrimary}`}
-              onClick={() => setShowPopup(true)}
-            >
-              Log History
-            </button>
-          </div>
+      <div className="flex justify-between mx-8 mt-6">
+        <div className="flex flex-col items-start">
+          <button
+            className={`${GlobalStyle.buttonPrimary}`}
+            onClick={() => setShowPopup(true)}
+          >
+            Log History
+          </button>
 
-          <div style={{ marginTop: "12px" }}>
-            <button className={GlobalStyle.buttonPrimary} onClick={goBack}>
+          <div style={{ marginTop: '15px' }}>
+            <button 
+              className={`${GlobalStyle.buttonPrimary}`}
+              onClick={goBack}
+            >
               <FaArrowLeft />
             </button>
           </div>
         </div>
-
+        
         <div className="flex justify-end h-fit">
-          {!isEditing && !showEndSection && (
+          {!editMode && !showEndSection && (
             <button
               onClick={() => {
                 if (userInfo.user_status !== "terminate") {
                   setShowEndSection(true);
                 }
               }}
-              className={`${GlobalStyle.buttonPrimary} ${userInfo.user_status === "terminate" ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`${GlobalStyle.buttonPrimary} ${
+                userInfo.user_status === "terminate" 
+                  ? "opacity-50 cursor-not-allowed" 
+                  : ""
+              }`}
               disabled={userInfo.user_status === "terminate"}
             >
               End
@@ -2095,7 +2098,6 @@ const UserInfo = () => {
               <button
                 onClick={() => setShowPopup(false)}
                 className="text-red-500 text-lg font-bold"
-                title="Close"
               >
                 ×
               </button>
@@ -2112,21 +2114,15 @@ const UserInfo = () => {
                 <FaSearch className={GlobalStyle.searchBarIcon} />
               </div>
             </div>
-
+            
             <div className="p-6 overflow-auto max-h-[70vh]">
               <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                   <thead className={GlobalStyle.thead}>
                     <tr>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Date
-                      </th>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Action
-                      </th>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Edited By
-                      </th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>Date</th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>Action</th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>Edited By</th>
                     </tr>
                   </thead>
 
@@ -2135,7 +2131,11 @@ const UserInfo = () => {
                       filteredLogHistory.map((log, index) => (
                         <tr
                           key={index}
-                          className={`${index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd} border-b`}
+                          className={`${
+                            index % 2 === 0
+                              ? GlobalStyle.tableRowEven
+                              : GlobalStyle.tableRowOdd
+                          } border-b`}
                         >
                           <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
                             {formatDate(log.remark_dtm) || "N/A"}
