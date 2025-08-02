@@ -74,8 +74,11 @@ const UserList = () => {
       const response = await getAllUserDetails(requestData);
       console.log("API Response:", response);
 
-      // Handle Python backend response
-      const userData = response?.data || response;
+      // Handle the API response structure
+      const userData = response?.data || [];
+      const totalCount = response?.total_count || 0;
+      const currentPage = response?.page || 1;
+      const limit = response?.limit || 10;
       
       if (Array.isArray(userData)) {
         const newUsers = userData.map((user) => ({
@@ -89,13 +92,15 @@ const UserList = () => {
             Array.isArray(user.role) && user.role.length > 0
               ? user.role[0].role_name
               : "N/A",
-          user_name: user.User_profile.username,
-          user_email: user.User_profile.email,
+          user_name: user.User_profile?.username || "N/A",
+          user_email: user.User_profile?.email || "N/A",
           contact_num:
             Array.isArray(user.user_contact_num) && user.user_contact_num.length > 0
               ? user.user_contact_num[0].contact_number
               : "N/A",
-          created_on: new Date(user.create_on.$date).toLocaleDateString("en-CA")
+          created_on: user.create_on?.$date 
+            ? new Date(user.create_on.$date).toLocaleDateString("en-CA")
+            : "N/A"
         }));
 
         // Update state
@@ -111,7 +116,9 @@ const UserList = () => {
           setFilteredData(prev => [...prev, ...newUsers]);
         }
 
-        setHasMoreData(newUsers.length === (filters.page === 1 ? 10 : 30));
+        // Calculate if there's more data based on total count
+        const totalLoadedRecords = filters.page === 1 ? newUsers.length : filteredData.length + newUsers.length;
+        setHasMoreData(totalLoadedRecords < totalCount);
         
       } else {
         throw new Error("No valid user data found");
@@ -129,7 +136,7 @@ const UserList = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [filteredData.length]);
 
   // Update the showNoDataMessage function
   const showNoDataMessage = (status = "", userRole = "", userType = "") => {
@@ -231,13 +238,15 @@ const UserList = () => {
     }
   }, [currentPage, committedFilters, callAPI, hasMoreData, maxCurrentPage]);
 
-  // Filter data (search query) 
-  const filteredDataBySearch = paginatedData.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+  // Filter data by search query on the current page data
+  const filteredDataBySearch = searchQuery 
+    ? paginatedData.filter((row) =>
+        Object.values(row)
+          .join(" ")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    : paginatedData;
 
   const formatRoleLabel = (value) => {
     // Check if value exists and is a string
