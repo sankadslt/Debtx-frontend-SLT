@@ -6,6 +6,7 @@ Modified By: Sathmi Peiris (sathmipeiris@gmail.com)
 Last Modified Date: 2025-07-20
 Modified By:  Yugani Gunarathna 
               Sathmi Peiris
+              Dinithi Wijesekara 
              Update 2025-07-20
              
 Version: React v18
@@ -457,15 +458,16 @@ const Incident = () => {
         status2,
         selectedServiceType,
         status3,
+        status4,
         fromDate,
         toDate,
         userData
-      );
+      );   
       
       if (response && response.message === "Task created successfully") {
         Swal.fire({
           title: "Task created successfully!",
-          text: "Task ID: " + response.ResponseData.data.Task_Id,
+          text: "Task ID: " + response.Task_Id,
           icon: "success",
           confirmButtonColor: "#28a745",
         });
@@ -473,15 +475,14 @@ const Incident = () => {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: error.message || "Failed to create task.",
+        text: error?.message || "Failed to create task.",
         icon: "error",
         confirmButtonColor: "#d33",
       });
     } finally {
       setIsCreatingTask(false);
     }
-  };
-
+  };  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
