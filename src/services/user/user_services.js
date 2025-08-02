@@ -1,3 +1,14 @@
+/* 
+    Purpose: This template is used for the DRC Controllers.
+    Created Date: 2025-07-24
+    Created By: Sasindu Srinayaka (sasindusrinayaka@gmail.com)
+    Last Modified Date: 2025-07-24
+    Modified By: Sasindu Srinayaka (sasindusrinayaka@gmail.com)
+    Version: Node.js v20.11.1
+    Notes:  
+*/
+
+
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;

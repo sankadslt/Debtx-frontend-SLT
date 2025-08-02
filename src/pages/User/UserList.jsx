@@ -77,12 +77,12 @@ const UserList = () => {
   //   setError(null);
 
   //   try {
-  //     const requestData = {
-  //       page,
-  //       user_role: filters.userRole,
-  //       user_type: filters.userType,
-  //       user_status: filters.status
-  //     };
+      // const requestData = {
+      //   page,
+      //   user_role: filters.userRole,
+      //   user_type: filters.userType,
+      //   user_status: filters.status
+      // };
 
   //     const response = await getAllUserDetails(requestData);
   //     console.log("API Response:", response);
@@ -146,16 +146,19 @@ const UserList = () => {
       if (Array.isArray(userData)) {
         const newUsers = userData.map((user) => ({
           user_id: user.user_id,
-          status: user.user_status,
+          status: user.user_status.status,
           user_type: user.user_type?.toUpperCase() || "",
-          user_role: user.role,
-          user_name: user.User_profile.username,
-          user_email: user.email,
-          contact_num:
-            Array.isArray(user.contact_num) && user.contact_num.length > 0
-              ? user.contact_num[0].contact_number
+          user_role: 
+            Array.isArray(user.role) && user.role.length > 0
+              ? user.role[0].role_name
               : "N/A",
-          created_on: new Date(user.Created_DTM).toLocaleDateString("en-CA")
+          user_name: user.User_profile.username,
+          user_email: user.User_profile.email,
+          contact_num:
+            Array.isArray(user.user_contact_num) && user.user_contact_num.length > 0
+              ? user.user_contact_num[0].contact_number
+              : "N/A",
+          created_on: new Date(user.create_on.$date).toLocaleDateString("en-CA")
         }));
 
         setAllFetchedData((prev) =>
@@ -341,12 +344,12 @@ const UserList = () => {
 
   // Function to render status icon with tooltip
   const renderStatusIcon = (user) => {
-    if (user.status === "Active") {
+    if (user.user_status.status === "active") {
       return (
         <div className="relative">
           <img 
             src={activeIcon} 
-            alt="Active" 
+            alt="active" 
             className="h-5 w-5 lg:h-6 lg:w-6"
             onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
             onMouseLeave={hideTooltip}
@@ -358,27 +361,27 @@ const UserList = () => {
           )}
         </div>
       );
-    } else if (user.status === "Inactive") {
+    } else if (user.user_status.status === "inactive") {
       return (
         <div className="relative">
           <img 
             src={deactiveIcon} 
-            alt="Inactive" 
+            alt="inactive" 
             className="h-5 w-5 lg:h-6 lg:w-6"
             onMouseEnter={() => showTooltip(`status-${user.user_id}`)}
             onMouseLeave={hideTooltip}
           />
           {tooltipVisible === `status-${user.user_id}` && (
             <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-              Inactive 
+              Inactive
             </div>
           )}
         </div>
       );
-    } else if (user.status === "terminate") {
+    } else if (user.user_status.status === "terminate") {
       return (
         <div className="relative">
-          <img 
+          <img
             src={terminateIcon} 
             alt="Terminate" 
             className="h-5 w-5 lg:h-6 lg:w-6"
@@ -387,12 +390,12 @@ const UserList = () => {
           />
           {tooltipVisible === `status-${user.user_id}` && (
             <div className="absolute left-1/2 bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap transform -translate-x-1/2 z-10">
-              Terminate 
+              Terminate
             </div>
           )}
         </div>
       );
-      } else if (user.status === "Pending_approval") {
+      } else if (user.user_status.status === "Pending_approval") {
       return (
         <div className="relative">
           <img 
