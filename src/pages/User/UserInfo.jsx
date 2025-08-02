@@ -1842,9 +1842,9 @@ const UserInfo = () => {
                       </td>
                     </tr>
 
-                    <tr className="block sm:table-row mb-4">
+                    <tr className="block sm:table-row ">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Role<span className="text-red-500">*</span><span className="sm:hidden">:</span>
+                        User Role<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
