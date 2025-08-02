@@ -124,6 +124,7 @@ import UserList from "../pages/User/UserList";
 import UserInfo from "../pages/User/UserInfo";
 import SignUp from "../pages/User/SignUp";
 import UserApproval from "../pages/User/UserApproval";
+import SignUpNew from "../pages/User/SignUpNew";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
@@ -963,6 +964,14 @@ const Routers = () => {
           <ProtectedRoute element={<SignUp />} allowedRoles={["superadmin"]} />
         }
       />
+
+      <Route
+        path="/pages/User/SignUpNew"
+        element={
+          <ProtectedRoute element={<SignUpNew />} allowedRoles={["superadmin"]} />
+        }
+      />
+
       <Route
         path="/pages/User/UserApproval"
         element={
