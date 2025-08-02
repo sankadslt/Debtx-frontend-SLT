@@ -133,5 +133,3 @@ export const createUser = async (formData) => {
     };
   }
 };
-
-

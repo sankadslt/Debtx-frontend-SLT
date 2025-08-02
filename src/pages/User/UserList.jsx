@@ -146,7 +146,10 @@ const UserList = () => {
       if (Array.isArray(userData)) {
         const newUsers = userData.map((user) => ({
           user_id: user.user_id,
-          status: user.user_status.status,
+          status: 
+            Array.isArray(user.user_status) && user.user_status.length > 0
+              ? user.user_status[0].status
+              : "N/A",
           user_type: user.user_type?.toUpperCase() || "",
           user_role: 
             Array.isArray(user.role) && user.role.length > 0
@@ -502,6 +505,7 @@ const UserList = () => {
                 <option value="" hidden>Status</option>
                 <option value="Active" style={{ color: "black" }}>Active</option>
                 <option value="Inactive" style={{ color: "black" }}>Inactive</option>
+                <option value="Pending-approval" style={{ color: "black" }}>Pending Approval</option>
                 <option value="Terminate" style={{ color: "black" }}>Terminated</option>
               </select>
             </div>
