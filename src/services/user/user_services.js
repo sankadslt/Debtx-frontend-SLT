@@ -134,4 +134,35 @@ export const createUser = async (formData) => {
   }
 };
 
+export const updateUserStatus = async (requestData = {}) => {
+  try {
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/status",
+      {
+        user_id: Number(requestData.user_id), 
+        status_payload: {
+          status: requestData.status_payload.status,
+          status_on: requestData.status_payload.status_on,
+          status_by: requestData.status_payload.status_by
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log("Status update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to update user status",
+      }
+    );
+  }
+};
+
 
