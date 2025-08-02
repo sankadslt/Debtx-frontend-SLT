@@ -330,7 +330,7 @@ const UserList = () => {
               >
                 <option value="" hidden>User Type</option>
                 <option value="Slt" style={{ color: "black" }}>SLT</option>
-                <option value="Drcuser" style={{ color: "black" }}>DRC User</option>
+                <option value="drc_officer" style={{ color: "black" }}>DRC Officer</option>
                 <option value="ro" style={{ color: "black" }}>RO</option>
               </select>
             </div>
