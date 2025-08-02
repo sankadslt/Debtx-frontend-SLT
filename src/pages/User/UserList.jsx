@@ -72,6 +72,58 @@ const UserList = () => {
   };
 
   // Fetch users
+  // const fetchUsers = async (page, filters) => {
+  //   setIsLoading(true);
+  //   setError(null);
+
+  //   try {
+  //     const requestData = {
+  //       page,
+  //       user_role: filters.userRole,
+  //       user_type: filters.userType,
+  //       user_status: filters.status
+  //     };
+
+  //     const response = await getAllUserDetails(requestData);
+  //     console.log("API Response:", response);
+
+  //     if (Array.isArray(response?.data)) {
+  //       const newUsers = response.data.map((user) => ({
+  //         user_id: user.user_id,
+  //         status: user.user_status,
+  //         user_type: user.user_type?.toUpperCase() || "",
+  //         user_role: user.role,
+  //         user_name: user.username,
+  //         user_email: user.email,
+  //         contact_num:
+  //           Array.isArray(user.contact_num) && user.contact_num.length > 0
+  //             ? user.contact_num[0].contact_number
+  //             : "N/A",
+  //         created_on: new Date(user.Created_DTM).toLocaleDateString("en-CA")
+  //       }));
+
+  //       setAllFetchedData((prev) =>
+  //         page === 1 ? newUsers : [...prev, ...newUsers]
+  //       );
+
+  //       const expectedSize = page === 1 ? fetchFirstPageSize : fetchSubsequentPageSize;
+  //       setIsMoreDataAvailable(newUsers.length === expectedSize);
+
+  //       fetchedPages.current.add(page);
+
+  //       if (newUsers.length === 0 && page === 1) showNoResultsAlert();
+  //     } else {
+  //       throw new Error("No valid user data found");
+  //     }
+  //   } catch (error) {
+  //     setError(error.message || "Failed to fetch users");
+  //     if (page === 1) setAllFetchedData([]);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // Updated fetchUsers function to handle Python backend response
   const fetchUsers = async (page, filters) => {
     setIsLoading(true);
     setError(null);
@@ -85,14 +137,19 @@ const UserList = () => {
       };
 
       const response = await getAllUserDetails(requestData);
+      console.log("API Response:", response);
 
-      if (response?.status === "success" && Array.isArray(response.data)) {
-        const newUsers = response.data.map((user) => ({
+      // Updated condition to handle Python backend response
+      // Check if response exists and has data array, OR if response itself is an array
+      const userData = response?.data || response;
+      
+      if (Array.isArray(userData)) {
+        const newUsers = userData.map((user) => ({
           user_id: user.user_id,
           status: user.user_status,
           user_type: user.user_type?.toUpperCase() || "",
           user_role: user.role,
-          user_name: user.username,
+          user_name: user.User_profile.username,
           user_email: user.email,
           contact_num:
             Array.isArray(user.contact_num) && user.contact_num.length > 0
@@ -259,8 +316,20 @@ const UserList = () => {
     setTooltipVisible(null);
   };
 
+  // const formatRoleLabel = (value) => {
+  //   if (!value) return "N/A";
+
+  //   return value
+  //     .split("_")
+  //     .map(word => word[0].toUpperCase() + word.slice(1))
+  //     .join(" ");
+  // };
+
   const formatRoleLabel = (value) => {
-    if (!value) return "N/A";
+  // Check if value exists and is a string
+    if (!value || typeof value !== 'string') {
+      return "N/A";
+    }
 
     return value
       .split("_")
@@ -569,71 +638,6 @@ const UserList = () => {
               )}
             </tbody>
           </table>
-
-          {/* Mobile Card View
-          <div className="md:hidden space-y-4">
-            {paginatedData.map((user) => (
-              <div key={user.user_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-900">#{user.user_id}</span> 
-                    <div className="flex items-center">
-                      {user.status === "Active" && (
-                        <>
-                          <img src={activeIcon} alt="Active" className="h-5 w-5" />
-                          <span className="ml-1 text-xs text-gray-600">Active</span>
-                        </>
-                      )}
-                      {user.status === "Inactive" && (
-                        <>
-                          <img src={deactiveIcon} alt="Inactive" className="h-5 w-5" />
-                          <span className="ml-1 text-xs text-gray-600">Inactive</span>
-                        </>
-                      )}
-                      {user.status === "Terminate" && (
-                        <>
-                          <img src={terminateIcon} alt="Terminated" className="h-5 w-5" />
-                          <span className="ml-1 text-xs text-gray-600">Terminate</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                   <Link to="/pages/User/UserInfo" state={{ user_id: user.user_id }}>
-                    <img src={more_info} alt="More Info" className="h-5 w-5" />
-                  </Link>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Name:</span>
-                    <span className="text-sm font-medium text-gray-900">{user.user_name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Email:</span>
-                    <span className="text-sm text-gray-700 break-all">{user.user_email}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Type:</span>
-                    <span className="text-sm text-gray-700">{user.user_type}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Role:</span>
-                    <span className="text-sm text-gray-700">{user.user_role}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Created:</span>
-                    <span className="text-sm text-gray-700">{user.created_on}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {paginatedData.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                No results found
-              </div>
-            )}
-          </div> */}
         </div>
       </div> 
 
@@ -659,7 +663,6 @@ const UserList = () => {
           </button>
         </div>
       )}
-
     </div>
   );
 };
