@@ -1425,10 +1425,13 @@ const UserInfo = () => {
             user_designation: fetchedData.user_designation || "",
             created_on: fetchedData.created_on || "",
             created_by: fetchedData.created_by || "",
-            status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
-            status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
+            // status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
+            // status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
+            // Remark: fetchedData.Remark || [],
+            // user_status: statusHistory 
+            status_on: fetchedData.user_status?.status_on || "",
+            status_by: fetchedData.user_status?.status_by || "",
             Remark: fetchedData.Remark || [],
-            user_status: statusHistory 
           });
 
           setEditableProfileFields({
@@ -1740,10 +1743,8 @@ useEffect(() => {
       });
 
       const payload = {
-        user_id,
-        end_by: loggedUserData,
-        end_dtm: endDate.toISOString(),
-        remark,
+        user_id: Number(user_id),
+        created_by: loggedUserData,
       };
 
       const response = await endUser(payload);
