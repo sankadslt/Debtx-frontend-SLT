@@ -137,7 +137,7 @@ const SignUp = () => {
           ? {
               ...basePayload,
               drc_id: formData.drcId,
-              nic: formData.nic,
+              'User_profile.nic': formData.nic,
               user_id: formData.email || formData.contactNo, // Use email or contact number as user_id
             }
           : null;
