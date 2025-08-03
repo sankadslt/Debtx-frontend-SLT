@@ -246,7 +246,9 @@ export const updateUserProfile = async (requestData = {}) => {
         user_id: Number(requestData.user_id),
         profile_payload: {
           username: requestData.profile_payload.username,
-          user_nic: requestData.profile_payload.user_nic
+          email: requestData.profile_payload.email,
+          user_nic: requestData.profile_payload.user_nic,
+          user_designation: requestData.profile_payload.user_designation 
         }
       },
       {

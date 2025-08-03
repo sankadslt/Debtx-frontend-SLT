@@ -1,3 +1,4 @@
+
 /* Purpose: This template is used for the 17.2 - User Info .
 Created Date: 2025-06-07
 Created By: sakumini (sakuminic@gmail.com)
@@ -69,6 +70,7 @@ const UserInfo = () => {
   const [editableProfileFields, setEditableProfileFields] = useState({
     username: "",
     user_nic: ""
+    
   });
 
   const userRoles = [
@@ -159,6 +161,14 @@ const UserInfo = () => {
             ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
             : 'inactive';
 
+            console.log("Setting initial userInfo:", {
+        username: fetchedData.username || "",
+        user_type: fetchedData.user_type || "",
+        // ... other fields ...
+        user_nic: fetchedData.user_nic || "",
+        // ... other fields ...
+      });
+
           const isProfileEditable = checkIfProfileEditable(fetchedData.created_on);
           setCanEditProfile(isProfileEditable);
           
@@ -224,68 +234,72 @@ const UserInfo = () => {
   };
 
   const updateProfile = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
+    
+    const payload = {
+      user_id: Number(user_id),
+      profile_payload: {
+        username: editableProfileFields.username,
+        user_nic: editableProfileFields.user_nic,
+        email: userInfo.email,
+         user_designation: userInfo.user_designation
+      }
+    };
+    
+    console.log("Payload being sent to update profile:", payload);
+
+    const response = await updateUserProfile(payload);
+    
+    if (response.status === "updated" || response.status === "Success") {
+      // Update both userInfo and editableProfileFields
+      setUserInfo(prev => ({
+        ...prev,
+        username: editableProfileFields.username,
+        user_nic: editableProfileFields.user_nic
+      }));
       
-      const payload = {
-        user_id: Number(user_id),
-        profile_payload: {
-          username: editableProfileFields.username,
-          user_nic: editableProfileFields.user_nic
-        }
-      };
-      
-      const response = await updateUserProfile(payload);
-      
-      if (response.status === "updated" || response.status === "Success") {
-        // Update both userInfo and editableProfileFields
+      // Force a refresh of user data
+      const fetchedData = await getUserDetailsById(user_id);
+      if (fetchedData?.status === "Success") {
         setUserInfo(prev => ({
           ...prev,
-          username: editableProfileFields.username,
-          user_nic: editableProfileFields.user_nic
+          ...fetchedData,
+          Remark: fetchedData.Remark || []
         }));
-        
-        // Force a refresh of user data
-        const fetchedData = await getUserDetailsById(user_id);
-        if (fetchedData?.status === "Success") {
-          setUserInfo(prev => ({
-            ...prev,
-            ...fetchedData,
-            Remark: fetchedData.Remark || []
-          }));
-          setEditableProfileFields({
-            username: fetchedData.username || "",
-            user_nic: fetchedData.user_nic || ""
-          });
-        }
-        
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Profile updated successfully",
+        setEditableProfileFields({
+          username: fetchedData.username || "",
+          user_nic: fetchedData.user_nic || ""
         });
-        return true;
       }
-      return false;
-    } catch (err) {
-      console.error("Error updating profile:", err);
+      
       Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: err?.response?.data?.message || "Failed to update profile",
+        icon: "success",
+        title: "Success",
+        text: "Profile updated successfully",
       });
-      return false;
-    } finally {
-      setLoading(false);
+      return true;
     }
-  };
-
-  useEffect(() => {
-    setEditableProfileFields({
-      username: userInfo.username || "",
-      user_nic: userInfo.user_nic || ""
+    return false;
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err?.response?.data?.message || "Failed to update profile",
     });
-  }, [userInfo.username, userInfo.user_nic]);
+    return false;
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  setEditableProfileFields({
+    username: userInfo.username || "",
+    user_nic: userInfo.user_nic || ""
+  });
+}, [userInfo.username, userInfo.user_nic]);
 
   const toggleEditMode = () => {
     setEditMode(!editMode);
@@ -293,147 +307,147 @@ const UserInfo = () => {
   };
 
   const handleSave = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      // Check if profile fields need to be updated
-      const profileChanged = 
-        editableProfileFields.username !== userInfo.username ||
-        editableProfileFields.user_nic !== userInfo.user_nic;
+    // Check if profile fields need to be updated
+    const profileChanged = 
+      editableProfileFields.username !== userInfo.username ||
+      editableProfileFields.user_nic !== userInfo.user_nic;
 
-      if (profileChanged && canEditProfile) {
-        await updateProfile();
-      }
+    if (profileChanged && canEditProfile) {
+      await updateProfile();
+    }
 
-      // Get current status
-      const statusHistory = userInfo.user_status || [];
-      const currentStatus = statusHistory.length > 0 
-        ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
-        : 'inactive';
+    // Get current status
+    const statusHistory = userInfo.user_status || [];
+    const currentStatus = statusHistory.length > 0 
+      ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
+      : 'inactive';
+    
+    const statusChanged = 
+      (isActive && currentStatus !== "active") ||
+      (!isActive && currentStatus === "active");
+
+    // Determine new roles to add
+    const rolesToAdd = userRolesList.filter(role => 
+      !userInfo.roles?.includes(role)
+    );
+
+    const rolesChanged = rolesToAdd.length > 0;
+
+    const contactsChanged = 
+      JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
+
+    if (!statusChanged && !rolesChanged && !contactsChanged && !profileChanged) {
+      Swal.fire({
+        icon: "info",
+        title: "No Changes",
+        text: "No changes were made to save",
+      });
+      setEditMode(false);
+      return;
+    }
+
+    const updatePromises = [];
+
+    if (statusChanged) {
+      updatePromises.push(updateUserStatus({
+        user_id: Number(user_id),
+        status_payload: {
+          status: isActive ? "Active" : "Inactive", 
+          status_on: new Date().toISOString(), 
+          status_by: loggedUserData 
+        }
+      }));
+    }
+
+    if (rolesChanged) {
+      updatePromises.push(updateUserRoles(
+        Number(user_id),
+        rolesToAdd
+      ));
+    }
+
+    if (contactsChanged) {
+      const contactPayload = [];
+      const currentDate = new Date().toISOString();
       
-      const statusChanged = 
-        (isActive && currentStatus !== "active") ||
-        (!isActive && currentStatus === "active");
-
-      // Determine new roles to add
-      const rolesToAdd = userRolesList.filter(role => 
-        !userInfo.roles?.includes(role)
-      );
-
-      const rolesChanged = rolesToAdd.length > 0;
-
-      const contactsChanged = 
-        JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
-
-      if (!statusChanged && !rolesChanged && !contactsChanged && !profileChanged) {
-        Swal.fire({
-          icon: "info",
-          title: "No Changes",
-          text: "No changes were made to save",
-        });
-        setEditMode(false);
-        return;
-      }
-
-      const updatePromises = [];
-
-      if (statusChanged) {
-        updatePromises.push(updateUserStatus({
-          user_id: Number(user_id),
-          status_payload: {
-            status: isActive ? "Active" : "Inactive", 
-            status_on: new Date().toISOString(), 
-            status_by: loggedUserData 
-          }
-        }));
-      }
-
-      if (rolesChanged) {
-        updatePromises.push(updateUserRoles(
-          Number(user_id),
-          rolesToAdd
-        ));
-      }
-
-      if (contactsChanged) {
-        const contactPayload = [];
-        const currentDate = new Date().toISOString();
+      for (let i = 0; i < 2; i++) {
+        const originalNumber = originalContactNumbers[i] || "";
+        const currentNumber = contactNumbers[i] || "";
         
-        for (let i = 0; i < 2; i++) {
-          const originalNumber = originalContactNumbers[i] || "";
-          const currentNumber = contactNumbers[i] || "";
-          
-          if (currentNumber !== originalNumber) {
-            if (originalNumber) {
-              contactPayload.push({
-                contact_number: originalNumber,
-                end_dtm: currentDate
-              });
-            }
-            
-            if (currentNumber) {
-              contactPayload.push({
-                contact_number: currentNumber,
-              });
-            }
-          } else if (currentNumber) {
+        if (currentNumber !== originalNumber) {
+          if (originalNumber) {
             contactPayload.push({
-              contact_number: currentNumber
+              contact_number: originalNumber,
+              end_dtm: currentDate
             });
           }
-        }
-
-        if (contactPayload.length > 0) {
-          updatePromises.push(updateUserContacts({
-            user_id: Number(user_id),
-            contact_payload: contactPayload
-          }));
+          
+          if (currentNumber) {
+            contactPayload.push({
+              contact_number: currentNumber,
+            });
+          }
+        } else if (currentNumber) {
+          contactPayload.push({
+            contact_number: currentNumber
+          });
         }
       }
 
-      await Promise.all(updatePromises);
-
-      // Refresh user data
-      const fetchedData = await getUserDetailsById(user_id);
-      if (fetchedData && fetchedData.status === "Success") {
-        const updatedStatusHistory = fetchedData.user_status || [];
-        const updatedStatus = updatedStatusHistory.length > 0 
-          ? String(updatedStatusHistory[statusHistory.length - 1].status).toLowerCase()
-          : 'inactive';
-
-        setIsActive(updatedStatus === "active");
-        
-        setUserInfo({
-          ...fetchedData,
-          Remark: fetchedData.Remark || [],
-          user_status: updatedStatusHistory
-        });
-
-        const updatedContacts = fetchedData.contact_numbers || [];
-        while (updatedContacts.length < 2) updatedContacts.push("");
-        setContactNumbers([...updatedContacts]);
-        setOriginalContactNumbers([...updatedContacts]);
-        setUserRolesList([]);
+      if (contactPayload.length > 0) {
+        updatePromises.push(updateUserContacts({
+          user_id: Number(user_id),
+          contact_payload: contactPayload
+        }));
       }
-
-      setEditMode(false);
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "User updated successfully",
-      });
-
-    } catch (err) {
-      console.error("Update Error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: err?.response?.data?.message || "Failed to update user",
-      });
-    } finally {
-      setLoading(false);
     }
-  };
+
+    await Promise.all(updatePromises);
+
+    // Refresh user data
+    const fetchedData = await getUserDetailsById(user_id);
+    if (fetchedData && fetchedData.status === "Success") {
+      const updatedStatusHistory = fetchedData.user_status || [];
+      const updatedStatus = updatedStatusHistory.length > 0 
+        ? String(updatedStatusHistory[statusHistory.length - 1].status).toLowerCase()
+        : 'inactive';
+
+      setIsActive(updatedStatus === "active");
+      
+      setUserInfo({
+        ...fetchedData,
+        Remark: fetchedData.Remark || [],
+        user_status: updatedStatusHistory
+      });
+
+      const updatedContacts = fetchedData.contact_numbers || [];
+      while (updatedContacts.length < 2) updatedContacts.push("");
+      setContactNumbers([...updatedContacts]);
+      setOriginalContactNumbers([...updatedContacts]);
+      setUserRolesList([]);
+    }
+
+    setEditMode(false);
+    Swal.fire({
+      icon: "success",
+      title: "Success",
+      text: "User updated successfully",
+    });
+
+  } catch (err) {
+    console.error("Update Error:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err?.response?.data?.message || "Failed to update user",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
@@ -538,6 +552,38 @@ const UserInfo = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const removeRole = (roleToRemove) => {
+    const isExistingRole = userInfo.roles?.includes(roleToRemove);
+    
+    if (isExistingRole) {
+      Swal.fire({
+        title: 'Remove Role?',
+        text: `Are you sure you want to remove the ${roleToRemove} role?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setUserInfo(prev => ({
+            ...prev,
+            roles: prev.roles.filter(role => role !== roleToRemove)
+          }));
+          
+          if (selectedRole === roleToRemove) {
+            setSelectedRole("");
+          }
+        }
+      });
+    } else {
+      setUserRolesList(userRolesList.filter(role => role !== roleToRemove));
+      if (selectedRole === roleToRemove) {
+        setSelectedRole("");
+      }
     }
   };
 
@@ -790,11 +836,35 @@ const UserInfo = () => {
 
                           {([...userInfo.roles, ...userRolesList].length > 0) && (
                             <div className={`${GlobalStyle.inputText} w-full sm:w-3/4 flex flex-wrap items-center gap-2 mt-4 p-2`}>
-                              {[...userInfo.roles, ...userRolesList].map((role, index) => (
-                                <div key={`role-${index}`} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                              {userInfo.roles?.map((role, index) => (
+                                <div key={`prev-${index}`} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
                                   <span className="text-blue-900 mr-2">
                                     {userRoles.find(r => r.value === role)?.label || formatRoleLabel(role)}
                                   </span>
+                                  <button
+                                    onClick={() => removeRole(role)}
+                                    className="text-blue-900 hover:text-red-600 font-bold"
+                                    title="Remove role"
+                                    type="button"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                              
+                              {userRolesList.map((role, index) => (
+                                <div key={`new-${index}`} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                                  <span className="text-blue-900 mr-2">
+                                    {userRoles.find(r => r.value === role)?.label || role}
+                                  </span>
+                                  <button
+                                    onClick={() => removeRole(role)}
+                                    className="text-blue-900 hover:text-red-600 font-bold"
+                                    title="Remove role"
+                                    type="button"
+                                  >
+                                    ×
+                                  </button>
                                 </div>
                               ))}
                             </div>
