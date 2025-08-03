@@ -17,7 +17,7 @@ const USER_URL3 = `${BASE_URL}/DRC_service`;
 
 export const getUserDetailsById = async (user_id) => {
   try {
-    const response = await axios.post(`${USER_URL}/List_All_User_Details_By_ID`, {
+    const response = await axios.post(`https://debtx.slt.lk:6500/users/details/by-id`, {
       user_id,
     });
 
@@ -123,7 +123,7 @@ export const Download_User_Approval_List = async (requestData) => {
 
 export const createUser = async (formData) => {
   try {
-    const res = await axios.post(`${USER_URL}/Create_User`, formData);
+    const res = await axios.post(`https://debtx.slt.lk:6500/users/create`, formData);
     return res.data;
   } catch (err) {
     return {
@@ -133,5 +133,3 @@ export const createUser = async (formData) => {
     };
   }
 };
-
-

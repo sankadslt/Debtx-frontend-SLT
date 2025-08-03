@@ -109,7 +109,8 @@ export const getAzureUserData = async (serviceNo) => {
     return {
       name: data.displayName || "",
       email: data.mail || "",
-      contactNo: data.mobilePhone || ""
+      contactNo: data.mobilePhone || "",
+      designation: data.jobTitle || ""
     };
   } catch (error) {
     console.error("Error fetching Azure user data:", error.response?.data || error.message);

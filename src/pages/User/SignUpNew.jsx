@@ -29,6 +29,7 @@ const AddUser = () => {
     nic: "",
     email: "",
     contactNo: "",
+    designation: "",
     role: [],
     drcId: "",
     loginMethod: "",
@@ -82,6 +83,7 @@ const AddUser = () => {
       nic: "",
       email: "",
       contactNo: "",
+      designation: "",
       role: [],
       drcId: "",
       loginMethod: "",
@@ -126,6 +128,7 @@ const AddUser = () => {
         name: data.name,
         email: data.email,
         contactNo: data.contactNo,
+        designation: data.designation,
         ...(userType === "DRC Officer" ? { nic: data.nic } : {}),
       }));
     } catch (err) {
@@ -165,7 +168,7 @@ const AddUser = () => {
         create_by: loggedUserData,
       };
 
-      const response = await createUser(basePayload, "https://debtx.slt.lk:6500/users/create");
+      const response = await createUser(basePayload);
 
       if (response.status === "success") {
         navigate(-1);
@@ -308,6 +311,23 @@ const AddUser = () => {
                         type="text"
                         name="contactNo"
                         value={formData.contactNo}
+                        onChange={handleInputChange}
+                        className={`${GlobalStyle.inputText} w-3/4`}
+                      />
+                    </td>
+                  </tr>
+                  <tr className="block md:table-row mb-2">
+                    <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
+                      <span className="inline-block min-w-[180px] text-left">
+                        Designation<span className="text-red-500">*</span>
+                      </span>{" "}
+                      :
+                    </td>
+                    <td className="block md:table-cell md:w-2/3 pb-2">
+                      <input
+                        type="text"
+                        name="designation"
+                        value={formData.designation}
                         onChange={handleInputChange}
                         className={`${GlobalStyle.inputText} w-3/4`}
                       />
