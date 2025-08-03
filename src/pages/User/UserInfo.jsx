@@ -1252,40 +1252,41 @@ Notes:The following page conatins the code for the User Info Screen */
 import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import edit from "../../assets/images/edit-info.svg";
-import add from "../../assets/images/user-add.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
-import { endUser, getUserDetailsById, updateUserDetails } from "../../services/user/user_services";
-import completeIcon from "../../assets/images/complete.png";
-import remove from "../../assets/images/remove.svg";
+import { 
+  endUser, 
+  getUserDetailsById, 
+  updateUserStatus, 
+  updateUserRoles,
+  updateUserContacts,
+  updateUserProfile 
+} from "../../services/user/user_services";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSearch, FaArrowLeft } from "react-icons/fa";
 import { getLoggedUserId } from "../../services/auth/authService";
 
 const UserInfo = () => {
   const location = useLocation();
   const user_id = location.state?.user_id;
-  console.log("user_id from location.state:", user_id);
+  const navigate = useNavigate();
 
   const goBack = () => {
     navigate(-1);
   };
 
-  const [currentPage, setCurrentPage] = useState(0);
-  const rowsPerPage = 10;
-
   const [loggedUserData, setLoggedUserData] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
   const [endDate, setEndDate] = useState(null);
   const [remark, setRemark] = useState("");
-  const [isActive, setIsActive] = useState(true);
-  const [emailError, setEmailError] = useState("");
+  const [isActive, setIsActive] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [canEditProfile, setCanEditProfile] = useState(false);
+  
   const [userInfo, setUserInfo] = useState({
     username: "",
     user_type: "",
@@ -1302,22 +1303,16 @@ const UserInfo = () => {
     Remark: [],
   });
 
-  const [formData, setFormData] = useState({
-    user_type: "",
-    email: "",
-    contact_numbers: "",
-    can_user_login: "",
-    roles: "",
-    created_on: "",
-    created_by: "",
-    status_on: "",
-    status_by: "",
+  const [editMode, setEditMode] = useState(false);
+  const [showEndSection, setShowEndSection] = useState(false);
+  const [userRolesList, setUserRolesList] = useState([]);
+  const [contactNumbers, setContactNumbers] = useState([]);
+  const [originalContactNumbers, setOriginalContactNumbers] = useState([]);
+  const [editableProfileFields, setEditableProfileFields] = useState({
+    username: "",
+    user_nic: ""
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [showEndSection, setShowEndSection] = useState(false);
-
-  // Available roles dropdown
   const userRoles = [
     { value: "", label: "User Role", hidden: true },
     { value: "GM", label: "GM" },
@@ -1328,11 +1323,10 @@ const UserInfo = () => {
     { value: "DRC_user", label: "DRC User" },
     { value: "recovery_staff", label: "Recovery Staff" },
     { value: "rtom", label: "RTOM" },
-    { value: "legal", label: "Legal" }, // Added to match response
-    { value: "analyst", label: "Analyst" }, // Added to match response
+    { value: "legal", label: "Legal" },
+    { value: "analyst", label: "Analyst" },
   ];
 
-  // Get system user
   const loadUser = async () => {
     try {
       const user = await getLoggedUserId();
@@ -1340,6 +1334,31 @@ const UserInfo = () => {
     } catch (err) {
       console.error("Error fetching logged user:", err);
     }
+  };
+
+  useEffect(() => {
+    if (userInfo.contact_numbers) {
+      const contacts = [...userInfo.contact_numbers];
+      while (contacts.length < 2) contacts.push("");
+      setContactNumbers(contacts);
+      setOriginalContactNumbers(contacts); 
+    }
+  }, [userInfo.contact_numbers]);
+
+  const handleContactNumberChange = (index, value) => {
+    const newContacts = [...contactNumbers];
+    newContacts[index] = value;
+    setContactNumbers(newContacts);
+  };
+
+  const checkIfProfileEditable = (createdOn) => {
+    if (!createdOn) return false;
+    
+    const createdDate = new Date(createdOn);
+    const now = new Date();
+    const hoursDiff = (now - createdDate) / (1000 * 60 * 60);
+    
+    return hoursDiff <= 24;
   };
 
   useEffect(() => {
@@ -1359,7 +1378,6 @@ const UserInfo = () => {
         return;
       }
 
-      // Validate user_id is numeric
       if (!/^\d+$/.test(user_id)) {
         if (isMounted) {
           setError("Invalid user ID format. Please provide a numeric ID.");
@@ -1376,9 +1394,26 @@ const UserInfo = () => {
       try {
         setLoading(true);
         const fetchedData = await getUserDetailsById(user_id);
-        console.log("Fetched user data:", fetchedData);
-
+        
         if (isMounted && fetchedData && fetchedData.status === "Success") {
+          const statusHistory = fetchedData.user_status || [];
+          const latestStatus = statusHistory.length > 0 
+            ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
+            : 'inactive';
+
+            console.log("Setting initial userInfo:", {
+        username: fetchedData.username || "",
+        user_type: fetchedData.user_type || "",
+        // ... other fields ...
+        user_nic: fetchedData.user_nic || "",
+        // ... other fields ...
+      });
+
+          const isProfileEditable = checkIfProfileEditable(fetchedData.created_on);
+          setCanEditProfile(isProfileEditable);
+          
+          setIsActive(latestStatus === "active");
+
           setUserInfo({
             username: fetchedData.username || "",
             user_type: fetchedData.user_type || "",
@@ -1390,26 +1425,21 @@ const UserInfo = () => {
             user_designation: fetchedData.user_designation || "",
             created_on: fetchedData.created_on || "",
             created_by: fetchedData.created_by || "",
-            status_on: fetchedData.user_status?.status_on || "",
-            status_by: fetchedData.user_status?.status_by || "",
-            Remark: fetchedData.Remark || [], // Handle missing Remark
+            status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
+            status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
+            Remark: fetchedData.Remark || [],
+            user_status: statusHistory 
           });
-          setIsActive(fetchedData.user_status?.status === "active");
-          setFormData({
-            user_type: fetchedData.user_type || "",
-            email: fetchedData.email || "",
-            contact_numbers:
-              fetchedData.contact_numbers && fetchedData.contact_numbers.length > 0
-                ? fetchedData.contact_numbers[0]
-                : "N/A",
-            can_user_login: fetchedData.can_user_login || "",
-            roles: fetchedData.roles && fetchedData.roles.length > 0 ? fetchedData.roles[0] : "",
-            created_on: fetchedData.created_on || "",
-            created_by: fetchedData.created_by || "",
-            status_on: fetchedData.user_status?.status_on || "",
-            status_by: fetchedData.user_status?.status_by || "",
+
+          setEditableProfileFields({
+            username: fetchedData.username || "",
+            user_nic: fetchedData.user_nic || ""
           });
-          setSelectedRole(fetchedData.roles && fetchedData.roles.length > 0 ? fetchedData.roles[0] : "");
+
+          const contacts = [...(fetchedData.contact_numbers || [])];
+          while (contacts.length < 2) contacts.push("");
+          setContactNumbers(contacts);
+          setOriginalContactNumbers(contacts);
         }
       } catch (err) {
         console.error("Error fetching User info:", err);
@@ -1436,72 +1466,217 @@ const UserInfo = () => {
     };
   }, [user_id]);
 
-  const toggleEdit = () => {
-    setIsEditing(!isEditing);
+  const handleProfileFieldChange = (field, value) => {
+    setEditableProfileFields(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const updateProfile = async () => {
+  try {
+    setLoading(true);
+    
+    const payload = {
+      user_id: Number(user_id),
+      profile_payload: {
+        username: editableProfileFields.username,
+        user_nic: editableProfileFields.user_nic
+      }
+    };
+    
+    console.log("Payload being sent to update profile:", payload);
+
+    const response = await updateUserProfile(payload);
+    
+    if (response.status === "updated" || response.status === "Success") {
+      // Update both userInfo and editableProfileFields
+      setUserInfo(prev => ({
+        ...prev,
+        username: editableProfileFields.username,
+        user_nic: editableProfileFields.user_nic
+      }));
+      
+      // Force a refresh of user data
+      const fetchedData = await getUserDetailsById(user_id);
+      if (fetchedData?.status === "Success") {
+        setUserInfo(prev => ({
+          ...prev,
+          ...fetchedData,
+          Remark: fetchedData.Remark || []
+        }));
+        setEditableProfileFields({
+          username: fetchedData.username || "",
+          user_nic: fetchedData.user_nic || ""
+        });
+      }
+      
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Profile updated successfully",
+      });
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err?.response?.data?.message || "Failed to update profile",
+    });
+    return false;
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  setEditableProfileFields({
+    username: userInfo.username || "",
+    user_nic: userInfo.user_nic || ""
+  });
+}, [userInfo.username, userInfo.user_nic]);
+
+  const toggleEditMode = () => {
+    setEditMode(!editMode);
     setShowEndSection(false);
-    setEmailError("");
   };
 
   const handleSave = async () => {
-    if (!remark.trim()) {
-      Swal.fire({
-        title: "Warning",
-        text: "Remark is required",
-        icon: "warning",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
-      return;
-    }
-
     try {
       setLoading(true);
 
-      const updateData = {
-        user_id: String(user_id),
-        updated_by: loggedUserData,
-        roles: [selectedRole],
-        user_status: isActive ? "active" : "inactive",
-        remark: remark,
-      };
+      // Check if profile fields need to be updated
+      const profileChanged = 
+        editableProfileFields.username !== userInfo.username ||
+        editableProfileFields.user_nic !== userInfo.user_nic;
 
-      const response = await updateUserDetails(updateData);
+      if (profileChanged && canEditProfile) {
+        await updateProfile();
+      }
 
-      if (response.status === "success") {
-        const fetchedData = await getUserDetailsById(user_id);
-        if (fetchedData && fetchedData.status === "Success") {
-          setUserInfo({
-            username: fetchedData.username || "",
-            user_type: fetchedData.user_type || "",
-            email: fetchedData.email || "",
-            contact_numbers: fetchedData.contact_numbers || [],
-            can_user_login: fetchedData.can_user_login || "",
-            roles: fetchedData.roles || [],
-            user_nic: fetchedData.user_nic || "",
-            user_designation: fetchedData.user_designation || "",
-            created_on: fetchedData.created_on || "",
-            created_by: fetchedData.created_by || "",
-            status_on: fetchedData.user_status?.status_on || "",
-            status_by: fetchedData.user_status?.status_by || "",
-            Remark: fetchedData.Remark || [],
-          });
+      // Get current status
+      const statusHistory = userInfo.user_status || [];
+      const currentStatus = statusHistory.length > 0 
+        ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
+        : 'inactive';
+      
+      const statusChanged = 
+        (isActive && currentStatus !== "active") ||
+        (!isActive && currentStatus === "active");
+
+      const rolesChanged = 
+        userRolesList.length > 0 || 
+        (userInfo.roles?.length !== [...userInfo.roles, ...userRolesList].length);
+
+      const contactsChanged = 
+        JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
+
+      if (!statusChanged && !rolesChanged && !contactsChanged && !profileChanged) {
+        Swal.fire({
+          icon: "info",
+          title: "No Changes",
+          text: "No changes were made to save",
+        });
+        setEditMode(false);
+        return;
+      }
+
+      const updatePromises = [];
+
+      if (statusChanged) {
+        updatePromises.push(updateUserStatus({
+          user_id: Number(user_id),
+          status_payload: {
+            status: isActive ? "Active" : "Inactive", 
+            status_on: new Date().toISOString(), 
+            status_by: loggedUserData 
+          }
+        }));
+      }
+
+      if (rolesChanged) {
+        const endDates = {};
+        const allRoles = [...userInfo.roles, ...userRolesList];
+        updatePromises.push(updateUserRoles(user_id, allRoles, endDates));
+      }
+
+      if (contactsChanged) {
+        const contactPayload = [];
+        const currentDate = new Date().toISOString();
+        
+        for (let i = 0; i < 2; i++) {
+          const originalNumber = originalContactNumbers[i] || "";
+          const currentNumber = contactNumbers[i] || "";
+          
+          if (currentNumber !== originalNumber) {
+            if (originalNumber) {
+              contactPayload.push({
+                contact_number: originalNumber,
+                end_dtm: currentDate
+              });
+            }
+            
+            if (currentNumber) {
+              contactPayload.push({
+                contact_number: currentNumber,
+              });
+            }
+          } else if (currentNumber) {
+            contactPayload.push({
+              contact_number: currentNumber
+            });
+          }
         }
 
-        setRemark("");
-        toggleEdit();
-
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "User details updated successfully",
-        });
+        if (contactPayload.length > 0) {
+          updatePromises.push(updateUserContacts({
+            user_id: Number(user_id),
+            contact_payload: contactPayload
+          }));
+        }
       }
+
+      await Promise.all(updatePromises);
+
+      // Refresh user data
+      const fetchedData = await getUserDetailsById(user_id);
+      if (fetchedData && fetchedData.status === "Success") {
+        const updatedStatusHistory = fetchedData.user_status || [];
+        const updatedStatus = updatedStatusHistory.length > 0 
+          ? String(updatedStatusHistory[statusHistory.length - 1].status).toLowerCase()
+          : 'inactive';
+
+        setIsActive(updatedStatus === "active");
+        
+        setUserInfo({
+          ...fetchedData,
+          Remark: fetchedData.Remark || [],
+          user_status: updatedStatusHistory
+        });
+
+        const updatedContacts = fetchedData.contact_numbers || [];
+        while (updatedContacts.length < 2) updatedContacts.push("");
+        setContactNumbers([...updatedContacts]);
+        setOriginalContactNumbers([...updatedContacts]);
+        setUserRolesList([]);
+      }
+
+      setEditMode(false);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "User updated successfully",
+      });
+
     } catch (err) {
-      console.error("Error updating user:", err);
+      console.error("Update Error:", err);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: err.message || "Failed to update user details",
+        text: err?.response?.data?.message || "Failed to update user",
       });
     } finally {
       setLoading(false);
@@ -1510,13 +1685,8 @@ const UserInfo = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
-
     const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${year}/${month}/${day}`;
+    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
   const handleEndUser = async () => {
@@ -1619,23 +1789,80 @@ const UserInfo = () => {
     }
   };
 
+  const removeRole = (roleToRemove) => {
+    const isExistingRole = userInfo.roles?.includes(roleToRemove);
+    
+    if (isExistingRole) {
+      Swal.fire({
+        title: 'Remove Role?',
+        text: `Are you sure you want to remove the ${roleToRemove} role?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setUserInfo(prev => ({
+            ...prev,
+            roles: prev.roles.filter(role => role !== roleToRemove)
+          }));
+          
+          if (selectedRole === roleToRemove) {
+            setSelectedRole("");
+          }
+        }
+      });
+    } else {
+      setUserRolesList(userRolesList.filter(role => role !== roleToRemove));
+      if (selectedRole === roleToRemove) {
+        setSelectedRole("");
+      }
+    }
+  };
+
   const filteredLogHistory = userInfo.Remark?.filter((log) => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      (log.remark && log.remark.toLowerCase().includes(searchLower)) ||
-      (log.remark_by && log.remark_by.toLowerCase().includes(searchLower)) ||
+      (log.remark?.toLowerCase().includes(searchLower)) ||
+      (log.remark_by?.toLowerCase().includes(searchLower)) ||
       (log.remark_dtm && formatDate(log.remark_dtm).toLowerCase().includes(searchLower))
     );
   }) || [];
 
   const formatRoleLabel = (value) => {
-    if (!value) return "N/A";
-
-    return value
-      .split("_")
-      .map((word) => word[0].toUpperCase() + word.slice(1))
-      .join(" ");
+    return value ? value.split("_").map(word => word[0].toUpperCase() + word.slice(1)).join(" ") : "N/A";
   };
+
+  const StatusToggle = () => (
+    <div className="flex justify-end items-center mb-4">
+      <div className="flex items-center">
+        <label className="inline-flex relative items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="sr-only peer"
+            checked={isActive}
+            onChange={() => setIsActive(!isActive)}
+          />
+          <div className={`
+            w-11 h-6 rounded-full 
+            ${isActive ? 'bg-green-600' : 'bg-gray-500'}
+            peer peer-focus:ring-4 peer-focus:ring-green-300
+            relative transition-colors duration-200
+          `}>
+            <div className={`
+              absolute top-0.5 left-[2px] bg-white border-gray-300
+              border rounded-full h-5 w-5 transition-all
+              ${isActive ? 'transform translate-x-5' : ''}
+            `}></div>
+          </div>
+          <span className="ml-3 text-sm font-medium">
+            {isActive ? "Active" : "Inactive"}
+          </span>
+        </label>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -1656,39 +1883,44 @@ const UserInfo = () => {
   return (
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
       <div className={`${GlobalStyle.headingLarge} mb-6 sm:mb-8`}>
-        <span>
-          {user_id} - {userInfo.username}
-        </span>
+        <span>{user_id} - {userInfo.username}</span>
       </div>
 
       <div className="w-full flex justify-center">
         <div className={`${GlobalStyle.cardContainer} relative w-full max-w-4xl`}>
-          {isEditing ? (
+          {editMode ? (
             <div className="space-y-4">
-              <div className="flex justify-end items-center mb-4">
-                <div className="flex items-center">
-                  <label className="inline-flex relative items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={isActive}
-                      onChange={() => setIsActive(!isActive)}
-                    />
-                    <div className="w-11 h-6 bg-gray-500 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                  </label>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="mb-6 sm:mb-8 w-full">
+              <StatusToggle />
+              
+              <div>
+                <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 mt-6 ml-8 underline text-left font-semibold`}>
+                  User Profile
+                </h2>
+  
+                <table className="mb-6 w-full ml-14">
                   <tbody>
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Type<span className="sm:hidden">:</span>
+                        User Name<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.user_type || "Not specified"}
+                        {canEditProfile ? (
+                          <input
+                            type="text"
+                            value={editableProfileFields.username}
+                            onChange={(e) => handleProfileFieldChange('username', e.target.value)}
+                            className={`${GlobalStyle.inputText} w-1/2`}
+                            placeholder="Enter username"
+                          />
+                        ) : (
+                          <div>
+                            {userInfo.username || "Not specified"}
+                            <p className="text-xs text-red-500 mt-1">
+                              Username can only be edited within 24 hours of creation
+                            </p>
+                          </div>
+                        )}
                       </td>
                     </tr>
 
@@ -1704,109 +1936,26 @@ const UserInfo = () => {
 
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Contact No.<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {Array.isArray(userInfo.contact_numbers) && userInfo.contact_numbers.length > 0
-                          ? userInfo.contact_numbers[0]
-                          : "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Login Method<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.can_user_login || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Role<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        <div className="flex items-center space-x-2">
-                          <select
-                            value={selectedRole}
-                            onChange={(e) => setSelectedRole(e.target.value)}
-                            className={`${GlobalStyle.selectBox} w-full`}
-                            style={{ color: selectedRole === "" ? "gray" : "black" }}
-                          >
-                            {userRoles.map((role) => (
-                              <option
-                                key={role.value}
-                                value={role.value}
-                                hidden={role.hidden}
-                                style={{ color: "black" }}
-                              >
-                                {role.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Created On<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(userInfo.created_on) || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Created By<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.created_by || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Status On<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(userInfo.status_on) || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="h-2"></tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Status By<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.status_by || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         NIC<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.user_nic || "Not specified"}
+                        {canEditProfile ? (
+                          <input
+                            type="text"
+                            value={editableProfileFields.user_nic}
+                            onChange={(e) => handleProfileFieldChange('user_nic', e.target.value)}
+                            className={`${GlobalStyle.inputText} w-1/2`}
+                            placeholder="Enter NIC"
+                          />
+                        ) : (
+                          <div>
+                            {userInfo.user_nic || "Not specified"}
+                            <p className="text-xs text-red-500 mt-1">
+                              NIC can only be edited within 24 hours of creation
+                            </p>
+                          </div>
+                        )}
                       </td>
                     </tr>
 
@@ -1822,31 +1971,169 @@ const UserInfo = () => {
                   </tbody>
                 </table>
 
-                <table className={`${GlobalStyle.table} min-w-full mt-4`}>
+                <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 mt-8 ml-8 underline text-left font-semibold`}>
+                  Contact Details
+                </h2>
+                
+                <table className="mb-6 w-full ml-14">
                   <tbody>
-                    <tr>
-                      <td className={`${GlobalStyle.tableData} underline whitespace-nowrap text-left w-1/3 sm:w-1/4 font-semibold`}>
-                        Remark
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Contact No 01<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        <input
+                          type="text"
+                          value={contactNumbers[0] || ""}
+                          onChange={(e) => handleContactNumberChange(0, e.target.value)}
+                          className={`${GlobalStyle.inputText} w-1/2`}
+                          placeholder="Enter contact number"
+                        />
                       </td>
                     </tr>
-                    <tr>
-                      <td className={`${GlobalStyle.tableData} break-words text-left`}>
-                        <textarea
-                          value={remark}
-                          onChange={(e) => setRemark(e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full min-h-[100px] resize-y"
-                          placeholder="Enter remarks here..."
-                        ></textarea>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Contact No 02<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        <input
+                          type="text"
+                          value={contactNumbers[1] || ""}
+                          onChange={(e) => handleContactNumberChange(1, e.target.value)}
+                          className={`${GlobalStyle.inputText} w-1/2`}
+                          placeholder="Enter contact number"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <table className="mb-6 w-full ml-8">
+                  <tbody>
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        User type<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.user_type || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Login Method<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.can_user_login || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row ">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        User Role<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-left block sm:table-cell`}>
+                        <div className="flex flex-col gap-2">
+                          <select
+                            value={selectedRole}
+                            onChange={(e) => {
+                              const newRole = e.target.value;
+                              if (newRole && ![...userInfo.roles, ...userRolesList].includes(newRole)) {
+                                setSelectedRole(newRole);
+                                setUserRolesList([...userRolesList, newRole]);
+                              }
+                            }}
+                            className={`${GlobalStyle.selectBox} w-full sm:w-3/4`}
+                            style={{ color: selectedRole === "" ? "gray" : "black" }}
+                          >
+                            <option value="" disabled hidden>
+                              Select Role
+                            </option>
+                            {userRoles.map((role) => (
+                              <option
+                                key={role.value}
+                                value={role.value}
+                                hidden={role.hidden}
+                                style={{ color: "black" }}
+                                disabled={[...userInfo.roles, ...userRolesList].includes(role.value)}
+                              >
+                                {role.label}
+                              </option>
+                            ))}
+                          </select>
+
+                          {([...userInfo.roles, ...userRolesList].length > 0) && (
+                            <div className={`${GlobalStyle.inputText} w-full sm:w-3/4 flex flex-wrap items-center gap-2 mt-4 p-2`}>
+                              {userInfo.roles?.map((role, index) => (
+                                <div key={`prev-${index}`} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                                  <span className="text-blue-900 mr-2">
+                                    {userRoles.find(r => r.value === role)?.label || formatRoleLabel(role)}
+                                  </span>
+                                  <button
+                                    onClick={() => removeRole(role)}
+                                    className="text-blue-900 hover:text-red-600 font-bold"
+                                    title="Remove role"
+                                    type="button"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                              
+                              {userRolesList.map((role, index) => (
+                                <div key={`new-${index}`} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                                  <span className="text-blue-900 mr-2">
+                                    {userRoles.find(r => r.value === role)?.label || role}
+                                  </span>
+                                  <button
+                                    onClick={() => removeRole(role)}
+                                    className="text-blue-900 hover:text-red-600 font-bold"
+                                    title="Remove role"
+                                    type="button"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Created On<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {formatDate(userInfo.created_on) || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Created By<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.created_by || "Not specified"}
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end gap-4 mt-8">
                 <button
                   onClick={handleSave}
-                  className={GlobalStyle.buttonPrimary}
+                  className={`${GlobalStyle.buttonPrimary} px-4 sm:px-6 py-2`}
                   disabled={loading}
                 >
                   {loading ? "Saving..." : "Save"}
@@ -1859,7 +2146,7 @@ const UserInfo = () => {
                 <button
                   onClick={() => {
                     if (userInfo.user_status !== "terminate") {
-                      toggleEdit();
+                      setEditMode(true);
                     }
                   }}
                   className={`${userInfo.user_status === "terminate" ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -1879,7 +2166,7 @@ const UserInfo = () => {
                   <tbody>
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Type<span className="sm:hidden">:</span>
+                        User type<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
@@ -1903,9 +2190,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {Array.isArray(userInfo.contact_numbers) && userInfo.contact_numbers.length > 0
-                          ? userInfo.contact_numbers[0]
-                          : "Not specified"}
+                        {contactNumbers[0] || "Not specified"}
                       </td>
                     </tr>
 
@@ -1925,9 +2210,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.roles && userInfo.roles.length > 0
-                          ? userInfo.roles.map((role) => formatRoleLabel(role)).join(", ")
-                          : "Not specified"}
+                        {userInfo.roles?.map(role => formatRoleLabel(role)).join(", ") || "Not specified"}
                       </td>
                     </tr>
 
@@ -2005,7 +2288,7 @@ const UserInfo = () => {
               <tbody className="space-y-4 sm:space-y-0">
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                    End Date
+                    End Date <span className="text-red-500">*</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -2023,7 +2306,7 @@ const UserInfo = () => {
 
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                    Remark
+                    Remark <span className="text-red-500">*</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -2045,40 +2328,45 @@ const UserInfo = () => {
                 onClick={handleEndUser}
                 className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
               >
-                Save
+                End
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex justify-between mx-8">
-        <div className="flex flex-col just-start">
-          <div className="flex gap-4">
-            <button
-              className={`${GlobalStyle.buttonPrimary}`}
-              onClick={() => setShowPopup(true)}
-            >
-              Log History
-            </button>
-          </div>
+      <div className="flex justify-between mx-8 mt-6">
+        <div className="flex flex-col items-start">
+          <button
+            className={`${GlobalStyle.buttonPrimary}`}
+            onClick={() => setShowPopup(true)}
+          >
+            Log History
+          </button>
 
-          <div style={{ marginTop: "12px" }}>
-            <button className={GlobalStyle.buttonPrimary} onClick={goBack}>
+          <div style={{ marginTop: '15px' }}>
+            <button 
+              className={`${GlobalStyle.buttonPrimary}`}
+              onClick={goBack}
+            >
               <FaArrowLeft />
             </button>
           </div>
         </div>
-
+        
         <div className="flex justify-end h-fit">
-          {!isEditing && !showEndSection && (
+          {!editMode && !showEndSection && (
             <button
               onClick={() => {
                 if (userInfo.user_status !== "terminate") {
                   setShowEndSection(true);
                 }
               }}
-              className={`${GlobalStyle.buttonPrimary} ${userInfo.user_status === "terminate" ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`${GlobalStyle.buttonPrimary} ${
+                userInfo.user_status === "terminate" 
+                  ? "opacity-50 cursor-not-allowed" 
+                  : ""
+              }`}
               disabled={userInfo.user_status === "terminate"}
             >
               End
@@ -2095,7 +2383,6 @@ const UserInfo = () => {
               <button
                 onClick={() => setShowPopup(false)}
                 className="text-red-500 text-lg font-bold"
-                title="Close"
               >
                 ×
               </button>
@@ -2112,21 +2399,15 @@ const UserInfo = () => {
                 <FaSearch className={GlobalStyle.searchBarIcon} />
               </div>
             </div>
-
+            
             <div className="p-6 overflow-auto max-h-[70vh]">
               <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                   <thead className={GlobalStyle.thead}>
                     <tr>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Date
-                      </th>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Action
-                      </th>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Edited By
-                      </th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>Date</th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>Action</th>
+                      <th scope="col" className={GlobalStyle.tableHeader}>Edited By</th>
                     </tr>
                   </thead>
 
@@ -2135,7 +2416,11 @@ const UserInfo = () => {
                       filteredLogHistory.map((log, index) => (
                         <tr
                           key={index}
-                          className={`${index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd} border-b`}
+                          className={`${
+                            index % 2 === 0
+                              ? GlobalStyle.tableRowEven
+                              : GlobalStyle.tableRowOdd
+                          } border-b`}
                         >
                           <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
                             {formatDate(log.remark_dtm) || "N/A"}
