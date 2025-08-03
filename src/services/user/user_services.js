@@ -205,3 +205,29 @@ export const updateUserRoles = async (user_id, roles, endDates = {}) => {
     );
   }
 };
+
+export const updateUserContacts = async (requestData = {}) => {
+  try {
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/contacts",  
+      {
+        user_id: Number(requestData.user_id),
+        contact_payload: requestData.contact_payload
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+           
+        }
+      }
+    );
+    console.log("Contact update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user contacts:", error);
+    throw error?.response?.data || {
+      status: "error",
+      message: "Unable to update user contacts",
+    };
+  }
+};
