@@ -1328,8 +1328,8 @@ const UserInfo = () => {
     { value: "DRC_user", label: "DRC User" },
     { value: "recovery_staff", label: "Recovery Staff" },
     { value: "rtom", label: "RTOM" },
-    { value: "legal", label: "Legal" }, // Added to match response
-    { value: "analyst", label: "Analyst" }, // Added to match response
+    { value: "legal", label: "Legal" },
+    { value: "analyst", label: "Analyst" },
   ];
 
   // Get system user
@@ -1392,7 +1392,7 @@ const UserInfo = () => {
             created_by: fetchedData.created_by || "",
             status_on: fetchedData.user_status?.status_on || "",
             status_by: fetchedData.user_status?.status_by || "",
-            Remark: fetchedData.Remark || [], // Handle missing Remark
+            Remark: fetchedData.Remark || [],
           });
           setIsActive(fetchedData.user_status?.status === "active");
           setFormData({
@@ -1570,10 +1570,8 @@ const UserInfo = () => {
       });
 
       const payload = {
-        user_id,
-        end_by: loggedUserData,
-        end_dtm: endDate.toISOString(),
-        remark,
+        user_id: Number(user_id),
+        created_by: loggedUserData,
       };
 
       const response = await endUser(payload);
