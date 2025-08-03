@@ -540,6 +540,18 @@ export default function AssignPendingDRCSummary() {
 
         const forwardForProceed = async () => {
           try {
+            const areThereAnyTasks = await Validate_Existing_Batch_Task(batchID);
+
+            if (areThereAnyTasks.status === 200) {
+              Swal.fire({
+                icon: "warning",
+                title: "Warning",
+                text: "Already has tasks with this case distribution batch id.",
+                confirmButtonColor: "#f1c40f",
+              });
+              return;
+            };
+
             const userId = await getLoggedUserId();
 
             const data = paginatedData1.find((item) => item.case_distribution_batch_id === batchID);

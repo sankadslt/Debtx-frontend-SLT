@@ -222,12 +222,19 @@ const Digital_Signature_LOD = () => {
         setIsCreatingTask(true);
         try {
             const response = await Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases(userData);
-            if (response === "success") {
+            if (response.status === 200) {
                 Swal.fire({
-                    title: response,
-                    text: `Task created successfully!`,
+                    title: 'Task created successfully!',
+                    text: "Task ID: " + response.data.data.data.Task_Id,
                     icon: "success",
                     confirmButtonColor: "#28a745"
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: "Failed to create task.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
                 });
             }
         } catch (error) {

@@ -61,7 +61,7 @@ export const List_F2_Selection_Cases = async (
     if (response.data.status === "success") {
       return response.data.data.map((LOD) => ({
         LODID: LOD.case_id,
-        Status: LOD.lod_final_reminder.current_document_type,
+        Status: LOD.lod_final_reminder?.current_document_type,
         Amount: LOD.current_arrears_amount,
         CustomerTypeName: LOD.customer_type_name || null,
         AccountManagerCode: LOD.account_manager_code || null,
@@ -89,7 +89,7 @@ export const Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases = async (
     );
 
     // return the response status
-    return response.data.status;
+    return response;
   } catch (error) {
     console.error(
       "Error creating task:",
