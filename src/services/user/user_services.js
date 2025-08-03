@@ -231,3 +231,34 @@ export const updateUserContacts = async (requestData = {}) => {
     };
   }
 };
+
+export const updateUserProfile = async (requestData = {}) => {
+  try {
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/profile",
+      {
+        user_id: Number(requestData.user_id),
+        profile_payload: {
+          username: requestData.profile_payload.username,
+          user_nic: requestData.profile_payload.user_nic
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log("Profile update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to update user profile",
+      }
+    );
+  }
+};

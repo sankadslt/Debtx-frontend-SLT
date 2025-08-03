@@ -1255,7 +1255,14 @@ import edit from "../../assets/images/edit-info.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
-import { endUser, getUserDetailsById, updateUserDetails, updateUserStatus, updateUserRoles ,updateUserContacts   } from "../../services/user/user_services";
+import { 
+  endUser, 
+  getUserDetailsById, 
+  updateUserStatus, 
+  updateUserRoles,
+  updateUserContacts,
+  updateUserProfile 
+} from "../../services/user/user_services";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaArrowLeft } from "react-icons/fa";
 import { getLoggedUserId } from "../../services/auth/authService";
@@ -1278,6 +1285,7 @@ const UserInfo = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [canEditProfile, setCanEditProfile] = useState(false);
   
   const [userInfo, setUserInfo] = useState({
     username: "",
@@ -1296,22 +1304,14 @@ const UserInfo = () => {
   });
 
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({
-    user_type: "",
-    email: "",
-    contact_numbers: "",
-    can_user_login: "",
-    roles: "",
-    created_on: "",
-    created_by: "",
-    status_on: "",
-    status_by: "",
-  });
   const [showEndSection, setShowEndSection] = useState(false);
   const [userRolesList, setUserRolesList] = useState([]);
-  const [editingContacts, setEditingContacts] = useState(false);
   const [contactNumbers, setContactNumbers] = useState([]);
   const [originalContactNumbers, setOriginalContactNumbers] = useState([]);
+  const [editableProfileFields, setEditableProfileFields] = useState({
+    username: "",
+    user_nic: ""
+  });
 
   const userRoles = [
     { value: "", label: "User Role", hidden: true },
@@ -1336,32 +1336,30 @@ const UserInfo = () => {
     }
   };
 
+  useEffect(() => {
+    if (userInfo.contact_numbers) {
+      const contacts = [...userInfo.contact_numbers];
+      while (contacts.length < 2) contacts.push("");
+      setContactNumbers(contacts);
+      setOriginalContactNumbers(contacts); 
+    }
+  }, [userInfo.contact_numbers]);
 
+  const handleContactNumberChange = (index, value) => {
+    const newContacts = [...contactNumbers];
+    newContacts[index] = value;
+    setContactNumbers(newContacts);
+  };
 
-
-useEffect(() => {
-  if (userInfo.contact_numbers) {
-    const contacts = [...userInfo.contact_numbers];
-    while (contacts.length < 2) contacts.push("");
-  
-    setContactNumbers(contacts);
-    setOriginalContactNumbers(contacts); 
-  }
-}, [userInfo.contact_numbers]);
-
-const handleContactNumberChange = (index, value) => {
-  console.log('Contact number changed:', {
-    'Index': index,
-    'Old value': contactNumbers[index],
-    'New value': value,
-    'All current numbers': [...contactNumbers]
-  });
-  
-  const newContacts = [...contactNumbers];
-  newContacts[index] = value;
-  setContactNumbers(newContacts);
-};
-
+  const checkIfProfileEditable = (createdOn) => {
+    if (!createdOn) return false;
+    
+    const createdDate = new Date(createdOn);
+    const now = new Date();
+    const hoursDiff = (now - createdDate) / (1000 * 60 * 60);
+    
+    return hoursDiff <= 24;
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -1403,7 +1401,16 @@ const handleContactNumberChange = (index, value) => {
             ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
             : 'inactive';
 
-          console.log("API Status:", latestStatus);
+            console.log("Setting initial userInfo:", {
+        username: fetchedData.username || "",
+        user_type: fetchedData.user_type || "",
+        // ... other fields ...
+        user_nic: fetchedData.user_nic || "",
+        // ... other fields ...
+      });
+
+          const isProfileEditable = checkIfProfileEditable(fetchedData.created_on);
+          setCanEditProfile(isProfileEditable);
           
           setIsActive(latestStatus === "active");
 
@@ -1424,21 +1431,15 @@ const handleContactNumberChange = (index, value) => {
             user_status: statusHistory 
           });
 
-          setFormData({
-            user_type: fetchedData.user_type || "",
-            email: fetchedData.email || "",
-            contact_numbers:
-              fetchedData.contact_numbers && fetchedData.contact_numbers.length > 0
-                ? fetchedData.contact_numbers[0]
-                : "N/A",
-            can_user_login: fetchedData.can_user_login || "",
-            roles: fetchedData.roles && fetchedData.roles.length > 0 ? fetchedData.roles[0] : "",
-            created_on: fetchedData.created_on || "",
-            created_by: fetchedData.created_by || "",
-            status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
-            status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
+          setEditableProfileFields({
+            username: fetchedData.username || "",
+            user_nic: fetchedData.user_nic || ""
           });
-          setSelectedRole(fetchedData.roles && fetchedData.roles.length > 0 ? fetchedData.roles[0] : "");
+
+          const contacts = [...(fetchedData.contact_numbers || [])];
+          while (contacts.length < 2) contacts.push("");
+          setContactNumbers(contacts);
+          setOriginalContactNumbers(contacts);
         }
       } catch (err) {
         console.error("Error fetching User info:", err);
@@ -1465,157 +1466,222 @@ const handleContactNumberChange = (index, value) => {
     };
   }, [user_id]);
 
-  useEffect(() => {
-    console.log("Toggle state changed to:", isActive);
-  }, [isActive]);
+  const handleProfileFieldChange = (field, value) => {
+    setEditableProfileFields(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const updateProfile = async () => {
+  try {
+    setLoading(true);
+    
+    const payload = {
+      user_id: Number(user_id),
+      profile_payload: {
+        username: editableProfileFields.username,
+        user_nic: editableProfileFields.user_nic
+      }
+    };
+    
+    console.log("Payload being sent to update profile:", payload);
+
+    const response = await updateUserProfile(payload);
+    
+    if (response.status === "updated" || response.status === "Success") {
+      // Update both userInfo and editableProfileFields
+      setUserInfo(prev => ({
+        ...prev,
+        username: editableProfileFields.username,
+        user_nic: editableProfileFields.user_nic
+      }));
+      
+      // Force a refresh of user data
+      const fetchedData = await getUserDetailsById(user_id);
+      if (fetchedData?.status === "Success") {
+        setUserInfo(prev => ({
+          ...prev,
+          ...fetchedData,
+          Remark: fetchedData.Remark || []
+        }));
+        setEditableProfileFields({
+          username: fetchedData.username || "",
+          user_nic: fetchedData.user_nic || ""
+        });
+      }
+      
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Profile updated successfully",
+      });
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err?.response?.data?.message || "Failed to update profile",
+    });
+    return false;
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  setEditableProfileFields({
+    username: userInfo.username || "",
+    user_nic: userInfo.user_nic || ""
+  });
+}, [userInfo.username, userInfo.user_nic]);
 
   const toggleEditMode = () => {
     setEditMode(!editMode);
     setShowEndSection(false);
   };
 
- const handleSave = async () => {
-  try {
-    setLoading(true);
+  const handleSave = async () => {
+    try {
+      setLoading(true);
 
-   
+      // Check if profile fields need to be updated
+      const profileChanged = 
+        editableProfileFields.username !== userInfo.username ||
+        editableProfileFields.user_nic !== userInfo.user_nic;
 
-    // Get current status
-    const statusHistory = userInfo.user_status || [];
-    const currentStatus = statusHistory.length > 0 
-      ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
-      : 'inactive';
-    
-    // Check changes
-    const statusChanged = 
-      (isActive && currentStatus !== "active") ||
-      (!isActive && currentStatus === "active");
-
-    const rolesChanged = 
-      userRolesList.length > 0 || 
-      (userInfo.roles?.length !== [...userInfo.roles, ...userRolesList].length);
-
-    const contactsChanged = 
-      JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
-
-    if (!statusChanged && !rolesChanged && !contactsChanged) {
-      Swal.fire({
-        icon: "info",
-        title: "No Changes",
-        text: "No changes were made to save",
-      });
-      setEditMode(false);
-      return;
-    }
-
-    const updatePromises = [];
-
-    // Status update
-    if (statusChanged) {
-      updatePromises.push(updateUserStatus({
-        user_id: Number(user_id),
-        status_payload: {
-          status: isActive ? "Active" : "Inactive", 
-          status_on: new Date().toISOString(), 
-          status_by: loggedUserData 
-        }
-      }));
-    }
-
-    // Roles update
-    if (rolesChanged) {
-      const endDates = {};
-      const allRoles = [...userInfo.roles, ...userRolesList];
-      updatePromises.push(updateUserRoles(user_id, allRoles, endDates));
-    }
-
-    if (contactsChanged) {
-      const contactPayload = [];
-      const currentDate = new Date().toISOString();
-      
-      for (let i = 0; i < 2; i++) {
-        const originalNumber = originalContactNumbers[i] || "";
-        const currentNumber = contactNumbers[i] || "";
-        
-        // If the number has changed
-        if (currentNumber !== originalNumber) {
-          if (originalNumber) {
-            contactPayload.push({
-              contact_number: originalNumber,
-              end_dtm: currentDate
-            });
-          }
-          
-          // Add the new number if it's not empty
-          if (currentNumber) {
-            contactPayload.push({
-              contact_number: currentNumber,
-              
-            });
-          }
-        } else if (currentNumber) {
-        
-          contactPayload.push({
-            contact_number: currentNumber
-          });
-        }
+      if (profileChanged && canEditProfile) {
+        await updateProfile();
       }
 
-      console.log('Contact Payload:', contactPayload);
+      // Get current status
+      const statusHistory = userInfo.user_status || [];
+      const currentStatus = statusHistory.length > 0 
+        ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
+        : 'inactive';
       
-      if (contactPayload.length > 0) {
-        updatePromises.push(updateUserContacts({
+      const statusChanged = 
+        (isActive && currentStatus !== "active") ||
+        (!isActive && currentStatus === "active");
+
+      const rolesChanged = 
+        userRolesList.length > 0 || 
+        (userInfo.roles?.length !== [...userInfo.roles, ...userRolesList].length);
+
+      const contactsChanged = 
+        JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
+
+      if (!statusChanged && !rolesChanged && !contactsChanged && !profileChanged) {
+        Swal.fire({
+          icon: "info",
+          title: "No Changes",
+          text: "No changes were made to save",
+        });
+        setEditMode(false);
+        return;
+      }
+
+      const updatePromises = [];
+
+      if (statusChanged) {
+        updatePromises.push(updateUserStatus({
           user_id: Number(user_id),
-          contact_payload: contactPayload
+          status_payload: {
+            status: isActive ? "Active" : "Inactive", 
+            status_on: new Date().toISOString(), 
+            status_by: loggedUserData 
+          }
         }));
       }
-    }
 
-    await Promise.all(updatePromises);
+      if (rolesChanged) {
+        const endDates = {};
+        const allRoles = [...userInfo.roles, ...userRolesList];
+        updatePromises.push(updateUserRoles(user_id, allRoles, endDates));
+      }
 
-    // Refresh user data
-    const fetchedData = await getUserDetailsById(user_id);
-    if (fetchedData && fetchedData.status === "Success") {
-      const updatedStatusHistory = fetchedData.user_status || [];
-      const updatedStatus = updatedStatusHistory.length > 0 
-        ? String(updatedStatusHistory[updatedStatusHistory.length - 1].status).toLowerCase()
-        : 'inactive';
+      if (contactsChanged) {
+        const contactPayload = [];
+        const currentDate = new Date().toISOString();
+        
+        for (let i = 0; i < 2; i++) {
+          const originalNumber = originalContactNumbers[i] || "";
+          const currentNumber = contactNumbers[i] || "";
+          
+          if (currentNumber !== originalNumber) {
+            if (originalNumber) {
+              contactPayload.push({
+                contact_number: originalNumber,
+                end_dtm: currentDate
+              });
+            }
+            
+            if (currentNumber) {
+              contactPayload.push({
+                contact_number: currentNumber,
+              });
+            }
+          } else if (currentNumber) {
+            contactPayload.push({
+              contact_number: currentNumber
+            });
+          }
+        }
 
-      setIsActive(updatedStatus === "active");
-      
-      setUserInfo({
-        ...fetchedData,
-        Remark: fetchedData.Remark || [],
-        user_status: updatedStatusHistory
+        if (contactPayload.length > 0) {
+          updatePromises.push(updateUserContacts({
+            user_id: Number(user_id),
+            contact_payload: contactPayload
+          }));
+        }
+      }
+
+      await Promise.all(updatePromises);
+
+      // Refresh user data
+      const fetchedData = await getUserDetailsById(user_id);
+      if (fetchedData && fetchedData.status === "Success") {
+        const updatedStatusHistory = fetchedData.user_status || [];
+        const updatedStatus = updatedStatusHistory.length > 0 
+          ? String(updatedStatusHistory[statusHistory.length - 1].status).toLowerCase()
+          : 'inactive';
+
+        setIsActive(updatedStatus === "active");
+        
+        setUserInfo({
+          ...fetchedData,
+          Remark: fetchedData.Remark || [],
+          user_status: updatedStatusHistory
+        });
+
+        const updatedContacts = fetchedData.contact_numbers || [];
+        while (updatedContacts.length < 2) updatedContacts.push("");
+        setContactNumbers([...updatedContacts]);
+        setOriginalContactNumbers([...updatedContacts]);
+        setUserRolesList([]);
+      }
+
+      setEditMode(false);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "User updated successfully",
       });
 
-      // Update contact numbers state with the new data from API
-      const updatedContacts = fetchedData.contact_numbers || [];
-      // Ensure we always have 2 contact numbers (empty strings if missing)
-      while (updatedContacts.length < 2) updatedContacts.push("");
-      setContactNumbers([...updatedContacts]);
-      setOriginalContactNumbers([...updatedContacts]);
-      setUserRolesList([]);
+    } catch (err) {
+      console.error("Update Error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.response?.data?.message || "Failed to update user",
+      });
+    } finally {
+      setLoading(false);
     }
-
-    setEditMode(false);
-    Swal.fire({
-      icon: "success",
-      title: "Success",
-      text: "User updated successfully",
-    });
-
-  } catch (err) {
-    console.error("Update Error:", err);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: err?.response?.data?.message || "Failed to update user",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
@@ -1839,7 +1905,22 @@ const handleContactNumberChange = (index, value) => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.username || "Not specified"}
+                        {canEditProfile ? (
+                          <input
+                            type="text"
+                            value={editableProfileFields.username}
+                            onChange={(e) => handleProfileFieldChange('username', e.target.value)}
+                            className={`${GlobalStyle.inputText} w-1/2`}
+                            placeholder="Enter username"
+                          />
+                        ) : (
+                          <div>
+                            {userInfo.username || "Not specified"}
+                            <p className="text-xs text-red-500 mt-1">
+                              Username can only be edited within 24 hours of creation
+                            </p>
+                          </div>
+                        )}
                       </td>
                     </tr>
 
@@ -1859,7 +1940,22 @@ const handleContactNumberChange = (index, value) => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.user_nic || "Not specified"}
+                        {canEditProfile ? (
+                          <input
+                            type="text"
+                            value={editableProfileFields.user_nic}
+                            onChange={(e) => handleProfileFieldChange('user_nic', e.target.value)}
+                            className={`${GlobalStyle.inputText} w-1/2`}
+                            placeholder="Enter NIC"
+                          />
+                        ) : (
+                          <div>
+                            {userInfo.user_nic || "Not specified"}
+                            <p className="text-xs text-red-500 mt-1">
+                              NIC can only be edited within 24 hours of creation
+                            </p>
+                          </div>
+                        )}
                       </td>
                     </tr>
 
@@ -1887,17 +1983,13 @@ const handleContactNumberChange = (index, value) => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {editMode ? (
-                          <input
-                            type="text"
-                            value={contactNumbers[0] || ""}
-                            onChange={(e) => handleContactNumberChange(0, e.target.value)}
-                            className={`${GlobalStyle.inputText} w-1/2`}
-                            placeholder="Enter contact number"
-                          />
-                        ) : (
-                          contactNumbers[0] || "Not specified"
-                        )}
+                        <input
+                          type="text"
+                          value={contactNumbers[0] || ""}
+                          onChange={(e) => handleContactNumberChange(0, e.target.value)}
+                          className={`${GlobalStyle.inputText} w-1/2`}
+                          placeholder="Enter contact number"
+                        />
                       </td>
                     </tr>
 
@@ -1907,17 +1999,13 @@ const handleContactNumberChange = (index, value) => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {editMode ? (
-                          <input
-                            type="text"
-                            value={contactNumbers[1] || ""}
-                            onChange={(e) => handleContactNumberChange(1, e.target.value)}
-                            className={`${GlobalStyle.inputText} w-1/2`}
-                            placeholder="Enter contact number"
-                          />
-                        ) : (
-                           contactNumbers[1] || "Not specified"
-                        )}
+                        <input
+                          type="text"
+                          value={contactNumbers[1] || ""}
+                          onChange={(e) => handleContactNumberChange(1, e.target.value)}
+                          className={`${GlobalStyle.inputText} w-1/2`}
+                          placeholder="Enter contact number"
+                        />
                       </td>
                     </tr>
                   </tbody>
@@ -1988,12 +2076,7 @@ const handleContactNumberChange = (index, value) => {
                                     {userRoles.find(r => r.value === role)?.label || formatRoleLabel(role)}
                                   </span>
                                   <button
-                                    onClick={() => {
-                                      setUserInfo(prev => ({
-                                        ...prev,
-                                        roles: prev.roles.filter(r => r !== role)
-                                      }));
-                                    }}
+                                    onClick={() => removeRole(role)}
                                     className="text-blue-900 hover:text-red-600 font-bold"
                                     title="Remove role"
                                     type="button"
@@ -2009,12 +2092,7 @@ const handleContactNumberChange = (index, value) => {
                                     {userRoles.find(r => r.value === role)?.label || role}
                                   </span>
                                   <button
-                                    onClick={() => {
-                                      setUserRolesList(userRolesList.filter(r => r !== role));
-                                      if (selectedRole === role) {
-                                        setSelectedRole("");
-                                      }
-                                    }}
+                                    onClick={() => removeRole(role)}
                                     className="text-blue-900 hover:text-red-600 font-bold"
                                     title="Remove role"
                                     type="button"
@@ -2112,7 +2190,7 @@ const handleContactNumberChange = (index, value) => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {contactNumbers[1] || "Not specified"}
+                        {contactNumbers[0] || "Not specified"}
                       </td>
                     </tr>
 
