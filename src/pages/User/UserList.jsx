@@ -56,7 +56,7 @@ const UserList = () => {
     { value: "legal_officer", label: "Legal Officer" },
     { value: "manager", label: "Manager" },
     { value: "slt_coordinator", label: "SLT Coordinator" },
-    { value: "DRC_user", label: "DRC User" },
+    { value: "drc_officer", label: "DRC Officer" },
     { value: "recovery_staff", label: "Recovery Staff" },
     { value: "rtom", label: "RTOM" }
   ];

@@ -116,15 +116,13 @@ const SignUp = () => {
         user_type: userType,
         user_login: userType === "Slt" ? [formData.serviceNo + "@intranet.slt.com.lk"] : userType === "Drcuser" ? [formData.email || formData.contactNo] : [],
         'User_profile.username': formData.name,
-        'User_profile.nic': formData.nic,
+        // 'User_profile.nic': formData.nic,
         'User_profile.email': formData.email,
         user_contact_num: formData.contactNo,
         'User_profile.designation': formData.designation,
         role: formData.role,
-        email: formData.email,
         contact_no: formData.contactNo,
         login_method: formData.loginMethod,
-        username: formData.name,
         created_by: loggedUserData,
       };
 
@@ -133,6 +131,7 @@ const SignUp = () => {
           ? {
               ...basePayload,
               user_id: formData.serviceNo + "@intranet.slt.com.lk", // Use service number as user_id
+              'User_profile.nic': formData.serviceNo , // Include NIC for SLT users
             }
           : userType === "Drcuser"
           ? {
