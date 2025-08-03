@@ -165,46 +165,52 @@ export const updateUserStatus = async (requestData = {}) => {
   }
 };
 
-
-export const updateUserRoles = async (user_id, roles, endDates = {}) => {
+export const updateUserRoles = async (userId, rolesToAdd = []) => {
   try {
-    const role_payload = roles.map(role => {
-      const roleObj = { role_name: role };
-      
-      if (endDates[role]) {
-        roleObj.end_dtm = endDates[role];
-      }
-      
-      return roleObj;
-    });
+    if (!userId) {
+      throw {
+        status: "error",
+        message: "User ID is required",
+        errors: {}
+      };
+    }
 
-    role_payload.push({});
+    const payload = {
+      user_id: Number(userId),
+      roles_to_add: rolesToAdd,
+    };
+
+    console.log("Updating roles with payload:", payload);
 
     const response = await axios.post(
       "https://debtx.slt.lk:6500/users/update/roles",
-      {
-        user_id: Number(user_id),
-        role_payload
-      },
+      payload,
       {
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
       }
     );
 
+    console.log("Roles update response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error updating user roles:", error);
-    throw (
-      error?.response?.data || {
-        status: "error",
-        message: "Unable to update user roles",
-        errors: error?.response?.data?.errors || {}
-      }
-    );
+
+    const errorResponse = error?.response?.data || {
+      status: "error",
+      message: error.message || "Unable to update user roles",
+      errors: error?.response?.data?.errors || {}
+    };
+
+    throw errorResponse;
   }
 };
+
+
+
+
 
 export const updateUserContacts = async (requestData = {}) => {
   try {
