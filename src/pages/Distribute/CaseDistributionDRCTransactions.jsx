@@ -540,56 +540,75 @@ export default function AssignPendingDRCSummary() {
 
         const forwardForProceed = async () => {
           try {
-            const userId = await getLoggedUserId();
+            const areThereAnyTasks = await Validate_Existing_Batch_Task(batchID);
 
-            const data = paginatedData1.find((item) => item.case_distribution_batch_id === batchID);
-            // console.log("Selected Batch Data:", data);
-            const batchSeqDetails = data?.batch_seq_details?.[0] || {};
-            const distribution = batchSeqDetails?.array_of_distributions?.[0] || {};
-            const payload = {
-              case_distribution_batch_id: batchID,
-              Proceed_by: userId,
-              //plus_drc : distribution.plus_drc || "null",
-              // plus_drc_id : distribution.plus_drc_id || "null",
-              // minus_drc : distribution.minus_drc  || "null",
-              // minus_drc_id : distribution.minus_drc_id  || "null",
+            if (areThereAnyTasks.status === 200) {
 
-            };
-            // console.log("Forward for Proceed Payload:", payload);
-            const response = await Batch_Forward_for_Proceed(payload);
-            // console.log("Forward for Proceed Response:", response);
+              const userId = await getLoggedUserId();
 
-            Swal.fire({
-              icon: "success",
-              title: "Success",
-              text: "Forwarded for Proceed successfully.",
-              confirmButtonColor: "#28a745",
-              allowOutsideClick: false,
-              allowEscapeKey: false,
-            }).then((result) => {
-              if (result.isConfirmed) {
-                // Reload the data when user clicks OK
-                if (currentPage1 === 1) {
-                  fetchDataAPI({
-                    ...committedFilters,
-                    currentPage1: 1
-                  });
-                } else {
-                  setCurrentPage1(1);
+              const data = paginatedData1.find((item) => item.case_distribution_batch_id === batchID);
+              // console.log("Selected Batch Data:", data);
+              const batchSeqDetails = data?.batch_seq_details?.[0] || {};
+              const distribution = batchSeqDetails?.array_of_distributions?.[0] || {};
+              const payload = {
+                case_distribution_batch_id: batchID,
+                Proceed_by: userId,
+                //plus_drc : distribution.plus_drc || "null",
+                // plus_drc_id : distribution.plus_drc_id || "null",
+                // minus_drc : distribution.minus_drc  || "null",
+                // minus_drc_id : distribution.minus_drc_id  || "null",
+
+              };
+              // console.log("Forward for Proceed Payload:", payload);
+              const response = await Batch_Forward_for_Proceed(payload);
+              // console.log("Forward for Proceed Response:", response);
+
+              Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: "Forwarded for Proceed successfully.",
+                confirmButtonColor: "#28a745",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  // Reload the data when user clicks OK
+                  if (currentPage1 === 1) {
+                    fetchDataAPI({
+                      ...committedFilters,
+                      currentPage1: 1
+                    });
+                  } else {
+                    setCurrentPage1(1);
+                  }
                 }
-              }
-            });
-
+              });
+            } else {
+              Swal.fire({
+                icon: "warning",
+                title: "Warning",
+                text: "Already has tasks with this case distribution batch id.",
+                confirmButtonColor: "#f1c40f",
+              });
+            }
           } catch (error) {
-            console.error(error)
-            const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: errorMessage,
-              confirmButtonColor: "#d33",
-            });
-
+            console.error(error);
+            if (error.status === 409) {
+              Swal.fire({
+                icon: "warning",
+                title: "Warning",
+                text: "Already has tasks with this case distribution batch id.",
+                confirmButtonColor: "#f1c40f",
+              });
+            } else {
+              const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: errorMessage,
+                confirmButtonColor: "#d33",
+              });
+            }
           }
         };
         forwardForProceed();

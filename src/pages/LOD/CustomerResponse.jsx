@@ -37,7 +37,12 @@ const CustomerResponse = () => {
     // Handle Submit button
     const handleSubmit = async () => {
         if (!ResponseType || !ResponseRemark) {
-            Swal.fire("Error", "Please enter both Customer Response and Remark", "error");
+            Swal.fire({
+                title: "Error",
+                text: "Please enter both Customer Response and Remark",
+                icon: "error",
+                confirmButtonColor: "#d33",
+            });
             return;
         }
 
@@ -48,13 +53,23 @@ const CustomerResponse = () => {
             const response = await Creat_Customer_Responce(caseId, ResponseType, ResponseRemark, userData);
             // console.log(response)
             if (response === "success") {
-                Swal.fire(response, `Customer Response created successfully!`, "success");
+                Swal.fire({
+                    title: response,
+                    text: `Customer Response created successfully!`,
+                    icon: "success",
+                    confirmButtonColor: "#28a745",
+                });
                 setResponseType("");
                 setResponseRemark("");
                 fetchCaseDetails({});
             }
         } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
+            Swal.fire({
+                title: "Error", 
+                text: error.message || "Failed to create task.", 
+                icon: "error",
+                confirmButtonColor: "#d33",
+            });
         }
     }
 
@@ -245,7 +260,9 @@ const CustomerResponse = () => {
                             </thead>
                             <tbody>
                                 {paginatedData.length > 0 ? (
-                                    paginatedData.map((log, index) => (
+                                    paginatedData
+                                    .sort((a, b) => new Date(b.created_on) - new Date(a.created_on))
+                                    .map((log, index) => (
                                         <tr
                                             key={index}
                                             className={`${index % 2 === 0
@@ -296,7 +313,7 @@ const CustomerResponse = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={handleBackButton}
                 >
                     <FaArrowLeft />

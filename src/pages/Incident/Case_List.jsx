@@ -32,6 +32,7 @@ import Only_CPE_Collect from "/src/assets/images/incidents/Only_CPE_Collect.png"
 import Direct_LOD from "/src/assets/images/incidents/Direct_LOD.png";
 import Pending_Assign_Agent from "/src/assets/images/distribution/Pending_Assign_Agent.png";
 import Pending_Assign_Agent_Approval from "/src/assets/images/distribution/Pending_Assign_Agent_Approval.png";
+import Reject_Assign_Agent_Approval from "/src/assets/images/distribution/Reject Assign Agent Approval .png"; 
 import Open_Assign_Agent from "/src/assets/images/distribution/Open_Assign_Agent.png";
 import Open_With_Agent from "/src/assets/images/distribution/Open_With_Agent.png";
 import RO_Negotiation from "/src/assets/images/Negotiation/RO_Negotiation.png";
@@ -65,9 +66,13 @@ import Final_Reminder_Settle_Pending from "/src/assets/images/LOD/Final_Reminder
 import Final_Reminder_Settle_Open_Pending from "/src/assets/images/LOD/Final_Reminder_Settle_Open_Pending.png";
 import Final_Reminder_Settle_Active from "/src/assets/images/LOD/Final_Reminder_Settle_Active.png";
 import LOD_Monitoring_Expire from "/src/assets/images/LOD/LOD_Monitoring_Expire.png";
+import LD_Hold from "/src/assets/images/LOD/LD_Hold .png";
 import Initial_Litigation from "/src/assets/images/litigation/status/Initial_Litigation.png";
+import Pending_FTL from "/src/assets/images/litigation/status/Pending FTL .png";
+import Forward_To_Litigation from "/src/assets/images/litigation/status/Forward To Litigation .png"; 
 import FLU from "/src/assets/images/litigation/status/FLU.png";
 import FLA from "/src/assets/images/litigation/status/FLA.png";
+import Litigation from "/src/assets/images/litigation/status/Litigation .png";
 import Litigation_Settle_Pending from "/src/assets/images/litigation/status/Litigation_Settle_Pending.png";
 import Litigation_Settle_Open_Pending from "/src/assets/images/litigation/status/Litigation_Settle_Open_Pending.png";
 import Litigation_Settle_Active from "/src/assets/images/litigation/status/Litigation_Settle_Active.png";
@@ -75,15 +80,23 @@ import Forward_LOD_Dispute from "/src/assets/images/Settlement/Forward_LOD_Dispu
 import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle_Pending.png";
 import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
 import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
+import Pending_Forward_to_WRIT from "/src/assets/images/WRIT/Pending_Forward_to_WRIT .png";
 import WRIT from "/src/assets/images/WRIT/WRIT.png";
 import Forward_To_RE_WRIT from "/src/assets/images/WRIT/Forward_To_RE-WRIT.png";
 import RE_WRIT from "/src/assets/images/WRIT/RE-WRIT.png";
 import WRIT_Settle_Pending from "/src/assets/images/WRIT/WRIT_Settle_Pending.png";
 import WRIT_Settle_Open_Pending from "/src/assets/images/WRIT/WRIT_Settle_Open-Pending.png";
 import WRIT_Settle_Active from "/src/assets/images/WRIT/WRIT_Settle_Active.png";
+import Re_WRIT_Settle_Pending from "/src/assets/images/WRIT/Re-WRIT_Settle_Pending .png";
+import Re_WRIT_Settle_Open_Pending from "/src/assets/images/WRIT/Re-WRIT_Settle_Open-Pending .png";
+import Re_WRIT_Settle_Active from "/src/assets/images/WRIT/Re-WRIT_Settle_Active .png";
+import Pending_Abandoned from "/src/assets/images/Abnormal/Pending_Abandoned .png"; 
 import Abandoned from "/src/assets/images/Abnormal/Abandoned.png";
+import Pending_Withdraw from "/src/assets/images/Abnormal/Pending_Withdraw .png";
 import Withdraw from "/src/assets/images/Abnormal/Withdraw.png";
 import Case_Closed from "/src/assets/images/Stop/Case Closed.png";
+import Ready_for_Write_Off from "/src/assets/images/Stop/Ready_for_Write-Off .png";
+import Approval_Pending_Write_Off from "/src/assets/images/Stop/Approval Pending Write-Off.png";
 import Pending_Write_Off from "/src/assets/images/Stop/Pending Write-Off.png";
 import Write_Off from "/src/assets/images/Stop/Write-Off.png";
 
@@ -149,6 +162,8 @@ const Case_List = () => {
         return Pending_Assign_Agent;
       case "Pending Assign Agent Approval":
         return Pending_Assign_Agent_Approval;
+      case "Reject Assign Agent Approval":
+        return Reject_Assign_Agent_Approval;
       case "Open Assign Agent":
         return Open_Assign_Agent;
       case "Open With Agent":
@@ -214,13 +229,21 @@ const Case_List = () => {
       case "Final Reminder Settle Active":
         return Final_Reminder_Settle_Active;
       case "LOD Monitoring Expire":
-        return LOD_Monitoring_Expire; 
+        return LOD_Monitoring_Expire;
+      case "LD Hold":
+        return LD_Hold; 
       case "Initial Litigation":
         return Initial_Litigation;
+      case "Pending FTL":
+        return Pending_FTL;
+      case "Forward To Litigation":
+        return Forward_To_Litigation;
       case "Fail from Legal Unit":
         return FLU;
       case "Fail Legal Action":
         return FLA;
+      case "Litigation":
+        return Litigation;
       case "Litigation Settle Pending":
         return Litigation_Settle_Pending;
       case "Litigation Settle Open-Pending":
@@ -235,6 +258,8 @@ const Case_List = () => {
         return Dispute_Settle_Open_Pending;
       case "Dispute Settle Active":
         return Dispute_Settle_Active;
+      case "Pending Forward to WRIT":
+        return Pending_Forward_to_WRIT;
       case "WRIT":
         return WRIT;
       case "Forward to Re-WRIT":
@@ -247,12 +272,26 @@ const Case_List = () => {
         return WRIT_Settle_Open_Pending;
       case "WRIT Settle Active":
         return WRIT_Settle_Active;
+      case "Re-WRIT Settle Pending":
+        return Re_WRIT_Settle_Pending;
+      case "Re-WRIT Settle Open-Pending":
+        return Re_WRIT_Settle_Open_Pending;
+      case "Re-WRIT Settle Active":
+        return Re_WRIT_Settle_Active;
+      case "Pending Abandoned":
+        return Pending_Abandoned;
       case "Abandoned":
         return Abandoned;
+      case "Pending Withdraw":
+        return Pending_Withdraw;
       case "Withdraw":
         return Withdraw;
       case "Case Close":
         return Case_Closed;
+      case "Ready for Write-Off":
+        return Ready_for_Write_Off;
+      case "Approval Pending Write-Off":
+        return Approval_Pending_Write_Off;
       case "Pending Write-Off":
         return Pending_Write_Off;
       case "Write-Off":
