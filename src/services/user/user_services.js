@@ -208,10 +208,6 @@ export const updateUserRoles = async (userId, rolesToAdd = []) => {
   }
 };
 
-
-
-
-
 export const updateUserContacts = async (requestData = {}) => {
   try {
     const response = await axios.post(

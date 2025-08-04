@@ -85,12 +85,17 @@ const UserList = () => {
           user_id: user.user_id,
           status: 
             Array.isArray(user.user_status) && user.user_status.length > 0
-              ? user.user_status[0].status
+              ? user.user_status[user.user_status.length - 1].status
               : "N/A",
           user_type: user.user_type?.toUpperCase() || "",
           user_role: 
             Array.isArray(user.role) && user.role.length > 0
-              ? user.role[0].role_name
+              ? (() => {
+                  const activeRoles = user.role.filter(role => role.end_dtm === null);
+                  return activeRoles.length > 0 
+                    ? activeRoles.map(role => role.role_name).join(', ')
+                    : "N/A";
+                })()
               : "N/A",
           user_name: user.User_profile?.username || "N/A",
           user_email: user.User_profile?.email || "N/A",
