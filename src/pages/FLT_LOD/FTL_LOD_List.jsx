@@ -31,6 +31,10 @@ import CreateSettlementIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/Creat
 import ViewDetailsIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/View_Details.png";
 import CustomerResponseIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/Customer_Response.png";
 
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService.js";
+import { use } from "react";
+
 
 const FTLLODCaseList = () => {
   const navigate = useNavigate(); // Initialize the navigate function
@@ -101,6 +105,27 @@ const FTLLODCaseList = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
+  // Role-Based Button
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try{
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Current time in seconds
+      if (decode.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }, []);
 
   const loadUser = async () => {
     const user = await getLoggedUserId();

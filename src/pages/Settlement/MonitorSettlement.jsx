@@ -43,7 +43,7 @@ import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle
 import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
 import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
 import { jwtDecode } from "jwt-decode";
-import { refreshAccessToken } from "../../services/auth/authService";
+import  {refreshAccessToken } from "../../services/auth/authService";
 
 const Monitor_settlement = () => {
   // State Variables
