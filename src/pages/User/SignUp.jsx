@@ -118,13 +118,13 @@ const SignUp = () => {
       }
  
       const basePayload = {
-        user_type: userType === "Slt" ? userType.toLowerCase() : userType,
-        user_login: userType === "Slt" ? [formData.serviceNo] : userType === "Drcuser" ? [formData.nic] : [],
+        user_type: userType,
+        user_login: userType === "slt" ? [formData.serviceNo] : userType === "drc_officer" ? [formData.nic] : [],
         User_profile: {
           username: formData.name,
           email: formData.email,
           user_designation: formData.designation,
-          user_nic: userType === "Slt" ? formData.serviceNo : formData.nic
+          user_nic: userType === "slt" ? formData.serviceNo : formData.nic
         },
         user_contact_num: formData.contactNo,
         role: formData.role,
@@ -135,12 +135,12 @@ const SignUp = () => {
       };
 
       const payload =
-        userType === "Slt"
+        userType === "slt"
           ? {
               ...basePayload,
               // user_id: formData.serviceNo + "@intranet.slt.com.lk", // Use service number as user_id
             }
-          : userType === "Drcuser"
+          : userType === "drc_officer"
           ? {
               ...basePayload,
               drc_id: formData.drcId,
@@ -249,13 +249,13 @@ const SignUp = () => {
               <option value="" disabled hidden>
                 User Type
               </option>
-              <option value="Drcuser">DRC</option>
-              <option value="Slt">SLT</option>
+              <option value="drc_officer">DRC</option>
+              <option value="slt">SLT</option>
             </select>
           </div>
 
           {/* DRC Form */}
-          {userType === "Drcuser" && (
+          {userType === "drc_officer" && (
             <>
               <select
                 name="role"
