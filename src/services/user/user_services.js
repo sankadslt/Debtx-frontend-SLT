@@ -123,7 +123,7 @@ export const Download_User_Approval_List = async (requestData) => {
 
 export const createUser = async (formData) => {
   try {
-    const res = await axios.post(`${USER_URL}/Create_User`, formData);
+    const res = await axios.post(`https://debtx.slt.lk:6500/users/create`, formData);
     return res.data;
   } catch (err) {
     return {
@@ -134,4 +134,135 @@ export const createUser = async (formData) => {
   }
 };
 
+export const updateUserStatus = async (requestData = {}) => {
+  try {
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/status",
+      {
+        user_id: Number(requestData.user_id), 
+        status_payload: {
+          status: requestData.status_payload.status,
+          status_on: requestData.status_payload.status_on,
+          status_by: requestData.status_payload.status_by
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log("Status update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to update user status",
+      }
+    );
+  }
+};
 
+export const updateUserRoles = async (userId, rolesToAdd = []) => {
+  try {
+    if (!userId) {
+      throw {
+        status: "error",
+        message: "User ID is required",
+        errors: {}
+      };
+    }
+
+    const payload = {
+      user_id: Number(userId),
+      roles_to_add: rolesToAdd,
+    };
+
+    console.log("Updating roles with payload:", payload);
+
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/roles",
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+      }
+    );
+
+    console.log("Roles update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user roles:", error);
+
+    const errorResponse = error?.response?.data || {
+      status: "error",
+      message: error.message || "Unable to update user roles",
+      errors: error?.response?.data?.errors || {}
+    };
+
+    throw errorResponse;
+  }
+};
+
+export const updateUserContacts = async (requestData = {}) => {
+  try {
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/contacts",  
+      {
+        user_id: Number(requestData.user_id),
+        contact_payload: requestData.contact_payload
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+           
+        }
+      }
+    );
+    console.log("Contact update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user contacts:", error);
+    throw error?.response?.data || {
+      status: "error",
+      message: "Unable to update user contacts",
+    };
+  }
+};
+
+export const updateUserProfile = async (requestData = {}) => {
+  try {
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/profile",
+      {
+        user_id: Number(requestData.user_id),
+        profile_payload: {
+          username: requestData.profile_payload.username,
+          email: requestData.profile_payload.email,
+          user_nic: requestData.profile_payload.user_nic,
+          user_designation: requestData.profile_payload.user_designation 
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log("Profile update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to update user profile",
+      }
+    );
+  }
+};
