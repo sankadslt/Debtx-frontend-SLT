@@ -208,7 +208,12 @@ const Digital_Signature_LOD = () => {
 
         setIsCreatingTask(true);
         try {
-            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData, LODType);
+
+            const payload = {
+                Created_By: createdBy,
+                current_document_type: LODType,
+            }
+            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(payload);
             console.log("Response:", response);
             if (response.status === 200) {
                 Swal.fire({
