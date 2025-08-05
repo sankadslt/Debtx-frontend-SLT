@@ -650,7 +650,7 @@ useEffect(() => {
   return (
     <div className={`${GlobalStyle.fontPoppins} px-4 sm:px-6 lg:px-8`}>
       <div className={`${GlobalStyle.headingLarge} mb-6 sm:mb-8`}>
-        <span>{user_id} - {userInfo.username}</span>
+        <span>{userInfo.username}</span>
       </div>
 
       <div className="w-full flex justify-center">
@@ -790,7 +790,7 @@ useEffect(() => {
                       </td>
                     </tr>
 
-                    <tr className="block sm:table-row">
+                    {/* <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         Login Method<span className="sm:hidden">:</span>
                       </td>
@@ -798,7 +798,7 @@ useEffect(() => {
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
                         {userInfo.can_user_login || "Not specified"}
                       </td>
-                    </tr>
+                    </tr> */}
 
                     <tr className="block sm:table-row ">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
@@ -961,7 +961,7 @@ useEffect(() => {
                       </td>
                     </tr>
 
-                    <tr className="block sm:table-row">
+                    {/* <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         Login Method<span className="sm:hidden">:</span>
                       </td>
@@ -969,7 +969,7 @@ useEffect(() => {
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
                         {userInfo.can_user_login || "Not specified"}
                       </td>
-                    </tr>
+                    </tr> */}
 
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
