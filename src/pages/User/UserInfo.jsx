@@ -185,12 +185,10 @@ const UserInfo = () => {
             user_designation: fetchedData.user_designation || "",
             created_on: fetchedData.created_on || "",
             created_by: fetchedData.created_by || "",
-            // status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
-            // status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
+            status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
+            status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
             // Remark: fetchedData.Remark || [],
-            // user_status: statusHistory 
-            status_on: fetchedData.user_status?.status_on || "",
-            status_by: fetchedData.user_status?.status_by || "",
+            user_status: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status : [],
             Remark: fetchedData.Remark || [],
           });
 
@@ -913,12 +911,12 @@ useEffect(() => {
               <div className="flex justify-end mb-4">
                 <button
                   onClick={() => {
-                    if (userInfo.user_status !== "terminate") {
+                    if (userInfo.user_status !== "terminate" && userInfo.user_status !== "Pending_approval") {
                       setEditMode(true);
                     }
                   }}
-                  className={`${userInfo.user_status === "terminate" ? "opacity-50 cursor-not-allowed" : ""}`}
-                  disabled={userInfo.user_status === "terminate"}
+                  className={`${userInfo.user_status === "terminate"? "opacity-50 cursor-not-allowed" : ""} || ${userInfo.user_status === "Pending_approval" ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={userInfo.user_status === "terminate" || userInfo.user_status === "Pending_approval"}
                 >
                   <img
                     src={edit}
