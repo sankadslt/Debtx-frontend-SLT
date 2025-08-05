@@ -19,6 +19,11 @@ import { FaArrowLeft, FaArrowRight, FaSearch, FaEdit, FaEye } from "react-icons/
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
 import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
+import { Tooltip } from "react-tooltip";
+import Final_Reminder from "../../assets/images/LOD/Final_Reminder.png";
+import Final_Reminder_Settle_Active from "../../assets/images/LOD/Final_Reminder_Settle_Active.png";
+import Final_Reminder_Settle_Open_Pending from "../../assets/images/LOD/Final_Reminder_Settle_Open_Pending.png";
+import Final_Reminder_Settle_Pending from "../../assets/images/LOD/Final_Reminder_Settle_Pending.png";
 
 const LOD_Log = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -42,6 +47,48 @@ const LOD_Log = () => {
         fromDate: null,
         toDate: null,
     });
+
+    // return Icon based on settlement status and settlement phase
+    const getStatusIcon = (status) => {
+        switch (status?.toLowerCase()) {
+            case "final reminder":
+                return Final_Reminder;
+            case "final reminder settle pending":
+                return Final_Reminder_Settle_Pending;
+            case "final reminder settle open-pending":
+                return Final_Reminder_Settle_Open_Pending;
+            case "final reminder settle active":
+                return Final_Reminder_Settle_Active;
+            default:
+                return null;
+        }
+    };
+
+    // render status icon with tooltip
+    const renderStatusIcon = (status, index) => {
+        const iconPath = getStatusIcon(status);
+
+        if (!iconPath) {
+            return <span>{status}</span>;
+        }
+
+        const tooltipId = `tooltip-${index}`;
+
+        return (
+            <div className="flex items-center gap-2">
+                <img
+                    src={iconPath}
+                    alt={status}
+                    className="w-7 h-7"
+                    data-tooltip-id={tooltipId} // Add tooltip ID to image
+                />
+                {/* Tooltip component */}
+                <Tooltip id={tooltipId} place="bottom" effect="solid">
+                    {`${status}`} {/* Tooltip text is the phase and status */}
+                </Tooltip>
+            </div>
+        );
+    };
 
     // validation for date
     const handleFromDateChange = (date) => {
@@ -402,7 +449,10 @@ const LOD_Log = () => {
                                     >
                                         {log.LODID.toString().padStart(3, '0')}
                                     </td>
-                                    <td className={GlobalStyle.tableData}>{log.Status}</td>
+                                    <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
+                                        {/* {log.Status} */}
+                                        {renderStatusIcon(log.Status, index)}
+                                    </td>
                                     <td className={GlobalStyle.tableData}>{log.LODBatchNo}</td>
                                     <td className={GlobalStyle.tableData}>{log.NotificationCount}</td>
                                     <td className={GlobalStyle.tableData}>
