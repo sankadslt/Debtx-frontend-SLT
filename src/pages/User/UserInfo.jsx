@@ -534,6 +534,7 @@ useEffect(() => {
           Remark: fetchedData.Remark || [],
         });
       }
+      console.log("UserInfo:", userInfo);
 
       setShowEndSection(false);
       setRemark("");
