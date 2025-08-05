@@ -836,7 +836,7 @@ const Final_Reminder_LOD_Hold_List = () => {
             </div>
           )}
 
-          {["admin", "superadmin", "slt"].includes(userRole) &&
+          {/* {["admin", "superadmin", "slt"].includes(userRole) &&
             filteredDataBySearch.length > 0 && (
               <button
                 // onClick={HandleCreateTaskDownloadSettlementList}
@@ -853,7 +853,7 @@ const Final_Reminder_LOD_Hold_List = () => {
                   ? "Creating Tasks..."
                   : "Create task and let me know"}
               </button>
-            )}
+            )} */}
         </main>
       </div>
     </div>
