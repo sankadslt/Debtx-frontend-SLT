@@ -17,10 +17,10 @@ const SignUp = () => {
     name: "",
     nic: "",
     email: "",
-    contactNo: "",
+    contactNo: [],
     designation: "",
     // loginMethod: "",
-    role: "",
+    role: [],
     drcId: ""
   });
 
@@ -81,10 +81,10 @@ const SignUp = () => {
       name: "",
       nic: "",
       email: "",
-      contactNo: "",
+      contactNo: [],
       designation: "",
       // loginMethod: "",
-      role: "",
+      role: [], // Changed from "" to []
       drcId: ""
     });
   }
@@ -95,7 +95,12 @@ const SignUp = () => {
     if (name === "serviceNo") {
       value = value.replace(/@intranet\.slt\.com\.lk$/, "");
     }
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "contactNo") {
+      // Handle contact number as array
+      setFormData((prev) => ({ ...prev, [name]: [value] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   //Register User
@@ -113,16 +118,20 @@ const SignUp = () => {
       }
  
       const basePayload = {
-        user_type: userType,
+        user_type: userType === "Slt" ? userType.toLowerCase() : userType,
         user_login: userType === "Slt" ? [formData.serviceNo] : userType === "Drcuser" ? [formData.nic] : [],
-        'User_profile.username': formData.name,
-        'User_profile.email': formData.email,
+        User_profile: {
+          username: formData.name,
+          email: formData.email,
+          user_designation: formData.designation,
+          user_nic: userType === "Slt" ? formData.serviceNo : formData.nic
+        },
         user_contact_num: formData.contactNo,
-        'User_profile.designation': formData.designation,
         role: formData.role,
-        // login_method: formData.loginMethod,
-        "Remark.remark_description": "Manual test insert",
-        created_by: loggedUserData,
+        Remark: {
+          remark_description: "Manual test insert"
+        },
+        create_by: loggedUserData,
       };
 
       const payload =
@@ -130,13 +139,11 @@ const SignUp = () => {
           ? {
               ...basePayload,
               // user_id: formData.serviceNo + "@intranet.slt.com.lk", // Use service number as user_id
-              'User_profile.nic': formData.serviceNo , // Include NIC for SLT users
             }
           : userType === "Drcuser"
           ? {
               ...basePayload,
               drc_id: formData.drcId,
-              'User_profile.nic': formData.nic,
               // user_id: formData.email || formData.contactNo, // Use email or contact number as user_id
             }
           : null;
@@ -195,7 +202,7 @@ const SignUp = () => {
         ...prev,
         name: data.name,
         email: data.email,
-        contactNo: data.contactNo,
+        contactNo: Array.isArray(data.contactNo) ? data.contactNo : [data.contactNo], // Always store as array
         designation: data.designation,
         // nic: data.nic,
       }));
@@ -252,8 +259,13 @@ const SignUp = () => {
             <>
               <select
                 name="role"
-                value={formData.role}
-                onChange={handleInputChange}
+                value={formData.role[0] || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    role: [e.target.value], // Always set as array
+                  }))
+                }
                 className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
               >
                 <option value="" disabled hidden>
@@ -313,7 +325,7 @@ const SignUp = () => {
                 type="text"
                 name="contactNo"
                 placeholder="Contact No"
-                value={formData.contactNo}
+                value={formData.contactNo[0] || ""}
                 onChange={handleInputChange}
                 className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
               />
@@ -384,8 +396,8 @@ const SignUp = () => {
                 type="text"
                 name="contactNo"
                 placeholder="Contact No"
-                value={formData.contactNo}
-                onChange={handleInputChange} // <-- Add this
+                value={formData.contactNo[0] || ""}
+                onChange={handleInputChange}
                 className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
               />
 
@@ -412,8 +424,13 @@ const SignUp = () => {
               </select> */}
               <select
                 name="role"
-                value={formData.role}
-                onChange={handleInputChange}
+                value={formData.role[0] || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    role: [e.target.value], // Always set as array
+                  }))
+                }
                 className={`${GlobalStyle.selectBox} w-full mb-4 text-blue-900 placeholder-blue-900 pl-2`}
               >
                 <option value="" disabled hidden>

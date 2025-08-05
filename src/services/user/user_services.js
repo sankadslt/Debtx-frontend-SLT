@@ -124,6 +124,10 @@ export const Download_User_Approval_List = async (requestData) => {
 export const createUser = async (formData) => {
   try {
     const res = await axios.post(`https://debtx.slt.lk:6500/users/create`, formData);
+    console.log("Test createUser response:", res.data);
+    // if (res.data.status === "error") {
+    //   return res.data;
+    // }
     return res.data;
   } catch (err) {
     return {
