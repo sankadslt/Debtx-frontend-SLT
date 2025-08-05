@@ -70,7 +70,6 @@ const UserInfo = () => {
   const [editableProfileFields, setEditableProfileFields] = useState({
     username: "",
     user_nic: ""
-    
   });
 
   const userRoles = [
@@ -158,21 +157,21 @@ const UserInfo = () => {
         if (isMounted && fetchedData && fetchedData.status === "Success") {
           const statusHistory = fetchedData.user_status || [];
           const latestStatus = statusHistory.length > 0 
-            ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
-            : 'inactive';
+            ? statusHistory[statusHistory.length - 1]
+            : null;
 
-            console.log("Setting initial userInfo:", {
-        username: fetchedData.username || "",
-        user_type: fetchedData.user_type || "",
-        // ... other fields ...
-        user_nic: fetchedData.user_nic || "",
-        // ... other fields ...
-      });
+          console.log("Setting initial userInfo:", {
+            username: fetchedData.username || "",
+            user_type: fetchedData.user_type || "",
+            user_nic: fetchedData.user_nic || "",
+            status_on: latestStatus ? latestStatus.status_on : "",
+            status_by: latestStatus ? latestStatus.status_by : "",
+          });
 
           const isProfileEditable = checkIfProfileEditable(fetchedData.created_on);
           setCanEditProfile(isProfileEditable);
           
-          setIsActive(latestStatus === "active");
+          setIsActive(latestStatus ? latestStatus.status.toLowerCase() === "active" : false);
 
           setUserInfo({
             username: fetchedData.username || "",
@@ -185,12 +184,8 @@ const UserInfo = () => {
             user_designation: fetchedData.user_designation || "",
             created_on: fetchedData.created_on || "",
             created_by: fetchedData.created_by || "",
-            // status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
-            // status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
-            // Remark: fetchedData.Remark || [],
-            // user_status: statusHistory 
-            status_on: fetchedData.user_status?.status_on || "",
-            status_by: fetchedData.user_status?.status_by || "",
+            status_on: latestStatus ? latestStatus.status_on : "",
+            status_by: latestStatus ? latestStatus.status_by : "",
             Remark: fetchedData.Remark || [],
           });
 
@@ -237,72 +232,70 @@ const UserInfo = () => {
   };
 
   const updateProfile = async () => {
-  try {
-    setLoading(true);
-    
-    const payload = {
-      user_id: Number(user_id),
-      profile_payload: {
-        username: editableProfileFields.username,
-        user_nic: editableProfileFields.user_nic,
-        email: userInfo.email,
-         user_designation: userInfo.user_designation
-      }
-    };
-    
-    console.log("Payload being sent to update profile:", payload);
-
-    const response = await updateUserProfile(payload);
-    
-    if (response.status === "updated" || response.status === "Success") {
-      // Update both userInfo and editableProfileFields
-      setUserInfo(prev => ({
-        ...prev,
-        username: editableProfileFields.username,
-        user_nic: editableProfileFields.user_nic
-      }));
+    try {
+      setLoading(true);
       
-      // Force a refresh of user data
-      const fetchedData = await getUserDetailsById(user_id);
-      if (fetchedData?.status === "Success") {
+      const payload = {
+        user_id: Number(user_id),
+        profile_payload: {
+          username: editableProfileFields.username,
+          user_nic: editableProfileFields.user_nic,
+          email: userInfo.email,
+          user_designation: userInfo.user_designation
+        }
+      };
+      
+      console.log("Payload being sent to update profile:", payload);
+
+      const response = await updateUserProfile(payload);
+      
+      if (response.status === "updated" || response.status === "Success") {
         setUserInfo(prev => ({
           ...prev,
-          ...fetchedData,
-          Remark: fetchedData.Remark || []
+          username: editableProfileFields.username,
+          user_nic: editableProfileFields.user_nic
         }));
-        setEditableProfileFields({
-          username: fetchedData.username || "",
-          user_nic: fetchedData.user_nic || ""
+        
+        const fetchedData = await getUserDetailsById(user_id);
+        if (fetchedData?.status === "Success") {
+          setUserInfo(prev => ({
+            ...prev,
+            ...fetchedData,
+            Remark: fetchedData.Remark || []
+          }));
+          setEditableProfileFields({
+            username: fetchedData.username || "",
+            user_nic: fetchedData.user_nic || ""
+          });
+        }
+        
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Profile updated successfully",
         });
+        return true;
       }
-      
+      return false;
+    } catch (err) {
+      console.error("Error updating profile:", err);
       Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Profile updated successfully",
+        icon: "error",
+        title: "Error",
+        text: err?.response?.data?.message || "Failed to update profile",
       });
-      return true;
+      return false;
+    } finally {
+      setLoading(false);
     }
-    return false;
-  } catch (err) {
-    console.error("Error updating profile:", err);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: err?.response?.data?.message || "Failed to update profile",
-    });
-    return false;
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-useEffect(() => {
-  setEditableProfileFields({
-    username: userInfo.username || "",
-    user_nic: userInfo.user_nic || ""
-  });
-}, [userInfo.username, userInfo.user_nic]);
+  useEffect(() => {
+    setEditableProfileFields({
+      username: userInfo.username || "",
+      user_nic: userInfo.user_nic || ""
+    });
+  }, [userInfo.username, userInfo.user_nic]);
 
   const toggleEditMode = () => {
     setEditMode(!editMode);
@@ -310,147 +303,143 @@ useEffect(() => {
   };
 
   const handleSave = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // Check if profile fields need to be updated
-    const profileChanged = 
-      editableProfileFields.username !== userInfo.username ||
-      editableProfileFields.user_nic !== userInfo.user_nic;
+      const profileChanged = 
+        editableProfileFields.username !== userInfo.username ||
+        editableProfileFields.user_nic !== userInfo.user_nic;
 
-    if (profileChanged && canEditProfile) {
-      await updateProfile();
-    }
-
-    // Get current status
-    const statusHistory = userInfo.user_status || [];
-    const currentStatus = statusHistory.length > 0 
-      ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
-      : 'inactive';
-    
-    const statusChanged = 
-      (isActive && currentStatus !== "active") ||
-      (!isActive && currentStatus === "active");
-
-    // Determine new roles to add
-    const rolesToAdd = userRolesList.filter(role => 
-      !userInfo.roles?.includes(role)
-    );
-
-    const rolesChanged = rolesToAdd.length > 0;
-
-    const contactsChanged = 
-      JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
-
-    if (!statusChanged && !rolesChanged && !contactsChanged && !profileChanged) {
-      Swal.fire({
-        icon: "info",
-        title: "No Changes",
-        text: "No changes were made to save",
-      });
-      setEditMode(false);
-      return;
-    }
-
-    const updatePromises = [];
-
-    if (statusChanged) {
-      updatePromises.push(updateUserStatus({
-        user_id: Number(user_id),
-        status_payload: {
-          status: isActive ? "Active" : "Inactive", 
-          status_on: new Date().toISOString(), 
-          status_by: loggedUserData 
-        }
-      }));
-    }
-
-    if (rolesChanged) {
-      updatePromises.push(updateUserRoles(
-        Number(user_id),
-        rolesToAdd
-      ));
-    }
-
-    if (contactsChanged) {
-      const contactPayload = [];
-      const currentDate = new Date().toISOString();
-      
-      for (let i = 0; i < 2; i++) {
-        const originalNumber = originalContactNumbers[i] || "";
-        const currentNumber = contactNumbers[i] || "";
-        
-        if (currentNumber !== originalNumber) {
-          if (originalNumber) {
-            contactPayload.push({
-              contact_number: originalNumber,
-              end_dtm: currentDate
-            });
-          }
-          
-          if (currentNumber) {
-            contactPayload.push({
-              contact_number: currentNumber,
-            });
-          }
-        } else if (currentNumber) {
-          contactPayload.push({
-            contact_number: currentNumber
-          });
-        }
+      if (profileChanged && canEditProfile) {
+        await updateProfile();
       }
 
-      if (contactPayload.length > 0) {
-        updatePromises.push(updateUserContacts({
+      const statusHistory = userInfo.user_status || [];
+      const currentStatus = statusHistory.length > 0 
+        ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
+        : 'inactive';
+      
+      const statusChanged = 
+        (isActive && currentStatus !== "active") ||
+        (!isActive && currentStatus === "active");
+
+      const rolesToAdd = userRolesList.filter(role => 
+        !userInfo.roles?.includes(role)
+      );
+
+      const rolesChanged = rolesToAdd.length > 0;
+
+      const contactsChanged = 
+        JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
+
+      if (!statusChanged && !rolesChanged && !contactsChanged && !profileChanged) {
+        Swal.fire({
+          icon: "info",
+          title: "No Changes",
+          text: "No changes were made to save",
+        });
+        setEditMode(false);
+        return;
+      }
+
+      const updatePromises = [];
+
+      if (statusChanged) {
+        updatePromises.push(updateUserStatus({
           user_id: Number(user_id),
-          contact_payload: contactPayload
+          status_payload: {
+            status: isActive ? "Active" : "Inactive", 
+            status_on: new Date().toISOString(), 
+            status_by: loggedUserData 
+          }
         }));
       }
-    }
 
-    await Promise.all(updatePromises);
+      if (rolesChanged) {
+        updatePromises.push(updateUserRoles(
+          Number(user_id),
+          rolesToAdd
+        ));
+      }
 
-    // Refresh user data
-    const fetchedData = await getUserDetailsById(user_id);
-    if (fetchedData && fetchedData.status === "Success") {
-      const updatedStatusHistory = fetchedData.user_status || [];
-      const updatedStatus = updatedStatusHistory.length > 0 
-        ? String(updatedStatusHistory[statusHistory.length - 1].status).toLowerCase()
-        : 'inactive';
+      if (contactsChanged) {
+        const contactPayload = [];
+        const currentDate = new Date().toISOString();
+        
+        for (let i = 0; i < 2; i++) {
+          const originalNumber = originalContactNumbers[i] || "";
+          const currentNumber = contactNumbers[i] || "";
+          
+          if (currentNumber !== originalNumber) {
+            if (originalNumber) {
+              contactPayload.push({
+                contact_number: originalNumber,
+                end_dtm: currentDate
+              });
+            }
+            
+            if (currentNumber) {
+              contactPayload.push({
+                contact_number: currentNumber,
+              });
+            }
+          } else if (currentNumber) {
+            contactPayload.push({
+              contact_number: currentNumber
+            });
+          }
+        }
 
-      setIsActive(updatedStatus === "active");
-      
-      setUserInfo({
-        ...fetchedData,
-        Remark: fetchedData.Remark || [],
-        user_status: updatedStatusHistory
+        if (contactPayload.length > 0) {
+          updatePromises.push(updateUserContacts({
+            user_id: Number(user_id),
+            contact_payload: contactPayload
+          }));
+        }
+      }
+
+      await Promise.all(updatePromises);
+
+      const fetchedData = await getUserDetailsById(user_id);
+      if (fetchedData && fetchedData.status === "Success") {
+        const updatedStatusHistory = fetchedData.user_status || [];
+        const updatedStatus = updatedStatusHistory.length > 0 
+          ? String(updatedStatusHistory[updatedStatusHistory.length - 1].status).toLowerCase()
+          : 'inactive';
+
+        setIsActive(updatedStatus === "active");
+        
+        setUserInfo({
+          ...fetchedData,
+          Remark: fetchedData.Remark || [],
+          user_status: updatedStatusHistory
+        });
+
+        const updatedContacts = fetchedData.contact_numbers || [];
+        while (updatedContacts.length < 2) updatedContacts.push("");
+        setContactNumbers([...updatedContacts]);
+        setOriginalContactNumbers([...updatedContacts]);
+        setUserRolesList([]);
+      }
+
+      setEditMode(false);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "User updated successfully",
       });
 
-      const updatedContacts = fetchedData.contact_numbers || [];
-      while (updatedContacts.length < 2) updatedContacts.push("");
-      setContactNumbers([...updatedContacts]);
-      setOriginalContactNumbers([...updatedContacts]);
-      setUserRolesList([]);
+    } catch (err) {
+      console.error("Update Error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.response?.data?.message || "Failed to update user",
+      });
+    } finally {
+      setLoading(false);
     }
-
-    setEditMode(false);
-    Swal.fire({
-      icon: "success",
-      title: "Success",
-      text: "User updated successfully",
-    });
-
-  } catch (err) {
-    console.error("Update Error:", err);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: err?.response?.data?.message || "Failed to update user",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
@@ -511,39 +500,49 @@ useEffect(() => {
       const payload = {
         user_id: Number(user_id),
         created_by: loggedUserData,
+        status_reason: remark,
       };
 
       const response = await endUser(payload);
       console.log("endUser response:", response);
 
-      const fetchedData = await getUserDetailsById(user_id);
-      if (fetchedData?.status === "Success") {
-        setUserInfo({
-          username: fetchedData.username || "",
-          user_type: fetchedData.user_type || "",
-          email: fetchedData.email || "",
-          contact_numbers: fetchedData.contact_numbers || [],
-          can_user_login: fetchedData.can_user_login || "",
-          roles: fetchedData.roles || [],
-          user_nic: fetchedData.user_nic || "",
-          user_designation: fetchedData.user_designation || "",
-          created_on: fetchedData.created_on || "",
-          created_by: fetchedData.created_by || "",
-          status_on: fetchedData.user_status?.status_on || "",
-          status_by: fetchedData.user_status?.status_by || "",
-          Remark: fetchedData.Remark || [],
+      const isSuccess = response && (
+        (typeof response === 'object' && response.message && response.message.includes("terminated successfully")) ||
+        (typeof response === 'string' && response.includes("terminated successfully"))
+      );
+
+      if (isSuccess) {
+        const fetchedData = await getUserDetailsById(user_id);
+        if (fetchedData?.status === "Success") {
+          setUserInfo({
+            username: fetchedData.username || "",
+            user_type: fetchedData.user_type || "",
+            email: fetchedData.email || "",
+            contact_numbers: fetchedData.contact_numbers || [],
+            can_user_login: fetchedData.can_user_login || "",
+            roles: fetchedData.roles || [],
+            user_nic: fetchedData.user_nic || "",
+            user_designation: fetchedData.user_designation || "",
+            created_on: fetchedData.created_on || "",
+            created_by: fetchedData.created_by || "",
+            status_on: fetchedData.user_status?.[fetchedData.user_status.length - 1]?.status_on || "",
+            status_by: fetchedData.user_status?.[fetchedData.user_status.length - 1]?.status_by || "",
+            Remark: fetchedData.Remark || [],
+          });
+        }
+
+        setShowEndSection(false);
+        setRemark("");
+        setEndDate(null);
+
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "User terminated successfully",
         });
+      } else {
+        throw new Error(response?.message || response || "Failed to terminate user");
       }
-
-      setShowEndSection(false);
-      setRemark("");
-      setEndDate(null);
-
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "User terminated successfully",
-      });
     } catch (err) {
       console.error("Error terminating user:", err);
       Swal.fire({
@@ -1183,11 +1182,7 @@ useEffect(() => {
                       filteredLogHistory.map((log, index) => (
                         <tr
                           key={index}
-                          className={`${
-                            index % 2 === 0
-                              ? GlobalStyle.tableRowEven
-                              : GlobalStyle.tableRowOdd
-                          } border-b`}
+                          className={`${index % 2 === 0 ? GlobalStyle.tableRowEven : GlobalStyle.tableRowOdd} border-b`}
                         >
                           <td className={`${GlobalStyle.tableData} text-xs lg:text-sm`}>
                             {formatDate(log.remark_dtm) || "N/A"}
