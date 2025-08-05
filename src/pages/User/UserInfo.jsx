@@ -911,17 +911,17 @@ useEffect(() => {
               <div className="flex justify-end mb-4">
                 <button
                   onClick={() => {
-                    if (userInfo.user_status !== "terminate" && userInfo.user_status !== "Pending_approval") {
+                    if (userInfo.user_status !== "Terminate" && userInfo.user_status !== "Pending_approval") {
                       setEditMode(true);
                     }
                   }}
-                  className={`${userInfo.user_status === "terminate"? "opacity-50 cursor-not-allowed" : ""} || ${userInfo.user_status === "Pending_approval" ? "opacity-50 cursor-not-allowed" : ""}`}
-                  disabled={userInfo.user_status === "terminate" || userInfo.user_status === "Pending_approval"}
+                  className={`${userInfo.user_status === "Terminate"? "opacity-50 cursor-not-allowed" : ''} || ${userInfo.user_status === "Pending_approval" ? "opacity-50 cursor-not-allowed" : ''}`}
+                  disabled={userInfo.user_status === "Terminate" || userInfo.user_status === "Pending_approval"}
                 >
                   <img
                     src={edit}
                     alt="Edit"
-                    className="px-3 py-1 sm:px-4 sm:py-2 rounded-lg cursor-pointer w-10 sm:w-14"
+                    className="px-3 py-1 sm:px-4 sm:py-2 rounded-lg w-10 sm:w-14"
                     title="Edit"
                   />
                 </button>
@@ -1124,16 +1124,16 @@ useEffect(() => {
           {!editMode && !showEndSection && (
             <button
               onClick={() => {
-                if (userInfo.user_status !== "terminate") {
+                if (userInfo.user_status !== "Terminate") {
                   setShowEndSection(true);
                 }
               }}
               className={`${GlobalStyle.buttonPrimary} ${
-                userInfo.user_status === "terminate" 
-                  ? "opacity-50 cursor-not-allowed" 
+                userInfo.user_status === "Terminate"
+                  ? "opacity-50 cursor-not-allowed"
                   : ""
               }`}
-              disabled={userInfo.user_status === "terminate"}
+              disabled={userInfo.user_status === "Terminate"}
             >
               End
             </button>

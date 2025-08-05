@@ -346,7 +346,7 @@ const SignUp = () => {
           )}
 
           {/* SLT Form */}
-          {userType === "Slt" && (
+          {userType === "slt" && (
             <>
               {/* Service No with Search */}
               <div className="flex mb-4">
