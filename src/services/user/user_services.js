@@ -66,7 +66,7 @@ export const updateUserDetails = async (requestData = {}) => {
 
 export const endUser = async (requestData ={}) => {
   try {
-    const response = await axios.patch(`http://localhost:7179/user/terminate`, requestData);
+    const response = await axios.patch(`https://debtx.slt.lk:6500/users/terminate`, requestData);
     return response.data;
   } catch (error) {
     console.error('Failed to terminate user:', error);
