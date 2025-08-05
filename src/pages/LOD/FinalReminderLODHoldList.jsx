@@ -30,6 +30,8 @@ import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { Withdraw_CasesOwened_By_DRC } from "../../services/case/CaseServices.js";
 import { Proceed_LD_Hold_List } from "../../services/LOD/LOD";
+import LD_Hold from "../../assets/images/LOD/LD_Hold .png";
+import { Tooltip } from "react-tooltip";
 
 import { List_Final_Reminder_Lod_Cases } from "../../services/LOD/LOD.js";
 
@@ -718,9 +720,15 @@ const Final_Reminder_LOD_Hold_List = () => {
                           {item.case_id || ""}
                         </td>
 
-                        <td className={GlobalStyle.tableData}>
-                          {" "}
-                          {item.status || ""}{" "}
+                        <td className={`${GlobalStyle.tableData} text-center`}>
+                          <img
+                            src={LD_Hold}
+                            alt="LD Hold"
+                            className="w-6 h-6 mx-auto"
+                            data-tooltip-id={`ld-hold-tooltip-${index}`}
+                            data-tooltip-content={item.status || "LD Hold"}
+                          />
+                          <Tooltip id={`ld-hold-tooltip-${index}`} place="bottom" effect="solid"/>
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {" "}
@@ -738,25 +746,29 @@ const Final_Reminder_LOD_Hold_List = () => {
                           {["admin", "superadmin", "slt"].includes(
                             userRole
                           ) && (
-                            <div className="flex flex-row gap-2">
-                              <button
-                                className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-                                onClick={() =>
-                                  handleProceedButton(item.case_id)
-                                }
-                              >
-                                Proceed
-                              </button>
-                              <button
-                                className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-                                onClick={() =>
-                                  handleWithdrawPopup(item.case_id)
-                                }
-                              >
-                                Withdraw
-                              </button>
-                            </div>
-                          )}
+                              <div className="flex flex-row gap-2">
+                                {["admin", "superadmin", "slt"].includes(userRole) && (
+                                  <button
+                                    className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+                                    onClick={() =>
+                                      handleProceedButton(item.case_id)
+                                    }
+                                  >
+                                    Proceed
+                                  </button>
+                                )}
+                                {["admin", "superadmin", "slt"].includes(userRole) && (
+                                  <button
+                                    className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+                                    onClick={() =>
+                                      handleWithdrawPopup(item.case_id)
+                                    }
+                                  >
+                                    Withdraw
+                                  </button>
+                                )}
+                              </div>
+                            )}
                         </td>
                       </tr>
                     ))
@@ -815,9 +827,8 @@ const Final_Reminder_LOD_Hold_List = () => {
               <button
                 onClick={() => handlePrevNext("prev")}
                 disabled={currentPage <= 1}
-                className={`${GlobalStyle.navButton} ${
-                  currentPage <= 1 ? "cursor-not-allowed" : ""
-                }`}
+                className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""
+                  }`}
               >
                 <FaArrowLeft />
               </button>
@@ -827,9 +838,8 @@ const Final_Reminder_LOD_Hold_List = () => {
               <button
                 onClick={() => handlePrevNext("next")}
                 disabled={currentPage === totalPages}
-                className={`${GlobalStyle.navButton} ${
-                  currentPage === totalPages ? "cursor-not-allowed" : ""
-                }`}
+                className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+                  }`}
               >
                 <FaArrowRight />
               </button>

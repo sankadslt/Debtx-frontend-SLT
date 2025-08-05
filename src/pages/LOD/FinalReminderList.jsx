@@ -24,6 +24,7 @@ import Final_Reminder from "../../assets/images/LOD/Final_Reminder.png";
 import Final_Reminder_Settle_Active from "../../assets/images/LOD/Final_Reminder_Settle_Active.png";
 import Final_Reminder_Settle_Open_Pending from "../../assets/images/LOD/Final_Reminder_Settle_Open_Pending.png";
 import Final_Reminder_Settle_Pending from "../../assets/images/LOD/Final_Reminder_Settle_Pending.png";
+import { jwtDecode } from "jwt-decode";
 
 const LOD_Log = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -47,6 +48,30 @@ const LOD_Log = () => {
         fromDate: null,
         toDate: null,
     });
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+    // Role-Based Buttons
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            let decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+
+            if (decoded.exp < currentTime) {
+                refreshAccessToken().then((newToken) => {
+                    if (!newToken) return;
+                    const newDecoded = jwtDecode(newToken);
+                    setUserRole(newDecoded.role);
+                });
+            } else {
+                setUserRole(decoded.role);
+            }
+        } catch (error) {
+            console.error("Invalid token:", error);
+        }
+    }, []);
 
     // return Icon based on settlement status and settlement phase
     const getStatusIcon = (status) => {
@@ -395,8 +420,22 @@ const LOD_Log = () => {
                     />
                     {/* </div> */}
 
-                    <button onClick={handleFilter} className={GlobalStyle.buttonPrimary}>Filter</button>
-                    <button onClick={clearFilter} className={GlobalStyle.buttonRemove}>Clear</button>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                            onClick={handleFilter}
+                            className={GlobalStyle.buttonPrimary}
+                        >
+                            Filter
+                        </button>
+                    )}
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                            onClick={clearFilter}
+                            className={GlobalStyle.buttonRemove}
+                        >
+                            Clear
+                        </button>
+                    )}
                 </div>
 
             </div>
