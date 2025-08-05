@@ -143,14 +143,15 @@ const PaymentPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Phase</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata.settlement_phase}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata.case_phase}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Cummilative Settled Balance</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {Paymentdata?.cummulative_settled_balance &&
-                                    Paymentdata.cummulative_settled_balance.toLocaleString("en-LK", {
+                                {Paymentdata?.cumulative_settled_balance
+ &&
+                                    Paymentdata.cumulative_settled_balance.toLocaleString("en-LK", {
                                         style: "currency",
                                         currency: "LKR",
                                     })
@@ -186,41 +187,30 @@ const PaymentPreview = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {dataInPagePaymentDetails.length > 0 ? (
-                            dataInPagePaymentDetails.map((log, index) => (
-                                <tr
-                                    key={index}
-                                    className={`${index % 2 === 0
-                                        ? "bg-white bg-opacity-75"
-                                        : "bg-gray-50 bg-opacity-50"
-                                        } border-b`}
-                                >
-                                    <td className={GlobalStyle.tableData}>{log.money_transaction_ref}</td>
-                                    <td className={GlobalStyle.tableData}>{log.money_transaction_reference_type}</td>
-                                    <td className={GlobalStyle.tableCurrency}>{log.money_transaction_amount}</td>
-                                    <td className={GlobalStyle.tableData}>
-                                        {log?.money_transaction_date &&
-                                            new Date(log.money_transaction_date).toLocaleString("en-GB", {
-                                                year: "numeric",
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                // hour: "2-digit",
-                                                // minute: "2-digit",
-                                                // second: "2-digit",
-                                                // hour12: true,
-                                            })}
-                                    </td>
-                                    <td className={GlobalStyle.tableData}>{log.money_transaction_type}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="6" className="text-center py-4">
-                                    No data matching the criteria.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
+  {Paymentdata?.money_details ? (
+    <tr className="bg-white bg-opacity-75 border-b">
+      <td className={GlobalStyle.tableData}>{Paymentdata.money_details.money_transaction_ref}</td>
+      <td className={GlobalStyle.tableData}>{Paymentdata.transaction_type}</td> {/* No reference type in your data */}
+      <td className={GlobalStyle.tableCurrency}>{Paymentdata.money_details.money_transaction_amount}</td>
+      <td className={GlobalStyle.tableData}>
+        {Paymentdata.money_details.money_transaction_date &&
+          new Date(Paymentdata.money_details.money_transaction_date).toLocaleString("en-GB", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })}
+      </td>
+      <td className={GlobalStyle.tableData}>{Paymentdata.money_details.money_transaction_status}</td>
+    </tr>
+  ) : (
+    <tr>
+      <td colSpan="6" className="text-center py-4">
+        No transaction data found.
+      </td>
+    </tr>
+  )}
+</tbody>
+
                 </table>
             </div>
 
@@ -247,48 +237,49 @@ const PaymentPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settled Effected Amount for Commission</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata.settle_Effected_Amount}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata?.settle_Effected_Amount ?? "N/A"}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Commission Type</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata.commission_type}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata.commission_details?.commission_type}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Commission Amount</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata.commission_amount}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata.commission_details?.commission_amount}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">DRC ID</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata.drc_id}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.drc?.drc_id ?? "N/A"}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">RO ID</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata.ro_id}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.drc?.ro_id ?? "N/A"}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Commission Issued By</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata.commision_issued_by}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.issued_by ?? "N/A"}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Commission Issued DTM</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
-                                {Paymentdata?.commision_issued_dtm &&
-                                    new Date(Paymentdata?.commision_issued_dtm).toLocaleString("en-GB", {
+                                {Paymentdata?.commission_details?.issued_dtm
+                                    ? new Date(Paymentdata.commission_details.issued_dtm).toLocaleString("en-GB", {
                                         year: "numeric",
                                         month: "2-digit",
                                         day: "2-digit",
                                         hour: "2-digit",
                                         minute: "2-digit",
                                         second: "2-digit",
-                                        hour12: true,
-                                    })}
-                            </div>
+                                        hour12: true
+                                    })
+                                    : "N/A"}
+                                    </div>
                         </div>
                     </div>
                 </div>
