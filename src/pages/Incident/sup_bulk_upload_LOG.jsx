@@ -43,6 +43,7 @@ const SupBulkUploadLog = () => {
     const [searchQuery, setSearchQuery] = useState("");
     //const [currentPage, setCurrentPage] = useState(0);
     const [status, setStatus] = useState("");
+      const [actionType, setActionType] = useState("");
     //const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
 
@@ -67,6 +68,7 @@ const SupBulkUploadLog = () => {
 
     const [committedFilters, setCommittedFilters] = useState({
         status: "",
+        actionType: "",
         fromDate: null,
         toDate: null
     });
@@ -183,7 +185,7 @@ const SupBulkUploadLog = () => {
     // Validate filters before calling the API
 
     const filterValidations = () => {
-        if (!fromDate && !toDate && !status) {
+        if (!actionType && !fromDate && !toDate && !status) {
             Swal.fire({
                 title: "Warning",
                 text: "No filter is selected. Please, select a filter.",
@@ -193,6 +195,7 @@ const SupBulkUploadLog = () => {
                 confirmButtonColor: "#f1c40f",
                 confirmButtonText: "OK"
             });
+            
             setToDate(null);
             setFromDate(null);
             return;
@@ -226,6 +229,7 @@ const SupBulkUploadLog = () => {
 
             const payload = {
                 status: filters.status,
+                Actions: filters.actionType,
                 from_date: formatDate(filters.fromDate),
                 to_date: formatDate(filters.toDate),
                 pages: filters.page,
@@ -328,6 +332,7 @@ const SupBulkUploadLog = () => {
             return;
         } else {
             setCommittedFilters({
+                actionType,
                 status,
                 fromDate,
                 toDate
@@ -336,6 +341,7 @@ const SupBulkUploadLog = () => {
             if (currentPage === 1) {
                 callAPI({
                     status,
+                    actionType,
                     fromDate,
                     toDate,
                     page: 1
@@ -350,6 +356,7 @@ const SupBulkUploadLog = () => {
 
     const handleClear = () => {
         setStatus("");
+        setActionType("");
         setFromDate(null);
         setToDate(null);
         //setTotalPages(0);
@@ -358,6 +365,7 @@ const SupBulkUploadLog = () => {
         setMaxCurrentPage(0);
         setIsMoreDataAvailable(true);
         setCommittedFilters({
+            actionType:"",
             status: "",
             fromDate: null,
             toDate: null
@@ -420,7 +428,22 @@ const SupBulkUploadLog = () => {
                                             <option value="Upload Complete" style={{ color: "black" }}>Upload Complete</option>
                                         </select>
                                     </div>
-
+                                     <div className="flex items-center">
+                                                    <select
+                                                      value={actionType}
+                                                      onChange={(e) => setActionType(e.target.value)}
+                                                      className={`${GlobalStyle.selectBox}`}
+                                                      style={{ color: actionType === "" ? "gray" : "black" }}
+                                                    >
+                                                       <option value="" hidden>Action Type</option>
+                                <option value="Incident Creation" style={{ color: "black" }}>Incident Creation</option>
+                                <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
+                                <option value="Distribute to DRC" style={{ color: "black" }}>Distribute to DRC</option>
+                                <option value="Validity Period Extend" style={{ color: "black" }}>Validity Period Extend</option>
+                                <option value="Hold" style={{ color: "black" }}>Hold</option>
+                                <option value="Discard" style={{ color: "black" }}>Discard</option>
+                                                    </select>
+                                                  </div>
                                     <label className={GlobalStyle.dataPickerDate}>Date:</label>
 
                                     <DatePicker

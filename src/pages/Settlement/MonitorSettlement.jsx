@@ -24,26 +24,32 @@ import Swal from 'sweetalert2';
 import { Tooltip } from "react-tooltip";
 import { Create_Task_For_Downloard_Settlement_List } from "../../services/settlement/SettlementServices";
 import { getLoggedUserId } from "../../services/auth/authService";
-import RO_Settle_Pending from "/src/assets/images/Settlement/RO_Settle_Pending.png";
-import RO_Settle_Open_Pending from "/src/assets/images/Settlement/RO_Settle_Open_Pending.png";
-import RO_Settle_Active from "/src/assets/images/Settlement/RO_Settle_Active.png";
-import MB_Settle_Pending from "/src/assets/images/Settlement/MB Settle Pending.png";
-import MB_Settle_Open_Pending from "/src/assets/images/Settlement/MB Settle Open Pending.png"
-import MB_Settle_Active from "/src/assets/images/Settlement/MB Settle Active.png";
-import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation Settle Pending.png";
-import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
-import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
-import LOD_Settle_Active from "/src/assets/images/Settlement/LOD_Settle_Active.png";
-import LOD_Settle_Pending from "/src/assets/images/Settlement/LOD_Settle_Pending.png";
-import LOD_Settle_Open_Pending from "/src/assets/images/Settlement/LOD_Settle_Open_Pending.png";
-import WRIT_Settle_Pending from "/src/assets/images/Settlement/WRIT_Settle_Pending.png";
-import WRIT_Settle_Open_Pending from "/src/assets/images/Settlement/WRIT_Settle_Open-Pending.png";
-import WRIT_Settle_Active from "/src/assets/images/Settlement/WRIT_Settle_Active.png";
-import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle_Pending.png";
-import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
-import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
+// import RO_Settle_Pending from "/src/assets/images/Settlement/RO_Settle_Pending.png";
+// import RO_Settle_Open_Pending from "/src/assets/images/Settlement/RO_Settle_Open_Pending.png";
+// import RO_Settle_Active from "/src/assets/images/Settlement/RO_Settle_Active.png";
+// import MB_Settle_Pending from "/src/assets/images/Settlement/MB Settle Pending.png";
+// import MB_Settle_Open_Pending from "/src/assets/images/Settlement/MB Settle Open Pending.png"
+// import MB_Settle_Active from "/src/assets/images/Settlement/MB Settle Active.png";
+// import Litigation_Settle_Pending from "/src/assets/images/Settlement/Litigation Settle Pending.png";
+// import Litigation_Settle_Open_Pending from "/src/assets/images/Settlement/Litigation Settle Open-Pending.png";
+// import Litigation_Settle_Active from "/src/assets/images/Settlement/Litigation Settle Active.png";
+// import LOD_Settle_Active from "/src/assets/images/Settlement/LOD_Settle_Active.png";
+// import LOD_Settle_Pending from "/src/assets/images/Settlement/LOD_Settle_Pending.png";
+// import LOD_Settle_Open_Pending from "/src/assets/images/Settlement/LOD_Settle_Open_Pending.png";
+// import WRIT_Settle_Pending from "/src/assets/images/Settlement/WRIT_Settle_Pending.png";
+// import WRIT_Settle_Open_Pending from "/src/assets/images/Settlement/WRIT_Settle_Open-Pending.png";
+// import WRIT_Settle_Active from "/src/assets/images/Settlement/WRIT_Settle_Active.png";
+// import Dispute_Settle_Pending from "/src/assets/images/Settlement/Dispute_Settle_Pending.png";
+// import Dispute_Settle_Open_Pending from "/src/assets/images/Settlement/Dispute_Settle_Open_Pending.png";
+// import Dispute_Settle_Active from "/src/assets/images/Settlement/Dispute_Settle_Active.png";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import Open from "/src/assets/images/settlement_status/Open .png";
+import Open_Pending  from "/src/assets/images/settlement_status/Open_Pending .png";
+import Compleate from "/src/assets/images/settlement_status/Compleate .png";
+import Active from "/src/assets/images/settlement_status/Active .png";
+import Abandaned from "/src/assets/images/settlement_status/Abandaned .png";
+import Withdraw from "/src/assets/images/settlement_status/Withdraw.png";
 
 const Monitor_settlement = () => {
   // State Variables
@@ -107,82 +113,28 @@ const Monitor_settlement = () => {
   }, []);
 
   // return Icon based on settlement status and settlement phase
-  const getStatusIcon = (phase, status) => {
-    switch (phase?.toLowerCase()) {
-      case "negotiation":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return RO_Settle_Pending;
-          case "open_pending":
-            return RO_Settle_Open_Pending;
-          case "active":
-            return RO_Settle_Active;
-          default:
-            return null;
-        }
-      case "mediation board":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return MB_Settle_Pending;
-          case "open_pending":
-            return MB_Settle_Open_Pending;
-          case "active":
-            return MB_Settle_Active;
-          default:
-            return null;
-        }
-      case "litigation":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return Litigation_Settle_Pending;
-          case "open_pending":
-            return Litigation_Settle_Open_Pending;
-          case "active":
-            return Litigation_Settle_Active;
-          default:
-            return null;
-        }
-      case "lod":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return LOD_Settle_Pending;
-          case "open_pending":
-            return LOD_Settle_Open_Pending;
-          case "active":
-            return LOD_Settle_Active;
-          default:
-            return null;
-        }
-      case "writ":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return WRIT_Settle_Pending;
-          case "open_pending":
-            return WRIT_Settle_Open_Pending;
-          case "active":
-            return WRIT_Settle_Active;
-          default:
-            return null;
-        }
-      case "dispute":
-        switch (status?.toLowerCase()) {
-          case "pending":
-            return Dispute_Settle_Pending;
-          case "open_pending":
-            return Dispute_Settle_Open_Pending;
-          case "active":
-            return Dispute_Settle_Active;
-          default:
-            return null;
-        }
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case "open":
+        return Open;
+      case "open_pending":
+        return Open_Pending;
+      case "active":
+        return Active;
+      case "withdraw":
+        return Withdraw;
+      case "completed":
+        return Compleate;
+      case "abondant":
+        return Abandaned;
       default:
         return null;
     }
   };
 
   // render status icon with tooltip
-  const renderStatusIcon = (phase, status, index) => {
-    const iconPath = getStatusIcon(phase, status);
+  const renderStatusIcon = (status, index) => {
+    const iconPath = getStatusIcon(status);
 
     if (!iconPath) {
       return <span>{status}</span>;
@@ -195,12 +147,12 @@ const Monitor_settlement = () => {
         <img
           src={iconPath}
           alt={status}
-          className="w-6 h-6"
+          className="w-7 h-7"
           data-tooltip-id={tooltipId} // Add tooltip ID to image
         />
         {/* Tooltip component */}
         <Tooltip id={tooltipId} place="bottom" effect="solid">
-          {`${phase} Settle ${status}`} {/* Tooltip text is the phase and status */}
+          {`${status}`} {/* Tooltip text is the phase and status */}
         </Tooltip>
       </div>
     );
@@ -321,12 +273,6 @@ const Monitor_settlement = () => {
   // Function to call the API and fetch filtered data
   const callAPI = async (filters) => {
     try {
-      // Format the date to 'YYYY-MM-DD' format
-      const formatDate = (date) => {
-        if (!date) return null;
-        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-        return offsetDate.toISOString().split('T')[0];
-      };
 
       console.log(currentPage);
 
@@ -344,8 +290,8 @@ const Monitor_settlement = () => {
         account_no: filters.accountNo,
         case_phase: filters.phase,
         settlement_status: filters.status,
-        from_date: formatDate(filters.fromDate),
-        to_date: formatDate(filters.toDate),
+        from_date: filters.fromDate,
+        to_date: filters.toDate, 
         pages: filters.page,
       };
       console.log("Payload sent to API: ", payload);
@@ -355,15 +301,17 @@ const Monitor_settlement = () => {
       setIsLoading(false); // Set loading state to false
 
       // Updated response handling
-      if (response && response.data) {
+      if (response) {
         // console.log("Valid data received:", response.data);
-        if (currentPage === 1) {
-          setFilteredData(response.data)
-        } else {
-          setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (response.status === 200 && response.data && response.data.data && response.data.data.length > 0) {
+          if (currentPage === 1) {
+            setFilteredData(response.data.data)
+          } else {
+            setFilteredData((prevData) => [...prevData, ...response.data.data]);
+          }
         }
 
-        if (response.data.length === 0) {
+        if (response.status === 204) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
             Swal.fire({
@@ -379,7 +327,7 @@ const Monitor_settlement = () => {
           }
         } else {
           const maxData = currentPage === 1 ? 10 : 30;
-          if (response.data.length < maxData) {
+          if (response.data.data.length < maxData) {
             setIsMoreDataAvailable(false); // More data available
           }
         }
@@ -527,12 +475,13 @@ const Monitor_settlement = () => {
     }
 
     setIsCreatingTask(true);
+    
     try {
       const response = await Create_Task_For_Downloard_Settlement_List(userData, phase, status, fromDate, toDate, caseId, accountNo);
-      if (response === "success") {
+      if (response.status === 200) {
         Swal.fire({
-          title: response,
-          text: `Task created successfully!`,
+          title: "Task created successfully!",
+          text: "Task ID: " + response.data.data.data.Task_Id,
           icon: "success",
           confirmButtonColor: "#28a745"
         });
@@ -572,7 +521,7 @@ const Monitor_settlement = () => {
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
-            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
+            <div className="flex flex-wrap items-center justify-end w-full gap-3">
 
               <div className="flex items-center">
                 <select
@@ -626,9 +575,12 @@ const Monitor_settlement = () => {
                   style={{ color: status === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Status</option>
-                  <option value="Pending" style={{ color: "black" }}>Pending</option>
+                  <option value="Open" style={{ color: "black" }}>Open</option>
                   <option value="Open_Pending" style={{ color: "black" }}>Open Pending</option>
                   <option value="Active" style={{ color: "black" }}>Active</option>
+                  <option value="WithDraw" style={{ color: "black" }}>WithDraw</option>
+                  <option value="Completed" style={{ color: "black" }}>Completed</option>
+                  <option value="Abandant" style={{ color: "black" }}>Abandant</option>
                 </select>
               </div>
 
@@ -697,9 +649,9 @@ const Monitor_settlement = () => {
               <thead className={GlobalStyle.thead}>
                 <tr>
                   <th className={GlobalStyle.tableHeader}>Case ID</th>
-                  <th className={GlobalStyle.tableHeader}>Status</th>
+                  <th className={GlobalStyle.tableHeader}>Settlement Status</th>
                   <th className={GlobalStyle.tableHeader}>Settlement ID</th>
-                  <th className={GlobalStyle.tableHeader}>Settlement Phase</th>
+                  <th className={GlobalStyle.tableHeader}>Case Phase</th>
                   <th className={GlobalStyle.tableHeader}>Created DTM</th>
                   <th className={GlobalStyle.tableHeader}></th>
                 </tr>
@@ -723,11 +675,12 @@ const Monitor_settlement = () => {
                         {item.case_id || "N/A"}
                       </td>
                       <td className={`${GlobalStyle.tableData} flex justify-center items-center`}>
-                        {renderStatusIcon(item.case_phase, item.settlement_status, index)}
+                        {renderStatusIcon(item.settlement_status, index)}
+                        {/* {item.settlement_status} */}
                       </td>
-                      <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}> {item.case_phase || "N/A"} </td>
-                      <td className={GlobalStyle.tableData}>{new Date(item.settlement_status_dtm).toLocaleDateString("en-GB") || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.settlement_id || ""}</td>
+                      <td className={GlobalStyle.tableData}> {item.settlement_phase || ""} </td>
+                      <td className={GlobalStyle.tableData}>{item.created_dtm ? new Date(item.created_dtm).toLocaleDateString("en-GB") : ""}</td>
                       <td className={GlobalStyle.tableData}>
                         <img
                           src={more}
@@ -771,10 +724,10 @@ const Monitor_settlement = () => {
                   : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage
                   )}
               className={`${GlobalStyle.navButton} ${(searchQuery
-                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
-                  ? "cursor-not-allowed"
-                  : ""
+                ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                ? "cursor-not-allowed"
+                : ""
                 }`}
             >
               <FaArrowRight />

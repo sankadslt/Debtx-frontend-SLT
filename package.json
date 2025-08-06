@@ -19,6 +19,7 @@
     "lucide-react": "^0.464.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
+    "react-confetti": "^6.4.0",
     "react-datepicker": "^7.6.0",
     "react-dom": "^18.3.1",
     "react-hooks": "^1.0.1",
@@ -26,6 +27,7 @@
     "react-loading-skeleton": "^3.5.0",
     "react-router-dom": "^7.0.1",
     "react-tooltip": "^5.29.0",
+    "recharts": "^3.1.0",
     "sweetalert2": "^11.21.2"
   },
   "devDependencies": {

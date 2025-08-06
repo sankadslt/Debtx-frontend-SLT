@@ -16,8 +16,10 @@ Related Files: (routes)
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import DatePicker from "react-datepicker";
-import { Case_Details_Settlement_Phase ,  Create_Settlement_Plan} from "../../services/settlement/SettlementServices";
-
+import { Case_Details_Settlement_Phase } from "../../services/settlement/SettlementServices";
+import { Submit_Mediation_Board_Acceptance, Settelment_plan_request_acceptence_type_A } from "../../services/request/request.js";
+import { FaSearch, FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -29,25 +31,40 @@ export default function CreateSettlementPlan() {
   const [calendarMonth, setCalendarMonth] = useState();
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
-
+  const navigate = useNavigate();
   const [phase, setPhase] = useState("");
   const [initialAmount, setInitialAmount] = useState("");
   const [remark, setRemark] = useState("");
-  const [visibleTables, setVisibleTables] = useState({}); 
+  const [remark1, setRemark1] = useState("");
+  const [visibleTables, setVisibleTables] = useState({});
   const [error, setError] = useState("");
   const [settlementCount, setSettlementCount] = useState(0);
+  const [acceptRequest, setAcceptRequest] = useState("");
   const [caseDetails, setCaseDetails] = useState([]);
   //const { caseId } = useParams(); // Get caseId from URL
   const [settlementdata, setSettlementdata] = useState([]);
-   const toggleSettlementTable = (index) => {
+  const toggleSettlementTable = (index) => {
     setVisibleTables((prev) => ({
       ...prev,
       [index]: !prev[index],
     }));
   };
 
+
+
   const caseId = location.state?.case_Id;
-  const PlanType  = location.state?.PlanType ;
+  const PlanType = location.state?.PlanType; // Default to "Type A" if not provided
+  const Roid = location.state?.RO_ID;
+  const casecurrentphase = location.state?.Case_Current_Phase;
+
+  const interactionlogid = location.state?.INteraction_Log_ID;
+  const interactiontype = location.state?.User_Interaction_TYPE;
+  const interationid = location.state?.INteraction_ID;
+
+  //console.log("Interaction Log ID from URL:", interactionlogid);
+  // console.log("Interaction Type from URL:", interactiontype);
+  //console.log("CASE current phase from URL:", casecurrentphase);
+
 
   const drcid = location.state?.DRC;
   console.log("Case ID from URL:", caseId);
@@ -64,7 +81,7 @@ export default function CreateSettlementPlan() {
   useEffect(() => {
     const fetchCaseDetails = async () => {
       try {
-        const payload = { case_id: caseId  };
+        const payload = { case_id: caseId };
         console.log("Sending API request with payload:", payload);
         const response = await Case_Details_Settlement_Phase(payload);
         console.log("API Response:", response);
@@ -114,92 +131,176 @@ export default function CreateSettlementPlan() {
   };
 
 
+
   const handlesubmit = async () => {
-    if (!phase ){
+    // if (!phase) {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Warning",
+    //     text: "Please enter the phase.",
+    //     confirmButtonColor: "#ffc107",
+    //   });
+    //   return;
+    // }
+    if (!acceptRequest) {
       Swal.fire({
         icon: "warning",
         title: "Warning",
-        text: "Please enter the phase.",
+        text: "Please select Accept Request: Yes or No.",
         confirmButtonColor: "#ffc107",
       });
       return;
     }
 
-    if (!initialAmount)
-    {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please enter the initial amount.",
-        confirmButtonColor: "#ffc107",
-      });
-      return;
+    if (acceptRequest === "Yes") {
+
+
+
+      if (!initialAmount) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Please enter the initial amount.",
+          confirmButtonColor: "#ffc107",
+        });
+        return;
+      }
+
+      if (!calendarMonth) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Please enter the calendar month.",
+          confirmButtonColor: "#ffc107",
+        });
+        return;
+      }
+
+      if (!remark) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Please enter a remark.",
+          confirmButtonColor: "#ffc107",
+        });
+        return;
+      }
+
+      try {
+        const userId = await getLoggedUserId();
+        console.log("User ID:", userId);
+        const payload = {
+          case_id: caseId,
+          Interaction_Log_ID: interactionlogid,
+          create_by: userId,
+          User_Interaction_Type: interactiontype,
+          Interaction_ID: interationid,
+          requestAccept: "Yes",
+          Remark: remark,
+          //  Letter_Send:   // what is this for ??
+          calendar_month: Number(calendarMonth),
+          initial_amount: Number(initialAmount),
+
+          // case_phase : phase,
+          // case_status : caseDetails?.case_current_status,
+          //settlement_type: PlanType, // currently goes as plan 1 ask about this
+          //settlement_amount : caseDetails?.current_arrears_amount, // should change this 
+          // drc_id : drcid,
+          // settlement_plan_received: [Number(initialAmount), Number(calendarMonth)],
+
+          remark: remark,
+        }
+
+        console.log("Payload for settlement plan submission:", payload);
+
+        const response = await Settelment_plan_request_acceptence_type_A(payload);
+        console.log("Response from settlement plan submission:", response);
+
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Settlement plan submitted successfully.",
+          confirmButtonColor: "#28a745"
+        });
+
+        setCalendarMonth("");
+        setInitialAmount("");
+        setFromDate(null);
+        setToDate(null);
+        setRemark("");
+        setPhase("");
+
+
+      } catch (error) {
+
+        const errorMessage = error.response?.data?.message || error.message || "An error occurred while submitting the settlement plan.";
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+        });
+      }
+    } else if (acceptRequest === "No") {
+      if (!remark1) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Please enter a remark.",
+          confirmButtonColor: "#ffc107",
+        });
+        return;
+      }
+
+      try {
+
+        const userId = await getLoggedUserId();
+        console.log("User ID:", userId);
+        const payload = {
+
+          create_by: userId,
+          Interaction_Log_ID: interactionlogid,
+          case_id: caseId,
+          User_Interaction_Type: interactiontype,
+          Interaction_ID: interationid,
+          requestAccept: "No",
+          Reamrk: remark1,
+        };
+
+        console.log("Payload for settlement rejection:", payload);
+
+        const response = await Submit_Mediation_Board_Acceptance(payload);
+        console.log("Response from settlement rejection:", response);
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Settlement request rejected successfully.",
+          confirmButtonColor: "#28a745"
+        });
+        setRemark("");
+      } catch (error) {
+
+        const errorMessage =
+          error.response?.data?.message || error.message || "An error occurred while rejecting the settlement request.";
+
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+        });
+      }
     }
+  };
 
-    if (!calendarMonth) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please enter the calendar month.",
-        confirmButtonColor: "#ffc107",
-      });
-      return;
+
+  const handlebackbuttonclick = () => {
+    if (PlanType === "Type A") {
+      navigate("/additional_request_log");
+    } else if (PlanType === "Type B") {
+      // navigate("/pages/Settlement/SettlementPlanB");
     }
-
-    if (!remark) {
-      Swal.fire({
-        icon: "warning",
-        title: "Warning",
-        text: "Please enter a remark.",
-        confirmButtonColor: "#ffc107",
-      });
-      return;
-    }
-
-    try {
-       const userId = await getLoggedUserId();
-       console.log("User ID:", userId);
-      const payload = {
-       created_by : userId,
-       case_phase : phase,
-       case_status : caseDetails?.case_current_status,
-       settlement_type : PlanType, // currently goes as plan 1 ask about this
-       settlement_amount : caseDetails?.current_arrears_amount, // should change this 
-       drc_id : drcid,
-       settlement_plan_received:[Number(initialAmount), Number(calendarMonth)], 
-       case_id: caseId,
-       remark: remark,
-    }
-
-    console.log("Payload for settlement plan submission:", payload);
-
-   const response = await Create_Settlement_Plan(payload);
-    console.log("Response from settlement plan submission:", response);
-
-    Swal.fire({
-      icon: "success",
-      title: "Success",
-      text: "Settlement plan submitted successfully.",
-      confirmButtonColor: "#28a745"
-    });
-
-    setCalendarMonth("");
-    setInitialAmount("");
-    setFromDate(null);
-    setToDate(null);
-    setRemark("");
-    setPhase("");
-    
-
-  } catch (error) {
-    Swal.fire({
-      icon: "error",  
-      title: "Error",
-      text: error.message || "An error occurred while submitting the settlement plan.",
-      confirmButtonColor: "#d33",
-    });
-    } 
-   }
+  };
 
   return (
     <div className={GlobalStyle.fontPoppins}>
@@ -209,8 +310,8 @@ export default function CreateSettlementPlan() {
       <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
         {/* Card Box */}
         <div className="flex items-center justify-center ">
-        <div className={`${GlobalStyle.cardContainer} w-full max-w-lg`}>
-          {/* <p className="flex gap-3 mb-2">
+          <div className={`${GlobalStyle.cardContainer} w-full max-w-lg`}>
+            {/* <p className="flex gap-3 mb-2">
             <strong>Case ID : </strong>
             <div> {caseDetails?.case_id}</div>
           </p>
@@ -231,159 +332,196 @@ export default function CreateSettlementPlan() {
             
           </p> */}
 
-          <table>
-            <colgroup>
-              <col  />
-              <col style={{ width: "20px" }} />
-              <col />
-              
-            </colgroup>
-            <tbody>
-              <tr>
+            <table>
+              <colgroup>
+                <col />
+                <col style={{ width: "20px" }} />
+                <col />
+
+              </colgroup>
+              <tbody>
+                <tr>
                   <td className="py-2"><strong> Case ID  </strong></td>
                   <td className="py-2"><strong> : </strong> </td>
                   <td className="py-2"> {caseDetails?.case_id}</td>
-              </tr>
-              <tr>
+                </tr>
+                <tr>
                   <td className="py-2"><strong>Customer Ref </strong></td>
                   <td className="py-2"> <strong> : </strong> </td>
                   <td className="py-2"> {caseDetails?.customer_ref}</td>
-              </tr>
-              <tr>
+                </tr>
+                <tr>
                   <td className="py-2"><strong>Account no</strong></td>
                   <td className="py-2"> <strong> : </strong> </td>
                   <td className="py-2"> {caseDetails?.account_no}</td>
-              </tr>
-              <tr>
+                </tr>
+                <tr>
                   <td className="py-2"><strong>Last Payment Date</strong></td>
                   <td className="py-2"> <strong> : </strong> </td>
-                  <td className="py-2">  {new Date(caseDetails?.last_payment_date).toLocaleDateString()}</td>
-              </tr>
+                  <td className="py-2">
+                    {caseDetails?.last_payment_date
+                      ? new Date(caseDetails.last_payment_date).toLocaleDateString()
+                      : ""}
+                  </td>
+                </tr>
 
-            </tbody>  
+              </tbody>
 
-          </table>
-        </div>
+            </table>
+          </div>
         </div>
 
         {/* Input Fields */}
         <div
           className={`${GlobalStyle.tableContainer}  bg-white bg-opacity-50 p-8 max-w-3xl mx-auto `}
         >
-        <div className="flex gap-4">
-          <h1 className={GlobalStyle.remarkTopic}>Phase:</h1>
-          <input
-            type="text"
-            placeholder="Text here"
-            value={phase}
-            onChange={(e) => setPhase(e.target.value)}
-            className={GlobalStyle.inputText}
-          />
-        </div>
-        <br />
 
-        <div className="flex gap-4">
-          <h1 className={GlobalStyle.remarkTopic}>Case Status:</h1>
-          <div> {caseDetails?.case_current_status}</div>
-        </div>
-        <br />
+          <div className="mb-6 flex items-center gap-6">
+            <label className={GlobalStyle.remarkTopic}>Accept Request:</label>
+            <div className="flex items-center gap-6">
+              <label className="flex items-center mb-1">
+                <input
+                  type="radio"
+                  value="Yes"
+                  name="acceptRequest"
+                  //checked={acceptRequest === "Yes"}
+                  //className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                Yes
+              </label>
+              <label className="flex items-center mb-1">
+                <input
+                  type="radio"
+                  value="No"
+                  name="acceptRequest"
+                  //checked={acceptRequest === "No"}
+                  //className="mr-2"
+                  onChange={(e) => setAcceptRequest(e.target.value)}
+                />
+                No
+              </label>
+            </div>
+          </div>
 
-        <div className="flex gap-4">
-          <h1 className={GlobalStyle.remarkTopic}>Settlement Count:</h1>
-          <div> {caseDetails?.settlement_count}</div>
-        </div>
-        <br />
+          {acceptRequest === "Yes" && (
+            <>
 
-        <div className="flex gap-4">
-          <h1 className={GlobalStyle.remarkTopic}>Settlement plan:</h1>
-          <input
-            className={GlobalStyle.inputText}
-            value={PlanType}
-            // onChange={(e) => setSelectedPlan(e.target.value)}
-            readOnly
-            style={{color: "black"}}
-          > 
+              <div className="flex gap-4">
+                <h1 className={GlobalStyle.remarkTopic}>Case Phase:</h1>
+                {/* <input
+              type="text"
+              placeholder="Text here"
+              value={phase}
+              onChange={(e) => setPhase(e.target.value)}
+              className={GlobalStyle.inputText}
+            /> */}
+                {casecurrentphase}
+              </div>
+              <br />
 
-            {/* <option value="" hidden>
+              <div className="flex gap-4">
+                <h1 className={GlobalStyle.remarkTopic}>Case Status:</h1>
+                <div> {caseDetails?.case_current_status}</div>
+              </div>
+              <br />
+
+              <div className="flex gap-4">
+                <h1 className={GlobalStyle.remarkTopic}>Settlement Count:</h1>
+                <div> {caseDetails?.settlement_count}</div>
+              </div>
+              <br />
+
+              <div className="flex gap-4">
+                <h1 className={GlobalStyle.remarkTopic}>Settlement plan:</h1>
+                <input
+                  className={GlobalStyle.inputText}
+                  value={PlanType}
+                  // onChange={(e) => setSelectedPlan(e.target.value)}
+                  readOnly
+                  style={{ color: "black" }}
+                >
+
+                  {/* <option value="" hidden>
               Select plan
             </option>
             <option value="plan1">Plan 1</option>
             <option value="plan2">Plan 2</option> */}
-          </input>
-        </div>
-        <br />
+                </input>
+              </div>
+              <br />
 
-        {PlanType === "Type A" && (
-          <>
-            <div className="flex gap-4 mt-4">
-              <h1 className={GlobalStyle.remarkTopic}>Initial Amount:</h1>
-              <input
-                type="text"
-                placeholder="Enter Amount"
-                className={GlobalStyle.inputText}
-                value={initialAmount}
-                 onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*\.?\d*$/.test(value)) {
-                    setInitialAmount(value);
-                  }
-                }}
-              />
-            </div>
-            <br />
+              {PlanType === "Type A" && (
+                <>
+                  <div className="flex gap-4 mt-4">
+                    <h1 className={GlobalStyle.remarkTopic}>Initial Amount:</h1>
+                    <input
+                      type="text"
+                      placeholder="Enter Amount"
+                      className={GlobalStyle.inputText}
+                      value={initialAmount}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d*\.?\d*$/.test(value)) {
+                          setInitialAmount(value);
+                        }
+                      }}
+                    />
+                  </div>
+                  <br />
 
-            <div className="mb-6 flex items-center gap-3">
-              <label className={GlobalStyle.remarkTopic}>Calendar month:</label>
-              <input
-                type="number"
-                className={`${GlobalStyle.inputText}`}
-                min="1"
-                max="12"
-                onChange={(e) => setCalendarMonth(e.target.value)}
-                value={calendarMonth}
-                 onKeyDown={(e) => e.preventDefault()}
-              />
-            </div>
+                  <div className="mb-6 flex items-center gap-3">
+                    <label className={GlobalStyle.remarkTopic}>Calendar month:</label>
+                    <input
+                      type="number"
+                      className={`${GlobalStyle.inputText}`}
+                      min="1"
+                      max="12"
+                      onChange={(e) => setCalendarMonth(e.target.value)}
+                      value={calendarMonth}
+                      onKeyDown={(e) => e.preventDefault()}
+                    />
+                  </div>
 
-            <div className="flex  flex-col sm:flex-row items-start gap-4">
-               <label className={`${GlobalStyle.remarkTopic} `}>Duration:</label>
-              {/* <h1 className={GlobalStyle.remarkTopic}>Duration:</h1> */}
-          
-            {/* <div className={GlobalStyle.datePickerContainer}> */}
-             <div className="flex flex-wrap items-center gap-4 ">
-              <label className={GlobalStyle.remarkTopic}>From:</label>
-              <DatePicker
-                selected={fromDate}
-                onChange={handleFromDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/mm/yyyy"
-                className={GlobalStyle.inputText}
-                readOnly
-              />
-              <label className={GlobalStyle.remarkTopic}>To:</label>
-              <DatePicker
-                selected={toDate}
-                onChange={handleToDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="dd/mm/yyyy"
-                className={GlobalStyle.inputText}
-                readOnly
-              />
-            </div>
-            </div>
-            <br />
+                  <div className="flex  flex-col sm:flex-row items-start gap-4">
+                    <label className={`${GlobalStyle.remarkTopic} `}>Duration:</label>
+                    {/* <h1 className={GlobalStyle.remarkTopic}>Duration:</h1> */}
 
-           <div className="flex  flex-col sm:flex-row items-start gap-4">
-              <label className={GlobalStyle.remarkTopic}>Remark : </label>
-              <textarea className={`${GlobalStyle.remark}`} rows="5"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-              ></textarea>
-            </div>
-            <br />
+                    {/* <div className={GlobalStyle.datePickerContainer}> */}
+                    <div className="flex flex-wrap items-center gap-4 ">
+                      <label className={GlobalStyle.remarkTopic}>From:</label>
+                      <DatePicker
+                        selected={fromDate}
+                        onChange={handleFromDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="dd/mm/yyyy"
+                        className={GlobalStyle.inputText}
+                        readOnly
+                      />
+                      <label className={GlobalStyle.remarkTopic}>To:</label>
+                      <DatePicker
+                        selected={toDate}
+                        onChange={handleToDateChange}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="dd/mm/yyyy"
+                        className={GlobalStyle.inputText}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <br />
 
-            {/* Dynamically Render Tables Based on Settlement Count */}
-            {/* {caseDetails?.settlement_plans?.map((plan, index) => (
+                  <div className="flex  flex-col sm:flex-row items-start gap-4">
+                    <label className={GlobalStyle.remarkTopic}>Remark : </label>
+                    <textarea className={`${GlobalStyle.remark}`} rows="5"
+                      value={remark}
+                      onChange={(e) => setRemark(e.target.value)}
+                    ></textarea>
+                  </div>
+                  <br />
+
+                  {/* Dynamically Render Tables Based on Settlement Count */}
+                  {/* {caseDetails?.settlement_plans?.map((plan, index) => (
               <div
                 key={plan.settlement_id}
                 className={GlobalStyle.tableContainer}
@@ -433,20 +571,54 @@ export default function CreateSettlementPlan() {
                     </table>
                   </div>
                 </div> */}
-              {/* </div> */}
-            {/* ))}
+                  {/* </div> */}
+                  {/* ))}
             <br /> */}
 
-            <div className="flex gap-4 justify-end">
-              <button className={GlobalStyle.buttonPrimary}
-                onClick={handlesubmit}
-              >Submit</button>
-            </div>
-          </>
-        )}
-      </div>
-      <br />
-      <div className="mt-6">
+
+                  <div className="flex gap-4 justify-end">
+                    {/* <button className={GlobalStyle.buttonRemove}
+                  onClick={handlereject}
+                >Reject</button> */}
+
+                    <button className={GlobalStyle.buttonPrimary}
+                      onClick={handlesubmit}
+                    >Submit</button>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {acceptRequest === "No" && (
+            <>
+
+              <div className="flex  flex-col sm:flex-row items-start gap-4">
+                <label className={GlobalStyle.remarkTopic}>Remark : </label>
+                <textarea className={`${GlobalStyle.remark}`} rows="5"
+                  value={remark1}
+                  onChange={(e) => setRemark1(e.target.value)}
+                ></textarea>
+              </div>
+
+              <div className="flex gap-4 justify-end">
+                {/* <button className={GlobalStyle.buttonRemove}
+                  onClick={handlereject}
+                >Reject</button> */}
+
+                <button className={GlobalStyle.buttonPrimary}
+                  onClick={handlesubmit}
+                >Submit</button>
+              </div>
+
+
+            </>
+          )}
+
+        </div>
+
+        <br />
+        <div className="mt-6">
           {settlementdata?.map((settlement, index) => (
             <div key={index} className="mb-4">
               <button
@@ -459,45 +631,47 @@ export default function CreateSettlementPlan() {
                 <span>{visibleTables[index] ? "▲" : "▼"}</span>
               </button>
 
-          { visibleTables[index] && (
-            <div className="mt-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
-              <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
-                <table className={GlobalStyle.table}>
-                  <thead className={GlobalStyle.thead}>
-                    <tr>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Seq. No
-                      </th>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Installment Settle Amount
-                      </th>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Plan Date
-                      </th>
-                      <th scope="col" className={GlobalStyle.tableHeader}>
-                        Installment Paid Amount
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {settlement.settlement_plan?.map((installment, i) => (
-                      <tr key={i} className="bg-white bg-opacity-75 border-b">
-                        <td className={GlobalStyle.tableData}>{installment.installment_seq}</td>
-                        <td className={GlobalStyle.tableCurrency}>{installment.Installment_Settle_Amount}</td>
-                        <td className={GlobalStyle.tableData}>{new Date (installment.Plan_Date).toLocaleDateString("en-GB")}</td>
-                        <td className={GlobalStyle.tableCurrency}>{installment.Installment_Paid_Amount}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {visibleTables[index] && (
+                <div className="mt-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
+                  <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+                    <table className={GlobalStyle.table}>
+                      <thead className={GlobalStyle.thead}>
+                        <tr>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            Seq. No
+                          </th>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            Installment Settle Amount
+                          </th>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            Plan Date
+                          </th>
+                          <th scope="col" className={GlobalStyle.tableHeader}>
+                            Installment Paid Amount
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {settlement.settlement_plan?.map((installment, i) => (
+                          <tr key={i} className="bg-white bg-opacity-75 border-b">
+                            <td className={GlobalStyle.tableData}>{installment.installment_seq}</td>
+                            <td className={GlobalStyle.tableCurrency}>{installment.Installment_Settle_Amount}</td>
+                            <td className={GlobalStyle.tableData}>{new Date(installment.Plan_Date).toLocaleDateString("en-GB")}</td>
+                            <td className={GlobalStyle.tableCurrency}>{installment.Installment_Paid_Amount}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
           ))}
         </div>
 
-      {/* { caseDetails?.setSettlementCount && (
+
+
+        {/* { caseDetails?.setSettlementCount && (
         <div className="mt-6">
           {settlementdata?.map((settlement, index) => (
             <div key={index} className="mb-4">
@@ -549,7 +723,13 @@ export default function CreateSettlementPlan() {
           ))}
         </div>
       )} */}
-    </div>
+        {/* Back Button */}
+
+        <button className={GlobalStyle.buttonPrimary} onClick={handlebackbuttonclick} >
+          <FaArrowLeft className="mr-2" />
+        </button>
+
+      </div>
     </div>
   );
 }

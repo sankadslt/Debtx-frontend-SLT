@@ -147,10 +147,10 @@ const SettlementPreview = () => {
         setIsCreatingTask(true);
         try {
             const response = await Create_Task_For_Downloard_Settlement_Details_By_Case_ID(userData, caseId, settlementID);
-            if (response === "success") {
+            if (response.status === 200) {
                 Swal.fire({
-                    title: response,
-                    text: `Task created successfully!`,
+                    title: "Task created successfully!",
+                    text: "Task ID: " + response.data.data.data.Task_Id,
                     icon: "success",
                     confirmButtonColor: "#28a745"
                 });
@@ -207,6 +207,18 @@ const SettlementPreview = () => {
                             <div className="table-cell px-4 py-2">{Settlementdata.account_num}</div>
                         </div>
                         <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Billing Arrears Amount</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">
+                                {Settlementdata?.bss_arrears_amount &&
+                                    Settlementdata.bss_arrears_amount.toLocaleString("en-LK", {
+                                        style: "currency",
+                                        currency: "LKR",
+                                    })
+                                }
+                            </div>
+                        </div>
+                        <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Arrears Amount</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">
@@ -218,6 +230,11 @@ const SettlementPreview = () => {
                                 }
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
+                    <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Last Monitoring DTM</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
@@ -234,11 +251,6 @@ const SettlementPreview = () => {
                                     })}
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
-                    <div className="table">
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Status</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
@@ -270,7 +282,7 @@ const SettlementPreview = () => {
             </div>
 
             {/* Settilement Plan table */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Settlement Plan</b></h2>
+            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>System Created Settlement Plan</b></h2>
 
             <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
@@ -284,31 +296,33 @@ const SettlementPreview = () => {
                     </thead>
                     <tbody>
                         {dataInPageSettlementPlans.length > 0 ? (
-                            dataInPageSettlementPlans.map((log, index) => (
-                                <tr
-                                    key={index}
-                                    className={`${index % 2 === 0
-                                        ? "bg-white bg-opacity-75"
-                                        : "bg-gray-50 bg-opacity-50"
-                                        } border-b`}
-                                >
-                                    <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
-                                    <td className={GlobalStyle.tableCurrency}>{log.Installment_Settle_Amount}</td>
-                                    <td className={GlobalStyle.tableCurrency}>{log.cumulative_Settle_Amount}</td>
-                                    <td className={GlobalStyle.tableData}>
-                                        {log?.Plan_Date &&
-                                            new Date(log.Plan_Date).toLocaleString("en-GB", {
-                                                year: "numeric",
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                // hour: "2-digit",
-                                                // minute: "2-digit",
-                                                // second: "2-digit",
-                                                // hour12: true,
-                                            })}
-                                    </td>
-                                </tr>
-                            ))
+                            dataInPageSettlementPlans
+                                .sort((a, b) => new Date(b.Plan_Date) - new Date(a.Plan_Date))
+                                .map((log, index) => (
+                                    <tr
+                                        key={index}
+                                        className={`${index % 2 === 0
+                                            ? "bg-white bg-opacity-75"
+                                            : "bg-gray-50 bg-opacity-50"
+                                            } border-b`}
+                                    >
+                                        <td className={GlobalStyle.tableData}>{log.installment_seq}</td>
+                                        <td className={GlobalStyle.tableCurrency}>{log.Installment_Settle_Amount}</td>
+                                        <td className={GlobalStyle.tableCurrency}>{log.cumulative_Settle_Amount}</td>
+                                        <td className={GlobalStyle.tableData}>
+                                            {log?.Plan_Date &&
+                                                new Date(log.Plan_Date).toLocaleString("en-GB", {
+                                                    year: "numeric",
+                                                    month: "2-digit",
+                                                    day: "2-digit",
+                                                    // hour: "2-digit",
+                                                    // minute: "2-digit",
+                                                    // second: "2-digit",
+                                                    // hour12: true,
+                                                })}
+                                        </td>
+                                    </tr>
+                                ))
                         ) : (
                             <tr>
                                 <td colSpan="6" className="text-center py-4">
@@ -322,22 +336,31 @@ const SettlementPreview = () => {
 
             {dataInPageSettlementPlans.length > 0 && (
                 <div className={GlobalStyle.navButtonContainer}>
-                    <button className={GlobalStyle.navButton} onClick={handlePrevPageSettlementPlans} disabled={currentPageSettlementPlans === 0}>
+                    <button
+                        className={`${GlobalStyle.navButton} ${currentPageSettlementPlans === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handlePrevPageSettlementPlans}
+                        disabled={currentPageSettlementPlans === 0}
+                    >
                         <FaArrowLeft />
                     </button>
                     <span className="text-gray-700">
                         Page {currentPageSettlementPlans + 1} of {pagesSettlementPlans}
                     </span>
-                    <button className={GlobalStyle.navButton} onClick={handleNextPageSettlementPlans} disabled={currentPageSettlementPlans === pagesSettlementPlans - 1}>
+                    <button
+                        className={`${GlobalStyle.navButton} ${currentPageSettlementPlans === pagesSettlementPlans - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handleNextPageSettlementPlans}
+                        disabled={currentPageSettlementPlans === pagesSettlementPlans - 1}
+                    >
                         <FaArrowRight />
                     </button>
                 </div>
             )}
 
             {/* Received Settlement Plan Table */}
-            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Received Settlement Plan</b></h2>
+            <h2 className={`${GlobalStyle.headingMedium} mt-4`}><b>Customer Requested Settlement Plan</b></h2>
 
-            <div className="flex gap-4 mt-4 justify-center">
+            <div className="flex flex-wrap gap-4 mt-4 justify-center">
+                {/* <div className="flex gap-4 mt-4 justify-center"> */}
                 <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
                     <div className="table">
                         <div className="table-row">
@@ -372,6 +395,22 @@ const SettlementPreview = () => {
                             </div>
                         </div>
                         <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Settlement Expire DTM</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">
+                                {Settlementdata?.expire_date &&
+                                    new Date(Settlementdata.expire_date).toLocaleString("en-GB", {
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                        hour12: true,
+                                    })}
+                            </div>
+                        </div>
+                        <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">DRC ID</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
                             <div className="table-cell px-4 py-2">{Settlementdata.drc_id}</div>
@@ -383,9 +422,50 @@ const SettlementPreview = () => {
                         </div>
                     </div>
                 </div>
+                {/* </div> */}
+
+                {/* <div className="flex gap-4 mt-4 justify-center"> */}
+                <div className={`${GlobalStyle.cardContainer} w-full max-w-xl`}>
+                    <div className="table">
+                        <div className="table-row px-4 py-2 font-bold underline">
+                            Received Settlement Plan
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Initial Amount</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">
+                                {/* {Settlementdata?.settlement_plan_received[0] &&
+                                    Settlementdata.settlement_plan_received[0].toLocaleString("en-LK", {
+                                        style: "currency",
+                                        currency: "LKR",
+                                    })
+                                } */}
+                                {Array.isArray(Settlementdata?.settlement_plan_received) &&
+                                    Settlementdata.settlement_plan_received[0] !== undefined
+                                    ? Settlementdata.settlement_plan_received[0].toLocaleString("en-LK", {
+                                        style: "currency",
+                                        currency: "LKR",
+                                    })
+                                    : ""}
+                            </div>
+                        </div>
+                        <div className="table-row">
+                            <div className="table-cell px-4 py-2 font-bold">Monitor Months</div>
+                            <div className="table-cell px-4 py-2 font-bold">:</div>
+                            <div className="table-cell px-4 py-2">
+                                {/* {Settlementdata.settlement_plan_received[1]} */}
+                                {Array.isArray(Settlementdata?.settlement_plan_received) &&
+                                    Settlementdata.settlement_plan_received[1] !== undefined
+                                    ? Settlementdata.settlement_plan_received[1]
+                                    : ""}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* </div> */}
             </div>
 
-            <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
+            {/* <div className={`${GlobalStyle.tableContainer} mt-4 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
@@ -429,9 +509,9 @@ const SettlementPreview = () => {
                         )}
                     </tbody>
                 </table>
-            </div>
+            </div> */}
 
-            {dataInPagesettlementPlanRecievedDetails.length > 0 && (
+            {/* {dataInPagesettlementPlanRecievedDetails.length > 0 && (
                 <div className={GlobalStyle.navButtonContainer}>
                     <button className={GlobalStyle.navButton} onClick={handlePrevPagesettlementPlanRecievedDetails} disabled={currentPagesettlementPlanRecievedDetails === 0}>
                         <FaArrowLeft />
@@ -443,7 +523,7 @@ const SettlementPreview = () => {
                         <FaArrowRight />
                     </button>
                 </div>
-            )}
+            )} */}
 
             <div>
                 <button
