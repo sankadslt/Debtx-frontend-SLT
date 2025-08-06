@@ -176,13 +176,13 @@ const Login = () => {
                 {socialLoading === "Azure" ? "Signing in..." : "Sign in with Azure"}
               </button>
 
-{/*               <button
+              <button
                 type="button"
                 className="w-full py-2 bg-white hover:bg-gray-100 text-blue-600 font-semibold rounded-lg border border-blue-600 transition-all duration-200"
                 onClick={() => setShowTestLogin(true)}
               >
                 Test Login
-              </button> */}
+              </button>
             </form>
           </div>
         </div>
