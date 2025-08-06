@@ -348,6 +348,14 @@ const Digital_Signature_LOD = () => {
                     text: "Task ID: " + response.data.data.data.Task_Id,
                     icon: "success",
                     confirmButtonColor: "#28a745"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (LODType === "LOD") {
+                            navigate("/pages/LOD/LODLog"); // Redirect to task list page
+                        } else if (LODType === "Final Reminder") {
+                            navigate("/pages/LOD/FinalReminderList"); // Redirect to task list page
+                        }
+                    }
                 });
             }
         } catch (error) {
