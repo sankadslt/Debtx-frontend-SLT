@@ -61,7 +61,7 @@ export const List_F2_Selection_Cases = async (
     if (response.data.status === "success") {
       return response.data.data.map((LOD) => ({
         LODID: LOD.case_id,
-        Status: LOD.lod_final_reminder.current_document_type,
+        Status: LOD.lod_final_reminder?.current_document_type,
         Amount: LOD.current_arrears_amount,
         CustomerTypeName: LOD.customer_type_name || null,
         AccountManagerCode: LOD.account_manager_code || null,
@@ -89,7 +89,7 @@ export const Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases = async (
     );
 
     // return the response status
-    return response.data.status;
+    return response;
   } catch (error) {
     console.error(
       "Error creating task:",
@@ -101,14 +101,30 @@ export const Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases = async (
 
 // Create task for downloading each digital signature LOD cases
 export const Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases =
-  async (createdBy, LODType) => {
+  async (payload) => {
     try {
       const response = await axios.post(
         `${LOD_URL}/Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases`,
-        {
-          Created_By: createdBy,
-          current_document_type: LODType,
-        }
+        payload
+      );
+
+      // return the response status
+      return response;
+    } catch (error) {
+      console.error(
+        "Error creating task:",
+        error.response?.data || error.message
+      );
+      throw error.response?.data || error;
+    }
+  };
+
+export const Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases_Not_LIT_Priscribed =
+  async (payload) => {
+    try {
+      const response = await axios.post(
+        `${LOD_URL}/Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases_Not_LIT_Priscribed`,
+        payload
       );
 
       // return the response status
@@ -210,8 +226,8 @@ export const List_Final_Reminder_Lod_Cases = async (
         LastResponse:
           LOD.lod_final_reminder?.lod_response?.length > 0
             ? LOD.lod_final_reminder.lod_response[
-                LOD.lod_final_reminder.lod_response.length - 1
-              ]?.created_on // returning the last response data
+              LOD.lod_final_reminder.lod_response.length - 1
+            ]?.created_on // returning the last response data
             : null,
       }));
     } else {
