@@ -1,12 +1,25 @@
-import React from "react";
+
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { useNavigate } from "react-router-dom";
+import { Create_FTL_LOD } from "../../services/FTL_LOD/FTL_LODServices.js";
 
 export default function FTL_LOD_creation() {
   const navigate = useNavigate();
   // Function to handle navigation to change details form
   const handleChangeDetails = () => {
     navigate("/pages/flt-lod/ftl-lod-change-details-form");
+  };
+
+  const handleCreateFTLLOD = async (payload) => {
+    try {
+      const response = await Create_FTL_LOD(payload);
+      console.log("FTL LOD created successfully:", response);
+      // Handle success (e.g., show a success message, redirect, etc.)
+    } catch (error) {
+      console.error("Error creating FTL LOD:", error);
+      // Handle error (e.g., show an error message)
+    } 
   };
   // Function to handle PDF creation
   const handleCreatePDF = () => {
