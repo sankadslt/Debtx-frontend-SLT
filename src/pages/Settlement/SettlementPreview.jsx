@@ -204,7 +204,7 @@ const SettlementPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Account no</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.account_num}</div>
+                            <div className="table-cell px-4 py-2">{Settlementdata.account_no}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Billing Arrears Amount</div>
@@ -275,7 +275,7 @@ const SettlementPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Status Reason</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.settlement_status_reason}</div>
+                            <div className="table-cell px-4 py-2">{Settlementdata.status_reason}</div>
                         </div>
                     </div>
                 </div>
@@ -366,7 +366,7 @@ const SettlementPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Phase</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Settlementdata.case_phase}</div>
+                            <div className="table-cell px-4 py-2">{Settlementdata.settlement_phase}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settlement Type</div>
