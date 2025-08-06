@@ -191,7 +191,7 @@ const PaymentPreview = () => {
     <tr className="bg-white bg-opacity-75 border-b">
       <td className={GlobalStyle.tableData}>{Paymentdata.money_details.money_transaction_ref}</td>
       <td className={GlobalStyle.tableData}>{Paymentdata.transaction_type}</td> {/* No reference type in your data */}
-      <td className={GlobalStyle.tableCurrency}>{Paymentdata.money_details.money_transaction_amount}</td>
+      <td className={GlobalStyle.tableCurrency}>{Paymentdata.money_details.money_transaction_amount.toLocaleString("en-LK")}</td>
       <td className={GlobalStyle.tableData}>
         {Paymentdata.money_details.money_transaction_date &&
           new Date(Paymentdata.money_details.money_transaction_date).toLocaleString("en-GB", {
@@ -237,7 +237,7 @@ const PaymentPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Settled Effected Amount for Commission</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata?.settle_Effected_Amount ?? "N/A"}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata?.settle_Effected_Amount}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Commission Type</div>
@@ -252,17 +252,17 @@ const PaymentPreview = () => {
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">DRC ID</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.drc?.drc_id ?? "N/A"}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.drc?.drc_id}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">RO ID</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.drc?.ro_id ?? "N/A"}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.drc?.ro_id}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Commission Issued By</div>
                             <div className="table-cell px-4 py-2 font-bold">:</div>
-                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.issued_by ?? "N/A"}</div>
+                            <div className="table-cell px-4 py-2">{Paymentdata?.commission_details?.issued_by}</div>
                         </div>
                         <div className="table-row">
                             <div className="table-cell px-4 py-2 font-bold">Commission Issued DTM</div>
@@ -278,7 +278,7 @@ const PaymentPreview = () => {
                                         second: "2-digit",
                                         hour12: true
                                     })
-                                    : "N/A"}
+                                    : null}
                                     </div>
                         </div>
                     </div>
