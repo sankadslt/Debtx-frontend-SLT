@@ -279,7 +279,7 @@ const Monitor_settlement = () => {
       // const payload = {
       //   case_id: caseId,
       //   account_no: accountNo,
-      //   case_phase: phase,
+      //   settlement_phase: phase,
       //   settlement_status: status,
       //   from_date: formatDate(fromDate),
       //   to_date: formatDate(toDate),
@@ -288,7 +288,7 @@ const Monitor_settlement = () => {
       const payload = {
         case_id: filters.caseId,
         account_no: filters.accountNo,
-        case_phase: filters.phase,
+        settlement_phase: filters.phase,
         settlement_status: filters.status,
         from_date: filters.fromDate,
         to_date: filters.toDate, 
