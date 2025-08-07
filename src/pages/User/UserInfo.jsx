@@ -1,4 +1,3 @@
-
 /* Purpose: This template is used for the 17.2 - User Info .
 Created Date: 2025-06-07
 Created By: sakumini (sakuminic@gmail.com)
@@ -6,7 +5,7 @@ Version: node 20
 ui number :17.2
 Dependencies: tailwind css
 Related Files: (routes)
-Notes:The following page conatins the code for the User Info Screen */
+Notes: The following page contains the code for the User Info Screen */
 
 import { useEffect, useState } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
@@ -447,6 +446,18 @@ const UserInfo = () => {
     return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
+  // Format date to YYYY-MM-DD HH:mm:ss
+  const formatDateTime = (date) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
   const handleEndUser = async () => {
     if (!endDate) {
       Swal.fire({
@@ -466,6 +477,33 @@ const UserInfo = () => {
         icon: "warning",
         allowOutsideClick: false,
         allowEscapeKey: false,
+      });
+      return;
+    }
+
+    // Ensure end_dtm is in the future
+    const now = new Date();
+    const selectedEndDate = new Date(endDate);
+    // Set time to 23:59:59 of the selected date to ensure it's in the future
+    selectedEndDate.setHours(23, 59, 59, 999);
+
+    if (selectedEndDate <= now) {
+      Swal.fire({
+        title: "Warning",
+        text: "End date must be in the future. Please select a future date.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
+    const currentStatus = userInfo.user_status?.[0]?.status;
+    if (currentStatus === "Pending_approval") {
+      Swal.fire({
+        title: "Warning",
+        text: "Cannot terminate user in Pending_approval status. Please approve or reject the user first.",
+        icon: "warning",
       });
       return;
     }
@@ -501,7 +539,10 @@ const UserInfo = () => {
         user_id: Number(user_id),
         created_by: loggedUserData,
         status_reason: remark,
+        end_dtm: formatDateTime(selectedEndDate),
       };
+
+      console.log("Sending payload to endUser:", payload);
 
       const response = await endUser(payload);
       console.log("endUser response:", response);
@@ -544,11 +585,12 @@ const UserInfo = () => {
         throw new Error(response?.message || response || "Failed to terminate user");
       }
     } catch (err) {
-      console.error("Error terminating user:", err);
+      console.error("Error terminating user:", err.response?.data, err);
+      const errorMessage = err.response?.data?.detail || err.response?.data?.message || err.message || "Failed to terminate user";
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: err.message || "Failed to terminate user",
+        text: typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage),
       });
     } finally {
       setLoading(false);
