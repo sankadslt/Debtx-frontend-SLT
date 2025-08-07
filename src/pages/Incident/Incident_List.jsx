@@ -476,7 +476,7 @@ const Incident_List = () => {
           <div className="flex justify-end mt-6">
             <button onClick={HandleAddIncident} className={`${GlobalStyle.buttonPrimary} flex items-center`}>
               <FaPlus className="mr-2" />
-              Add Incident
+              Add Account
             </button>
           </div>
 
