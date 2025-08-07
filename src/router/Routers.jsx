@@ -140,6 +140,8 @@ import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
 import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
 import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
+// import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
+ 
 
 const Routers = () => {
   return (
@@ -565,9 +567,9 @@ const Routers = () => {
           />
         }
       />
-      <Route
-        path="
-		"
+        {/* //INCIDENT */}
+        <Route
+        path="/Incident/Incident_List"
         element={
           <ProtectedRoute
             element={<Incident_List />}
@@ -1023,6 +1025,18 @@ const Routers = () => {
         }
       />
 
+{/* <Route
+        path="/pages/Abnormal/Case_Closed_Log"
+        element={
+          <ProtectedRoute
+            element={<Case_Closed_Log/>}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      /> */}
+
+ 
+ 
       {/* FTL LOD Routes */}
       <Route
         path="/pages/flt-lod/ftl-lod-list"

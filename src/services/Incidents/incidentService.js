@@ -69,7 +69,9 @@ export const New_List_Incidents = async (filters) => {
       `${INCIDENT_URL}/New_List_Incidents`,
       filters
     );
+    console.log("Response:", response.data);
     return response.data;
+    
   } catch (error) {
     console.error(
       "Error fetching incidents:",
@@ -272,28 +274,51 @@ export const Task_for_Download_Incidents = async (
 export const Task_for_Download_Incidents_Full_List = async (
   status1,
   status2,
+  selectedServiceType,
+  status3,
+  status4,
   fromDate,
   toDate,
-  createdBy
+  createdBy,
+   
 ) => {
+  console.log("selected:"," Action",status1,
+    "Incident_Status",status2,
+    "Service_Type",selectedServiceType,
+    "Source_Type",status3,
+    "Incident_Direction",status4,
+    fromDate,
+    toDate,
+    createdBy,)
   try {
     const response = await axios.post(
       `${INCIDENT_URL}/Task_for_Download_Incidents_Full_List`,
       {
         Incident_Status: status2,
         Actions: status1,
+        Service_Type:selectedServiceType,
         From_Date: fromDate,
         To_Date: toDate,
+         Incident_Direction: status4,
+        
         // Account_Num: accountNo,
         Created_By: createdBy,
+        Template_Task_Id:21,
+        task_type: "Create incident distribution download",
+        Source_Type: status3,
+
       }
     );
-    return response.data;
+    if (response.status === 201) {
+     
+      return response.data;
+      
+    } else {
+      throw new Error("Failed to create task, status code: " + response.status);
+    }
   } catch (error) {
-    console.error(
-      "Error creating incident:",
-      error.response?.data || error.message
-    );
+    console.error("Error creating task:", error.message || error);
     throw error.response?.data || error;
   }
+  
 };
