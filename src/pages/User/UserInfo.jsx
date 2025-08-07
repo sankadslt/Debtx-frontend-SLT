@@ -1096,7 +1096,7 @@ const UserInfo = () => {
               <tbody className="space-y-4 sm:space-y-0">
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                    End Date <span className="text-red-500">*</span>
+                    End Date and Time<span className="text-red-500">*</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1104,10 +1104,29 @@ const UserInfo = () => {
                       <DatePicker
                         selected={endDate}
                         onChange={(date) => setEndDate(date)}
-                        dateFormat="dd/MM/yyyy"
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        dateFormat="yyyy-MM-dd HH:mm:ss"
+                        timeCaption="Time"
                         className={`${GlobalStyle.inputText} w-full text-left`}
                         minDate={new Date()}
+                        filterTime={(time) => {
+                          const now = new Date();
+                          const selectedDate = endDate || now;
+                          // If selected date is today, disable times before now
+                          if (
+                            selectedDate.getDate() === now.getDate() &&
+                            selectedDate.getMonth() === now.getMonth() &&
+                            selectedDate.getFullYear() === now.getFullYear()
+                          ) {
+                            return time.getTime() > now.getTime();
+                          }
+                          return true; // allow all times for future dates
+                        }}
                       />
+
+
                     </div>
                   </td>
                 </tr>
