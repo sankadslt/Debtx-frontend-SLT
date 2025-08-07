@@ -88,3 +88,24 @@ export const Create_FTL_LOD = async (payload) => {
     throw error;
   }
 }
+
+export const FTL_LOD_Case_Details = async (case_id) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/FTL_LOD_Case_Details`,
+      { case_id }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching FTL LOD case details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
