@@ -1,13 +1,14 @@
 /* 
 Purpose: This template is used for the 17.4 - User Registration Form.
 Created Date: 2025-07-31 
-last Updated: 2025-08-02
+Last Updated: 2025-08-07
 Created By: Tharindu Darshana (tharindu.drubasinge@gmail.com)
 Version: React v18 
-ui number: 17.4 / 17.4.1 / 17.4.2 
-Dependencies: Tailwind CSS, React Icons Related 
-Files: GlobalStyle.js 
-Notes: The following page contains the code for the User Registration Form for SLT and DRC officers. */
+UI Number: 17.4 / 17.4.1 / 17.4.2 
+Dependencies: Tailwind CSS, React Icons, SweetAlert2
+Related Files: GlobalStyle.js 
+Notes: The following page contains the code for the User Registration Form for SLT and DRC officers, with multiple role selection and login method from the provided code, redirect logic and Swal alerts matching SignUp.jsx, and preserved table-based UI.
+*/
 
 import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
@@ -77,6 +78,11 @@ const AddUser = () => {
 
   // Reset form data on user type change
   useEffect(() => {
+    clearFormData();
+  }, [userType]);
+
+  // Clear form data
+  const clearFormData = () => {
     setFormData({
       serviceNo: "",
       name: "",
@@ -89,8 +95,9 @@ const AddUser = () => {
       loginMethod: "",
     });
     setError("");
-  }, [userType]);
+  };
 
+  // Form Input handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === "role") {
@@ -110,6 +117,7 @@ const AddUser = () => {
     }
   };
 
+  // Remove role handler
   const handleRemoveRole = (roleToRemove) => {
     setFormData((prev) => ({
       ...prev,
@@ -117,6 +125,7 @@ const AddUser = () => {
     }));
   };
 
+  // Handle search for SLT user data
   const handleSearch = async () => {
     setError("");
     setLoading(true);
@@ -129,7 +138,6 @@ const AddUser = () => {
         email: data.email,
         contactNo: data.contactNo,
         designation: data.designation,
-        ...(userType === "DRC Officer" ? { nic: data.nic } : {}),
       }));
     } catch (err) {
       console.error(err);
@@ -138,9 +146,16 @@ const AddUser = () => {
     setLoading(false);
   };
 
+  // Go back to previous page
+  const goBack = () => {
+    navigate(-1);
+  };
+
+  // Register User
   const handleRegister = async () => {
     try {
       setLoading(true);
+
       if (!userType) {
         Swal.fire({
           icon: "error",
@@ -151,27 +166,42 @@ const AddUser = () => {
       }
 
       const basePayload = {
-        user_type: userType === "SLT" ? "internal" : "external",
-        user_login: userType === "SLT" ? [formData.serviceNo] : [formData.email || formData.contactNo],
+        user_type: userType,
+        user_login: userType === "slt" ? [formData.serviceNo] : [formData.nic],
         User_profile: {
           username: formData.name,
           email: formData.email,
-          user_nic: formData.nic || "",
-          user_designation: formData.role[0] || "",
+          user_designation: formData.designation,
+          user_nic: userType === "slt" ? formData.serviceNo : formData.nic,
         },
         user_contact_num: [formData.contactNo],
         role: formData.role,
-        drc_details: userType === "DRC Officer" ? { drc_id: formData.drcId } : {},
         Remark: {
-          remark_description: "User registered via form",
+          remark_description: "Manual test insert",
         },
         create_by: loggedUserData,
       };
 
-      const response = await createUser(basePayload);
+      const payload =
+        userType === "slt"
+          ? { ...basePayload }
+          : userType === "drc_officer"
+          ? { ...basePayload, drc_id: formData.drcId }
+          : null;
 
-      if (response.status === "success") {
-        navigate(-1);
+      if (!payload) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Invalid user type.",
+        });
+        return;
+      }
+
+      const result = await createUser(payload);
+
+      if (result.status === "success") {
+        goBack();
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -181,7 +211,7 @@ const AddUser = () => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: response.message || "Failed to register user",
+          text: result.message || "Failed to register user",
         });
       }
     } catch (error) {
@@ -197,7 +227,7 @@ const AddUser = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className=" flex items-center justify-center">
       <div className={`${GlobalStyle.fontPoppins} w-full max-w-5xl`}>
         <h1 className={GlobalStyle.headingLarge}>Register User</h1>
         <div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[750px] lg:w-[750px]`}>
@@ -219,8 +249,8 @@ const AddUser = () => {
                     <option value="" disabled hidden>
                       Select
                     </option>
-                    <option value="SLT">SLT</option>
-                    <option value="DRC Officer">DRC Officer</option>
+                    <option value="slt">SLT</option>
+                    <option value="drc_officer">DRC Officer</option>
                   </select>
                 </td>
               </tr>
@@ -228,7 +258,7 @@ const AddUser = () => {
           </table>
 
           {/* SLT Form */}
-          {userType === "SLT" && (
+          {userType === "slt" && (
             <>
               <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 ml-10 text-left font-bold`}>
                 <span className="underline">User Details</span>
@@ -408,7 +438,7 @@ const AddUser = () => {
           )}
 
           {/* DRC Form */}
-          {userType === "DRC Officer" && (
+          {userType === "drc_officer" && (
             <>
               <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-8 ml-10 text-left font-bold`}>
                 <span className="underline">DRC Officer Details</span>
