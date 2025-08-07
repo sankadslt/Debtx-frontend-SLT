@@ -70,7 +70,7 @@ export const Create_Task_for_OpenNoAgent = async (filteredParams) => {
       task_type: "Create incident  distribution download",
       Created_By: user_id,
       task_status: "open",
-      Incident_Status: "Open No Agent",
+      Incident_direction: "Open No Agent",
       ...filteredParams,
     };
 
@@ -92,7 +92,7 @@ export const Create_Task_for_Create_CaseFromIncident = async (
       task_type: "Create Case from Incident Direct NO Agent",
       Created_By: user_id,
       task_status: "open",
-      Incident_Status: "Open No Agent",
+      Incident_direction: "Open No Agent",
       ...filteredParams,
     };
 
@@ -112,7 +112,8 @@ export const Create_Task_for_Forward_CPECollect = async (filteredParams) => {
       task_type: "Create Case from Incident Open CPE Collect",
       Created_By: user_id,
       task_status: "open",
-      Incident_Status: "Open CPE Collect",
+      
+Incident_direction: "Open CPE Collect",
       ...filteredParams,
     };
 
@@ -243,8 +244,8 @@ export const Create_Task_for_Download_Case_List = async (filteredParams) => {
   try {
     const user_id = await getLoggedUserId();
     const taskData = {
-      Template_Task_Id: 21,
-      task_type: "Create incident  distribution download",
+      Template_Task_Id: 56,
+      task_type: "Case List for Download",
       Created_By: user_id,
       task_status: "open",
       ...filteredParams,
@@ -252,7 +253,9 @@ export const Create_Task_for_Download_Case_List = async (filteredParams) => {
 
     const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
     if (response.status === 201) {
-      return "success"; // Return the data if the request was successful
+     
+      return response.data;
+      
     } else {
       throw new Error("Failed to create task, status code: " + response.status);
     }

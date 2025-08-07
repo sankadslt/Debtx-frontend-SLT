@@ -21,6 +21,7 @@ import { useParams } from "react-router-dom";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { Creat_Customer_Responce } from "../../services/LOD/LOD.js";
 import { case_details_for_lod_final_reminder } from "../../services/LOD/LOD.js";
+import { jwtDecode } from "jwt-decode";
 
 const CustomerResponse = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -33,11 +34,40 @@ const CustomerResponse = () => {
     const location = useLocation(); // Get the location object from react-router-dom
     const { caseId } = location.state || {}; // Get the case_id from the URL parameters
     const rowsPerPage = 10; // Number of rows per page
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+    // Role-Based Buttons
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            let decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+
+            if (decoded.exp < currentTime) {
+                refreshAccessToken().then((newToken) => {
+                    if (!newToken) return;
+                    const newDecoded = jwtDecode(newToken);
+                    setUserRole(newDecoded.role);
+                });
+            } else {
+                setUserRole(decoded.role);
+            }
+        } catch (error) {
+            console.error("Invalid token:", error);
+        }
+    }, []);
 
     // Handle Submit button
     const handleSubmit = async () => {
         if (!ResponseType || !ResponseRemark) {
-            Swal.fire("Error", "Please enter both Customer Response and Remark", "error");
+            Swal.fire({
+                title: "Error",
+                text: "Please enter both Customer Response and Remark",
+                icon: "error",
+                confirmButtonColor: "#d33",
+            });
             return;
         }
 
@@ -48,13 +78,23 @@ const CustomerResponse = () => {
             const response = await Creat_Customer_Responce(caseId, ResponseType, ResponseRemark, userData);
             // console.log(response)
             if (response === "success") {
-                Swal.fire(response, `Customer Response created successfully!`, "success");
+                Swal.fire({
+                    title: response,
+                    text: `Customer Response created successfully!`,
+                    icon: "success",
+                    confirmButtonColor: "#28a745",
+                });
                 setResponseType("");
                 setResponseRemark("");
                 fetchCaseDetails({});
             }
         } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
+            Swal.fire({
+                title: "Error",
+                text: error.message || "Failed to create task.",
+                icon: "error",
+                confirmButtonColor: "#d33",
+            });
         }
     }
 
@@ -209,13 +249,15 @@ const CustomerResponse = () => {
 
                     {/* Button */}
                     <dev className="flex justify-end space-x-2">
-                        <button
-                            className={`${GlobalStyle.buttonPrimary}`}
-                            style={{ display: 'flex', alignItems: 'center' }}
-                            onClick={handleSubmit}
-                        >
-                            Submit
-                        </button>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                            <button
+                                className={`${GlobalStyle.buttonPrimary}`}
+                                style={{ display: 'flex', alignItems: 'center' }}
+                                onClick={handleSubmit}
+                            >
+                                Submit
+                            </button>
+                        )}
                     </dev>
                 </div>
             </div>
@@ -245,31 +287,33 @@ const CustomerResponse = () => {
                             </thead>
                             <tbody>
                                 {paginatedData.length > 0 ? (
-                                    paginatedData.map((log, index) => (
-                                        <tr
-                                            key={index}
-                                            className={`${index % 2 === 0
-                                                ? "bg-white bg-opacity-75"
-                                                : "bg-gray-50 bg-opacity-50"
-                                                } border-b`}
-                                        >
-                                            <td className={GlobalStyle.tableData}>{log.response_type}</td>
-                                            <td className={GlobalStyle.tableData}>{log.lod_remark}</td>
-                                            <td className={GlobalStyle.tableData}>
-                                                {/* {log.created_on} */}
-                                                {log?.created_on &&
-                                                    new Date(log.created_on).toLocaleString("en-GB", {
-                                                        year: "numeric",
-                                                        month: "2-digit",
-                                                        day: "2-digit",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                        second: "2-digit",
-                                                        hour12: true,
-                                                    })}
-                                            </td>
-                                        </tr>
-                                    ))
+                                    paginatedData
+                                        .sort((a, b) => new Date(b.created_on) - new Date(a.created_on))
+                                        .map((log, index) => (
+                                            <tr
+                                                key={index}
+                                                className={`${index % 2 === 0
+                                                    ? "bg-white bg-opacity-75"
+                                                    : "bg-gray-50 bg-opacity-50"
+                                                    } border-b`}
+                                            >
+                                                <td className={GlobalStyle.tableData}>{log.response_type}</td>
+                                                <td className={GlobalStyle.tableData}>{log.lod_remark}</td>
+                                                <td className={GlobalStyle.tableData}>
+                                                    {/* {log.created_on} */}
+                                                    {log?.created_on &&
+                                                        new Date(log.created_on).toLocaleString("en-GB", {
+                                                            year: "numeric",
+                                                            month: "2-digit",
+                                                            day: "2-digit",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                            second: "2-digit",
+                                                            hour12: true,
+                                                        })}
+                                                </td>
+                                            </tr>
+                                        ))
                                 ) : (
                                     <tr>
                                         <td colSpan="3" className="text-center py-4">
@@ -296,7 +340,7 @@ const CustomerResponse = () => {
 
             <div>
                 <button
-                    className={GlobalStyle.navButton}
+                    className={GlobalStyle.buttonPrimary}
                     onClick={handleBackButton}
                 >
                     <FaArrowLeft />

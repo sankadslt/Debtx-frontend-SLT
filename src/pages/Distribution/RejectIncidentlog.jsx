@@ -197,6 +197,10 @@ const RejectIncidentlog = () => {
           id: incident.incidentID,
           status: incident.status,
           account_no: incident.accountNo,
+          filtered_reason: incident.filtered_reason,
+          Proceed_Dtm:incident.Proceed_Dtm,
+          drc_commision_rule: incident.drc_commision_rule,
+          Arrears: incident.Arrears,
           action: incident.action,
           source_type: incident.sourceType,
           created_dtm: incident.created_dtm,
@@ -459,8 +463,17 @@ const RejectIncidentlog = () => {
                 <tr>
                   <th className={GlobalStyle.tableHeader}>ID</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
+                  
+                  <th className={GlobalStyle.tableHeader}>Service Type</th>
+                  <th  className={GlobalStyle.tableHeader}>
+                      Filtered Reason
+                    </th>
+                    <th  className={GlobalStyle.tableHeader}>
+                      Reject On
+                    </th>
                   <th className={GlobalStyle.tableHeader}>Account No</th>
-                  <th className={GlobalStyle.tableHeader}>Action</th>
+                  <th className={GlobalStyle.tableHeader}>Amount</th>
+                  {/* <th className={GlobalStyle.tableHeader}>Action</th> */}
                   <th className={GlobalStyle.tableHeader}>Source Type</th>
                   <th className={GlobalStyle.tableHeader}>Created DTM</th>
                 </tr>
@@ -480,8 +493,34 @@ const RejectIncidentlog = () => {
                       <td className={`${GlobalStyle.tableData} flex justify-center`}>
                         {renderStatusIcon(row.status, index)}
                       </td>
+                      <td className={GlobalStyle.tableData}>{row.drc_commision_rule}</td>
+                      <td className={GlobalStyle.tableData}>
+                        {row.filtered_reason}
+                      </td>
+                      <td className={GlobalStyle.tableData}>
+                       
+                          {row.Proceed_Dtm
+                          ? new Date(row.Proceed_Dtm).toLocaleString("en-GB", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })
+                          : ""}
+                      </td>
+                     
                       <td className={GlobalStyle.tableData}>{row.account_no}</td>
-                      <td className={GlobalStyle.tableData}>{row.action}</td>
+                      <td className={GlobalStyle.tableCurrency}>
+  {typeof row.Arrears === 'number'
+    ? row.Arrears.toLocaleString("en-LK", {
+        style: "currency",
+        currency: "LKR",
+      })
+    : ""}
+</td>
+                      {/* <td className={GlobalStyle.tableData}>{row.action}</td> */}
                       <td className={GlobalStyle.tableData}>{row.source_type}</td>
                       <td className={GlobalStyle.tableData}>
                         {row.created_dtm
