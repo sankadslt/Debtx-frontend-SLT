@@ -27,7 +27,7 @@
     "react-loading-skeleton": "^3.5.0",
     "react-router-dom": "^7.0.1",
     "react-tooltip": "^5.29.0",
-    "recharts": "^3.1.0",
+    "recharts": "^3.1.2",
     "sweetalert2": "^11.21.2"
   },
   "devDependencies": {
