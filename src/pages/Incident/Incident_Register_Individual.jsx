@@ -135,7 +135,7 @@ const Incident_Register_Individual = () => {
       console.log("Incident created successfully:", response.data);
       Swal.fire({
         icon: "success",
-        title: "Incident Created",
+        title: "Account Created",
         text: `Incident Log ID: ${response.data.Incident_Log_Id} created successfully.`,
         confirmButtonColor: "#28a745",
       });
@@ -152,7 +152,7 @@ const Incident_Register_Individual = () => {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.message || "Failed to create incident.",
+        text: error.message || "Failed to create account.",
         confirmButtonColor: "#d33",
       });
     }
@@ -167,8 +167,8 @@ const Incident_Register_Individual = () => {
 
       <div className="flex flex-wrap justify-center sm:px-6 lg:px-8 overflow-auto">
         <div className={`${GlobalStyle.cardContainer} mt-4 `}>
-          <h1 className={`${GlobalStyle.headingLarge} mb-4 flex justify-center items-center`}>Incident Register</h1>
-          <h2 className={`${GlobalStyle.headingMedium} mb-6 flex justify-center items-center`}>Incident Details</h2>
+          <h1 className={`${GlobalStyle.headingLarge} mb-4 flex justify-center items-center`}>Account Register</h1>
+          <h2 className={`${GlobalStyle.headingMedium} mb-6 flex justify-center items-center`}>Account Details</h2>
           {/* <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex gap-4 justify-center items-center ">
               <label htmlFor="accountNo" className="w-[150px]">Account No </label>
