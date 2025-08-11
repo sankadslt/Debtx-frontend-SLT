@@ -140,7 +140,7 @@ import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
 import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
 import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
-// import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
+import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
  
 
 const Routers = () => {
@@ -1025,7 +1025,7 @@ const Routers = () => {
         }
       />
 
-{/* <Route
+<Route
         path="/pages/Abnormal/Case_Closed_Log"
         element={
           <ProtectedRoute
@@ -1033,7 +1033,7 @@ const Routers = () => {
             allowedRoles={["superadmin"]}
           />
         }
-      /> */}
+      />
 
  
  
