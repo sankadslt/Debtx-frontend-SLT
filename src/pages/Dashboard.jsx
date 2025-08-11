@@ -24,7 +24,7 @@ const Dashboard = () => {
     const isLaunchDay =
       today.getFullYear() === 2025 &&
       today.getMonth() === 7 && // Aug (0-indexed)
-      today.getDate() === 1;
+      today.getDate() === 4;
 
     if (isLaunchDay) {
       setShowCelebration(true);

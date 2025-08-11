@@ -24,6 +24,7 @@ import { Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases } from "../..
 import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Change_Document_Type } from "../../services/LOD/LOD.js";
 import { Create_Task_for_Proceed_LOD_OR_Final_Reminder_List } from "../../services/LOD/LOD.js";
+import { jwtDecode } from "jwt-decode";
 
 
 const Digital_Signature_LOD = () => {
@@ -46,6 +47,30 @@ const Digital_Signature_LOD = () => {
     const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Maximum current page for the table
     const rowsPerPage = 10; // Number of rows per page
     const navigate = useNavigate();
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+    // Role-Based Buttons
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            let decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+
+            if (decoded.exp < currentTime) {
+                refreshAccessToken().then((newToken) => {
+                    if (!newToken) return;
+                    const newDecoded = jwtDecode(newToken);
+                    setUserRole(newDecoded.role);
+                });
+            } else {
+                setUserRole(decoded.role);
+            }
+        } catch (error) {
+            console.error("Invalid token:", error);
+        }
+    }, []);
 
     // Fetch LOD, Final reminder and total counts
     const fetchLODCounts = async () => {
@@ -183,7 +208,12 @@ const Digital_Signature_LOD = () => {
 
         setIsCreatingTask(true);
         try {
-            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData, LODType);
+
+            const payload = {
+                Created_By: userData,
+                current_document_type: LODType,
+            }
+            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(payload);
             console.log("Response:", response);
             if (response.status === 200) {
                 Swal.fire({
@@ -222,12 +252,19 @@ const Digital_Signature_LOD = () => {
         setIsCreatingTask(true);
         try {
             const response = await Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases(userData);
-            if (response === "success") {
+            if (response.status === 200) {
                 Swal.fire({
-                    title: response,
-                    text: `Task created successfully!`,
+                    title: 'Task created successfully!',
+                    text: "Task ID: " + response.data.data.data.Task_Id,
                     icon: "success",
                     confirmButtonColor: "#28a745"
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: "Failed to create task.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
                 });
             }
         } catch (error) {
@@ -311,6 +348,14 @@ const Digital_Signature_LOD = () => {
                     text: "Task ID: " + response.data.data.data.Task_Id,
                     icon: "success",
                     confirmButtonColor: "#28a745"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (LODType === "LOD") {
+                            navigate("/pages/LOD/LODLog"); // Redirect to task list page
+                        } else if (LODType === "Final Reminder") {
+                            navigate("/pages/LOD/FinalReminderList"); // Redirect to task list page
+                        }
+                    }
                 });
             }
         } catch (error) {
@@ -430,7 +475,7 @@ const Digital_Signature_LOD = () => {
                 </div>
             </div>
 
-            {!LODType && (
+            {["admin", "superadmin", "slt"].includes(userRole) && !LODType && (
                 <div className="flex justify-end mt-6">
                     <button
                         onClick={HandleCreateTaskAllLOD}
@@ -554,12 +599,14 @@ const Digital_Signature_LOD = () => {
                                     ></textarea>
                                 </div>
                                 <div className="flex justify-end mt-4">
-                                    <button
-                                        onClick={handleSubmitChange}
-                                        className={`${GlobalStyle.buttonPrimary} mr-4`}
-                                    >
-                                        Change
-                                    </button>
+                                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                                        <button
+                                            onClick={handleSubmitChange}
+                                            className={`${GlobalStyle.buttonPrimary} mr-4`}
+                                        >
+                                            Change
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -590,17 +637,19 @@ const Digital_Signature_LOD = () => {
 
             {LODType && (
                 <div className="flex justify-between mt-6 space-x-4">
-                    <button
-                        onClick={HandleCreateTaskEachLOD}
-                        className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-                        // className={GlobalStyle.buttonPrimary}
-                        disabled={isCreatingTask}
-                        style={{ display: 'flex', alignItems: 'center' }}
-                    >
-                        {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-                        {/* Create task and let me know */}
-                    </button>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                            onClick={HandleCreateTaskEachLOD}
+                            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                            // className={GlobalStyle.buttonPrimary}
+                            disabled={isCreatingTask}
+                            style={{ display: 'flex', alignItems: 'center' }}
+                        >
+                            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+                            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                            {/* Create task and let me know */}
+                        </button>
+                    )}
                     <div className="flex justify-end gap-4">
                         <input
                             type="number"
@@ -608,12 +657,14 @@ const Digital_Signature_LOD = () => {
                             value={LODCount}
                             onChange={(e) => handleInputCount(e.target.value)}
                         />
-                        <button
-                            className={GlobalStyle.buttonPrimary}
-                            onClick={HandleCreateLODList}
-                        >
-                            {LODType === "LOD" ? "Create LOD List" : "Create Final Reminder List"}
-                        </button>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                            <button
+                                className={GlobalStyle.buttonPrimary}
+                                onClick={HandleCreateLODList}
+                            >
+                                {LODType === "LOD" ? "Create LOD List" : "Create Final Reminder List"}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
