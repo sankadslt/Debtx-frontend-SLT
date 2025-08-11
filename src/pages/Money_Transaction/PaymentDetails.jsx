@@ -112,7 +112,7 @@ const PaymentDetails = () => {
   }, [fromDate, toDate]);
 
   // Search Section
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -163,7 +163,7 @@ const PaymentDetails = () => {
       const payload = {
         case_id: filters.caseId,
         account_num: filters.accountNo,
-        settlement_phase: filters.phase,
+        case_phase: filters.phase,
         from_date: formatDate(filters.fromDate),
         to_date: formatDate(filters.toDate),
         pages: filters.page,
@@ -176,8 +176,11 @@ const PaymentDetails = () => {
       // Updated response handling
       if (response && response.data) {
         // console.log("Valid data received:", response.data);
-
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data);
+        } else {
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
 
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
@@ -246,11 +249,6 @@ const PaymentDetails = () => {
 
   // Fetch data when the component mounts
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
       // CallAPI(); // Call the function whenever currentPage changes
@@ -271,9 +269,7 @@ const PaymentDetails = () => {
       if (isMoreDataAvailable) {
         setCurrentPage(currentPage + 1);
       } else {
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        setTotalPages(totalPages);
-        if (currentPage < totalPages) {
+        if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
           setCurrentPage(currentPage + 1);
         }
       }
@@ -512,7 +508,10 @@ const PaymentDetails = () => {
                 type="text"
                 className={GlobalStyle.inputSearch}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage(1); // Reset to page 1 on search
+                  setSearchQuery(e.target.value);
+                }}
               />
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
@@ -537,7 +536,7 @@ const PaymentDetails = () => {
 
               <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-                  filteredDataBySearch.map((item, index) => (
+                  filteredDataBySearch.slice(startIndex, endIndex).map((item, index) => (
                     <tr
                       key={item.settlement_id || index}
                       className={
@@ -553,11 +552,11 @@ const PaymentDetails = () => {
                         {item.Case_ID || "N/A"}
                       </td>
                       <td className={GlobalStyle.tableData}>{item.Account_No || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{item.Settlement_ID || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
                       <td className={GlobalStyle.tableCurrency}>{item.Money_Transaction_Amount}</td>
                       <td className={GlobalStyle.tableData}>{item.Transaction_Type || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{item.Settlement_Phase || "N/A"}</td>
-                      <td className={GlobalStyle.tableCurrency}>{item.Cummulative_Settled_Balance}</td>
+                      <td className={GlobalStyle.tableData}>{item.case_phase || "N/A"}</td>
+                      <td className={GlobalStyle.tableCurrency}>{item.cumulative_settled_balance}</td>
                       <td className={GlobalStyle.tableData}>
                         {item.Money_Transaction_Date &&
                           new Date(item.Money_Transaction_Date).toLocaleString("en-GB", {
@@ -609,8 +608,15 @@ const PaymentDetails = () => {
             </span>
             <button
               onClick={() => handlePrevNext("next")}
-              disabled={currentPage === totalPages}
-              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""
+              disabled={
+                searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
+              className={`${GlobalStyle.navButton} ${(searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                  ? "cursor-not-allowed"
+                  : ""
                 }`}
             >
               <FaArrowRight />

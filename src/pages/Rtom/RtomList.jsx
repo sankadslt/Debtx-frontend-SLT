@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
@@ -9,6 +9,7 @@ import ActiveIcon from "../../assets/images/rtom/ROTM_Active.png";
 import InactiveIcon from "../../assets/images/rtom/ROTM_Inactive.png";
 import TerminateIcon from "../../assets/images/rtom/ROTM_Terminate.png";
 import MoreIcon from "../../assets/images/more.svg";
+import { Tooltip } from "react-tooltip";
 
 const RtomList = () => {
   const navigate = useNavigate();
@@ -18,8 +19,10 @@ const RtomList = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [appliedStatus, setAppliedStatus] = useState("");
   const [filtersApplied, setFiltersApplied] = useState(false);
-  const [data, setData] = useState([]);
+  const [allData, setAllData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastFetchedBackendPage, setLastFetchedBackendPage] = useState(1);
+  const hasMoreData = useRef(true);
   const rowsPerPage = 10;
 
   const getStatusIcon = (status) => {
@@ -35,46 +38,89 @@ const RtomList = () => {
     }
   };
 
-  useEffect(() => {
-    const loadRTOMs = async () => {
-      setIsLoading(true);
-      try {
-        const rtoms = await fetchRTOMs({
-          rtom_status: filtersApplied ? appliedStatus : "",
-          pages: currentPage,
+  // Fetch RTOMs from the backend
+  const callRTOMAPI = async (pageNo) => {
+    setIsLoading(true);
+    try {
+      const rtoms = await fetchRTOMs({
+        rtom_status: filtersApplied ? appliedStatus : "",
+        pages: pageNo,
+      });
+
+      if (rtoms.length === 0) {
+        hasMoreData.current = false;
+
+        // status filter warning message
+        if (pageNo === 1) {
+          Swal.fire({
+            icon: filtersApplied ? "info" : "warning",
+            iconColor: filtersApplied ? "#ff6b6b" : "#ff9999",
+            title: filtersApplied ? "No Records Found" : "No Data Available",
+            text: filtersApplied
+              ? "No applicable records available for the selected filter."
+              : "There are currently no RTOM records available.",
+          });
+        }
+      } else {
+        setAllData((prev) => {
+          const newData = rtoms.filter(
+            (item) => !prev.some((p) => p.rtom_id === item.rtom_id)
+          );
+          return [...prev, ...newData];
         });
-        setData(rtoms);
-      } catch (error) {
-        Swal.fire("Error", error.message || "Failed to load RTOMs", "error");
-        setData([]);
-      } finally {
-        setIsLoading(false);
+        setLastFetchedBackendPage(pageNo);
       }
-    };
+    } catch (err) {
+      Swal.fire({
+        title: "Error",
+        text: err.message || "Failed to fetch RTOMs",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    loadRTOMs();
-  }, [currentPage, appliedStatus, filtersApplied]);
+  useEffect(() => {
+    setAllData([]);
+    setCurrentPage(1);
+    hasMoreData.current = true;
+    callRTOMAPI(1);
+  }, [filtersApplied, appliedStatus]);
 
+  // handle filter
   const handleFilter = () => {
-    setFiltersApplied(true);
     setAppliedStatus(statusFilter);
-    setSearchQuery(tempSearchQuery);
-    setCurrentPage(1);
+    setFiltersApplied(true);
   };
 
+  // handle clear
   const handleClear = () => {
+  setSearchQuery("");            
+  setTempSearchQuery("");      
+  setStatusFilter("");           
+  setAppliedStatus("");     
+  setFiltersApplied(false);     
+  setCurrentPage(1);             
+  setLastFetchedBackendPage(1);  
+  hasMoreData.current = true;     
+  setAllData([]); 
+  
+  if (filtersApplied) {
     setFiltersApplied(false);
-    setAppliedStatus("");
-    setStatusFilter("");
-    setSearchQuery("");
-    setTempSearchQuery("");
-    setCurrentPage(1);
-  };
+  } else {
+    callRTOMAPI(1);
+  }
+  
+};
 
+
+  // handle search change
   const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setTempSearchQuery(value);
-    setSearchQuery(value);
+    const val = e.target.value;
+    setTempSearchQuery(val);
+    setSearchQuery(val);
     setCurrentPage(1);
   };
 
@@ -83,38 +129,57 @@ const RtomList = () => {
   };
 
   const handleRowClick = (rtomId) => {
-    navigate(`/pages/Rtom/RtomInfo/${rtomId}`);
+    navigate("/pages/Rtom/RtomInfoNew", {
+      state: { rtomId: rtomId },
+    });
   };
 
-  const filteredData = data.filter((row) => {
+  // Filter data based on search query and status filter
+  const filteredData = allData.filter((row) => {
+    const searchableFields = { ...row };
+    delete searchableFields.rtom_status;
+
     const matchesSearch =
       searchQuery === "" ||
-      Object.values(row)
+      Object.values(searchableFields)
         .join(" ")
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      !filtersApplied ||
-      appliedStatus === "" ||
-      row.rtom_status === appliedStatus;
-
-    return matchesSearch && matchesStatus;
+    // const matchesStatus =
+    //   !filtersApplied ||
+    //   appliedStatus === "" ||
+    //   row.rtom_status === appliedStatus;
+    // return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const currentRows = filteredData.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
+  // Handle previous page
   const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  // Handle next page
+  const handleNextPage = () => {
+    const nextPage = currentPage + 1;
+
+    const needMoreData = nextPage > totalPages && hasMoreData.current;
+    if (needMoreData) {
+      callRTOMAPI(lastFetchedBackendPage + 1);
+    }
+
+    if (nextPage <= totalPages || hasMoreData.current) {
+      setCurrentPage(nextPage);
     }
   };
 
-  const handleNextPage = () => {
-    setCurrentPage(currentPage + 1);
-  };
-
-  if (isLoading) {
+  if (isLoading && allData.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -124,7 +189,7 @@ const RtomList = () => {
 
   return (
     <div className={GlobalStyle.fontPoppins}>
-      <h2 className={GlobalStyle.headingLarge}> RTOM List </h2>
+      <h2 className={GlobalStyle.headingLarge}> Billing Center List </h2>
       <div className="flex justify-end mt-2">
         <button onClick={handleAdd} className={GlobalStyle.buttonPrimary}>
           Add
@@ -185,7 +250,7 @@ const RtomList = () => {
             <thead className={GlobalStyle.thead}>
               <tr>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  RTOM Id
+                  Billing Center Id
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Status
@@ -197,7 +262,7 @@ const RtomList = () => {
                   Name
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
-                  Telephone No
+                  Mobile No
                 </th>
                 <th scope="col" className={GlobalStyle.tableHeader}>
                   Action
@@ -205,7 +270,7 @@ const RtomList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((rtom, index) => (
+              {currentRows.map((rtom, index) => (
                 <tr
                   key={index}
                   className={`${
@@ -222,14 +287,24 @@ const RtomList = () => {
                       <img
                         src={getStatusIcon(rtom.rtom_status)}
                         alt={rtom.rtom_status}
+                        data-tooltip-id={`status-tooltip-${rtom.rtom_id}`}
                         className="w-6 h-6"
                       />
                       {/* Tooltip */}
-                      <div className="absolute top-full right-0 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                        {rtom.rtom_status}
-                        {/* Tooltip arrow */}
-                        <div className="absolute bottom-full right-2 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-800"></div>
-                      </div>
+                      <Tooltip
+                        id={`status-tooltip-${rtom.rtom_id}`}
+                        place="bottom"
+                        effect="solid"
+                        className="z-50"
+                      >
+                        {rtom.rtom_status === "Active"
+                          ? "Active"
+                          : rtom.rtom_status === "Inactive"
+                          ? "Inactive"
+                          : rtom.rtom_status === "Terminate"
+                          ? "Terminate"
+                          : "Unknown Status"}
+                      </Tooltip>
                     </div>
                   </td>
 
@@ -240,7 +315,10 @@ const RtomList = () => {
                   <td className={GlobalStyle.tableData}>
                     {rtom.rtom_mobile_no}
                   </td>
-                  <td className={GlobalStyle.tableData}>
+                  <td
+                    className={GlobalStyle.tableData}
+                    style={{ display: "flex", justifyContent: "center" }}
+                  >
                     <button
                       onClick={() => handleRowClick(rtom.rtom_id)}
                       className="w-6 h-6 cursor-pointer"
@@ -249,12 +327,20 @@ const RtomList = () => {
                         src={MoreIcon}
                         alt="View Details"
                         className="w-full h-full"
+                        data-tooltip-id="view-details-tooltip"
                       />
+                      <Tooltip
+                        id="view-details-tooltip"
+                        place="bottom"
+                        effect="solid"
+                      >
+                        More Info
+                      </Tooltip>
                     </button>
                   </td>
                 </tr>
               ))}
-              {filteredData.length === 0 && (
+              {currentRows.length === 0 && (
                 <tr>
                   <td colSpan="6" className="text-center py-4">
                     No records found
@@ -266,23 +352,37 @@ const RtomList = () => {
         </div>
       </div>
 
-      <div className={GlobalStyle.navButtonContainer}>
-        <button
-          className={`${GlobalStyle.navButton} flex items-center justify-center w-10 h-10 rounded-full`}
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-        >
-          <FaArrowLeft />
-        </button>
-        <span>Page {currentPage}</span>
-        <button
-          className={`${GlobalStyle.navButton} flex items-center justify-center w-10 h-10 rounded-full`}
-          onClick={handleNextPage}
-          disabled={filteredData.length < rowsPerPage}
-        >
-          <FaArrowRight />
-        </button>
-      </div>
+      {filteredData.length > 0 && (
+        <div className={GlobalStyle.navButtonContainer}>
+          <button
+            className={`${GlobalStyle.navButton} ${
+              currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+          >
+            <FaArrowLeft />
+          </button>
+
+          <span>Page {currentPage}</span>
+
+          <button
+            className={`${GlobalStyle.navButton} ${
+              (!hasMoreData.current && currentPage === totalPages) ||
+              currentRows.length < rowsPerPage
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            }`}
+            onClick={handleNextPage}
+            disabled={
+              (!hasMoreData.current && currentPage === totalPages) ||
+              currentRows.length < rowsPerPage
+            }
+          >
+            <FaArrowRight />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

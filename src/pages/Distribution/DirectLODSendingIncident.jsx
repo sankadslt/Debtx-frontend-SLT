@@ -25,6 +25,7 @@ import { Tooltip } from "react-tooltip";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import { getLoggedUserId } from "../../services/auth/authService.js";
 
 export default function DirectLODSendingIncident() {
   // Table data exactly matching the image
@@ -124,11 +125,12 @@ export default function DirectLODSendingIncident() {
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
 
         return {
-          id: item.Incident_Id || "N/A",
-          status: item.Incident_Status || "N/A",
-          account_no: item.Account_Num || "N/A",
-          amount: item.Arrears || "N/A",
-          source_type: item?.Source_Type || "N/A",
+          id: item.Incident_Id || "",
+          Incident_direction:item.Incident_direction||"",
+          drc_commision_rule: item.drc_commision_rule || "",
+          account_no: item.Account_Num || "",
+          amount: item.Arrears || "",
+          source_type: item?.Source_Type || "",
           created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? (createdDate.toLocaleString("en-GB", {
             day: "2-digit",
             month: "2-digit",
@@ -137,7 +139,7 @@ export default function DirectLODSendingIncident() {
             minute: "2-digit",
             second: "2-digit",
             hour12: true, // Keeps AM/PM format
-          })) : "N/A",
+          })) : "",
         };
       });
       setTableData(formattedData);
@@ -174,7 +176,7 @@ export default function DirectLODSendingIncident() {
     if (!source_type && !fromDate && !toDate) {
       Swal.fire({
         title: 'Warning',
-        text: 'Missing Parameters',
+        text: 'Please select a Source Type or provide a date range before creating a task.',
         icon: 'warning',
         confirmButtonText: 'OK',
         confirmButtonColor: "#f1c40f"
@@ -279,8 +281,15 @@ export default function DirectLODSendingIncident() {
             icon: "success",
             confirmButtonText: "OK",
             confirmButtonColor: "#28a745"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setCurrentPage(0); // Reset to the first page
+              setSelectedRows([]); // Clear selected rows 
+              setSelectAllData(false); // Uncheck the select all checkbox
+              fetchData();
+            }
           });
-          fetchData();
+
         }
       }
     } catch (error) {
@@ -344,11 +353,13 @@ export default function DirectLODSendingIncident() {
 
           if (!confirmTask.isConfirmed) return;
 
+          const user_id = await getLoggedUserId();
 
           const parameters = {
             Status: "Direct LOD",
             // Inncident_Ids: selectedRows,
-            Created_Date: new Date().toISOString().split("T")[0],
+            Proceed_Dtm: new Date().toISOString().split("T")[0],
+            Proceed_By: user_id,
 
           };
 
@@ -374,9 +385,14 @@ export default function DirectLODSendingIncident() {
             icon: "success",
             confirmButtonText: "OK",
             confirmButtonColor: "#28a745"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setCurrentPage(0); // Reset to the first page
+              setSelectedRows([]); // Clear selected rows
+              setSelectAllData(false); // Uncheck the select all checkbox
+              fetchData();
+            }
           });
-
-          fetchData();
         }
       }
 
@@ -726,11 +742,14 @@ export default function DirectLODSendingIncident() {
                   type="text"
                   placeholder=""
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    // setCurrentPage(1); // Reset to page 1 on search
+                      setSearchQuery(e.target.value)
+                  }}
                   className={GlobalStyle.inputSearch}
-                />
-                <FaSearch className={GlobalStyle.searchBarIcon} />
-              </div>
+              />
+              <FaSearch className={GlobalStyle.searchBarIcon} />
+          </div>
             </div>
             <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
               <table className={GlobalStyle.table}>
@@ -740,8 +759,9 @@ export default function DirectLODSendingIncident() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       ID
                     </th>
+               
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      Status
+                      Service Type
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Account No.
@@ -780,25 +800,9 @@ export default function DirectLODSendingIncident() {
                           {row.id}
                         </a>
                       </td>
+                      
                       <td className={GlobalStyle.tableData}>
-                        <div className="flex justify-center items-center h-full">
-                          {row.status.toLowerCase() === "direct lod" && (
-                            <div >
-                              <img
-                                src={Direct_LOD}
-                                alt="Direct LOD"
-                                className="w-5 h-5"
-                                data-tooltip-id="direct-lod-tooltip"
-                              />
-                            </div>
-                          )}
-                          <Tooltip
-                            id="direct-lod-tooltip"
-                            place="bottom"
-                            content="Direct LOD"
-                            className="tooltip"
-                          />
-                        </div>
+                        {row.drc_commision_rule}
                       </td>
 
                       <td className={GlobalStyle.tableData}>{row.account_no}</td>
@@ -900,7 +904,7 @@ export default function DirectLODSendingIncident() {
                   className={`${GlobalStyle.buttonPrimary} ml-4`}
                   onClick={handleCreate}
                 >
-                  Create
+                  Proceed
                 </button>
               )}
             </div>

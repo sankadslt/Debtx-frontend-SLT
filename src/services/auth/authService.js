@@ -98,3 +98,21 @@ export const getUserData = async () => {
     throw error.response?.data || error;
   }
 };
+
+// Fetch SLT user data from Azure
+export const getAzureUserData = async (serviceNo) => {
+  try {
+    const response = await axios.get(`${AUTH_URL}/azure-user/${serviceNo}`);
+    const data = response.data;
+
+    // Map Azure fields to your form fields
+    return {
+      name: data.displayName || "",
+      email: data.mail || "",
+      contactNo: data.mobilePhone || ""
+    };
+  } catch (error) {
+    console.error("Error fetching Azure user data:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};

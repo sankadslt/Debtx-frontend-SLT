@@ -62,7 +62,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
       try {
         const data = { case_distribution_batch_id: BatchID  };
         const response = await List_all_transaction_seq_of_batch_id(data);
-      //  console.log("Response", response);
+       console.log("Response", response);
         if (response.status === "success") {
           setTransaction(response.data || []); // Ensure `data` is always an array
         } else {
@@ -100,14 +100,14 @@ export default function CaseDistributionDRCTransactions1Batch() {
       const response = await Create_Task_For_case_distribution_transaction(
         payload
       );
-     // console.log("Response", response);
+     console.log("Response", response);
 
       if (response.status === "success") {
       //  console.log("Task created successfully");
         Swal.fire({
           icon: "success",
-          title: "Success",
-          text: "Task created successfully",
+          title: "Task Created Successfully!",
+          text: "Task ID: " + response.data.data.Task_Id,
           confirmButtonColor: "#28a745",
         });
       } else {
@@ -147,7 +147,7 @@ export default function CaseDistributionDRCTransactions1Batch() {
     });
   };
 
-  const batchSeqDetails = transaction[0]?.batch_seq_details || [];
+  const batchSeqDetails = transaction[0]?.batch_details || [];
 
   //search function
   const filteredData = batchSeqDetails.filter((row) =>
@@ -179,22 +179,27 @@ export default function CaseDistributionDRCTransactions1Batch() {
               <tr>
                 <td className="py-2"><strong>Batch ID  </strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2">  {transaction[0]?.case_distribution_batch_id || "N/A"}</td>
+                <td className="py-2">  {transaction[0]?.case_distribution_batch_id || ""}</td>
               </tr>
               <tr>
                 <td className="py-2"><strong>DRC Commission Rule  </strong></td>
                 <td className="py-2"> <strong> : </strong></td>
-                <td className="py-2">  {transaction[0]?.drc_commision_rule || "N/A"}</td>
+                <td className="py-2">  {transaction[0]?.drc_commision_rule || ""}</td>
               </tr>
               <tr>
                 <td className="py-2"><strong>Arrears Band  </strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2">  {transaction[0]?.current_arrears_band || "N/A"}</td>
+                <td className="py-2">  {transaction[0]?.current_arrears_band || ""}</td>
               </tr>
               <tr>
                 <td className="py-2"><strong>Case Count </strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2">  {transaction[0]?.rulebase_count || "N/A"}</td>
+                <td className="py-2">  {transaction[0]?.inspected_count}</td>
+              </tr>
+              <tr>
+                <td className="py-2"><strong>Captured Count </strong></td>
+                <td className="py-2"> <strong> : </strong> </td>
+                <td className="py-2">  {transaction[0]?.captured_count}</td>
               </tr>
             </tbody>
           </table>
@@ -246,13 +251,13 @@ export default function CaseDistributionDRCTransactions1Batch() {
                   
                   <td className={GlobalStyle.tableData}>{item.action_type}</td>
                   <td className={GlobalStyle.tableData}>
-                    {item.batch_seq_rulebase_count}
+                    {item.batch_case_count}
                   </td>
                   {/* <td className={GlobalStyle.tableData}>
                     {item.batch_seq_rulebase_arrears_sum}
                   </td> */}
                   <td className={GlobalStyle.tableData}>
-                    {new Date(item.created_dtm).toLocaleString('en-GB', {
+                    {item.created_on && new Date(item.created_on).toLocaleString('en-GB', {
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric", // Ensures two-digit year (YY)

@@ -12,7 +12,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { FaSearch , FaArrowLeft } from "react-icons/fa";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { useLocation, useNavigate } from "react-router-dom";
-import {List_Case_Distribution_Details_With_Rtoms} from "/src/services/case/CaseServices.js";
+import {List_Case_Distribution_Details_With_Rtoms ,List_Case_Distribution_Details} from "/src/services/case/CaseServices.js";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
@@ -72,8 +72,9 @@ const CaseDistributionDRCSummarywithRTOM = () => {
         
        // console.log("Fetching data with payload:", payload);
         
-        const response = await List_Case_Distribution_Details_With_Rtoms(payload);
-        setFilteredData(response);
+        const response = await List_Case_Distribution_Details(payload);
+        const batchData = response.data[0];
+        setFilteredData(batchData.rtom_distribution);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -137,7 +138,7 @@ const handleonbacknuttonclick = () => {
               >
                 <td className={GlobalStyle.tableData}>{item.rtom}</td>
                 <td className={GlobalStyle.tableData}>{item.case_count}</td>
-                <td className={GlobalStyle.tableCurrency}>{item.tot_arrease}</td>
+                <td className={GlobalStyle.tableCurrency}>{item.rtom_tot_arrease}</td>
               </tr>
             ))
             ) : (

@@ -8,7 +8,7 @@ ui number : 1.A.12
 Dependencies: tailwind css
 Related Files: (routes)
 Notes: This page includes a case count bar, filter , table and a pie chart  */
- 
+
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -20,14 +20,15 @@ import {
   count_cases_rulebase_and_arrears_band,
   Case_Distribution_Among_Agents,
 } from "/src/services/case/CaseServices.js";
-import {getLoggedUserId} from "/src/services/auth/authService.js";
+import { getLoggedUserId } from "/src/services/auth/authService.js";
 import { Active_DRC_Details } from "/src/services/drc/Drc.js";
 import Minus from "/src/assets/images/distribution/minorc.png";
 
-import  { Tooltip } from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 import Swal from "sweetalert2";
 import Chart from "/src/pages/Chart.jsx";
-import { FaArrowLeft} from "react-icons/fa";
+import RtomCaseCountChart from "/src/pages/RtomCaseCountChart.jsx";
+import { FaArrowLeft } from "react-icons/fa";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
@@ -47,6 +48,7 @@ const AssignDRC = () => {
   const navigate = useNavigate(); // Using useNavigate for routing
   const [selectedBandKey, setSelectedBandKey] = useState(null); // Usestate for selected band key
   const [showPopup, setShowPopup] = useState(false); // Usestate for showing the popup
+  const [showPopUpBilingCenterCount, setShowPopUpBilingCenterCount] = useState(false); // Usestate for showing the popup for billing center count
   const { serviceType } = location.state || {};
 
   const [drcData, setDrcData] = useState([]); // Usestate for DRC data
@@ -58,35 +60,36 @@ const AssignDRC = () => {
 
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 
-  
-     // Role-Based Buttons
-     useEffect(() => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) return;
-  
-      try {
-        let decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
-  
-        if (decoded.exp < currentTime) {
-          refreshAccessToken().then((newToken) => {
-            if (!newToken) return;
-            const newDecoded = jwtDecode(newToken);
-            setUserRole(newDecoded.role);
-          });
-        } else {
-          setUserRole(decoded.role);
-        }
-      } catch (error) {
-        console.error("Invalid token:", error);
+
+  // Role-Based Buttons
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
       }
-    }, []);
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }, []);
 
   //fetch all arrears bands
   useEffect(() => {
     const fetchArrearsBands = async () => {
       try {
         const bands = await fetchAllArrearsBands();
+        console.log("Arrears Bands:", bands);
         setArrearsBands(bands);
       } catch (error) {
         console.error("Error fetching arrears bands:", error);
@@ -101,22 +104,20 @@ const AssignDRC = () => {
       try {
         const Names = await Active_DRC_Details();
         setDrcNames(Names);
-        
+
       } catch (error) {
         console.error("Error fetching drc names:", error);
       }
     };
     fetchDRCNames();
-  });
-
-  
+  }, []);
 
   //fetch count cases rulebase and arrears band
   useEffect(() => {
     const displayData = async () => {
-      const effectiveServiceType = serviceType ; // Use "PEO TV" as default
-    //  console.log("Service Type:", serviceType);
-   //   console.log("Effective Service Type:", effectiveServiceType);
+      const effectiveServiceType = serviceType; // Use "PEO TV" as default
+      //  console.log("Service Type:", serviceType);
+      //   console.log("Effective Service Type:", effectiveServiceType);
       try {
         const drcDetails = await count_cases_rulebase_and_arrears_band(
           effectiveServiceType
@@ -125,7 +126,7 @@ const AssignDRC = () => {
 
         setTotal(total);
         setBandsAndCounts(bandsAndCounts);
-      //  console.log("bandsAndCounts:", bandsAndCounts);
+        //  console.log("bandsAndCounts:", bandsAndCounts);
       } catch (error) {
         console.error("Failed to fetch and display data:", error);
       }
@@ -145,17 +146,16 @@ const AssignDRC = () => {
   // Function to handle adding a new entry
   const handleAdd = () => {
     const { drc, drckey, casesAmount } = newEntry;
-   // console.log("New Entry:", newEntry);
+    // console.log("New Entry:", newEntry);
     const numericCasesAmount = parseInt(casesAmount, 10);
 
     if (totalDistributedAmount + numericCasesAmount > arrearsbandTotal) {
-      
+
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: `The total distributed cases (${
-          totalDistributedAmount + numericCasesAmount
-        }) exceeds the limit of the Total count ${arrearsbandTotal}. Please adjust the entered number of cases.`,
+        text: `The total distributed cases (${totalDistributedAmount + numericCasesAmount
+          }) exceeds the limit of the Total count ${arrearsbandTotal}. Please adjust the entered number of cases.`,
         confirmButtonColor: "#d33",
       });
       return;
@@ -176,7 +176,7 @@ const AssignDRC = () => {
         ...drcData,
         { id: drcData.length + 1, name: drc, amount: parseFloat(casesAmount), drckey: drckey },
       ]);
-      setNewEntry({ drc: "", casesAmount: ""  }); // Clear inputs
+      setNewEntry({ drc: "", casesAmount: "" }); // Clear inputs
     }
   };
 
@@ -194,7 +194,7 @@ const AssignDRC = () => {
   // Function to handle changes in the arrears band dropdown
   const handleArrearsBandChange = (e) => {
     const selectedBand = e.target.value;
-   // console.log("Selected Band:", selectedBand);
+    // console.log("Selected Band:", selectedBand);
     setSelectedBand(selectedBand);
 
     const selectedBandCount = bandsAndCounts[selectedBand];
@@ -203,10 +203,10 @@ const AssignDRC = () => {
     const band = arrearsBands.find((band) => band.value === selectedBand);
     if (band) {
       setSelectedBandKey(band.key);
-     // console.log("Selected Band Key:", band.key);
+      // console.log("Selected Band Key:", band.key);
     }
   };
-  
+
 
   // Function to handle proceeding with the selected DRCs
   const handleProceed = async () => {
@@ -219,22 +219,22 @@ const AssignDRC = () => {
     }));
 
     const requestData = {
-      drc_commision_rule: serviceType ,
+      drc_commision_rule: serviceType,
       current_arrears_band: selectedBandKey,
       drc_list: drcList,
       created_by: userId,
     };
 
-   // console.log("Request Data:", requestData);
+    // console.log("Request Data:", requestData);
 
     try {
       const response = await Case_Distribution_Among_Agents(requestData); // Use 'await' here
-     // console.log("Response:", response);
+      // console.log("Response:", response);
 
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Data sent successfully.",
+        title: "Task Created Successfully",
+        text: "Tast ID: " + response.Task_Id,
         confirmButtonColor: "#28a745",
       }).then(() => {
         navigate("/pages/Distribute/AssignedDRCSummary");
@@ -242,16 +242,26 @@ const AssignDRC = () => {
     } catch (error) {
       console.error("Error in sending the data:", error);
 
-      const errorMessage = error?.response?.data?.message || 
-                             error?.message || 
-                             "An error occurred. Please try again.";
+      const errorMessage = error?.response?.data?.message ||
+        error?.message ||
+        "An error occurred. Please try again.";
+
+      if (error.response && error.response.status === 409) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: errorMessage,
+          confirmButtonColor: "#ffc107",
+        });
+      } else {
 
         Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: errorMessage,
-            confirmButtonColor: "#d33",
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
         });
+      }
     }
   };
 
@@ -269,7 +279,7 @@ const AssignDRC = () => {
   const handlebackbuttonClick = () => {
     navigate("/pages/Distribute/DistributionPreparationBulkUpload"); // Navigate back to the previous page
   };
-  
+
   return (
     <div className={`${GlobalStyle.fontPoppins} flex flex-col `}>
       {/* Main Content */}
@@ -303,135 +313,151 @@ const AssignDRC = () => {
 
         {/* Service Type and Table */}
         <div className="relative">
-          <div className="flex items-center my-10 space-x-4 gap-14 flex-col sm:flex-row sm:items-center">
+          <div className="flex flex-wrap justify-between items-center my-4 space-x-4 gap-14 flex-col sm:flex-row sm:items-center">
+            <div className="flex space-x-5 item-center">
+              {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
+                  Pie Chart 1
+                </button> */}
+              <div>
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button className={`${GlobalStyle.buttonPrimary} mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
+                    DRC Summary
+                  </button>
+                )}
+              </div>
+              <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
+
+              <div>
+                {["admin", "superadmin", "slt"].includes(userRole) && (
+                  <button className={`${GlobalStyle.buttonPrimary} mt-2 w-full sm:w-auto `} onClick={() => setShowPopUpBilingCenterCount(true)}>
+                    Success Path Chart
+                  </button>
+                )}
+              </div>
+              <RtomCaseCountChart showPopup={showPopUpBilingCenterCount} setShowPopup={setShowPopUpBilingCenterCount} arrearsBands={arrearsBands} serviceType={serviceType} />
+            </div>
             {/* Arrears Band Dropdown */}
-            <select
-              className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
-              value={selectedBand}
-              onChange={handleArrearsBandChange}
-              disabled={totalDistributedAmount > 0}
-            >
-              <option value="" hidden>
-                Arrears Band
-              </option>
-              {arrearsBands.map(({ key, value }) => (
-                <option key={key} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-            <div
-              className={`${GlobalStyle.countBarMainBox}`}
-              style={{ width: "160px", textAlign: "center" }}
-            >
-              Total Count: {arrearsbandTotal}
+            <div className="flex items-center space-x-4 gap-4 flex-col sm:flex-row sm:items-center">
+              <div
+                className={`${GlobalStyle.countBarMainBox}`}
+                style={{ width: "160px", textAlign: "center" }}
+              >
+                Total Count: {arrearsbandTotal}
+              </div>
+              <div
+                className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
+                style={{ width: "160px", textAlign: "center" }}
+              >
+                Selected Count: {totalDistributedAmount}
+
+              </div>
             </div>
           </div>
-          <div className="flex justify-between items-center my-10 lg:flex-row flex-col lg:items-center">
-            <div className="flex items-center space-x-10 gap-9 flex-col sm:flex-row sm:items-center ">
+          <div className="flex justify-end items-center">
+            <div className="w-[750px] sm:w-[100%] md:w-[750px]">
+              <div className={`${GlobalStyle.cardContainer} w-full flex flex-wrap justify-end items-center gap-4`}>
+                <div className="flex flex-wrap items-center space-x-3 gap-3 flex-col sm:flex-row sm:items-center ">
 
-                {/* DRC Dropdown */}
-                <select
-                  className={`${GlobalStyle.selectBox}  w-full sm:w-44`}
-                  value={newEntry.drc}
-                  onChange={(e) =>{
-                    const selectedDRC = drcNames.find((drc) => drc.value === e.target.value);
-                    setNewEntry({ ...newEntry, 
-                      drckey: selectedDRC.key,
-                      drc: selectedDRC.value });
-                  }}
-                >
-                  <option value="" hidden>
-                    DRC
-                  </option>
-                  {drcNames.map(({ key, value }) => (
-                    <option key={key} value={value}>
-                      {value}
+                  <select
+                    className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
+                    value={selectedBand}
+                    onChange={handleArrearsBandChange}
+                    disabled={totalDistributedAmount > 0}
+                    style={{ color: selectedBand ? "black" : "gray" }}
+                  >
+                    <option value="" hidden>
+                      Arrears Band
                     </option>
-                  ))}
-                </select>
+                    {arrearsBands.map(({ key, value }) => (
+                      <option key={key} value={value} style={{ color: "black" }}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                  {/* DRC Dropdown */}
+                  <select
+                    className={`${GlobalStyle.selectBox}  w-full sm:w-44`}
+                    value={newEntry.drc}
+                    onChange={(e) => {
+                      const selectedDRC = drcNames.find((drc) => drc.value === e.target.value);
+                      setNewEntry({
+                        ...newEntry,
+                        drckey: selectedDRC.key,
+                        drc: selectedDRC.value
+                      });
+                    }}
+                    disabled={!selectedBand}
+                    style={{ color: newEntry.drc ? "black" : "gray" }}
+                  >
+                    <option value="" hidden>
+                      DRC
+                    </option>
+                    {drcNames.map(({ key, value }) => (
+                      <option key={key} value={value} style={{ color: "black" }}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
 
-                {/* Input for "+ cases" */}
-                <input
-                  type="number"
-                  placeholder="+ cases "
-                  className="py-1 px-5 w-44 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
-                  min="1"
-                  max={arrearsbandTotal}
-                  value={newEntry.casesAmount}
-                  onChange={(e) =>
-                    setNewEntry({ ...newEntry, casesAmount: e.target.value })
-                  }
-                />
+                  {/* Input for "+ cases" */}
+                  <input
+                    type="number"
+                    placeholder="+ cases "
+                    className="py-1 px-5 w-44 border-2 border-[#0056A2] rounded-lg bg-[#057DE8] bg-opacity-10"
+                    min="1"
+                    max={arrearsbandTotal}
+                    value={newEntry.casesAmount}
+                    onChange={(e) =>
+                      setNewEntry({ ...newEntry, casesAmount: e.target.value })
+                    }
+                    disabled={!selectedBand}
+                  />
 
-                {/* Add Button */}
-              
-                {/* <button
+                  {/* Add Button */}
+
+                  {/* <button
                   className={`${GlobalStyle.buttonPrimary} w-[135px]`}
                   onClick={handleAdd}
                 >
                   Add
                 </button> */}
-                <div>
+                  <div>
                     {["admin", "superadmin", "slt"].includes(userRole) && (
                       <button
-                      className={`${GlobalStyle.buttonPrimary}  w-[135px]`}
-                      onClick={handleAdd}
-                    >
-                      Add
-                    </button>
+                        className={`${GlobalStyle.buttonPrimary}  w-[135px]`}
+                        onClick={handleAdd}
+                      >
+                        Add
+                      </button>
                     )}
+                  </div>
                 </div>
-            </div>
 
-            <div className="flex justify-end items-center sm:items-center flex-col sm:flex-row   space-x-4">
-              <div>
-                {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
-                  Pie Chart 1
-                </button> */}
-
-                <div>
-                    {["admin", "superadmin", "slt"].includes(userRole) && (
-                      <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5  mt-2 w-full sm:w-auto `} onClick={handlepiechart1}>
-                      Pie Chart 1
-                  </button>
-                    )}
-                </div>
-                <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
-                </div>
-                <div>
+                {/* <div className="flex justify-end items-center sm:items-center flex-col sm:flex-row   space-x-4"> */}
+                {/* <div> */}
 
                 {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
                   Pie Chart 2
                 </button> */}
-                <div>
-                    {["admin", "superadmin", "slt"].includes(userRole) && (
-                      <button className={`${GlobalStyle.buttonPrimary} h-10  mt-2  w-full sm:w-auto`} onClick={handlepiechart2}>
+                {/* <div>
+                  {["admin", "superadmin", "slt"].includes(userRole) && (
+                    <button className={`${GlobalStyle.buttonPrimary} h-10  mt-2  w-full sm:w-auto`} onClick={handlepiechart2}>
                       Pie Chart 2
-                  </button>
-                    )}
-                </div>
-                <Chart showPopup={showPopup} setShowPopup={setShowPopup} />
-                </div>
-          </div>
-            
-          </div>
-          
-          
-          <div
-            className={`${GlobalStyle.countBarMainBox}flex items-center my-10 `}
-            style={{ width: "160px", textAlign: "center" }}
-          >
-            Selected Count: {totalDistributedAmount}
+                    </button>
+                  )}
+                </div> */}
+                {/* <Chart showPopup={showPopup} setShowPopup={setShowPopup} /> */}
+                {/* </div> */}
+                {/* </div> */}
 
+              </div>
+            </div>
           </div>
-          
-          
 
           <div className="flex">
             {/* Table */}
-            <div className="flex flex-col w-2/3">
-              <div className="flex justify-start mb-4">
+            <div className="flex flex-col w-full">
+              {/* <div className="flex justify-start mb-4">
                 <div className={GlobalStyle.searchBarContainer}>
                   <input
                     type="text"
@@ -442,7 +468,7 @@ const AssignDRC = () => {
                   />
                   <FaSearch className={GlobalStyle.searchBarIcon} />
                 </div>
-              </div>{" "}
+              </div>{" "} */}
               <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
                 <table
                   className={`${GlobalStyle.table}`}
@@ -493,9 +519,9 @@ const AssignDRC = () => {
                             <div>
                               {["admin", "superadmin", "slt"].includes(userRole) && (
                                 <button onClick={() => handleRemove(drc.name)}>
-                              
-                                <img src={Minus} width={20} height={15} alt="Delete" data-tooltip-id="delete" />
-                              </button>
+
+                                  <img src={Minus} width={20} height={15} alt="Delete" data-tooltip-id="delete" />
+                                </button>
                               )}
                             </div>
                             <Tooltip id="delete" place="bottom" content="Remove" />
@@ -516,11 +542,11 @@ const AssignDRC = () => {
 
             {/* Pie Chart Buttons */}
             <div>
-            {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
+              {/* <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
                Pie Chart 1
             </button> */}
 
-            {/* <div>
+              {/* <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button  className={`${GlobalStyle.buttonPrimary} h-10 mr-5 ml-5 `} onClick={handlepiechart1}>
                   Pie Chart 1
@@ -531,10 +557,10 @@ const AssignDRC = () => {
             </div>
             <div>
 
-            {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
+              {/* <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
                Pie Chart 2
             </button> */}
-            {/* <div>
+              {/* <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button className={`${GlobalStyle.buttonPrimary} h-10`} onClick={handlepiechart2}>
                   Pie Chart 2
@@ -543,7 +569,7 @@ const AssignDRC = () => {
             </div>
             <Chart showPopup={showPopup} setShowPopup={setShowPopup} /> */}
             </div>
-            
+
           </div>
 
           {/* Proceed Button */}
@@ -556,25 +582,25 @@ const AssignDRC = () => {
               Proceed
             </button> */}
             <div>
-                {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
                   onClick={handleProceed}
-                  className={`${GlobalStyle.buttonPrimary}`}
-                  disabled={totalDistributedAmount !== arrearsbandTotal}
+                  className={`${GlobalStyle.buttonPrimary} mt-5 ${totalDistributedAmount !== arrearsbandTotal || selectedBand === "" ? "cursor-not-allowed" : ""}`}
+                  disabled={totalDistributedAmount !== arrearsbandTotal || selectedBand === ""}
                 >
                   Proceed
                 </button>
-                )}
+              )}
             </div>
           </div>
           {/* Back Button */}
           <div className="flex justify-start items-center w-full mt-5  ">
             <button
-              className={`${GlobalStyle.buttonPrimary} `} 
-             onClick={handlebackbuttonClick}
+              className={`${GlobalStyle.buttonPrimary} `}
+              onClick={handlebackbuttonClick}
             >
               <FaArrowLeft className="mr-2" />
-              
+
             </button>
           </div>
         </div>

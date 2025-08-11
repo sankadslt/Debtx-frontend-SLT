@@ -31,6 +31,7 @@ import { Tooltip } from "react-tooltip";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import { getLoggedUserId } from "../../services/auth/authService.js";
 
 export default function CollectOnlyCPECollect() {
   const [fromDate, setFromDate] = useState(null); // Usestate for From Date
@@ -104,14 +105,17 @@ export default function CollectOnlyCPECollect() {
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
 
         return {
-          id: item.Incident_Id || "N/A",
-          status: item.Incident_Status || "N/A",
-          account_num: item.Account_Num || "N/A",
-          action: item.Actions || "N/A",
-          source_type: item?.Source_Type || "N/A",
+          id: item.Incident_Id || "",
+          
+          Incident_direction :item.Incident_direction || "",
+          drc_commision_rule:item.drc_commision_rule||"",
+          account_num: item.Account_Num || "",
+          Arrears: item.Arrears || "",
+          action: item.Actions || "",
+          source_type: item?.Source_Type || "",
           created_dtm: createdDate instanceof Date && !isNaN(createdDate)
-            ? createdDate.toLocaleString("en-GB") || "N/A"
-            : "N/A",
+            ? createdDate.toLocaleString("en-GB") || ""
+            : "",
         };
       });
 
@@ -126,12 +130,11 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
-
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Function to  handle the creation of a task for download button
+  // Function to handle the creation of a task for download button
   const handleCreateTaskForDownload = async ({
     source_type,
     fromDate,
@@ -254,15 +257,24 @@ export default function CollectOnlyCPECollect() {
         return;
       }
       const response = await Forward_CPE_Collect(Incident_Id);
-      if (response.status === 201) {
+      if (response.status === 200) {
         Swal.fire({
           title: "Success",
           text: response.data.message,
           icon: "success",
           confirmButtonText: "OK",
           confirmButtonColor: "#28a745",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          allowEnterKey: false
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setCurrentPage(0);
+            setSelectedRows([]);
+            setSelectAllData(false);
+            fetchData();
+          }
         });
-        fetchData();
       }
     } catch (error) {
       Swal.fire({
@@ -302,7 +314,6 @@ export default function CollectOnlyCPECollect() {
       }
 
       if (selectedRows.length > 5) {
-
         const confirmCreateTask = await Swal.fire({
           title: "Create Task?",
           text: "You have selected more than 5 incidents. Do you want to create a task instead?",
@@ -316,14 +327,15 @@ export default function CollectOnlyCPECollect() {
 
         if (!confirmCreateTask.isConfirmed) return;
 
+        const userId = await getLoggedUserId();
+
         const parameters = {
-          Status: "Open CPE Collect",
-          //Incident_Ids: selectedRows,
-          Proceed_Date: new Date(),
+          Proceed_Dtm: new Date(),
+          Proceed_By: userId
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
 
-        if (response.status === 200) {
+        if (response.status === 201) {
           Swal.fire({
             title: "Success",
             text: "Task successfully created for forwarding Collect CPE Only incidents.",
@@ -332,9 +344,9 @@ export default function CollectOnlyCPECollect() {
             confirmButtonColor: "#28a745",
           });
         }
-        fetchData();
+        setSelectedRows([]);
+        setSelectAllData(false);
       } else {
-
         const confirmProceed = await Swal.fire({
           title: "Proceed?",
           text: `You have selected ${selectedRows.length} incidents. Do you want to proceed?`,
@@ -358,9 +370,17 @@ export default function CollectOnlyCPECollect() {
           icon: "success",
           confirmButtonText: "OK",
           confirmButtonColor: "#28a745",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          allowEnterKey: false
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setCurrentPage(0);
+            setSelectedRows([]);
+            setSelectAllData(false);
+            fetchData();
+          }
         });
-
-        fetchData();
       }
     } catch (error) {
       Swal.fire({
@@ -377,15 +397,13 @@ export default function CollectOnlyCPECollect() {
   // Function to handle the date change for From Date
   const handleFromDateChange = (date) => {
     if (toDate && date > toDate) {
-
       Swal.fire({
         title: "Error",
         text: "The 'From' date cannot be later than the 'To' date.",
         icon: "error",
         confirmButtonColor: "#f1c40f",
-      });;
+      });
     } else if (toDate) {
-      // Calculate month gap
       const diffInMs = toDate - date;
       const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
@@ -396,7 +414,6 @@ export default function CollectOnlyCPECollect() {
           icon: "warning",
           confirmButtonColor: "#f1c40f",
         });
-
         return;
       }
       setFromDate(date);
@@ -406,27 +423,10 @@ export default function CollectOnlyCPECollect() {
       setFromDate(date);
     }
   };
-  // else if (toDate){
-  //       // Calculate month gap
-  //       const diffInMs = toDate - date;
-  //       const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
-  //       if (diffInDays > 31) {
-  //           Swal.fire({
-  //               title: "Warning",
-  //               text: "The selected range is more than 1 month.",
-  //               icon: "warning",
-  //               confirmButtonColor: "#f1c40f",
-  //           });
-
-  //           return;
-  //       }
-  //       setFromDate(date);
-  //     }
   // Function to handle the date change for To Date
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
-
       Swal.fire({
         title: "Error",
         text: "The 'To' date cannot be earlier than the 'From' date.",
@@ -434,8 +434,6 @@ export default function CollectOnlyCPECollect() {
         confirmButtonColor: "#f1c40f",
       });
     } else if (fromDate) {
-
-      // Calculate month gap
       const diffInMs = date - fromDate;
       const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
@@ -446,12 +444,10 @@ export default function CollectOnlyCPECollect() {
           icon: "warning",
           confirmButtonColor: "#f1c40f",
         });
-
         return;
       }
       setToDate(date);
     }
-
     else {
       setError("");
       setToDate(date);
@@ -468,6 +464,7 @@ export default function CollectOnlyCPECollect() {
           .includes(searchQuery.toLowerCase())
       )
     );
+    setCurrentPage(0); // Reset to first page when search query changes
   }, [searchQuery, tableData]);
 
   const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -611,28 +608,13 @@ export default function CollectOnlyCPECollect() {
             <h1 className={`${GlobalStyle.headingLarge} mb-6`}>
               Incidents for Distribute to Collect Only CPE
             </h1>
-
           </div>
+          
           <div className="flex justify-end items-center w-full mb-4">
-            {/* <button
-            
-              className={`${GlobalStyle.buttonPrimary} flex items-center`}
-              onClick={() => {
-                handleCreateTaskForDownload({
-                  source_type: selectedSource,
-                  fromDate: fromDate,
-                  toDate: toDate,
-                });
-              }}
-            >
-            <FaDownload className="mr-2" />
-              Create task and let me know
-            </button> */}
             {paginatedData.length > 0 && (
               <div>
                 {["admin", "superadmin", "slt"].includes(userRole) && (
                   <button
-
                     className={`${GlobalStyle.buttonPrimary} flex items-center ${isCreatingTask ? 'opacity-50' : ''}`}
                     disabled={isCreatingTask}
                     onClick={() => {
@@ -649,13 +631,11 @@ export default function CollectOnlyCPECollect() {
                 )}
               </div>
             )}
-
-
           </div>
+          
           <div className="flex justify-end">
-            {/* Filter Section */}
             <div className={`${GlobalStyle.cardContainer} w-full items-center md:w-[75vw] mb-8 mt-8`}>
-              <div className="flex  gap-4 justify-end flex-wrap">
+              <div className="flex gap-4 justify-end flex-wrap">
                 <div className="flex flex-wrap items-center gap-4 sm:w-auto sm:flex-row sm:items-center">
                   <label>Source:</label>
                   <select
@@ -671,7 +651,6 @@ export default function CollectOnlyCPECollect() {
                   </select>
                 </div>
 
-                {/* <div className="flex flex-wrap items-center gap-4 sm:w-auto sm:flex-row sm:items-center"> */}
                 <label className="mt-1">Date:</label>
                 <DatePicker
                   selected={fromDate}
@@ -687,20 +666,11 @@ export default function CollectOnlyCPECollect() {
                   placeholderText="To"
                   className={`${GlobalStyle.inputText} w-full sm:w-auto`}
                 />
-                {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
-                {/* </div> */}
-
-                {/* <button
-                      className={`${GlobalStyle.buttonPrimary} h-[35px]`}
-                      onClick={handleFilterClick}
-                    >
-                      Filter
-                    </button> */}
 
                 <div>
                   {["admin", "superadmin", "slt"].includes(userRole) && (
                     <button
-                      className={`${GlobalStyle.buttonPrimary} h-[35px]  w-full sm:w-auto`}
+                      className={`${GlobalStyle.buttonPrimary} h-[35px] w-full sm:w-auto`}
                       onClick={handleFilterClick}
                     >
                       Filter
@@ -708,13 +678,10 @@ export default function CollectOnlyCPECollect() {
                   )}
                 </div>
 
-                {/* <button className={GlobalStyle.buttonRemove} onClick={handleclearfilter}>
-                                Clear
-                    </button> */}
                 <div>
                   {["admin", "superadmin", "slt"].includes(userRole) && (
                     <button
-                      className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                      className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
                       onClick={handleclearfilter}>
                       Clear
                     </button>
@@ -725,19 +692,23 @@ export default function CollectOnlyCPECollect() {
           </div>
 
           <div className="flex flex-col">
-            {/* Search Section */}
+            {/* Updated Search Section */}
             <div className="mb-4 flex justify-start">
               <div className={GlobalStyle.searchBarContainer}>
                 <input
                   type="text"
                   placeholder=""
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setCurrentPage(0); // Reset to first page on search
+                    setSearchQuery(e.target.value);
+                  }}
                   className={GlobalStyle.inputSearch}
                 />
                 <FaSearch className={GlobalStyle.searchBarIcon} />
               </div>
             </div>
+            
             {/* Table Section */}
             <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
               <table className={GlobalStyle.table}>
@@ -747,11 +718,16 @@ export default function CollectOnlyCPECollect() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       ID
                     </th>
+               
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      Status
+                      Service Type
                     </th>
+                    
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Account No
+                    </th>
+                       <th scope="col" className={GlobalStyle.tableHeader}>
+                      Amount
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Action
@@ -771,7 +747,7 @@ export default function CollectOnlyCPECollect() {
                         : "bg-gray-50 bg-opacity-50"
                         } border-b`}
                     >
-                      <td className={GlobalStyle.tableData} >
+                      <td className={GlobalStyle.tableData}>
                         <input
                           type="checkbox"
                           className={"rounded-lg"}
@@ -784,46 +760,28 @@ export default function CollectOnlyCPECollect() {
                           {row.id}
                         </a>
                       </td>
+
+                   
                       <td className={GlobalStyle.tableData}>
-                        <div className="flex justify-center items-center h-full">
-                          {row.status === "Open CPE Collect" && (
-                            <div>
-                              <img
-                                src={Open_CPE_Collect}
-                                alt="Open CPE Collect"
-                                className="w-5 h-5"
-                                data-tooltip-id="open-cpe-collect-tooltip"
-                              />
-                            </div>
-                          )}
-                          <Tooltip
-                            id="open-cpe-collect-tooltip"
-                            place="bottom"
-                            content="Open CPE Collect"
-                            className="tooltip"
-                          />
-                        </div>
+                        {row.drc_commision_rule}
                       </td>
 
                       <td className={GlobalStyle.tableData}>
                         {row.account_num}
                       </td>
-
+                      <td className={GlobalStyle.tableCurrency}>
+  {typeof row.Arrears === 'number'
+    ? row.Arrears.toLocaleString("en-LK", {
+        style: "currency",
+        currency: "LKR",
+      })
+    : ""}
+</td>
                       <td className={GlobalStyle.tableData}>{row.action}</td>
                       <td className={GlobalStyle.tableData}>
                         {row.source_type}
                       </td>
-                      <td
-                        className={`${GlobalStyle.tableData} text-center px-6 py-4`}
-                      >
-                        {/* <button
-                          className={`${GlobalStyle.buttonPrimary} mx-auto`}
-                          onClick={() => {
-                            handleProceed(row.id);
-                          }}
-                        >
-                          Proceed
-                        </button> */}
+                      <td className={`${GlobalStyle.tableData} text-center px-6 py-4`}>
                         <div>
                           {["admin", "superadmin", "slt"].includes(userRole) && (
                             <button
@@ -852,7 +810,6 @@ export default function CollectOnlyCPECollect() {
           </div>
 
           {/* Pagination Section */}
-
           {tableData.length > rowsPerPage && (
             <div className={GlobalStyle.navButtonContainer}>
               <button
@@ -874,17 +831,18 @@ export default function CollectOnlyCPECollect() {
               </button>
             </div>
           )}
+          
           {/* Back Button Section */}
           <div className="flex justify-start items-center w-full mt-4 mb-4">
             <button
-              className={`${GlobalStyle.buttonPrimary} `}
+              className={`${GlobalStyle.buttonPrimary}`}
               onClick={() => navigate(-1)}
             >
               <FaArrowLeft className="mr-2 mt" />
-
             </button>
           </div>
-          {/* Select All Data and proceed button Section  */}
+          
+          {/* Select All Data and proceed button Section */}
           <div className="flex justify-end items-center w-full">
             <label className="flex items-center gap-2">
               <input
@@ -898,13 +856,6 @@ export default function CollectOnlyCPECollect() {
               />
               Select All Data
             </label>
-
-            {/* <button
-              className={`${GlobalStyle.buttonPrimary} ml-4`}
-              onClick={handleCreate}
-            >
-              Proceed
-            </button> */}
 
             <div>
               {["admin", "superadmin", "slt"].includes(userRole) && (

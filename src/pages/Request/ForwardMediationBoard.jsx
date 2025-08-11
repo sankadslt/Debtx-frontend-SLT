@@ -235,6 +235,43 @@ const ForwardMediationBoard = () => {
   const handleSubmit = async () => {
     const loggedUserId = await getLoggedUserId();
 
+    if (!acceptRequest) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please select whether to accept the request or not.",
+        confirmButtonColor: "#ffc107",
+      });
+      return;
+    }
+
+    if (requestType === "Mediation board forward request letter"
+      && acceptRequest === "No" && !remarkText.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please provide a remark if you are not accepting the request.",
+        confirmButtonColor: "#ffc107",
+      });
+      return;
+    } else if ((requestType === "Negotiation period extend Request" ||
+      requestType === "Mediation Board period extend Request" ||
+      requestType === "Negotiation customer further information Request" ||
+      requestType === "Negotiation Settlement plan Request" ||
+      requestType === "Negotiation Customer request service" ||
+      requestType === "Mediation Board Settlement plan Request" ||
+      requestType === "Mediation Board customer further information request" ||
+      requestType === "Mediation Board Customer request service"
+    ) && !remarkText.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please provide a remark.",
+        confirmButtonColor: "#ffc107",
+      });
+      return;
+    }
+
     const payload = {
       create_by: loggedUserId,
       Interaction_Log_ID: INteraction_Log_ID,
@@ -243,7 +280,7 @@ const ForwardMediationBoard = () => {
       // Request_Mode: request_mode,
       Interaction_ID: interationid,
       requestAccept: acceptRequest,
-      Reamrk: remarkText,
+      Reamrk: remarkText.trim(),
       No_of_Calendar_Month: calendarMonth,
       Letter_Send: letterSent
     };
@@ -316,19 +353,30 @@ const ForwardMediationBoard = () => {
               <tr>
                 <td className="py-2"><strong>Arrears Amount</strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2"> {Data?.current_arrears_amount}</td>
+                <td className="py-2">
+                  {Data?.current_arrears_amount !== undefined
+                    ? Data.current_arrears_amount.toLocaleString("en-LK", {
+                      style: "currency",
+                      currency: "LKR",
+                    })
+                    : ""}
+                </td>
               </tr>
-              {requestType === "Mediation board forward request letter" && (
+              {/* {requestType === "Mediation board forward request letter" && (
                 <tr>
                   <td className="py-2"><strong>Validity Expire Date</strong></td>
                   <td className="py-2"> <strong> : </strong> </td>
-                  {/* <td className="py-2"> {new Date(Data?.validity_expire_dtm).toLocaleDateString("en-GB")} </td> */}
+                  <td className="py-2"> {new Date(Data?.validity_expire_dtm).toLocaleDateString("en-GB")} </td>
                 </tr>
-              )}
+              )} */}
               <tr>
                 <td className="py-2"><strong>Last Payment Date</strong></td>
                 <td className="py-2"> <strong> : </strong> </td>
-                <td className="py-2"> {new Date(Data?.last_payment_date).toLocaleDateString("en-GB")} </td>
+                <td className="py-2">
+                  {Data.last_payment_date ?
+                    new Date(Data.last_payment_date).toLocaleDateString("en-GB")
+                    : ""}
+                </td>
               </tr>
               {requestType === "Mediation board forward request letter" && (
                 <tr>
@@ -344,20 +392,20 @@ const ForwardMediationBoard = () => {
                   <td className="py-2"> {Data?.account_manager_code}</td>
                 </tr>
               )}
-              {requestType === "Mediation board forward request letter" && (
+              {/* {requestType === "Mediation board forward request letter" && (
                 <tr>
                   <td className="py-2"><strong>Credit Class No</strong></td>
                   <td className="py-2"> <strong> : </strong> </td>
                   <td className="py-2"></td>
                 </tr>
-              )}
-              {requestType === "Mediation board forward request letter" && (
+              )} */}
+              {/* {requestType === "Mediation board forward request letter" && (
                 <tr>
                   <td className="py-2"><strong>Credit Class Name</strong></td>
                   <td className="py-2"> <strong> : </strong> </td>
                   <td className="py-2"></td>
                 </tr>
-              )}
+              )} */}
             </tbody>
           </table>
 
@@ -387,21 +435,23 @@ const ForwardMediationBoard = () => {
               </thead>
               <tbody>
                 {currentData && currentData.length > 0 ? (
-                  currentData.map((detail, index) => (
-                    <tr
-                      key={index}
-                      className={`${index % 2 === 0
-                        ? GlobalStyle.tableRowEven
-                        : GlobalStyle.tableRowOdd
-                        }`}
-                    >
-                      <td className={GlobalStyle.tableData}> {new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
-                      <td className={GlobalStyle.tableData}>
-                        {detail.field_reason}
-                      </td>
-                      <td className={GlobalStyle.tableData}>{detail.remark}</td>
-                    </tr>
-                  ))) : (
+                  currentData
+                    .sort((a, b) => new Date(b.created_dtm) - new Date(a.created_dtm))
+                    .map((detail, index) => (
+                      <tr
+                        key={index}
+                        className={`${index % 2 === 0
+                          ? GlobalStyle.tableRowEven
+                          : GlobalStyle.tableRowOdd
+                          }`}
+                      >
+                        <td className={GlobalStyle.tableData}> {new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
+                        <td className={GlobalStyle.tableData}>
+                          {detail.field_reason}
+                        </td>
+                        <td className={GlobalStyle.tableData}>{detail.negotiation_remark}</td>
+                      </tr>
+                    ))) : (
                   <tr>
                     <td colSpan="3" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                       No negotiation history available.
@@ -459,21 +509,23 @@ const ForwardMediationBoard = () => {
               </thead>
               <tbody>
                 {currentData2 && currentData2.length > 0 ? (
-                  currentData2.map((detail, index) => (
-                    <tr
-                      key={index}
-                      className={`${index % 2 === 0
-                        ? GlobalStyle.tableRowEven
-                        : GlobalStyle.tableRowOdd
-                        }`}
-                    >
-                      <td className={GlobalStyle.tableData}> {new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
-                      <td className={GlobalStyle.tableData}>
-                        {detail.customer_response}
-                      </td>
-                      <td className={GlobalStyle.tableData}>{detail.comment}</td>
-                    </tr>
-                  ))) : (
+                  currentData2
+                    .sort((a, b) => new Date(b.created_dtm) - new Date(a.created_dtm))
+                    .map((detail, index) => (
+                      <tr
+                        key={index}
+                        className={`${index % 2 === 0
+                          ? GlobalStyle.tableRowEven
+                          : GlobalStyle.tableRowOdd
+                          }`}
+                      >
+                        <td className={GlobalStyle.tableData}> {new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
+                        <td className={GlobalStyle.tableData}>
+                          {detail.customer_response}
+                        </td>
+                        <td className={GlobalStyle.tableData}>{detail.comment}</td>
+                      </tr>
+                    ))) : (
                   <tr>
                     <td colSpan="3" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                       No mediation board history available.
@@ -528,21 +580,28 @@ const ForwardMediationBoard = () => {
             </thead>
             <tbody>
               {currentData1 && currentData1.length > 0 ? (
-                currentData1.map((detail, index) => (
-                  <tr
-                    key={index}
-                    className={`${index % 2 === 0
-                      ? GlobalStyle.tableRowEven
-                      : GlobalStyle.tableRowOdd
-                      }`}
-                  >
-                    <td className={GlobalStyle.tableData}>{new Date(detail.created_dtm).toLocaleDateString("en-GB")}</td>
-                    <td className={GlobalStyle.tableData}>
-                      {detail.ro_request}
-                    </td>
-                    <td className={GlobalStyle.tableData}>{detail.request_remark}</td>
-                  </tr>
-                ))) : (
+                currentData1
+                  .sort((a, b) => new Date(b.created_dtm) - new Date(a.created_dtm))
+                  .map((detail, index) => (
+                    <tr
+                      key={index}
+                      className={`${index % 2 === 0
+                        ? GlobalStyle.tableRowEven
+                        : GlobalStyle.tableRowOdd
+                        }`}
+                    >
+                      <td className={GlobalStyle.tableData}>
+                        {detail.created_dtm ?
+                          new Date(detail.created_dtm).toLocaleDateString("en-GB")
+                          : ""
+                        }
+                      </td>
+                      <td className={GlobalStyle.tableData}>
+                        {detail.ro_request}
+                      </td>
+                      <td className={GlobalStyle.tableData}>{detail.request_remark}</td>
+                    </tr>
+                  ))) : (
                 <tr>
                   <td colSpan="3" className={GlobalStyle.tableData} style={{ textAlign: "center" }}>
                     No request history available.
@@ -634,14 +693,14 @@ const ForwardMediationBoard = () => {
             )}
 
             <div className="flex gap-4">
-              {acceptRequest !== "Yes" && (
+              {/* {acceptRequest !== "Yes" && (
                 <button
                   className={GlobalStyle.buttonPrimary}
                 // onClick={handleWithdraw}
                 >
                   Withdraw
                 </button>
-              )}
+              )} */}
               <button
                 className={GlobalStyle.buttonPrimary}
                 onClick={handleSubmit}
@@ -717,12 +776,12 @@ const ForwardMediationBoard = () => {
             </div>
 
             <div className="flex gap-4">
-              <button
+              {/* <button
                 className={GlobalStyle.buttonPrimary}
               // onClick={handleWithdraw}
               >
                 Withdraw
-              </button>
+              </button> */}
               <button
                 className={GlobalStyle.buttonPrimary}
                 onClick={handleSubmit}

@@ -23,6 +23,7 @@ import { Create_Task_Download_Pending_Reject, Create_Task_Forward_F1_Filtered, C
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 import { useRef } from "react";
+import { getLoggedUserId } from "../../services/auth/authService";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
@@ -98,14 +99,17 @@ export default function RejectIncident() {
         const rejectedDateStr = typeof item.Rejected_Dtm === "string" ? item.Rejected_Dtm.replace(" ", "T") : item.Rejected_Dtm;
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
         const rejectedDate = rejectedDateStr ? new Date(rejectedDateStr) : null;
+
         return {
-          id: item.Incident_Id || "N/A",
-          status: "Reject Pending4",
-          account_no: item.Account_Num || "N/A",
-          filtered_reason: item.Filtered_Reason || "N/A",
-          source_type: item?.Source_Type || "N/A",
-          rejected_on: rejectedDate instanceof Date && !isNaN(rejectedDate) ? rejectedDate.toLocaleString("en-GB") : "N/A",
-          created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? createdDate.toLocaleString("en-GB") : "N/A"
+          id: item.Incident_Id || "",
+          Incident_direction:item.Incident_direction||"",
+          drc_commision_rule: item.drc_commision_rule || "",
+          account_no: item.Account_Num || "",
+          filtered_reason: item.Filtered_Reason || "",
+          Arrears: item.Arrears || "",
+          source_type: item?.Source_Type || "",
+          rejected_on: rejectedDate instanceof Date && !isNaN(rejectedDate) ? rejectedDate.toLocaleString("en-GB") : "",
+          created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? createdDate.toLocaleString("en-GB") : ""
         };
       });
       setTableData(formattedData);
@@ -331,7 +335,7 @@ export default function RejectIncident() {
     if (!source_type && !fromDate && !toDate) {
       Swal.fire({
         title: 'Warning',
-        text: 'Missing Parameters',
+        text: 'Please select a Source Type or provide a date range before creating a task.',
         icon: 'warning',
         confirmButtonText: 'OK',
         confirmButtonColor: "#f1c40f"
@@ -422,9 +426,18 @@ export default function RejectIncident() {
           text: response.data.message,
           icon: 'success',
           confirmButtonText: 'OK',
-          confirmButtonColor: "#28a745"
+          confirmButtonColor: "#28a745",
+          allowOutsideClick: false,  // Prevent closing by clicking outside
+          allowEscapeKey: false,     // Disable closing with the Escape key
+          allowEnterKey: false       // Disable dismissing with Enter
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setCurrentPage(0); // Reset to first page
+            setSelectedRows([]); // Clear selected rows after rejection
+            setSelectAllData(false); // Clear select all checkbox
+            fetchData();
+          }
         });
-        fetchData();
       }
     } catch (error) {
       Swal.fire({
@@ -506,10 +519,13 @@ export default function RejectIncident() {
           // const today = new Date().toISOString().split("T")[0];
           // Proceed_Dtm: new Date().toISOString(),
 
+
+          const user = await getLoggedUserId();
+
           const parameters = {
             Status: "Reject Pending",
-            Reject_Date: new Date(),
-
+            Proceed_Dtm: new Date(),
+            Proceed_By: user
           }
           const response = await Create_Task_Reject_F1_Filtered(parameters);
           if (response.status === 201) {
@@ -533,11 +549,18 @@ export default function RejectIncident() {
             text: "Successfully rejected selected records",
             icon: 'success',
             confirmButtonText: 'OK',
-            confirmButtonColor: "#28a745"
+            confirmButtonColor: "#28a745",
+            allowOutsideClick: false,  // Prevent closing by clicking outside
+            allowEscapeKey: false,     // Disable closing with the Escape key
+            allowEnterKey: false       // Disable dismissing with Enter
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setCurrentPage(0); // Reset to first page
+              fetchData();
+              setSelectedRows([]); // Clear selected rows after rejection
+              setSelectAllData(false); // Clear select all checkbox
+            }
           });
-          fetchData();
-          setSelectedRows([]); // Clear selected rows after rejection
-          setSelectAllData(false); // Clear select all checkbox
         }
       }
     } catch (error) {
@@ -611,9 +634,12 @@ export default function RejectIncident() {
           // const today1 = new Date().toISOString().split("T")[0];
           // Proceed_Dtm: new Date().toISOString(),
 
+          const user = await getLoggedUserId();
+
           const parameters = {
             Status: "Reject Pending",
-            Forward_Date: new Date(),
+            Incident_Forwarded_By: user,
+            Incident_Forwarded_On: new Date(),
           }
           const response = await Create_Task_Forward_F1_Filtered(parameters);
           if (response.status === 201) {
@@ -636,12 +662,18 @@ export default function RejectIncident() {
             text: "Successfully forwarded selected records",
             icon: 'success',
             confirmButtonText: 'OK',
-            confirmButtonColor: "#28a745"
+            confirmButtonColor: "#28a745",
+            allowOutsideClick: false,  // Prevent closing by clicking outside
+            allowEscapeKey: false,     // Disable closing with the Escape key
+            allowEnterKey: false       // Disable dismissing with Enter
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setCurrentPage(0); // Reset to first page
+              fetchData();
+              setSelectedRows([]); // Clear selected rows after move forward
+              setSelectAllData(false); // Clear select all checkbox
+            }
           });
-          fetchData();
-          setSelectedRows([]); // Clear selected rows after move forward
-          setSelectAllData(false); // Clear select all checkbox
-
         }
       }
     } catch (error) {
@@ -799,8 +831,9 @@ export default function RejectIncident() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Id
                     </th>
+                  
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      Status
+                      Service Type
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Account No
@@ -808,8 +841,11 @@ export default function RejectIncident() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Filtered Reason
                     </th>
-                    <th scope="col" className={GlobalStyle.tableHeader}>
+                    {/* <th scope="col" className={GlobalStyle.tableHeader}>
                       Rejected On
+                    </th> */}
+                      <th scope="col" className={GlobalStyle.tableHeader}>
+                  Amount
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Source Type
@@ -842,24 +878,24 @@ export default function RejectIncident() {
                           {row.id}
                         </a>
                       </td>
-
+                     
                       <td
-                        className={`${GlobalStyle.tableData} flex items-center justify-center`}
-                      >
-                        {row.status === "Reject Pending4" && (
-                          <img
-                            src={Reject_Pending}
-                            alt="Reject Pending"
-                            className="w-5 h-5"
-                          />
-                        )}
-                      </td>
+                        className= {GlobalStyle.tableData}>{row.drc_commision_rule}</td>
 
                       <td className={GlobalStyle.tableData}>{row.account_no}</td>
                       <td className={GlobalStyle.tableData}>
                         {row.filtered_reason}
                       </td>
-                      <td className={GlobalStyle.tableData}>{row.rejected_on}</td>
+                      {/* <td className={GlobalStyle.tableData}>{row.rejected_on}</td> */}
+                       
+                      <td className={GlobalStyle.tableCurrency}>
+  {typeof row.Arrears === 'number'
+    ? row.Arrears.toLocaleString("en-LK", {
+        style: "currency",
+        currency: "LKR",
+      })
+    : ""}
+</td>
                       <td className={GlobalStyle.tableData}>{row.source_type}</td>
                       <td className={GlobalStyle.tableData}>{row.created_dtm}</td>
                       <td
@@ -945,7 +981,7 @@ export default function RejectIncident() {
                   <button
                     className={`${GlobalStyle.buttonPrimary} ml-4 w-full sm:w-auto ${isRejecting ? 'opacity-50' : ''}`}
                     onClick={handleMoveForward}
-                    disable={isRejecting} 
+                    disable={isRejecting}
                   >
                     Move Forward
                   </button>

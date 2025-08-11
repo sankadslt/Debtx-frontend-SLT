@@ -44,7 +44,7 @@ export const ListAllRequestLogFromRecoveryOfficers = async (payload) => {
       `${URL}/ListAllRequestLogFromRecoveryOfficers`,
       payload
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error(
       "Error fetching all request log from recovery officers: ",
@@ -123,16 +123,16 @@ export const List_Request_Response_log = async (payload) => {
   try {
     const response = await axios.post(
       `${URL}/List_Request_Response_log`,
-      {
-        case_current_status: payload.case_current_status,
-        date_from: payload.date_from,
-        date_to: payload.date_to
-      }
-     
+      // {
+      //   case_current_status: payload.case_current_status,
+      //   date_from: payload.date_from,
+      //   date_to: payload.date_to
+      // }
+      payload
     );
     console.log("Payload for List_Request_Response_log:", response);
     console.log("Response from List_Request_Response_log:", response.data);
-    return response.data;
+    return response;
     
   } catch (error) {
     console.error(
@@ -155,6 +155,23 @@ export const Create_Task_For_Request_Responce_Log_Download = async (
   } catch (error) {
     console.error(
       "Error creating task for request response log download:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+
+export const Settelment_plan_request_acceptence_type_A = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/Settelment_plan_request_acceptence_type_A`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating settlement plan request acceptance type A:",
       error.response?.data || error.message
     );
     throw error;

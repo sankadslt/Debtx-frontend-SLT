@@ -219,8 +219,13 @@ const MediationBoardCaseList = () => {
       if (response && response.data && response.status === "success") {
         // console.log("Valid data received:", response.data);
 
-        // Append the new data to the existing data
-        setFilteredData((prevData) => [...prevData, ...response.data]);
+        if (currentPage === 1) {
+          setFilteredData(response.data); // Set initial data for page 1
+        } else {
+          // Append the new data to the existing data
+          setFilteredData((prevData) => [...prevData, ...response.data]);
+        }
+
         if (response.data.length === 0) {
           setIsMoreDataAvailable(false); // No more data available
           if (currentPage === 1) {
@@ -277,7 +282,7 @@ const MediationBoardCaseList = () => {
   const validateDates = (from, to) => {
     if (from && to) {
 
-      if (from >= to) {
+      if (from > to) {
         Swal.fire({
           title: "Warning",
           text: "From date must be before to date",
@@ -315,11 +320,6 @@ const MediationBoardCaseList = () => {
   }, [caseId]);
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage); // Update max current page
       // CallAPI(); // Call the function whenever currentPage changes
@@ -369,7 +369,7 @@ const MediationBoardCaseList = () => {
   // console.log("Paginated data:", paginatedData);
 
   // Search Section
-  const filteredDataBySearch = paginatedData.filter((row) =>
+  const filteredDataBySearch = filteredData.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -381,9 +381,7 @@ const MediationBoardCaseList = () => {
     if (isMoreDataAvailable) {
       setCurrentPage(currentPage + 1);
     } else {
-      const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-      setTotalPages(totalPages);
-      if (currentPage < totalPages) {
+      if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
         setCurrentPage(currentPage + 1);
       }
     }
@@ -461,8 +459,8 @@ const MediationBoardCaseList = () => {
               <option value="" hidden>Status</option>
               <option value="Forward to Mediation Board" style={{ color: "black" }}>Forward to Mediation Board</option>
               <option value="MB Negotiation" style={{ color: "black" }}>MB Negotiation</option>
-              <option value="MB Request Customer-Info" style={{ color: "black" }}>MB Request Customer-Info</option>
-              <option value="MB Handover Customer-Info" style={{ color: "black" }}>MB Handover Customer-Info</option>
+              {/* <option value="MB Request Customer-Info" style={{ color: "black" }}>MB Request Customer-Info</option> */}
+              {/* <option value="MB Handover Customer-Info" style={{ color: "black" }}>MB Handover Customer-Info</option> */}
               <option value="MB Settle Pending" style={{ color: "black" }}>MB Settle Pending</option>
               <option value="MB Settle Open-Pending" style={{ color: "black" }}>MB Settle Open-Pending</option>
               <option value="MB Fail with Pending Non-Settlement" style={{ color: "black" }}>MB Fail with Pending Non-Settlement</option>
@@ -497,15 +495,15 @@ const MediationBoardCaseList = () => {
               className={`${GlobalStyle.selectBox}`}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>RTOM</option>
+              <option value="" hidden>Billing Center</option>
               {rtomList.length > 0 ? (Object.values(rtomList).map((rtom) => (
-                <option key={rtom.rtom_id} value={rtom.rtom_id} style={{ color: "black" }}>
+                <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
                   {rtom.rtom}
                 </option>
               ))
               ) : (
                 <option value="" disabled style={{ color: "gray" }}>
-                  No RTOMs available
+                  No Billing Centers available
                 </option>
               )}
             </select>
@@ -561,7 +559,10 @@ const MediationBoardCaseList = () => {
             type="text"
             className={GlobalStyle.inputSearch}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setCurrentPage(1); // Reset to page 1 on search
+              setSearchQuery(e.target.value);
+            }}
           />
           <FaSearch className={GlobalStyle.searchBarIcon} />
         </div>
@@ -575,7 +576,7 @@ const MediationBoardCaseList = () => {
               <th className={GlobalStyle.tableHeader}>Status</th>
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>RO Name</th>
-              <th className={GlobalStyle.tableHeader}>RTOM</th>
+              <th className={GlobalStyle.tableHeader}>Billing Center</th>
               <th className={GlobalStyle.tableHeader}>Calling Round</th>
               <th className={GlobalStyle.tableHeader}>Created Date</th>
               <th className={GlobalStyle.tableHeader}>Next Calling Date</th>
@@ -584,7 +585,7 @@ const MediationBoardCaseList = () => {
           </thead>
           <tbody>
             {filteredDataBySearch.length > 0 ? (
-              filteredDataBySearch.map((row, index) => (
+              filteredDataBySearch.slice(startIndex, startIndex + rowsPerPage).map((row, index) => (
                 <tr
                   key={index}
                   className={
@@ -604,7 +605,7 @@ const MediationBoardCaseList = () => {
                   </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{row.ro_name}</td>
-                  <td className={GlobalStyle.tableData}>{row.area}</td>
+                  <td className={GlobalStyle.tableData}>{row.rtom}</td>
                   <td className={GlobalStyle.tableData}>{row.calling_round}</td>
                   <td className={GlobalStyle.tableData}>
                     {row.date &&
@@ -669,9 +670,17 @@ const MediationBoardCaseList = () => {
               Page {currentPage}
             </span>
             <button
-              className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+              className={`${GlobalStyle.navButton} ${(searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                  ? "cursor-not-allowed"
+                  : ""
+                }`}
               onClick={handleNextPage}
-              disabled={currentPage === totalPages}
+              disabled={
+                searchQuery
+                  ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                  : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
             >
               <FaArrowRight />
             </button>
