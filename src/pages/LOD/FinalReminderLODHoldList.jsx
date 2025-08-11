@@ -305,24 +305,7 @@ const Final_Reminder_LOD_Hold_List = () => {
     }
   }, [currentPage]);
 
-  // Handle Pagination
-  const handlePrevNext = (direction) => {
-    if (direction === "prev" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      // console.log("Current Page:", currentPage);
-    } else if (direction === "next") {
-      if (isMoreDataAvailable) {
-        setCurrentPage(currentPage + 1);
-      } else {
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        setTotalPages(totalPages);
-        if (currentPage < totalPages) {
-          setCurrentPage(currentPage + 1);
-        }
-      }
-      // console.log("Current Page:", currentPage);
-    }
-  };
+  
 
   // Handle Filter Button cl ick
   const handleFilterButton = () => {
