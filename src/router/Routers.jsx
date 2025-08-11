@@ -36,7 +36,7 @@ import DirectLODSendingIncident from "../pages/Distribution/DirectLODSendingInci
 import RejectIncident from "../pages/Distribution/RejectIncident";
 import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
 import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
-import AbundantIncident from "../pages/Distribution/AbundantIncident";
+import AbundantIncidentlog from "../pages/Distribution/AbundantIncidentlog";
 
 {
   /* Distribute Imports */
