@@ -17,6 +17,7 @@ import RecoveryOfficerRequests from "../pages/Request/additiional_request_log";
 import ForwardMediationBoard from "../pages/Request/ForwardMediationBoard";
 import ValidityPeriodExtension from "../pages/Request/ValidityPeriodExtension";
 import RequestResponseLog from "../pages/Request/RequestResponseLog";
+import DeligatedRequestResponse from "../pages/Request/DeligatedRequestResponse";
 
 import Incident_List from "../pages/Incident/Incident_List";
 import Incident from "../pages/Incident/Incident";
@@ -225,6 +226,16 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<RequestResponseLog />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      
+       <Route
+        path="/drs/logs/Deligated-Request-Response"
+        element={
+          <ProtectedRoute
+            element={<DeligatedRequestResponse />}
             allowedRoles={["superadmin"]}
           />
         }
