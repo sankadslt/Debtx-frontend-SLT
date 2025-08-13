@@ -24,6 +24,7 @@ import Incident_Register_Individual from "../pages/Incident/Incident_Register_In
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 import Incident_File_Download from "../pages/Incident/Incident_File_Download";
+import Incident_Details from "../pages/Incident/Incident_Details";
 
 //import for the case details page
 import CaseDetails from "../pages/Incident/Case_Details";
