@@ -1,11 +1,11 @@
 import React from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import {FLT_LOD_Case_Details } from "../../services/FTL_LOD/FLT_LODServices.js";
-import { Create_FLT_LOD } from "../../services/FLT_LOD/FTL_LODServices.js";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { FLT_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
+import { Create_FLT_LOD} from "../../services/FTL_LOD/FTL_LODServices.js";
 
 import { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom"; // <-- Add this
+
 
 export default function FLT_LOD_Change_Details_Form() {
 
@@ -39,7 +39,7 @@ export default function FLT_LOD_Change_Details_Form() {
       account_no: formData.post("account_no"),
       event_source: formData.post("event_source"),
       customer_name: formData.post("customer_name"),
-      Postal_Address: formData.post("postal_address"),
+      address: formData.post("address"),
       additional_fields: [
         formData.post("additional_field_1"),
         formData.post("additional_field_2"),
@@ -117,7 +117,7 @@ export default function FLT_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
-                      name="postal_address"
+                      name="address"
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
