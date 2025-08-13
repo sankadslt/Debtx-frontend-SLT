@@ -5,6 +5,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/DRC`;
 const URL2 = `${BASE_URL}/recovery_officer`;
 const URL3 = `${BASE_URL}/DRC_service`;
+const USER_URL = `${BASE_URL}/user`;
 
 export const Active_DRC_Details = async () => {
   try {
@@ -12,14 +13,16 @@ export const Active_DRC_Details = async () => {
     const data = response.data.data.mongoData;
 
     // Extract and return the drc_name for all active DRCs
-
+ 
     const drcNames = data.map((drc) => ({
       key: drc.drc_id, // Use _id as key
       value: drc.drc_name, // Use drc_name as the display value
       id: drc.drc_id,
     }));
-
+ 
     return drcNames;
+   
+    
   } catch (error) {
     console.error(
       "Error fetching active DRC details:",
@@ -295,8 +298,11 @@ export const getActiveRTOMDetails = async () => {
 // getActiveServiceDetails
 export const getActiveServiceDetails = async () => {
   try {
+   
       const response = await axios.get(`${BASE_URL}/service/Active_Service_Details`);
-      return response.data.data; // Make sure this returns an array of {id, value} objects
+      
+      return response.data.data;
+     // Make sure this returns an array of {id, value} objects
   } catch (error) {
     console.error(
       "Error fetching active services:",
@@ -508,4 +514,21 @@ export const Assign_DRC_To_Agreement = async (updateData) => {
   }
 }
 
+export const getUserDetailsByIdforDRC = async (user_id) => {
+  try {
+    const response = await axios.post(`${USER_URL}/List_All_User_Details_By_ID`, {
+      user_id,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to fetch user details by ID",
+      }
+    );
+  }
+};
 

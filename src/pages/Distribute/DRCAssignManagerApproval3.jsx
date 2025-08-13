@@ -663,7 +663,7 @@ export default function DRCAssignManagerApproval3() {
   const onTableIconClick = (item) => {
 
     const formattedParameters = Object.entries(item.parameters)
-      .map(([key, value]) => `  "${key}": ${JSON.stringify(value)}`)
+      .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
       .join('\n');
 
     Swal.fire({
@@ -729,7 +729,7 @@ export default function DRCAssignManagerApproval3() {
 
             </select>
 
-            <select
+            {/* <select
               className={`${GlobalStyle.selectBox} w-full sm:w-auto`}
               value={approverstatus}
               onChange={(e) => setApproverStatus(e.target.value)}
@@ -743,7 +743,7 @@ export default function DRCAssignManagerApproval3() {
               <option value="Reject" style={{ color: "black" }}>Reject</option>
 
 
-            </select>
+            </select> */}
 
 
 
@@ -891,7 +891,7 @@ export default function DRCAssignManagerApproval3() {
                   <td className={GlobalStyle.tableData}>
                     {item.remark.length > 0
                       ? item.remark[item.remark.length - 1].remark
-                      : "N/A"}
+                      : ""}
                   </td>
 
                   <td className={GlobalStyle.tableData}>{item.created_by}</td>

@@ -163,7 +163,7 @@ const PaymentDetails = () => {
       const payload = {
         case_id: filters.caseId,
         account_num: filters.accountNo,
-        settlement_phase: filters.phase,
+        case_phase: filters.phase,
         from_date: formatDate(filters.fromDate),
         to_date: formatDate(filters.toDate),
         pages: filters.page,
@@ -552,11 +552,11 @@ const PaymentDetails = () => {
                         {item.Case_ID || "N/A"}
                       </td>
                       <td className={GlobalStyle.tableData}>{item.Account_No || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{item.Settlement_ID || "N/A"}</td>
+                      <td className={GlobalStyle.tableData}>{item.settlement_id || "N/A"}</td>
                       <td className={GlobalStyle.tableCurrency}>{item.Money_Transaction_Amount}</td>
                       <td className={GlobalStyle.tableData}>{item.Transaction_Type || "N/A"}</td>
-                      <td className={GlobalStyle.tableData}>{item.Settlement_Phase || "N/A"}</td>
-                      <td className={GlobalStyle.tableCurrency}>{item.Cummulative_Settled_Balance}</td>
+                      <td className={GlobalStyle.tableData}>{item.case_phase || "N/A"}</td>
+                      <td className={GlobalStyle.tableCurrency}>{item.cumulative_settled_balance}</td>
                       <td className={GlobalStyle.tableData}>
                         {item.Money_Transaction_Date &&
                           new Date(item.Money_Transaction_Date).toLocaleString("en-GB", {

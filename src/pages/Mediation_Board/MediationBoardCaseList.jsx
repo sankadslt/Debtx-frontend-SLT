@@ -459,8 +459,8 @@ const MediationBoardCaseList = () => {
               <option value="" hidden>Status</option>
               <option value="Forward to Mediation Board" style={{ color: "black" }}>Forward to Mediation Board</option>
               <option value="MB Negotiation" style={{ color: "black" }}>MB Negotiation</option>
-              <option value="MB Request Customer-Info" style={{ color: "black" }}>MB Request Customer-Info</option>
-              <option value="MB Handover Customer-Info" style={{ color: "black" }}>MB Handover Customer-Info</option>
+              {/* <option value="MB Request Customer-Info" style={{ color: "black" }}>MB Request Customer-Info</option> */}
+              {/* <option value="MB Handover Customer-Info" style={{ color: "black" }}>MB Handover Customer-Info</option> */}
               <option value="MB Settle Pending" style={{ color: "black" }}>MB Settle Pending</option>
               <option value="MB Settle Open-Pending" style={{ color: "black" }}>MB Settle Open-Pending</option>
               <option value="MB Fail with Pending Non-Settlement" style={{ color: "black" }}>MB Fail with Pending Non-Settlement</option>
@@ -495,15 +495,15 @@ const MediationBoardCaseList = () => {
               className={`${GlobalStyle.selectBox}`}
               style={{ color: rtom === "" ? "gray" : "black" }}
             >
-              <option value="" hidden>RTOM</option>
+              <option value="" hidden>Billing Center</option>
               {rtomList.length > 0 ? (Object.values(rtomList).map((rtom) => (
-                <option key={rtom.rtom_id} value={rtom.rtom_id} style={{ color: "black" }}>
+                <option key={rtom.rtom_id} value={rtom.rtom} style={{ color: "black" }}>
                   {rtom.rtom}
                 </option>
               ))
               ) : (
                 <option value="" disabled style={{ color: "gray" }}>
-                  No RTOMs available
+                  No Billing Centers available
                 </option>
               )}
             </select>
@@ -576,7 +576,7 @@ const MediationBoardCaseList = () => {
               <th className={GlobalStyle.tableHeader}>Status</th>
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>RO Name</th>
-              <th className={GlobalStyle.tableHeader}>RTOM</th>
+              <th className={GlobalStyle.tableHeader}>Billing Center</th>
               <th className={GlobalStyle.tableHeader}>Calling Round</th>
               <th className={GlobalStyle.tableHeader}>Created Date</th>
               <th className={GlobalStyle.tableHeader}>Next Calling Date</th>
@@ -605,7 +605,7 @@ const MediationBoardCaseList = () => {
                   </td>
                   <td className={GlobalStyle.tableData}>{row.drc_name}</td>
                   <td className={GlobalStyle.tableData}>{row.ro_name}</td>
-                  <td className={GlobalStyle.tableData}>{row.area}</td>
+                  <td className={GlobalStyle.tableData}>{row.rtom}</td>
                   <td className={GlobalStyle.tableData}>{row.calling_round}</td>
                   <td className={GlobalStyle.tableData}>
                     {row.date &&

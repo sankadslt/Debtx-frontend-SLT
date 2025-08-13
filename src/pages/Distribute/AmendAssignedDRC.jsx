@@ -144,8 +144,8 @@ export default function AmendAssignedDRC() {
       case_distribution_batch_id: BatchID,
       drc_list: drc_list,
       created_by: user_id,
-      drc_commision_rule : transaction[0]?.drc_commision_rule , 
-      current_arrears_band: transaction[0]?.current_arrears_band ,
+      drc_commision_rule: transaction[0]?.drc_commision_rule,
+      current_arrears_band: transaction[0]?.current_arrears_band,
     };
     //console.log("Payload", payload);
 
@@ -417,7 +417,7 @@ export default function AmendAssignedDRC() {
             {/* textbox */}
             <div className="flex gap-7 flex-wrap">
               <h1 className={GlobalStyle.headingMedium}>
-                Assigned case count:{assignedCaseCount}
+                Assigned case count : {assignedCaseCount}
 
               </h1>
               <input
@@ -553,15 +553,16 @@ export default function AmendAssignedDRC() {
                       <div className="flex justify-center items-center">
                         {["admin", "superadmin", "slt"].includes(userRole) && (
                           <button
+                            src={Minorc}
                             onClick={() =>
                               handledeleteclick(item.RTOM, item.DRC1, item.DRC2)
                             }
-                            className={`${GlobalStyle.buttonPrimary}`}
                           >
-                            Delete
+                            <img src={Minorc} alt="Delete Icon" className="h-6 w-6" />
                           </button>
                         )}
                       </div>
+
                     </td>
                   </tr>
                 ))

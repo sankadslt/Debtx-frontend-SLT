@@ -276,17 +276,9 @@ export const List_CasesOwened_By_DRC = async (requestData) => {
     );
 
     // Validate response structure
-    if (response.data && response.data.status === "success") {
+   
       return response.data; // Return the cases data
-    } else {
-      console.error(
-        "Error in API response:",
-        response.data?.message || "Unknown error"
-      );
-      throw new Error(
-        response.data?.message || "Failed to retrieve case details."
-      );
-    }
+    
   } catch (error) {
     console.error(
       "Error fetching cases owned by DRC:",
@@ -377,7 +369,7 @@ export const List_DRC_Assign_Manager_Approval = async (payload) => {
 export const Approve_DRC_Assign_Manager_Approval = async (payload) => {
   try {
     const response = await axios.post(
-      `${URL}/Approve_DRC_Assign_Manager_Approval`,
+      `${URL}/Aprove_DRC_Assign_Manager_Approval`,
       payload
     );
     return response.data;
@@ -640,6 +632,20 @@ export const fetchCaseDetails = async (caseId) => {
   }
 };
 
+export const Create_Task_For_Download_Case_Details=async (createdBy)=>{
+  try{
+    const response = await axios.post(`${URL}/Create_Task_For_Download_Case_Details`, {
+      Created_By: createdBy
+    });
+
+     
+    return response.data.status;
+  }catch(error){
+    console.error("Error creating task:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 export const GetFilteredCaseLists = async ({
   case_current_status,
   From_DAT,
@@ -648,6 +654,7 @@ export const GetFilteredCaseLists = async ({
   DRC,
   arrears_band: selectedBand,
   service_type,
+  account_no,
   pages
 }) => {
   try {
@@ -659,6 +666,7 @@ export const GetFilteredCaseLists = async ({
       DRC,
       arrears_band: selectedBand,
       service_type,
+      account_no,
       pages
     };
 
@@ -678,7 +686,7 @@ export const GetFilteredCaseLists = async ({
         accountno: item.account_no,
         amount: item.current_arrears_amount,
         servicetype: item.service_type,
-        Agent: item.drc_name,
+        drc_name: item.drc_name,
         drccommisionrule: item.service_type,
         currentarrearsamount: item.current_arrears_amount,
         rtom: item.rtom,

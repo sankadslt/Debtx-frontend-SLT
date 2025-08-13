@@ -94,7 +94,11 @@ const ListAllTasks = () => {
       case "open":
         return Task_List_Open;
       case "complete":
+
         return Task_List_Success;
+      case "success":
+        return Task_List_Success;
+
       case "inprogress":
         return Task_List_In_Progress;
       default:
@@ -379,68 +383,66 @@ const ListAllTasks = () => {
           <h1 className={GlobalStyle.headingLarge}>Task List</h1>
 
           {/* Filters Section */}
-          <div className="flex justify-end items-center">
-            <div className="w-[700px] sm:w-[100%] md:w-[700px]"></div>
-            <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
-              <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
-                <div className="flex items-center">
-                  <select
-                    value={taskstatus}
-                    onChange={(e) => setTaskstatus(e.target.value)}
-                    style={{ color: taskstatus === "" ? "gray" : "black" }}
-                    className={GlobalStyle.selectBox}
-                  >
-                    <option value="" hidden>
-                      Task Status
-                    </option>
-                    <option value="open">Open</option>
-                    {/* <option value="error">Error</option> */}
-                    <option value="inprogress">In Progress</option>
-                    <option value="complete">Complete</option>
-                  </select>
-                </div>
 
-                <label className={GlobalStyle.dataPickerDate}>Date</label>
-                {/* <div className={GlobalStyle.datePickerContainer}> */}
-                {/* <div className="flex items-center space-x-2"> */}
-                {/* <div className="flex items-center"> */}
-                <DatePicker
-                  selected={fromDate}
-                  onChange={handlestartdatechange}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="From"
-                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                />
-                {/* </div> */}
-
-                {/* <div className="flex items-center"> */}
-                <DatePicker
-                  selected={toDate}
-                  onChange={handleenddatechange}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="To"
-                  className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                />
-                {/* </div> */}
-                {/* </div> */}
-
-                {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button
-                    className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-                    onClick={handleFilterButton}
-                  >
-                    Filter
-                  </button>
-                )}
-                {["admin", "superadmin", "slt"].includes(userRole) && (
-                  <button
-                    className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
-                    onClick={handleClear}
-                  >
-                    Clear
-                  </button>
-                )}
+          <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
+            <div className="flex flex-wrap  xl:flex-nowrap items-center justify-end w-full space-x-3">
+              <div className="flex items-center">
+                <select
+                  value={taskstatus}
+                  onChange={(e) => setTaskstatus(e.target.value)}
+                  style={{ color: taskstatus === "" ? "gray" : "black" }}
+                  className={GlobalStyle.selectBox}
+                >
+                  <option value="" hidden>
+                    Task Status
+                  </option>
+                  <option value="open">Open</option>
+                  {/* <option value="error">Error</option> */}
+                  <option value="inprogress">In Progress</option>
+                  <option value="complete">Complete</option>
+                </select>
               </div>
+
+              <label className={GlobalStyle.dataPickerDate}>Date</label>
+              {/* <div className={GlobalStyle.datePickerContainer}> */}
+              {/* <div className="flex items-center space-x-2"> */}
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={fromDate}
+                onChange={handlestartdatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="From"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div> */}
+
+              {/* <div className="flex items-center"> */}
+              <DatePicker
+                selected={toDate}
+                onChange={handleenddatechange}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="To"
+                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+              />
+              {/* </div> */}
+              {/* </div> */}
+
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+                  onClick={handleFilterButton}
+                >
+                  Filter
+                </button>
+              )}
+              {["admin", "superadmin", "slt"].includes(userRole) && (
+                <button
+                  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                  onClick={handleClear}
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
@@ -484,7 +486,7 @@ const ListAllTasks = () => {
                     .slice(startIndex, endIndex)
                     .map((item, index) => (
                       <tr
-                        key={item.settlement_id || index}
+                        key={item.task_id || index}
                         className={
                           index % 2 === 0
                             ? GlobalStyle.tableRowEven

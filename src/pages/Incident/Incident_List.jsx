@@ -31,7 +31,9 @@ import inprogressincident from "/src/assets/images/incidents/Incident_InProgress
 import incidentDone from "/src/assets/images/incidents/Incident_Done.png"
 import errorincident from "/src/assets/images/incidents/Incident_Error.png";
 //import error from "/src/assets/images/incidents/Reject.png"
-
+import Complete from "/src/assets/images/incidents/Incident_Done.png";
+ 
+ 
 const Incident_List = () => {
 
 
@@ -105,10 +107,12 @@ const Incident_List = () => {
         return errorincident;
       // case "reject":
       //   return error;
-      // case "incident reject":
-      //   return rejectincident;
-      case "complete":
-        return incidentDone;
+      case "reject":
+        return errorincident;
+
+        case "complete":
+          return Complete;
+   
       default:
         return null;
     }
@@ -467,12 +471,12 @@ const Incident_List = () => {
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          <h1 className={GlobalStyle.headingLarge}>Incident List</h1>
+          <h1 className={GlobalStyle.headingLarge}>User Created Account List</h1>
 
           <div className="flex justify-end mt-6">
             <button onClick={HandleAddIncident} className={`${GlobalStyle.buttonPrimary} flex items-center`}>
               <FaPlus className="mr-2" />
-              Add Incident
+              Add Account
             </button>
           </div>
 
@@ -504,10 +508,11 @@ const Incident_List = () => {
                 >
                   <option value="" hidden>Status</option>
                   <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
+                  <option value="Reject" style={{ color: "black" }}>Reject</option>
                   <option value="Complete" style={{ color: "black" }}>Complete</option>
                   <option value="Incident Error" style={{ color: "black" }}>Incident Error</option>
                   <option value="Incident InProgress" style={{ color: "black" }}>Incident InProgress</option>
-                </select>
+                </select> 
               </div>
 
               <div className="flex items-center">
@@ -580,7 +585,7 @@ const Incident_List = () => {
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
-                  <th className={GlobalStyle.tableHeader}>ID</th>
+                  {/* <th className={GlobalStyle.tableHeader}>ID</th> */}
                   <th className={GlobalStyle.tableHeader}>Status</th>
                   <th className={GlobalStyle.tableHeader}>Account No</th>
                   <th className={GlobalStyle.tableHeader}>Action</th>
@@ -600,7 +605,7 @@ const Incident_List = () => {
                           : GlobalStyle.tableRowOdd
                       }
                     >
-                      <td className={GlobalStyle.tableData}>{row.incidentID || ""}</td>
+                      {/* <td className={GlobalStyle.tableData}>{row.incidentID || ""}</td> */}
                       <td className={`${GlobalStyle.tableData} flex justify-center`}>
                         {renderStatusIcon(row.status, index)}
                       </td>
