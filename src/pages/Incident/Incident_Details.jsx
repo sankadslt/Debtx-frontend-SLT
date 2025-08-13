@@ -1,3 +1,18 @@
+ /*Purpose:
+Created Date: 2025-08-17
+Created By: Yugani Gunarathna (yuganesha027g@gmail.com)
+Last Modified Date: 2025-08-05
+Modified By: Sathmi Peiris (sathmipeiris@gmail.com)
+Last Modified Date: 2025-05-08
+Modified By:  Yugani Gunarathna 
+              Dinithi Wijesekara 
+              Update 2025-08-13
+             
+Version: React v18
+ui number : 1.1
+Dependencies: Tailwind CSS
+Related Files: 
+Notes: This template uses Tailwind CSS and connects to Incident collection with Account Number filtering */
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchIncidentDetails, Create_Task_For_Download_Incident_Details } from '../../services/Incidents/incidentService.js';
