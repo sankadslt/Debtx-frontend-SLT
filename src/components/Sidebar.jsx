@@ -197,10 +197,15 @@ const Sidebar = ({ onHoverChange }) => {
           link: "/MediationBoard/MediationBoardCaseList",
         },
         // { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "Digital Signature LOD", link: "/pages/LOD/DigitalSignatureLOD", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "LOD List", link: "/pages/LOD/LODLog", roles: ["superadmin", "admin"] },
-        { icon: CgEditFade, label: "Final Reminder List", link: "/pages/LOD/FinalReminderList", roles: ["superadmin", "admin"] },
-        
+        { icon: CgEditFade,
+          label: "LOD",
+          roles: ["superadmin", "admin", "user"],
+          subItems: [
+            { icon: CgEditFade, label: "DS List", link: "/pages/LOD/DigitalSignatureLOD", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "LOD Log", link: "/pages/LOD/LODLog", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "FR Log", link: "/pages/LOD/FinalReminderList", roles: ["superadmin", "admin"] },
+          ]
+        }
         
         // { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },
