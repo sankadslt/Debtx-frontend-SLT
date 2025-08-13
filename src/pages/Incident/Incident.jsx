@@ -695,18 +695,19 @@ const Incident = () => {
                 </tr>
               </thead>
 
-              <tbody>
+        <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
                   filteredDataBySearch
                     .slice(startIndex, startIndex + rowsPerPage)
                     .map((row, index) => (
                       <tr
                         key={row.incidentID || index}
-                        className={
+                        className={`${
                           index % 2 === 0
                             ? GlobalStyle.tableRowEven
                             : GlobalStyle.tableRowOdd
-                        }
+                        } cursor-pointer hover:bg-gray-100 hover:underline transition-all duration-200`}
+                        onClick={() => naviIncidentID(row.Incident_Id)}
                       >
                         <td className={GlobalStyle.tableData}>
                           {row.Incident_Id || ""}
