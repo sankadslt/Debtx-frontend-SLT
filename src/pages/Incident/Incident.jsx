@@ -1,13 +1,13 @@
   /*Purpose:
 Created Date: 2025-07-17
-Created By: Yugani Gunarathna (jtdsiriwardena@gmail.com)
+Created By: Yugani Gunarathna (yuganesha027g@gmail.com)
 Last Modified Date: 2025-07-18
 Modified By: Sathmi Peiris (sathmipeiris@gmail.com)
 Last Modified Date: 2025-07-20
 Modified By:  Yugani Gunarathna 
               Sathmi Peiris
               Dinithi Wijesekara 
-             Update 2025-07-20
+              Update 2025-07-20
              
 Version: React v18
 ui number : 1.1
@@ -174,6 +174,10 @@ const Incident = () => {
   };
 
   const navigate = useNavigate();
+
+   const naviIncidentID = (incidentId) => {
+    navigate("/Incident/Incident_Details", { state: { IncidentID: incidentId } });
+  };
 
   const handlestartdatechange = (date) => {
     setFromDate(date);

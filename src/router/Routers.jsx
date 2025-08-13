@@ -623,6 +623,16 @@ const Routers = () => {
         }
       />
 
+       <Route
+        path="/Incident/Incident_Details"
+        element={
+          <ProtectedRoute
+            element={<Incident_Details />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
       {/* //MEDIATION BOARD */}
       <Route
         path="/MediationBoard/MediationBoardCaseList"
