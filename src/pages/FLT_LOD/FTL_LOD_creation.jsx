@@ -2,26 +2,36 @@
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { useNavigate } from "react-router-dom";
-import { FTL_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
+import { FLT_LOD_Case_Details } from "../../services/FTL_LOD/FLT_LODServices.js";
+import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-export default function FTL_LOD_Creation() {
+export default function FLT_LOD_Creation() {
 
-  
+  const { case_id } = useParams(); // Get case_id from URL parameters
+  // const case_id = useParams().case_id;
+  //const case_id = 1
+    // const case_id = location.state?.caseid
+  // State to hold case details
+  const location = useLocation();
+  const item = location.state?.item;
+
+  const [caseDetails, setCaseDetails] = useState(null);
+
+
   const navigate = useNavigate();
   // Function to handle navigation to change details form
   const handleChangeDetails = () => {
     navigate("/pages/flt-lod/ftl-lod-change-details-form");
   };
 
-  // State to hold case details
-  const [caseDetails, setCaseDetails] = useState(null);
-  
   useEffect(() => {
     // Fetch case details when the component mounts
     const fetchCaseDetails = async () => {
       try {
+        console.log("Fetching case details for case_id:", case_id);
         //const case_id = "12345"; // Replace with actual case ID
-        const caseDetails = await FTL_LOD_Case_Details(case_id);
+        const caseDetails = await FLT_LOD_Case_Details(case_id);
         console.log("Case Details:", caseDetails);
       } catch (error) {
         console.error("Error fetching case details:", error);

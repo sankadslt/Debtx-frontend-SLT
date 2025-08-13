@@ -17,6 +17,7 @@ import FTL_LOD_Cus_Response_update from "./FTL_LOD_Cus_Response_update.jsx";
 import { fetchAllArrearsBands } from "../../services/case/CaseServices.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { List_FTL_LOD_Cases } from "../../services/FTL_LOD/FTL_LODServices.js";
+import {FLT_LOD_Case_Details} from "../../services/FTL_LOD/FLT_LODServices.js";
 //Status Icons
 
 import Pending_FTL_LOD from "../../assets/images/FTL_LOD/Pending_FTL_LOD.svg";

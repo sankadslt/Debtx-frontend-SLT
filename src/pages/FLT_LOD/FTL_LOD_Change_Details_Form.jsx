@@ -1,18 +1,28 @@
 import React from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { FTL_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
-import { Create_FTL_LOD } from "../../services/FTL_LOD/FTL_LODServices.js";
+import {FLT_LOD_Case_Details } from "../../services/FTL_LOD/FLT_LODServices.js";
+import { Create_FLT_LOD } from "../../services/FLT_LOD/FTL_LODServices.js";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { useEffect } from "react";
 
-export default function FTL_LOD_Change_Details_Form() {
+export default function FLT_LOD_Change_Details_Form() {
+
+  const { case_id } = useParams(); // Get case_id from URL parameters
+  // const case_id = location.state?.caseid// Get case_id from URL parameters
+  const navigate = useNavigate();
+  // const case_id = 1649
+
+
 
   useEffect(() => {
     const fetchCaseDetails = async () => {
       try {
+         console.log("Case Details:", case_id);
         // Replace 'case_id' with the actual case ID variable or prop
-        const caseDetails = await FTL_LOD_Case_Details(case_id);
-        console.log("Case Details:", caseDetails);
+        const caseDetails = await FLT_LOD_Case_Details(case_id);
+        console.log("Fetched Case Details:", caseDetails);
       } catch (error) {
         console.error("Error fetching case details:", error);
       }
@@ -25,11 +35,26 @@ export default function FTL_LOD_Change_Details_Form() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const payload = Object.fromEntries(formData.entries());
+    const payload = {
+      account_no: formData.post("account_no"),
+      event_source: formData.post("event_source"),
+      customer_name: formData.post("customer_name"),
+      Postal_Address: formData.post("postal_address"),
+      additional_fields: [
+        formData.post("additional_field_1"),
+        formData.post("additional_field_2"),
+        formData.post("additional_field_3"),
+        formData.post("additional_field_4"),
+      ],
+      current_arrears_band: formData.post("current_arrears_band"),
+      billing_centre: formData.post("rtom"),
+      customer_type_name: formData.post("customer_type_name"),
+    }
+
 
     try {
-      const response = await Create_FTL_LOD(payload);
-      console.log("FTL LOD created successfully:", response);
+      const response = await Create_FLT_LOD(payload);
+      console.log("FLT LOD created successfully:", response);
       // Handle success (e.g., show a success message, redirect, etc.)
     } catch (error) {
       console.error("Error creating FTL LOD:", error);
@@ -58,6 +83,7 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="account_no"
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -66,7 +92,7 @@ export default function FTL_LOD_Change_Details_Form() {
                 <tr>
                   <td className={GlobalStyle.tableData}>Select Option :</td>
                   <td className={GlobalStyle.tableData}>
-                    <select className={`${GlobalStyle.selectBox} w-full`}>
+                    <select name="event_source" className={`${GlobalStyle.selectBox} w-full`}>
                       <option value="">Event Source</option>
                       <option value="option1">Option 1</option>
                       <option value="option2">Option 2</option>
@@ -80,6 +106,7 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="customer_name"
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -90,6 +117,7 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="postal_address"
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -102,6 +130,7 @@ export default function FTL_LOD_Change_Details_Form() {
                     <td className={GlobalStyle.tableData}>
                       <input
                         type="text"
+                        name={`additional_field_${index + 1}`}
                         className={`${GlobalStyle.inputText} w-full`}
                       />
                     </td>
@@ -113,6 +142,7 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="current_arrears_band"
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -123,6 +153,7 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="rtom"
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -133,6 +164,7 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="customer_type_name"
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
