@@ -24,6 +24,7 @@ import { Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases } from "../..
 import { Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases } from "../../services/LOD/LOD.js";
 import { Change_Document_Type } from "../../services/LOD/LOD.js";
 import { Create_Task_for_Proceed_LOD_OR_Final_Reminder_List } from "../../services/LOD/LOD.js";
+import { jwtDecode } from "jwt-decode";
 
 
 const Digital_Signature_LOD = () => {
@@ -45,6 +46,31 @@ const Digital_Signature_LOD = () => {
     const [maxTablePages, setMaxTablePages] = useState(0); // Maximum number of pages for the table
     const [maxCurrentPage, setMaxCurrentPage] = useState(0); // Maximum current page for the table
     const rowsPerPage = 10; // Number of rows per page
+    const navigate = useNavigate();
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
+    // Role-Based Buttons
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            let decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+
+            if (decoded.exp < currentTime) {
+                refreshAccessToken().then((newToken) => {
+                    if (!newToken) return;
+                    const newDecoded = jwtDecode(newToken);
+                    setUserRole(newDecoded.role);
+                });
+            } else {
+                setUserRole(decoded.role);
+            }
+        } catch (error) {
+            console.error("Invalid token:", error);
+        }
+    }, []);
 
     // Fetch LOD, Final reminder and total counts
     const fetchLODCounts = async () => {
@@ -57,7 +83,12 @@ const Digital_Signature_LOD = () => {
             setFinalReminderCount(response.finalReminderCount);
         } catch (error) {
             console.error("Error fetching LOD counts:", error.message);
-            Swal.fire("Error", "Failed to fetch LOD counts.", "error");
+            Swal.fire({
+                title: "Error",
+                text: "Failed to fetch LOD counts.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
         }
     }
 
@@ -94,6 +125,16 @@ const Digital_Signature_LOD = () => {
             const LODs = await List_F2_Selection_Cases(LODType, currentPage);
             // setLODData(LODs);
             setLODData((prevData) => [...prevData, ...LODs]); // Append new data to existing data
+            if (LODs.length === 0 && currentPage === 1) {
+                Swal.fire({
+                    title: "No Results",
+                    text: "No LOD is matching the criteria.",
+                    icon: "warning",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    confirmButtonColor: "#f1c40f"
+                });
+            }
 
             // if (LODs.length === 0) {
             //     setIsMoreDataAvailable(false); // No more data available
@@ -114,7 +155,12 @@ const Digital_Signature_LOD = () => {
             // }
 
         } catch (error) {
-            Swal.fire("Error", error.message || "No LOD is matching the criteria.", "error");
+            Swal.fire({
+                title: "Error",
+                text: error.message || "No LOD is matching the criteria.",
+                icon: "error",
+                confirmButtonColor: "#d33",
+            });
         } finally {
             setIsLoading(false);
         }
@@ -149,7 +195,12 @@ const Digital_Signature_LOD = () => {
     // Function to handle the creation of tasks for downloading each LOD
     const HandleCreateTaskEachLOD = async () => {
         if (!LODType) {
-            Swal.fire("Error", "Please apply filter 2 befor download.", "error");
+            Swal.fire({
+                title: "Error",
+                text: "Please apply filter 2 befor download.",
+                icon: "error",
+                confirmButtonColor: "#d33",
+            });
             return;
         }
 
@@ -157,12 +208,28 @@ const Digital_Signature_LOD = () => {
 
         setIsCreatingTask(true);
         try {
-            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(userData, LODType);
-            if (response === "success") {
-                Swal.fire(response, `Task created successfully!`, "success");
+
+            const payload = {
+                Created_By: userData,
+                current_document_type: LODType,
+            }
+            const response = await Create_Task_For_Downloard_Each_Digital_Signature_LOD_Cases(payload);
+            console.log("Response:", response);
+            if (response.status === 200) {
+                Swal.fire({
+                    title: `Task created successfully!`,
+                    text: "Task ID: " + response.data.data.data.Task_Id,
+                    icon: "success",
+                    confirmButtonColor: "#28a745"
+                });
             }
         } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
+            Swal.fire({
+                title: "Error",
+                text: error.message || "Failed to create task.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
         } finally {
             setIsCreatingTask(false);
         }
@@ -171,7 +238,12 @@ const Digital_Signature_LOD = () => {
     // Function to handle the creation of tasks for downloading all LODs
     const HandleCreateTaskAllLOD = async () => {
         if (LODType) {
-            Swal.fire("Error", "Please do not apply filter 2 for download all the LODs.", "error");
+            Swal.fire({
+                title: "Error",
+                text: "Please do not apply filter 2 for download all the LODs.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
             return;
         }
 
@@ -180,11 +252,28 @@ const Digital_Signature_LOD = () => {
         setIsCreatingTask(true);
         try {
             const response = await Create_Task_For_Downloard_All_Digital_Signature_LOD_Cases(userData);
-            if (response === "success") {
-                Swal.fire(response, `Task created successfully!`, "success");
+            if (response.status === 200) {
+                Swal.fire({
+                    title: 'Task created successfully!',
+                    text: "Task ID: " + response.data.data.data.Task_Id,
+                    icon: "success",
+                    confirmButtonColor: "#28a745"
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: "Failed to create task.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
             }
         } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
+            Swal.fire({
+                title: "Error",
+                text: error.message || "Failed to create task.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
         } finally {
             setIsCreatingTask(false);
         }
@@ -193,7 +282,12 @@ const Digital_Signature_LOD = () => {
     // Function to handle the change of document type (LOD or Final Reminder)
     const ChangeDocumentType = async () => {
         if (!activePopupLODID) {
-            Swal.fire("Error", "Please select a LOD or Final Reminder.", "error");
+            Swal.fire({
+                text: "Error",
+                title: "Please select a LOD or Final Reminder.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
             return;
         }
 
@@ -203,25 +297,43 @@ const Digital_Signature_LOD = () => {
             const intLODID = parseInt(activePopupLODID, 10); // converti and store string type LOD_ID as a int
             const response = await Change_Document_Type(intLODID, activePopupLODStatus, userData, changeReason);
             if (response === "success") {
-                Swal.fire(response, `LOD Type changed successfully!`, "success");
-                setLODData([]); // Clear previous data when LODType changes
-                setMaxCurrentPage(0); // Reset the current page
-                if (currentPage === 1) {
-                    fetchData();
-                } else {
-                    setCurrentPage(1); // Reset to the first page if LODType changes
-                }
-                fetchLODCounts(); // Refresh the counts after changing the document type
+                Swal.fire({
+                    title: response,
+                    text: `LOD Type changed successfully!`,
+                    icon: "success",
+                    confirmButtonColor: "#28a745"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        setLODData([]); // Clear previous data when LODType changes
+                        setMaxCurrentPage(0); // Reset the current page
+                        if (currentPage === 1) {
+                            fetchData();
+                        } else {
+                            setCurrentPage(1); // Reset to the first page if LODType changes
+                        }
+                        fetchLODCounts(); // Refresh the counts after changing the document type
+                    }
+                });
             }
         } catch (error) {
-            Swal.fire("Error", error.message || "Failed to changee the LOD Type.", "error");
+            Swal.fire({
+                title: "Error",
+                text: error.message || "Failed to changee the LOD Type.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
         }
     };
 
     // Function to handle the creation of LOD or Final Reminder list
     const HandleCreateLODList = async () => {
         if (LODCount <= 0) {
-            Swal.fire("Error", "Please enter LOD Count", "error");
+            Swal.fire({
+                title: "Warning",
+                text: "Please enter LOD Count",
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
             return;
         }
 
@@ -230,11 +342,29 @@ const Digital_Signature_LOD = () => {
         try {
             const intLODCount = parseInt(LODCount, 10); // convert string variable into int variable
             const response = await Create_Task_for_Proceed_LOD_OR_Final_Reminder_List(userData, intLODCount, LODType);
-            if (response === "success") {
-                Swal.fire(response, `Task created successfully!`, "success");
+            if (response.status === 200) {
+                Swal.fire({
+                    title: `Task created successfully!`,
+                    text: "Task ID: " + response.data.data.data.Task_Id,
+                    icon: "success",
+                    confirmButtonColor: "#28a745"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (LODType === "LOD") {
+                            navigate("/pages/LOD/LODLog"); // Redirect to task list page
+                        } else if (LODType === "Final Reminder") {
+                            navigate("/pages/LOD/FinalReminderList"); // Redirect to task list page
+                        }
+                    }
+                });
             }
         } catch (error) {
-            Swal.fire("Error", error.message || "Failed to create task.", "error");
+            Swal.fire({
+                title: "Error",
+                text: error.message || "Failed to create task.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
         }
     };
 
@@ -252,7 +382,7 @@ const Digital_Signature_LOD = () => {
     const paginatedData = LODData.slice(startIndex, startIndex + rowsPerPage);
 
     // Handle search bar
-    const filteredData = paginatedData.filter((row) =>
+    const filteredData = LODData.filter((row) =>
         Object.values(row)
             .join(" ")
             .toLowerCase()
@@ -283,7 +413,12 @@ const Digital_Signature_LOD = () => {
     // handle submit button
     const handleSubmitChange = () => {
         if (!changeReason.trim()) {
-            Swal.fire("Error", "Please enter a reason for the change.", "error");
+            Swal.fire({
+                title: "Error",
+                text: "Please enter a reason for the change.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
             return;
         }
 
@@ -304,8 +439,18 @@ const Digital_Signature_LOD = () => {
         if (parseInt(value, 10) <= maxCount) {
             setLODCount(value);
         } else {
-            Swal.fire("Invalid Input", `Value cannot exceed ${maxCount}.`, "warning");
+            Swal.fire({
+                title: "Invalid Input",
+                text: `Value cannot exceed ${maxCount}.`,
+                icon: "warning",
+                confirmButtonColor: "#f1c40f"
+            });
         }
+    }
+
+    // Function to navigate to the case ID page
+    const naviCaseID = (caseId) => {
+        navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
     }
 
     return (
@@ -330,7 +475,7 @@ const Digital_Signature_LOD = () => {
                 </div>
             </div>
 
-            {!LODType && (
+            {["admin", "superadmin", "slt"].includes(userRole) && !LODType && (
                 <div className="flex justify-end mt-6">
                     <button
                         onClick={HandleCreateTaskAllLOD}
@@ -356,8 +501,8 @@ const Digital_Signature_LOD = () => {
                         style={{ color: LODType === "" ? "gray" : "black" }}
                     >
                         <option value="" hidden>LOD Type</option>
-                        <option value="LOD">LOD</option>
-                        <option value="Final Reminder">Final Reminder</option>
+                        <option value="LOD" style={{ color: "black" }}>LOD</option>
+                        <option value="Final Reminder" style={{ color: "black" }}>Final Reminder</option>
                     </select>
                 </div>
             </div>
@@ -368,20 +513,23 @@ const Digital_Signature_LOD = () => {
                         type="text"
                         placeholder=""
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setCurrentPage(1); // Reset to the first page on search
+                            setSearchQuery(e.target.value);
+                        }}
                         className={GlobalStyle.inputSearch}
                     />
                     <FaSearch className={GlobalStyle.searchBarIcon} />
                 </div>
             </div>
 
-            <div className={GlobalStyle.tableContainer}>
+            <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
                             <th className={GlobalStyle.tableHeader}>Case ID</th>
                             {/* <th className={GlobalStyle.tableHeader}>Status</th> */}
-                            <th className={GlobalStyle.tableHeader}>Arrears Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Arrears Amount (LKR)</th>
                             <th className={GlobalStyle.tableHeader}>Customer Type Name</th>
                             <th className={GlobalStyle.tableHeader}>Account Manager Code</th>
                             <th className={GlobalStyle.tableHeader}>Source Type</th>
@@ -390,7 +538,7 @@ const Digital_Signature_LOD = () => {
                     </thead>
                     <tbody>
                         {filteredData.length > 0 ? (
-                            filteredData.map((log, index) => (
+                            filteredData.slice(startIndex, startIndex + rowsPerPage).map((log, index) => (
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
@@ -398,13 +546,14 @@ const Digital_Signature_LOD = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.LODID}</td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log.Amount.toLocaleString("en-LK", {
-                                            style: "currency",
-                                            currency: "LKR",
-                                        })}
+                                    <td
+                                        // className={GlobalStyle.tableData}
+                                        className={`${GlobalStyle.tableData}  text-black hover:underline cursor-pointer`}
+                                        onClick={() => naviCaseID(log.LODID)}
+                                    >
+                                        {log.LODID.toString().padStart(3, '0')}
                                     </td>
+                                    <td className={GlobalStyle.tableCurrency}>{log.Amount}</td>
                                     <td className={GlobalStyle.tableData}>{log.CustomerTypeName}</td>
                                     <td className={GlobalStyle.tableData}>{log.AccountManagerCode}</td>
                                     <td className={GlobalStyle.tableData}>{log.SourceType}</td>
@@ -450,12 +599,14 @@ const Digital_Signature_LOD = () => {
                                     ></textarea>
                                 </div>
                                 <div className="flex justify-end mt-4">
-                                    <button
-                                        onClick={handleSubmitChange}
-                                        className={`${GlobalStyle.buttonPrimary} mr-4`}
-                                    >
-                                        Change
-                                    </button>
+                                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                                        <button
+                                            onClick={handleSubmitChange}
+                                            className={`${GlobalStyle.buttonPrimary} mr-4`}
+                                        >
+                                            Change
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -463,15 +614,22 @@ const Digital_Signature_LOD = () => {
                 )}
             </div>
 
-            {LODType && (
+            {LODType && filteredData.length > 0 && (
                 <div className={GlobalStyle.navButtonContainer}>
                     <button className={GlobalStyle.navButton} onClick={handlePrevPage} disabled={currentPage === 1}>
                         <FaArrowLeft />
                     </button>
                     <span className="text-gray-700">
-                        Page {currentPage} of {maxTablePages}
+                        Page {currentPage} of {searchQuery
+                            ? Math.ceil(filteredData.length / rowsPerPage)
+                            : maxTablePages}
                     </span>
-                    <button className={GlobalStyle.navButton} onClick={handleNextPage} disabled={currentPage === maxTablePages}>
+                    <button
+                        className={GlobalStyle.navButton}
+                        onClick={handleNextPage}
+                        disabled={searchQuery
+                            ? currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+                            : currentPage >= maxTablePages}>
                         <FaArrowRight />
                     </button>
                 </div>
@@ -479,31 +637,34 @@ const Digital_Signature_LOD = () => {
 
             {LODType && (
                 <div className="flex justify-between mt-6 space-x-4">
-                    <button
-                        onClick={HandleCreateTaskEachLOD}
-                        className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
-                        // className={GlobalStyle.buttonPrimary}
-                        disabled={isCreatingTask}
-                        style={{ display: 'flex', alignItems: 'center' }}
-                    >
-                        {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
-                        {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-                        {/* Create task and let me know */}
-                    </button>
+                    {["admin", "superadmin", "slt"].includes(userRole) && (
+                        <button
+                            onClick={HandleCreateTaskEachLOD}
+                            className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
+                            // className={GlobalStyle.buttonPrimary}
+                            disabled={isCreatingTask}
+                            style={{ display: 'flex', alignItems: 'center' }}
+                        >
+                            {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
+                            {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
+                            {/* Create task and let me know */}
+                        </button>
+                    )}
                     <div className="flex justify-end gap-4">
                         <input
-                            type="text"
-                            placeholder="Text here"
+                            type="number"
                             className={GlobalStyle.inputText}
                             value={LODCount}
                             onChange={(e) => handleInputCount(e.target.value)}
                         />
-                        <button
-                            className={GlobalStyle.buttonPrimary}
-                            onClick={HandleCreateLODList}
-                        >
-                            {LODType === "LOD" ? "Create LOD List" : "Create Final Reminder List"}
-                        </button>
+                        {["admin", "superadmin", "slt"].includes(userRole) && (
+                            <button
+                                className={GlobalStyle.buttonPrimary}
+                                onClick={HandleCreateLODList}
+                            >
+                                {LODType === "LOD" ? "Create LOD List" : "Create Final Reminder List"}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

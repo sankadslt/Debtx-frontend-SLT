@@ -34,7 +34,7 @@ const RecoveryOfficerRequests = () => {
   const [error, setError] = useState("");
   const [requestType, setRequestType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [approved, setApproved] = useState("");
   const [requestsData, setRequestsData] = useState([]);
   const [count, setcount] = useState(0);
@@ -42,9 +42,17 @@ const RecoveryOfficerRequests = () => {
   const [drcNames, setDrcNames] = useState([]);
   const [selectedBand, setSelectedBand] = useState("");
   const [firstRequestCount, setFirstRequestCount] = useState(0);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
+  const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const navigate = useNavigate();
-  const rowsPerPage = 7;
+  const rowsPerPage = 10;
   console.log("Selected DRC:", selectedBand);
+  const [committedFilters, setCommittedFilters] = useState({
+    requestType: "",
+    fromDate: null,
+    toDate: null,
+    selectedBand: "",
+  })
 
   // useEffect(() => {
   //   const fetchcases = async () => {
@@ -308,7 +316,9 @@ const RecoveryOfficerRequests = () => {
     delegate_user_id,
     Interaction_Log_ID,
     Interaction_ID,
-    drc_id
+    drc_id,
+    ro_id,
+    case_current_phase
   ) => {
     console.log("case_id", case_id);
     console.log("User_Interaction_Type", User_Interaction_Type);
@@ -316,6 +326,8 @@ const RecoveryOfficerRequests = () => {
     console.log("Interaction_Log_ID", Interaction_Log_ID);
     console.log("Interaction_ID", Interaction_ID);
     console.log("drc_id", drc_id);
+    console.log("ro_id", ro_id);
+    console.log("case_current_phase", case_current_phase);
     if (User_Interaction_Type === "Mediation Board Settlement plan Request" || User_Interaction_Type === "Negotiation Settlement plan Request") {
       navigate("/pages/CreateSettlement/CreateSettlementPlan", {
         state: {
@@ -323,9 +335,11 @@ const RecoveryOfficerRequests = () => {
           User_Interaction_TYPE: User_Interaction_Type,
           Delegate_User_id: delegate_user_id,
           INteraction_Log_ID: Interaction_Log_ID,
+          INteraction_ID: Interaction_ID,
           PlanType: "Type A",
           DRC: drc_id,
-
+          RO_ID: ro_id,
+          Case_Current_Phase: case_current_phase,
         },
       });
     } else {
@@ -340,8 +354,8 @@ const RecoveryOfficerRequests = () => {
       });
     }
   };
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIndex = currentPage * rowsPerPage;
+  // const pages = Math.ceil(filteredData.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
@@ -353,38 +367,171 @@ const RecoveryOfficerRequests = () => {
   };
 
   const handleNextPage = () => {
-    if (currentPage < pages - 1) {
-      setCurrentPage(currentPage + 1);
+    setCurrentPage(currentPage + 1);
+  };
+
+  const filterValidations = () => {
+    // if (!fromDate || !toDate) {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Warning",
+    //     text: "Please select both From Date and To Date.",
+    //     confirmButtonColor: "#f1c40f",
+    //   });
+    //   return false;
+    // }
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+      Swal.fire({
+        title: "Warning",
+        text: "Both From Date and To Date must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f"
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+
+    if (fromDate > toDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "From Date cannot be later than To Date.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return false;
+    }
+
+    if (!requestType && !selectedBand && !fromDate && !toDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Please select at least one filter option.",
+        confirmButtonColor: "#f1c40f",
+      });
+      return false;
+    }
+
+    return true;
+  }
+
+  console.log("Request Data", requestsData);
+
+  const callAPI = async (filters) => {
+    try {
+      const userId = await getLoggedUserId();
+      console.log("User ID:", userId);
+
+      const payload = {
+        delegate_user_id: userId,
+        User_Interaction_Type: filters.requestType,
+        // "Request Accept": approved,
+        date_from: filters.fromDate,
+        drc_id: filters.selectedBand,
+        date_to: filters.toDate,
+        pages: filters.currentPage,
+      };
+
+      console.log("Filter payload:", payload);
+      const response = await ListAllRequestLogFromRecoveryOfficers(payload);
+
+      // const data = Array.isArray(response.data.data) ? response.data.data : [];
+      console.log("the response given by the api", response.data.data);
+
+      if (response) {
+        if (response.status === 200 && response.data && Array.isArray(response.data.data)) {
+          if (currentPage === 1) {
+            setRequestsData(response.data.data);
+            setcount(response.data.count);
+          } else {
+            setRequestsData((prevData) => [...prevData, ...response.data.data]);
+          }
+        }
+
+        if (response.status === 204) {
+          setIsMoreDataAvailable(false); // No more data available
+          if (currentPage === 1) {
+            Swal.fire({
+              title: "No Results",
+              text: "No matching data found.",
+              icon: "warning",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              confirmButtonColor: "#f1c40f"
+            });
+            setRequestsData([]); // Clear data if no results found
+            setcount(0); // Reset count
+          } else if (currentPage === 2) {
+            setCurrentPage(1); // Reset to page 1 if no data found on page 2
+          }
+        } else {
+          const maxData = currentPage === 1 ? 10 : 30;
+          if (response.data.data.length < maxData) {
+            setIsMoreDataAvailable(false); // More data available
+          }
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid request data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+        setRequestsData([]);
+      }
+
+      // setcount(response.count);
+      // console.log("the count of the  response:", response.data.count);
+      // setRequestsData(data);
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error",
+        text: "No valid request data found in response.",
+        icon: "error",
+        confirmButtonColor: "#d33"
+      });
+      setRequestsData([]);
     }
   };
 
-  const onfilterbuttonclick = () => {
-    const fetchcases = async () => {
-      try {
-        const userId = await getLoggedUserId();
-        console.log("User ID:", userId);
-        const payload = {
-          delegate_user_id: userId,
-          User_Interaction_Type: requestType,
-          // "Request Accept": approved,
-          date_from: fromDate,
-          drc_id: selectedBand,
-          date_to: toDate,
-        };
-        console.log("Filter payload:", payload);
-        const response = await ListAllRequestLogFromRecoveryOfficers(payload);
+  useEffect(() => {
+    console.log("Current Page effect triggered:", currentPage);
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
+      setMaxCurrentPage(currentPage); // Update max current page
+      // callAPI(); // Call the function whenever currentPage changes
+      callAPI({
+        ...committedFilters,
+        currentPage: currentPage
+      });
+    }
+  }, [currentPage]);
 
-        const data = Array.isArray(response.data) ? response.data : [];
-        console.log("the response given by the api", data);
-        setcount(response.count);
-        console.log("the count of the  response:", response.count);
-        setRequestsData(data);
-      } catch (error) {
-        console.error(error);
-        setRequestsData([]);
+  const onfilterbuttonclick = () => {
+    setIsMoreDataAvailable(true);
+    setMaxCurrentPage(0);
+    if (filterValidations()) {
+      setCommittedFilters({
+        requestType,
+        fromDate,
+        toDate,
+        selectedBand,
+      });
+      setRequestsData([]);
+      if (currentPage === 1) {
+        callAPI({
+          requestType,
+          fromDate,
+          toDate,
+          selectedBand,
+          currentPage: 1,
+        });
+      } else {
+        setCurrentPage(1); // Reset to page 1 if filters are applied
       }
-    };
-    fetchcases();
+    }
   };
 
   const handleclearbutton = () => {
@@ -396,7 +543,20 @@ const RecoveryOfficerRequests = () => {
     setRequestsData([]);
     setSearchQuery("");
     setcount(0);
-
+    setIsMoreDataAvailable(true);
+    setMaxCurrentPage(0);
+    setCommittedFilters({
+      requestType: "",
+      fromDate: null,
+      toDate: null,
+      selectedBand: "",
+    });
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    }
   }
 
 
@@ -454,11 +614,11 @@ const RecoveryOfficerRequests = () => {
       </div>
       {/* Filter Section */}
 
-        <div className=" flex justify-end">
-          <div className={`${GlobalStyle.cardContainer} w-full flex  flex-wrap justify-end gap-5 items-center mb-8 mt-8`}>
-            <div className="flex items-center gap-2">
-              {/* <span className={GlobalStyle.headingMedium}>Request Type:</span> */}
-              <select 
+      <div className=" flex justify-end">
+        <div className={`${GlobalStyle.cardContainer} w-full flex  flex-wrap justify-end gap-5 items-center mb-8 mt-8`}>
+          <div className="flex items-center gap-2">
+            {/* <span className={GlobalStyle.headingMedium}>Request Type:</span> */}
+            <select
               className={`${GlobalStyle.selectBox}  w-35 md:w-40`}
 
               style={{ color: selectedBand === "" ? "gray" : "black" }}
@@ -488,7 +648,7 @@ const RecoveryOfficerRequests = () => {
             <select
               value={requestType}
               onChange={(e) => setRequestType(e.target.value)}
-               className={`${GlobalStyle.selectBox}   `}
+              className={`${GlobalStyle.selectBox}   `}
               style={{ color: requestType === "" ? "gray" : "black" }}
             >
               <option value="" hidden>
@@ -541,35 +701,35 @@ const RecoveryOfficerRequests = () => {
             </div> */}
 
 
-            {/* <div className={GlobalStyle.datePickerContainer}> */}
-              <span className={GlobalStyle.dataPickerDate}>Date :</span>
-              <DatePicker
-                selected={fromDate}
-                onChange={handleFromDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="From"
-                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-              />
-              <DatePicker
-                selected={toDate}
-                onChange={handleToDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="To"
-                 className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-              />
-            {/* </div> */}
-            {error && <span className={GlobalStyle.errorText}>{error}</span>}
-            <button
-              className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
-              onClick={onfilterbuttonclick} // Reset to first page when filter is applied
-            >
-              Filter
-            </button>
-            <button  className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}  onClick={handleclearbutton} >
-                        Clear 
-                    </button>
+          {/* <div className={GlobalStyle.datePickerContainer}> */}
+          <span className={GlobalStyle.dataPickerDate}>Date :</span>
+          <DatePicker
+            selected={fromDate}
+            onChange={handleFromDateChange}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="From"
+            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+          />
+          <DatePicker
+            selected={toDate}
+            onChange={handleToDateChange}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="To"
+            className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+          />
+          {/* </div> */}
+          {error && <span className={GlobalStyle.errorText}>{error}</span>}
+          <button
+            className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+            onClick={onfilterbuttonclick} // Reset to first page when filter is applied
+          >
+            Filter
+          </button>
+          <button className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`} onClick={handleclearbutton} >
+            Clear
+          </button>
 
-         
+
         </div>
       </div>
 
@@ -582,7 +742,11 @@ const RecoveryOfficerRequests = () => {
               type="text"
               placeholder=""
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setCurrentPage(1); // Reset to first page when search query changes
+                setSearchQuery(e.target.value)
+              }
+              }
               className={GlobalStyle.inputSearch}
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
@@ -591,8 +755,8 @@ const RecoveryOfficerRequests = () => {
 
         {/* Table Section */}
 
-        
-         <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
+
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
 
           <table className={GlobalStyle.table}>
             <thead className={GlobalStyle.thead}>
@@ -706,7 +870,9 @@ const RecoveryOfficerRequests = () => {
                           row.delegate_user_id,
                           row.Interaction_Log_ID,
                           row.Interaction_ID,
-                          row.drc_id
+                          row.drc_id,
+                          row.ro_id,
+                          row.case_current_phase
                         )
                       }
                     >
@@ -728,22 +894,31 @@ const RecoveryOfficerRequests = () => {
       </div>
 
       {/* Navigation Buttons */}
-      {filteredData.length > rowsPerPage && (
+      {filteredData.length > 0 && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
-            className={GlobalStyle.navButton}
+            className={`${GlobalStyle.navButton} ${currentPage === 1 ? "cursor-not-allowed" : ""}`}
             onClick={handlePrevPage}
-            disabled={currentPage === 0}
+            disabled={currentPage === 1}
           >
             <FaArrowLeft />
           </button>
           <span>
-            Page {currentPage + 1} of {pages}
+            Page {currentPage}
           </span>
           <button
-            className={GlobalStyle.navButton}
             onClick={handleNextPage}
-            disabled={currentPage === pages - 1}
+            disabled={
+              searchQuery
+                ? currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+                : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage
+                )}
+            className={`${GlobalStyle.navButton} ${(searchQuery
+              ? currentPage >= Math.ceil(filteredData.length / rowsPerPage)
+              : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+              ? "cursor-not-allowed"
+              : ""
+              }`}
           >
             <FaArrowRight />
           </button>

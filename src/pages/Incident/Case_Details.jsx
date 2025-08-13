@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchCaseDetails } from '../../services/case/CaseServices.js';
+import { fetchCaseDetails ,Create_Task_For_Download_Case_Details} from '../../services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-
+import { getLoggedUserId } from "../../services/auth/authService";
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService";
 
 const CaseDetails = () => {
     const [caseData, setCaseData] = useState(null);
@@ -12,21 +14,44 @@ const CaseDetails = () => {
     const [error, setError] = useState(null);
     const [openSections, setOpenSections] = useState({});
     const [currentIndices, setCurrentIndices] = useState({});
-    const location = useLocation();
+    const location = useLocation();  
     const navigate = useNavigate();
+    const [isCreatingTask, setIsCreatingTask] = useState(false);
 
-    const caseId = location.state?.CaseID || null; // Get caseId from state or URL params
+    const caseId = location.state?.CaseID ;
+
+
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+    
+        try {
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
+    
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+        }
+      }, []);
+
 
     useEffect(() => {
         const loadCaseDetails = async () => {
             try {
-                // const token = localStorage.getItem("accessToken");
                 const response = await fetchCaseDetails(caseId);
 
                 if (response.success) {
                     setCaseData(response.data);
                 } else {
-                    // setError(response.message || 'Failed to load case details');
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -36,7 +61,6 @@ const CaseDetails = () => {
                     });
                 }
             } catch (err) {
-                // setError(err.message || 'An error occurred while fetching case details');
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -89,23 +113,29 @@ const CaseDetails = () => {
 
     const getSectionData = (sectionKey) => {
         const sectionMap = {
-
             'drc': caseData?.drcInfo,
-            'roNegotiateArrears': caseData?.roNegotiations,
+            'roNegotiations': caseData?.roNegotiations,
             'roCpeCollections': caseData?.roCpeCollections,
-            'roNegotiateCPE': caseData?.ro_negotiatepecollections,
-            'roCustomerUpdated': caseData?.roCustomerUpdates,
+            'roCustomerUpdates': caseData?.roCustomerUpdates,
             'mediationBoard': caseData?.mediationBoard,
-            'settlement': caseData?.settlements,
-            'payment': caseData?.payments,
-            'lod': caseData?.lod,
-            'abnormal_stop': caseData?.abnormal_stop
+            'settlements': caseData?.settlements,
+            'payments': caseData?.payments,
+            'ftlLod': caseData?.ftlLodLetterDetails,
+            'abnormalStop': caseData?.abnormal_stop,
+            'remark': caseData?.remark,
+            'approve': caseData?.approve,
+            'caseStatus': caseData?.caseStatus,
+            'refProducts': caseData?.refProducts,
+            'roRequests': caseData?.roRequests,
+            'litigation': caseData?.litigationInfo,
+            'lodFinalReminder': caseData?.lodFinalReminder
         };
+        
         return sectionMap[sectionKey];
     };
 
     const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
+        if (!dateString) return '';
         try {
             return new Date(dateString).toLocaleDateString("en-GB") || "";
         } catch {
@@ -127,10 +157,10 @@ const CaseDetails = () => {
                             <div className="space-y-2">
                                 {[
                                     { label: 'ro_id', value: officer.ro_id },
-                                    { label: 'Assigned By', value: officer.assigned_by || 'N/A' },
+                                    { label: 'Assigned By', value: officer.assigned_by || '' },
                                     { label: 'Assigned Date', value: formatDate(officer.assigned_dtm) },
                                     { label: 'Removed Date', value: formatDate(officer.removed_dtm) },
-                                    { label: 'Removal Remark', value: officer.case_removal_remark || 'N/A' }
+                                    { label: 'Removal Remark', value: officer.case_removal_remark || '' }
                                 ].map((item, i) => (
                                     <div key={`officer-detail-${i}`} className="flex justify-between">
                                         <span className="text-sm text-gray-600">{item.label}:</span>
@@ -151,7 +181,6 @@ const CaseDetails = () => {
         if (title === "DRC" && data.recoveryOfficers) {
             return (
                 <div className="space-y-6">
-
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {Object.entries(data)
@@ -165,7 +194,7 @@ const CaseDetails = () => {
                                             {key.includes('date') || key.includes('dtm')
                                                 ? formatDate(value)
                                                 : (value === null || value === undefined
-                                                    ? 'N/A'
+                                                    ? ''
                                                     : value.toString())}
                                         </div>
                                     </div>
@@ -181,7 +210,175 @@ const CaseDetails = () => {
             );
         }
 
+        // Special handling for FTL LOD data
+        if (title === "FTL LOD") {
+            return (
+                <div className="space-y-6">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {Object.entries(data)
+                                .filter(([key]) => !['ftlLodLetterDetails', 'relatedDocuments'].includes(key))
+                                .map(([key, value]) => (
+                                    <div key={key} className="flex flex-col space-y-1">
+                                        <label className="text-sm font-medium text-gray-600">
+                                            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                        </label>
+                                        <div className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                            {key.includes('date') || key.includes('dtm')
+                                                ? formatDate(value)
+                                                : (value === null || value === undefined
+                                                    ? ''
+                                                    : value.toString())}
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
 
+                    {data.ftlLodLetterDetails && data.ftlLodLetterDetails.length > 0 && (
+                        <div className="mt-4">
+                            <h3 className="text-sm font-medium text-gray-600 mb-3">LOD Letter Details</h3>
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                {data.ftlLodLetterDetails.map((detail, index) => (
+                                    <div key={`lod-detail-${index}`} className="mb-4 last:mb-0">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {Object.entries(detail).map(([key, value]) => (
+                                                <div key={key} className="flex flex-col space-y-1">
+                                                    <label className="text-sm font-medium text-gray-600">
+                                                        {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                                    </label>
+                                                    <div className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                                        {key.includes('date') || key.includes('dtm')
+                                                            ? formatDate(value)
+                                                            : (value === null || value === undefined
+                                                                ? ''
+                                                                : value.toString())}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {data.relatedDocuments && data.relatedDocuments.length > 0 && (
+                        <div className="mt-4">
+                            <h3 className="text-sm font-medium text-gray-600 mb-3">Customer Responses</h3>
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                {data.relatedDocuments.map((response, index) => (
+                                    <div key={`response-${index}`} className="mb-4 last:mb-0">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {Object.entries(response).map(([key, value]) => (
+                                                <div key={key} className="flex flex-col space-y-1">
+                                                    <label className="text-sm font-medium text-gray-600">
+                                                        {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                                    </label>
+                                                    <div className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                                        {key.includes('date') || key.includes('dtm')
+                                                            ? formatDate(value)
+                                                            : (value === null || value === undefined
+                                                                ? ''
+                                                                : value.toString())}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Special handling for Litigation data
+        if (title === "Litigation Information") {
+            return (
+                <div className="space-y-6">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {Object.entries(data)
+                                .filter(([key]) => !['supportDocuments', 'hsFilesInformation', 'legalSubmission', 'legalDetails'].includes(key))
+                                .map(([key, value]) => (
+                                    <div key={key} className="flex flex-col space-y-1">
+                                        <label className="text-sm font-medium text-gray-600">
+                                            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                        </label>
+                                        <div className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                            {key.includes('date') || key.includes('dtm')
+                                                ? formatDate(value)
+                                                : (value === null || value === undefined
+                                                    ? ''
+                                                    : value.toString())}
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+
+                    {data.supportDocuments && data.supportDocuments.length > 0 && (
+                        <div className="mt-4">
+                            <h3 className="text-sm font-medium text-gray-600 mb-3">Support Documents</h3>
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                {data.supportDocuments.map((doc, index) => (
+                                    <div key={`support-doc-${index}`} className="mb-4 last:mb-0">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {Object.entries(doc).map(([key, value]) => (
+                                                <div key={key} className="flex flex-col space-y-1">
+                                                    <label className="text-sm font-medium text-gray-600">
+                                                        {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                                    </label>
+                                                    <div className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                                        {key.includes('date') || key.includes('dtm')
+                                                            ? formatDate(value)
+                                                            : (value === null || value === undefined
+                                                                ? ''
+                                                                : value.toString())}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {data.hsFilesInformation && data.hsFilesInformation.length > 0 && (
+                        <div className="mt-4">
+                            <h3 className="text-sm font-medium text-gray-600 mb-3">HS Files Information</h3>
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                {data.hsFilesInformation.map((file, index) => (
+                                    <div key={`hs-file-${index}`} className="mb-4 last:mb-0">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {Object.entries(file).map(([key, value]) => (
+                                                <div key={key} className="flex flex-col space-y-1">
+                                                    <label className="text-sm font-medium text-gray-600">
+                                                        {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                                    </label>
+                                                    <div className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                                        {key.includes('date') || key.includes('dtm')
+                                                            ? formatDate(value)
+                                                            : (value === null || value === undefined
+                                                                ? ''
+                                                                : value.toString())}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Default card rendering
         return (
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,7 +391,7 @@ const CaseDetails = () => {
                                 {key.includes('date') || key.includes('dtm')
                                     ? formatDate(value)
                                     : (value === null || value === undefined
-                                        ? 'N/A'
+                                        ? ''
                                         : value.toString())}
                             </div>
                         </div>
@@ -204,60 +401,56 @@ const CaseDetails = () => {
         );
     };
 
-    const renderReferenceDataCard = (data, currentIndex) => {
-        if (!data) return <p className="text-gray-500">No data available</p>;
-
-        const sections = [];
-        if (data.products?.length > 0) sections.push({ title: 'Products', data: data.products });
-        if (data.contacts?.length > 0) sections.push({ title: 'Contacts', data: data.contacts });
-
-        if (sections.length === 0) return <p className="text-gray-500">No data available</p>;
-
-        const currentSection = sections[currentIndex % sections.length];
-        const currentItem = currentSection.data[Math.floor(currentIndex / sections.length)] || currentSection.data[0];
-
-        return (
-            <div className="space-y-4">
-                <h4 className="text-lg font-medium text-gray-800">{currentSection.title}</h4>
-                {renderCard(currentItem, currentSection.title)}
-            </div>
-        );
-    };
-
     const renderBasicInfoCard = (basicInfo) => {
         if (!basicInfo) return null;
 
         const infoFields = [
+             [
+                { label: 'Account No', value: basicInfo.accountNo || '' },
+                { label: 'Customer Ref', value: basicInfo.customerRef || '' },
+                { label: 'Incident ID', value: basicInfo.incidentId || '' },
+ 
+                { label: 'Customer Name', value: basicInfo.customerName || '' },
+                { label: 'Customer Type', value: basicInfo.customerType || '' },
+                { label: 'Arrears Band', value: basicInfo.arrearsBand || '' },
+                 
+                
+              ],
+              
+               [
+                { label: 'Rtom', value: basicInfo.rtom || '' },
+                { label: 'Arrears Amount', value: basicInfo.arrearsAmount || '' },
+                { label: 'Action Type', value: basicInfo.actionType || '' },
+                { label: 'Area', value: basicInfo.area || '' },
+                { label: 'Implemented Dtm', value: formatDate(basicInfo.implementedDtm) },
+                { label: 'Account Manager Code', value: basicInfo.accountManagerCode || '' },
+                
+               
+              ],
             [
-                { label: 'Account No', value: basicInfo.accountNo || basicInfo.account_no || 'N/A' },
-                { label: 'Customer Ref', value: basicInfo.customerRef || basicInfo.customer_ref || 'N/A' },
-                { label: 'Area', value: basicInfo.area || 'N/A' }
-            ],
-            [
-                { label: 'Rtom', value: basicInfo.rtom || 'N/A' },
-                { label: 'Arrears Amount', value: basicInfo.arrearsAmount || basicInfo.arrears_amount || 'N/A' },
-                { label: 'Action Type', value: basicInfo.actionType || basicInfo.action_type || 'N/A' }
-            ],
-            [
-                { label: 'Current Status', value: basicInfo.currentStatus || basicInfo.current_status || 'N/A' },
-                {
-                    label: 'Last Payment Date',
-                    value: basicInfo.lastPaymentDate ? formatDate(basicInfo.lastPaymentDate) :
-                        basicInfo.last_payment_date ? formatDate(basicInfo.last_payment_date) : 'N/A'
-                },
-                {
-                    label: 'Last BSS Reading Date',
-                    value: basicInfo.lastBssReadingDate ? formatDate(basicInfo.lastBssReadingDate) :
-                        basicInfo.last_bss_reading_date ? formatDate(basicInfo.last_bss_reading_date) : 'N/A'
-                }
-            ]
+              { label: 'DRC Commission Rule', value: basicInfo.drcCommissionRule || '' },
+              { label: 'Monitor Months', value: basicInfo.monitorMonths || '' },
+              { label: 'Commission', value: caseData.basicInfo.commission || '' },
+              { label: 'Case Distribution Batch ID', value: caseData.basicInfo.caseDistributionBatchId || '' },
+              { label: 'Filtered Reason', value: caseData.basicInfo.filteredReason || '' },
+              { label: 'BSS Arrears Amount', value: caseData.basicInfo.bssArrearsAmount || '' },
+               ],
+              [
+                { label: 'Current Status', value: caseData.caseInfo.currentStatus || '' },
+                { label: 'Last Payment Date', value: formatDate(caseData.basicInfo.lastPaymentDate) },
+                { label: 'Last BSS Reading Date', value: formatDate(caseData.basicInfo.lastBssReadingDate) },
+                { label: 'Remark', value: caseData.basicInfo.remark || '' },
+                { label: 'Region', value: basicInfo.region || '' },
+                
+              ],
+              
         ];
 
-        return (
+                return (
             // <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-gray-200">
             <div className={`${GlobalStyle.cardContainer}p-6 mb-8`}>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                     {infoFields.map((column, colIndex) => (
                         <div key={`col-${colIndex}`} className="space-y-4">
                             {column.map((field, fieldIndex) => (
@@ -288,13 +481,7 @@ const CaseDetails = () => {
         const isOpen = openSections[sectionKey];
         const currentIndex = currentIndices[sectionKey] || 0;
         const sectionData = getSectionData(sectionKey);
-
-        let totalItems = 0;
-        if (sectionKey === 'referenceData' && sectionData) {
-            totalItems = (sectionData.products?.length || 0) + (sectionData.contacts?.length || 0);
-        } else if (Array.isArray(sectionData)) {
-            totalItems = sectionData.length;
-        }
+        const totalItems = Array.isArray(sectionData) ? sectionData.length : 0;
 
         return (
             <div className="mb-2">
@@ -343,9 +530,35 @@ const CaseDetails = () => {
         navigate(-1);
     };
 
-    const handleDownloadClick = () => {
+    const handleDownloadClick = async () => {
 
-    };
+         const userData = await getLoggedUserId(); 
+         setIsCreatingTask(true);
+
+         try {
+            const response = await Create_Task_For_Download_Case_Details(userData);
+            if(response==="success"){
+                Swal.fire({
+                    title:response,
+                    text:'Task created successfully!',
+                    icon:"success",
+                    confirmButtonColor:"#28a745"
+                });
+            }
+        } catch(error){
+            Swal.fire({
+                title:"Error",
+                text:error.message || "Failed to create task.",
+                icon:"error",
+                confirmButtonColor:"#d33"
+            });
+        
+        }finally{
+            setIsCreatingTask(false)
+        }
+            };
+        
+    
 
     if (loading) {
         return (
@@ -355,21 +568,13 @@ const CaseDetails = () => {
         );
     }
 
-    // if (error) {
-    //     return (
-    //         <div className="font-sans p-6 bg-gray-50 min-h-screen flex items-center justify-center">
-    //             <div className="text-red-600">Error: {error}</div>
-    //         </div>
-    //     );
-    // }
-
-    // if (!caseData) {
-    //     return (
-    //         <div className="font-sans p-6 bg-gray-50 min-h-screen flex items-center justify-center">
-    //             <div className="text-gray-600">No case data found</div>
-    //         </div>
-    //     );
-    // }
+    if (!caseData) {
+        return (
+            <div className="font-sans p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+                <div className="text-gray-600">No case data found</div>
+            </div>
+        );
+    }
 
     return (
         <div className="font-sans p-6 min-h-screen relative">
@@ -378,33 +583,47 @@ const CaseDetails = () => {
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Case Details</h1>
 
                     <div className="bg-white rounded-lg shadow-md p-6 min-w-64">
-                        <div className="space-y-2">
-                            {[
-                                { label: 'Case ID', value: caseData.caseInfo.caseId },
-                                { label: 'Created dtm', value: new Date(caseData.caseInfo.createdDtm).toLocaleDateString("en-GB") },
-                                { label: 'Days count', value: caseData.caseInfo.daysCount }
-                            ].map((item, index) => (
-                                <div key={`case-info-${index}`} className="flex justify-between">
-                                    <span className="text-sm text-gray-600">{item.label}:</span>
-                                    <span className={`text-sm ${index === 0 ? 'font-bold' : ''} text-gray-900`}>
-                                        {item.value}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+  <div className="grid grid-cols-2 gap-x-8">
+    {/* Left column: first 4 items */}
+    <div className="space-y-2">
+      {[
+        { label: 'Case ID', value: caseData.caseInfo.caseId },
+        { label: 'Created dtm', value: formatDate(caseData.caseInfo.createdDtm) },
+        { label: 'Days count', value: caseData.caseInfo.daysCount },
+        { label: 'Current Arrears Band', value: caseData.caseInfo.currentArrearsBand },
+      ].map((item, index) => (
+        <div key={`left-case-info-${index}`} className="flex justify-between">
+          <span className="text-sm text-gray-600">{item.label}:</span>
+          <span className={`text-sm ${index === 0 ? 'font-bold' : ''} text-gray-900`}>
+            {item.value}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    {/* Right column: remaining items */}
+    <div className="space-y-2">
+      {[
+        { label: 'Proceed DTM', value: formatDate(caseData.caseInfo.proceedDtm) },
+        { label: 'Proceed By', value: caseData.caseInfo.ProceedBy },
+        { label: 'Current Status', value: caseData.caseInfo.currentStatus },
+        { label: 'Current Phase', value: caseData.caseInfo.caseCurrentPhase },
+      ].map((item, index) => (
+        <div key={`right-case-info-${index}`} className="flex justify-between">
+          <span className="text-sm text-gray-600">{item.label}:</span>
+          <span className="text-sm text-gray-900">{item.value}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
                 </div>
             </div>
 
             {renderBasicInfoCard(caseData.basicInfo)}
 
             <div className="space-y-2 mb-8">
-                {caseData.referenceData && (
-                    <CollapsibleSection title="Reference Data" sectionKey="referenceData">
-                        {renderReferenceDataCard(caseData.referenceData, currentIndices['referenceData'] || 0, "Reference Data")}
-                    </CollapsibleSection>
-                )}
-
                 {caseData.drcInfo && (
                     <CollapsibleSection title="DRC" sectionKey="drc">
                         {renderCard(caseData.drcInfo[currentIndices['drc'] || 0], "DRC")}
@@ -412,26 +631,20 @@ const CaseDetails = () => {
                 )}
 
                 {caseData.roNegotiations && (
-                    <CollapsibleSection title="RO - Negotiate | Arrears" sectionKey="roNegotiateArrears">
-                        {renderCard(caseData.roNegotiations[currentIndices['roNegotiateArrears'] || 0], "RO Negotiations")}
+                    <CollapsibleSection title="RO Negotiations" sectionKey="roNegotiations">
+                        {renderCard(caseData.roNegotiations[currentIndices['roNegotiations'] || 0], "RO Negotiations")}
                     </CollapsibleSection>
                 )}
 
                 {caseData.roCpeCollections && (
-                    <CollapsibleSection title="RO - CPE Collections" sectionKey="roCpeCollections">
+                    <CollapsibleSection title="RO CPE Collections" sectionKey="roCpeCollections">
                         {renderCard(caseData.roCpeCollections[currentIndices['roCpeCollections'] || 0], "RO CPE Collections")}
                     </CollapsibleSection>
                 )}
 
-                {caseData.ro_negotiatepecollections && (
-                    <CollapsibleSection title="RO - Negotiate & CPE Collections" sectionKey="roNegotiateCPE">
-                        {renderCard(caseData.ro_negotiatepecollections[currentIndices['roNegotiateCPE'] || 0], "RO Negotiate CPE")}
-                    </CollapsibleSection>
-                )}
-
                 {caseData.roCustomerUpdates && (
-                    <CollapsibleSection title="RO - Customer Updated data" sectionKey="roCustomerUpdated">
-                        {renderCard(caseData.roCustomerUpdates[currentIndices['roCustomerUpdated'] || 0], "RO Customer Updates")}
+                    <CollapsibleSection title="Ro Edited Customer Details" sectionKey="roCustomerUpdates">
+                        {renderCard(caseData.roCustomerUpdates[currentIndices['roCustomerUpdates'] || 0], "Ro Edited Customer Details")}
                     </CollapsibleSection>
                 )}
 
@@ -442,28 +655,68 @@ const CaseDetails = () => {
                 )}
 
                 {caseData.settlements && (
-                    <CollapsibleSection title="Settlement" sectionKey="settlement">
-                        {renderCard(caseData.settlements[currentIndices['settlement'] || 0], "Settlement")}
-                    </CollapsibleSection>
-                )}
-
-                {caseData.abnormal_stop && (
-                    <CollapsibleSection title="Abnormal Stop" sectionKey="abnormal_stop">
-                        {renderCard(caseData.abnormal_stop[currentIndices['abnormal_stop'] || 0], "Abnormal Stop")}
+                    <CollapsibleSection title="Settlements" sectionKey="settlements">
+                        {renderCard(caseData.settlements[currentIndices['settlements'] || 0], "Settlements")}
                     </CollapsibleSection>
                 )}
 
                 {caseData.payments && (
-                    <CollapsibleSection title="Payment" sectionKey="payment">
-                        {renderCard(caseData.payments[currentIndices['payment'] || 0], "Payment")}
+                    <CollapsibleSection title="Money Transactions" sectionKey="payments">
+                        {renderCard(caseData.payments[currentIndices['payments'] || 0], "Payments")}
                     </CollapsibleSection>
                 )}
 
+                {caseData.ftlLodLetterDetails && (
+                    <CollapsibleSection title="FTL LOD" sectionKey="ftlLod">
+                        {renderCard(caseData.ftlLodLetterDetails[currentIndices['ftlLod'] || 0], "FTL LOD")}
+                    </CollapsibleSection>
+                )}
 
+                {caseData.abnormal_stop && (
+                    <CollapsibleSection title="Abnormal Stop" sectionKey="abnormalStop">
+                        {renderCard(caseData.abnormal_stop[currentIndices['abnormalStop'] || 0], "Abnormal Stop")}
+                    </CollapsibleSection>
+                )}
 
-                {caseData.lod && (
-                    <CollapsibleSection title="LOD" sectionKey="lod">
-                        {renderCard(caseData.lod[currentIndices['lod'] || 0], "LOD")}
+                {caseData.remark && (
+                    <CollapsibleSection title="Remarks" sectionKey="remark">
+                        {renderCard(caseData.remark[currentIndices['remark'] || 0], "Remarks")}
+                    </CollapsibleSection>
+                )}
+
+                {caseData.approve && (
+                    <CollapsibleSection title="Approvals" sectionKey="approve">
+                        {renderCard(caseData.approve[currentIndices['approve'] || 0], "Approvals")}
+                    </CollapsibleSection>
+                )}
+
+                {caseData.caseStatus && (
+                    <CollapsibleSection title="Case Status" sectionKey="caseStatus">
+                        {renderCard(caseData.caseStatus[currentIndices['caseStatus'] || 0], "Case Status")}
+                    </CollapsibleSection>
+                )}
+
+                {caseData.refProducts && (
+                    <CollapsibleSection title="Reference Products" sectionKey="refProducts">
+                        {renderCard(caseData.refProducts[currentIndices['refProducts'] || 0], "Reference Products")}
+                    </CollapsibleSection>
+                )}
+
+                {caseData.roRequests && (
+                    <CollapsibleSection title="RO Requests" sectionKey="roRequests">
+                        {renderCard(caseData.roRequests[currentIndices['roRequests'] || 0], "RO Requests")}
+                    </CollapsibleSection>
+                )}
+
+                {caseData.litigationInfo && (
+                    <CollapsibleSection title="Litigation Information" sectionKey="litigation">
+                        {renderCard(caseData.litigationInfo[currentIndices['litigation'] || 0], "Litigation Information")}
+                    </CollapsibleSection>
+                )}
+
+                {caseData.lodFinalReminder && (
+                    <CollapsibleSection title="LOD Final Reminder" sectionKey="lodFinalReminder">
+                        {renderCard(caseData.lodFinalReminder[currentIndices['lodFinalReminder'] || 0], "LOD Final Reminder")}
                     </CollapsibleSection>
                 )}
             </div>
@@ -488,5 +741,4 @@ const CaseDetails = () => {
 };
 
 export default CaseDetails;
-
-
+ 
