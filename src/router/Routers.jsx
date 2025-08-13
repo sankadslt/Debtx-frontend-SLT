@@ -17,6 +17,7 @@ import RecoveryOfficerRequests from "../pages/Request/additiional_request_log";
 import ForwardMediationBoard from "../pages/Request/ForwardMediationBoard";
 import ValidityPeriodExtension from "../pages/Request/ValidityPeriodExtension";
 import RequestResponseLog from "../pages/Request/RequestResponseLog";
+import DeligatedRequestResponse from "../pages/Request/DeligatedRequestResponse";
 
 import Incident_List from "../pages/Incident/Incident_List";
 import Incident from "../pages/Incident/Incident";
@@ -24,6 +25,7 @@ import Incident_Register_Individual from "../pages/Incident/Incident_Register_In
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 import Incident_File_Download from "../pages/Incident/Incident_File_Download";
+import Incident_Details from "../pages/Incident/Incident_Details";
 
 //import for the case details page
 import CaseDetails from "../pages/Incident/Case_Details";
@@ -225,6 +227,16 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<RequestResponseLog />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+      
+       <Route
+        path="/drs/logs/Deligated-Request-Response"
+        element={
+          <ProtectedRoute
+            element={<DeligatedRequestResponse />}
             allowedRoles={["superadmin"]}
           />
         }
@@ -623,6 +635,16 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<Incident />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+       <Route
+        path="/Incident/Incident_Details"
+        element={
+          <ProtectedRoute
+            element={<Incident_Details />}
             allowedRoles={["superadmin"]}
           />
         }

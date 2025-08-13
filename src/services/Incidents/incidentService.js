@@ -80,6 +80,17 @@ export const New_List_Incidents = async (filters) => {
     throw error.response?.data || error;
   }
 };
+export const fetchIncidentDetails = async (incidentId) => {
+  try {
+    const response = await axios.get(`${INCIDENT_URL}/listdownIncidentDetailsByIncidentId/${incidentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching incident details:', error);
+    throw error;
+  }
+};
+
+
 export const List_Distribution_Ready_Incidents = async () => {
   try {
     const response = await axios.post(
@@ -322,5 +333,31 @@ export const Task_for_Download_Incidents_Full_List = async (
     console.error("Error creating task:", error.message || error);
     throw error.response?.data || error;
   }
+
   
 };
+
+export const Create_Task_For_Download_Incident_Details = async (userData) => {
+  try {
+    const response = await axios.post(
+      `${INCIDENT_URL}/Create_Task_For_Download_Incident_Details`,
+      {
+        Created_By: userData,
+        Template_Task_Id: 22,
+        task_type: "Download incident details"
+      }
+    );
+    
+    if (response.status === 201) {
+      return "success";
+    } else {
+      throw new Error("Failed to create task, status code: " + response.status);
+    }
+  } catch (error) {
+    console.error("Error creating download task:", error.message || error);
+    throw error.response?.data || error;
+  }
+};
+
+
+
