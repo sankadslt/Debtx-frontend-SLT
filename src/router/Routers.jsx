@@ -17,6 +17,7 @@ import RecoveryOfficerRequests from "../pages/Request/additiional_request_log";
 import ForwardMediationBoard from "../pages/Request/ForwardMediationBoard";
 import ValidityPeriodExtension from "../pages/Request/ValidityPeriodExtension";
 import RequestResponseLog from "../pages/Request/RequestResponseLog";
+import DeligatedRequestResponse from "../pages/Request/DeligatedRequestResponse";
 
 import Incident_List from "../pages/Incident/Incident_List";
 import Incident from "../pages/Incident/Incident";
@@ -24,6 +25,7 @@ import Incident_Register_Individual from "../pages/Incident/Incident_Register_In
 import Incident_Register_Bulk_Upload from "../pages/Incident/Incident_Register_Bulk_Upload";
 import SupBulkUploadLog from "../pages/Incident/sup_bulk_upload_LOG";
 import Incident_File_Download from "../pages/Incident/Incident_File_Download";
+import Incident_Details from "../pages/Incident/Incident_Details";
 
 //import for the case details page
 import CaseDetails from "../pages/Incident/Case_Details";
@@ -36,6 +38,7 @@ import DirectLODSendingIncident from "../pages/Distribution/DirectLODSendingInci
 import RejectIncident from "../pages/Distribution/RejectIncident";
 import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
 import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
+import AbundantIncidentlog from "../pages/Distribution/AbundantIncidentlog";
 
 {
   /* Distribute Imports */
@@ -141,6 +144,8 @@ import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
 import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
 import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
+import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
+ 
 
 const Routers = () => {
   return (
@@ -227,6 +232,16 @@ const Routers = () => {
           />
         }
       />
+      
+       <Route
+        path="/drs/logs/Deligated-Request-Response"
+        element={
+          <ProtectedRoute
+            element={<DeligatedRequestResponse />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
       {/* //DISTRIBUTION */}
 
@@ -246,6 +261,10 @@ const Routers = () => {
       <Route
         path="/Distribution/reject-incident-log"
         element={<RejectIncidentlog />}
+      />
+       <Route
+        path="/Distribution/abundant-incident-log"
+        element={<AbundantIncidentlog />}
       />
       <Route
         path="/Distribution/filtered-incident"
@@ -617,6 +636,16 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<Incident />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+       <Route
+        path="/Incident/Incident_Details"
+        element={
+          <ProtectedRoute
+            element={<Incident_Details />}
             allowedRoles={["superadmin"]}
           />
         }
@@ -1032,6 +1061,18 @@ const Routers = () => {
         }
       />
 
+<Route
+        path="/pages/Abnormal/Case_Closed_Log"
+        element={
+          <ProtectedRoute
+            element={<Case_Closed_Log/>}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+ 
+ 
       {/* FTL LOD Routes */}
       <Route
         path="/pages/flt-lod/ftl-lod-list"
