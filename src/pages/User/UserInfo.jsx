@@ -185,6 +185,8 @@ const UserInfo = () => {
             created_by: fetchedData.created_by || "",
             status_on: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_on : "",
             status_by: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status_by : "",
+            // status_on: latestStatus ? latestStatus.status_on : "",
+            // status_by: latestStatus ? latestStatus.status_by : "",
             // Remark: fetchedData.Remark || [],
             user_status: statusHistory.length > 0 ? statusHistory[statusHistory.length - 1].status : [],
             Remark: fetchedData.Remark || [],
