@@ -143,6 +143,30 @@ export const List_Request_Response_log = async (payload) => {
   }
 };
 
+export const List_Deligated_Request_Response = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_Deligated_Request_Response`,
+      // {
+      //   case_current_status: payload.case_current_status,
+      //   date_from: payload.date_from,
+      //   date_to: payload.date_to
+      // }
+      payload
+    );
+    console.log("Payload for List_Deligated_Request_Response:", response);
+    console.log("Response from List_Deligated_Request_Response:", response.data);
+    return response;
+    
+  } catch (error) {
+    console.error(
+      "Error fetching request response log:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
 export const Create_Task_For_Request_Responce_Log_Download = async (
   payload
 ) => {
