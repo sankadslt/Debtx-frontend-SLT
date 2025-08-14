@@ -196,6 +196,12 @@ const Sidebar = ({ onHoverChange }) => {
           roles: ["superadmin", "admin"],
           link: "/MediationBoard/MediationBoardCaseList",
         },
+        {
+          icon: CgEditFade,
+          label: "FTL LOD Case List",
+          roles: ["superadmin", "admin"],
+          link: "/pages/flt-lod/ftl-lod-list",
+        },
         // { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         { icon: CgEditFade,
           label: "LOD",
