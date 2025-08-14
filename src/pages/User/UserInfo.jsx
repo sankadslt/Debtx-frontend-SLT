@@ -539,7 +539,7 @@ const UserInfo = () => {
         user_id: Number(user_id),
         created_by: loggedUserData,
         status_reason: remark,
-        end_dtm: formatDateTime(selectedEndDate),
+        end_dtm: formatDate(selectedEndDate),
       };
 
       console.log("Sending payload to endUser:", payload);
@@ -1096,7 +1096,7 @@ const UserInfo = () => {
               <tbody className="space-y-4 sm:space-y-0">
                 <tr className="block sm:table-row">
                   <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
-                    End Date and Time<span className="text-red-500">*</span>
+                    End Date<span className="text-red-500">*</span>
                   </td>
                   <td className="w-4 text-left hidden sm:table-cell">:</td>
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
@@ -1104,11 +1104,11 @@ const UserInfo = () => {
                       <DatePicker
                         selected={endDate}
                         onChange={(date) => setEndDate(date)}
-                        showTimeSelect
-                        timeFormat="HH:mm"
-                        timeIntervals={15}
-                        dateFormat="yyyy-MM-dd HH:mm:ss"
-                        timeCaption="Time"
+                        // showTimeSelect
+                        // timeFormat="HH:mm"
+                        // timeIntervals={15}
+                        dateFormat="yyyy-MM-dd"
+                        // timeCaption="Time"
                         className={`${GlobalStyle.inputText} w-full text-left`}
                         minDate={new Date()}
                         filterTime={(time) => {
