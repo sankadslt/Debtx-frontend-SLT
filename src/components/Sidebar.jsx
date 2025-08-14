@@ -198,7 +198,7 @@ const Sidebar = ({ onHoverChange }) => {
         },
         {
           icon: CgEditFade,
-          label: "FTL LOD Case List",
+          label: "FTL LOD",
           roles: ["superadmin", "admin"],
           link: "/pages/flt-lod/ftl-lod-list",
         },
@@ -211,8 +211,35 @@ const Sidebar = ({ onHoverChange }) => {
             { icon: CgEditFade, label: "LOD Log", link: "/pages/LOD/LODLog", roles: ["superadmin", "admin"] },
             { icon: CgEditFade, label: "FR Log", link: "/pages/LOD/FinalReminderList", roles: ["superadmin", "admin"] },
           ]
-        }
-        
+        },
+        // {
+        //   icon: CgEditFade,
+        //   label: "Dispute",
+        //   roles: ["superadmin", "admin"],
+        //   link: "",
+        // },
+        {
+          icon: CgEditFade,
+          label: "Litigation",
+          roles: ["superadmin", "admin"],
+          link: "/pages/Litigation/Litigation_List",
+        },
+        {
+          icon: CgEditFade,
+          label: "Disposed list",
+          roles: ["superadmin", "admin"],
+          subItems: [
+            // { icon: CgEditFade, label: "Write Off list", link: "", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "Abandoned List", link: "/pages/Abnormal/Abondoned_Case_Log", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "Withdraw list", link: "/pages/Abnormal/Withdraw_Case_Log", roles: ["superadmin", "admin"] },
+          ],
+        },
+        {
+          icon: CgEditFade,
+          label: "Closed list",
+          roles: ["superadmin", "admin"],
+          link: "/pages/Abnormal/Case_Closed_Log",
+        },
         // { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Dispute", link: "/dashboard", roles: ["superadmin", "admin"] },
