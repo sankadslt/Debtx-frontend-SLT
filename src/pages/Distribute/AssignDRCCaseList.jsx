@@ -996,7 +996,7 @@ export default function AssignDRCsLOG() {
   // };
 
   // Withdraw button handler
-  const handlewithdrawbutton = async (caseID) => {
+  const handlewithdrawbutton = async (caseID, case_status) => {
     const userId = await getLoggedUserId();
     Swal.fire({
       title: "Enter your remark",
@@ -1020,6 +1020,7 @@ export default function AssignDRCsLOG() {
           remark: result.value,
           remark_edit_by: userId,
           created_by: userId,
+          case_status: case_status, // Include the case status in the payload
         };
         // console.log("Withdraw Payload:", payload);
 
@@ -1293,7 +1294,7 @@ export default function AssignDRCsLOG() {
                         <Tooltip id="my-tooltip" place="bottom" content="Re-Assign" />
                       </button>
 
-                      <button className={GlobalStyle.buttonPrimary} onClick={() => handlewithdrawbutton(caseItem.case_id)} data-tooltip-id="my-tooltip2">
+                      <button className={GlobalStyle.buttonPrimary} onClick={() => handlewithdrawbutton(caseItem.case_id, caseItem.case_current_status)} data-tooltip-id="my-tooltip2">
                         <FaUndo /> {/* Icon for Withdraw */}
                         <Tooltip id="my-tooltip2" place="bottom" content="Withdraw" />
                       </button>
