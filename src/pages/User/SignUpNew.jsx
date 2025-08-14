@@ -32,7 +32,7 @@ const AddUser = () => {
     designation: "",
     role: [],
     drcId: "",
-    loginMethod: "",
+    // loginMethod: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -86,7 +86,7 @@ const AddUser = () => {
       designation: "",
       role: [],
       drcId: "",
-      loginMethod: "",
+      // loginMethod: "",
     });
     setError("");
   }, [userType]);
@@ -333,7 +333,7 @@ const AddUser = () => {
                       />
                     </td>
                   </tr>
-                  <tr className="block md:table-row mb-2">
+                  {/* <tr className="block md:table-row mb-2">
                     <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
                       <span className="inline-block min-w-[180px] text-left">
                         Login Method<span className="text-red-500">*</span>
@@ -355,7 +355,7 @@ const AddUser = () => {
                         <option value="slt">SLT</option>
                       </select>
                     </td>
-                  </tr>
+                  </tr> */}
                   <tr className="block md:table-row mb-2">
                     <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
                       <span className="inline-block min-w-[180px] text-left">
@@ -508,7 +508,7 @@ const AddUser = () => {
                       />
                     </td>
                   </tr>
-                  <tr className="block md:table-row mb-2">
+                  {/* <tr className="block md:table-row mb-2">
                     <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
                       <span className="inline-block min-w-[180px] text-left">
                         Login Method<span className="text-red-500">*</span>
@@ -530,7 +530,7 @@ const AddUser = () => {
                         <option value="slt">SLT</option>
                       </select>
                     </td>
-                  </tr>
+                  </tr> */}
                   <tr className="block md:table-row mb-2">
                     <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
                       <span className="inline-block min-w-[180px] text-left">

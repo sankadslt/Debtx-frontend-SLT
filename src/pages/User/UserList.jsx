@@ -427,7 +427,7 @@ const UserList = () => {
                               : user.status === "Inactive"
                               ? "Inactive"
                               : user.status === "Terminate"
-                              ? "Terminated"
+                              ? "Terminate"
                               : "Pending Approval"
                           }
                           data-tooltip-id={`status-${user.user_id}`}
@@ -437,7 +437,7 @@ const UserList = () => {
                               : user.status === "Inactive"
                               ? "Inactive"
                               : user.status === "Terminate"
-                              ? "Terminated"
+                              ? "Terminate"
                               : "Pending Approval"
                           }
                           className="h-5 w-5 lg:h-6 lg:w-6"
@@ -449,7 +449,7 @@ const UserList = () => {
                           : user.status === "Inactive"
                           ? "Inactive"
                           : user.status === "Terminate"
-                          ? "Terminated"
+                          ? "Terminate"
                           : "Pending Approval"
                       } />
                     </td>
