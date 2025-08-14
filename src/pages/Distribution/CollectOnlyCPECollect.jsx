@@ -198,7 +198,7 @@ export default function CollectOnlyCPECollect() {
       if (response.status === 201) {
         Swal.fire({
           title: "Success",
-          text: "Task successfully created",
+          text: "Task ID: " + response.data.Task_Id,
           icon: "success",
           confirmButtonText: "OK",
           confirmButtonColor: "#28a745",
@@ -428,10 +428,12 @@ export default function CollectOnlyCPECollect() {
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
       Swal.fire({
-        title: "Error",
-        text: "The 'To' date cannot be earlier than the 'From' date.",
-        icon: "error",
-        confirmButtonColor: "#f1c40f",
+        title: "Warning",
+        text: "To date should be greater than or equal to From date",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",  
       });
     } else if (fromDate) {
       const diffInMs = date - fromDate;

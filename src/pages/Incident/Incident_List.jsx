@@ -430,9 +430,10 @@ const Incident_List = () => {
 
       const response = await Task_for_Download_Incidents(status1, status2, fromDate, toDate, userData);
       if (response && response.message === "Task created successfully") {
+        const taskId = response.ResponseData?.data?.Task_Id; 
         Swal.fire({
           title: "Success",
-          text: `Task created successfully!`,
+          text: "Task ID: " + taskId  ,
           icon: "success",
           confirmButtonColor: "#28a745"
         });
@@ -476,7 +477,7 @@ const Incident_List = () => {
           <div className="flex justify-end mt-6">
             <button onClick={HandleAddIncident} className={`${GlobalStyle.buttonPrimary} flex items-center`}>
               <FaPlus className="mr-2" />
-              Add Incident
+              Add Account
             </button>
           </div>
 
