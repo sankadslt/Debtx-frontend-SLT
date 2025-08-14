@@ -27,10 +27,9 @@ import {
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
-import {
-  New_List_Incidents,
-  Task_for_Download_Incidents_Full_List,
-} from "../../services/Incidents/incidentService.js";
+import {New_List_Incidents} from "../../services/Incidents/incidentService.js";
+//import {Task_for_Download_Incidents_Full_List,} from "../../services/Incidents/incidentService.js";
+import {Task_for_Download_Incidents_Full_List,} from "../../services/task/taskIncidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
@@ -51,10 +50,10 @@ const Incident = () => {
   const [fromDate, setFromDate] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const [toDate, setToDate] = useState(null);
-  const [status1, setStatus1] = useState("");
-  const [status2, setStatus2] = useState("");
-  const [status3, setStatus3] = useState("");
-  const [status4, setStatus4] = useState("");
+  const [actionType, setActionType] = useState("");
+  const [status, setStatus] = useState("");
+  const [sourceType, setSourceType] = useState("");
+  const [incidentDirection, setIncidentDirection] = useState("");
   const [serviceTypes, setServiceTypes] = useState([]);
   const [selectedServiceType, setSelectedServiceType] = useState("");
   const [accountNo, setAccountNo] = useState("");
@@ -73,10 +72,10 @@ const Incident = () => {
   const hasMounted = useRef(false);
 
   const [committedFilters, setCommittedFilters] = useState({
-    status1: "",
-    status2: "",
-    status3: "",
-    status4: "",
+    actionType: "",
+    status: "",
+    sourceType: "",
+    incidentDirection: "",
     selectedServiceType: "",
     fromDate: null,
     toDate: null,
@@ -228,10 +227,10 @@ const Incident = () => {
 
   const filterValidations = () => {
     if (
-      !status1 &&
-      !status2 &&
-      !status3 &&
-      !status4 &&
+      !actionType &&
+      !status &&
+      !sourceType &&
+      !incidentDirection &&
       !selectedServiceType &&
       !fromDate &&
       !toDate &&
@@ -278,11 +277,11 @@ const Incident = () => {
       };
 
       const payload = {
-        Actions: filters.status1,
-        Incident_Status: filters.status2,
-        Incident_Direction: filters.status4,
+        Actions: filters.actionType,
+        Incident_Status: filters.status,
+        Incident_Direction: filters.incidentDirection,
         Service_Type: filters.selectedServiceType,
-        Source_Type: filters.status3,
+        Source_Type: filters.sourceType,
         From_Date: formatDate(filters.fromDate),
         To_Date: formatDate(filters.toDate),
         Account_Num: filters.accountNo,
@@ -375,10 +374,10 @@ const Incident = () => {
       return;
     } else {
       setCommittedFilters({
-        status1,
-        status2,
-        status3,
-        status4,
+        actionType,
+        status,
+        sourceType,
+        incidentDirection,
         selectedServiceType,
         fromDate,
         toDate,
@@ -388,10 +387,10 @@ const Incident = () => {
 
       if (currentPage === 1) {
         callAPI({
-          status1,
-          status2,
-          status3,
-          status4,
+          actionType,
+          status,
+          sourceType,
+          incidentDirection,
           selectedServiceType,
           fromDate,
           toDate,
@@ -405,10 +404,10 @@ const Incident = () => {
   };
 
   const handleClear = () => {
-    setStatus1("");
-    setStatus2("");
-    setStatus3("");
-    setStatus4("");
+    setActionType("");
+    setStatus("");
+    setSourceType("");
+    setIncidentDirection("");
     setSelectedServiceType("");
     setFromDate(null);
     setToDate(null);
@@ -418,10 +417,10 @@ const Incident = () => {
     setMaxCurrentPage(0);
     setIsMoreDataAvailable(true);
     setCommittedFilters({
-      status1: "",
-      status2: "",
-      status3: "",
-      status4: "",
+      actionType: "",
+      status: "",
+      sourceType: "",
+      incidentDirection: "",
       selectedServiceType: "",
       accountNo: "",
       fromDate: null,
@@ -453,16 +452,16 @@ const Incident = () => {
     setIsCreatingTask(true);
 
     try {
-      const response = await Task_for_Download_Incidents_Full_List(
-        status1,
-        status2,
-        selectedServiceType,
-        status3,
-        status4,
-        fromDate,
-        toDate,
-        userData
-      );   
+      const response = await Task_for_Download_Incidents_Full_List({
+        Action: actionType,
+        Status: status,
+        Service_Type: selectedServiceType,
+        Source_Type: sourceType,
+        Incident_Direction: incidentDirection,
+        From_Date: fromDate,
+        To_Date: toDate,
+        
+      });   
       
       if (response && response.message === "Task created successfully") {
         Swal.fire({
@@ -509,10 +508,10 @@ const Incident = () => {
                 style={{ minWidth: "150px" }}
               />
               <select
-                value={status1}
-                onChange={(e) => setStatus1(e.target.value)}
+                value={actionType}
+                onChange={(e) => setActionType(e.target.value)}
                 className={`${GlobalStyle.selectBox}`}
-                style={{ color: status1 === "" ? "gray" : "black" }}
+                style={{ color: actionType === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>
                   Action Type
@@ -550,10 +549,10 @@ const Incident = () => {
               </select>
 
               <select
-                value={status2}
-                onChange={(e) => setStatus2(e.target.value)}
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
                 className={`${GlobalStyle.selectBox}`}
-                style={{ color: status2 === "" ? "gray" : "black" }}
+                style={{ color: status === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>
                   Status
@@ -575,10 +574,10 @@ const Incident = () => {
               </select>
 
               <select
-                value={status3}
-                onChange={(e) => setStatus3(e.target.value)}
+                value={sourceType}
+                onChange={(e) => setSourceType(e.target.value)}
                 className={`${GlobalStyle.selectBox}`}
-                style={{ color: status3 === "" ? "gray" : "black" }}
+                style={{ color: sourceType === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>
                   Source Type
@@ -594,10 +593,10 @@ const Incident = () => {
                 </option>
               </select>
               <select
-                value={status4}
-                onChange={(e) => setStatus4(e.target.value)}
+                value={incidentDirection}
+                onChange={(e) => setIncidentDirection(e.target.value)}
                 className={`${GlobalStyle.selectBox}`}
-                style={{ color: status4 === "" ? "gray" : "black" }}
+                style={{ color: incidentDirection === "" ? "gray" : "black" }}
               >
                 <option value="" hidden>
                   Incident Direction

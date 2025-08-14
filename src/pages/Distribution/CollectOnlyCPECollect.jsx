@@ -21,11 +21,9 @@ import {
   List_Incidents_CPE_Collect,
   Forward_CPE_Collect,
 } from "../../services/Incidents/incidentService";
-import {
-  Create_Task,
-  Create_Task_for_Forward_CPECollect,
-  Open_Task_Count_Forward_CPE_Collect,
-} from "../../services/task/taskService.js";
+import {Create_Task_for_Forward_CPECollect,Open_Task_Count_Forward_CPE_Collect} from "../../services/task/taskService.js";
+//import {Create_Task} from "../../services/task/taskService.js";
+import {Create_Task} from "../../services/task/taskIncidentService.js";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 
@@ -135,12 +133,8 @@ export default function CollectOnlyCPECollect() {
   }, []);
 
   // Function to handle the creation of a task for download button
-  const handleCreateTaskForDownload = async ({
-    source_type,
-    fromDate,
-    toDate,
-  }) => {
-    if (!source_type && !fromDate && !toDate) {
+  const handleCreateTaskForDownload = async () => {
+    if (!selectedSource && !fromDate && !toDate) {
       Swal.fire({
         title: "Warning",
         text: "Please select a Source Type or provide a date range before creating a task.",
@@ -186,14 +180,12 @@ export default function CollectOnlyCPECollect() {
     if (!confirmation.isConfirmed) return;
 
     try {
-      const filteredParams = {
-        Source_Type: source_type,
+      setIsCreatingTask(true);
+      const response = await Create_Task({
+        Source_Type: selectedSource,
         FromDate: fromDate,
         ToDate: toDate,
-      };
-
-      setIsCreatingTask(true);
-      const response = await Create_Task(filteredParams);
+      });
 
       if (response.status === 201) {
         Swal.fire({
