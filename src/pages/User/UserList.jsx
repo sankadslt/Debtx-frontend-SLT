@@ -225,7 +225,7 @@ const UserList = () => {
     }
   };
 
-  const handleUserRegister = () => navigate("/pages/user/signup");
+  const handleUserRegister = () => navigate("/pages/User/SignUpNew");
 
   // Effect for API calls
   useEffect(() => {
