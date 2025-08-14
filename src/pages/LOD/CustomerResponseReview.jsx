@@ -262,10 +262,11 @@ const CustomerResponseReview = () => {
                 <table className={GlobalStyle.table}>
                     <thead className={GlobalStyle.thead}>
                         <tr>
-                            <th className={GlobalStyle.tableHeader}>Seq. No</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Settle Amount</th>
-                            <th className={GlobalStyle.tableHeader}>Plan Date</th>
-                            <th className={GlobalStyle.tableHeader}>Installment Paid Amount</th>
+                            <th className={GlobalStyle.tableHeader}>Settlement ID</th>
+                            <th className={GlobalStyle.tableHeader}>Settlement Status</th>
+                            <th className={GlobalStyle.tableHeader}>Settlement Amount (LKR)</th>
+                            <th className={GlobalStyle.tableHeader}>Created Date</th>
+                            <th className={GlobalStyle.tableHeader}>Expire Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -278,18 +279,16 @@ const CustomerResponseReview = () => {
                                         : "bg-gray-50 bg-opacity-50"
                                         } border-b`}
                                 >
-                                    <td className={GlobalStyle.tableData}>{log.settlement_plan[0]?.installment_seq}</td>
+                                    <td className={GlobalStyle.tableData}>{log.settlement_id}</td>
+                                    <td className={GlobalStyle.tableData}>{log.settlement_status}</td>
                                     <td className={GlobalStyle.tableCurrency}>
-                                        {log?.settlement_plan[0]?.Installment_Settle_Amount &&
-                                            log.settlement_plan[0]?.Installment_Settle_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
+                                        {log?.settlement_amount &&
+                                            log.settlement_amount.toLocaleString("en-LK")
                                         }
                                     </td>
                                     <td className={GlobalStyle.tableData}>
-                                        {log?.settlement_plan[0]?.Plan_Date &&
-                                            new Date(log.settlement_plan[0]?.Plan_Date).toLocaleString("en-GB", {
+                                        {log?.created_dtm &&
+                                            new Date(log.created_dtm).toLocaleString("en-GB", {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
@@ -299,13 +298,17 @@ const CustomerResponseReview = () => {
                                                 // hour12: true,
                                             })}
                                     </td>
-                                    <td className={GlobalStyle.tableCurrency}>
-                                        {log?.settlement_plan[0]?.Installment_Paid_Amount &&
-                                            log.settlement_plan[0]?.Installment_Paid_Amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
-                                            })
-                                        }
+                                    <td className={GlobalStyle.tableData}>
+                                        {log?.expire_date &&
+                                            new Date(log.expire_date).toLocaleString("en-GB", {
+                                                year: "numeric",
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                                // hour: "2-digit",
+                                                // minute: "2-digit",
+                                                // second: "2-digit",
+                                                // hour12: true,
+                                            })}
                                     </td>
                                 </tr>
                             ))

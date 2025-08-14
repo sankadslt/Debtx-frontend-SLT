@@ -70,3 +70,42 @@ export const Create_Customer_Response = async (payload) => {
     throw error;
   }
 };
+
+export const Create_FTL_LOD = async (payload) => {
+  try {
+    const response = await axios.post(`${URL}/Create_FTL_LOD`, payload);
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+
+    return response.data; // Return the full response data as-is
+  } catch (error) {
+    console.error(
+      "Error creating FTL LOD:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+export const FTL_LOD_Case_Details = async (case_id) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/FTL_LOD_Case_Details`,
+      { case_id }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching FTL LOD case details:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
