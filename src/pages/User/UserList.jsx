@@ -1,11 +1,13 @@
-/* Purpose: This template is used for the 17.1 - User List .
+/* Purpose: This template is used for the 17.1 - User List.
 Created Date: 2025-06-06
 Created By: sakumini (sakuminic@gmail.com)
+Last Modified Date: 2025-08-11
+Modified By: Tharindu Darshana (tharindu.drubasinge@gmail.com)
 Version: node 20
-ui number :17.1
-Dependencies: tailwind css
-Related Files: (routes)
-Notes:The following page conatins the code for the User list Screen */
+ui number: 17.1
+Dependencies: tailwind css, react, react-router-dom, sweetalert2, react-tooltip, axios
+Related Files: user_services.js, GlobalStyle.js
+Notes: The following page contains the code for the User List Screen, updated to fix SLT user filtering issue by removing the SLT-specific filter in the search query logic and normalizing user_type and status in the API call to ensure consistent filtering. */
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,7 +20,7 @@ import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
-import { getAllUserDetails } from "../../services/user/user_services"; 
+import { getAllUserDetails } from "../../services/user/user_services";
 
 const UserList = () => {
   const navigate = useNavigate();
@@ -57,8 +59,7 @@ const UserList = () => {
     { value: "manager", label: "Manager" },
     { value: "slt_coordinator", label: "SLT Coordinator" },
     { value: "drc_officer", label: "DRC Officer" },
-    { value: "recovery_staff", label: "Recovery Staff" },
-    { value: "rtom", label: "RTOM" }
+    { value: "recovery_staff", label: "Recovery Staff" }
   ];
 
   const callAPI = useCallback(async (filters) => {
@@ -67,8 +68,8 @@ const UserList = () => {
       const requestData = {
         page: filters.page || 1,
         user_role: filters.userRole || "",
-        user_type: filters.userType || "",
-        user_status: filters.status || ""
+        user_type: filters.userType ? filters.userType.toLowerCase() : "",
+        user_status: filters.status ? filters.status.replace('-', '_') : ""
       };
 
       const response = await getAllUserDetails(requestData);
@@ -179,7 +180,7 @@ const UserList = () => {
     }
   };
 
-  // Handle filter button 
+  // Handle filter button
   const handleFilterButton = () => {
     if (!status && !userRole && !userType) {
       Swal.fire({
@@ -208,7 +209,7 @@ const UserList = () => {
     }
   };
 
-  // Handle clear 
+  // Handle clear
   const handleClear = () => {
     setStatus("");
     setUserRole("");
@@ -243,7 +244,7 @@ const UserList = () => {
     }
   }, [currentPage, committedFilters, callAPI, hasMoreData, maxCurrentPage]);
 
-  // Filter data by search query on the current page data
+  // Filter data by search query
   const filteredDataBySearch = searchQuery 
     ? paginatedData.filter((row) =>
         Object.values(row)
@@ -254,7 +255,6 @@ const UserList = () => {
     : paginatedData;
 
   const formatRoleLabel = (value) => {
-    // Check if value exists and is a string
     if (!value || typeof value !== 'string') {
       return "N/A";
     }
