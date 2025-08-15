@@ -393,13 +393,38 @@ const DRCInfo = () => {
   };
 
   // Navigation (Back btn)
-  const goBack = () => {
-    if (editMode) {
-      setEditMode(false);
-    } else {
-      navigate(-1);
-    }
-  };
+ const goBack = () => {
+  if (editMode) {
+    // Reset any unsaved changes when going back in edit mode
+    const fetchCompanyData = async () => {
+      try {
+        setLoading(true);
+        const drcIdToUse = drcId;
+        const data = await getDebtCompanyByDRCID(drcIdToUse);
+        if (data) {
+          setCompanyData(data);
+          setContactNo(data.drc_contact_no || "");
+          setAddress(data.drc_address || "");
+          setEmail(data.drc_email || "");
+          setRemark("");
+          
+          // Reset service and RTOM areas
+          fetchActiveServices();
+          fetchRTOMData();
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch DRC data:", err);
+        setLoading(false);
+      }
+    };
+    fetchCompanyData();
+    
+    setEditMode(false);
+  } else {
+    navigate(-1);
+  }
+};
 
   // Handle DRC End
   const handleEndSubmit = async () => {
@@ -484,14 +509,35 @@ const DRCInfo = () => {
       fetchActiveServices();
       setDropdownClicked(true);
     }
-  };
+      const availableServices = serviceTypes.filter(service => !service.selected);
+  if (availableServices.length === 0 && !serviceLoading) {
+    Swal.fire({
+      icon: 'info',
+      title: 'No More Service Types',
+      iconColor:"#ff9999",
+      text: 'All available service types have already been added.',
+      confirmButtonColor: '#ff9999',
+    });
+  }
+};
+  
 
   const handleRtomDropdownClick = () => {
     if (!rtomDropdownClicked) {
       fetchRTOMData();
       setRtomDropdownClicked(true);
     }
-  };
+   const availableBillingCenters = rtomAreas.filter(area => !area.selected);
+  if (availableBillingCenters.length === 0 && !rtomLoading) {
+    Swal.fire({
+      icon: 'info',
+      iconColor:"#ff9999",
+      title: 'No More Billing Center Areas',
+      text: 'All available billing center areas have already been added.',
+      confirmButtonColor: '#ff9999',
+    });
+  }
+};
 
   const handleAddServiceType = () => {
     if (
