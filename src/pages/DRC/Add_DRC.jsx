@@ -443,12 +443,27 @@ const Add_DRC = () => {
       throw new Error(response.message || "Failed to register DRC");
     }
 
-  } catch (error) {
+ } catch (error) {
     console.error("Error registering DRC:", error);
+    
+    let errorMessage = "Failed to register DRC. Please try again.";
+    
+    if (error.message.includes("E11000")) {
+      if (error.message.includes("drc_business_registration_number")) {
+        errorMessage = `This Registration number "${BusinessRegistrationNo}" is already in use. Please enter a different one.`;
+      } 
+      else if (error.message.includes("drc_email")) {
+        errorMessage = `The email address "${Email}" is already registered to another DRC. Please use a different email address.`;
+      }
+      else {
+        errorMessage = "This company appears to be already registered. Please check your  details and try again.";
+      }
+    }
+
     Swal.fire({
       icon: "error",
-      title: "Error",
-      text: error.message || "Failed to register DRC. Please check the data and try again.",
+      title: "Registration Failed",
+      text: errorMessage,
     });
   }
 };
