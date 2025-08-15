@@ -75,11 +75,11 @@ export const updateWithdrawCaseRemark = async (payload) => {
 };
 
 
-export const fetchAbondonedCases = async (payload) => {
+export const fetchAbandonedCases = async (payload) => {
   try {
  
 
-    const response = await axios.post(`${URL}/List_All_Abondoned_Case_Logs`, {   
+    const response = await axios.post(`${URL}/List_All_Abandoned_Case_Logs`, {   
       ...payload,
        
     });
@@ -87,17 +87,17 @@ export const fetchAbondonedCases = async (payload) => {
     console.log("API Response:", response);  
 
     if (!response.data || response.data.status === "error") {
-      throw new Error(response.data?.message || "Failed to fetch Abondoned cases.");
+      throw new Error(response.data?.message || "Failed to fetch Abandoned cases.");
     }
  
     return response.data;
   } catch (error) {
-    console.error("Error fetching Abondoned cases:", error);
+    console.error("Error fetching Abandoned cases:", error);
     throw new Error(error.response?.data?.message || error.message || "Unknown error occurred");
   }
 };
   
-  export const Task_for_Download_Abondoned = async (
+  export const Task_for_Download_Abandoned = async (
   status,
   accountNumber,
   fromDate,
@@ -115,7 +115,7 @@ export const fetchAbondonedCases = async (payload) => {
 
  console.log("Payload for download task:", payload);  
     const response = await axios.post(
-      `${URL}/Task_for_Download_Abondoned`,
+      `${URL}/Task_for_Download_Abandoned`,
       payload
     );
     return response.data;
@@ -129,16 +129,16 @@ export const fetchAbondonedCases = async (payload) => {
  
 
 
-export const updateAbondonedCaseRemark = async (payload) => {
+export const updateAbandonedCaseRemark = async (payload) => {
   try {
     const response = await axios.post(
-      `${URL}/Create_Abondoned_case`,
+      `${URL}/Create_Abandoned_case`,
       payload
     );
     return response.data;
   } catch (error) {
     console.error(
-      "Error submitting Abondoned cases ",
+      "Error submitting Abandoned cases ",
       error.response?.data || error.message
     );
     throw error;
