@@ -19,9 +19,8 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Link } from "react-router-dom";
-import more_info from "../../assets/images/more.svg";
 import Swal from "sweetalert2";
-import { getAllUserApprovals, Approve_DRC_Agreement_Approval , Reject_DRC_Agreement_Approval , Download_User_Approval_List}  from "../../services/user/user_services";
+import { getAllUserApprovals, User_Approval, Approve_DRC_Agreement_Approval , Reject_DRC_Agreement_Approval , Download_User_Approval_List}  from "../../services/user/user_services";
 import moreImg from "../../assets/images/more.svg";
 import { Tooltip } from "react-tooltip";
 import { getLoggedUserId } from "../../services/auth/authService";
@@ -44,10 +43,10 @@ const UserApproval = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
 
-	const [selectAll, setSelectAll] = useState(false);
-	const [selectedUsers, setSelectedUsers] = useState([]);
+	// const [selectAll, setSelectAll] = useState(false);
+	// const [selectedUsers, setSelectedUsers] = useState([]);
 	const [isCreatingTask, setIsCreatingTask] = useState(false);
-	const [isFiltered, setIsFiltered] = useState(false);
+	// const [isFiltered, setIsFiltered] = useState(false);
 
 	// Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
@@ -72,8 +71,8 @@ const UserApproval = () => {
 		setIsLoading(true);
 		setError(null);
 
-				const formatDate = (date) => {
-		return date instanceof Date ? date.toISOString().split('T')[0] : '';
+		const formatDate = (date) => {
+			return date instanceof Date ? date.toISOString().split('T')[0] : '';
 		};
 		
 		try {
@@ -109,17 +108,6 @@ const UserApproval = () => {
 					setFilteredData([]); // Clear data on no results
 				} else {
 					const maxData = currentPage === 1 ? 10 : 30;
-					// Append new users to existing data
-					// setFilteredData((prevData) => [
-					// 	...prevData,
-					// 	...response.data.map(approval => ({
-					// 		approval_id: approval.user_approver_id,
-					// 		user_type: approval.user_type?.toUpperCase() || "",
-					// 		user_name: approval.user_name,
-					// 		user_email: approval.login_email,
-					// 		created_on: new Date(approval.created_dtm).toLocaleDateString("en-CA"),
-					// 	})),
-					// ]);
 					setFilteredData((prevData) => [
 					...prevData,
 						...response.data.map(approval => ({
@@ -266,24 +254,7 @@ const UserApproval = () => {
 				icon: "warning",
 				confirmButtonColor: "#f1c40f",
 			});
-		} 
-		// else if (toDate) {
-		// 	// Calculate month gap
-		// 	const diffInMs = toDate - date;
-		// 	const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-
-		// 	if (diffInDays > 31) {
-		// 		Swal.fire({
-		// 			title: "Warning",
-		// 			text: "The selected range is more than 1 month.",
-		// 			icon: "warning",
-		// 			confirmButtonColor: "#f1c40f",
-		// 		});
-
-		// 		return;
-		// 	}
-		// 	setFromDate(date);
-		// } 
+		}
 		else
 		 {
 			setFromDate(date);
@@ -299,23 +270,6 @@ const UserApproval = () => {
 				confirmButtonColor: "#f1c40f",
 			});
 		} 
-		// else if (fromDate) {
-		// 	// Calculate month gap
-		// 	const diffInMs = date - fromDate;
-		// 	const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-
-		// 	if (diffInDays > 31) {
-		// 		Swal.fire({
-		// 			title: "Warning",
-		// 			text: "The selected range is more than 1 month.",
-		// 			icon: "warning",
-		// 			confirmButtonColor: "#f1c40f",
-		// 		});
-
-		// 		return;
-		// 	}
-		// 	setToDate(date);
-		// } 
 		else {
 			setToDate(date);
 		}
@@ -352,33 +306,6 @@ const UserApproval = () => {
 		return true;
 	};
 
-	const handleSelectAll = () => {
-		const currentPageUserIds = filteredDataBySearch.map((approval) => approval.approval_id);
-
-		if (selectAll) {
-			// Deselect only current page users
-			setSelectedUsers((prev) =>
-				prev.filter((id) => !currentPageUserIds.includes(id))
-			);
-		} else {
-			// Select current page users
-			setSelectedUsers((prev) => [
-				...prev,
-				...currentPageUserIds.filter((id) => !prev.includes(id)),
-			]);
-		}
-
-		setSelectAll(!selectAll);
-	};
-
-	const handleCheckboxChange = (user_id) => {
-		if (selectedUsers.includes(user_id)) {
-			setSelectedUsers(selectedUsers.filter((id) => id !== user_id));
-		} else {
-			setSelectedUsers([...selectedUsers, user_id]);
-		}
-	};
-
 	const approveSelectedUsers = async(approval_id , drc_id) => {
 		console.log("Approving User ID:", approval_id);
 		console.log("DRC ID:", drc_id);
@@ -402,9 +329,10 @@ const UserApproval = () => {
 		// Call the API to approve the user
 
 		 const requestData = {
-				drc_id: drc_id,
+				// drc_id: drc_id,
 				user_approver_id: approval_id,
-				approved_by: user,
+				conf_type: "accept",
+				conf_by: user,
 
 			};
 
@@ -414,17 +342,6 @@ const UserApproval = () => {
 			const response = await Approve_DRC_Agreement_Approval(requestData);
 			console.log("API Response:", response);
 
-		// if (selectedUsers.length === 0) {
-		// 	Swal.fire({
-		// 		title: "Warning",
-		// 		text: "Please select at least one user to approve.",
-		// 		icon: "warning",
-		// 		confirmButtonColor: "#f1c40f",
-		// 	});
-		// 	return;
-		// }
-
-		//console.log("Approving Users:", selectedUsers);
 
 		Swal.fire({
 			title: "Approved",
@@ -448,12 +365,6 @@ const UserApproval = () => {
 				confirmButtonColor: "#d33",
 			});
 		}
-
-
-
-		// Clear selection after approval
-		//setSelectedUsers([]);
-		//setSelectAll(false);
 	};
 
 
@@ -717,14 +628,6 @@ const UserApproval = () => {
 											: GlobalStyle.tableRowOdd
 									}`}
 								>
-									{/* <td className={`${GlobalStyle.tableData} text-center`}>
-										<input
-											type="checkbox"
-											checked={selectedUsers.includes(approval.approval_id)}
-											className="cursor-pointer"
-											onChange={() => handleCheckboxChange(approval.approval_id)}
-										/>
-									</td> */}
 									<td className={`${GlobalStyle.tableData}`}>{approval.approval_id}</td>
 									<td className={`${GlobalStyle.tableData}`}>
 										{approval.user_name}
@@ -735,9 +638,6 @@ const UserApproval = () => {
 									<td className={`${GlobalStyle.tableData} break-all`}>
 										{approval.user_email}
 									</td>
-									{/* <td className={`${GlobalStyle.tableData} break-all`}>
-										{approval.login_method || "N/A"}
-									</td> */}
 									<td className={`${GlobalStyle.tableData}`}>
 										{approval.created_on}
 									</td>
@@ -761,9 +661,8 @@ const UserApproval = () => {
 									<td className="text-center">
 										<div className="flex justify-center gap-2">
 											<button
-												onClick={() => approveSelectedUsers(approval.approval_id , approval.drc_id)}
+												// onClick={() => approveSelectedUsers(approval.approval_id , approval.drc_id)}
 												className={GlobalStyle.buttonPrimary}
-												
 											>
 										Approve
 										</button>
