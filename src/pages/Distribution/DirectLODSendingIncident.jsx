@@ -215,8 +215,9 @@ export default function DirectLODSendingIncident() {
       const response = await Create_Task_Download_Direct_LOD_Sending(filteredParams);
       if (response.status === 201) {
         Swal.fire({
-          title: 'Success',
-          text: 'Task successfully created',
+           
+          title: "Task Created Successfully!",
+          text: "Task ID: " + response.data.Task_Id,
           icon: 'success',
           confirmButtonText: 'OK',
           confirmButtonColor: "#28a745"
@@ -412,10 +413,13 @@ export default function DirectLODSendingIncident() {
     if (toDate && date > toDate) {
 
       Swal.fire({
-        title: "Error",
+        title: "Warning",
         text: "The 'From' date cannot be later than the 'To' date.",
         icon: "error",
         confirmButtonColor: "#f1c40f",
+
+
+        
       });;
     } else if (toDate) {
       // Calculate month gap
@@ -447,9 +451,11 @@ export default function DirectLODSendingIncident() {
     if (fromDate && date < fromDate) {
 
       Swal.fire({
-        title: "Error",
-        text: "The 'To' date cannot be earlier than the 'From' date.",
-        icon: "error",
+         title: "Warning",
+        text: "To date should be greater than or equal to From date",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         confirmButtonColor: "#f1c40f",
       });
     } else if (fromDate) {

@@ -144,3 +144,41 @@ export const updateAbondonedCaseRemark = async (payload) => {
     throw error;
   }
 };
+
+
+export const listAllCaseClosedLog = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${URL}/List_All_Case_Closed_Log`,
+      payload
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      "Error withdrawing Settlement cases :",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+
+export const Create_Task_For_Downloard_Case_Closed_List = async (createdBy, Phase, Case_Status, from_date, to_date, Case_ID, Account_Number) => {
+  try {
+    const response = await axios.post(`${URL}/Create_Task_For_Downloard_Case_Closed_List`, {
+      Created_By: createdBy,
+      Phase: Phase,
+      Case_Status: Case_Status,
+      from_date: from_date,
+      to_date: to_date,
+      Case_ID: Case_ID,
+      Account_Number: Account_Number
+    });
+
+   
+    return response;
+  } catch (error) {
+    console.error("Error creating task:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};

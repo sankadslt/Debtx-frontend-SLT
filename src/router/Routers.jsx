@@ -38,6 +38,7 @@ import DirectLODSendingIncident from "../pages/Distribution/DirectLODSendingInci
 import RejectIncident from "../pages/Distribution/RejectIncident";
 import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
 import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
+import AbundantIncidentlog from "../pages/Distribution/AbundantIncidentlog";
 
 {
   /* Distribute Imports */
@@ -126,6 +127,7 @@ import UserList from "../pages/User/UserList";
 import UserInfo from "../pages/User/UserInfo";
 import SignUp from "../pages/User/SignUp";
 import UserApproval from "../pages/User/UserApproval";
+import SignUpNew from "../pages/User/SignUpNew";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
@@ -142,7 +144,7 @@ import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
 import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
 import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
-// import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
+import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
  
 
 const Routers = () => {
@@ -259,6 +261,10 @@ const Routers = () => {
       <Route
         path="/Distribution/reject-incident-log"
         element={<RejectIncidentlog />}
+      />
+       <Route
+        path="/Distribution/abundant-incident-log"
+        element={<AbundantIncidentlog />}
       />
       <Route
         path="/Distribution/filtered-incident"
@@ -987,6 +993,14 @@ const Routers = () => {
           <ProtectedRoute element={<SignUp />} allowedRoles={["superadmin"]} />
         }
       />
+
+      <Route
+        path="/pages/User/SignUpNew"
+        element={
+          <ProtectedRoute element={<SignUpNew />} allowedRoles={["superadmin"]} />
+        }
+      />
+
       <Route
         path="/pages/User/UserApproval"
         element={
@@ -1047,7 +1061,7 @@ const Routers = () => {
         }
       />
 
-{/* <Route
+<Route
         path="/pages/Abnormal/Case_Closed_Log"
         element={
           <ProtectedRoute
@@ -1055,7 +1069,7 @@ const Routers = () => {
             allowedRoles={["superadmin"]}
           />
         }
-      /> */}
+      />
 
  
  
