@@ -31,14 +31,23 @@ import CreateSettlementIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/Creat
 import ViewDetailsIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/View_Details.png";
 import CustomerResponseIcon from "../../assets/images/FTL_LOD/3.1- FLT_LOD/Customer_Response.png";
 
-export default function FTLLODCaseList() {
+import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "../../services/auth/authService.js";
+import { use } from "react";
+
+
+const FTLLODCaseList = () => {
   const navigate = useNavigate(); // Initialize the navigate function
 
   // State Variables
   const [arrearsBandList, setArrearsBandList] = useState([]);
 
+  //User and Authentication
+  //const [userData, setUserData] = useState(null);
+
   const [status, setStatus] = useState("");
   const [arrearsAmount, setArrearsAmount] = useState("");
+  const [account_no, setAccountNo] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   //const [filterParams, setFilterParams] = useState([]);
@@ -54,24 +63,36 @@ export default function FTLLODCaseList() {
         setFilterParams(updatedParams);
         console.log("Updated filterParams:", updatedParams);
     }, [status, arrearsAmount, fromDate, toDate]); */
-
+  const [searchBy, setSearchBy] = useState("case_id");
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   //const [error, setError] = useState("");
-  //const [caseId, setCaseId] = useState("");
+  const [caseId, setCaseId] = useState("");
   //const [searchBy, setSearchBy] = useState("case_id"); // Default search by case ID
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  //const [totalAPIPages, setTotalAPIPages] = useState(1);
+  //const [isFilterApplied, setIsFilterApplied] = useState(false);
+  const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [totalAPIPages, setTotalAPIPages] = useState(1);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const rowsPerPage = 10; // Number of rows per page
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
+  
+  const [committedFilters, setCommittedFilters] = useState({
+    caseId: "",
+    status: "",
+    arrearsAmount: "",
+    account_no: "",
+    fromDate: null,
+    toDate: null
+  });
 
   //const currentData = filteredCases.slice(indexOfFirstRecord, indexOfLastRecord);
   //const totalPages = Math.ceil(filteredCases.length / rowsPerPage);
@@ -84,36 +105,27 @@ export default function FTLLODCaseList() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // const loadUser = async () => {
-  //     let token = localStorage.getItem("accessToken");
-  //     if (!token) {
-  //       setUserData(null);
-  //       return;
-  //     }
+  // Role-Based Button
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
 
-  //     try {
-  //       let decoded = jwtDecode(token);
-  //       const currentTime = Date.now() / 1000;
-  //       if (decoded.exp < currentTime) {
-  //         token = await refreshAccessToken();
-  //         if (!token) return;
-  //         decoded = jwtDecode(token);
-  //       }
-
-  //       setUserData({
-  //         id: decoded.user_id,
-  //         role: decoded.role,
-  //         drc_id: decoded.drc_id,
-  //         ro_id: decoded.ro_id,
-  //       });
-  //     } catch (error) {
-  //       console.error("Invalid token:", error);
-  //     }
-  //   };
-
-  //   useEffect(() => {
-  //     loadUser();
-  //   }, [localStorage.getItem("accessToken")]);
+    try{
+      let decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Current time in seconds
+      if (decode.exp < currentTime) {
+        refreshAccessToken().then((newToken) => {
+          if (!newToken) return;
+          const newDecoded = jwtDecode(newToken);
+          setUserRole(newDecoded.role);
+        });
+      } else {
+        setUserRole(decoded.role);
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }, []);
 
   const loadUser = async () => {
     const user = await getLoggedUserId();
@@ -124,624 +136,9 @@ export default function FTLLODCaseList() {
   useEffect(() => {
     loadUser();
   }, []);
-
-  useEffect(() => {
-    const fetchArrearsBands = async () => {
-      try {
-        if (userData) {
-          // Make sure to convert to number if needed
-          const arrearsBandList = await fetchAllArrearsBands();
-          setArrearsBandList(arrearsBandList);
-          console.log("Arrears Bands:", arrearsBandList);
-        }
-      } catch (error) {
-        console.error("Error fetching ArrearsBands:", error);
-      }
-    };
-
-    fetchArrearsBands();
-  }, [userData]);
-
-  /* const checkdatediffrence = (startDate, endDate) => {
-        const start = new Date(startDate).getTime();
-        const end = new Date(endDate).getTime();
-        const diffInMs = end - start;
-        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-        const diffInMonths = diffInDays / 30;
-
-        if (diffInMonths > 1) {
-            Swal.fire({
-                title: "Date Range Exceeded",
-                text: "The selected dates shouldn't have more than a 1-month gap.",
-                icon: "warning",
-                // allowOutsideClick: false,
-                // allowEscapeKey: false,
-                // showCancelButton: true,
-                // confirmButtonText: "Yes",
-                // confirmButtonColor: "#28a745",
-                // cancelButtonText: "No",
-                // cancelButtonColor: "#d33",
-            })
-            setToDate(null);
-            setFromDate(null);
-            return;
-        }
-    }; */
-
-  const handlestartdatechange = (date) => {
-    // Case: User clears the "From Date"
-    if (!date) {
-      setFromDate(null);
-      return;
-    }
-
-    // Case: To Date is set and From Date is after it
-    if (toDate && date > toDate) {
-      Swal.fire({
-        title: "Warning",
-        text: "The 'From' date cannot be later than the 'To' date.",
-        icon: "warning",
-        confirmButtonText: "OK",
-      });
-      setFromDate(null);
-      return;
-    }
-
-    // All good: update From Date
-    setFromDate(date);
-
-    // Optional: if toDate exists, call custom logic
-    /* if (toDate) {
-            checkdatediffrence(date, toDate);
-        } */
-  };
-
-  const handleenddatechange = (date) => {
-    // Case: User clears the "To Date"
-    if (!date) {
-      setToDate(null);
-      return;
-    }
-
-    // Case: From Date is set and To Date is before it
-    if (fromDate && date < fromDate) {
-      Swal.fire({
-        title: "Warning",
-        text: "The 'To' date cannot be earlier than the 'From' date.",
-        icon: "warning",
-        confirmButtonText: "OK",
-      });
-      setToDate(null);
-      return;
-    }
-
-    // All good: update To Date
-    setToDate(date);
-
-    // Optional: if fromDate exists, call custom logic
-    /* if (fromDate) {
-            checkdatediffrence(fromDate, date);
-        } */
-  };
-
-  /* const handlestartdatechange = (date) => {
-        // Case: User clears the "From Date"
-        if (!date) {
-            setFilters({ ...filters, fromDate: null });
-            return;
-        }
-
-        // Case: To Date is set and From Date is after it
-        if (filters.toDate && date > filters.toDate) {
-            Swal.fire({
-                title: "Warning",
-                text: "The 'From' date cannot be later than the 'To' date.",
-                icon: "warning",
-                confirmButtonText: "OK",
-            });
-            setFilters({ ...filters, fromDate: null });
-            return;
-        }
-
-        // All good: update From Date
-        setFilters({ ...filters, fromDate: date });
-    };
- */
-  // Handle api calling only when the currentPage incriment more that before
-  const handlePageChange = () => {
-    // console.log("Page changed to:", currentPage);
-    if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
-      setMaxCurrentPage(currentPage);
-      handleFilter(); // Call the filter function only after the page incrimet
-    }
-  };
-
-  useEffect(() => {
-    if (isFilterApplied) {
-      handlePageChange(); // Call the function whenever currentPage changes
-    }
-  }, [currentPage]);
-
-  /* const handleenddatechange = (date) => {
-
-        // Helper function to check if the year is valid (4 digits)
-        const isValidYear = (date) => {
-            const year = date.getFullYear();
-            return year >= 1000 && year <= 9999;
-        };
-
-
-        // Case: User clears the "To Date"
-        if (!isValidYear(date)) {
-            setFilters({ ...filters, toDate: null });
-            return;
-        }
-
-        console.log("From Date:", filters.fromDate);
-
-        console.log("To Date:", date);
-
-
-        // Case: From Date is set and To Date is before it
-        if (filters.fromDate) {
-            if (date < filters.fromDate) {
-                Swal.fire({
-                    title: "Warning",
-                    text: "The 'To' date cannot be before the 'From' date.",
-                    icon: "warning",
-                    confirmButtonText: "OK",
-                });
-                setFilters({ ...filters, toDate: null });
-                return;
-            }
-        }
-
-        // All good: update To Date
-        setFilters({ ...filters, toDate: date });
-    };
- */
-
-  /* 
-        const checkdatediffrence = (startDate, endDate) => {
-            const start = new Date(startDate).getTime();
-            const end = new Date(endDate).getTime();
-            const diffInMs = end - start;
-            const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-            const diffInMonths = diffInDays / 30;
-    
-            if (diffInMonths > 1) {
-                Swal.fire({
-                    title: "Date Range Exceeded",
-                    text: "The selected dates have more than a 1-month gap.",
-                    icon: "warning",
-                    confirmButtonText: "OK",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        setToDate(null);
-                        console.log("Dates cleared");
-                    }
-                }
-                );
-            };
-        }; */
-
-  // Search Section
-  const filteredDataBySearch = paginatedData.filter((row) =>
-    Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
-
-  const handleFilter = async () => {
-    try {
-      // setFilteredData([]); // Clear previous results
-
-      // Format the date to 'YYYY-MM-DD' format
-      const formatDate = (date) => {
-        if (!date) return null;
-        const offsetDate = new Date(
-          date.getTime() - date.getTimezoneOffset() * 60000
-        );
-        return offsetDate.toISOString().split("T")[0];
-      };
-
-      if (!arrearsAmount && !status && !fromDate && !toDate) {
-        Swal.fire({
-          title: "Warning",
-          text: "No filter is selected. Please, select a filter.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      // if (searchBy === "case_id" && !/^\d*$/.test(caseId)) {
-      //   Swal.fire({
-      //     title: "Warning",
-      //     text: "Invalid input. Only numbers are allowed for Case ID.",
-      //     icon: "warning",
-      //     allowOutsideClick: false,
-      //     allowEscapeKey: false,
-      //   });
-      //   setCaseId(""); // Clear the invalid input
-      //   return;
-      // }
-
-      if ((fromDate && !toDate) || (!fromDate && toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "Both From Date and To Date must be selected.",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-        Swal.fire({
-          title: "Warning",
-          text: "To date should be greater than or equal to From date",
-          icon: "warning",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        });
-        setToDate(null);
-        setFromDate(null);
-        return;
-      }
-
-      console.log(currentPage);
-
-      const payload = {
-        case_current_status: status || "",
-        current_arrears_band: arrearsAmount || "",
-        date_from: fromDate ? formatDate(fromDate) : null,
-        date_to: toDate ? formatDate(toDate) : null,
-        pages: currentPage,
-      };
-
-      console.log("Payload sent to API: ", payload);
-
-      setIsLoading(true); // Set loading state to true
-      const response = await List_FTL_LOD_Cases(payload).catch((error) => {
-        if (error.response && error.response.status === 404) {
-          Swal.fire({
-            title: "No Results",
-            text: "No matching data found for the selected filters.",
-            icon: "warning",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-          });
-          setFilteredData([]);
-          return null;
-        } else {
-          throw error;
-        }
-      });
-      console.log("Response from API:", response);
-      setIsLoading(false); // Set loading state to false
-
-      // Updated response handling
-      if (response && response.data && response.data.cases) {
-        const cases = response.data.cases;
-        console.log("Valid data received:", cases);
-
-        const totalPages = Math.ceil(
-          response.data.pagination.total / rowsPerPage
-        );
-        setTotalPages(totalPages);
-        setTotalAPIPages(response.data.pagination.pages);
-
-        setFilteredData((prevData) => [...prevData, ...cases]);
-      } else {
-        console.error(
-          "No valid FTL LOD case data found in response:",
-          response
-        );
-        setFilteredData([]);
-      }
-    } catch (error) {
-      console.error("Error filtering cases:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Failed to fetch filtered data. Please try again.",
-        icon: "error",
-      });
-    }
-  };
-  const handleFilterButton = () => {
-    // Reset to the first page
-    setFilteredData([]); // Clear previous results
-    setMaxCurrentPage(0); // Reset max current page
-    setTotalAPIPages(1); // Reset total API pages
-    if (currentPage === 1) {
-      handleFilter();
-    } else {
-      setCurrentPage(1);
-    }
-    setIsFilterApplied(true); // Set filter applied state to true
-  };
-
-  /* const handleFilter = async () => {
-        console.log("Filters applied:", filters);
-        console.log("Filters applied:", filters.arrearsAmount, filters.status, filters.fromDate, filters.toDate);
-
-        try {
-            setFilteredCases([]);
-
-            const formatDate = (date) => {
-                if (!date) return null;
-                const d = new Date(date);
-
-                const year = d.getFullYear();
-                const month = (d.getMonth() + 1).toString().padStart(2, '0');
-                const day = d.getDate().toString().padStart(2, '0');
-
-                return `${year}-${month}-${day}`;
-            };
-
-            console.log("Formatted From Date:", formatDate(filters.fromDate));
-            console.log("Formatted To Date:", formatDate(filters.toDate));
-
-            if (!filters.arrearsAmount && !filters.status && !filters.fromDate && !filters.toDate) {
-                Swal.fire({
-                    title: "Missing Filters",
-                    text: "Please select at least one filter.",
-                    icon: "warning",
-                    confirmButtonText: "OK",
-                });
-                return;
-            }
-
-            if ((filters.fromDate && !filters.toDate) || (!filters.fromDate && filters.toDate)) {
-                Swal.fire({
-                    title: "Incomplete Date Range",
-                    text: "Both From Date and To Date must be selected together.",
-                    icon: "warning",
-                    confirmButtonText: "OK",
-                });
-                return;
-            }
-
-            if (filters.fromDate && filters.toDate && filters.fromDate > filters.toDate) {
-                Swal.fire({
-                    title: "Invalid Date Range",
-                    text: "To Date should be greater than or equal to From Date.",
-                    icon: "warning",
-                    confirmButtonText: "OK",
-                });
-                return;
-            }
-
-            const payload = {
-                case_current_status: filters.status || "",
-                current_arrears_band: filters.arrearsAmount || "",
-                date_from: filters.fromDate ? formatDate(filters.fromDate) : null,
-                date_to: filters.toDate ? formatDate(filters.toDate) : null,
-                pages: currentPage,
-            };
-
-            console.log("Payload sent to API: ", payload);
-
-            const response = await List_FTL_LOD_Cases(payload);
-
-            console.log("Response from API:", response);
-
-            if (Array.isArray(response.data)) {
-                console.log("Filtered Cases:", response.data);
-                setFilteredCases(response.data);
-            } else {
-                console.error("Expected an array but got:", response.data);
-            }
-        } catch (error) {
-            console.error("Error filtering cases:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Failed to fetch filtered data. Please try again.",
-                icon: "error"
-            });
-        }
-    }; */
-
-  /*  // Search Section
-     const filteredDataBySearch = currentData.filter((row) =>
-         Object.values(row)
-             .join(" ")
-             .toLowerCase()
-             .includes(searchQuery.toLowerCase())
-     );
-     console.log("Filtered Data by Search:", filteredDataBySearch); */
-
-  const handleClear = () => {
-    setArrearsAmount("");
-    setStatus("");
-    setFromDate(null);
-    setToDate(null);
-    setSearchQuery("");
-    setCurrentPage(1); // Reset to the first page
-    setIsFilterApplied(false); // Reset filter applied state
-    setTotalPages(1); // Reset total pages
-    setFilteredData([]); // Clear filtered data
-    setTotalAPIPages(1); // Reset total API pages
-  };
-
-  /* const handleFilter = async () => {
-        try {
-            setFilteredData([]); // Clear previous results
-
-            // Format the date to 'YYYY-MM-DD' format
-            const formatDate = (date) => {
-                if (!date) return null;
-                const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-                return offsetDate.toISOString().split('T')[0];
-            };
-
-            if (!selectedArrearsBand && !selectedRTOM && !fromDate && !toDate) {
-                Swal.fire({
-                    title: "Warning",
-                    text: "No filter data is selected. Please, select data.",
-                    icon: "warning",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false
-                });
-                setToDate(null);
-                setFromDate(null);
-                return;
-            };
-
-            if ((fromDate && !toDate) || (!fromDate && toDate)) {
-                Swal.fire({
-                    title: "Warning",
-                    text: "Both From Date and To Date must be selected.",
-                    icon: "warning",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false
-                });
-                setToDate(null);
-                setFromDate(null);
-                return;
-            }
-
-            if (new Date(fromDate) > new Date(toDate)) {
-                Swal.fire({
-                    title: "Warning",
-                    text: "To date should be greater than or equal to From date",
-                    icon: "warning",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false
-                });
-                setToDate(null);
-                setFromDate(null);
-                return;
-            };
-
-            const payload = {
-                drc_id: Number(userData?.drc_id), // Convert drc_id to number
-                rtom: selectedRTOM,
-                arrears_band: selectedArrearsBand,
-                from_date: formatDate(fromDate),
-                to_date: formatDate(toDate),
-            };
-            console.log('Sending filter payload:', payload); // Log the payload before sending for debugging
-            // Fetch filtered data from the API using the payload
-            const AssignedRoCaseLogs = await listHandlingCasesByDRC(payload);
-
-
-            if (Array.isArray(AssignedRoCaseLogs)) {
-                setFilteredlogData(AssignedRoCaseLogs.data);
-            } else {
-                console.error("No valid cases data found in response.");
-            }
-
-
-            // Log the response
-            console.log('Response from API:', AssignedRoCaseLogs); //for debugging
-
-            // Set the filtered data (assuming setFilteredData updates the state or UI)
-            setFilteredlogData(AssignedRoCaseLogs);
-
-
-            console.log("Filtered data updated:", filteredlogData); //for debugging
-
-            const endDate = AssignedROcaselog.expire_dtm;
-            const currentDate = new Date();
-            const isPastDate = endDate < currentDate;
-        } catch (error) {
-            console.error("Error filtering cases:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Failed to fetch filtered data. Please try again.",
-                icon: "error"
-            });
-        }
-    }; */
-
-  // Handle pagination
-  const handlePrevNext = (direction) => {
-    if (direction === "prev" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    } else if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  // Filter handlers
-  /*  const handleFilterChange = (e) => {
-         const { name, value } = e.target;
-         setFilters((prev) => ({
-             ...prev,
-             [name]: value,
-         }));
-         setError("");
-     }; */
-
-  /* 
-        // Filtering the data based on filter values
-        const filterData = () => {
-            let tempData = data;
-            if (filterType && filterValue) {
-                if (filterType === "Account No") {
-                    tempData = tempData.filter((item) =>
-                        item.accountNo.includes(filterValue)
-                    );
-                } else if (filterType === "Case ID") {
-                    tempData = tempData.filter((item) => item.caseId.includes(filterValue));
-                }
-            }
-    
-            if (fromDate) {
-                tempData = tempData.filter((item) => {
-                    const itemDate = new Date(item.date);
-                    return itemDate >= toDate;
-                });
-            }
-    
-            if (toDate) {
-                tempData = tempData.filter((item) => {
-                    const itemDate = new Date(item.date);
-                    return itemDate <= toDate;
-                });
-            }
-            // Apply filters
-            if (filterAccountNo) {
-                tempData = tempData.filter((item) =>
-                    item.accountNo.includes(filterAccountNo)
-                );
-            }
-            if (filterCaseId) {
-                tempData = tempData.filter((item) => item.caseId.includes(filterCaseId));
-            }
-            if (filterStatus) {
-                tempData = tempData.filter((item) => item.status.includes(filterStatus));
-            }
-            if (selectedArrearsAmount) {
-                tempData = tempData.filter((item) => {
-                    const amount = parseInt(item.amount.replace(/,/g, "")); // Remove commas and parse as integer
-                    if (selectedArrearsAmount === "5-10") {
-                        return amount >= 5000 && amount <= 10000;
-                    } else if (selectedArrearsAmount === "10-25") {
-                        return amount >= 10000 && amount <= 25000;
-                    } else if (selectedArrearsAmount === "25-50") {
-                        return amount >= 25000 && amount <= 50000;
-                    } else if (selectedArrearsAmount === "50-100") {
-                        return amount >= 50000 && amount <= 100000;
-                    } else if (selectedArrearsAmount === "100+") {
-                        return amount > 100000;
-                    }
-                    return true; // Return true if no filter is applied
-                });
-            }
-            setFilteredData(tempData);
-            setCurrentPage(1); // Reset pagination when filter changes
-        }; */
-
+  
+// Function to get the status icon based on the case status
+  // This function returns the appropriate icon based on the case status
   const getStatusIcon = (status) => {
     switch (status) {
       case "Pending FTL LOD":
@@ -865,6 +262,9 @@ export default function FTLLODCaseList() {
   };
 
   const handleCreateFtl = (item) => {
+    navigate("/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)", {
+      state: {item},
+    });
     console.log("Create FTL for:", item);
   };
 
@@ -885,6 +285,403 @@ export default function FTLLODCaseList() {
     console.log("View Details for:", item);
   };
 
+
+
+  useEffect(() => {
+    const fetchArrearsBands = async () => {
+      try {
+        if (userData) {
+          // Make sure to convert to number if needed
+          const arrearsBandList = await fetchAllArrearsBands();
+          setArrearsBandList(arrearsBandList);
+          console.log("Arrears Bands:", arrearsBandList);
+        }
+      } catch (error) {
+        console.error("Error fetching ArrearsBands:", error);
+      }
+    };
+
+    fetchArrearsBands();
+  }, [userData]);
+
+  const handlestartdatechange = (date) => {
+    
+    setFromDate(date);
+
+   
+  };
+
+  const handleenddatechange = (date) => {
+    
+    setToDate(date);
+  };
+
+
+  // Handle api calling only when the currentPage incriment more that before
+  // const handlePageChange = () => {
+  //   // console.log("Page changed to:", currentPage);
+  //   if (currentPage > maxCurrentPage && currentPage <= totalAPIPages) {
+  //     setMaxCurrentPage(currentPage);
+  //     handleFilter(); // Call the filter function only after the page incrimet
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (isFilterApplied) {
+  //     handlePageChange(); // Call the function whenever currentPage changes
+  //   }
+  // }, [currentPage]);
+
+  // Check if toDate is greater than fromDate
+    useEffect(() => {
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+        Swal.fire({
+          title: "Warning",
+          text: "To date should be greater than or equal to From date",
+          icon: "warning",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          confirmButtonColor: "#f1c40f"
+        });
+        setToDate(null);
+        setFromDate(null);
+        return;
+      }
+    }, [fromDate, toDate]);
+
+  // Search Section
+  const filteredDataBySearch = filteredData.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  // Filter validation
+  const filterValidations = () => {
+    if ( !arrearsAmount && !status && !fromDate && !toDate) {
+      Swal.fire({
+        title: "Warning",
+        text: "At least one filter must be selected.",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
+      setToDate(null);
+      setFromDate(null);
+      return false;
+    }
+    if ((fromDate && !toDate) || (!fromDate && toDate)) {
+          Swal.fire({
+            title: "Warning",
+            text: "Both From Date and To Date must be selected.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            confirmButtonColor: "#f1c40f"
+          });
+          setToDate(null);
+          setFromDate(null);
+          return false;
+        }
+    
+        return true; // All validations passed
+  };
+
+  const handleFilter = async (filters) => {
+    try {
+      // setFilteredData([]); // Clear previous results
+
+      // Format the date to 'YYYY-MM-DD' format
+      const formatDate = (date) => {
+        if (!date) return null;
+        const offsetDate = new Date(
+          date.getTime() - date.getTimezoneOffset() * 60000
+        );
+        return offsetDate.toISOString().split("T")[0];
+      };
+      console.log(currentPage);
+
+      // if (!arrearsAmount && !status && !fromDate && !toDate) {
+      //   Swal.fire({
+      //     title: "Warning",
+      //     text: "No filter is selected. Please, select a filter.",
+      //     icon: "warning",
+      //     allowOutsideClick: false,
+      //     allowEscapeKey: false,
+      //   });
+      //   setToDate(null);
+      //   setFromDate(null);
+      //   return;
+      // }
+
+      const payload = {
+        case_current_status: filters.status,
+        current_arrears_band: filters.arrearsAmount,
+        date_from: formatDate(filters.fromDate) ,
+        date_to: formatDate(filters.toDate),
+        pages: filters.page ,
+      };
+
+      console.log("Payload sent to API: ", payload);
+
+      setIsLoading(true); // Set loading state to true
+      const response = await List_FTL_LOD_Cases(payload);
+      setIsLoading(false); // Set loading state to false
+
+      //  // Updated response handling
+      // if (response && response.data && response.data.cases) { 
+      //   if (currentPage === 1) {
+      //   setFilteredData(response.data.cases)}
+      //   else {
+      //   setFilteredData((prevData) => [...prevData, ...response.data.cases]);
+      // }
+
+      // if (response.data.length === 0) {
+      //   setIsMoreDataAvailable(false);
+      //   if (currentPage === 1) {
+      //     Swal.fire({
+      //       title: "No Results",
+      //       text: "No matching data found for the selected filters.",
+      //       icon: "warning",
+      //       allowOutsideClick: false,
+      //       allowEscapeKey: false,
+      //       confirmButtonColor:"#f1c40f"
+      //     });
+    //     } else if (currentPage === 2) {
+    //       setCurrentPage(1);
+    //     }
+    //   }
+    // } else {
+    //   const maxData = currentPage === 1 ? 10 : 30;
+    //   if (response.data.cases.length < maxData) {
+    //     setIsMoreDataAvailable(false);
+    //   }
+    // }
+  //   } else {
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: "No valid data found in response.",
+  //       icon: "error",
+  //       confirmButtonColor: "#d33"
+  //     });
+  //     setFilteredData([]);
+  //   }
+  // } catch (error) {
+  //     console.error("Error filtering cases:", error);
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: "Failed to fetch filtered data. Please try again.",
+  //       icon: "error",
+  //       confirmButtonColor: "#d33"
+  //     });
+   if (response) {
+       
+              
+              if ( response.data && response.data.cases && response.data.cases.length > 0) {
+                 console.log("Valid data received:",response.data.cases);
+         console.log("Current Page:",currentPage);
+                if (currentPage === 1) {
+                             
+  
+                  setFilteredData(response.data.cases)
+                  
+                } else {
+                   
+                  setFilteredData((prevData) => [...prevData, ...response.data.cases]);
+                }
+              }
+               if (response.data.cases.length === 0) {
+      
+              // if (response.status === 204) {
+                setIsMoreDataAvailable(false); // No more data available
+                if (currentPage === 1) {
+                  Swal.fire({
+                    title: "No Results",
+                    text: "No matching data found for the selected filters.",
+                    icon: "warning",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    confirmButtonColor: "#f1c40f"
+                  });
+                } else if (currentPage === 2) {
+                  setCurrentPage(1); // Reset to page 1 if no data found on page 2
+                }
+              } else {
+                const maxData = currentPage === 1 ? 10 : 30;
+                if (response.data.cases.length < maxData) {
+                  setIsMoreDataAvailable(false); // More data available
+                }
+              }
+      
+            
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No valid data found in response.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+        setFilteredData([]);
+      }
+    } catch (error) {
+        console.error("Error filtering cases:", error);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to fetch filtered data. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+  } finally {
+    setIsLoading(false); // Ensure loading state is reset
+  }
+  };
+
+
+      // setIsLoading(true); // Set loading state to true
+      // const response = await List_FTL_LOD_Cases(payload).catch((error) => {
+      //   if (error.response && error.response.status === 404) {
+      //     Swal.fire({
+      //       title: "No Results",
+      //       text: "No matching data found for the selected filters.",
+      //       icon: "warning",
+      //       allowOutsideClick: false,
+      //       allowEscapeKey: false,
+      //     });
+      //     setFilteredData([]);
+      //     return null;
+      //   } else {
+      //     throw error;
+      //   }
+      // });
+      // console.log("Response from API:", response);
+      // setIsLoading(false); // Set loading state to false
+
+  //       const cases = response.data.cases;
+  //       console.log("Valid data received:", cases);
+
+  //       const totalPages = Math.ceil(
+  //         response.data.pagination.total / rowsPerPage
+  //       );
+  //       setTotalPages(totalPages);
+  //       setTotalAPIPages(response.data.pagination.pages);
+
+  //       setFilteredData((prevData) => [...prevData, ...cases]);
+  //     } else {
+  //       console.error(
+  //         "No valid FTL LOD case data found in response:",
+  //         response
+  //       );
+  //       setFilteredData([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error filtering cases:", error);
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: "Failed to fetch filtered data. Please try again.",
+  //       icon: "error",
+  //     });
+  //   }
+  // };
+  
+
+  useEffect(() => {
+    if (isMoreDataAvailable && currentPage > maxCurrentPage) {
+     setMaxCurrentPage(currentPage);
+      handleFilter({
+        ...committedFilters,
+        page: currentPage
+      }); // Call the filter function only after the page increment
+    }
+  }, [currentPage]);
+
+
+  // Handle pagination
+  // const handlePrevNext = (direction) => {
+  //   if (direction === "prev" && currentPage > 1) {
+  //     setCurrentPage(currentPage - 1);
+  //   } else if (direction === "next" && currentPage < totalPages) {
+  //     setCurrentPage(currentPage + 1);
+  //   }
+  // };
+   const handlePrevNext = (direction) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      // console.log("Current Page:", currentPage);
+    } else if (direction === "next") {
+      if (isMoreDataAvailable) {
+        setCurrentPage(currentPage + 1);
+      } else {
+        if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
+          setCurrentPage(currentPage + 1);
+        }
+      }
+      // console.log("Current Page:", currentPage);
+    }
+  };
+
+  const handleFilterButton = () => {
+    // Reset to the first page
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setTotalPages(0); // Reset total pages
+    setMaxCurrentPage(0); // Reset max current page
+   
+   const isValid = filterValidations(); // Validate filters before applying
+    if (!isValid) {
+      return; // If validation fails, do not proceed
+    } else {
+      setCommittedFilters({
+        caseId,
+        account_no,
+        status,
+        fromDate,
+        toDate
+      });
+      setFilteredData([]); // Clear previous results
+      if (currentPage === 1) {
+        // callAPI();
+        handleFilter({
+          arrearsAmount,
+          status,
+          fromDate,
+          toDate,
+          page: 1
+        });
+      } else {
+        setCurrentPage(1);
+      }
+    }
+  }
+
+  const handleClear = () => {
+    setArrearsAmount("");
+    setStatus("");
+    setFromDate(null);
+    setToDate(null);
+    setSearchQuery("");
+    // setIsFilterApplied(false); // Reset filter applied state
+    setIsMoreDataAvailable(true); // Reset more data available state
+    setMaxCurrentPage(0); // Reset max current page
+    setTotalPages(0); // Reset total pages
+    setFilteredData([]); // Clear filtered data
+    // setTotalAPIPages(1); // Reset total API pages
+
+    setCommittedFilters({
+      caseId: "",
+      status: "",
+      arrearsAmount: "",
+      account_no: "",
+      fromDate: null,
+      toDate: null
+    }); 
+    if (currentPage != 1) {
+      setCurrentPage(1); // Reset to page 1
+    } else {
+      setCurrentPage(0); // Temp set to 0
+      setTimeout(() => setCurrentPage(1), 0); // Reset to 1 after
+    } 
+  };
+
   // display loading animation when data is loading
   if (isLoading) {
     return (
@@ -895,123 +692,142 @@ export default function FTLLODCaseList() {
   }
 
   return (
-    <div className={GlobalStyle.fontPoppins}>
-      {/* Title */}
-      <h1 className={GlobalStyle.headingLarge}>FTL LOD List </h1>
+    <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
+      <div className={"flex flex-col flex-1 " }>
+        
+        {/* Title */}
+        <h1 className={GlobalStyle.headingLarge + " mb-6"}>FTL LOD List </h1>
 
-      <div className={`${GlobalStyle.cardContainer} w-full mb-8 mt-8`}>
-        <div className="flex items-center justify-end w-full space-x-6">
-          {/* Status Select Dropdown */}
-          <select
-            name="status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className={`${GlobalStyle.selectBox} w-32 md:w-40`}
-          >
-            <option value="" disabled>
-              Status
-            </option>
-            <option value="Pending FTL LOD">Pending FTL LOD</option>
-            <option value="Initial FTL LOD">Initial FTL LOD</option>
-            <option value="FTL LOD Settle Pending">
-              FTL LOD Settle Pending
-            </option>
-            <option value="FTL LOD Settle Open-Pending">
-              FTL LOD Settle Open-Pending
-            </option>
-            <option value="FTL LOD Settle Active">FTL LOD Settle Active</option>
-          </select>
-
-          <select
-            className={GlobalStyle.selectBox}
-            value={arrearsAmount}
-            onChange={(e) => setArrearsAmount(e.target.value)}
-          >
-            <option value="" disabled>
-              Arrears band
-            </option>
-            {Array.isArray(arrearsBandList) && arrearsBandList.length > 0 ? (
-              arrearsBandList.map(({ key, value }) => (
-                <option key={key} value={key}>
-                  {value}
+        <div className = "flex justify-end">
+          <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
+            <div className="flex flex-wrap items-center justify-end w-full space-x-4 space-y-3">
+              {/* Status Select Dropdown */}
+              <select
+                name="status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className={`${GlobalStyle.selectBox} mt-3 `}
+              >
+                <option value="" disabled>
+                  Status
                 </option>
-              ))
-            ) : (
-              <option disabled>No arrears bands available</option>
-            )}
-          </select>
+                <option value="Pending FTL LOD">Pending FTL LOD</option>
+                <option value="Initial FTL LOD">Initial FTL LOD</option>
+                <option value="FTL LOD Settle Pending">FTL LOD Settle Pending</option>
+                <option value="FTL LOD Settle Open-Pending">FTL LOD Settle Open-Pending</option>
+                <option value="FTL LOD Settle Active">FTL LOD Settle Active</option>
+              </select>
 
-          <div className={GlobalStyle.datePickerContainer}>
-            <label className={GlobalStyle.dataPickerDate}>Date</label>
-            <DatePicker
-              selected={fromDate}
-              onChange={handlestartdatechange}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="From"
-              className={GlobalStyle.inputText}
-            />
-            <DatePicker
-              selected={toDate}
-              onChange={handleenddatechange}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="To"
-              className={GlobalStyle.inputText}
-            />
+              <select
+                className={`${GlobalStyle.selectBox} mt-3`}
+                value={arrearsAmount}
+                onChange={(e) => setArrearsAmount(e.target.value)}
+              >
+              <option value="" disabled>
+                Arrears band
+              </option>
+              {Array.isArray(arrearsBandList) && arrearsBandList.length > 0 ? (
+                  arrearsBandList.map(({ key, value }) => (
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
+                  ))
+                ) : (
+                    <option disabled>No arrears bands available</option>
+                )}
+              </select>
+            
+                <label className={GlobalStyle.dataPickerDate}>Date</label>
+                  <DatePicker
+                    selected={fromDate}
+                    onChange={handlestartdatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="From"
+                    className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                  />
+                  <DatePicker
+                    selected={toDate}
+                    onChange={handleenddatechange}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="To"
+                    className={`${GlobalStyle.inputText} w-full  sm:w-auto`}
+                  />
+              </div>
+
+              {/* <button
+                onClick={handleFilterButton}
+                className={`${GlobalStyle.buttonPrimary}  w-full sm:w-auto`}
+              >
+                Filter
+              </button>
+              <button
+                className={`${GlobalStyle.buttonRemove}  w-full sm:w-auto`}
+                onClick={handleClear} >
+                  Clear
+              </button> */}
+              <div className="flex flex-col sm:flex-row justify-end sm:space-x-4 space-y-2 sm:space-y-0 mt-4 w-full">
+                  <button
+                    onClick={handleFilterButton}
+                    className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+                   >
+                    Filter
+                  </button>
+                  <button
+                    className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
+                    onClick={handleClear}
+                  >
+                      Clear
+                  </button>
+              </div>
+              
+            </div>
           </div>
-
-          <button
-            onClick={handleFilterButton}
-            className={`${GlobalStyle.buttonPrimary}`}
-          >
-            Filter
-          </button>
-          <button onClick={handleClear} className={GlobalStyle.buttonRemove}>
-            Clear
-          </button>
         </div>
-      </div>
+        
 
-      {/* Search Section */}
-      <div className="flex justify-start mt-10 mb-4">
-        <div className={GlobalStyle.searchBarContainer}>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={GlobalStyle.inputSearch}
-          />
-          <FaSearch className={GlobalStyle.searchBarIcon} />
-        </div>
-      </div>
+          {/* Search Section */}
+          <div className="flex justify-start mt-10 mb-4">
+            <div className={GlobalStyle.searchBarContainer}>
+              <input
+                type="text"
+                placeholder=""
+                value={searchQuery}
+                onChange={(e) => {setCurrentPage(1); setSearchQuery(e.target.value)}}
+                className={GlobalStyle.inputSearch}
+              />
+              <FaSearch className={GlobalStyle.searchBarIcon} />
+            </div>
+          </div>
+        
 
-      {/* Table Section */}
-      <div className={GlobalStyle.tableContainer}>
-        <table className={GlobalStyle.table}>
-          <thead className={GlobalStyle.thead}>
-            <tr>
-              <th scope="col" className={GlobalStyle.tableHeader}>
-                Case ID
-              </th>
-              <th scope="col" className={GlobalStyle.tableHeader}>
-                Status
-              </th>
-              <th scope="col" className={GlobalStyle.tableHeader}>
-                Account No
-              </th>
-              <th scope="col" className={GlobalStyle.tableHeader}>
-                Amount
-              </th>
+        {/* Table Section */}
+        <div className={`${GlobalStyle.tableContainer} mt-10 overflow-x-auto`}>
+          <table className={GlobalStyle.table}>
+            <thead className={GlobalStyle.thead}>
+              <tr>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Case ID
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Status
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Account No
+                </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Amount
+                </th>
 
-              <th scope="col" className={GlobalStyle.tableHeader}>
-                Expire Date
-              </th>
+                <th scope="col" className={GlobalStyle.tableHeader}>
+                  Expire Date
+                </th>
 
               <th scope="col" className={GlobalStyle.tableHeader}></th>
             </tr>
           </thead>
           <tbody>
             {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
-              filteredDataBySearch.map((item, index) => (
+              filteredDataBySearch.slice(startIndex, endIndex).map((item, index) => (
                 <tr
                   key={item.case_id || index}
                   className={
@@ -1029,17 +845,17 @@ export default function FTLLODCaseList() {
                     } // Pass the full object or just case_id
                     title="Click to view details"
                   >
-                    {item.case_id || "N/A"}
+                    {item.case_id || null}
                   </td>
 
                   <td
                     className={`${GlobalStyle.tableData} flex justify-center items-center pt-6`}
                   >
-                    {getStatusIcon(item.case_current_status) || "N/A"}
+                    {getStatusIcon(item.case_current_status) || null}
                   </td>
 
                   <td className={`${GlobalStyle.tableData} `}>
-                    {item.account_no || "N/A"}
+                    {item.account_no || null}
                   </td>
 
                   <td className={GlobalStyle.tableCurrency}>
@@ -1048,7 +864,7 @@ export default function FTLLODCaseList() {
                           style: "currency",
                           currency: "LKR",
                         })
-                      : "N/A"}
+                      : null}
                   </td>
 
                   <td className={`${GlobalStyle.tableData} `}>
@@ -1058,7 +874,7 @@ export default function FTLLODCaseList() {
                       ? new Date(
                           item.ftl_lod[0].expire_date
                         ).toLocaleDateString("en-GB")
-                      : "N/A"}
+                      : null}
                   </td>
 
                   <td className={`${GlobalStyle.tableData} text-center`}>
@@ -1070,55 +886,87 @@ export default function FTLLODCaseList() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="text-center">
+                <td colSpan={6} className={GlobalStyle.tableData + " text-center"}>
                   No cases available
                 </td>
               </tr>
             )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Section */}
-      <div className={GlobalStyle.navButtonContainer}>
-        <button
-          onClick={() => handlePrevNext("prev")}
-          disabled={currentPage === 1}
-          className={`${GlobalStyle.navButton} ${
-            currentPage === 1 ? "cursor-not-allowed" : ""
-          }`}
-        >
+            </tbody>
+          </table>
+        </div>
+      
+          {/* Pagination Section */}
+          {/* <div className={GlobalStyle.navButtonContainer}>
+            <button
+              onClick={() => handlePrevNext("prev")}
+              disabled={currentPage === 1}
+              className={`${GlobalStyle.navButton} ${
+              currentPage === 1 ? "cursor-not-allowed" : ""
+            }`}
+          >
           <FaArrowLeft />
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => handlePrevNext("next")}
-          disabled={currentPage === totalPages}
-          className={`${GlobalStyle.navButton} ${
-            currentPage === totalPages ? "cursor-not-allowed" : ""
-          }`}
-        >
-          <FaArrowRight />
-        </button>
-      </div>
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => handlePrevNext("next")}
+              disabled={currentPage === totalPages}
+              className={`${GlobalStyle.navButton} ${
+              currentPage === totalPages ? "cursor-not-allowed" : ""
+              }`}
+          >
+              <FaArrowRight />
+              </button>
+          </div> */}
+          {filteredDataBySearch.length > 0 && (<div className={GlobalStyle.navButtonContainer}>
+                  <button
+                    onClick={() => handlePrevNext("prev")}
+                    disabled={currentPage <= 1}
+                    className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+                  >
+                    <FaArrowLeft />
+                  </button>
+                  <span className={`${GlobalStyle.pageIndicator} mx-4`}>
+                    Page {currentPage} 
+                  </span>
+                  <button
+                    onClick={() => handlePrevNext("next")}
+                    disabled={
+                      searchQuery
+                        ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                        : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage
+                        )}
+                    className={`${GlobalStyle.navButton} ${(searchQuery
+                        ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                        : !isMoreDataAvailable && currentPage >= Math.ceil(filteredData.length / rowsPerPage))
+                        ? "cursor-not-allowed"
+                        : ""
+                      }`}
+                    >
+                    <FaArrowRight />
+                      </button>
+                    </div>)}
 
-      <button
-        onClick={() => navigate(-1)}
-        className={`${GlobalStyle.buttonPrimary} `}
-      >
-        <FaArrowLeft />
-      </button>
+                <button
+                  onClick={() => navigate(-1)}
+                  className={`${GlobalStyle.buttonPrimary} `}
+                >
+                  <FaArrowLeft />
+                </button>
 
-      {/* Render the popup when needed */}
-      {isPopupOpen && selectedItem && (
-        <FTL_LOD_Cus_Response_update
-          isOpen={isPopupOpen}
-          onClose={() => setIsPopupOpen(false)}
-          selectedItem={selectedItem}
-        />
-      )}
-    </div>
+            {/* Render the popup when needed */}
+              {isPopupOpen && selectedItem && (
+                <FTL_LOD_Cus_Response_update
+                  isOpen={isPopupOpen}
+                  onClose={() => setIsPopupOpen(false)}
+                  selectedItem={selectedItem}
+                />
+              )}
+        </div>
+      
+   
+
   );
-}
+};
+export default FTLLODCaseList;

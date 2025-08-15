@@ -11,7 +11,7 @@ import { GrConfigure } from "react-icons/gr";
 import { FaListCheck } from "react-icons/fa6";
 import { BiAlignLeft, BiSolidDiamond } from "react-icons/bi";
 import { HiOutlineDocumentCheck } from "react-icons/hi2";
-import { MdDownload } from "react-icons/md";
+import { MdDownload, MdUpload } from "react-icons/md";
 
 import { useState, useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -91,6 +91,13 @@ const Sidebar = ({ onHoverChange }) => {
     },
 
     {
+      icon: MdUpload,
+      label: "Bulk Upload",
+      link: "/incident/upload-log",
+      roles: ["superadmin", "admin"],
+    },
+
+    {
       icon: GoChecklist,
       label: "Incident List",
       roles: ["superadmin", "admin", "user"],
@@ -98,21 +105,22 @@ const Sidebar = ({ onHoverChange }) => {
         {
           icon: CgEditFade,
           label: " Register Accounts",
+          link: "/Incident/Incident_List",
           roles: ["superadmin", "admin"],
-          subItems: [
-            {
-              icon: CgEditFade,
-              label: "Bulk",
-              link: "/incident/upload-log",
-              roles: ["superadmin", "admin"],
-            },
-            {
-              icon: CgEditFade,
-              label: "Individual",
-              link: "/Incident/Incident_List",
-              roles: ["superadmin", "admin"],
-            },
-          ],
+          // subItems: [
+            // {
+            //   icon: CgEditFade,
+            //   label: "Bulk",
+            //   link: "/incident/upload-log",
+            //   roles: ["superadmin", "admin"],
+            // },
+            // {
+            //   icon: CgEditFade,
+            //   label: "Individual",
+            //   link: "/Incident/Incident_List",
+            //   roles: ["superadmin", "admin"],
+            // },
+          // ],
         },
         // { icon: CgEditFade, label: "New Reg Incidents", link: "", roles: ["superadmin", "admin"] },
         {
@@ -121,12 +129,12 @@ const Sidebar = ({ onHoverChange }) => {
           link: "/Distribution/filtered-incident",
           roles: ["superadmin", "admin"],
         },
-        {
-          icon: CgEditFade,
-          label: "Bulk Upload History",
-          link: "/incident/upload-log",
-          roles: ["superadmin", "admin"],
-        },
+        // {
+        //   icon: CgEditFade,
+        //   label: "Bulk Upload History",
+        //   link: "/incident/upload-log",
+        //   roles: ["superadmin", "admin"],
+        // },
         {
           icon: CgEditFade,
           label: "Rejected log",
@@ -188,7 +196,50 @@ const Sidebar = ({ onHoverChange }) => {
           roles: ["superadmin", "admin"],
           link: "/MediationBoard/MediationBoardCaseList",
         },
+        {
+          icon: CgEditFade,
+          label: "FTL LOD",
+          roles: ["superadmin", "admin"],
+          link: "/pages/flt-lod/ftl-lod-list",
+        },
         // { icon: CgEditFade, label: "FTL LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
+        { icon: CgEditFade,
+          label: "LOD",
+          roles: ["superadmin", "admin", "user"],
+          subItems: [
+            { icon: CgEditFade, label: "DS List", link: "/pages/LOD/DigitalSignatureLOD", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "LOD Log", link: "/pages/LOD/LODLog", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "FR Log", link: "/pages/LOD/FinalReminderList", roles: ["superadmin", "admin"] },
+          ]
+        },
+        // {
+        //   icon: CgEditFade,
+        //   label: "Dispute",
+        //   roles: ["superadmin", "admin"],
+        //   link: "",
+        // },
+        {
+          icon: CgEditFade,
+          label: "Litigation",
+          roles: ["superadmin", "admin"],
+          link: "/pages/Litigation/Litigation_List",
+        },
+        {
+          icon: CgEditFade,
+          label: "Disposed list",
+          roles: ["superadmin", "admin"],
+          subItems: [
+            // { icon: CgEditFade, label: "Write Off list", link: "", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "Abandoned List", link: "/pages/Abnormal/Abondoned_Case_Log", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "Withdraw list", link: "/pages/Abnormal/Withdraw_Case_Log", roles: ["superadmin", "admin"] },
+          ],
+        },
+        {
+          icon: CgEditFade,
+          label: "Closed list",
+          roles: ["superadmin", "admin"],
+          link: "/pages/Abnormal/Case_Closed_Log",
+        },
         // { icon: CgEditFade, label: "Direct LOD", link: "/dashboard", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Litigation", link: "/pages/Litigation/Litigation_List", roles: ["superadmin", "admin"] },
         // { icon: CgEditFade, label: "Dispute", link: "/dashboard", roles: ["superadmin", "admin"] },
@@ -435,9 +486,8 @@ const Sidebar = ({ onHoverChange }) => {
               <Link
                 to={item.link || "#"}
                 onClick={() => handleClick(0, index, !!item.subItems)}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition ${
-                  isActive ? "bg-blue-400 shadow-lg" : "hover:bg-blue-400"
-                }`}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition ${isActive ? "bg-blue-400 shadow-lg" : "hover:bg-blue-400"
+                  }`}
               >
                 <div className="flex items-center gap-x-4">
                   <item.icon className="w-6 h-6 text-white" />

@@ -242,7 +242,7 @@ export default function OpenIncident() {
         }
 
         const taskParams = {
-          Incident_Status: "Open No Agent",
+          Incident_direction: "Open No Agent",
           Proceed_By: user,
           Proceed_Dtm: new Date(),
         };
@@ -392,7 +392,8 @@ export default function OpenIncident() {
               <tr>
                 <th className={GlobalStyle.tableHeader}></th>
                 <th className={GlobalStyle.tableHeader}>ID</th>
-                <th className={GlobalStyle.tableHeader}>Status</th>
+                {/* <th className={GlobalStyle.tableHeader}>Incident Direction</th> */}
+                <th className={GlobalStyle.tableHeader}>Service Type</th>
                 <th className={GlobalStyle.tableHeader}>Account No</th>
                 <th className={GlobalStyle.tableHeader}>Action</th>
                 <th className={GlobalStyle.tableHeader}>Amount (LKR)</th>
@@ -422,19 +423,11 @@ export default function OpenIncident() {
                         {row.Incident_Id}
                       </a>
                     </td>
+                    {/* <td className={GlobalStyle.tableData}>{row.Incident_direction}
+                    </td> */}
                     <td className={GlobalStyle.tableData}>
-                      <div className="flex justify-center items-center h-full">
-                        {row.Incident_Status === "Open No Agent" && (
-                          <div data-tooltip-id="incident-tooltip">
-                            <img
-                              src={Open_No_Agent}
-                              alt="open no agent"
-                              className="w-5 h-5"
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <Tooltip id="incident-tooltip" place="bottom" content="Open No Agent" />
+                     
+                    {row.drc_commision_rule}
                     </td>
                     <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
                     <td className={GlobalStyle.tableData}>{row.Actions}</td>

@@ -125,11 +125,12 @@ export default function DirectLODSendingIncident() {
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
 
         return {
-          id: item.Incident_Id || "N/A",
-          status: item.Incident_Status || "N/A",
-          account_no: item.Account_Num || "N/A",
-          amount: item.Arrears || "N/A",
-          source_type: item?.Source_Type || "N/A",
+          id: item.Incident_Id || "",
+          Incident_direction:item.Incident_direction||"",
+          drc_commision_rule: item.drc_commision_rule || "",
+          account_no: item.Account_Num || "",
+          amount: item.Arrears || "",
+          source_type: item?.Source_Type || "",
           created_dtm: createdDate instanceof Date && !isNaN(createdDate) ? (createdDate.toLocaleString("en-GB", {
             day: "2-digit",
             month: "2-digit",
@@ -138,7 +139,7 @@ export default function DirectLODSendingIncident() {
             minute: "2-digit",
             second: "2-digit",
             hour12: true, // Keeps AM/PM format
-          })) : "N/A",
+          })) : "",
         };
       });
       setTableData(formattedData);
@@ -214,8 +215,9 @@ export default function DirectLODSendingIncident() {
       const response = await Create_Task_Download_Direct_LOD_Sending(filteredParams);
       if (response.status === 201) {
         Swal.fire({
-          title: 'Success',
-          text: 'Task successfully created',
+           
+          title: "Task Created Successfully!",
+          text: "Task ID: " + response.data.Task_Id,
           icon: 'success',
           confirmButtonText: 'OK',
           confirmButtonColor: "#28a745"
@@ -411,10 +413,13 @@ export default function DirectLODSendingIncident() {
     if (toDate && date > toDate) {
 
       Swal.fire({
-        title: "Error",
+        title: "Warning",
         text: "The 'From' date cannot be later than the 'To' date.",
         icon: "error",
         confirmButtonColor: "#f1c40f",
+
+
+        
       });;
     } else if (toDate) {
       // Calculate month gap
@@ -446,9 +451,11 @@ export default function DirectLODSendingIncident() {
     if (fromDate && date < fromDate) {
 
       Swal.fire({
-        title: "Error",
-        text: "The 'To' date cannot be earlier than the 'From' date.",
-        icon: "error",
+         title: "Warning",
+        text: "To date should be greater than or equal to From date",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         confirmButtonColor: "#f1c40f",
       });
     } else if (fromDate) {
@@ -742,7 +749,7 @@ export default function DirectLODSendingIncident() {
                   placeholder=""
                   value={searchQuery}
                   onChange={(e) => {
-                      setCurrentPage(1); // Reset to page 1 on search
+                    // setCurrentPage(1); // Reset to page 1 on search
                       setSearchQuery(e.target.value)
                   }}
                   className={GlobalStyle.inputSearch}
@@ -758,8 +765,9 @@ export default function DirectLODSendingIncident() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       ID
                     </th>
+               
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      Status
+                      Service Type
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Account No.
@@ -798,25 +806,9 @@ export default function DirectLODSendingIncident() {
                           {row.id}
                         </a>
                       </td>
+                      
                       <td className={GlobalStyle.tableData}>
-                        <div className="flex justify-center items-center h-full">
-                          {row.status.toLowerCase() === "direct lod" && (
-                            <div >
-                              <img
-                                src={Direct_LOD}
-                                alt="Direct LOD"
-                                className="w-5 h-5"
-                                data-tooltip-id="direct-lod-tooltip"
-                              />
-                            </div>
-                          )}
-                          <Tooltip
-                            id="direct-lod-tooltip"
-                            place="bottom"
-                            content="Direct LOD"
-                            className="tooltip"
-                          />
-                        </div>
+                        {row.drc_commision_rule}
                       </td>
 
                       <td className={GlobalStyle.tableData}>{row.account_no}</td>

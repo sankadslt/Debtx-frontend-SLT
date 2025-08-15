@@ -105,14 +105,17 @@ export default function CollectOnlyCPECollect() {
         const createdDate = createdDateStr ? new Date(createdDateStr) : null;
 
         return {
-          id: item.Incident_Id || "N/A",
-          status: item.Incident_Status || "N/A",
-          account_num: item.Account_Num || "N/A",
-          action: item.Actions || "N/A",
-          source_type: item?.Source_Type || "N/A",
+          id: item.Incident_Id || "",
+          
+          Incident_direction :item.Incident_direction || "",
+          drc_commision_rule:item.drc_commision_rule||"",
+          account_num: item.Account_Num || "",
+          Arrears: item.Arrears || "",
+          action: item.Actions || "",
+          source_type: item?.Source_Type || "",
           created_dtm: createdDate instanceof Date && !isNaN(createdDate)
-            ? createdDate.toLocaleString("en-GB") || "N/A"
-            : "N/A",
+            ? createdDate.toLocaleString("en-GB") || ""
+            : "",
         };
       });
 
@@ -195,7 +198,7 @@ export default function CollectOnlyCPECollect() {
       if (response.status === 201) {
         Swal.fire({
           title: "Success",
-          text: "Task successfully created",
+          text: "Task ID: " + response.data.Task_Id,
           icon: "success",
           confirmButtonText: "OK",
           confirmButtonColor: "#28a745",
@@ -425,10 +428,12 @@ export default function CollectOnlyCPECollect() {
   const handleToDateChange = (date) => {
     if (fromDate && date < fromDate) {
       Swal.fire({
-        title: "Error",
-        text: "The 'To' date cannot be earlier than the 'From' date.",
-        icon: "error",
-        confirmButtonColor: "#f1c40f",
+        title: "Warning",
+        text: "To date should be greater than or equal to From date",
+        icon: "warning",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonColor: "#f1c40f",  
       });
     } else if (fromDate) {
       const diffInMs = date - fromDate;
@@ -715,11 +720,16 @@ export default function CollectOnlyCPECollect() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       ID
                     </th>
+               
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      Status
+                      Service Type
                     </th>
+                    
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Account No
+                    </th>
+                       <th scope="col" className={GlobalStyle.tableHeader}>
+                      Amount
                     </th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Action
@@ -752,31 +762,23 @@ export default function CollectOnlyCPECollect() {
                           {row.id}
                         </a>
                       </td>
+
+                   
                       <td className={GlobalStyle.tableData}>
-                        <div className="flex justify-center items-center h-full">
-                          {row.status === "Open CPE Collect" && (
-                            <div>
-                              <img
-                                src={Open_CPE_Collect}
-                                alt="Open CPE Collect"
-                                className="w-5 h-5"
-                                data-tooltip-id="open-cpe-collect-tooltip"
-                              />
-                            </div>
-                          )}
-                          <Tooltip
-                            id="open-cpe-collect-tooltip"
-                            place="bottom"
-                            content="Open CPE Collect"
-                            className="tooltip"
-                          />
-                        </div>
+                        {row.drc_commision_rule}
                       </td>
 
                       <td className={GlobalStyle.tableData}>
                         {row.account_num}
                       </td>
-
+                      <td className={GlobalStyle.tableCurrency}>
+  {typeof row.Arrears === 'number'
+    ? row.Arrears.toLocaleString("en-LK", {
+        style: "currency",
+        currency: "LKR",
+      })
+    : ""}
+</td>
                       <td className={GlobalStyle.tableData}>{row.action}</td>
                       <td className={GlobalStyle.tableData}>
                         {row.source_type}

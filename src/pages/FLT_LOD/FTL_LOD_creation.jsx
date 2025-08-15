@@ -1,7 +1,41 @@
-import React from "react";
-import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 
-export default function FTL_LOD_creation() {
+import { useState, useEffect } from "react";
+import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
+import { useNavigate } from "react-router-dom";
+import { FTL_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
+
+export default function FTL_LOD_Creation() {
+
+  
+  const navigate = useNavigate();
+  // Function to handle navigation to change details form
+  const handleChangeDetails = () => {
+    navigate("/pages/flt-lod/ftl-lod-change-details-form");
+  };
+
+  // State to hold case details
+  const [caseDetails, setCaseDetails] = useState(null);
+  
+  useEffect(() => {
+    // Fetch case details when the component mounts
+    const fetchCaseDetails = async () => {
+      try {
+        //const case_id = "12345"; // Replace with actual case ID
+        const caseDetails = await FTL_LOD_Case_Details(case_id);
+        console.log("Case Details:", caseDetails);
+      } catch (error) {
+        console.error("Error fetching case details:", error);
+      }
+    };
+
+    fetchCaseDetails();
+  }, []);
+
+  // Function to handle PDF creation
+  const handleCreatePDF = () => {
+    // Logic for creating PDF goes here
+    console.log("Creating PDF...");
+  };
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
@@ -29,7 +63,9 @@ export default function FTL_LOD_creation() {
         </div>
       </div>
       <div className="flex items-center justify-end gap-4 mt-4 mb-4">
-        <button className={`${GlobalStyle.buttonPrimary}`}>
+        <button 
+        onClick= {() => navigate("/pages/flt-lod/ftl-lod-change-details-form")}
+        className={`${GlobalStyle.buttonPrimary}`}>
           Change Details
         </button>
 
