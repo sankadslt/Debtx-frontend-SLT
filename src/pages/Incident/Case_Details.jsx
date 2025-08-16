@@ -428,7 +428,7 @@ const CaseDetails = () => {
                
               ],
             [
-              { label: 'DRC Commission Rule', value: basicInfo.drcCommissionRule || '' },
+              { label: 'Service Type', value: basicInfo.drcCommissionRule || '' },
               { label: 'Monitor Months', value: basicInfo.monitorMonths || '' },
               { label: 'Commission', value: caseData.basicInfo.commission || '' },
               { label: 'Case Distribution Batch ID', value: caseData.basicInfo.caseDistributionBatchId || '' },
