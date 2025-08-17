@@ -285,8 +285,8 @@ const IncidentDetails = () => {
             [
                 { label: 'Incident ID', value: getValue('incidentInfo.incidentId', 'Incident_Id') },
                 { label: 'Case ID', value: getValue('caseId', 'Case_Id') },
-                { label: 'Doc Version', value: getValue('docVersion', 'DocVersion') },
-                { label: 'Customer Name', value: getValue('basicInfo.customerName', 'Customer_Details.Customer_Name') },
+                 
+             //   { label: 'Customer Name', value: getValue('basicInfo.customerName', 'Customer_Details.Customer_Name') },
                 { label: 'Arrears Amount', value: getValue('basicInfo.arrearsAmount', 'Arrears') },
                
             ],
@@ -295,7 +295,7 @@ const IncidentDetails = () => {
                  { label: 'Account No', value: getValue('basicInfo.accountNum', 'Account_Num') },
                 { label: 'Created By', value: getValue('incidentInfo.createdBy', 'Created_By') },
                 { label: 'Arrears Band', value: getValue('basicInfo.arrearsBand', 'Arrears_Band') },
-                { label: 'DRC Commission Rule', value: getValue('incidentInfo.drcCommissionRule', 'Drc_Commision_Rule') },
+                { label: 'Service Type', value: getValue('incidentInfo.drcCommissionRule', 'Drc_Commision_Rule') },
                 { label: 'Created Date', value: formatDate(getValue('incidentInfo.createdDtm', 'Created_Dtm')) },
               
             ], 
@@ -534,9 +534,9 @@ const IncidentDetails = () => {
             'Incident_Status_Dtm': ['incidentStatusDtm', 'incidentInfo.incidentStatusDtm'],
             'Validity_period': ['validityPeriod'],
             'updatedAt': ['UpdatedAt', 'updated_at', 'Updated_At'],
-            'Days_Count': ['daysCount', 'incidentInfo.daysCount'],
+            
             'Drc_Commision_Rule': ['drcCommissionRule', 'incidentInfo.drcCommissionRule'],
-            'BSS_Arrears_Amount': ['bssArrearsAmount', 'basicInfo.bssArrearsAmount'],
+           // 'BSS_Arrears_Amount': ['bssArrearsAmount', 'basicInfo.bssArrearsAmount'],
             'Monitor_Months': ['monitorMonths', 'basicInfo.monitorMonths'],
             'Commission': ['commission', 'basicInfo.commission'],
             'Case_Distribution_Batch_Id': ['caseDistributionBatchId', 'basicInfo.caseDistributionBatchId'],
@@ -547,9 +547,8 @@ const IncidentDetails = () => {
             'Remark': ['remark', 'basicInfo.remark'],
             'Batch_Id_Tag_Dtm': ['batchIdTagDtm'],
             'Filtered_Reason': ['filteredReason', 'basicInfo.filteredReason'],
-            'Batch_Id': ['batchId'],
-            'DocVersion': ['docVersion'],
-            'Doc_Version': ['docVersion']
+            'Batch_Id': ['batchId']
+           
         };
         
         const alternatives = alternativeFields[rawField] || [];
@@ -591,7 +590,7 @@ const IncidentDetails = () => {
                                 {[
                                     { label: 'Incident ID', value: getValue('incidentInfo.incidentId', 'Incident_Id') },
                                     { label: 'Created Dtm', value: formatDate(getValue('incidentInfo.createdDtm', 'Created_Dtm')) },
-                                    { label: 'Days Count', value: getValue('incidentInfo.daysCount', 'Days_Count') },
+                                   
                                     { label: 'Incident Status', value: getValue('incidentInfo.incidentStatus', 'Incident_Status') },
                                 ].map((item, index) => (
                                     <div key={`left-incident-info-${index}`} className="flex justify-between">
