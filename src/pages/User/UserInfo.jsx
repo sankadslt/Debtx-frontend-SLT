@@ -974,95 +974,29 @@ const UserInfo = () => {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="mb-6 sm:mb-8 w-full">
+                <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 -mt-1 ml-8 underline text-left font-semibold`}>
+                  User Profile
+                </h2>
+
+                <table className="mb-6 sm:mb-8 w-full ml-24">
                   <tbody>
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User type<span className="sm:hidden">:</span>
+                        User Name<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.user_type || "Not specified"}
+                        {userInfo.username || "Not specified"}
                       </td>
                     </tr>
 
-                    <tr className="block sm:table-row">
+                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
                         User Mail<span className="sm:hidden">:</span>
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
                         {userInfo.email || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Contact No.<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {contactNumbers[0] || "Not specified"}
-                      </td>
-                    </tr>
-
-                    {/* <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Login Method<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.can_user_login || "Not specified"}
-                      </td>
-                    </tr> */}
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        User Role<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.roles?.map(role => formatRoleLabel(role)).join(", ") || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Created On<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(userInfo.created_on) || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Created By<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.created_by || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Status On<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {formatDate(userInfo.status_on) || "Not specified"}
-                      </td>
-                    </tr>
-
-                    <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        Status By<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.status_by || "Not specified"}
                       </td>
                     </tr>
 
@@ -1085,6 +1019,94 @@ const UserInfo = () => {
                         {userInfo.user_designation || "Not specified"}
                       </td>
                     </tr>
+                     </tbody>
+                </table>
+
+                    <table className="mb-6 sm:mb-8 w-full ml-24">
+                  <tbody>
+                    <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 -mt-2 -ml-12 underline text-left font-semibold`}>
+                  Contact Details
+                </h2>
+
+                <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Contact 01<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {contactNumbers[0] || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Contact 02<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {contactNumbers[0] || "Not specified"}
+                      </td>
+                    </tr>
+
+                    </tbody>
+                    </table>
+                    
+                    <table className="mb-6 sm:mb-8 w-full ml-10 ">
+                  <tbody>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        User type<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 pl-14 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.user_type || "Not specified"}
+                      </td>
+                    </tr>
+
+                                       
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Login Method<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 pl-14 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.can_user_login || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        User Role<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 pl-14 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.roles?.map(role => formatRoleLabel(role)).join(", ") || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Created On<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 pl-14 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {formatDate(userInfo.created_on) || "Not specified"}
+                      </td>
+                    </tr>
+
+                    <tr className="block sm:table-row">
+                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                        Created By<span className="sm:hidden">:</span>
+                      </td>
+                      <td className="w-4 pl-14 text-left hidden sm:table-cell">:</td>
+                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                        {userInfo.created_by || "Not specified"}
+                      </td>
+                    </tr>
+
+                                   
+          
                   </tbody>
                 </table>
               </div>
