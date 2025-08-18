@@ -47,6 +47,7 @@ const FTLLODCaseList = () => {
   //const [userData, setUserData] = useState(null);
 
   const [status, setStatus] = useState("");
+  const [arrearsBand, setArrearsBand] = useState("");
   const [arrearsAmount, setArrearsAmount] = useState("");
   const [account_no, setAccountNo] = useState("");
   const [fromDate, setFromDate] = useState(null);
@@ -89,6 +90,7 @@ const FTLLODCaseList = () => {
   const [committedFilters, setCommittedFilters] = useState({
     caseId: "",
     status: "",
+    arrearsBand: "",
     arrearsAmount: "",
     account_no: "",
     fromDate: null,
@@ -404,7 +406,7 @@ const FTLLODCaseList = () => {
 
   // Filter validation
   const filterValidations = () => {
-    if (!caseId && !arrearsAmount && !status && !fromDate && !toDate) {
+    if (!caseId && !arrearsBand && !arrearsAmount && !status && !fromDate && !toDate) {
       Swal.fire({
         title: "Warning",
         text: "At least one filter must be selected.",
@@ -462,7 +464,8 @@ const FTLLODCaseList = () => {
 
       const payload = {
         case_current_status: filters.status,
-        current_arrears_band: filters.arrearsAmount,
+        current_arrears_band: filters.arrearsBand,
+        current_arrears_amount: filters.arrearsAmount,
         date_from: formatDate(filters.fromDate) ,
         date_to: formatDate(filters.toDate),
         pages: filters.page ,
@@ -629,6 +632,8 @@ const FTLLODCaseList = () => {
       if (currentPage === 1) {
         // callAPI();
         handleFilter({
+          caseId,
+          arrearsBand,
           arrearsAmount,
           status,
           fromDate,
@@ -642,6 +647,8 @@ const FTLLODCaseList = () => {
   }
 
   const handleClear = () => {
+    setCaseId("");
+    setArrearsBand("");
     setArrearsAmount("");
     setStatus("");
     setFromDate(null);
@@ -657,6 +664,7 @@ const FTLLODCaseList = () => {
     setCommittedFilters({
       caseId: "",
       status: "",
+      arrearsBand: "",
       arrearsAmount: "",
       account_no: "",
       fromDate: null,
@@ -708,8 +716,8 @@ const FTLLODCaseList = () => {
 
               <select
                 className={`${GlobalStyle.selectBox} mt-3`}
-                value={arrearsAmount}
-                onChange={(e) => setArrearsAmount(e.target.value)}
+                value={arrearsBand}
+                onChange={(e) => setArrearsBand(e.target.value)}
               >
               <option value="" disabled>
                 Arrears band

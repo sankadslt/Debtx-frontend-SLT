@@ -12,16 +12,20 @@ export default function FLT_LOD_Change_Details_Form() {
   const { case_id } = useParams(); // Get case_id from URL parameters
   // const case_id = location.state?.caseid// Get case_id from URL parameters
   const navigate = useNavigate();
+  const item = location.state?.item;
   // const case_id = 1649
+
+  // State to hold case details
+  const [caseDetails, setCaseDetails] = useState(null);
 
 
 
   useEffect(() => {
     const fetchCaseDetails = async () => {
       try {
-         console.log("Case Details:", case_id);
+         console.log("Case Details:", item.case_id);
         // Replace 'case_id' with the actual case ID variable or prop
-        const caseDetails = await FLT_LOD_Case_Details(case_id);
+        const caseDetails = await FLT_LOD_Case_Details(item.case_id); // pass case_id
         console.log("Fetched Case Details:", caseDetails);
       } catch (error) {
         console.error("Error fetching case details:", error);
@@ -84,6 +88,7 @@ export default function FLT_LOD_Change_Details_Form() {
                     <input
                       type="text"
                       name="account_no"
+                      defaultValue={caseDetails?.account_no}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -92,7 +97,7 @@ export default function FLT_LOD_Change_Details_Form() {
                 <tr>
                   <td className={GlobalStyle.tableData}>Select Option :</td>
                   <td className={GlobalStyle.tableData}>
-                    <select name="event_source" className={`${GlobalStyle.selectBox} w-full`}>
+                    <select name="event_source" defaultValue={caseDetails?.event_source} className={`${GlobalStyle.selectBox} w-full`}>
                       <option value="">Event Source</option>
                       <option value="option1">Option 1</option>
                       <option value="option2">Option 2</option>
@@ -107,6 +112,7 @@ export default function FLT_LOD_Change_Details_Form() {
                     <input
                       type="text"
                       name="customer_name"
+                      defaultValue={caseDetails?.customer_name}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -117,7 +123,8 @@ export default function FLT_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
-                      name="address"
+                      name="full_address"
+                      defaultValue={caseDetails?.full_address}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -131,6 +138,7 @@ export default function FLT_LOD_Change_Details_Form() {
                       <input
                         type="text"
                         name={`additional_field_${index + 1}`}
+                        defaultValue={caseDetails?.[`additional_field_${index + 1}`]}
                         className={`${GlobalStyle.inputText} w-full`}
                       />
                     </td>
@@ -142,7 +150,8 @@ export default function FLT_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
-                      name="current_arrears_band"
+                      name="current_arrears_amount"
+                      defaultValue={caseDetails?.current_arrears_amount}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -154,6 +163,7 @@ export default function FLT_LOD_Change_Details_Form() {
                     <input
                       type="text"
                       name="rtom"
+                      defaultValue={caseDetails?.rtom}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -165,6 +175,7 @@ export default function FLT_LOD_Change_Details_Form() {
                     <input
                       type="text"
                       name="customer_type_name"
+                      defaultValue={caseDetails?.customer_type_name}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>

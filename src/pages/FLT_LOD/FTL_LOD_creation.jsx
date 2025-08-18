@@ -30,8 +30,8 @@ export default function FLT_LOD_Creation() {
  useEffect(() => {
   const fetchCaseDetails = async () => {
     try {
-      console.log("Fetching case details for case_id:", case_id);
-      const caseDetails = await FLT_LOD_Case_Details(case_id); // pass case_id
+      console.log("Fetching case details for case_id:", item.case_id);
+      const caseDetails = await FLT_LOD_Case_Details(item.case_id); // pass case_id
       console.log("Case Details:", caseDetails.data);
       setCaseDetails(caseDetails.data); // store in state
     } catch (error) {
@@ -120,17 +120,17 @@ const handleCreatePDF = async () => {
 
           <div style={{ marginBottom: "20px" }}>
             <strong>BY REGISTERED POST</strong><br /><br />
-            {caseDetails?.customer_name || "………………"}<br />
-          </div>
-
-          {caseDetails?.postal_address
-            ? caseDetails.postal_address.split("\n").map((line, index) => (
-                <span key={index}>
-                  {line}
-                  <br />
-                </span>
-              ))
-            : "…………………"}
+           <strong>{caseDetails?.customer_name || "………………"}</strong> <br />
+          
+        <strong>{caseDetails?.full_address
+        ? caseDetails.full_address.split(",").map((line, index) => (
+      <span key={index}>
+        {line.trim()}   {/* trim() removes extra spaces */}
+        <br />
+      </span>
+    ))
+  : "…………………"}</strong>
+  </div>
 
           <p>Dear Sir/Madam,</p>
           <div style={{ textAlign: "center", margin: "20px 0", fontWeight: "bold" }}>
@@ -138,9 +138,9 @@ const handleCreatePDF = async () => {
           </div>
 
           <div style={{ margin: "20px 0" }}>
-            OUTSTANDING BALANCE: {caseDetails?.current_arrears_band || "………………"}<br />
-            ACCOUNT NUMBER: {caseDetails?.account_no || "………………"}<br />
-            TELEPHONE NUMBER: {caseDetails?.contact_no || "………………"}
+            OUTSTANDING BALANCE: <strong>{caseDetails?.current_arrears_amount || "………………"}</strong><br />
+            ACCOUNT NUMBER: <strong>{caseDetails?.account_no || "………………"}</strong><br />
+            TELEPHONE NUMBER: <strong>{caseDetails?.contact_no || "………………"}</strong>
           </div>
 
           <p style={{ textAlign: "justify", marginBottom: "20px" }}>
@@ -149,7 +149,7 @@ const handleCreatePDF = async () => {
 
           <div style={{ textAlign: "justify" }}>
             <p>
-              I write on the instructions of my Client Sri Lanka Telecom PLC, which has a Regional Office at …………. and its Head Office at Lotus Road, Colombo 01 and which is the Successor to all the assets, liabilities, rights, obligations and contracts of the Corporation named Sri Lanka Telecom and of the Department of Telecommunications.
+              I write on the instructions of my Client Sri Lanka Telecom PLC, which has a Regional Office at <strong>{caseDetails?.rtom || "…………."}</strong> and its Head Office at Lotus Road, Colombo 01 and which is the Successor to all the assets, liabilities, rights, obligations and contracts of the Corporation named Sri Lanka Telecom and of the Department of Telecommunications.
             </p>
             <br />
 
@@ -163,7 +163,7 @@ const handleCreatePDF = async () => {
             </p>
 
             <p>
-              I am instructed that, presently there is a sum of {caseDetails?.current_arrears_band || "………………"} owing from you to my Client, on account of the subscriptions, charges, fees and other monies due from you to my Client for the installation and provision of the said telephone services. You are liable and bound and obliged to pay these monies to my Client.
+              I am instructed that, presently there is a sum of <strong>{caseDetails?.current_arrears_amount || "………………"}</strong> owing from you to my Client, on account of the subscriptions, charges, fees and other monies due from you to my Client for the installation and provision of the said telephone services. You are liable and bound and obliged to pay these monies to my Client.
             </p>
             <br />
 
