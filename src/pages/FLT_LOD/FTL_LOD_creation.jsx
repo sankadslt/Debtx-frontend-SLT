@@ -190,7 +190,11 @@ const handleCreatePDF = async () => {
 
       <div className="flex items-center justify-end gap-4 mt-4 mb-4">
         <button 
-        onClick= {() => navigate("/pages/flt-lod/ftl-lod-change-details-form")}
+        onClick={() =>
+            navigate("/pages/flt-lod/ftl-lod-change-details-form", {
+            state: { item: item }, // 👈 pass along the case details
+  })
+}
         className={`${GlobalStyle.buttonPrimary}`}>
           Change Details
         </button>

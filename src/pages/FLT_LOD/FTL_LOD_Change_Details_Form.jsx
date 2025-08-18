@@ -1,10 +1,10 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { FLT_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
 import { Create_FLT_LOD} from "../../services/FTL_LOD/FTL_LODServices.js";
 
-import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // <-- Add this
+import { useParams, useNavigate, useLocation } from "react-router-dom"; // <-- Add this
 
 
 export default function FLT_LOD_Change_Details_Form() {
@@ -12,27 +12,30 @@ export default function FLT_LOD_Change_Details_Form() {
   const { case_id } = useParams(); // Get case_id from URL parameters
   // const case_id = location.state?.caseid// Get case_id from URL parameters
   const navigate = useNavigate();
+  const location = useLocation();
   const item = location.state?.item;
   // const case_id = 1649
 
   // State to hold case details
   const [caseDetails, setCaseDetails] = useState(null);
+  const [arrearsBand, setArrearsBand] = useState("");
+  const [response, setResponse] = useState("");
 
+  
+ useEffect(() => {
+  const fetchCaseDetails = async () => {
+    try {
+      console.log("Fetching case details for case_id:", item.case_id);
+      const caseDetails = await FLT_LOD_Case_Details(item.case_id); // pass case_id
+      console.log("Case Details:", caseDetails.data);
+      setCaseDetails(caseDetails.data); // store in state
+    } catch (error) {
+      console.error("Error fetching case details:", error);
+    }
+  };
 
-
-  useEffect(() => {
-    const fetchCaseDetails = async () => {
-      try {
-         console.log("Case Details:", item.case_id);
-        // Replace 'case_id' with the actual case ID variable or prop
-        const caseDetails = await FLT_LOD_Case_Details(item.case_id); // pass case_id
-        console.log("Fetched Case Details:", caseDetails);
-      } catch (error) {
-        console.error("Error fetching case details:", error);
-      }
-    };
-    fetchCaseDetails();
-  }, []);
+  fetchCaseDetails();
+}, [case_id]);
   
 
   // Function to handle form submission
@@ -43,14 +46,14 @@ export default function FLT_LOD_Change_Details_Form() {
       account_no: formData.post("account_no"),
       event_source: formData.post("event_source"),
       customer_name: formData.post("customer_name"),
-      address: formData.post("address"),
+      full_address: formData.post("full_address"),
       additional_fields: [
         formData.post("additional_field_1"),
         formData.post("additional_field_2"),
         formData.post("additional_field_3"),
         formData.post("additional_field_4"),
       ],
-      current_arrears_band: formData.post("current_arrears_band"),
+      current_arrears_band: formData.post("current_arrears_amount"),
       billing_centre: formData.post("rtom"),
       customer_type_name: formData.post("customer_type_name"),
     }
