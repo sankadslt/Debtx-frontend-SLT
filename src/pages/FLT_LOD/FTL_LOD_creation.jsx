@@ -42,11 +42,37 @@ export default function FLT_LOD_Creation() {
   fetchCaseDetails();
 }, [case_id]);
 
-  // Function to handle PDF creation
-  const handleCreatePDF = () => {
-    // Logic for creating PDF goes here
-    console.log("Creating PDF...");
-  };
+ // Function to handle PDF creation
+const handleCreatePDF = async () => {
+  try {
+    if (!case_id) {
+      console.error("Case ID is missing!");
+      return;
+    }
+
+    console.log("Creating PDF for case_id:", case_id);
+
+    const response = await Create_FLT_LOD(case_id); // Pass case_id to backend
+    console.log("PDF Created:", response.data);
+
+    // If the API returns a file blob for download
+    if (response.data && response.data.pdfBase64) {
+      const link = document.createElement("a");
+      link.href = `data:application/pdf;base64,${response.data.pdfBase64}`;
+      link.download = `FTL_LOD_${case_id}.pdf`;
+      link.click();
+    } else if (response.data && response.data.pdfUrl) {
+      // If the API returns a file URL
+      window.open(response.data.pdfUrl, "_blank");
+    } else {
+      alert("PDF created successfully.");
+    }
+  } catch (error) {
+    console.error("Error creating PDF:", error);
+    alert("Failed to create PDF. Please try again.");
+  }
+};
+
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
@@ -169,7 +195,12 @@ export default function FLT_LOD_Creation() {
           Change Details
         </button>
 
-        <button className={`${GlobalStyle.buttonPrimary}`}>Create PDF</button>
+        <button 
+          onClick={handleCreatePDF} 
+          className={`${GlobalStyle.buttonPrimary}`}
+          >Create PDF
+        </button>
+
       </div>
     </div>
   );
