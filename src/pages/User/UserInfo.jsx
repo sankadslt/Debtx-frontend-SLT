@@ -1001,14 +1001,20 @@ const UserInfo = () => {
                     </tr>
 
                     <tr className="block sm:table-row">
-                      <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
-                        NIC<span className="sm:hidden">:</span>
-                      </td>
-                      <td className="w-4 text-left hidden sm:table-cell">:</td>
-                      <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {userInfo.user_nic || "Not specified"}
-                      </td>
-                    </tr>
+                    {(userInfo.user_type && 
+                      ["RO", "ro", "DRC_OFFICER", "drc_officer", "DRC_USER", "drc_user"]
+                        .includes(userInfo.user_type.toUpperCase())) && (
+                      <>
+                        <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
+                          NIC<span className="sm:hidden">:</span>
+                        </td>
+                        <td className="w-4 text-left hidden sm:table-cell">:</td>
+                        <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
+                          {userInfo.user_nic || "Not specified"}
+                        </td>
+                      </>
+                    )}
+                  </tr>
 
                     <tr className="block sm:table-row">
                       <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap text-left w-full sm:w-1/3 block sm:table-cell`}>
