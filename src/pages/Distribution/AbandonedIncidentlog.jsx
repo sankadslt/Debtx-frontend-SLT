@@ -1,5 +1,5 @@
  /* 
-Purpose: Abundant Incident Log View
+Purpose: Abandoned Incident Log View
 Created Date: 2025.08.07
 Created By: sadinsa
 
@@ -21,9 +21,9 @@ import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
-import { Create_Rejected_List_for_Download, List_Abundant_Incident } from "../../services/distribution/distributionService";
+import { Create_Rejected_List_for_Download, List_Abandoned_Incident } from "../../services/distribution/distributionService";
 
-const AbundantIncidentlog = () => {
+const AbandonedIncidentlog = () => {
   const navigate = useNavigate();
  
   const [searchQuery, setSearchQuery] = useState("");
@@ -189,7 +189,7 @@ const AbundantIncidentlog = () => {
       };
 
       setIsLoading(true);
-      const response = await List_Abundant_Incident(payload);
+      const response = await List_Abandoned_Incident(payload);
       setIsLoading(false);
 
       if (response && response.data) {
@@ -376,7 +376,7 @@ const AbundantIncidentlog = () => {
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          <h1 className={GlobalStyle.headingLarge}>Abundant Incident Log</h1>
+          <h1 className={GlobalStyle.headingLarge}>Abandoned Incident Log</h1>
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
@@ -539,7 +539,7 @@ const AbundantIncidentlog = () => {
                 ) : (
                   <tr>
                     <td colSpan={6} className={`${GlobalStyle.tableData} text-center`}>
-                      No abundant incidents available
+                      No abandoned incidents available
                     </td>
                   </tr>
                 )}
@@ -602,4 +602,4 @@ const AbundantIncidentlog = () => {
   );
 };
 
-export default AbundantIncidentlog;
+export default AbandonedIncidentlog;
