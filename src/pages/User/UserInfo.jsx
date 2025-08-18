@@ -973,7 +973,7 @@ const UserInfo = () => {
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="">
                 <h2 className={`${GlobalStyle.headingMedium} mb-4 sm:mb-4 -mt-1 ml-8 underline text-left font-semibold`}>
                   User Profile
                 </h2>
@@ -1044,7 +1044,7 @@ const UserInfo = () => {
                       </td>
                       <td className="w-4 text-left hidden sm:table-cell">:</td>
                       <td className={`${GlobalStyle.tableData} text-gray-500 text-left block sm:table-cell`}>
-                        {contactNumbers[0] || "Not specified"}
+                        {contactNumbers[1] || "Not specified"}
                       </td>
                     </tr>
 
