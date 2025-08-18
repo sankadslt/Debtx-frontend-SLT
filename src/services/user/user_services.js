@@ -66,7 +66,7 @@ export const updateUserDetails = async (requestData = {}) => {
 
 export const endUser = async (requestData ={}) => {
   try {
-    const response = await axios.patch(`${USER_URL}/End_User`, requestData);
+    const response = await axios.post(`https://debtx.slt.lk:6500/users/terminate`, requestData);
     return response.data;
   } catch (error) {
     console.error('Failed to terminate user:', error);
@@ -110,6 +110,16 @@ export const Reject_DRC_Agreement_Approval = async (requestData) => {
   }
 }
 
+export const User_Approval = async (requestData) => {
+  try {
+    const response = await axios.post(`https://debtx.slt.lk:6500/users/login/confirm`, requestData);
+    return response.data;
+  } catch (error) {
+    console.error('Error approving User:', error.response?.data || error.message);
+    throw error.response?.data || { status: 'error', message: 'Something went wrong while approving User.' };
+  }
+};
+
 export const Download_User_Approval_List = async (requestData) => {
   try {
     const response = await axios.post(`${USER_URL3}/Download_User_Approval_List`, 
@@ -124,6 +134,10 @@ export const Download_User_Approval_List = async (requestData) => {
 export const createUser = async (formData) => {
   try {
     const res = await axios.post(`https://debtx.slt.lk:6500/users/create`, formData);
+    console.log("Test createUser response:", res.data);
+    // if (res.data.status === "error") {
+    //   return res.data;
+    // }
     return res.data;
   } catch (err) {
     return {
@@ -207,10 +221,6 @@ export const updateUserRoles = async (userId, rolesToAdd = []) => {
     throw errorResponse;
   }
 };
-
-
-
-
 
 export const updateUserContacts = async (requestData = {}) => {
   try {

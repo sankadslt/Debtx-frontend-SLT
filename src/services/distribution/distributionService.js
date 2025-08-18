@@ -34,7 +34,9 @@ export const List_incidents_Direct_LOD = async (filters) => {
             ...filteredParams,
         };
         const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+        console.log("response",response)
         return response; 
+        
     } catch (error) {
         console.error("Error creating task:", error.response?.data || error.message);
         throw error.response?.data || error; 
@@ -203,6 +205,19 @@ export const List_Incidents_CPE_Collect = async (filters) => {
 export const List_Reject_Incident = async (payload) => {
   try {
     const response = await axios.post(`${URL}/List_Reject_Incident`, payload);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Detailed error:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const List_Abandoned_Incident = async (payload) => {
+  try {
+    const response = await axios.post(`${URL}/List_Abandoned_Incident`, payload);
     return response.data;
   } catch (error) {
     console.error(

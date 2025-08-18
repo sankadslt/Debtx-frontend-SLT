@@ -14,7 +14,7 @@ const CaseDetails = () => {
     const [error, setError] = useState(null);
     const [openSections, setOpenSections] = useState({});
     const [currentIndices, setCurrentIndices] = useState({});
-    const location = useLocation();
+    const location = useLocation();  
     const navigate = useNavigate();
     const [isCreatingTask, setIsCreatingTask] = useState(false);
 
@@ -428,7 +428,7 @@ const CaseDetails = () => {
                
               ],
             [
-              { label: 'DRC Commission Rule', value: basicInfo.drcCommissionRule || '' },
+              { label: 'Service Type', value: basicInfo.drcCommissionRule || '' },
               { label: 'Monitor Months', value: basicInfo.monitorMonths || '' },
               { label: 'Commission', value: caseData.basicInfo.commission || '' },
               { label: 'Case Distribution Batch ID', value: caseData.basicInfo.caseDistributionBatchId || '' },

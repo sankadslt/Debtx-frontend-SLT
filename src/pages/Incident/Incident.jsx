@@ -1,12 +1,13 @@
   /*Purpose:
 Created Date: 2025-07-17
-Created By: Yugani Gunarathna (jtdsiriwardena@gmail.com)
+Created By: Yugani Gunarathna (yuganesha027g@gmail.com)
 Last Modified Date: 2025-07-18
 Modified By: Sathmi Peiris (sathmipeiris@gmail.com)
 Last Modified Date: 2025-07-20
 Modified By:  Yugani Gunarathna 
               Sathmi Peiris
-             Update 2025-07-20
+              Dinithi Wijesekara 
+              Update 2025-07-20
              
 Version: React v18
 ui number : 1.1
@@ -173,6 +174,10 @@ const Incident = () => {
   };
 
   const navigate = useNavigate();
+
+   const naviIncidentID = (incidentId) => {
+    navigate("/Incident/Incident_Details", { state: { IncidentID: incidentId } });
+  };
 
   const handlestartdatechange = (date) => {
     setFromDate(date);
@@ -457,15 +462,16 @@ const Incident = () => {
         status2,
         selectedServiceType,
         status3,
+        status4,
         fromDate,
         toDate,
         userData
-      );
+      );   
       
       if (response && response.message === "Task created successfully") {
         Swal.fire({
           title: "Task created successfully!",
-          text: "Task ID: " + response.ResponseData.data.Task_Id,
+          text: "Task ID: " + response.Task_Id,
           icon: "success",
           confirmButtonColor: "#28a745",
         });
@@ -473,15 +479,14 @@ const Incident = () => {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: error.message || "Failed to create task.",
+        text: error?.message || "Failed to create task.",
         icon: "error",
         confirmButtonColor: "#d33",
       });
     } finally {
       setIsCreatingTask(false);
     }
-  };
-
+  };  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -690,18 +695,19 @@ const Incident = () => {
                 </tr>
               </thead>
 
-              <tbody>
+        <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
                   filteredDataBySearch
                     .slice(startIndex, startIndex + rowsPerPage)
                     .map((row, index) => (
                       <tr
                         key={row.incidentID || index}
-                        className={
+                        className={`${
                           index % 2 === 0
                             ? GlobalStyle.tableRowEven
                             : GlobalStyle.tableRowOdd
-                        }
+                        } cursor-pointer hover:bg-gray-100 hover:underline transition-all duration-200`}
+                        onClick={() => naviIncidentID(row.Incident_Id)}
                       >
                         <td className={GlobalStyle.tableData}>
                           {row.Incident_Id || ""}
