@@ -22,11 +22,7 @@ export default function FLT_LOD_Creation() {
 
 
   const navigate = useNavigate();
-  // Function to handle navigation to change details form
-  const handleChangeDetails = () => {
-    navigate("/pages/flt-lod/ftl-lod-change-details-form");
-  };
-
+  
  useEffect(() => {
   const fetchCaseDetails = async () => {
     try {
@@ -42,24 +38,26 @@ export default function FLT_LOD_Creation() {
   fetchCaseDetails();
 }, [case_id]);
 
- // Function to handle PDF creation
+// Function to handle PDF creation
 const handleCreatePDF = async () => {
   try {
-    if (!case_id) {
+    const currentCaseId = item?.case_id || case_id; // fallback to either one
+
+    if (!currentCaseId) {
       console.error("Case ID is missing!");
       return;
     }
 
-    console.log("Creating PDF for case_id:", case_id);
+    console.log("Creating PDF for case_id:", currentCaseId);
 
-    const response = await Create_FLT_LOD(case_id); // Pass case_id to backend
+    const response = await Create_FLT_LOD(currentCaseId); // ✅ use correct case_id
     console.log("PDF Created:", response.data);
 
     // If the API returns a file blob for download
     if (response.data && response.data.pdfBase64) {
       const link = document.createElement("a");
       link.href = `data:application/pdf;base64,${response.data.pdfBase64}`;
-      link.download = `FTL_LOD_${case_id}.pdf`;
+      link.download = `FTL_LOD_${currentCaseId}.pdf`;
       link.click();
     } else if (response.data && response.data.pdfUrl) {
       // If the API returns a file URL
@@ -73,6 +71,8 @@ const handleCreatePDF = async () => {
   }
 };
 
+const [signatureOwner, setSignatureOwner] = useState("");
+
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
@@ -84,13 +84,25 @@ const handleCreatePDF = async () => {
           <option value=""></option>
         </select>
 
-        <label className={"${GlobalStyle.dataPickerDate}  ml-24"}>
+        <label className={`${GlobalStyle.dataPickerDate} ml-24`}>
           Signature Owner
         </label>
-        <select className={GlobalStyle.selectBox}>
-          <option value=""></option>
+        <select
+          className={GlobalStyle.selectBox}
+          value={signatureOwner}
+          onChange={(e) => setSignatureOwner(e.target.value)}
+        >
+          <option value="">Select...</option>
+          <option value="Damithri Palliyaguru - Attorney-at-Law">
+            Damithri Palliyaguru - Attorney-at-Law
+          </option>
+          <option value="John Doe - Legal Advisor">John Doe - Legal Advisor</option>
+          <option value="Jane Smith - Senior Attorney">Jane Smith - Senior Attorney</option>
+          <option value="Legal Department Head">Legal Department Head</option>
+          <option value="Attorney-at-Law">Attorney-at-Law</option>
         </select>
       </div>
+
 
       <div className="flex items-center justify-center mt-10 px-2">
   <div className="bg-slate-100 max-w-[750px] w-full rounded-lg p-4 overflow-auto max-h-screen">
@@ -138,7 +150,7 @@ const handleCreatePDF = async () => {
           </div>
 
           <div style={{ margin: "20px 0" }}>
-            OUTSTANDING BALANCE: <strong>{caseDetails?.current_arrears_amount || "………………"}</strong><br />
+            OUTSTANDING BALANCE: <strong>Rs.{caseDetails?.current_arrears_amount || "………………"}</strong><br />
             ACCOUNT NUMBER: <strong>{caseDetails?.account_no || "………………"}</strong><br />
             TELEPHONE NUMBER: <strong>{caseDetails?.contact_no || "………………"}</strong>
           </div>
@@ -163,7 +175,7 @@ const handleCreatePDF = async () => {
             </p>
 
             <p>
-              I am instructed that, presently there is a sum of <strong>{caseDetails?.current_arrears_amount || "………………"}</strong> owing from you to my Client, on account of the subscriptions, charges, fees and other monies due from you to my Client for the installation and provision of the said telephone services. You are liable and bound and obliged to pay these monies to my Client.
+              I am instructed that, presently there is a sum of <strong>Rs.{caseDetails?.current_arrears_amount || "………………"}</strong> owing from you to my Client, on account of the subscriptions, charges, fees and other monies due from you to my Client for the installation and provision of the said telephone services. You are liable and bound and obliged to pay these monies to my Client.
             </p>
             <br />
 
@@ -180,7 +192,7 @@ const handleCreatePDF = async () => {
 
           <p>
             Yours faithfully,<br /><br />
-            Attorney-at-Law
+             {signatureOwner || "[Your Name]"}
           </p>
         </div>
       </div>

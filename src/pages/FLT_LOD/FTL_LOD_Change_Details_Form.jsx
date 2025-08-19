@@ -110,18 +110,6 @@ export default function FLT_LOD_Change_Details_Form() {
                 </tr>
 
                 <tr>
-                  <td className={GlobalStyle.tableData}>Customer Name :</td>
-                  <td className={GlobalStyle.tableData}>
-                    <input
-                      type="text"
-                      name="customer_name"
-                      defaultValue={caseDetails?.customer_name}
-                      className={`${GlobalStyle.inputText} w-full`}
-                    />
-                  </td>
-                </tr>
-
-                <tr>
                   <td className={GlobalStyle.tableData}>Address :</td>
                   <td className={GlobalStyle.tableData}>
                     <input
@@ -133,20 +121,23 @@ export default function FLT_LOD_Change_Details_Form() {
                   </td>
                 </tr>
 
-                {/* Dynamic Additional Fields */}
-                {["", "", "", ""].map((label, index) => (
+              {/* Dynamic Additional Fields from Address (skip empty parts, no labels) */}
+              {(caseDetails?.full_address?.split(",") || [])
+                .map((part) => part.trim())          // trim spaces
+                .filter((part) => part.length > 0)   // remove empty values
+                .map((part, index) => (
                   <tr key={index}>
-                    <td className={GlobalStyle.tableData}>{label}</td>
+                    <td className={GlobalStyle.tableData}></td> {/* empty label cell */}
                     <td className={GlobalStyle.tableData}>
                       <input
                         type="text"
-                        name={`additional_field_${index + 1}`}
-                        defaultValue={caseDetails?.[`additional_field_${index + 1}`]}
+                        name={`address_part_${index + 1}`}
+                        defaultValue={part}
                         className={`${GlobalStyle.inputText} w-full`}
                       />
                     </td>
                   </tr>
-                ))}
+              ))}
 
                 <tr>
                   <td className={GlobalStyle.tableData}>Arrears :</td>

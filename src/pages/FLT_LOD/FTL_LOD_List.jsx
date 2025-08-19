@@ -217,44 +217,23 @@ const FTLLODCaseList = () => {
         break;
       case "Initial FTL LOD":
         pushIcon(
-          CreateSettlementIcon,
-          "Create Settlement",
-          handleCreateSettlement
-        );
+          CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
         pushIcon(
-          CustomerResponseIcon,
-          "Customer Response",
-          handleCustomerResponse
-        );
-        pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+          CustomerResponseIcon, "Customer Response", handleCustomerResponse);
+        pushIcon(
+          ViewDetailsIcon, "View Details", handleViewDetails);
         break;
       case "FTL LOD Settle Pending":
         pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
         break;
       case "FTL LOD Settle Open-Pending":
-        pushIcon(
-          CreateSettlementIcon,
-          "Create Settlement",
-          handleCreateSettlement
-        );
-        pushIcon(
-          CustomerResponseIcon,
-          "Customer Response",
-          handleCustomerResponse
-        );
+        pushIcon(CreateSettlementIcon,"Create Settlement", handleCreateSettlement);
+        pushIcon(CustomerResponseIcon, "Customer Response", handleCustomerResponse);
         pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
         break;
       case "FTL LOD Settle Active":
-        pushIcon(
-          CreateSettlementIcon,
-          "Create Settlement",
-          handleCreateSettlement
-        );
-        pushIcon(
-          CustomerResponseIcon,
-          "Customer Response",
-          handleCustomerResponse
-        );
+        pushIcon(CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
+        pushIcon(CustomerResponseIcon,"Customer Response",handleCustomerResponse);
         pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
         break;
       default:
@@ -272,6 +251,9 @@ const FTLLODCaseList = () => {
   };
 
   const handleCreateSettlement = (item) => {
+    navigate("/pages/CreateSettlement/CreateSettlementPlan", {
+      state: { item },
+    });
     console.log("Create Settlement for:", item);
   };
 
