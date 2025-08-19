@@ -1,11 +1,23 @@
 /* Purpose: This template is used for the F1 Criteria List.
 Created Date: 2025-08-19
-Created By: Grok (based on provided sample)
+Created By: Deshan Chinthaka
 Last Modified Date: 2025-08-19
-Modified By: Grok
+Modified By: Deshan Chinthaka
 Version: node 20
 ui number: Unknown
 Dependencies: tailwind css, react, react-router-dom, sweetalert2, react-tooltip, axios (if API added later)
+Related Files: Potentially f1_criteria_services.js, GlobalStyle.js
+Notes: This component is adapted from UserList.jsx to display F1 Criteria. It uses static data based on the screenshot. Filters for Key and Operator are included. Pagination and search are implemented. Actions use more_info icon for details/edit. If API is needed, replace static data with a service call similar to UserList. */
+
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import more_info from "../../assets/images/more.svg";
+import Swal from "sweetalert2";
+import { Tooltip } from "react-tooltip";
+
+const F1Criteria = () => {
   const navigate = useNavigate();
 
   // State Variables

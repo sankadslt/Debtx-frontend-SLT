@@ -147,7 +147,7 @@ import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment
 import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
 
 //Configuration
-import F1Configuration from "../pages/Configuration/F1Criteria";
+import F1Criteria from "../pages/Configuration/F1Criteria";
  
 
 const Routers = () => {
@@ -1157,12 +1157,12 @@ const Routers = () => {
         }
       />
 
-      //Configuration
+      {/* //Configuration */}
       <Route
         path="/pages/Configuration/F1Critiria"
         element={
           <ProtectedRoute
-            element={<F1Critiria />}
+            element={<F1Criteria />}
             allowedRoles={["superadmin"]}
           />
         }
