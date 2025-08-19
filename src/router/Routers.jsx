@@ -127,6 +127,7 @@ import UserList from "../pages/User/UserList";
 import UserInfo from "../pages/User/UserInfo";
 import SignUp from "../pages/User/SignUp";
 import UserApproval from "../pages/User/UserApproval";
+import SignUpNew from "../pages/User/SignUpNew";
 
 //RO
 import ROList from "../pages/Recovery_Officer/ROList";
@@ -137,7 +138,7 @@ import ListAllTasks from "../pages/Task/ListAllTasks";
 
 //Abnormal
 import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
-import AbondonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
+import AbandonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
 
 //Dispute
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
@@ -992,6 +993,14 @@ const Routers = () => {
           <ProtectedRoute element={<SignUp />} allowedRoles={["superadmin"]} />
         }
       />
+
+      <Route
+        path="/pages/User/SignUpNew"
+        element={
+          <ProtectedRoute element={<SignUpNew />} allowedRoles={["superadmin"]} />
+        }
+      />
+
       <Route
         path="/pages/User/UserApproval"
         element={
@@ -1043,10 +1052,10 @@ const Routers = () => {
       />
 
       <Route
-        path="/pages/Abnormal/Abondoned_Case_Log"
+        path="/pages/Abnormal/Abandoned_Case_Log"
         element={
           <ProtectedRoute
-            element={<AbondonedCaseLog />}
+            element={<AbandonedCaseLog />}
             allowedRoles={["superadmin"]}
           />
         }
@@ -1061,6 +1070,17 @@ const Routers = () => {
           />
         }
       />
+
+
+    {/* <Route
+        path="/pages/Abnormal/WRIT_List"
+        element={
+          <ProtectedRoute
+            element={<WRIT_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />   */}
 
  
  

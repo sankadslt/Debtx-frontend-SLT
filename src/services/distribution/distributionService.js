@@ -22,7 +22,7 @@ export const List_incidents_Direct_LOD = async (filters) => {
   }
 };
 
- export const Create_Task_Download_Direct_LOD_Sending = async (filteredParams) => {
+ /*export const Create_Task_Download_Direct_LOD_Sending = async (filteredParams) => {
     try {
         const user = await getUserData();
        
@@ -41,7 +41,7 @@ export const List_incidents_Direct_LOD = async (filters) => {
         console.error("Error creating task:", error.response?.data || error.message);
         throw error.response?.data || error; 
       }
- }
+ }*/
 
 export const List_F1_filtered_incidents = async (filters) => {
   try {
@@ -95,7 +95,7 @@ export const Create_Task_Forward_Direct_LOD = async (parameters) => {
       }
  }
 
- export const Create_Task_Download_Pending_Reject = async (filteredParams) => {
+/* export const Create_Task_Download_Pending_Reject = async (filteredParams) => {
     try {
         const user = await getUserData();
         const taskData = {
@@ -111,7 +111,7 @@ export const Create_Task_Forward_Direct_LOD = async (parameters) => {
         console.error("Error creating task:", error.response?.data || error.message);
         throw error.response?.data || error; 
       }
-}
+}*/
 
 export const Forward_F1_Filtered = async (Incident_Id) => {
   try {
@@ -229,7 +229,7 @@ export const List_Abundant_Incident = async (payload) => {
 };
 
 
-export const Create_Rejected_List_for_Download = async (filteredParams) => {
+/*export const Create_Rejected_List_for_Download = async (filteredParams) => {
   try {
       const user = await getUserData();
       const taskData = {
@@ -245,7 +245,7 @@ export const Create_Rejected_List_for_Download = async (filteredParams) => {
       console.error("Error creating task:", error.response?.data || error.message);
       throw error.response?.data || error; 
     }
-}
+}*/
 
 export const Open_Task_Count_Forward_Direct_LOD = async () => {
   try {
