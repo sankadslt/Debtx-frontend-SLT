@@ -336,7 +336,7 @@ export const Litigation_List = () => {
 
         {/* Filtering Section */}
          <div className="flex justify-end">
-        <div className={`${GlobalStyle.cardContainer} w-[75vw] flex px-3  sm:w-[75vw] py-2 items-center justify-end  w-full flex-wrap sm:flex-row gap-4 mt-20 mb-4`}>
+        <div className={`${GlobalStyle.cardContainer} w-[71vw] flex px-3  sm:w-[71vw] py-2 items-center justify-end  w-full flex-wrap sm:flex-row gap-4 mt-20 mb-4`}>
            {/* <div className="flex flex-col sm:flex-row items-center w-full gap-3"> */}
                 {/* Status */}
                 <select 
