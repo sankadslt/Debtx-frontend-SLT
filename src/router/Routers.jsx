@@ -38,7 +38,7 @@ import DirectLODSendingIncident from "../pages/Distribution/DirectLODSendingInci
 import RejectIncident from "../pages/Distribution/RejectIncident";
 import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
 import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
-import AbandonedIncidentlog from "../pages/Distribution/AbandonedIncidentlog";
+import AbundantIncidentlog from "../pages/Distribution/AbundantIncidentlog";
 
 {
   /* Distribute Imports */
@@ -263,8 +263,8 @@ const Routers = () => {
         element={<RejectIncidentlog />}
       />
        <Route
-        path="/Distribution/abandoned-incident-log"
-        element={<AbandonedIncidentlog />}
+        path="/Distribution/abundant-incident-log"
+        element={<AbundantIncidentlog />}
       />
       <Route
         path="/Distribution/filtered-incident"
