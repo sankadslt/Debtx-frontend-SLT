@@ -38,7 +38,7 @@ import DirectLODSendingIncident from "../pages/Distribution/DirectLODSendingInci
 import RejectIncident from "../pages/Distribution/RejectIncident";
 import RejectIncidentlog from "../pages/Distribution/RejectIncidentlog";
 import FilteredIncidents from "../pages/Distribution/FilteredIncidents";
-import AbandonedIncidentlog from "../pages/Distribution/AbandonedIncidentlog";
+import AbundantIncidentlog from "../pages/Distribution/AbundantIncidentlog";
 
 {
   /* Distribute Imports */
@@ -145,6 +145,9 @@ import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
 import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
 import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
 import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
+
+//Configuration
+import F1Configuration from "../pages/Configuration/F1Criteria";
  
 
 const Routers = () => {
@@ -263,8 +266,8 @@ const Routers = () => {
         element={<RejectIncidentlog />}
       />
        <Route
-        path="/Distribution/abandoned-incident-log"
-        element={<AbandonedIncidentlog />}
+        path="/Distribution/abundant-incident-log"
+        element={<AbundantIncidentlog />}
       />
       <Route
         path="/Distribution/filtered-incident"
@@ -1071,6 +1074,17 @@ const Routers = () => {
         }
       />
 
+
+    {/* <Route
+        path="/pages/Abnormal/WRIT_List"
+        element={
+          <ProtectedRoute
+            element={<WRIT_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />   */}
+
  
  
       {/* FTL LOD Routes */}
@@ -1138,6 +1152,17 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<Dispute_Settlment_Letter_Preview />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      //Configuration
+      <Route
+        path="/pages/Configuration/F1Critiria"
+        element={
+          <ProtectedRoute
+            element={<F1Critiria />}
             allowedRoles={["superadmin"]}
           />
         }

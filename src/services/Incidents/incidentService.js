@@ -253,6 +253,7 @@ export const getOpenTaskCountforCPECollect = async () => {
   }
 };
 
+/*
 export const Task_for_Download_Incidents = async (
   status1,
   status2,
@@ -283,8 +284,9 @@ export const Task_for_Download_Incidents = async (
     throw error.response?.data || error;
   }
 };
+*/
 
-export const Task_for_Download_Incidents_Full_List = async (
+/*export const Task_for_Download_Incidents_Full_List = async (
   status1,
   status2,
   selectedServiceType,
@@ -333,9 +335,8 @@ export const Task_for_Download_Incidents_Full_List = async (
     console.error("Error creating task:", error.message || error);
     throw error.response?.data || error;
   }
+};*/
 
-  
-};
 
 export const Create_Task_For_Download_Incident_Details = async (userData) => {
   try {
@@ -358,6 +359,7 @@ export const Create_Task_For_Download_Incident_Details = async (userData) => {
     throw error.response?.data || error;
   }
 };
+
 
 
 

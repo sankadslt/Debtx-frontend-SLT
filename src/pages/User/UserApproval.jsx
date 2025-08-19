@@ -1562,6 +1562,7 @@ const UserApproval = () => {
 					onClick={() => handlePrevNext("prev")}
 					disabled={currentPage <= 1}
 					className={`${GlobalStyle.navButton} ${currentPage <= 1 ? "cursor-not-allowed" : ""}`}
+					style={{ opacity: currentPage <= 1 ? 0.5 : 1 }}
 				>
 					<FaArrowLeft />
 				</button>
@@ -1572,6 +1573,7 @@ const UserApproval = () => {
 					onClick={() => handlePrevNext("next")}
 					disabled={currentPage === totalPages}
 					className={`${GlobalStyle.navButton} ${currentPage === totalPages ? "cursor-not-allowed" : ""}`}
+					style={{ opacity: currentPage === totalPages ? 0.5 : 1 }}
 				>
 					<FaArrowRight />
 				</button>

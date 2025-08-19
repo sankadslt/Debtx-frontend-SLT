@@ -304,9 +304,19 @@ export default function DRCAssignManagerApproval3() {
 
     if ((startDate && !endDate) || (!startDate && endDate)) {
       Swal.fire({
-        title: "Error",
+        title: "Warning",
         text: "Please select both start and end dates.",
-        icon: "error",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    if (!startDate && !endDate && !approverstatus) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select at least one parameter.",
+        icon: "warning",
         confirmButtonColor: "#f1c40f",
       });
       return;
