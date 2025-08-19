@@ -336,7 +336,7 @@ export const Litigation_List = () => {
 
         {/* Filtering Section */}
          <div className="flex justify-end">
-        <div className={`${GlobalStyle.cardContainer} w-[71vw] flex px-3  sm:w-[71vw] py-2 items-center justify-end  w-full flex-wrap sm:flex-row gap-4 mt-20 mb-4`}>
+        <div className={`${GlobalStyle.cardContainer} w-[72vw] flex px-3  sm:w-[72vw] py-2 items-center justify-end  w-full flex-wrap sm:flex-row gap-4 mt-20 mb-4`}>
            {/* <div className="flex flex-col sm:flex-row items-center w-full gap-3"> */}
                 {/* Status */}
                 <select 
@@ -576,14 +576,14 @@ export const Litigation_List = () => {
                 })}
                 {isLoading && (
                   <tr>
-                    <td colSpan="7" className="text-center py-4">
+                    <td colSpan="7" className={`${GlobalStyle.tableData} text-center py-4`}>
                       Loading...
                     </td>
                   </tr>
                 )}
                 {!isLoading && filteredDataBySearch.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="text-center py-4">
+                    <td colSpan="7" className={`${GlobalStyle.tableData} text-center py-4`}>
                       No results found
                     </td>
                   </tr>
