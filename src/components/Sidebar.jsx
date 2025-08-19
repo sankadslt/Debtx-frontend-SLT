@@ -230,7 +230,7 @@ const Sidebar = ({ onHoverChange }) => {
           roles: ["superadmin", "admin"],
           subItems: [
             // { icon: CgEditFade, label: "Write Off list", link: "", roles: ["superadmin", "admin"] },
-            { icon: CgEditFade, label: "Abandoned List", link: "/pages/Abnormal/Abondoned_Case_Log", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "Abandoned List", link: "/pages/Abnormal/Abandoned_Case_Log", roles: ["superadmin", "admin"] },
             { icon: CgEditFade, label: "Withdraw list", link: "/pages/Abnormal/Withdraw_Case_Log", roles: ["superadmin", "admin"] },
           ],
         },
