@@ -17,6 +17,7 @@ import FTL_LOD_Cus_Response_update from "./FTL_LOD_Cus_Response_update.jsx";
 import { fetchAllArrearsBands } from "../../services/case/CaseServices.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { List_FTL_LOD_Cases } from "../../services/FTL_LOD/FTL_LODServices.js";
+import {FLT_LOD_Case_Details} from "../../services/FTL_LOD/FTL_LODServices.js";
 //Status Icons
 
 import Pending_FTL_LOD from "../../assets/images/FTL_LOD/Pending_FTL_LOD.svg";
@@ -46,6 +47,7 @@ const FTLLODCaseList = () => {
   //const [userData, setUserData] = useState(null);
 
   const [status, setStatus] = useState("");
+  const [arrearsBand, setArrearsBand] = useState("");
   const [arrearsAmount, setArrearsAmount] = useState("");
   const [account_no, setAccountNo] = useState("");
   const [fromDate, setFromDate] = useState(null);
@@ -88,6 +90,7 @@ const FTLLODCaseList = () => {
   const [committedFilters, setCommittedFilters] = useState({
     caseId: "",
     status: "",
+    arrearsBand: "",
     arrearsAmount: "",
     account_no: "",
     fromDate: null,
@@ -214,44 +217,23 @@ const FTLLODCaseList = () => {
         break;
       case "Initial FTL LOD":
         pushIcon(
-          CreateSettlementIcon,
-          "Create Settlement",
-          handleCreateSettlement
-        );
+          CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
         pushIcon(
-          CustomerResponseIcon,
-          "Customer Response",
-          handleCustomerResponse
-        );
-        pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+          CustomerResponseIcon, "Customer Response", handleCustomerResponse);
+        pushIcon(
+          ViewDetailsIcon, "View Details", handleViewDetails);
         break;
       case "FTL LOD Settle Pending":
         pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
         break;
       case "FTL LOD Settle Open-Pending":
-        pushIcon(
-          CreateSettlementIcon,
-          "Create Settlement",
-          handleCreateSettlement
-        );
-        pushIcon(
-          CustomerResponseIcon,
-          "Customer Response",
-          handleCustomerResponse
-        );
+        pushIcon(CreateSettlementIcon,"Create Settlement", handleCreateSettlement);
+        pushIcon(CustomerResponseIcon, "Customer Response", handleCustomerResponse);
         pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
         break;
       case "FTL LOD Settle Active":
-        pushIcon(
-          CreateSettlementIcon,
-          "Create Settlement",
-          handleCreateSettlement
-        );
-        pushIcon(
-          CustomerResponseIcon,
-          "Customer Response",
-          handleCustomerResponse
-        );
+        pushIcon(CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
+        pushIcon(CustomerResponseIcon,"Customer Response",handleCustomerResponse);
         pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
         break;
       default:
@@ -269,6 +251,9 @@ const FTLLODCaseList = () => {
   };
 
   const handleCreateSettlement = (item) => {
+    navigate("/pages/CreateSettlement/CreateSettlementPlan", {
+      state: { item },
+    });
     console.log("Create Settlement for:", item);
   };
 
@@ -359,7 +344,9 @@ const FTLLODCaseList = () => {
 
   // Filter validation
   const filterValidations = () => {
+
     if ( !arrearsAmount && !status && !fromDate && !toDate) {
+
       Swal.fire({
         title: "Warning",
         text: "At least one filter must be selected.",
@@ -417,7 +404,8 @@ const FTLLODCaseList = () => {
 
       const payload = {
         case_current_status: filters.status,
-        current_arrears_band: filters.arrearsAmount,
+        current_arrears_band: filters.arrearsBand,
+        current_arrears_amount: filters.arrearsAmount,
         date_from: formatDate(filters.fromDate) ,
         date_to: formatDate(filters.toDate),
         pages: filters.page ,
@@ -641,6 +629,8 @@ const FTLLODCaseList = () => {
       if (currentPage === 1) {
         // callAPI();
         handleFilter({
+          caseId,
+          arrearsBand,
           arrearsAmount,
           status,
           fromDate,
@@ -654,6 +644,8 @@ const FTLLODCaseList = () => {
   }
 
   const handleClear = () => {
+    setCaseId("");
+    setArrearsBand("");
     setArrearsAmount("");
     setStatus("");
     setFromDate(null);
@@ -669,6 +661,7 @@ const FTLLODCaseList = () => {
     setCommittedFilters({
       caseId: "",
       status: "",
+      arrearsBand: "",
       arrearsAmount: "",
       account_no: "",
       fromDate: null,
@@ -720,8 +713,8 @@ const FTLLODCaseList = () => {
 
               <select
                 className={`${GlobalStyle.selectBox} mt-3`}
-                value={arrearsAmount}
-                onChange={(e) => setArrearsAmount(e.target.value)}
+                value={arrearsBand}
+                onChange={(e) => setArrearsBand(e.target.value)}
               >
               <option value="" disabled>
                 Arrears band

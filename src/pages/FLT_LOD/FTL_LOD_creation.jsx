@@ -1,75 +1,222 @@
 
+
 import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { useNavigate } from "react-router-dom";
-import { FTL_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
+import { FLT_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
 
-export default function FTL_LOD_Creation() {
+import { useParams, useLocation } from "react-router-dom";
+import { Create_FLT_LOD} from "../../services/FTL_LOD/FTL_LODServices.js";
 
-  
-  const navigate = useNavigate();
-  // Function to handle navigation to change details form
-  const handleChangeDetails = () => {
-    navigate("/pages/flt-lod/ftl-lod-change-details-form");
-  };
+export default function FLT_LOD_Creation() {
 
+  const { case_id } = useParams(); // Get case_id from URL parameters
+  // const case_id = useParams().case_id;
+  //const case_id = 1
+    // const case_id = location.state?.caseid
   // State to hold case details
+  const location = useLocation();
+  const item = location.state?.item;
+
   const [caseDetails, setCaseDetails] = useState(null);
+
+
+  const navigate = useNavigate();
   
-  useEffect(() => {
-    // Fetch case details when the component mounts
-    const fetchCaseDetails = async () => {
-      try {
-        //const case_id = "12345"; // Replace with actual case ID
-        const caseDetails = await FTL_LOD_Case_Details(case_id);
-        console.log("Case Details:", caseDetails);
-      } catch (error) {
-        console.error("Error fetching case details:", error);
-      }
-    };
-
-    fetchCaseDetails();
-  }, []);
-
-  // Function to handle PDF creation
-  const handleCreatePDF = () => {
-    // Logic for creating PDF goes here
-    console.log("Creating PDF...");
+ useEffect(() => {
+  const fetchCaseDetails = async () => {
+    try {
+      console.log("Fetching case details for case_id:", item.case_id);
+      const caseDetails = await FLT_LOD_Case_Details(item.case_id); // pass case_id
+      console.log("Case Details:", caseDetails.data);
+      setCaseDetails(caseDetails.data); // store in state
+    } catch (error) {
+      console.error("Error fetching case details:", error);
+    }
   };
+
+  fetchCaseDetails();
+}, [case_id]);
+
+// Function to handle PDF creation
+const handleCreatePDF = async () => {
+  try {
+    const currentCaseId = item?.case_id || case_id; // fallback to either one
+
+    if (!currentCaseId) {
+      console.error("Case ID is missing!");
+      return;
+    }
+
+    console.log("Creating PDF for case_id:", currentCaseId);
+
+    const response = await Create_FLT_LOD(currentCaseId); // ✅ use correct case_id
+    console.log("PDF Created:", response.data);
+
+    // If the API returns a file blob for download
+    if (response.data && response.data.pdfBase64) {
+      const link = document.createElement("a");
+      link.href = `data:application/pdf;base64,${response.data.pdfBase64}`;
+      link.download = `FTL_LOD_${currentCaseId}.pdf`;
+      link.click();
+    } else if (response.data && response.data.pdfUrl) {
+      // If the API returns a file URL
+      window.open(response.data.pdfUrl, "_blank");
+    } else {
+      alert("PDF created successfully.");
+    }
+  } catch (error) {
+    console.error("Error creating PDF:", error);
+    alert("Failed to create PDF. Please try again.");
+  }
+};
+
+const [signatureOwner, setSignatureOwner] = useState("");
+
   return (
     <div className={GlobalStyle.fontPoppins}>
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Preview of FTL LOD</h1>
 
-      <div className="flex gap-4 items-center flex-wrap mt-10 ">
+      <div className="flex gap-4 items-center flex-wrap mt-10 w-full justify-end md:justify-start ">
         <label className={GlobalStyle.dataPickerDate}>Template</label>
         <select className={GlobalStyle.selectBox}>
           <option value=""></option>
         </select>
 
-        <label className={"${GlobalStyle.dataPickerDate}  ml-24"}>
+        <label className={`${GlobalStyle.dataPickerDate} ml-24`}>
           Signature Owner
         </label>
-        <select className={GlobalStyle.selectBox}>
-          <option value=""></option>
+        <select
+          className={GlobalStyle.selectBox}
+          value={signatureOwner}
+          onChange={(e) => setSignatureOwner(e.target.value)}
+        >
+          <option value="">Select...</option>
+          <option value="Damithri Palliyaguru - Attorney-at-Law">
+            Damithri Palliyaguru - Attorney-at-Law
+          </option>
+          <option value="John Doe - Legal Advisor">John Doe - Legal Advisor</option>
+          <option value="Jane Smith - Senior Attorney">Jane Smith - Senior Attorney</option>
+          <option value="Legal Department Head">Legal Department Head</option>
+          <option value="Attorney-at-Law">Attorney-at-Law</option>
         </select>
       </div>
 
-      <div className={"flex items-center justify-center mt-10"}>
-        <div className={" bg-slate-100 h-[400px] w-[600px]  rounded-lg"}>
-          <div className={"flex justify-center items-center h-full"}>
-            <h1 className={GlobalStyle.headingLarge}>Preview of FTL LOD</h1>
+
+      <div className="flex items-center justify-center mt-10 px-2">
+  <div className="bg-slate-100 max-w-[750px] w-full rounded-lg p-4 overflow-auto max-h-screen">
+    <div className="flex justify-center items-center">
+      <div className="p-4 bg-white rounded-lg shadow-md text-sm leading-relaxed w-full">
+        <div
+          style={{
+            padding: "20px",
+            fontFamily: "'Times New Roman', Times, serif",
+            fontSize: "14px",
+            lineHeight: "1.6",
+            backgroundColor: "#ffffff",
+            color: "#000000",
+          }}
+        >
+          <div style={{ marginBottom: "20px" }}>
+            <strong>Damithri Palliyaguru</strong><br />
+            Attorney-at-Law - LLB<br />
+            Recovery Section<br />
+            CTO Ground Floor<br />
+            Sri Lanka Telecom PLC<br />
+            Lotus Road, Colombo 01<br />
+            T.P No: 011-2341080<br />
+            Email: reclegal@slt.lk<br />
+            (9.00AM – 4.30PM)
           </div>
+
+          <div style={{ marginBottom: "20px" }}>
+            <strong>BY REGISTERED POST</strong><br /><br />
+           <strong>{caseDetails?.customer_name || "………………"}</strong> <br />
+          
+        <strong>{caseDetails?.full_address
+        ? caseDetails.full_address.split(",").map((line, index) => (
+      <span key={index}>
+        {line.trim()}   {/* trim() removes extra spaces */}
+        <br />
+      </span>
+    ))
+  : "…………………"}</strong>
+  </div>
+
+          <p>Dear Sir/Madam,</p>
+          <div style={{ textAlign: "center", margin: "20px 0", fontWeight: "bold" }}>
+            LETTER OF DEMAND AND TERMINATION
+          </div>
+
+          <div style={{ margin: "20px 0" }}>
+            OUTSTANDING BALANCE: <strong>Rs.{caseDetails?.current_arrears_amount || "………………"}</strong><br />
+            ACCOUNT NUMBER: <strong>{caseDetails?.account_no || "………………"}</strong><br />
+            TELEPHONE NUMBER: <strong>{caseDetails?.contact_no || "………………"}</strong>
+          </div>
+
+          <p style={{ textAlign: "justify", marginBottom: "20px" }}>
+            <strong>SRI LANKA TELECOM PUBLIC LIMITED COMPANY</strong>
+          </p>
+
+          <div style={{ textAlign: "justify" }}>
+            <p>
+              I write on the instructions of my Client Sri Lanka Telecom PLC, which has a Regional Office at <strong>{caseDetails?.rtom || "…………."}</strong> and its Head Office at Lotus Road, Colombo 01 and which is the Successor to all the assets, liabilities, rights, obligations and contracts of the Corporation named Sri Lanka Telecom and of the Department of Telecommunications.
+            </p>
+            <br />
+
+            <p>
+              I am instructed that, you are a Customer of my Client and that, as such, at your request, my Client installed its telephone equipment and provided a telephone service to you at your premises bearing the above stated number, subject to the terms and conditions of the Agreement entered into by and between my client and you, including the payment of all subscriptions, charges, fees and other monies.
+            </p>
+            <br />
+
+            <p>
+              I am instructed that, you have benefited from and used the said facilities and services provided by my client, but you have failed and neglected to pay the monies due as aforesaid, though my client has sent you Monthly Statements setting out the sums, which are due, and payable.
+            </p>
+
+            <p>
+              I am instructed that, presently there is a sum of <strong>Rs.{caseDetails?.current_arrears_amount || "………………"}</strong> owing from you to my Client, on account of the subscriptions, charges, fees and other monies due from you to my Client for the installation and provision of the said telephone services. You are liable and bound and obliged to pay these monies to my Client.
+            </p>
+            <br />
+
+            <p>
+              However, you have wrongfully and unlawfully failed and neglected to pay these monies to my Client and the said monies payable by you to my Client, are in arrears and in default. Therefore, my Client has instructed me to advise that the aforesaid Agreement is hereby terminated and determined.
+            </p>
+            <br />
+
+            <p>
+              I am also instructed to demand and I do hereby demand payment from you to my Client, of the aforesaid monies, within 14 days of the date of receipt of this letter and advise that if you fail to make such payment, legal action will be instituted against you, for the recovery of these monies, without any further notice to you.
+            </p>
+            <br />
+          </div>
+
+          <p>
+            Yours faithfully,<br /><br />
+             {signatureOwner || "[Your Name]"}
+          </p>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
       <div className="flex items-center justify-end gap-4 mt-4 mb-4">
         <button 
-        onClick= {() => navigate("/pages/flt-lod/ftl-lod-change-details-form")}
+        onClick={() =>
+            navigate("/pages/flt-lod/ftl-lod-change-details-form", {
+            state: { item: item }, // 👈 pass along the case details
+  })
+}
         className={`${GlobalStyle.buttonPrimary}`}>
           Change Details
         </button>
 
-        <button className={`${GlobalStyle.buttonPrimary}`}>Create PDF</button>
+        <button 
+          onClick={handleCreatePDF} 
+          className={`${GlobalStyle.buttonPrimary}`}
+          >Create PDF
+        </button>
+
       </div>
     </div>
   );

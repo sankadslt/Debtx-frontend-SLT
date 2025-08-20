@@ -1,35 +1,67 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
-import { FTL_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
-import { Create_FTL_LOD } from "../../services/FTL_LOD/FTL_LODServices.js";
+import { FLT_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
+import { Create_FLT_LOD} from "../../services/FTL_LOD/FTL_LODServices.js";
 
-import { useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom"; // <-- Add this
 
-export default function FTL_LOD_Change_Details_Form() {
 
-  useEffect(() => {
-    const fetchCaseDetails = async () => {
-      try {
-        // Replace 'case_id' with the actual case ID variable or prop
-        const caseDetails = await FTL_LOD_Case_Details(case_id);
-        console.log("Case Details:", caseDetails);
-      } catch (error) {
-        console.error("Error fetching case details:", error);
-      }
-    };
-    fetchCaseDetails();
-  }, []);
+export default function FLT_LOD_Change_Details_Form() {
+
+  const { case_id } = useParams(); // Get case_id from URL parameters
+  // const case_id = location.state?.caseid// Get case_id from URL parameters
+  const navigate = useNavigate();
+  const location = useLocation();
+  const item = location.state?.item;
+  // const case_id = 1649
+
+  // State to hold case details
+  const [caseDetails, setCaseDetails] = useState(null);
+  const [arrearsBand, setArrearsBand] = useState("");
+  const [response, setResponse] = useState("");
+
+  
+ useEffect(() => {
+  const fetchCaseDetails = async () => {
+    try {
+      console.log("Fetching case details for case_id:", item.case_id);
+      const caseDetails = await FLT_LOD_Case_Details(item.case_id); // pass case_id
+      console.log("Case Details:", caseDetails.data);
+      setCaseDetails(caseDetails.data); // store in state
+    } catch (error) {
+      console.error("Error fetching case details:", error);
+    }
+  };
+
+  fetchCaseDetails();
+}, [case_id]);
   
 
   // Function to handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const payload = Object.fromEntries(formData.entries());
+    const payload = {
+      account_no: formData.post("account_no"),
+      event_source: formData.post("event_source"),
+      customer_name: formData.post("customer_name"),
+      full_address: formData.post("full_address"),
+      additional_fields: [
+        formData.post("additional_field_1"),
+        formData.post("additional_field_2"),
+        formData.post("additional_field_3"),
+        formData.post("additional_field_4"),
+      ],
+      current_arrears_band: formData.post("current_arrears_amount"),
+      billing_centre: formData.post("rtom"),
+      customer_type_name: formData.post("customer_type_name"),
+    }
+
 
     try {
-      const response = await Create_FTL_LOD(payload);
-      console.log("FTL LOD created successfully:", response);
+      const response = await Create_FLT_LOD(payload);
+      console.log("FLT LOD created successfully:", response);
       // Handle success (e.g., show a success message, redirect, etc.)
     } catch (error) {
       console.error("Error creating FTL LOD:", error);
@@ -58,6 +90,8 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="account_no"
+                      defaultValue={caseDetails?.account_no}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -66,7 +100,7 @@ export default function FTL_LOD_Change_Details_Form() {
                 <tr>
                   <td className={GlobalStyle.tableData}>Select Option :</td>
                   <td className={GlobalStyle.tableData}>
-                    <select className={`${GlobalStyle.selectBox} w-full`}>
+                    <select name="event_source" defaultValue={caseDetails?.event_source} className={`${GlobalStyle.selectBox} w-full`}>
                       <option value="">Event Source</option>
                       <option value="option1">Option 1</option>
                       <option value="option2">Option 2</option>
@@ -76,43 +110,42 @@ export default function FTL_LOD_Change_Details_Form() {
                 </tr>
 
                 <tr>
-                  <td className={GlobalStyle.tableData}>Customer Name :</td>
-                  <td className={GlobalStyle.tableData}>
-                    <input
-                      type="text"
-                      className={`${GlobalStyle.inputText} w-full`}
-                    />
-                  </td>
-                </tr>
-
-                <tr>
                   <td className={GlobalStyle.tableData}>Address :</td>
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="full_address"
+                      defaultValue={caseDetails?.full_address}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
                 </tr>
 
-                {/* Dynamic Additional Fields */}
-                {["", "", "", ""].map((label, index) => (
+              {/* Dynamic Additional Fields from Address (skip empty parts, no labels) */}
+              {(caseDetails?.full_address?.split(",") || [])
+                .map((part) => part.trim())          // trim spaces
+                .filter((part) => part.length > 0)   // remove empty values
+                .map((part, index) => (
                   <tr key={index}>
-                    <td className={GlobalStyle.tableData}>{label}</td>
+                    <td className={GlobalStyle.tableData}></td> {/* empty label cell */}
                     <td className={GlobalStyle.tableData}>
                       <input
                         type="text"
+                        name={`address_part_${index + 1}`}
+                        defaultValue={part}
                         className={`${GlobalStyle.inputText} w-full`}
                       />
                     </td>
                   </tr>
-                ))}
+              ))}
 
                 <tr>
                   <td className={GlobalStyle.tableData}>Arrears :</td>
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="current_arrears_amount"
+                      defaultValue={caseDetails?.current_arrears_amount}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -123,6 +156,8 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="rtom"
+                      defaultValue={caseDetails?.rtom}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
@@ -133,6 +168,8 @@ export default function FTL_LOD_Change_Details_Form() {
                   <td className={GlobalStyle.tableData}>
                     <input
                       type="text"
+                      name="customer_type_name"
+                      defaultValue={caseDetails?.customer_type_name}
                       className={`${GlobalStyle.inputText} w-full`}
                     />
                   </td>
