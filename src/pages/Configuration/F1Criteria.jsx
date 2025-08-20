@@ -7,7 +7,7 @@ Version: node 20
 ui number: Unknown
 Dependencies: tailwind css, react, react-router-dom, sweetalert2, react-tooltip, axios (if API added later)
 Related Files: Potentially f1_criteria_services.js, GlobalStyle.js
-Notes: This component is adapted from UserList.jsx to display F1 Criteria. It uses static data based on the screenshot. Filters for Key and Operator are included. Pagination and search are implemented. Actions use more_info icon for details/edit. If API is needed, replace static data with a service call similar to UserList. */
+*/
 
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -340,7 +340,7 @@ const F1Criteria = () => {
                     <td className={`${GlobalStyle.tableData}`}>{criteria.end_dtm}</td>
                     <td className={`${GlobalStyle.tableData}`}>
                       <div className="flex justify-center">
-                        <Link to="/pages/Configuration/EditF1Criteria" state={{ id: criteria.id }}>
+                        <Link to="/pages/Configuration/F1CriteriaInfo" state={{ id: criteria.id }}>
                           <img src={more_info} alt="More Info" className="h-5 w-5 lg:h-6 lg:w-6" data-tooltip-id={`more-info-tooltip-${criteria.id}`} />
                         </Link>
                         <Tooltip id={`more-info-tooltip-${criteria.id}`} place="bottom" content="More Info" />
