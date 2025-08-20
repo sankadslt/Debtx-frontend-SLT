@@ -1,8 +1,8 @@
  /* 
-Purpose: Rejected Incident Log View
-Created Date: 2025.01.24
-Created By: Nadali Linara
-Last Modified Date: 2025.07.15
+Purpose: Abundant Incident Log View
+Created Date: 2025.08.07
+Created By: sadinsa
+
 
 Version: React v18
 ui number : 1.7.4
@@ -21,10 +21,10 @@ import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
-import { List_Reject_Incident } from "../../services/distribution/distributionService";
-//import {Create_Rejected_List_for_Download} from "../../services/distribution/distributionService";
+import {List_Abundant_Incident } from "../../services/distribution/distributionService";
 import {Create_Rejected_List_for_Download} from "../../services/task/taskIncidentService";
-const RejectIncidentlog = () => {
+
+const AbundantIncidentlog = () => {
   const navigate = useNavigate();
  
   const [searchQuery, setSearchQuery] = useState("");
@@ -190,7 +190,7 @@ const RejectIncidentlog = () => {
       };
 
       setIsLoading(true);
-      const response = await List_Reject_Incident(payload);
+      const response = await List_Abundant_Incident(payload);
       setIsLoading(false);
 
       if (response && response.data) {
@@ -377,7 +377,7 @@ const RejectIncidentlog = () => {
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          <h1 className={GlobalStyle.headingLarge}>Rejected Incident Log</h1>
+          <h1 className={GlobalStyle.headingLarge}>Abundant Incident Log</h1>
 
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
@@ -451,7 +451,7 @@ const RejectIncidentlog = () => {
                   setCurrentPage(1);
                   setSearchQuery(e.target.value);
                 }}
-                placeholder="Search..."
+                // placeholder="Search..."
               />
               <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
@@ -540,7 +540,7 @@ const RejectIncidentlog = () => {
                 ) : (
                   <tr>
                     <td colSpan={6} className={`${GlobalStyle.tableData} text-center`}>
-                      No rejected incidents available
+                      No abundant incidents available
                     </td>
                   </tr>
                 )}
@@ -603,4 +603,4 @@ const RejectIncidentlog = () => {
   );
 };
 
-export default RejectIncidentlog;
+export default AbundantIncidentlog;
