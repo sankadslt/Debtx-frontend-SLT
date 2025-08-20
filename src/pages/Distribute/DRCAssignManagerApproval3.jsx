@@ -229,17 +229,24 @@ export default function DRCAssignManagerApproval3() {
     };
     console.log("Fetching DRC data with payload:", payload);
 
-    // console.log("Request Payload:", payload);
     try {
       setIsLoading(true); // Set loading state to true
       const response = await List_DRC_Assign_Manager_Approval(payload);
       setIsLoading(false); // Set loading state to false
-      console.log("Response:", response);
-      // setFilteredData(response);
+      console.log("Full API Response:", response);
+      if (Array.isArray(response) && response.length > 0) {
+        console.log("First item in response:", response[0]);
+        if (response[0] && response[0].parameters) {
+          console.log("parameters field in first item:", response[0].parameters);
+        } else {
+          console.warn("parameters field missing in first item");
+        }
+      } else {
+        console.warn("API response is empty or not an array");
+      }
 
       // Updated response handling
       if (response) {
-        // console.log("Valid data received:", response.data);
         if (currentPage === 1) {
           setFilteredData(response)
         } else {
@@ -665,27 +672,49 @@ export default function DRCAssignManagerApproval3() {
   };
 
   // Function to handle table icon click
-  const onTableIconClick = (item) => {
+ const onTableIconClick = (item) => {
+  console.log('onTableIconClick item:', item)
+  // Debug: show the full item object in the alert for troubleshooting
+  console.log('onTableIconClick item:', item);
 
-    const formattedParameters = Object.entries(item.parameters)
-      .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-      .join('\n');
+  const approveType = item.approver_type || '';
+  const param = item.parameters || {};
+  // Show both drc_name and drc_id for debugging
+  const drcName = item.drc_name !== undefined ? String(item.drc_name) : '(undefined)';
+  const drcId = param.drc_id || item.drc_id || '(not found)';
+  const startDate = param.start_date || '';
+  const endDate = param.end_date || '';
 
-    Swal.fire({
-
-      title: "Row Parameters",
-      html: `
-      <div style="margin-top: -15px; font-size: 15px; color: #000; margin-bottom: 10px;">
-        <strong>${item.approver_type}</strong>
+  let detailsHtml = `
+    <div style="margin-top: 12px;">
+      <div style="display: flex; margin-bottom: 10px; align-items: center;">
+        <span style="min-width: 120px; font-weight: 600; color: #1a237e;">Approve Type:</span>
+        <span style="margin-left: 8px; color: #1a237e; background: #e3eafc; padding: 4px 10px; border-radius: 6px;">${approveType}</span>
       </div>
-      <pre style="text-align: center; white-space: pre-wrap;">${formattedParameters}</pre>
-    `,
-      icon: "info",
-      confirmButtonText: "Close",
-      confirmButtonColor: "#d33",
-      width: "500px",
-    });
-  };
+      <div style="display: flex; margin-bottom: 6px; align-items: center;">
+        <span style="min-width: 120px; font-weight: 500; color: #374151;">DRC Name:</span>
+        <span style="margin-left: 8px; color: #374151; background: #f3f4f6; padding: 3px 8px; border-radius: 4px;">${drcName}</span>
+      </div>
+      <div style="display: flex; margin-bottom: 6px; align-items: center;">
+        <span style="min-width: 120px; font-weight: 500; color: #374151;">DRC ID:</span>
+        <span style="margin-left: 8px; color: #374151; background: #f3f4f6; padding: 3px 8px; border-radius: 4px;">${drcId}</span>
+      </div>
+      ${startDate ? `<div style=\"display: flex; margin-bottom: 6px; align-items: center;\"><span style=\"min-width: 120px; font-weight: 500; color: #374151;\">start_date:</span><span style=\"margin-left: 8px; color: #374151; background: #f3f4f6; padding: 3px 8px; border-radius: 4px;\">${startDate}</span></div>` : ''}
+      ${endDate ? `<div style=\"display: flex; margin-bottom: 6px; align-items: center;\"><span style=\"min-width: 120px; font-weight: 500; color: #374151;\">end_date:</span><span style=\"margin-left: 8px; color: #374151; background: #f3f4f6; padding: 3px 8px; border-radius: 4px;\">${endDate}</span></div>` : ''}
+      
+    </div>
+  `;
+
+  Swal.fire({
+    title: "Approval Details",
+    html: detailsHtml,
+    icon: "info",
+    confirmButtonText: "Close",
+    confirmButtonColor: "#d33",
+    width: "600px",
+  });
+};
+
 
   // Function to handle hover button click of the table 
   const onhoverbuttonclick = (caseid) => {
