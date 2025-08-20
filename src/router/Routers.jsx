@@ -148,6 +148,7 @@ import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
 //Configuration
 import F1Criteria from "../pages/Configuration/F1Criteria";
 import AddF1Criteria from "../pages/Configuration/AddF1Criteria";
+import F1CriteriaInfo from "../pages/Configuration/F1CriteriaInfo";
 
 const Routers = () => {
   return (
@@ -1149,6 +1150,16 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<AddF1Criteria />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      <Route
+        path="/pages/Configuration/F1CriteriaInfo"
+        element={
+          <ProtectedRoute
+            element={<F1CriteriaInfo />}
             allowedRoles={["superadmin"]}
           />
         }
