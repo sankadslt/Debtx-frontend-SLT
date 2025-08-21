@@ -6,7 +6,7 @@ Modified By: Deshan Chinthaka
 Version: node 20
 ui number: CONFIG (F2 Criteria)
 Dependencies: tailwind css, react, react-router-dom, sweetalert2, react-tooltip, axios (if API added later)
-Related Files: Potentially f1_criteria_services.js, GlobalStyle.js
+Related Files: Potentially GlobalStyle.js
 */
 
 import { useState, useEffect, useRef } from "react";
