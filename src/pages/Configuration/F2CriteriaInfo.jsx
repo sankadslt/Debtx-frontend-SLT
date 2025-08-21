@@ -103,7 +103,7 @@ const F2CriteriaInfo = () => {
     // if (response?.status === "Success") {
     Swal.fire({
       title: "Success",
-      text: "F1 Criteria ended successfully!",
+      text: "F2 Criteria ended successfully!",
       icon: "success",
       confirmButtonColor: "#3085d6",
     }).then(() => {
@@ -122,7 +122,7 @@ const F2CriteriaInfo = () => {
   return (
     <div className="p-2 flex items-start justify-center h-screen">
       <div className={`${GlobalStyle.fontPoppins} w-full max-w-5xl`}>
-        <h1 className={GlobalStyle.headingLarge}>F1 Criteria Info</h1>
+        <h1 className={GlobalStyle.headingLarge}>F2 Criteria Info</h1>
 
         <div className="w-full flex justify-center">
           <div className={`${GlobalStyle.cardContainer} mx-auto w-full md:w-[750px] lg:w-[750px]`}>
@@ -142,7 +142,7 @@ const F2CriteriaInfo = () => {
             </div>
 
             <h2 className={`${GlobalStyle.headingMedium} mb-4 mt-4 ml-10 text-left font-bold`}>
-              <span className="underline">F1 Criteria Details</span>
+              <span className="underline">F2 Criteria Details</span>
             </h2>
 
             <div className="overflow-x-auto">
