@@ -7,6 +7,7 @@ import { FLT_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js"
 
 import { useParams, useLocation } from "react-router-dom";
 import { Create_FLT_LOD} from "../../services/FTL_LOD/FTL_LODServices.js";
+import {Fetch_Letter} from "../../services/FTL_LOD/LetterServices.js";
 
 export default function FLT_LOD_Creation() {
 
@@ -19,6 +20,10 @@ export default function FLT_LOD_Creation() {
   const item = location.state?.item;
 
   const [caseDetails, setCaseDetails] = useState(null);
+  const [language, setLanguage] = useState("English");
+  const [templateType, setTemplateType] = useState(""); 
+  const [letterData, setLetterData] = useState(null);
+
 
 
   const navigate = useNavigate();
@@ -37,6 +42,21 @@ export default function FLT_LOD_Creation() {
 
   fetchCaseDetails();
 }, [case_id]);
+
+// Fetch letter when template type or language changes
+const handleFetchLetter = async (typeId) => {
+  try {
+    const response = await Fetch_Letter({
+      case_id: item?.case_id || case_id,
+      language,
+      letter_template_type_id: typeId,
+    });
+
+    setLetterData(response.data); // save letter content in state
+  } catch (error) {
+    console.error("Error fetching letter:", error);
+  }
+};
 
 // Function to handle PDF creation
 const handleCreatePDF = async () => {
@@ -78,10 +98,17 @@ const [signatureOwner, setSignatureOwner] = useState("");
       {/* Title */}
       <h1 className={GlobalStyle.headingLarge}>Preview of FTL LOD</h1>
 
-      <div className="flex gap-4 items-center flex-wrap mt-10 w-full justify-end md:justify-start ">
+      <div className="flex gap-2 items-center flex-wrap mt-8 w-full justify-end md:justify-start ">
         <label className={GlobalStyle.dataPickerDate}>Template</label>
-        <select className={GlobalStyle.selectBox}>
-          <option value=""></option>
+        <select className={GlobalStyle.selectBox}
+        value={templateType}
+        onChange={(e) => {
+          setTemplateType(e.target.value);
+          handleFetchLetter(e.target.value); // fetch on selection
+        }}>
+          <option value="">Select Template...</option>
+          <option value="1">Letter of Demand and Termination</option>
+          <option value="2">Reminder Letter</option>
         </select>
 
         <label className={`${GlobalStyle.dataPickerDate} ml-24`}>
@@ -93,13 +120,11 @@ const [signatureOwner, setSignatureOwner] = useState("");
           onChange={(e) => setSignatureOwner(e.target.value)}
         >
           <option value="">Select...</option>
-          <option value="Damithri Palliyaguru - Attorney-at-Law">
-            Damithri Palliyaguru - Attorney-at-Law
-          </option>
-          <option value="John Doe - Legal Advisor">John Doe - Legal Advisor</option>
-          <option value="Jane Smith - Senior Attorney">Jane Smith - Senior Attorney</option>
-          <option value="Legal Department Head">Legal Department Head</option>
           <option value="Attorney-at-Law">Attorney-at-Law</option>
+          <option value="Legal Advisor">Legal Advisor</option>
+          <option value="Senior Attorney">Senior Attorney</option>
+          <option value="Legal Department Head">Legal Department Head</option>
+          
         </select>
       </div>
 
@@ -108,6 +133,7 @@ const [signatureOwner, setSignatureOwner] = useState("");
   <div className="bg-slate-100 max-w-[750px] w-full rounded-lg p-4 overflow-auto max-h-screen">
     <div className="flex justify-center items-center">
       <div className="p-4 bg-white rounded-lg shadow-md text-sm leading-relaxed w-full">
+        {letterData ? (
         <div
           style={{
             padding: "20px",
@@ -118,83 +144,41 @@ const [signatureOwner, setSignatureOwner] = useState("");
             color: "#000000",
           }}
         >
-          <div style={{ marginBottom: "20px" }}>
-            <strong>Damithri Palliyaguru</strong><br />
-            Attorney-at-Law - LLB<br />
-            Recovery Section<br />
-            CTO Ground Floor<br />
-            Sri Lanka Telecom PLC<br />
-            Lotus Road, Colombo 01<br />
-            T.P No: 011-2341080<br />
-            Email: reclegal@slt.lk<br />
-            (9.00AM – 4.30PM)
-          </div>
-
-          <div style={{ marginBottom: "20px" }}>
-            <strong>BY REGISTERED POST</strong><br /><br />
-           <strong>{caseDetails?.customer_name || "………………"}</strong> <br />
           
-        <strong>{caseDetails?.full_address
-        ? caseDetails.full_address.split(",").map((line, index) => (
-      <span key={index}>
-        {line.trim()}   {/* trim() removes extra spaces */}
-        <br />
-      </span>
-    ))
-  : "…………………"}</strong>
-  </div>
+      
+        {/* Sender */}
+        <div style={{ marginBottom: "20px" }}>
+          <strong>{letterData.senders_address}</strong>
+        </div>
 
-          <p>Dear Sir/Madam,</p>
-          <div style={{ textAlign: "center", margin: "20px 0", fontWeight: "bold" }}>
-            LETTER OF DEMAND AND TERMINATION
-          </div>
+        {/* Sending Mode */}
+        <div style={{ marginBottom: "20px" }}>
+          <strong>{letterData.sending_mode}</strong><br />
+          <strong>{letterData.reciepients_address}</strong>
+        </div>
 
-          <div style={{ margin: "20px 0" }}>
-            OUTSTANDING BALANCE: <strong>Rs.{caseDetails?.current_arrears_amount || "………………"}</strong><br />
-            ACCOUNT NUMBER: <strong>{caseDetails?.account_no || "………………"}</strong><br />
-            TELEPHONE NUMBER: <strong>{caseDetails?.contact_no || "………………"}</strong>
-          </div>
+        {/* Greetings */}
+        <p>{letterData.greetings}</p>
 
-          <p style={{ textAlign: "justify", marginBottom: "20px" }}>
-            <strong>SRI LANKA TELECOM PUBLIC LIMITED COMPANY</strong>
-          </p>
+        {/* Title */}
+        <div style={{ textAlign: "center", margin: "20px 0", fontWeight: "bold" }}>
+          {letterData.title}
+        </div>
 
-          <div style={{ textAlign: "justify" }}>
-            <p>
-              I write on the instructions of my Client Sri Lanka Telecom PLC, which has a Regional Office at <strong>{caseDetails?.rtom || "…………."}</strong> and its Head Office at Lotus Road, Colombo 01 and which is the Successor to all the assets, liabilities, rights, obligations and contracts of the Corporation named Sri Lanka Telecom and of the Department of Telecommunications.
-            </p>
-            <br />
-
-            <p>
-              I am instructed that, you are a Customer of my Client and that, as such, at your request, my Client installed its telephone equipment and provided a telephone service to you at your premises bearing the above stated number, subject to the terms and conditions of the Agreement entered into by and between my client and you, including the payment of all subscriptions, charges, fees and other monies.
-            </p>
-            <br />
-
-            <p>
-              I am instructed that, you have benefited from and used the said facilities and services provided by my client, but you have failed and neglected to pay the monies due as aforesaid, though my client has sent you Monthly Statements setting out the sums, which are due, and payable.
-            </p>
-
-            <p>
-              I am instructed that, presently there is a sum of <strong>Rs.{caseDetails?.current_arrears_amount || "………………"}</strong> owing from you to my Client, on account of the subscriptions, charges, fees and other monies due from you to my Client for the installation and provision of the said telephone services. You are liable and bound and obliged to pay these monies to my Client.
-            </p>
-            <br />
-
-            <p>
-              However, you have wrongfully and unlawfully failed and neglected to pay these monies to my Client and the said monies payable by you to my Client, are in arrears and in default. Therefore, my Client has instructed me to advise that the aforesaid Agreement is hereby terminated and determined.
-            </p>
-            <br />
-
-            <p>
-              I am also instructed to demand and I do hereby demand payment from you to my Client, of the aforesaid monies, within 14 days of the date of receipt of this letter and advise that if you fail to make such payment, legal action will be instituted against you, for the recovery of these monies, without any further notice to you.
-            </p>
-            <br />
-          </div>
-
+        {/* Body */}
+        <div style={{ textAlign: "justify" }}>
+          <p>{letterData.Body}</p>
+        </div>
+          
           <p>
             Yours faithfully,<br /><br />
              {signatureOwner || "[Your Name]"}
           </p>
         </div>
+        ) : (
+          <p>Please select a template to preview the letter.</p>
+        )}
+
       </div>
     </div>
   </div>
