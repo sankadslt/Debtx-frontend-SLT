@@ -7,7 +7,7 @@ import { FLT_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js"
 
 import { useParams, useLocation } from "react-router-dom";
 import { Create_FLT_LOD} from "../../services/FTL_LOD/FTL_LODServices.js";
-import {Fetch_Letter} from "../../services/FTL_LOD/LetterServices.js";
+import {Fetch_Letter} from "../../services/Letter/LetterServices.js";
 
 export default function FLT_LOD_Creation() {
 
@@ -52,7 +52,7 @@ const handleFetchLetter = async (typeId) => {
       letter_template_type_id: typeId,
     });
 
-    setLetterData(response.data); // save letter content in state
+    setLetterData(response.data); // use API response
   } catch (error) {
     console.error("Error fetching letter:", error);
   }
@@ -148,12 +148,19 @@ const [signatureOwner, setSignatureOwner] = useState("");
       
         {/* Sender */}
         <div style={{ marginBottom: "20px" }}>
-          <strong>{letterData.senders_address}</strong>
-        </div>
+  {letterData.senders_address?.split("\n").map((line, index) => (
+    <div key={index}>
+      <strong>{line.trim()}</strong>
+    </div>
+  ))}
+</div>
+
+
 
         {/* Sending Mode */}
         <div style={{ marginBottom: "20px" }}>
           <strong>{letterData.sending_mode}</strong><br />
+          
           <strong>{letterData.reciepients_address}</strong>
         </div>
 
@@ -162,13 +169,17 @@ const [signatureOwner, setSignatureOwner] = useState("");
 
         {/* Title */}
         <div style={{ textAlign: "center", margin: "20px 0", fontWeight: "bold" }}>
-          {letterData.title}
+          {letterData.title}<br />
         </div>
 
         {/* Body */}
         <div style={{ textAlign: "justify" }}>
-          <p>{letterData.Body}</p>
-        </div>
+  {letterData.Body?.split("\n").map((paragraph, index) => (
+    <p key={index} style={{ marginBottom: "1em" }}>
+      {paragraph.trim()}
+    </p>
+  ))}
+</div>
           
           <p>
             Yours faithfully,<br /><br />

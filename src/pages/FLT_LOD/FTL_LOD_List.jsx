@@ -17,7 +17,7 @@ import FTL_LOD_Cus_Response_update from "./FTL_LOD_Cus_Response_update.jsx";
 import { fetchAllArrearsBands } from "../../services/case/CaseServices.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { List_FTL_LOD_Cases } from "../../services/FTL_LOD/FTL_LODServices.js";
-import {FLT_LOD_Case_Details} from "../../services/FTL_LOD/FTL_LODServices.js";
+import {Tooltip} from "react-tooltip";
 //Status Icons
 
 import Pending_FTL_LOD from "../../assets/images/FTL_LOD/Pending_FTL_LOD.svg";
@@ -47,7 +47,6 @@ const FTLLODCaseList = () => {
   //const [userData, setUserData] = useState(null);
 
   const [status, setStatus] = useState("");
-  const [arrearsBand, setArrearsBand] = useState("");
   const [arrearsAmount, setArrearsAmount] = useState("");
   const [account_no, setAccountNo] = useState("");
   const [fromDate, setFromDate] = useState(null);
@@ -90,7 +89,6 @@ const FTLLODCaseList = () => {
   const [committedFilters, setCommittedFilters] = useState({
     caseId: "",
     status: "",
-    arrearsBand: "",
     arrearsAmount: "",
     account_no: "",
     fromDate: null,
@@ -107,6 +105,8 @@ const FTLLODCaseList = () => {
   const [userData, setUserData] = useState(1);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+    const [userRole, setUserRole] = useState(null); // Role-Based Buttons
+
 
   // Role-Based Button
   useEffect(() => {
@@ -116,7 +116,7 @@ const FTLLODCaseList = () => {
     try{
       let decoded = jwtDecode(token);
       const currentTime = Date.now() / 1000; // Current time in seconds
-      if (decode.exp < currentTime) {
+      if (decoded.exp < currentTime) {
         refreshAccessToken().then((newToken) => {
           if (!newToken) return;
           const newDecoded = jwtDecode(newToken);
@@ -146,103 +146,208 @@ const FTLLODCaseList = () => {
     switch (status) {
       case "Pending FTL LOD":
         return (
-          <img
-            src={Pending_FTL_LOD}
-            alt="Pending FTL LOD"
-            title="Pending FTL LOD"
-            className="w-6 h-6"
-          />
+          Pending_FTL_LOD
         );
       case "Initial FTL LOD":
         return (
-          <img
-            src={Initial_FTL_LOD}
-            alt="Initial FTL LOD"
-            title="Initial FTL LOD"
-            className="w-6 h-6"
-          />
+          Initial_FTL_LOD
         );
       case "FTL LOD Settle Pending":
         return (
-          <img
-            src={FTL_LOD_Settle_Pending}
-            alt="FTL LOD Settle Pending"
-            title="FTL LOD Settle Pending"
-            className="w-6 h-6"
-          />
+          FTL_LOD_Settle_Pending
         );
       case "FTL LOD Settle Open-Pending":
         return (
-          <img
-            src={FTL_LOD_Settle_Open_Pending}
-            alt="FTL LOD Settle Open-Pending"
-            title="FTL LOD Settle Open-Pending"
-            className="w-6 h-6"
-          />
+          FTL_LOD_Settle_Open_Pending
         );
       case "FTL LOD Settle Active":
         return (
-          <img
-            src={FTL_LOD_Settle_Active}
-            alt="FTL LOD Settle Active"
-            title="FTL LOD Settle Active"
-            className="w-6 h-6"
-          />
+          
+            FTL_LOD_Settle_Active
+          
         );
 
-      default:
-        return <span className="text-gray-500"></span>;
-    }
-  };
-
-  const getActionIcons = (status, item) => {
-    const icons = [];
-
-    const pushIcon = (src, alt, onClickHandler, title) => {
-      icons.push(
-        <img
-          key={alt}
-          src={src}
-          alt={alt}
-          title={alt}
-          className="w-6 h-6  cursor-pointer"
-          onClick={() => onClickHandler(item)}
-        />
-      );
-    };
-
-    switch (status) {
-      case "Pending FTL LOD":
-        pushIcon(CreateFtlIcon, "Create FTL", handleCreateFtl);
-        break;
-      case "Initial FTL LOD":
-        pushIcon(
-          CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
-        pushIcon(
-          CustomerResponseIcon, "Customer Response", handleCustomerResponse);
-        pushIcon(
-          ViewDetailsIcon, "View Details", handleViewDetails);
-        break;
-      case "FTL LOD Settle Pending":
-        pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
-        break;
-      case "FTL LOD Settle Open-Pending":
-        pushIcon(CreateSettlementIcon,"Create Settlement", handleCreateSettlement);
-        pushIcon(CustomerResponseIcon, "Customer Response", handleCustomerResponse);
-        pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
-        break;
-      case "FTL LOD Settle Active":
-        pushIcon(CreateSettlementIcon, "Create Settlement", handleCreateSettlement);
-        pushIcon(CustomerResponseIcon,"Customer Response",handleCustomerResponse);
-        pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
-        break;
       default:
         return null;
     }
-
-    return icons;
   };
 
+  // render status icon with tooltip
+  const renderStatusIcon = (status, index) => {
+    const iconPath = getStatusIcon(status);
+
+    if (!iconPath) {
+      return <span>{status}</span>;
+    }
+
+    const tooltipId = `tooltip-${index}`;
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={iconPath}
+          alt={status}
+          className="w-7 h-7"
+          data-tooltip-id={tooltipId} // Add tooltip ID to image
+        />
+        {/* Tooltip component */}
+        <Tooltip id={tooltipId} place="bottom" effect="solid">
+          {`${status}`} {/* Tooltip text is the phase and status */}
+        </Tooltip>
+      </div>
+    );
+  };
+
+  // const getActionIcons = (status, item) => {
+  //   const icons = [];
+
+  //   const pushIcon = (src, alt, onClickHandler, title) => {
+  //     icons.push(
+  //       <img
+  //         key={alt}
+  //         src={src}
+  //         alt={alt}
+  //         title={alt}
+  //         className="w-6 h-6  cursor-pointer"
+  //         onClick={() => onClickHandler(item)}
+          
+  //       />
+        
+  //     );
+  //   };
+
+  //   switch (status) {
+  //     case "Pending FTL LOD":
+  //       pushIcon(CreateFtlIcon, "Create FTL", handleCreateFtl);
+  //       break;
+  //     case "Initial FTL LOD":
+  //       pushIcon(
+  //         CreateSettlementIcon,
+  //         "Create Settlement",
+  //         handleCreateSettlement
+  //       );
+  //       pushIcon(
+  //         CustomerResponseIcon,
+  //         "Customer Response",
+  //         handleCustomerResponse
+  //       );
+  //       pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+  //       break;
+  //     case "FTL LOD Settle Pending":
+  //       pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+  //       break;
+  //     case "FTL LOD Settle Open-Pending":
+  //       pushIcon(
+  //         CreateSettlementIcon,
+  //         "Create Settlement",
+  //         handleCreateSettlement
+  //       );
+  //       pushIcon(
+  //         CustomerResponseIcon,
+  //         "Customer Response",
+  //         handleCustomerResponse
+  //       );
+  //       pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+  //       break;
+  //     case "FTL LOD Settle Active":
+  //       pushIcon(
+  //         CreateSettlementIcon,
+  //         "Create Settlement",
+  //         handleCreateSettlement
+  //       );
+  //       pushIcon(
+  //         CustomerResponseIcon,
+  //         "Customer Response",
+  //         handleCustomerResponse
+  //       );
+  //       pushIcon(ViewDetailsIcon, "View Details", handleViewDetails);
+  //       break;
+  //     default:
+  //       return null;
+  //   }
+
+  //   return icons;
+  // };
+const getActionIcons = (status, item) => {
+  const icons = [];
+
+  const pushIcon = (src, alt, onClickHandler, tooltipText) => {
+    const tooltipId = `action-tooltip-${alt}-${item.case_id}`;
+    
+    icons.push(
+      <div key={alt} className="relative">
+        <img
+          src={src}
+          alt={alt}
+          className="w-6 h-6 cursor-pointer"
+          onClick={() => onClickHandler(item)}
+          data-tooltip-id={tooltipId}
+        />
+        <Tooltip id={tooltipId} place="top" effect="solid">
+          {tooltipText}
+        </Tooltip>
+      </div>
+    );
+  };
+
+  switch (status) {
+    case "Pending FTL LOD":
+      pushIcon(CreateFtlIcon, "Create FTL", handleCreateFtl, "Create FTL LOD");
+      break;
+    case "Initial FTL LOD":
+      pushIcon(
+        CreateSettlementIcon,
+        "Create Settlement",
+        handleCreateSettlement,
+        "Create Settlement Plan"
+      );
+      pushIcon(
+        CustomerResponseIcon,
+        "Customer Response",
+        handleCustomerResponse,
+        "Update Customer Response"
+      );
+      pushIcon(ViewDetailsIcon, "View Details", handleViewDetails, "View Case Details");
+      break;
+    case "FTL LOD Settle Pending":
+      pushIcon(ViewDetailsIcon, "View Details", handleViewDetails, "View Case Details");
+      break;
+    case "FTL LOD Settle Open-Pending":
+      pushIcon(
+        CreateSettlementIcon,
+        "Create Settlement",
+        handleCreateSettlement,
+        "Create Settlement Plan"
+      );
+      pushIcon(
+        CustomerResponseIcon,
+        "Customer Response",
+        handleCustomerResponse,
+        "Update Customer Response"
+      );
+      pushIcon(ViewDetailsIcon, "View Details", handleViewDetails, "View Case Details");
+      break;
+    case "FTL LOD Settle Active":
+      pushIcon(
+        CreateSettlementIcon,
+        "Create Settlement",
+        handleCreateSettlement,
+        "Create Settlement Plan"
+      );
+      pushIcon(
+        CustomerResponseIcon,
+        "Customer Response",
+        handleCustomerResponse,
+        "Update Customer Response"
+      );
+      pushIcon(ViewDetailsIcon, "View Details", handleViewDetails, "View Case Details");
+      break;
+    default:
+      return null;
+  }
+
+  return icons;
+};
   const handleCreateFtl = (item) => {
     navigate("/pages/flt-lod/ftl-lod-creation(preview-of-ftl-lod)", {
       state: {item},
@@ -252,8 +357,13 @@ const FTLLODCaseList = () => {
 
   const handleCreateSettlement = (item) => {
     navigate("/pages/CreateSettlement/CreateSettlementPlan", {
-      state: { item },
-    });
+        state: {
+          case_Id: item.case_id,
+          
+          PlanType: "Type B",
+          
+        },
+      });
     console.log("Create Settlement for:", item);
   };
 
@@ -344,9 +454,7 @@ const FTLLODCaseList = () => {
 
   // Filter validation
   const filterValidations = () => {
-
     if ( !arrearsAmount && !status && !fromDate && !toDate) {
-
       Swal.fire({
         title: "Warning",
         text: "At least one filter must be selected.",
@@ -404,8 +512,7 @@ const FTLLODCaseList = () => {
 
       const payload = {
         case_current_status: filters.status,
-        current_arrears_band: filters.arrearsBand,
-        current_arrears_amount: filters.arrearsAmount,
+        current_arrears_band: filters.arrearsAmount,
         date_from: formatDate(filters.fromDate) ,
         date_to: formatDate(filters.toDate),
         pages: filters.page ,
@@ -629,8 +736,6 @@ const FTLLODCaseList = () => {
       if (currentPage === 1) {
         // callAPI();
         handleFilter({
-          caseId,
-          arrearsBand,
           arrearsAmount,
           status,
           fromDate,
@@ -644,8 +749,6 @@ const FTLLODCaseList = () => {
   }
 
   const handleClear = () => {
-    setCaseId("");
-    setArrearsBand("");
     setArrearsAmount("");
     setStatus("");
     setFromDate(null);
@@ -661,7 +764,6 @@ const FTLLODCaseList = () => {
     setCommittedFilters({
       caseId: "",
       status: "",
-      arrearsBand: "",
       arrearsAmount: "",
       account_no: "",
       fromDate: null,
@@ -701,7 +803,7 @@ const FTLLODCaseList = () => {
                 onChange={(e) => setStatus(e.target.value)}
                 className={`${GlobalStyle.selectBox} mt-3 `}
               >
-                <option value="" disabled>
+                <option value="" hidden>
                   Status
                 </option>
                 <option value="Pending FTL LOD">Pending FTL LOD</option>
@@ -713,10 +815,10 @@ const FTLLODCaseList = () => {
 
               <select
                 className={`${GlobalStyle.selectBox} mt-3`}
-                value={arrearsBand}
-                onChange={(e) => setArrearsBand(e.target.value)}
+                value={arrearsAmount}
+                onChange={(e) => setArrearsAmount(e.target.value)}
               >
-              <option value="" disabled>
+              <option value="" hidden>
                 Arrears band
               </option>
               {Array.isArray(arrearsBandList) && arrearsBandList.length > 0 ? (
@@ -844,7 +946,7 @@ const FTLLODCaseList = () => {
                   <td
                     className={`${GlobalStyle.tableData} flex justify-center items-center pt-6`}
                   >
-                    {getStatusIcon(item.case_current_status) || null}
+                    {renderStatusIcon(item.case_current_status, index)}
                   </td>
 
                   <td className={`${GlobalStyle.tableData} `}>
