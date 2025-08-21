@@ -235,8 +235,8 @@ const MediationBoardResponse = () => {
                             <div className="table-cell px-4 py-2">
                                 {Casedata?.current_arrears_amount &&
                                     Casedata.current_arrears_amount.toLocaleString("en-LK", {
-                                        style: "currency",
-                                        currency: "LKR",
+                                        // style: "currency",
+                                        // currency: "LKR",
                                     })
                                 }
                             </div>

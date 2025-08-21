@@ -861,8 +861,8 @@ const FTLLODCaseList = () => {
                   <td className={GlobalStyle.tableCurrency}>
                     {item?.current_arrears_amount
                       ? item.current_arrears_amount.toLocaleString("en-LK", {
-                          style: "currency",
-                          currency: "LKR",
+                          // style: "currency",
+                          // currency: "LKR",
                         })
                       : null}
                   </td>

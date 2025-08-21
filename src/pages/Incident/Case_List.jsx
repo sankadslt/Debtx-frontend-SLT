@@ -904,8 +904,8 @@ const Case_List = () => {
                     <td className={GlobalStyle.tableCurrency}>
   {typeof row.amount === 'number'
     ? row.amount.toLocaleString("en-LK", {
-        style: "currency",
-        currency: "LKR",
+        // style: "currency",
+        // currency: "LKR",
       })
     : ""}
 </td>

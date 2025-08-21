@@ -212,8 +212,8 @@ const SettlementPreview = () => {
                             <div className="table-cell px-4 py-2">
                                 {Settlementdata?.bss_arrears_amount &&
                                     Settlementdata.bss_arrears_amount.toLocaleString("en-LK", {
-                                        style: "currency",
-                                        currency: "LKR",
+                                        // style: "currency",
+                                        // currency: "LKR",
                                     })
                                 }
                             </div>
@@ -224,8 +224,8 @@ const SettlementPreview = () => {
                             <div className="table-cell px-4 py-2">
                                 {Settlementdata?.arrears_amount &&
                                     Settlementdata.arrears_amount.toLocaleString("en-LK", {
-                                        style: "currency",
-                                        currency: "LKR",
+                                        // style: "currency",
+                                        // currency: "LKR",
                                     })
                                 }
                             </div>
@@ -443,8 +443,8 @@ const SettlementPreview = () => {
                                 {Array.isArray(Settlementdata?.settlement_plan_received) &&
                                     Settlementdata.settlement_plan_received[0] !== undefined
                                     ? Settlementdata.settlement_plan_received[0].toLocaleString("en-LK", {
-                                        style: "currency",
-                                        currency: "LKR",
+                                        // style: "currency",
+                                        // currency: "LKR",
                                     })
                                     : ""}
                             </div>

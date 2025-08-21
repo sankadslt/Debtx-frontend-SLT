@@ -188,8 +188,8 @@ const CustomerResponse = () => {
                             <div className="table-cell px-4 py-2">
                                 {LODdata?.arrears_amount &&
                                     LODdata.arrears_amount.toLocaleString("en-LK", {
-                                        style: "currency",
-                                        currency: "LKR",
+                                        // style: "currency",
+                                        // currency: "LKR",
                                     })
                                 }
                             </div>

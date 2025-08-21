@@ -516,8 +516,8 @@ const AbundantIncidentlog = () => {
                       <td className={GlobalStyle.tableCurrency}>
   {typeof row.Arrears === 'number'
     ? row.Arrears.toLocaleString("en-LK", {
-        style: "currency",
-        currency: "LKR",
+        // style: "currency",
+        // currency: "LKR",
       })
     : ""}
 </td>
