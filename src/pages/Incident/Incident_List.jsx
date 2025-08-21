@@ -20,7 +20,9 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload, FaPlus } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
-import { fetchIncidents, Task_for_Download_Incidents } from "../../services/Incidents/incidentService.js";
+import { fetchIncidents } from "../../services/Incidents/incidentService.js";
+//import { Task_for_Download_Incidents } from "../../services/Incidents/incidentService.js";
+import { Task_for_Download_Incidents } from "../../services/task/taskIncidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
@@ -42,9 +44,9 @@ const Incident_List = () => {
   const [fromDate, setFromDate] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const [toDate, setToDate] = useState(null);
-  const [status1, setStatus1] = useState("");
-  const [status2, setStatus2] = useState("");
-  const [status3, setStatus3] = useState("");
+  const [actionType, setActionType] = useState("");
+  const [status, setStatus] = useState("");
+  const [sourceType, setSourceType] = useState("");
 
 
   const [isLoading, setIsLoading] = useState(false);
@@ -66,9 +68,9 @@ const Incident_List = () => {
   const hasMounted = useRef(false);
 
   const [committedFilters, setCommittedFilters] = useState({
-    status1: "",
-    status2: "",
-    status3: "",
+    actionType: "",
+    status: "",
+    sourceType: "",
     fromDate: null,
     toDate: null
   });
@@ -170,7 +172,7 @@ const Incident_List = () => {
         cancelButtonColor: "#d33",
       }).then((result) => {
         if (result.isConfirmed) {
-          endDate = toDate;
+          const endDate = toDate;
           handleApicall(fromDate, toDate);
         } else {
           setToDate(null);
@@ -210,7 +212,7 @@ const Incident_List = () => {
 
 
   const filterValidations = () => {
-    if (!status1 && !status2 && !status3 && !fromDate && !toDate) {
+    if (!actionType && !status && !sourceType && !fromDate && !toDate) {
       Swal.fire({
         title: "Warning",
         text: "No filter is selected. Please, select a filter.",
@@ -252,9 +254,9 @@ const Incident_List = () => {
       };
 
       const payload = {
-        Actions: filters.status1,
-        Incident_Status: filters.status2,
-        Source_Type: filters.status3,
+        Actions: filters.actionType,
+        Incident_Status: filters.status,
+        Source_Type: filters.sourceType,
         from_date: formatDate(filters.fromDate),
         to_date: formatDate(filters.toDate),
         pages: filters.page,
@@ -352,9 +354,9 @@ const Incident_List = () => {
       return;
     } else {
       setCommittedFilters({
-        status1,
-        status2,
-        status3,
+        actionType,
+        status,
+        sourceType,
         fromDate,
         toDate
       });
@@ -362,9 +364,9 @@ const Incident_List = () => {
 
       if (currentPage === 1) {
         callAPI({
-          status1,
-          status2,
-          status3,
+          actionType,
+          status,
+          sourceType,
           fromDate,
           toDate,
           page: 1
@@ -378,9 +380,9 @@ const Incident_List = () => {
   }
 
   const handleClear = () => {
-    setStatus1("");
-    setStatus2("");
-    setStatus3("");
+    setActionType("");
+    setStatus("");
+    setSourceType("");
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
@@ -389,9 +391,9 @@ const Incident_List = () => {
     setMaxCurrentPage(0);
     setIsMoreDataAvailable(true);
     setCommittedFilters({
-      status1: "",
-      status2: "",
-      status3: "",
+      actionType: "",
+      status: "",
+      sourceType: "",
       fromDate: null,
       toDate: null
     });
@@ -405,9 +407,6 @@ const Incident_List = () => {
 
 
   const HandleCreateTask = async () => {
-
-    const userData = await getLoggedUserId();
-
     if (!fromDate || !toDate) {
       Swal.fire({
         title: "Warning",
@@ -420,15 +419,15 @@ const Incident_List = () => {
       return;
     }
 
-
     setIsCreatingTask(true);
-
     try {
-
-
-
-
-      const response = await Task_for_Download_Incidents(status1, status2, fromDate, toDate, userData);
+      const response = await Task_for_Download_Incidents({
+        DRC_Action: actionType,
+        Incident_Status: status,
+        Source_type: sourceType,
+        From_Date: fromDate,
+        To_Date: toDate
+      });
       if (response && response.message === "Task created successfully") {
         const taskId = response.ResponseData?.data?.Task_Id; 
         Swal.fire({
@@ -488,10 +487,10 @@ const Incident_List = () => {
               <div className="flex items-center">
 
                 <select
-                  value={status1}
-                  onChange={(e) => setStatus1(e.target.value)}
+                  value={actionType}
+                  onChange={(e) => setActionType(e.target.value)}
                   className={`${GlobalStyle.selectBox}`}
-                  style={{ color: status1 === "" ? "gray" : "black" }}
+                  style={{ color: actionType === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Action Type</option>
                   <option value="collect arrears" style={{ color: "black" }}>collect arrears</option>
@@ -502,10 +501,10 @@ const Incident_List = () => {
 
               <div className="flex items-center">
                 <select
-                  value={status2}
-                  onChange={(e) => setStatus2(e.target.value)}
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
                   className={`${GlobalStyle.selectBox}`}
-                  style={{ color: status2 === "" ? "gray" : "black" }}
+                  style={{ color: status === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Status</option>
                   <option value="Incident Open" style={{ color: "black" }}>Incident Open</option>
@@ -518,10 +517,10 @@ const Incident_List = () => {
 
               <div className="flex items-center">
                 <select
-                  value={status3}
-                  onChange={(e) => setStatus3(e.target.value)}
+                  value={sourceType}
+                  onChange={(e) => setSourceType(e.target.value)}
                   className={`${GlobalStyle.selectBox}`}
-                  style={{ color: status3 === "" ? "gray" : "black" }}
+                  style={{ color: sourceType === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Source Type</option>
                   <option value="Pilot Suspended" style={{ color: "black" }}>Pilot Suspended</option>

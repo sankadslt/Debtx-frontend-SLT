@@ -19,7 +19,9 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx"; // Import GlobalStyle
 import Reject_Pending from "../../assets/images/incidents/Reject_Pending.png";
-import { Create_Task_Download_Pending_Reject, Create_Task_Forward_F1_Filtered, Create_Task_Reject_F1_Filtered, Forward_F1_Filtered, List_F1_filtered_incidents, Open_Task_Count_Forward_F1_Filtered, Open_Task_Count_Reject_F1_Filtered, Reject_F1_Filtered } from "../../services/distribution/distributionService.js";
+import { Create_Task_Forward_F1_Filtered, Create_Task_Reject_F1_Filtered, Forward_F1_Filtered, List_F1_filtered_incidents, Open_Task_Count_Forward_F1_Filtered, Open_Task_Count_Reject_F1_Filtered, Reject_F1_Filtered } from "../../services/distribution/distributionService.js";
+//import { Create_Task_Download_Pending_Reject} from "../../services/distribution/distributionService.js";
+import { Create_Task_Download_Pending_Reject} from "../../services/task/taskIncidentService.js";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 import { useRef } from "react";
@@ -320,7 +322,7 @@ export default function RejectIncident() {
   }, [fromDate, toDate, selectedSource]);
 
   // Create task for download function
-  const handleCreateTaskForDownload = async ({ source_type, fromDate, toDate }) => {
+  const handleCreateTaskForDownload = async () => {
     if (filteredData.length === 0) {
       Swal.fire({
         title: "Warning",
@@ -332,7 +334,7 @@ export default function RejectIncident() {
       return;
     }
 
-    if (!source_type && !fromDate && !toDate) {
+    if (!selectedSource && !fromDate && !toDate) {
       Swal.fire({
         title: 'Warning',
         text: 'Please select a Source Type or provide a date range before creating a task.',
@@ -361,13 +363,12 @@ export default function RejectIncident() {
       return;
     } else {
       try {
-        const filteredParams = {
-          Source_Type: source_type,
-          FromDate: fromDate,
-          ToDate: toDate
-        }
         setIsCreatingTask(true); // Set creating task state to true
-        const response = await Create_Task_Download_Pending_Reject(filteredParams);
+        const response = await Create_Task_Download_Pending_Reject({
+          Source_Type: selectedSource,
+          From_Date: fromDate,
+          To_Date: toDate
+        });
         if (response.status === 201) {
           Swal.fire({
             title: 'Success',

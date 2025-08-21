@@ -19,7 +19,9 @@ import { FaArrowLeft, FaArrowRight, FaSearch, FaDownload } from "react-icons/fa"
 import { useNavigate, Link } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Direct_LOD from "../../assets/images/incidents/Direct_LOD.png";
-import { List_incidents_Direct_LOD, Create_Task_Download_Direct_LOD_Sending, Forward_Direct_LOD, Create_Task_Forward_Direct_LOD, Open_Task_Count_Forward_Direct_LOD } from "../../services/distribution/distributionService.js";
+import { List_incidents_Direct_LOD, Forward_Direct_LOD, Create_Task_Forward_Direct_LOD, Open_Task_Count_Forward_Direct_LOD } from "../../services/distribution/distributionService.js";
+//import {Create_Task_Download_Direct_LOD_Sending } from "../../services/distribution/distributionService.js";
+import {Create_Task_Download_Direct_LOD_Sending } from "../../services/task/taskIncidentService.js";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 
@@ -159,7 +161,7 @@ export default function DirectLODSendingIncident() {
   }, []);
 
   // Function to handle the creation of a task for downloading
-  const handleCreateTaskForDownload = async ({ source_type, fromDate, toDate }) => {
+  const handleCreateTaskForDownload = async () => {
     if (filteredData.length === 0) {
       Swal.fire({
         title: "Warning",
@@ -173,7 +175,7 @@ export default function DirectLODSendingIncident() {
 
 
 
-    if (!source_type && !fromDate && !toDate) {
+    if (!selectedSource && !fromDate && !toDate) {
       Swal.fire({
         title: 'Warning',
         text: 'Please select a Source Type or provide a date range before creating a task.',
@@ -207,12 +209,11 @@ export default function DirectLODSendingIncident() {
     }
     try {
       setIsCreatingTask(true);
-      const filteredParams = {
-        Source_Type: source_type,
+      const response = await Create_Task_Download_Direct_LOD_Sending({
+        Source_Type: selectedSource,
         FromDate: fromDate,
         ToDate: toDate
-      }
-      const response = await Create_Task_Download_Direct_LOD_Sending(filteredParams);
+      });
       if (response.status === 201) {
         Swal.fire({
            
