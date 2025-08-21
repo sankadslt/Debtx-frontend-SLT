@@ -1,11 +1,11 @@
-/* Purpose: This template is used for the F2 Criteria List.
+/* Purpose: This template is used for the F2 Criteria Info.
 Created Date: 2025-08-21
 Created By: Deshan Chinthaka
 Last Modified Date: 2025-08-21
 Modified By: Deshan Chinthaka
 Version: node 20
 ui number: CONFIG F2 Criteria (Info)
-Dependencies: tailwind css, react, react-router-dom, sweetalert2, react-tooltip, axios (if API added later)*/
+Dependencies: tailwind css, react, react-router-dom, sweetalert2, react-tooltip*/
 
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
