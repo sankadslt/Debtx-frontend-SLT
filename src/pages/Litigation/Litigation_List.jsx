@@ -166,7 +166,8 @@ export const Litigation_List = () => {
           text: "No filter is selected. Please, select a filter.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#ffc107",
         });
         setToDate(null);
         setFromDate(null);
@@ -179,7 +180,8 @@ export const Litigation_List = () => {
           text: "Both From Date and To Date must be selected.",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#ffc107",
         });
         setToDate(null);
         setFromDate(null);
@@ -192,7 +194,8 @@ export const Litigation_List = () => {
           text: "To date should be greater than or equal to From date",
           icon: "warning",
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          confirmButtonColor: "#ffc107",
         });
         setToDate(null);
         setFromDate(null);
@@ -217,7 +220,8 @@ export const Litigation_List = () => {
             text: "No matching data found for the selected filters.",
             icon: "warning",
             allowOutsideClick: false,
-            allowEscapeKey: false
+            allowEscapeKey: false,
+            confirmButtonColor: "#ffc107"
           });
           setFilteredData([]);
           return null;
@@ -244,7 +248,8 @@ export const Litigation_List = () => {
               text: "No matching data found for the selected filters.",
               icon: "warning",
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              confirmButtonColor: "#ffc107"
             });
           }
         } else {
@@ -259,7 +264,8 @@ export const Litigation_List = () => {
         Swal.fire({
           title: "Error",
           text: "No valid data found in response.",
-          icon: "error"
+          icon: "error",
+          confirmButtonColor: "#d33",
         });
         setFilteredData([]);
       }
@@ -268,7 +274,8 @@ export const Litigation_List = () => {
       Swal.fire({
         title: "Error",
         text: "Failed to fetch filtered data. Please try again.",
-        icon: "error"
+        icon: "error",
+        confirmButtonColor: "#d33"
       });
     } 
   };
@@ -328,44 +335,48 @@ export const Litigation_List = () => {
         <h1 className={GlobalStyle.headingLarge}>Litigation List</h1>
 
         {/* Filtering Section */}
-        <div className={`${GlobalStyle.cardContainer} w-full mt-4`}>
-            <div className="flex items-center justify-end w-full space-x-3">
+         <div className="flex justify-end">
+        <div className={`${GlobalStyle.cardContainer} w-[71vw] flex px-3  sm:w-[71vw] py-2 items-center justify-end  w-full flex-wrap sm:flex-row gap-4 mt-20 mb-4`}>
+           {/* <div className="flex flex-col sm:flex-row items-center w-full gap-3"> */}
                 {/* Status */}
                 <select 
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className={GlobalStyle.selectBox}
+                className={`${GlobalStyle.selectBox} w-full sm:min-w-[150px] sm:w-auto`}
+                style={{ color: status === "" ? "gray" : "black" }}
                 >
-                    <option value="">Status</option>
-                    <option value="Initial_Litigation">Initial Litigation</option>
-                    <option value="Pending_FTL">Pending FTL</option>
-                    <option value="FTL_Settle_Pending">FTL Settle Pending</option>
-                    <option value="FTL">FTL</option>
-                    <option value="FLU">FLU (Fail from Legal Unit)</option>
-                    <option value="SLA">SLA (Success Legal Action)</option>
-                    <option value="FLA">FLA (Fail Legal Action)</option>
-                    <option value="Litigation">Litigation</option>
+                    <option value="" hidden>Status</option>
+                    <option value="Initial_Litigation" style={{ color: "black" }}>Initial Litigation</option>
+                    <option value="Pending_FTL" style={{ color: "black" }}>Pending FTL</option>
+                    <option value="FTL_Settle_Pending" style={{ color: "black" }}>FTL Settle Pending</option>
+                    <option value="FTL" style={{ color: "black" }} >FTL</option>
+                    <option value="FLU" style={{ color: "black" }}>FLU (Fail from Legal Unit)</option>
+                    <option value="SLA" style={{ color: "black" }}>SLA (Success Legal Action)</option>
+                    <option value="FLA" style={{ color: "black" }}>FLA (Fail Legal Action)</option>
+                    <option value="Litigation" style={{ color: "black" }}>Litigation</option>
                 </select>
 
                 {/* Date Type */}
                 <select 
                 value={dateType}
                 onChange={(e) => setDateType(e.target.value)}
-                className={GlobalStyle.selectBox}>
-                    <option value="">Date Type</option>
-                    <option value="accepted">Legal Accepted Date</option>
-                    <option value="created">Settlement Created DTM</option>
+                className={`${GlobalStyle.selectBox} w-full sm:min-w-[150px] sm:w-auto`}
+                style={{ color: dateType === "" ? "gray" : "black" }}
+                >
+                    <option value="" hidden>Date Type</option>
+                    <option value="accepted" style={{ color: "black" }}>Legal Accepted Date</option>
+                    <option value="created" style={{ color: "black" }}>Settlement Created DTM</option>
                 </select>
 
                 {/* Date */}
-                <div className="flex gap-1 items-center">
+               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
                     <label className={GlobalStyle.dataPickerDate}>Date</label>
                     <DatePicker
                         selected={fromDate}
                         onChange={(date) => setFromDate(date)}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/yyyy"
-                        className={`${GlobalStyle.inputText} w-32 md:w-40`}
+                        className={`${GlobalStyle.inputText} w-full sm:w-40`}
                         disabled={!dateType}
                     />
 
@@ -374,14 +385,14 @@ export const Litigation_List = () => {
                         onChange={(date) => setToDate(date)}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="dd/mm/yyyy"
-                        className={`${GlobalStyle.inputText} w-32 md:w-40`}
+                        className={`${GlobalStyle.inputText} w-full sm:w-40`}
                         disabled={!dateType}
                     />
                 </div>
 
                 {/* Filter Button */}
                 <button
-                  className={GlobalStyle.buttonPrimary}
+                  className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
                   onClick={handleFilterButton}
                   disabled={isLoading}
                 >
@@ -389,13 +400,14 @@ export const Litigation_List = () => {
                 </button>
 
                 <button
-                  className={GlobalStyle.buttonRemove}
+                  className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
                   onClick={handleClear}
                 >
                   Clear
                 </button>
             </div>
         </div>
+        {/* </div> */}
 
         {/* Search bar */}
         <div className="mb-4 flex justify-start">
@@ -405,14 +417,14 @@ export const Litigation_List = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={GlobalStyle.inputSearch}
-                placeholder="Search by ID, Status, or Account No"
+                placeholder=""
             />
             <FaSearch className={GlobalStyle.searchBarIcon} />
             </div>
         </div>
 
         {/* Table */}
-        <div className={GlobalStyle.tableContainer}>
+        <div className={`${GlobalStyle.tableContainer} overflow-x-auto`}>
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
@@ -422,7 +434,7 @@ export const Litigation_List = () => {
                   <th className={GlobalStyle.tableHeader}>Amount</th>
                   <th className={GlobalStyle.tableHeader}>Legal Accepted Date</th>
                   <th className={GlobalStyle.tableHeader}>Settlement Created Date</th>
-                  <th className={GlobalStyle.tableHeader}>Actions</th>
+                  <th className={GlobalStyle.tableHeader}></th>
                 </tr>
               </thead>
               <tbody>

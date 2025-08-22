@@ -47,6 +47,9 @@ const CaseDetails = () => {
     useEffect(() => {
         const loadCaseDetails = async () => {
             try {
+                if (!caseId) {
+                    return;
+                }
                 const response = await fetchCaseDetails(caseId);
 
                 if (response.success) {
@@ -74,7 +77,7 @@ const CaseDetails = () => {
         };
 
         loadCaseDetails();
-    }, [caseId]);
+    }, []);
 
     const toggleSection = (sectionName) => {
         setOpenSections(prev => ({
