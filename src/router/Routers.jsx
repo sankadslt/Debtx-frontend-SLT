@@ -139,6 +139,7 @@ import ListAllTasks from "../pages/Task/ListAllTasks";
 //Abnormal
 import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
 import AbandonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
+import Write_Off_Log from "../pages/Abnormal/Write_Off_Log";
 
 //Dispute
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
@@ -1081,6 +1082,16 @@ const Routers = () => {
           />
         }
       />   */}
+
+      <Route
+        path="/pages/Abnormal/Write_Off_Log"
+        element={
+          <ProtectedRoute
+            element={<Write_Off_Log/>}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
 
  
  
