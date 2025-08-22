@@ -938,6 +938,22 @@ const UserInfo = () => {
                         {userInfo.created_by || "Not specified"}
                       </td>
                     </tr>
+                    <tr className="block sm:table-row">
+                  <td className={`${GlobalStyle.tableData} font-medium whitespace-nowrap hidden sm:table-cell w-1/3 sm:w-1/4`}>
+                    Remark 
+                  </td>
+                  <td className="w-4 text-left hidden sm:table-cell">:</td>
+                  <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
+                    <textarea
+                      value={remark}
+                      onChange={(e) => setRemark(e.target.value)}
+                      rows="4"
+                      className={`${GlobalStyle.inputText} w-3/4 text-left`}
+                      placeholder="Enter reason for add Remark"
+                      required
+                    />
+                  </td>
+                </tr>
                   </tbody>
                 </table>
               </div>
