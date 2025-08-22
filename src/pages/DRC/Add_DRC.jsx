@@ -1,3 +1,15 @@
+// /*Purpose:
+// Created Date: 2025-03-20
+// Created By: Janani Kumarasiri (jkktg001@gmail.com)
+// Last Modified Date: 2025-08-22
+// Modified By: Sasindu Srinayaka(sasindusrinayaka@gmail.com)
+// Version: React v18
+// ui number : 10.2
+// Dependencies: Tailwind CSS
+// Related Files:
+// Notes: This template uses Tailwind CSS */
+
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
@@ -232,21 +244,33 @@ const Add_DRC = () => {
     }
   };
 
-  // Handle coordinator selection and auto-populate email
+  // Handle coordinator selection and auto-populate email - FIXED
   const handleCoordinatorChange = (e) => {
     const selectedUserId = e.target.value;
+    console.log("Selected User ID from dropdown:", selectedUserId, typeof selectedUserId);
+    console.log("Available coordinators in change handler:", coordinators);
+    
     setSelectedCoordinator(selectedUserId);
 
     // Find the coordinator with the selected user_id
     const selectedCoord = coordinators.find(
-      (coord) => coord.user_id === selectedUserId
+      (coord) => {
+        console.log(`Checking coordinator: ${coord.user_id} (${typeof coord.user_id}) === ${selectedUserId} (${typeof selectedUserId})`);
+        // Try both string and number comparison
+        return coord.user_id === selectedUserId || coord.user_id.toString() === selectedUserId || coord.user_id === parseInt(selectedUserId);
+      }
     );
 
+    console.log("Found coordinator in change handler:", selectedCoord);
+
     if (selectedCoord) {
-      setCEmail(selectedCoord.email);
+      // Fixed: Use useremail from the selected coordinator
+      setCEmail(selectedCoord.useremail);
+      console.log("Set email to:", selectedCoord.useremail);
     } else {
       // Clear the email field if no coordinator is found
       setCEmail("");
+      console.log("No coordinator found, cleared email");
     }
   };
 
@@ -381,16 +405,41 @@ const Add_DRC = () => {
           status_update_dtm: new Date().toISOString(),
         }));
 
-      // Get selected coordinator details
+      // Debug logging
+      console.log("Selected Coordinator ID:", selectedCoordinator);
+      console.log("Available Coordinators:", coordinators);
+      console.log("Coordinators length:", coordinators.length);
+
+      // Get selected coordinator details - FIXED with debugging
       const selectedCoord = coordinators.find(
-        (coord) => coord.user_id === selectedCoordinator
+        (coord) => {
+          console.log(`Comparing: coord.user_id (${typeof coord.user_id}) "${coord.user_id}" === selectedCoordinator (${typeof selectedCoordinator}) "${selectedCoordinator}"`);
+          // Try multiple comparison methods to handle data type mismatches
+          return coord.user_id === selectedCoordinator || 
+                 coord.user_id.toString() === selectedCoordinator || 
+                 coord.user_id === parseInt(selectedCoordinator) ||
+                 coord.user_id === Number(selectedCoordinator);
+        }
       );
 
-      // Format the coordinator data
+      console.log("Selected Coordinator found:", selectedCoord);
+
+      // If coordinator not found, show error
+      if (!selectedCoord) {
+        console.error("Coordinator not found! Available coordinator IDs:", coordinators.map(c => c.user_id));
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Selected coordinator not found. Please select a coordinator again.",
+        });
+        return;
+      }
+
+      // Format the coordinator data - FIXED
       const coordinatorData = {
         service_no: selectedCoordinator, // Using user_id as service_no
-        slt_coordinator_name: selectedCoord?.username || "",
-        slt_coordinator_email: selectedCoord?.useremail || "",
+        slt_coordinator_name: selectedCoord.username || "",
+        slt_coordinator_email: selectedCoord.useremail || C_Email, // Use useremail from coordinator
         coordinator_create_dtm: new Date().toISOString(),
         coordinator_create_by: user_id,
       };
@@ -857,17 +906,6 @@ const Add_DRC = () => {
 
 export default Add_DRC;
 
-// /*Purpose:
-// Created Date: 2025-03-20
-// Created By: Janani Kumarasiri (jkktg001@gmail.com)
-// Last Modified Date: 2025-05-22
-// Modified By: Buthmi Mithara Abeysena (buthmimithara1234@gmail.com)
-// Version: React v18
-// ui number : 10.2
-// Dependencies: Tailwind CSS
-// Related Files:
-// Notes: This template uses Tailwind CSS */
-
 // import { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 // import GlobalStyle from "../../assets/prototype/GlobalStyle";
@@ -901,9 +939,6 @@ export default Add_DRC;
 
 //   // const [coordinators, setCoordinators] = useState([]);
 //   // const [coordinatorLoading, setCoordinatorLoading] = useState(true);
-//   const [coordinatorDropdownClicked, setCoordinatorDropdownClicked] = useState(false);
-//   const [selectedCoordinator, setSelectedCoordinator] = useState("");
-//   const [coordinators, setCoordinators] = useState([]);
 
 //   // Service Types
 //   const [selectedServiceType, setSelectedServiceType] = useState("");
@@ -1119,12 +1154,7 @@ export default Add_DRC;
 //       newErrors.Email = "Please enter a valid email address.";
 //     }
 
-//     // if (!ServiceNo) newErrors.ServiceNo = "Service number is required.";
-
-//     // Check if at least one RTOM area is selected
-//     if (coordinators.filter((r) => r.selected).length === 0) {
-//       newErrors.coordinators = "One coordinator must be selected.";
-//     }
+//     if (!ServiceNo) newErrors.ServiceNo = "Service number is required.";
 
 //     // Check if at least one service type is selected
 //     if (serviceTypes.filter((s) => s.selected).length === 0) {
@@ -1140,21 +1170,21 @@ export default Add_DRC;
 //     return Object.keys(newErrors).length === 0;
 //   };
 
-//   const handleAddServiceType = () => {
-//     if (!selectedServiceType) return; 
+//       const handleAddServiceType = () => {
+//       if (!selectedServiceType) return; 
 
-//     const serviceToAdd = serviceTypes.find(
-//       (service) => service.code === selectedServiceType
-//     );
-
-//     if (serviceToAdd && !serviceToAdd.selected) {
-//       const updatedTypes = serviceTypes.map((item) =>
-//         item.code === selectedServiceType ? { ...item, selected: true } : item
+//       const serviceToAdd = serviceTypes.find(
+//         (service) => service.code === selectedServiceType
 //       );
-//       setServiceTypes(updatedTypes);
-//       setSelectedServiceType(""); 
-//     }
-//   };
+
+//       if (serviceToAdd && !serviceToAdd.selected) {
+//         const updatedTypes = serviceTypes.map((item) =>
+//           item.code === selectedServiceType ? { ...item, selected: true } : item
+//         );
+//         setServiceTypes(updatedTypes);
+//         setSelectedServiceType(""); 
+//       }
+//     };
 
 //   const handleAddRTOM = () => {
 //   if (!selectedRTOM || !selectedhandlingtype) {
@@ -1193,40 +1223,13 @@ export default Add_DRC;
 //     setRtomAreas(updatedAreas);
 //   };
 
-//   // const handleSearchUsers = async (e) => {
-//   //   e.preventDefault();
-    
-//   //   if (!ServiceNo || ServiceNo.trim() === "") {
-//   //     Swal.fire("Error", "Please provide a valid service number.", "error");
-//   //     return;
-//   //   }
-
-//   //   try {
-
-//   //     // Fetch user details
-//   //     const response = await getUserDetailsById(ServiceNo);
-      
-//   //     // Handle different response structures:
-//   //     const userData = response.data || response; // Check for nested data
-      
-//   //     // Extract name - try multiple possible fields
-//   //     const userName = userData.username || userData.name || userData.fullName || "";
-      
-//   //     // Extract email
-//   //     const userEmail = userData.email || "";
-//   //     setCName(userName);
-//   //     setCEmail(userEmail);
-
-//   //   } catch (error) {
-//   //     Swal.close();
-//   //     Swal.fire("Error", "Coordinator not found", "error");
-//   //     setCName("");
-//   //     setCEmail("");
-//   //   }
-//   // };
-
-//   const handleCoordinatorDropdown(e) => {
+//   const handleSearchUsers = async (e) => {
 //     e.preventDefault();
+    
+//     if (!ServiceNo || ServiceNo.trim() === "") {
+//       Swal.fire("Error", "Please provide a valid service number.", "error");
+//       return;
+//     }
 
 //     try {
 
@@ -1238,13 +1241,9 @@ export default Add_DRC;
       
 //       // Extract name - try multiple possible fields
 //       const userName = userData.username || userData.name || userData.fullName || "";
-
-//       const ServiceNo = userData.serviceNo || "";
-
+      
 //       // Extract email
 //       const userEmail = userData.email || "";
-
-//       setServiceNo(ServiceNo);
 //       setCName(userName);
 //       setCEmail(userEmail);
 
@@ -1488,7 +1487,7 @@ export default Add_DRC;
 //                     <span className="inline-block min-w-[120px] pl-6">Service No <span className="text-red-500">*</span></span>
 //                     <span className="ml-8">:</span>
 //                   </td>
-//                   {/* <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
+//                   <td className="block md:table-cell w-full md:w-2/3 pb-3 md:pb-2">
 //                     <input
 //                       type="text"
 //                       value={ServiceNo}
@@ -1505,25 +1504,10 @@ export default Add_DRC;
 //                     {errors.ServiceNo && (
 //                       <p className="text-red-500">{errors.ServiceNo}</p>
 //                     )}
-//                   </td> */}
-//                   <td className="block md:table-cell w-full md:w-1/3 text-left pb-1 md:pb-2 whitespace-nowrap">
-//                     <select
-//                         name="drcId"
-//                         // value={formData.drcId}
-//                         onClick={handleCoordinatorDropdown}
-//                         className={`${GlobalStyle.inputText} w-full`}
-//                       >
-//                         {/* <option value="" disabled hidden>
-//                           Select DRC
-//                         </option>
-//                         {drcList.map((drc) => (
-//                           <option key={drc.key} value={drc.id}>
-//                             {drc.value}
-//                           </option>
-//                         ))} */}
-//                       </select>
 //                   </td>
 //                 </tr>
+
+
 //                 <tr className="block md:table-row">
 //                 <td className="block md:table-cell w-full md:w-1/3 text-left pb-1 md:pb-2 whitespace-nowrap">
 //                   <span className="inline-block min-w-[120px] pl-6">Name</span>
