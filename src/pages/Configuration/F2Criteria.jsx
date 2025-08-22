@@ -40,9 +40,8 @@ const F2Criteria = () => {
 
   const keys = [
     { value: "", label: "Key", hidden: true },
-    { value: "Credit Class ID", label: "Credit Class ID" },
-    { value: "Credit Class Name", label: "Credit Class Name" },
-    { value: "Customer Name", label: "Customer Name" },
+    { value: "Account Manager Type", label: "Account Manager Type" },
+    { value: "Customer Type Name", label: "Customer Type Name" },
   ];
 
   const operators = [

@@ -153,6 +153,7 @@ import F1CriteriaEdit from "../pages/Configuration/F1CriteriaEdit";
 import F2Criteria from "../pages/Configuration/F2Criteria";
 import F2CriteriaInfo from "../pages/Configuration/F2CriteriaInfo";
 import F2CriteriaEdit from "../pages/Configuration/F2CriteriaEdit";
+import AddF2Criteria from "../pages/Configuration/AddF2Criteria";
 
 const Routers = () => {
   return (
@@ -1184,6 +1185,16 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<F2Criteria />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      <Route
+        path="/pages/Configuration/AddF2Criteria"
+        element={
+          <ProtectedRoute
+            element={<AddF2Criteria />}
             allowedRoles={["superadmin"]}
           />
         }
