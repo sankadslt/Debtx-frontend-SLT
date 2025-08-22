@@ -199,7 +199,8 @@ const PrototypeC = () => {
           setUserRole(newDecoded.role);
         });
       } else {
-        setUserRole(decoded.role);
+        // setUserRole(decoded.role);
+        setUserRole(Array.isArray(decoded.role) ? decoded.role : [decoded.role]);
       }
     } catch (error) {
       console.error("Invalid token:", error);
@@ -240,13 +241,18 @@ const PrototypeC = () => {
       </div>
 
       {/* Role-Based Button */}
-      <div>
+      {/* <div>
         {["admin", "superadmin", "slt"].includes(userRole) && (
           <button className={GlobalStyle.buttonPrimary}>
             Role-Based Button
           </button>
         )}
-      </div>
+      </div> */}
+      {userRole && userRole.some(role => ["admin", "superadmin", "slt"].includes(role)) && (
+        <button className={GlobalStyle.buttonPrimary}>
+          Role-Based Button
+        </button>
+      )}
 
       {/* Filter Section */}
       <div className="flex flex-col mb-10">

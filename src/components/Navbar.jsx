@@ -361,7 +361,8 @@ const Navbar = () => {
         id: decoded.user_id,
         name: decoded.username,
         email: decoded.email,
-        role: decoded.role,
+        // role: decoded.role,
+        role: Array.isArray(decoded.role) ? decoded.role : [decoded.role],
       });
     } catch (error) {
       console.error("Invalid token:", error);
@@ -641,7 +642,13 @@ const Navbar = () => {
               <p className="text-sm font-semibold text-center">
                 {currentUser.name}
               </p>
-              <p className="text-xs mb-4 text-center">{currentUser.role}</p>
+              {/* <p className="text-xs mb-4 text-center">{currentUser.role}</p> */}
+              <p className="text-xs mb-4 text-center">
+                {Array.isArray(currentUser.role)
+                  ? currentUser.role.join(" | ")
+                  : currentUser.role
+                }
+              </p>
               <div className="space-y-2">
                 {defaultUser.profileOptions.map((option) => (
                   <button
