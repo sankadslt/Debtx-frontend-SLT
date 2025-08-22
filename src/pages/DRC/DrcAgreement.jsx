@@ -283,6 +283,7 @@ const DrcAgreement = () => {
       // Simulate API call
       const updateData = {
         drc_id: drcId,
+        drc_name: companyname,
         start_date: formatDateLocal(startDate),
         end_date: formatDateLocal(endDate),
         remark: remark,
