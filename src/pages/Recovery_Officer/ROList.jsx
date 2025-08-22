@@ -521,7 +521,8 @@ export default function ROList() {
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>NIC</th>
               <th className={GlobalStyle.tableHeader}>RO Name</th>
-              <th className={GlobalStyle.tableHeader}>Contact No.</th>
+              <th className={GlobalStyle.tableHeader}>Contact No. 1</th>
+              <th className={GlobalStyle.tableHeader}>Contact No. 2</th>
               <th className={GlobalStyle.tableHeader}>Billing Center Area count</th>
             </tr>
           </thead>
@@ -538,6 +539,7 @@ export default function ROList() {
                   <td className={GlobalStyle.tableData}>{item.drc_name || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.nic || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.ro_name || "N/A"}</td>
+                  <td className={GlobalStyle.tableData}>{item.login_contact_no || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.login_contact_no || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.rtom_area_count || "0"}</td>
                 </tr>
