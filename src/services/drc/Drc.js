@@ -532,3 +532,19 @@ export const getUserDetailsByIdforDRC = async (user_id) => {
   }
 };
 
+
+export const getUserDetails = async () => {
+  try {
+    const response = await axios.get(`https://debtx.slt.lk:6500/users/list_slt_cordinator`);
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to fetch user details",
+      }
+    );
+  }
+};
