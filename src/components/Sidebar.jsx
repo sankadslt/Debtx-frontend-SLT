@@ -207,7 +207,7 @@ const Sidebar = ({ onHoverChange }) => {
           label: "LOD",
           roles: ["superadmin", "admin", "user"],
           subItems: [
-            { icon: CgEditFade, label: "DS List", link: "/pages/LOD/DigitalSignatureLOD", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "Pending List", link: "/pages/LOD/DigitalSignatureLOD", roles: ["superadmin", "admin"] },
             { icon: CgEditFade, label: "LOD Log", link: "/pages/LOD/LODLog", roles: ["superadmin", "admin"] },
             { icon: CgEditFade, label: "FR Log", link: "/pages/LOD/FinalReminderList", roles: ["superadmin", "admin"] },
           ]
@@ -230,7 +230,7 @@ const Sidebar = ({ onHoverChange }) => {
           roles: ["superadmin", "admin"],
           subItems: [
             // { icon: CgEditFade, label: "Write Off list", link: "", roles: ["superadmin", "admin"] },
-            { icon: CgEditFade, label: "Abandoned List", link: "/pages/Abnormal/Abondoned_Case_Log", roles: ["superadmin", "admin"] },
+            { icon: CgEditFade, label: "Abandoned List", link: "/pages/Abnormal/Abandoned_Case_Log", roles: ["superadmin", "admin"] },
             { icon: CgEditFade, label: "Withdraw list", link: "/pages/Abnormal/Withdraw_Case_Log", roles: ["superadmin", "admin"] },
           ],
         },
@@ -309,6 +309,12 @@ const Sidebar = ({ onHoverChange }) => {
       subItems: [
         {
           icon: CgEditFade,
+          label: "User Approval",
+          link: "/pages/User/UserApproval",
+          roles: ["superadmin", "admin"],
+        },
+        {
+          icon: CgEditFade,
           label: "Distribution Approval",
           link: "/pages/Distribute/DRCAssignManagerApproval2",
           roles: ["superadmin", "admin"],
@@ -317,12 +323,6 @@ const Sidebar = ({ onHoverChange }) => {
           icon: CgEditFade,
           label: "Other Approval",
           link: "/pages/Distribute/DRCAssignManagerApproval3",
-          roles: ["superadmin", "admin"],
-        },
-        {
-          icon: CgEditFade,
-          label: "User Approval",
-          link: "/pages/User/UserApproval",
           roles: ["superadmin", "admin"],
         },
       ],
