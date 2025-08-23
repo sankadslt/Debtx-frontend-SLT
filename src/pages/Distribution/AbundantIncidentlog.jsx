@@ -21,7 +21,8 @@ import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
-import { Create_Rejected_List_for_Download, List_Abundant_Incident } from "../../services/distribution/distributionService";
+import {List_Abundant_Incident } from "../../services/distribution/distributionService";
+import {Create_Rejected_List_for_Download} from "../../services/task/taskIncidentService";
 
 const AbundantIncidentlog = () => {
   const navigate = useNavigate();

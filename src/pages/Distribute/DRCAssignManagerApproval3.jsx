@@ -304,9 +304,19 @@ export default function DRCAssignManagerApproval3() {
 
     if ((startDate && !endDate) || (!startDate && endDate)) {
       Swal.fire({
-        title: "Error",
+        title: "Warning",
         text: "Please select both start and end dates.",
-        icon: "error",
+        icon: "warning",
+        confirmButtonColor: "#f1c40f",
+      });
+      return;
+    }
+
+    if (!startDate && !endDate && !approverstatus) {
+      Swal.fire({
+        title: "Warning",
+        text: "Please select at least one parameter.",
+        icon: "warning",
         confirmButtonColor: "#f1c40f",
       });
       return;
@@ -497,7 +507,18 @@ export default function DRCAssignManagerApproval3() {
         confirmButtonColor: "#28a745",
       }).then(() => {
         setSelectedRows(new Set());
-        applyFilters();
+        // applyFilters();
+        if (currentPage === 1) {
+          fetchDRCDataAPI({
+            drcFilter: drcFilter,
+            startDate: startDate, // Format: YYYY-MM-DD
+            endDate: endDate, // Format: YYYY-MM-DD
+            approverstatus: approverstatus,
+            currentPage: 1, // Reset to page 1
+          });
+        } else {
+          setCurrentPage(1); // Reset to page 1 if filters are applied
+        }
       });
       //setSelectAll(false);
     } catch (error) {
@@ -578,7 +599,18 @@ export default function DRCAssignManagerApproval3() {
         allowEscapeKey: false,
       }).then(() => {
         setSelectedRows(new Set());
-        applyFilters();
+        // applyFilters();
+        if (currentPage === 1) {
+          fetchDRCDataAPI({
+            drcFilter: drcFilter,
+            startDate: startDate, // Format: YYYY-MM-DD
+            endDate: endDate, // Format: YYYY-MM-DD
+            approverstatus: approverstatus,
+            currentPage: 1, // Reset to page 1
+          });
+        } else {
+          setCurrentPage(1); // Reset to page 1 if filters are applied
+        }
       });
       //setSelectAll(false);
 

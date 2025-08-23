@@ -10,21 +10,21 @@ import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import {
-  fetchAbondonedCases,
-  Task_for_Download_Abondoned,
-  updateAbondonedCaseRemark,
+  fetchAbandonedCases,
+  Task_for_Download_Abandoned,
+  updateAbandonedCaseRemark,
 } from "../../services/Abnormal/AbnormalServices";
 
- import Abondoned from "/src/assets/images/Abnormal/Abandoned.png";
+ import Abandoned from "/src/assets/images/Abnormal/Abandoned.png";
 
 const STATUS_ICONS = {
-  "Abondoned": {
-    icon: Abondoned,
-    tooltip: "Abondoned",
+  "Abandoned": {
+    icon: Abandoned,
+    tooltip: "Abandoned",
   },
-  "Pending Abondoned": {
-    //icon: Pending_Abondoned,
-    tooltip: "Pending Abondoned",
+  "Pending Abandoned": {
+    //icon: Pending_Abandoned,
+    tooltip: "Pending Abandoned",
   },
 };
 
@@ -49,7 +49,7 @@ const StatusIcon = ({ status, index }) => {
   );
 };
 
-const AbondonedCaseModal = ({ onSuccess, onClose }) => {
+const AbandonedCaseModal = ({ onSuccess, onClose }) => {
   const [caseId, setCaseId] = useState("");
   const [remark, setRemark] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -86,7 +86,7 @@ const AbondonedCaseModal = ({ onSuccess, onClose }) => {
         created_by: userId,
       };
  
-      const response = await updateAbondonedCaseRemark(payload);
+      const response = await updateAbandonedCaseRemark(payload);
 
       if (response.success) {
         Swal.fire({
@@ -112,7 +112,7 @@ const AbondonedCaseModal = ({ onSuccess, onClose }) => {
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <span className={GlobalStyle.headingLarge}>Abondoned Case</span>
+        <span className={GlobalStyle.headingLarge}>Abandoned Case</span>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
           <FaTimes size={20} />
         </button>
@@ -165,9 +165,9 @@ const Modal = ({ isOpen, onClose, children }) => {
   );
 };
 
-const AbondonedCaseLog = () => {
+const AbandonedCaseLog = () => {
  
-  const [abondonedCases, setAbondonedCases] = useState([]);
+  const [abandonedCases, setAbandonedCases] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [fromDate, setFromDate] = useState(null);
@@ -179,7 +179,7 @@ const AbondonedCaseLog = () => {
   const [userRole, setUserRole] = useState(null);
   const [isMoreDataAvailable, setIsMoreDataAvailable] = useState(true);
   const [maxCurrentPage, setMaxCurrentPage] = useState(0);
-  const [isAbondonedCaseModalOpen, setIsAbondonedCaseModalOpen] = useState(false);
+  const [isAbandonedCaseModalOpen, setIsAbandonedCaseModalOpen] = useState(false);
   const [committedFilters, setCommittedFilters] = useState({
     status: "",
     accountNumber: "",
@@ -190,7 +190,7 @@ const AbondonedCaseLog = () => {
   const rowsPerPage = 10;
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const filteredDataBySearch = abondonedCases.filter((row) =>
+  const filteredDataBySearch = abandonedCases.filter((row) =>
     Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -265,7 +265,7 @@ const AbondonedCaseLog = () => {
     return true;
   };
 
-  const loadAbondonedCases = async (filters) => {
+  const loadAbandonedCases = async (filters) => {
     try {
       const formatDate = (date) => {
         if (!date) return null;
@@ -282,14 +282,14 @@ const AbondonedCaseLog = () => {
       };
 
       setLoading(true);
-      const response = await fetchAbondonedCases(payload);
+      const response = await fetchAbandonedCases(payload);
       setLoading(false);
 
       if (response?.data) {
         if (currentPage === 1) {
-          setAbondonedCases(response.data);
+          setAbandonedCases(response.data);
         } else {
-          setAbondonedCases((prev) => [...prev, ...response.data]);
+          setAbandonedCases((prev) => [...prev, ...response.data]);
         }
 
         if (response.data.length === 0) {
@@ -309,13 +309,13 @@ const AbondonedCaseLog = () => {
           }
         }
       } else {
-        setAbondonedCases([]);
+        setAbandonedCases([]);
       }
     } catch (error) {
-      console.error("Error fetching abondoned cases:", error);
+      console.error("Error fetching abandoned cases:", error);
       Swal.fire({
         title: "Error",
-        text: "Failed to fetch abondoned cases.",
+        text: "Failed to fetch abandoned cases.",
         icon: "error",
         confirmButtonColor: "#d33",
       });
@@ -327,7 +327,7 @@ const AbondonedCaseLog = () => {
   useEffect(() => {
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
-      loadAbondonedCases({
+      loadAbandonedCases({
         ...committedFilters,
         page: currentPage,
       });
@@ -346,10 +346,10 @@ const AbondonedCaseLog = () => {
       fromDate,
       toDate,
     });
-    setAbondonedCases([]);
+    setAbandonedCases([]);
 
     if (currentPage === 1) {
-      loadAbondonedCases({
+      loadAbandonedCases({
         status,
         accountNumber,
         fromDate,
@@ -367,7 +367,7 @@ const AbondonedCaseLog = () => {
     setFromDate(null);
     setToDate(null);
     setSearchQuery("");
-    setAbondonedCases([]);
+    setAbandonedCases([]);
     setMaxCurrentPage(0);
     setIsMoreDataAvailable(true);
     setCommittedFilters({
@@ -381,17 +381,17 @@ const AbondonedCaseLog = () => {
   };
 
   const handleAdd = () => {
-    setIsAbondonedCaseModalOpen(true);
+    setIsAbandonedCaseModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsAbondonedCaseModalOpen(false);
+    setIsAbandonedCaseModalOpen(false);
   };
 
-  const handleAbondonedSuccess = () => {
+  const handleAbandonedSuccess = () => {
     handleCloseModal();
     if (Object.values(committedFilters).some(Boolean)) {
-      loadAbondonedCases({ ...committedFilters, page: 1 });
+      a({ ...committedFilters, page: 1 });
     }
   };
 
@@ -399,7 +399,7 @@ const AbondonedCaseLog = () => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
     } else if (direction === "next") {
-      if (isMoreDataAvailable || currentPage < Math.ceil(abondonedCases.length / rowsPerPage)) {
+      if (isMoreDataAvailable || currentPage < Math.ceil(abandonedCases.length / rowsPerPage)) {
         setCurrentPage(currentPage + 1);
       }
     }
@@ -419,7 +419,7 @@ const AbondonedCaseLog = () => {
     setIsCreatingTask(true);
     try {
       const userData = await getLoggedUserId();
-      const response = await Task_for_Download_Abondoned(
+      const response = await Task_for_Download_Abandoned(
         status,
         accountNumber,
         fromDate,
@@ -464,7 +464,7 @@ const AbondonedCaseLog = () => {
     <div className={`p-4 ${GlobalStyle.fontPoppins}`}>
       <div className="flex flex-col flex-1">
         <main className="p-6">
-          <h1 className={GlobalStyle.headingLarge}>Abondoned Case Log</h1>
+          <h1 className={GlobalStyle.headingLarge}>Abandoned Case Log</h1>
           
           {["admin", "superadmin", "slt"].includes(userRole) && (
             <div className="flex justify-end mt-2 sm:mt-0">
@@ -495,8 +495,8 @@ const AbondonedCaseLog = () => {
                   style={{ color: status === "" ? "gray" : "black" }}
                 >
                   <option value="" hidden>Select Status</option>
-                  <option value="Pending Abondoned" style={{ color: "black" }}>Pending Abondoned</option>
-                  <option value="Abondoned" style={{ color: "black" }}>Abondoned</option>
+                  <option value="Pending Abandoned" style={{ color: "black" }}>Pending Abandoned</option>
+                  <option value="Abandoned" style={{ color: "black" }}>Abandoned</option>
                 </select>
               </div>
 
@@ -562,8 +562,8 @@ const AbondonedCaseLog = () => {
                   <th className={GlobalStyle.tableHeader}>Status</th>
                   <th className={GlobalStyle.tableHeader}>Amount</th>
                   <th className={GlobalStyle.tableHeader}>Remark</th>
-                  <th className={GlobalStyle.tableHeader}>Abondoned By</th>
-                  <th className={GlobalStyle.tableHeader}>Abondoned On</th>
+                  <th className={GlobalStyle.tableHeader}>Abandoned By</th>
+                  <th className={GlobalStyle.tableHeader}>Abandoned On</th>
                   <th className={GlobalStyle.tableHeader}>Approved On</th>
                 </tr>
               </thead>
@@ -580,9 +580,9 @@ const AbondonedCaseLog = () => {
                       </td>
                       <td className={GlobalStyle.tableData}>{formatCurrency(row.amount)}</td>
                       <td className={GlobalStyle.tableData}>{row.remark || ""}</td>
-                      <td className={GlobalStyle.tableData}>{row.abondonedBy || ""}</td>
+                      <td className={GlobalStyle.tableData}>{row.abandonedBy || ""}</td>
                       <td className={GlobalStyle.tableData}>
-                        {row.abondonedOn ? new Date(row.abondonedOn).toLocaleDateString("en-GB") : ""}
+                        {row.abandonedOn ? new Date(row.abandonedOn).toLocaleDateString("en-GB") : ""}
                       </td>
                       <td className={GlobalStyle.tableData}>
                         {row.approvedOn ? new Date(row.approvedOn).toLocaleDateString("en-GB") : ""}
@@ -618,7 +618,7 @@ const AbondonedCaseLog = () => {
                 disabled={
                   searchQuery
                     ? currentPage >= Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                    : !isMoreDataAvailable && currentPage >= Math.ceil(abondonedCases.length / rowsPerPage)
+                    : !isMoreDataAvailable && currentPage >= Math.ceil(abandonedCases.length / rowsPerPage)
                 }
                 className={`${GlobalStyle.navButton}`}
               >
@@ -645,10 +645,10 @@ const AbondonedCaseLog = () => {
         </main>
       </div>
 
-      {/* Abondoned Case Modal */}
-      <Modal isOpen={isAbondonedCaseModalOpen} onClose={handleCloseModal}>
-        <AbondonedCaseModal 
-          onSuccess={handleAbondonedSuccess} 
+      {/* Abandoned Case Modal */}
+      <Modal isOpen={isAbandonedCaseModalOpen} onClose={handleCloseModal}>
+        <AbandonedCaseModal 
+          onSuccess={handleAbandonedSuccess} 
           onClose={handleCloseModal} 
         />
       </Modal>
@@ -656,4 +656,4 @@ const AbondonedCaseLog = () => {
   );
 };
 
-export default AbondonedCaseLog;
+export default AbandonedCaseLog;
