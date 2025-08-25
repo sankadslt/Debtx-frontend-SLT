@@ -4,7 +4,7 @@ Created By: Deshan Chinthaka
 Last Modified Date: 2025-08-19
 Modified By: Deshan Chinthaka
 Version: node 20
-ui number: Unknown
+ui number: CONFIG - F1 Criteria (List)
 Dependencies: tailwind css, react, react-router-dom, sweetalert2, react-tooltip, axios (if API added later)
 Related Files: Potentially f1_criteria_services.js, GlobalStyle.js
 */

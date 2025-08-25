@@ -4,7 +4,7 @@ Created By: Deshan Chinthaka
 Last Modified Date: 2025-08-21
 Modified By: Deshan Chinthaka 
 Version: node 20
-ui number: Unknown
+ui number: CONFIG - F2 Criteria (ADD)
 Dependencies: tailwind css, react, react-router-dom, sweetalert2
 Related Files: F2Criteria.jsx, GlobalStyle.js
 Notes: This component provides a form to add a new F2 Criteria entry. It includes fields for Key, Operator, Value, Description. Upon submission, it simulates a success message (replace with API call if needed). The form resets after submission. */

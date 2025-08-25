@@ -1,3 +1,14 @@
+/* Purpose: This template is used for adding a new F1 Criteria.
+Created Date: 2025-08-20
+Created By: Deshan Chinthaka
+Last Modified Date: 2025-08-20
+Modified By: Deshan Chinthaka 
+Version: node 20
+ui number: CONFIG - F1 Criteria (Edit)
+Dependencies: tailwind css, react, react-router-dom, sweetalert2
+Related Files: F1Criteria.jsx, GlobalStyle.js
+Notes: This component provides a form to edit an existing F1 Criteria entry. It includes fields for Key, Operator, Value, Description. Upon submission, it simulates a success message. The form resets after submission. */
+
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
