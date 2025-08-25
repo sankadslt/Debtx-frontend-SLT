@@ -633,7 +633,12 @@ export default function DirectLODSendingIncident() {
             </h1>
 
           </div>
-
+          <p className="text-gray-600 mb-4 font-medium">
+  Incident Direction: Direct LOD
+</p>
+<p className="text-gray-600 mb-4 font-medium">
+  Incident Status:Done
+</p>
           <div className="flex justify-end items-center w-full mb-4">
             {/* <button
             className={`${GlobalStyle.buttonPrimary} flex items-center`}

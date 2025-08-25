@@ -304,7 +304,13 @@ export default function OpenIncident() {
           <h1 className={`${GlobalStyle.headingLarge} m-0 mb-4`}>
             Incidents Open for Distribution
           </h1>
+     
         </div>
+        <p className="text-gray-600 mb-4 font-medium">
+  Incident Direction: {data.length > 0 ? data[0].Incident_direction : ""}
+</p><p className="text-gray-600 mb-4 font-medium">
+  Incident Status:Open
+</p>
 
         <div className="flex justify-end items-center mb-4">
           {paginatedData.length > 0 && (

@@ -603,7 +603,13 @@ export default function CollectOnlyCPECollect() {
               Incidents for Distribute to Collect Only CPE
             </h1>
           </div>
-          
+          <p className="text-gray-600 mb-4 font-medium">
+  Incident Direction: Open CPE Collect
+</p>  
+<p className="text-gray-600 mb-4 font-medium">
+  Incident Status:Forward
+</p>
+ 
           <div className="flex justify-end items-center w-full mb-4">
             {paginatedData.length > 0 && (
               <div>

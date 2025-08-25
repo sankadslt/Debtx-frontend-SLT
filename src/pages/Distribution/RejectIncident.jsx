@@ -713,7 +713,12 @@ export default function RejectIncident() {
             </h1>
 
           </div>
-
+          <p className="text-gray-600 mb-4 font-medium">
+  Incident Direction:Reject Pending
+</p>
+<p className="text-gray-600 mb-4 font-medium">
+  Incident Status:Reject
+</p>
           <div className="flex justify-end items-center mb-4">
             {paginatedData.length > 0 && (
               <button
