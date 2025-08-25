@@ -1,14 +1,14 @@
-  /*Purpose:
+/*Purpose:
 Created Date: 2025-07-17
 Created By: Yugani Gunarathna (yuganesha027g@gmail.com)
 Last Modified Date: 2025-07-18
 Modified By: Sathmi Peiris (sathmipeiris@gmail.com)
 Last Modified Date: 2025-07-20
 Modified By:  Yugani Gunarathna 
-              Sathmi Peiris
-              Dinithi Wijesekara 
-              Update 2025-07-20
-             
+            Sathmi Peiris
+            Dinithi Wijesekara 
+            Update 2025-07-20
+           
 Version: React v18
 ui number : 1.1
 Dependencies: Tailwind CSS
@@ -27,9 +27,9 @@ import {
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Swal from "sweetalert2";
-import {New_List_Incidents} from "../../services/Incidents/incidentService.js";
+import { New_List_Incidents } from "../../services/Incidents/incidentService.js";
 //import {Task_for_Download_Incidents_Full_List,} from "../../services/Incidents/incidentService.js";
-import {Task_for_Download_Incidents_Full_List,} from "../../services/task/taskIncidentService.js";
+import { Task_for_Download_Incidents_Full_List, } from "../../services/task/taskIncidentService.js";
 import { getLoggedUserId } from "../../services/auth/authService.js";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
@@ -135,14 +135,14 @@ const Incident = () => {
         return Only_CPE_Collect;
       case "incident inprogress":
         return Incident_InProgress;
-        case "open":
-          return Open;
-          case "reject":
-            return Reject;
-            case "done":
-              return Done;
-              case "forward":
-                return Forward;
+      case "open":
+        return Open;
+      case "reject":
+        return Reject;
+      case "done":
+        return Done;
+      case "forward":
+        return Forward;
       default:
         return null;
     }
@@ -153,10 +153,10 @@ const Incident = () => {
     if (!iconPath) {
       return <span>{status}</span>;
     }
-  
+
     // Create unique tooltip ID by combining index and column name
     const tooltipId = `tooltip-${columnName}-${index}`;
-  
+
     return (
       <div className="flex items-center gap-2">
         <img
@@ -174,7 +174,7 @@ const Incident = () => {
 
   const navigate = useNavigate();
 
-   const naviIncidentID = (incidentId) => {
+  const naviIncidentID = (incidentId) => {
     navigate("/Incident/Incident_Details", { state: { IncidentID: incidentId } });
   };
 
@@ -464,9 +464,9 @@ const Incident = () => {
         Incident_Direction: incidentDirection,
         From_Date: fromDate,
         To_Date: toDate,
-        
-      });   
-      
+
+      });
+
       if (response && response.message === "Task created successfully") {
         Swal.fire({
           title: "Task created successfully!",
@@ -485,7 +485,7 @@ const Incident = () => {
     } finally {
       setIsCreatingTask(false);
     }
-  };  
+  };
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -503,7 +503,7 @@ const Incident = () => {
           {/* Filters Section */}
           <div className={`${GlobalStyle.cardContainer} w-full mt-6`}>
             <div className="flex flex-wrap items-center justify-end w-full gap-3">
-            <input
+              <input
                 type="text"
                 value={accountNo}
                 onChange={(e) => setAccountNo(e.target.value)}
@@ -573,8 +573,8 @@ const Incident = () => {
                 <option value="Forward" style={{ color: "black" }}>
                   Forward
                 </option>
-              
-                 
+
+
               </select>
 
               <select
@@ -606,25 +606,25 @@ const Incident = () => {
                   Incident Direction
                 </option>
                 <option value="Direct LOD" style={{ color: "black" }}>
-                Direct LOD
+                  Direct LOD
                 </option>
                 <option
                   value="Incident Reject"
                   style={{ color: "black" }}
                 >
-                   Incident Reject
+                  Incident Reject
                 </option>
                 <option value="Reject Pending" style={{ color: "black" }}>
-                Reject Pending
+                  Reject Pending
                 </option>
                 <option value="Open No Agent" style={{ color: "black" }}>
-                Open No Agent
+                  Open No Agent
                 </option>
                 <option value="Open CPE Collect" style={{ color: "black" }}>
-                Open CPE Collect
+                  Open CPE Collect
                 </option>
               </select>
-              
+
 
               <label className={GlobalStyle.dataPickerDate}>Date</label>
               <DatePicker
@@ -686,7 +686,7 @@ const Incident = () => {
                   <th className={GlobalStyle.tableHeader}>Incident Direction</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
                   <th className={GlobalStyle.tableHeader}>Service Type</th>
-                    <th className={GlobalStyle.tableHeader}>Account No</th>
+                  <th className={GlobalStyle.tableHeader}>Account No</th>
                   <th className={GlobalStyle.tableHeader}>Action</th>
                   <th className={GlobalStyle.tableHeader}>Source Type</th>
                   <th className={GlobalStyle.tableHeader}>Arrears Amount (LKR)</th>
@@ -694,24 +694,25 @@ const Incident = () => {
                 </tr>
               </thead>
 
-        <tbody>
+              <tbody>
                 {filteredDataBySearch && filteredDataBySearch.length > 0 ? (
                   filteredDataBySearch
                     .slice(startIndex, startIndex + rowsPerPage)
                     .map((row, index) => (
                       <tr
                         key={row.incidentID || index}
-                        className={`${
+                        className={
                           index % 2 === 0
                             ? GlobalStyle.tableRowEven
                             : GlobalStyle.tableRowOdd
-                        } cursor-pointer hover:bg-gray-100 hover:underline transition-all duration-200`}
-                        onClick={() => naviIncidentID(row.Incident_Id)}
+                        }
                       >
-                        <td className={GlobalStyle.tableData}>
+                        <td className={`${GlobalStyle.tableData} text-black hover:underline cursor-pointer`}
+                          onClick={() => naviIncidentID(row.Incident_Id)}
+                        >
                           {row.Incident_Id || ""}
                         </td>
-                         
+
                         {/* <td className={GlobalStyle.tableData}>
                           {row.Incident_direction || ""}
                         </td> */}
@@ -724,28 +725,28 @@ const Incident = () => {
                         <td
                           className={`${GlobalStyle.tableData}>flex justify-center`}
                         >
-                          {renderStatusIcon(row.Incident_Status, index,"status")}
+                          {renderStatusIcon(row.Incident_Status, index, "status")}
                         </td>
-                         
+
                         <td className={GlobalStyle.tableData}>
                           {row.drc_commision_rule || ""}
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {row.Account_Num || ""}
                         </td>
-                        
+
                         <td className={GlobalStyle.tableData}>
                           {row.Actions || ""}
                         </td>
                         <td className={GlobalStyle.tableData}>
                           {row.Source_Type || "null"}
                         </td>
-                        
+
                         <td className={GlobalStyle.tableCurrency}>
-  {typeof row.Arrears === 'number'
-    ? row.Arrears.toLocaleString("en-LK") // just format with commas
-    : ""}
-</td>
+                          {typeof row.Arrears === 'number'
+                            ? row.Arrears.toLocaleString("en-LK") // just format with commas
+                            : ""}
+                        </td>
 
                         <td className={GlobalStyle.tableData}>
                           {new Date(row.Created_Dtm).toLocaleString("en-GB", {
@@ -790,23 +791,22 @@ const Incident = () => {
                 disabled={
                   searchQuery
                     ? currentPage >=
-                      Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    Math.ceil(filteredDataBySearch.length / rowsPerPage)
                     : !isMoreDataAvailable &&
-                      currentPage >=
-                        Math.ceil(filteredData.length / rowsPerPage)
+                    currentPage >=
+                    Math.ceil(filteredData.length / rowsPerPage)
                 }
-                className={`${GlobalStyle.navButton} ${
-                  (
-                    searchQuery
-                      ? currentPage >=
-                        Math.ceil(filteredDataBySearch.length / rowsPerPage)
-                      : !isMoreDataAvailable &&
-                        currentPage >=
-                          Math.ceil(filteredData.length / rowsPerPage)
-                  )
-                    ? "cursor-not-allowed"
-                    : ""
-                }`}
+                className={`${GlobalStyle.navButton} ${(
+                  searchQuery
+                    ? currentPage >=
+                    Math.ceil(filteredDataBySearch.length / rowsPerPage)
+                    : !isMoreDataAvailable &&
+                    currentPage >=
+                    Math.ceil(filteredData.length / rowsPerPage)
+                )
+                  ? "cursor-not-allowed"
+                  : ""
+                  }`}
               >
                 <FaArrowRight />
               </button>

@@ -43,7 +43,7 @@ const SupBulkUploadLog = () => {
     const [searchQuery, setSearchQuery] = useState("");
     //const [currentPage, setCurrentPage] = useState(0);
     const [status, setStatus] = useState("");
-      const [actionType, setActionType] = useState("");
+    const [actionType, setActionType] = useState("");
     //const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
 
@@ -195,7 +195,7 @@ const SupBulkUploadLog = () => {
                 confirmButtonColor: "#f1c40f",
                 confirmButtonText: "OK"
             });
-            
+
             setToDate(null);
             setFromDate(null);
             return;
@@ -365,7 +365,7 @@ const SupBulkUploadLog = () => {
         setMaxCurrentPage(0);
         setIsMoreDataAvailable(true);
         setCommittedFilters({
-            actionType:"",
+            actionType: "",
             status: "",
             fromDate: null,
             toDate: null
@@ -397,7 +397,7 @@ const SupBulkUploadLog = () => {
                 <main className="p-6">
                     <h1 className={`${GlobalStyle.headingLarge} `}>Incident Upload Log</h1>
 
-                    <div className="flex justify-end ">
+                    <div className="flex justify-end">
 
                         <div>
                             {["admin", "superadmin", "slt"].includes(userRole) && (
@@ -410,80 +410,78 @@ const SupBulkUploadLog = () => {
                     </div>
 
                     {/* Filters */}
-                    <div className="flex justify-end w-full">
-                        <div className="w-[950px] md:w-[950px] sm:w-full">
-                            <div className={`${GlobalStyle.cardContainer}  w-full mt-6`} > {/* Filter Section Small issue with the viewport width. or else can use  w-3/4  */}
-                                <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
-                                    <div className="flex items-center">
-                                        <select
-                                            value={status}
-                                            onChange={(e) => setStatus(e.target.value)}
-                                            className={`${GlobalStyle.selectBox}`}
-                                            style={{ color: status === "" ? "gray" : "black" }}
-                                        >
-                                            <option value="" hidden>Status</option>
-                                            <option value="Upload Open" style={{ color: "black" }}>Upload Open</option>
-                                            <option value="Upload InProgress" style={{ color: "black" }}>Upload InProgress</option>
-                                            <option value="Upload Failed" style={{ color: "black" }}>Upload Failed</option>
-                                            <option value="Upload Complete" style={{ color: "black" }}>Upload Complete</option>
-                                        </select>
-                                    </div>
-                                     <div className="flex items-center">
-                                                    <select
-                                                      value={actionType}
-                                                      onChange={(e) => setActionType(e.target.value)}
-                                                      className={`${GlobalStyle.selectBox}`}
-                                                      style={{ color: actionType === "" ? "gray" : "black" }}
-                                                    >
-                                                       <option value="" hidden>Action Type</option>
-                                <option value="Incident Creation" style={{ color: "black" }}>Incident Creation</option>
-                                <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
-                                <option value="Distribute to DRC" style={{ color: "black" }}>Distribute to DRC</option>
-                                <option value="Validity Period Extend" style={{ color: "black" }}>Validity Period Extend</option>
-                                <option value="Hold" style={{ color: "black" }}>Hold</option>
-                                <option value="Discard" style={{ color: "black" }}>Discard</option>
-                                                    </select>
-                                                  </div>
-                                    <label className={GlobalStyle.dataPickerDate}>Date:</label>
-
-                                    <DatePicker
-                                        selected={fromDate}
-                                        onChange={handlestartdatechange}
-                                        dateFormat="dd/MM/yyyy"
-                                        placeholderText="From"
-                                        className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                                    />
-
-                                    <DatePicker
-                                        selected={toDate}
-                                        onChange={handleenddatechange}
-                                        dateFormat="dd/MM/yyyy"
-                                        placeholderText="To"
-                                        className={`${GlobalStyle.inputText} w-full sm:w-auto`}
-                                    />
-
-                                    {["admin", "superadmin", "slt"].includes(userRole) && (
-                                        <button
-                                            className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
-                                            onClick={handleFilterButton}
-                                        >
-                                            Filter
-                                        </button>
-                                    )}
-
-                                    {["admin", "superadmin", "slt"].includes(userRole) && (
-                                        <button
-                                            className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
-                                            onClick={handleClear}
-                                        >
-                                            Clear
-                                        </button>
-                                    )}
-                                </div>
-                                {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
+                    <div className={`${GlobalStyle.cardContainer}  w-full mt-6`} > {/* Filter Section Small issue with the viewport width. or else can use  w-3/4  */}
+                        <div className="flex flex-wrap xl:flex-nowrap items-center justify-end w-full space-x-3">
+                            <div className="flex items-center">
+                                <select
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    className={`${GlobalStyle.selectBox}`}
+                                    style={{ color: status === "" ? "gray" : "black" }}
+                                >
+                                    <option value="" hidden>Status</option>
+                                    <option value="Upload Open" style={{ color: "black" }}>Upload Open</option>
+                                    <option value="Upload InProgress" style={{ color: "black" }}>Upload InProgress</option>
+                                    <option value="Upload Failed" style={{ color: "black" }}>Upload Failed</option>
+                                    <option value="Upload Complete" style={{ color: "black" }}>Upload Complete</option>
+                                </select>
                             </div>
+                            <div className="flex items-center">
+                                <select
+                                    value={actionType}
+                                    onChange={(e) => setActionType(e.target.value)}
+                                    className={`${GlobalStyle.selectBox}`}
+                                    style={{ color: actionType === "" ? "gray" : "black" }}
+                                >
+                                    <option value="" hidden>Action Type</option>
+                                    <option value="Incident Creation" style={{ color: "black" }}>Incident Creation</option>
+                                    <option value="Incident Reject" style={{ color: "black" }}>Incident Reject</option>
+                                    <option value="Distribute to DRC" style={{ color: "black" }}>Distribute to DRC</option>
+                                    <option value="Validity Period Extend" style={{ color: "black" }}>Validity Period Extend</option>
+                                    <option value="Hold" style={{ color: "black" }}>Hold</option>
+                                    <option value="Discard" style={{ color: "black" }}>Discard</option>
+                                </select>
+                            </div>
+                            <label className={GlobalStyle.dataPickerDate}>Date:</label>
+
+                            <DatePicker
+                                selected={fromDate}
+                                onChange={handlestartdatechange}
+                                dateFormat="dd/MM/yyyy"
+                                placeholderText="From"
+                                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                            />
+
+                            <DatePicker
+                                selected={toDate}
+                                onChange={handleenddatechange}
+                                dateFormat="dd/MM/yyyy"
+                                placeholderText="To"
+                                className={`${GlobalStyle.inputText} w-full sm:w-auto`}
+                            />
+
+                            {["admin", "superadmin", "slt"].includes(userRole) && (
+                                <button
+                                    className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+                                    onClick={handleFilterButton}
+                                >
+                                    Filter
+                                </button>
+                            )}
+
+                            {["admin", "superadmin", "slt"].includes(userRole) && (
+                                <button
+                                    className={`${GlobalStyle.buttonRemove} w-full sm:w-auto`}
+                                    onClick={handleClear}
+                                >
+                                    Clear
+                                </button>
+                            )}
                         </div>
+                        {/* {error && <span className={GlobalStyle.errorText}>{error}</span>} */}
                     </div>
+
+
 
                     {/* Search Bar */}
                     <div className="mb-4 flex justify-start mt-4">

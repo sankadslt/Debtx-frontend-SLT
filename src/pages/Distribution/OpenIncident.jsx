@@ -393,7 +393,7 @@ export default function OpenIncident() {
             <thead className={GlobalStyle.thead}>
               <tr>
                 <th className={GlobalStyle.tableHeader}></th>
-                <th className={GlobalStyle.tableHeader}>ID</th>
+                <th className={GlobalStyle.tableHeader}>Incident ID</th>
                 {/* <th className={GlobalStyle.tableHeader}>Incident Direction</th> */}
                 <th className={GlobalStyle.tableHeader}>Service Type</th>
                 <th className={GlobalStyle.tableHeader}>Account No</th>

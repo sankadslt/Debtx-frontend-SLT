@@ -830,7 +830,7 @@ export default function RejectIncident() {
                   <tr>
                     <th scope="col" className={GlobalStyle.tableHeader}></th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      Id
+                      Incident ID
                     </th>
                   
                     <th scope="col" className={GlobalStyle.tableHeader}>

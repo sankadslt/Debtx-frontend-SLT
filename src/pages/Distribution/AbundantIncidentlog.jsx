@@ -462,7 +462,7 @@ const AbundantIncidentlog = () => {
             <table className={GlobalStyle.table}>
               <thead className={GlobalStyle.thead}>
                 <tr>
-                  <th className={GlobalStyle.tableHeader}>ID</th>
+                  <th className={GlobalStyle.tableHeader}>Incident ID</th>
                   <th className={GlobalStyle.tableHeader}>Status</th>
                   
                   <th className={GlobalStyle.tableHeader}>Service Type</th>

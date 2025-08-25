@@ -710,7 +710,7 @@ export default function CollectOnlyCPECollect() {
                   <tr>
                     <th scope="col" className={GlobalStyle.tableHeader}></th>
                     <th scope="col" className={GlobalStyle.tableHeader}>
-                      ID
+                      Incident ID
                     </th>
                
                     <th scope="col" className={GlobalStyle.tableHeader}>
