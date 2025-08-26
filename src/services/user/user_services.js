@@ -280,3 +280,45 @@ export const updateUserProfile = async (requestData = {}) => {
     );
   }
 };
+
+
+export const updateUserRemarks = async (requestData = {}) => {
+  try {
+    console.log("Sending remark update request:", {
+      user_id: Number(requestData.user_id),
+      remark_payload: {
+        remark: requestData.remark_payload.remark,
+        remark_by: requestData.remark_payload.remark_by,
+        remark_on: requestData.remark_payload.remark_on
+      }
+    });
+    
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/remarks",
+      {
+        user_id: Number(requestData.user_id),
+        remark_payload: {
+          remark: requestData.remark_payload.remark,
+          remark_by: requestData.remark_payload.remark_by,
+          remark_on: requestData.remark_payload.remark_on
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log("Remark update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user remarks:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to update user remarks",
+      }
+    );
+  }
+};
