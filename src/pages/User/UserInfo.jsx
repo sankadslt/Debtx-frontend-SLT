@@ -19,7 +19,8 @@ import {
   updateUserStatus, 
   updateUserRoles,
   updateUserContacts,
-  updateUserProfile 
+  updateUserProfile,
+  updateUserRemarks   
 } from "../../services/user/user_services";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaArrowLeft } from "react-icons/fa";
@@ -305,144 +306,169 @@ const UserInfo = () => {
     setShowEndSection(false);
   };
 
-  const handleSave = async () => {
-    try {
-      setLoading(true);
+const handleSave = async () => {
+  try {
+    setLoading(true);
 
-      const profileChanged = 
-        editableProfileFields.username !== userInfo.username ||
-        editableProfileFields.user_nic !== userInfo.user_nic;
+    // Validate required remark field
+    if (!remark.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Remark is required before saving changes",
+      });
+      setLoading(false);
+      return;
+    }
 
-      if (profileChanged && canEditProfile) {
-        await updateProfile();
+    const profileChanged = 
+      editableProfileFields.username !== userInfo.username ||
+      editableProfileFields.user_nic !== userInfo.user_nic;
+
+    if (profileChanged && canEditProfile) {
+      await updateProfile();
+    }
+
+    const statusHistory = userInfo.user_status || [];
+    const currentStatus = statusHistory.length > 0 
+      ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
+      : 'inactive';
+    
+    const statusChanged = 
+      (isActive && currentStatus !== "active") ||
+      (!isActive && currentStatus === "active");
+
+    const rolesToAdd = userRolesList.filter(role => 
+      !userInfo.roles?.includes(role)
+    );
+
+    const rolesChanged = rolesToAdd.length > 0;
+
+    const contactsChanged = 
+      JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
+
+    if (!statusChanged && !rolesChanged && !contactsChanged && !profileChanged) {
+      Swal.fire({
+        icon: "info",
+        title: "No Changes",
+        text: "No changes were made to save",
+      });
+      setEditMode(false);
+      return;
+    }
+
+    const updatePromises = [];
+
+    // Add remark update
+    updatePromises.push(updateUserRemarks({
+      user_id: Number(user_id),
+      remark_payload: {
+        remark: remark,
+        remark_by: loggedUserData,
+        remark_on: new Date().toISOString()
       }
+    }));
 
-      const statusHistory = userInfo.user_status || [];
-      const currentStatus = statusHistory.length > 0 
-        ? String(statusHistory[statusHistory.length - 1].status).toLowerCase()
-        : 'inactive';
+    if (statusChanged) {
+      updatePromises.push(updateUserStatus({
+        user_id: Number(user_id),
+        status_payload: {
+          status: isActive ? "Active" : "Inactive", 
+          status_on: new Date().toISOString(), 
+          status_by: loggedUserData 
+        }
+      }));
+    }
+
+    if (rolesChanged) {
+      updatePromises.push(updateUserRoles(
+        Number(user_id),
+        rolesToAdd
+      ));
+    }
+
+    if (contactsChanged) {
+      const contactPayload = [];
+      const currentDate = new Date().toISOString();
       
-      const statusChanged = 
-        (isActive && currentStatus !== "active") ||
-        (!isActive && currentStatus === "active");
-
-      const rolesToAdd = userRolesList.filter(role => 
-        !userInfo.roles?.includes(role)
-      );
-
-      const rolesChanged = rolesToAdd.length > 0;
-
-      const contactsChanged = 
-        JSON.stringify(contactNumbers) !== JSON.stringify(originalContactNumbers);
-
-      if (!statusChanged && !rolesChanged && !contactsChanged && !profileChanged) {
-        Swal.fire({
-          icon: "info",
-          title: "No Changes",
-          text: "No changes were made to save",
-        });
-        setEditMode(false);
-        return;
-      }
-
-      const updatePromises = [];
-
-      if (statusChanged) {
-        updatePromises.push(updateUserStatus({
-          user_id: Number(user_id),
-          status_payload: {
-            status: isActive ? "Active" : "Inactive", 
-            status_on: new Date().toISOString(), 
-            status_by: loggedUserData 
-          }
-        }));
-      }
-
-      if (rolesChanged) {
-        updatePromises.push(updateUserRoles(
-          Number(user_id),
-          rolesToAdd
-        ));
-      }
-
-      if (contactsChanged) {
-        const contactPayload = [];
-        const currentDate = new Date().toISOString();
+      for (let i = 0; i < 2; i++) {
+        const originalNumber = originalContactNumbers[i] || "";
+        const currentNumber = contactNumbers[i] || "";
         
-        for (let i = 0; i < 2; i++) {
-          const originalNumber = originalContactNumbers[i] || "";
-          const currentNumber = contactNumbers[i] || "";
-          
-          if (currentNumber !== originalNumber) {
-            if (originalNumber) {
-              contactPayload.push({
-                contact_number: originalNumber,
-                end_dtm: currentDate
-              });
-            }
-            
-            if (currentNumber) {
-              contactPayload.push({
-                contact_number: currentNumber,
-              });
-            }
-          } else if (currentNumber) {
+        if (currentNumber !== originalNumber) {
+          if (originalNumber) {
             contactPayload.push({
-              contact_number: currentNumber
+              contact_number: originalNumber,
+              end_dtm: currentDate
             });
           }
-        }
-
-        if (contactPayload.length > 0) {
-          updatePromises.push(updateUserContacts({
-            user_id: Number(user_id),
-            contact_payload: contactPayload
-          }));
+          
+          if (currentNumber) {
+            contactPayload.push({
+              contact_number: currentNumber,
+            });
+          }
+        } else if (currentNumber) {
+          contactPayload.push({
+            contact_number: currentNumber
+          });
         }
       }
 
-      await Promise.all(updatePromises);
-
-      const fetchedData = await getUserDetailsById(user_id);
-      if (fetchedData && fetchedData.status === "Success") {
-        const updatedStatusHistory = fetchedData.user_status || [];
-        const updatedStatus = updatedStatusHistory.length > 0 
-          ? String(updatedStatusHistory[updatedStatusHistory.length - 1].status).toLowerCase()
-          : 'inactive';
-
-        setIsActive(updatedStatus === "active");
-        
-        setUserInfo({
-          ...fetchedData,
-          Remark: fetchedData.Remark || [],
-          user_status: updatedStatusHistory
-        });
-
-        const updatedContacts = fetchedData.contact_numbers || [];
-        while (updatedContacts.length < 2) updatedContacts.push("");
-        setContactNumbers([...updatedContacts]);
-        setOriginalContactNumbers([...updatedContacts]);
-        setUserRolesList([]);
+      if (contactPayload.length > 0) {
+        updatePromises.push(updateUserContacts({
+          user_id: Number(user_id),
+          contact_payload: contactPayload
+        }));
       }
-
-      setEditMode(false);
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "User updated successfully",
-      });
-
-    } catch (err) {
-      console.error("Update Error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: err?.response?.data?.message || "Failed to update user",
-      });
-    } finally {
-      setLoading(false);
     }
-  };
+
+    await Promise.all(updatePromises);
+
+    const fetchedData = await getUserDetailsById(user_id);
+    if (fetchedData && fetchedData.status === "Success") {
+      const updatedStatusHistory = fetchedData.user_status || [];
+      const updatedStatus = updatedStatusHistory.length > 0 
+        ? String(updatedStatusHistory[updatedStatusHistory.length - 1].status).toLowerCase()
+        : 'inactive';
+
+      setIsActive(updatedStatus === "active");
+      
+      setUserInfo({
+        ...fetchedData,
+        Remark: fetchedData.Remark || [],
+        user_status: updatedStatusHistory
+      });
+
+      const updatedContacts = fetchedData.contact_numbers || [];
+      while (updatedContacts.length < 2) updatedContacts.push("");
+      setContactNumbers([...updatedContacts]);
+      setOriginalContactNumbers([...updatedContacts]);
+      setUserRolesList([]);
+      
+      // Reset remark after successful save
+      setRemark("");
+    }
+
+    setEditMode(false);
+    Swal.fire({
+      icon: "success",
+      title: "Success",
+      text: "User updated successfully",
+    });
+
+  } catch (err) {
+    console.error("Update Error:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err?.response?.data?.message || "Failed to update user",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
