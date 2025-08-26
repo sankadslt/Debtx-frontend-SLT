@@ -1,7 +1,5 @@
 import axios from "axios";
 
-// const URL = "http://localhost:5000/api/ftl_lod"; // ✅ Backend base URL
-
 //Base URL for for case-related API
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const URL = `${BASE_URL}/ftl_lod`;
@@ -51,6 +49,26 @@ export const Case_Details_Settlement_LOD_FTL_LOD = async (case_id) => {
     throw error.response?.data?.message || "Failed to fetch case details";
   }
 };
+export const FLT_LOD_Case_Details = async (case_id) => {
+  try {
+    const response = await axios.post(
+      `${URL}/FLT_LOD_Case_Details`,
+      { case_id }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+
+    return response.data; // Return the full response data as-is
+  } catch (error) {
+    console.error(
+      "Error retrieving response:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
 
 export const Create_Customer_Response = async (payload) => {
   try {
@@ -73,7 +91,7 @@ export const Create_Customer_Response = async (payload) => {
   }
 };
 
-export const Create_FLT_LOD = async (payload) => {
+export const Create_FTL_LOD = async (payload) => {
   try {
     const response = await axios.post(`${URL}/Create_FLT_LOD`, payload);
 
@@ -91,35 +109,32 @@ export const Create_FLT_LOD = async (payload) => {
   }
 }
 
-// export const FTL_LOD_Case_Details = async (case_id) => {
-//   try {
-//     const response = await axios.post(
-//       `${URL}/FTL_LOD_Case_Details`,
-//       { case_id: case_id }
-//     );
-//     console.log("Response from FTL_LOD_Case_Details:", case_id);
-
-//     if (response.data.status === "error") {
-//       throw new Error(response.data.message);
-//     }
-
-//     return response.data;
-//   } catch (error) {
-//     console.error(
-//       "Error fetching FTL LOD case details:",
-//       error.response?.data || error.message
-//     );
-//     throw error;
-//   }
-// };
-
-
-export const FLT_LOD_Case_Details = async (case_id) => {
+export const Change_Details_FLT_LOD = async (payload) => {
   try {
-    const response = await axios.post(`${URL}/FLT_LOD_Case_Details`, { case_id });
+    const response = await axios.post(`${URL}/Change_Details_FLT_LOD`, payload);
 
-    console.log("Sent case_id:", case_id);
-    console.log("Received response:", response.data);
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+
+    return response.data; // Return the full response data as-is
+  } catch (error) {
+    console.error(
+      "Error creating FTL LOD:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+
+
+export const FTL_LOD_Case_Details = async (case_id) => {
+  try {
+    const response = await axios.post(
+      `${URL}/FLT_LOD_Case_Details`,
+      { case_id }
+    );
 
     if (response.data.status === "error") {
       throw new Error(response.data.message);
@@ -127,7 +142,10 @@ export const FLT_LOD_Case_Details = async (case_id) => {
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching FTL LOD case details:", error.response?.data || error.message);
+    console.error(
+      "Error fetching FTL LOD case details:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };

@@ -1,223 +1,547 @@
-
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { Viewer, Worker } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { useNavigate } from "react-router-dom";
 import { FLT_LOD_Case_Details } from "../../services/FTL_LOD/FTL_LODServices.js";
+import axios from "axios";
+import { getLoggedUserId } from "../../services/auth/authService.js";
+import Swal from "sweetalert2";
+import { Create_FTL_LOD } from "../../services/FTL_LOD/FTL_LODServices.js";
+// Import CSS for PDF viewer
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import { useLocation } from 'react-router-dom';
+import { Fetch_Letter } from "../../services/Letter_template/Letter_FTL_LOD.js";
 
-import { useParams, useLocation } from "react-router-dom";
-import { Create_FLT_LOD} from "../../services/FTL_LOD/FTL_LODServices.js";
-
-export default function FLT_LOD_Creation() {
-
-  const { case_id } = useParams(); // Get case_id from URL parameters
-  // const case_id = useParams().case_id;
-  //const case_id = 1
-    // const case_id = location.state?.caseid
-  // State to hold case details
-  const location = useLocation();
-  const item = location.state?.item;
-
-  const [caseDetails, setCaseDetails] = useState(null);
-
-
+const FTL_LOD_Creation = () => {
   const navigate = useNavigate();
-  
- useEffect(() => {
-  const fetchCaseDetails = async () => {
+
+
+
+  // State to hold case details
+  const [caseDetails, setCaseDetails] = useState(null);
+  const [template, setTemplate] = useState("Default");
+  const [signatureOwner, setSignatureOwner] = useState("Attorney-at-Law");
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [letterTemplate, setLetterTemplate] = useState(null);
+
+    const { state } = useLocation(); // Get the state from navigation
+  const item = state?.item; // Access the item from state
+  const case_id = item?.case_id; // Extract case_id from the item
+  console.log("Case ID:", case_id);
+
+    // Function to handle navigation to change details form
+  const handleChangeDetails = () => {
+    navigate("/pages/flt-lod/ftl-lod-change-details-form", {
+      state: {item},
+    });
+  };
+
+  // Create default layout plugin
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+
+  // useEffect(() => {
+  //   // Fetch case details when the component mounts
+  //   const fetchCaseDetails = async () => {
+  //     try {
+  //       // const case_id = "12345"; // Replace with actual case ID
+  //       const details = await FLT_LOD_Case_Details(case_id);
+  //       // const details = {
+  //       //   outstanding_balance: "Rs. 25,000.00",
+  //       //   account_number: "12345678",
+  //       //   telephone_number: "011-1234567"
+  //       // }; // Sample data for testing
+  //       setCaseDetails(details);
+  //       console.log("Case Details:", details);
+  //     } catch (error) {
+  //       console.error("Error fetching case details:", error);
+  //     }
+  //   };
+  //   fetchCaseDetails();
+  // }, []);
+ const fetchCaseDetails = async () => {
     try {
-      console.log("Fetching case details for case_id:", item.case_id);
-      const caseDetails = await FLT_LOD_Case_Details(item.case_id); // pass case_id
-      console.log("Case Details:", caseDetails.data);
-      setCaseDetails(caseDetails.data); // store in state
+      console.log("Fetching details for case_id:", case_id);
+      const details = await FLT_LOD_Case_Details(case_id);
+      
+      if (details) {
+        setCaseDetails(details);
+        console.log("Case Details:", details);
+      } else {
+        throw new Error("No data received from API");
+      }
     } catch (error) {
       console.error("Error fetching case details:", error);
+      // Fallback to sample data on error
+      const fallbackDetails = {
+        outstanding_balance: "Rs. 25,000.00",
+        account_number: "12345678",
+        telephone_number: "011-1234567"
+      };
+      setCaseDetails(fallbackDetails);
+    }
+  };
+  // Generate PDF when case details change
+
+    // Fetch letter template
+  const fetchLetterTemplate = async () => {
+    try {
+      const payload = {
+        case_id,
+        language: "English",
+        letter_template_type_id: 1,
+      };
+      const response = await Fetch_Letter(payload);
+      setLetterTemplate(response);
+      console.log("Letter Template:", response);
+    } catch (error) {
+      console.error("Error fetching letter template:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to fetch letter template",
+        confirmButtonColor: "#d33",
+      });
     }
   };
 
-  fetchCaseDetails();
-}, [case_id]);
-
-// Function to handle PDF creation
-const handleCreatePDF = async () => {
-  try {
-    const currentCaseId = item?.case_id || case_id; // fallback to either one
-
-    if (!currentCaseId) {
-      console.error("Case ID is missing!");
+  // Fetch case details and letter template when case_id is available
+  useEffect(() => {
+    if (!case_id) {
+      console.log("Waiting for case_id...");
       return;
     }
+    fetchCaseDetails();
+    fetchLetterTemplate();
+  }, [case_id]);
 
-    console.log("Creating PDF for case_id:", currentCaseId);
-
-    const response = await Create_FLT_LOD(currentCaseId); // ✅ use correct case_id
-    console.log("PDF Created:", response.data);
-
-    // If the API returns a file blob for download
-    if (response.data && response.data.pdfBase64) {
-      const link = document.createElement("a");
-      link.href = `data:application/pdf;base64,${response.data.pdfBase64}`;
-      link.download = `FTL_LOD_${currentCaseId}.pdf`;
-      link.click();
-    } else if (response.data && response.data.pdfUrl) {
-      // If the API returns a file URL
-      window.open(response.data.pdfUrl, "_blank");
-    } else {
-      alert("PDF created successfully.");
+  
+  // Add case_id as dependency so it re-runs when case_id changes
+  useEffect(() => {
+    if (caseDetails) {
+      generatePDF();
     }
-  } catch (error) {
-    console.error("Error creating PDF:", error);
-    alert("Failed to create PDF. Please try again.");
-  }
-};
+  }, [caseDetails, signatureOwner, template]);
 
-const [signatureOwner, setSignatureOwner] = useState("");
+  // Function to generate PDF using pdf-lib
+  const generatePDF = async () => {
+    try {
+      const pdfDoc = await PDFDocument.create();
+      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+      const timesRomanBoldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
-  return (
-    <div className={GlobalStyle.fontPoppins}>
-      {/* Title */}
-      <h1 className={GlobalStyle.headingLarge}>Preview of FTL LOD</h1>
+      const page = pdfDoc.addPage([595.28, 841.89]); // A4 size in points
+      const { width, height } = page.getSize();
+      const fontSize = 10;
+      const margin = 40;
+      
 
-      <div className="flex gap-4 items-center flex-wrap mt-10 w-full justify-end md:justify-start ">
-        <label className={GlobalStyle.dataPickerDate}>Template</label>
-        <select className={GlobalStyle.selectBox}>
-          <option value=""></option>
-        </select>
+      let y = height - margin;
 
-        <label className={`${GlobalStyle.dataPickerDate} ml-24`}>
-          Signature Owner
-        </label>
-        <select
-          className={GlobalStyle.selectBox}
-          value={signatureOwner}
-          onChange={(e) => setSignatureOwner(e.target.value)}
-        >
-          <option value="">Select...</option>
-          <option value="Damithri Palliyaguru - Attorney-at-Law">
-            Damithri Palliyaguru - Attorney-at-Law
-          </option>
-          <option value="John Doe - Legal Advisor">John Doe - Legal Advisor</option>
-          <option value="Jane Smith - Senior Attorney">Jane Smith - Senior Attorney</option>
-          <option value="Legal Department Head">Legal Department Head</option>
-          <option value="Attorney-at-Law">Attorney-at-Law</option>
-        </select>
-      </div>
+      // Helper function to add text
+      const addText = (text, x, yPos, options = {}) => {
+        page.drawText(text, {
+          x,
+          y: yPos,
+          size: options.size || fontSize,
+          font: options.bold ? timesRomanBoldFont : timesRomanFont,
+          ...options
+        });
+        return yPos - (options.lineHeight || 20);
+      };
+
+ // Sender's address
+      const senderAddress =  typeof letterTemplate.senders_address === "string"
+          ? letterTemplate.senders_address.split("\n").map(item => item.trim())
+          : Array.isArray(letterTemplate.senders_address)
+            ? letterTemplate.senders_address.map(item => item.trim())
+            : []
+        
+      senderAddress.forEach((text) => {
+        if (typeof text === "string" && text) {
+          page.drawText(text, {
+            x: margin + 420,
+            y: y,
+            size: fontSize,
+            font: timesRomanFont,
+          });
+          y -= 12;
+        }
+      });
+     
+
+      // // BY REGISTERED POST - right aligned
+      // page.drawText("BY REGISTERED POST", {
+      //   x: width - 200,
+      //   y: y,
+      //   size: fontSize,
+      //   font: timesRomanFont
+      // });
+
+      
+
+    // Address placeholder
+      y = addText(letterTemplate?.sending_mode, margin, y);
+
+      
+
+     // Recipient's address
+      const recipientAddressTexts = (() => {
+        if (letterTemplate?.reciepients_address) {
+          if (typeof letterTemplate.reciepients_address === "string") {
+            return letterTemplate.reciepients_address.split(",").map((item) => item.trim());
+          } else if (Array.isArray(letterTemplate.reciepients_address)) {
+            // If array, check if first element is a comma-separated string
+            if (letterTemplate.reciepients_address.length > 0 && typeof letterTemplate.reciepients_address[0] === "string") {
+              return letterTemplate.reciepients_address[0].split(",").map((item) => item.trim());
+            }
+            return letterTemplate.reciepients_address.map((item) => String(item).trim());
+          }
+        }
+        if (caseDetails?.full_address) {
+          if (typeof caseDetails.full_address === "string") {
+            return caseDetails.full_address.split(",").map((item) => item.trim());
+          } else if (Array.isArray(caseDetails.full_address)) {
+            return caseDetails.full_address.map((item) => String(item).trim());
+          }
+        }
+        return [];
+      })();
+      console.log("Recipient Address Texts:", recipientAddressTexts); // Debug log
+      if (recipientAddressTexts.length === 0) {
+        console.warn("No recipient address available");
+        y = addText("No Address Provided", margin, y, { lineHeight: 12 });
+      } else {
+        recipientAddressTexts.forEach((text) => {
+          if (typeof text === "string" && text) {
+            y = addText(text, margin, y, { lineHeight: 12 });
+          }
+        });
+      }
 
 
-      <div className="flex items-center justify-center mt-10 px-2">
-  <div className="bg-slate-100 max-w-[750px] w-full rounded-lg p-4 overflow-auto max-h-screen">
-    <div className="flex justify-center items-center">
-      <div className="p-4 bg-white rounded-lg shadow-md text-sm leading-relaxed w-full">
-        <div
-          style={{
-            padding: "20px",
-            fontFamily: "'Times New Roman', Times, serif",
-            fontSize: "14px",
-            lineHeight: "1.6",
-            backgroundColor: "#ffffff",
-            color: "#000000",
-          }}
-        >
-          <div style={{ marginBottom: "20px" }}>
-            <strong>Damithri Palliyaguru</strong><br />
-            Attorney-at-Law - LLB<br />
-            Recovery Section<br />
-            CTO Ground Floor<br />
-            Sri Lanka Telecom PLC<br />
-            Lotus Road, Colombo 01<br />
-            T.P No: 011-2341080<br />
-            Email: reclegal@slt.lk<br />
-            (9.00AM – 4.30PM)
-          </div>
+      // Salutation
+    y = addText(letterTemplate?.greetings, margin, y);
 
-          <div style={{ marginBottom: "20px" }}>
-            <strong>BY REGISTERED POST</strong><br /><br />
-           <strong>{caseDetails?.customer_name || "………………"}</strong> <br />
+      // y -= 30;
+     // Title
+      const title = letterTemplate?.title ;
+      const titleWidth = timesRomanBoldFont.widthOfTextAtSize(title, fontSize);
+      page.drawText(title, {
+        x: (width - titleWidth) / 2,
+        y: y,
+        size: fontSize,
+        font: timesRomanBoldFont,
+      });
+      page.drawLine({
+        start: { x: (width - titleWidth) / 2, y: y - 5 },
+        end: { x: (width + titleWidth) / 2, y: y - 5 },
+        thickness: 1,
+      });
+      y -= 40;
+
+ 
+
+        // Case details
+      y = addText(
+        `${letterTemplate?.bodyParameters}`,
+        margin,
+        y,
+        { lineHeight: 12 }
+      );
+    y -= 30;
+  y = addText(`${letterTemplate?.body_title}`,margin, y, { bold: true });
+      y -= 5;
+      // Letter content paragraphs
+     // Letter body
+      const paragraphs = typeof letterTemplate.Body === "string"
+          ? letterTemplate.Body.split("\n").map(item => item.trim())
+          : Array.isArray(letterTemplate.Body)
+            ? letterTemplate.Body.map(item => String(item).trim())
+            : []
+        
+      paragraphs.forEach((paragraph) => {
+        const words = paragraph.split(" ");
+        let lines = [];
+        let currentLine = "";
+
+        // Break text into lines
+        words.forEach((word) => {
+          const testLine = currentLine + word + " ";
+          const testWidth = timesRomanFont.widthOfTextAtSize(testLine, fontSize);
+          if (testWidth > width - margin * 2 && currentLine !== "") {
+            lines.push(currentLine.trim());
+            currentLine = word + " ";
+          } else {
+            currentLine = testLine;
+          }
+        });
+        if (currentLine.trim() !== "") {
+          lines.push(currentLine.trim());
+        }
+
+        // Draw lines with justification
+        lines.forEach((line, lineIndex) => {
+          if (lineIndex === lines.length - 1 || lines.length === 1) {
+            y = addText(line, margin, y);
+          } else {
+            const lineWords = line.split(" ");
+            if (lineWords.length > 1) {
+              const totalTextWidth = lineWords.reduce(
+                (total, word) => total + timesRomanFont.widthOfTextAtSize(word, fontSize),
+                0
+              );
+              const availableWidth = width - margin * 2;
+              const totalSpaceWidth = availableWidth - totalTextWidth;
+              const spaceWidth = totalSpaceWidth / (lineWords.length - 1);
+              let xPos = margin;
+              lineWords.forEach((word, wordIndex) => {
+                page.drawText(word, {
+                  x: xPos,
+                  y: y,
+                  size: fontSize,
+                  font: timesRomanFont,
+                });
+                xPos += timesRomanFont.widthOfTextAtSize(word, fontSize);
+                if (wordIndex < lineWords.length - 1) {
+                  xPos += spaceWidth;
+                }
+              });
+              y -= 10;
+            } else {
+              y = addText(line, margin, y);
+            }
+          }
+        });
+        y -= 5;
+      });
+
+      // Add paragraphs with text wrapping
+      // paragraphs.forEach(paragraph => {
+      //   const words = paragraph.split(' ');
+      //   let line = '';
+        
+      //   words.forEach(word => {
+      //     const testLine = line + word + ' ';
+      //     const testWidth = timesRomanFont.widthOfTextAtSize(testLine, fontSize);
           
-        <strong>{caseDetails?.full_address
-        ? caseDetails.full_address.split(",").map((line, index) => (
-      <span key={index}>
-        {line.trim()}   {/* trim() removes extra spaces */}
-        <br />
-      </span>
-    ))
-  : "…………………"}</strong>
-  </div>
+      //     if (testWidth > width - (margin * 2) && line !== '') {
+      //       y = addText(line.trim(), margin, y);
+      //       line = word + ' ';
+      //     } else {
+      //       line = testLine;
+      //     }
+      //   });
+        
+      //   if (line.trim() !== '') {
+      //     y = addText(line.trim(), margin, y);
+      //   }
+        
+      //   y -= 10; // Paragraph spacing
+      // });
 
-          <p>Dear Sir/Madam,</p>
-          <div style={{ textAlign: "center", margin: "20px 0", fontWeight: "bold" }}>
-            LETTER OF DEMAND AND TERMINATION
-          </div>
+      // Add paragraphs with text wrapping and justification
 
-          <div style={{ margin: "20px 0" }}>
-            OUTSTANDING BALANCE: <strong>Rs.{caseDetails?.current_arrears_amount || "………………"}</strong><br />
-            ACCOUNT NUMBER: <strong>{caseDetails?.account_no || "………………"}</strong><br />
-            TELEPHONE NUMBER: <strong>{caseDetails?.contact_no || "………………"}</strong>
-          </div>
+  
+ 
 
-          <p style={{ textAlign: "justify", marginBottom: "20px" }}>
-            <strong>SRI LANKA TELECOM PUBLIC LIMITED COMPANY</strong>
-          </p>
+      y -= 5;
 
-          <div style={{ textAlign: "justify" }}>
-            <p>
-              I write on the instructions of my Client Sri Lanka Telecom PLC, which has a Regional Office at <strong>{caseDetails?.rtom || "…………."}</strong> and its Head Office at Lotus Road, Colombo 01 and which is the Successor to all the assets, liabilities, rights, obligations and contracts of the Corporation named Sri Lanka Telecom and of the Department of Telecommunications.
-            </p>
-            <br />
+      // Closing
+      y = addText("Yours faithfully,", margin, y);
+      y -= 20;
+      y = addText("Amal Perera", margin, y);
+      y = addText(signatureOwner, margin, y);
 
-            <p>
-              I am instructed that, you are a Customer of my Client and that, as such, at your request, my Client installed its telephone equipment and provided a telephone service to you at your premises bearing the above stated number, subject to the terms and conditions of the Agreement entered into by and between my client and you, including the payment of all subscriptions, charges, fees and other monies.
-            </p>
-            <br />
+      // Convert PDF to blob and create URL
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      setPdfUrl(url);
 
-            <p>
-              I am instructed that, you have benefited from and used the said facilities and services provided by my client, but you have failed and neglected to pay the monies due as aforesaid, though my client has sent you Monthly Statements setting out the sums, which are due, and payable.
-            </p>
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
 
-            <p>
-              I am instructed that, presently there is a sum of <strong>Rs.{caseDetails?.current_arrears_amount || "………………"}</strong> owing from you to my Client, on account of the subscriptions, charges, fees and other monies due from you to my Client for the installation and provision of the said telephone services. You are liable and bound and obliged to pay these monies to my Client.
-            </p>
-            <br />
-
-            <p>
-              However, you have wrongfully and unlawfully failed and neglected to pay these monies to my Client and the said monies payable by you to my Client, are in arrears and in default. Therefore, my Client has instructed me to advise that the aforesaid Agreement is hereby terminated and determined.
-            </p>
-            <br />
-
-            <p>
-              I am also instructed to demand and I do hereby demand payment from you to my Client, of the aforesaid monies, within 14 days of the date of receipt of this letter and advise that if you fail to make such payment, legal action will be instituted against you, for the recovery of these monies, without any further notice to you.
-            </p>
-            <br />
-          </div>
-
-          <p>
-            Yours faithfully,<br /><br />
-             {signatureOwner || "[Your Name]"}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-      <div className="flex items-center justify-end gap-4 mt-4 mb-4">
-        <button 
-        onClick={() =>
-            navigate("/pages/flt-lod/ftl-lod-change-details-form", {
-            state: { item: item }, // 👈 pass along the case details
-  })
-}
-        className={`${GlobalStyle.buttonPrimary}`}>
-          Change Details
-        </button>
-
-        <button 
-          onClick={handleCreatePDF} 
-          className={`${GlobalStyle.buttonPrimary}`}
-          >Create PDF
-        </button>
-
+   const handleDownloadPDF = async (e) => {
+          e.preventDefault();
+        
+  
+          const userDataID = await getLoggedUserId();
+          console.log("User Data ID:", userDataID);
+          let payload = {
+              
+              case_id: Number(case_id),
+              pdf_by: userDataID,
+              signed_by: userDataID,
+              customer_name: caseDetails.data.customer_name,
+              created_by: userDataID,
+              postal_address: caseDetails.data.full_address,
+              event_source: "Hard coded test",
+              
+          };
+  
+          // Check for changes
+          
+          // if (accountNo !== caseDetails.accountNo) payload.edited_account_no = accountNo;
+          // if (selectOption) payload.edited_event_source = selectOption;
+          // if (customerName !== caseDetails.customerName) payload.edited_customer_name = customerName;
+          // if (address !== caseDetails.address) payload.edited_address = address;
+          // if (arrears !== caseDetails.arrears) payload.edited_arrears = Number(arrears);
+          // if (billingCentre !== caseDetails.billingCentre) payload.edited_billing_centre = billingCentre;
+          // if (customerType !== caseDetails.customerType) payload.edited_customer_type = customerType;
+  
+          // if (Object.keys(payload).length <= 2) { // Only case_id, edited_by
+          //     Swal.fire({
+          //         icon: 'warning',
+          //         title: 'No Changes Detected',
+          //         text: 'No changes were made to the form.',
+          //         confirmButtonColor: "#f1c40f",
+          //     });
+          //     return;
+          // }
+  
+          // setIsEdited(true);
+  
+          Swal.fire({
+              title: "Confirm Submission",
+              text: "Are you sure you want to proceed ?",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Yes",
+          }).then(async (result) => {
+              if (result.isConfirmed) {
+                  try {
+                      console.log("Submitting payload:", payload);
+                      const response = await Create_FTL_LOD(payload);
+                      console.log("Response from Create_FTL_LOD:", response);
+                      if (response.message === "FTL LOD entry and case status updated successfully") {
+                          Swal.fire({
+                              icon: 'success',
+                              title: 'Success',
+                              text: 'Data submitted successfully!',
+                              confirmButtonColor: "#28a745",
+                          });
+                          // setRemark("");
+                          if (pdfUrl) {
+                            const link = document.createElement('a');
+                            link.href = pdfUrl;
+                            link.download = 'FTL_LOD.pdf';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            } 
+                          fetchCaseDetails();
+                      } else {
+                          Swal.fire({
+                              icon: 'error',
+                              title: 'Error',
+                              text: 'Failed to submit data. Please try again.',
+                              confirmButtonColor: "#d33",
+                          });
+                      }
+                  } catch (error) {
+                      console.error("Error submitting data:", error);
+                      const errorMessage = error.response?.data?.error || 'Failed to submit data. Please try again.';
+                      Swal.fire({
+                          icon: 'error',
+                          title: 'Error',
+                          text: errorMessage,
+                          confirmButtonColor: "#d33",
+                      });
+                  }
+              }
+          });
+      };
+ 
+  // Add this before the return statement
+if (!case_id) {
+  return (
+    <div className="min-h-screen bg-gray-50 p-8 font-[Poppins] flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Loading...</h2>
+        <p className="text-gray-600">Waiting for case information...</p>
       </div>
     </div>
   );
 }
+
+  return (
+    <>
+      {/* <GlobalStyle /> */}
+      {/* <div className="min-h-screen bg-gray-50 p-8 font-[Poppins]"> */}
+        {/* Title */}
+                <h1 className={GlobalStyle.headingLarge + " mb-6"}>Preview of FTL LOD </h1>
+
+                <div
+                    className={`${GlobalStyle.tableContainer}  bg-white bg-opacity-50 p-8 max-w-4xl mx-auto `}
+                >
+        
+        <div className="flex flex-wrap gap-4 items-center mb-8">
+          <label className="text-lg font-medium text-gray-700">Template</label>
+          <select
+            className="border border-gray-300 rounded-md p-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={template}
+            onChange={(e) => setTemplate(e.target.value)}
+          >
+            <option value="Default">Default</option>
+            <option value="Custom">Custom</option>
+          </select>
+          
+          <label className="text-lg font-medium text-gray-700 ml-6">Signature Owner</label>
+          <select
+            className="border border-gray-300 rounded-md p-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={signatureOwner}
+            onChange={(e) => setSignatureOwner(e.target.value)}
+          >
+            <option value="Attorney-at-Law">Attorney-at-Law</option>
+            <option value="Legal Officer">Legal Officer</option>
+          </select>
+        </div>
+
+           {/* PDF Viewer */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="bg-white shadow-lg h-[800px] w-[900px] rounded-lg border border-gray-200 overflow-hidden">
+            {pdfUrl ? (
+              <Worker workerUrl={`${window.location.origin}/node_modules/pdfjs-dist/build/pdf.worker.min.js`}>
+                <div style={{ height: '100%' }}>
+                  <Viewer
+                    fileUrl={pdfUrl}
+                    plugins={[defaultLayoutPluginInstance]}
+                  />
+                </div>
+              </Worker>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">Loading PDF preview...</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-4">
+          <button
+            onClick={handleChangeDetails}
+            className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+          >
+            Change Details
+          </button>
+          <button
+            onClick={handleDownloadPDF}
+            className={`${GlobalStyle.buttonPrimary} w-full sm:w-auto`}
+            disabled={!pdfUrl}
+          >
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default FTL_LOD_Creation;
