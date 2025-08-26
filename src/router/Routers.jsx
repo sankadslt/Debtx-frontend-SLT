@@ -145,6 +145,9 @@ import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
 import Dispute_Settlment_Letter_Creation from "../pages/Dispute/Dispute_Settlment_Letter_Creation";
 import Dispute_Settlment_Letter_Preview from "../pages/Dispute/Dispute_Settlment_Letter_Preview";
 import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
+
+//Configuration
+import F1Criteria from "../pages/Configuration/F1Criteria";
  
 
 const Routers = () => {
@@ -1149,6 +1152,17 @@ const Routers = () => {
         element={
           <ProtectedRoute
             element={<Dispute_Settlment_Letter_Preview />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />
+
+      {/* //Configuration */}
+      <Route
+        path="/pages/Configuration/F1Critiria"
+        element={
+          <ProtectedRoute
+            element={<F1Criteria />}
             allowedRoles={["superadmin"]}
           />
         }

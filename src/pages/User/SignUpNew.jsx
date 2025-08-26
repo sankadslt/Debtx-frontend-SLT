@@ -198,8 +198,10 @@ const AddUser = () => {
         return;
       }
 
-      const result = await createUser(payload);
+      console.log("create user payload:", payload);
 
+      const result = await createUser(payload);
+      console.log("create user result:", result);
       if (result.status === "success") {
         goBack();
         Swal.fire({
