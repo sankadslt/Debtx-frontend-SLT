@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { Create_Customer_Response } from "../../services/FTL_LOD/FTL_LODServices.js";
 import { getLoggedUserId } from "/src/services/auth/authService.js";
-
+import Swal from "sweetalert2";
 export default function FTL_LOD_Cus_Response_update({
   isOpen,
   onClose,
@@ -44,19 +44,45 @@ export default function FTL_LOD_Cus_Response_update({
       console.log("Response from API:", response);
 
       //  Show success message
-      setSuccessMessage("Response submitted successfully!");
+      // setSuccessMessage("Response submitted successfully!");
+         if (response.status === "success") {
+                              Swal.fire({
+                                  icon: 'success',
+                                  title: 'Success',
+                                  text: 'Response submitted successfully!',
+                                  confirmButtonColor: "#28a745",
+                              });
+                              setRemark("");
+                              onClose(false);
+                              
+                          } else {
+                              Swal.fire({
+                                  icon: 'error',
+                                  title: 'Error',
+                                  text: 'Failed to submit data. Please try again.',
+                                  confirmButtonColor: "#d33",
+                              });
+                          }
 
       //  Clear remark field
       setRemark("");
 
-      // Close the popup after a short delay (e.g., 2 seconds)
-      setTimeout(() => {
-        setSuccessMessage(""); // Clear message
-        onClose(false); // Close popup
-      }, 1000);
+      // // Close the popup after a short delay (e.g., 2 seconds)
+      // setTimeout(() => {
+      //   setSuccessMessage(""); // Clear message
+      //   onClose(false); // Close popup
+      // }, 1000);
     } catch (error) {
-      console.error("Submission error:", error);
-      setSuccessMessage("An error occurred while submitting.");
+      // console.error("Submission error:", error);
+       console.error("Error submitting data:", error);
+                          const errorMessage =  'Failed to submit data. Please try again.';
+                          Swal.fire({
+                              icon: 'error',
+                              title: 'Error',
+                              text: errorMessage,
+                              confirmButtonColor: "#d33",
+                          });
+      // setSuccessMessage("An error occurred while submitting.");
     }
   };
 
