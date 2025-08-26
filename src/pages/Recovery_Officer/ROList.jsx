@@ -365,47 +365,77 @@ export default function ROList() {
     });
   };
 
-  const callAPI = useCallback(async (filters) => {
-    try {
-      setIsLoading(true);
-      const payload = {
-        drcUser_status: filters.status || "",
-        drc_id: filters.drc_id || "",
-        pages: filters.page || 1
-      };
+const callAPI = useCallback(async (filters) => {
+  try {
+    setIsLoading(true);
+    const payload = {
+      drcUser_status: filters.status || "",
+      drc_id: filters.drc_id || "",
+      pages: filters.page || 1
+    };
 
-      const response = await List_All_RO_and_DRCuser_Details_to_SLT(payload);
+    const response = await List_All_RO_and_DRCuser_Details_to_SLT(payload);
 
-      if (response?.status === "success" && response.data?.length > 0) {
-        const roData = response.data.map(item => ({
-          ro_id: item.ro_id,
-          drcUser_status: item.drcUser_status,
-          drc_name: item.drc_name,
-          nic: item.nic,
-          ro_name: item.ro_name,
-          login_contact_no: item.login_contact_no,
-          rtom_area_count: item.rtom_area_count
-        }));
+    if (response?.status === "success" && response.data?.length > 0) {
+      const roData = response.data.map(item => ({
+        ro_id: item.ro_id,
+        drcUser_status: item.drcUser_status,
+        drc_name: item.drc_name,
+        nic: item.nic,
+        ro_name: item.ro_name,
+        login_contact_no: item.login_contact_no,
+        login_contact_no_two: item.login_contact_no_two,
+        rtom_area_count: item.rtom_area_count
+      }));
 
-        setFilteredData(roData);
-        setHasMoreData(response.data.length === rowsPerPage);
-      } else {
-        setFilteredData([]);
-        showNoDataMessage(filters.status, filters.drc_id);
-      }
-    } catch (error) {
-      console.error("Error fetching RO list:", error);
-      Swal.fire({
-        // title: "Error",
-        // text: "Failed to fetch RO data. Please try again.",
-        title: "Not available any data.",
-        text: "Please choose a different DRC with available data.",
-        icon: "error"
-      });
-    } finally {
-      setIsLoading(false);
+      setFilteredData(roData);
+      setHasMoreData(response.data.length === rowsPerPage);
+    } else {
+      setFilteredData([]);
+      showNoDataMessage(filters.status, filters.drc_id);
     }
-  }, []);
+  } catch (error) {
+    console.error("Error fetching RO list:", error);
+    
+    // Determine which filter is applied and show appropriate error message
+    const hasStatusFilter = filters.status && filters.status !== "";
+    const hasDrcFilter = filters.drc_id && filters.drc_id !== "";
+    
+    let errorTitle = "No Data Available";
+    let errorText = "No ROs found for the selected criteria.";
+    
+    if (hasStatusFilter && hasDrcFilter) {
+      // Both filters applied
+      const statusName = filters.status.replace("_", " ");
+      const drcName = drcNames.find(drc => drc.key === filters.drc_id)?.value || "selected DRC";
+      errorTitle = "No Matching Records";
+      errorText = `No ${statusName} ROs found for ${drcName}. Please try a different combination of filters.`;
+    } else if (hasDrcFilter && !hasStatusFilter) {
+      // Only DRC filter applied
+      const drcName = drcNames.find(drc => drc.key === filters.drc_id)?.value || "selected DRC";
+      errorTitle = "No Data for Selected DRC";
+      errorText = `No ROs available for ${drcName}. Please choose a different DRC with available data.`;
+    } else if (hasStatusFilter && !hasDrcFilter) {
+      // Only status filter applied
+      const statusName = filters.status.replace("_", " ");
+      errorTitle = "No Records for Selected Status";
+      errorText = `No ${statusName} ROs found. Please try selecting a different status or clear the filter to view all ROs.`;
+    } else {
+      // No specific filters applied
+      errorTitle = "No RO Data Available";
+      errorText = "Currently, there are no RO records available in the system. Please contact your administrator if this seems incorrect.";
+    }
+
+    Swal.fire({
+      title: errorTitle,
+      text: errorText,
+      icon: "error",
+      confirmButtonColor: "#3085d6"
+    });
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
 
   useEffect(() => {
     callAPI({
@@ -521,7 +551,8 @@ export default function ROList() {
               <th className={GlobalStyle.tableHeader}>DRC</th>
               <th className={GlobalStyle.tableHeader}>NIC</th>
               <th className={GlobalStyle.tableHeader}>RO Name</th>
-              <th className={GlobalStyle.tableHeader}>Contact No.</th>
+              <th className={GlobalStyle.tableHeader}>Contact No 1</th>
+              <th className={GlobalStyle.tableHeader}>Contact No 2</th>
               <th className={GlobalStyle.tableHeader}>Billing Center Area count</th>
             </tr>
           </thead>
@@ -539,6 +570,7 @@ export default function ROList() {
                   <td className={GlobalStyle.tableData}>{item.nic || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.ro_name || "N/A"}</td>
                   <td className={GlobalStyle.tableData}>{item.login_contact_no || "N/A"}</td>
+                  <td className={GlobalStyle.tableData}>{item.login_contact_no_two }</td>
                   <td className={GlobalStyle.tableData}>{item.rtom_area_count || "0"}</td>
                 </tr>
               ))
