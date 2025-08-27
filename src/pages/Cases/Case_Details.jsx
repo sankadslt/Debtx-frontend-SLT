@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchCaseDetails ,Create_Task_For_Download_Case_Details} from '../../services/case/CaseServices.js';
-import GlobalStyle from "../../assets/prototype/GlobalStyle";
+import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { getLoggedUserId } from "../../services/auth/authService";
+import { getLoggedUserId } from "../../services/auth/authService.js";
 import { jwtDecode } from "jwt-decode";
-import { refreshAccessToken } from "../../services/auth/authService";
+import { refreshAccessToken } from "../../services/auth/authService.js";
 
 const CaseDetails = () => {
     const [caseData, setCaseData] = useState(null);

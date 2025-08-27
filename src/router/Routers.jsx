@@ -28,8 +28,8 @@ import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 import Incident_Details from "../pages/Incident/Incident_Details";
 
 //import for the case details page
-import CaseDetails from "../pages/Incident/Case_Details";
-import Case_List from "../pages/Incident/Case_List";
+import CaseDetails from "../pages/Cases/Case_Details";
+import Case_List from "../pages/Cases/Case_List";
 
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
@@ -571,7 +571,7 @@ const Routers = () => {
       {/* //INCIDENT */}
 
       <Route
-        path="/Incident/Case_Details"
+        path="/Cases/Case_Details"
         element={
           <ProtectedRoute
             element={<CaseDetails />}
@@ -580,7 +580,7 @@ const Routers = () => {
         }
       />
       <Route
-        path="/Incident/Case_List"
+        path="/Cases/Case_List"
         element={
           <ProtectedRoute
             element={<Case_List />}
