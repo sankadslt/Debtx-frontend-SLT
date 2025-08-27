@@ -28,8 +28,8 @@ import Incident_File_Download from "../pages/Incident/Incident_File_Download";
 import Incident_Details from "../pages/Incident/Incident_Details";
 
 //import for the case details page
-import CaseDetails from "../pages/Cases/Case_Details";
-import Case_List from "../pages/Cases/Case_List";
+import CaseDetails from "../pages/Incident/Case_Details";
+import Case_List from "../pages/Incident/Case_List";
 
 //DISTRIBUTION
 import OpenIncident from "../pages/Distribution/OpenIncident";
