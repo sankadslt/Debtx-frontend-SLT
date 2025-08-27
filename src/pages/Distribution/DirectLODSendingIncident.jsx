@@ -21,7 +21,7 @@ import GlobalStyle from "../../assets/prototype/GlobalStyle.jsx";
 import Direct_LOD from "../../assets/images/incidents/Direct_LOD.png";
 import { List_incidents_Direct_LOD, Forward_Direct_LOD, Create_Task_Forward_Direct_LOD, Open_Task_Count_Forward_Direct_LOD } from "../../services/distribution/distributionService.js";
 //import {Create_Task_Download_Direct_LOD_Sending } from "../../services/distribution/distributionService.js";
-import {Create_Task_Download_Direct_LOD_Sending } from "../../services/task/taskIncidentService.js";
+import { Create_Task_Download_Direct_LOD_Sending } from "../../services/task/taskIncidentService.js";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 
@@ -128,7 +128,7 @@ export default function DirectLODSendingIncident() {
 
         return {
           id: item.Incident_Id || "",
-          Incident_direction:item.Incident_direction||"",
+          Incident_direction: item.Incident_direction || "",
           drc_commision_rule: item.drc_commision_rule || "",
           account_no: item.Account_Num || "",
           amount: item.Arrears || "",
@@ -216,7 +216,7 @@ export default function DirectLODSendingIncident() {
       });
       if (response.status === 201) {
         Swal.fire({
-           
+
           title: "Task Created Successfully!",
           text: "Task ID: " + response.data.Task_Id,
           icon: 'success',
@@ -237,6 +237,10 @@ export default function DirectLODSendingIncident() {
       setIsCreatingTask(false);
     }
   };
+
+  const naviIncidentID = (incidentId) => {
+    navigate("/Incident/Incident_Details", { state: { IncidentID: incidentId } });
+  }
 
   // Function to handle the "Proceed" button click
   const handleProceed = async (Incident_Id) => {
@@ -420,7 +424,7 @@ export default function DirectLODSendingIncident() {
         confirmButtonColor: "#f1c40f",
 
 
-        
+
       });;
     } else if (toDate) {
       // Calculate month gap
@@ -452,7 +456,7 @@ export default function DirectLODSendingIncident() {
     if (fromDate && date < fromDate) {
 
       Swal.fire({
-         title: "Warning",
+        title: "Warning",
         text: "To date should be greater than or equal to From date",
         icon: "warning",
         allowOutsideClick: false,
@@ -751,12 +755,12 @@ export default function DirectLODSendingIncident() {
                   value={searchQuery}
                   onChange={(e) => {
                     // setCurrentPage(1); // Reset to page 1 on search
-                      setSearchQuery(e.target.value)
+                    setSearchQuery(e.target.value)
                   }}
                   className={GlobalStyle.inputSearch}
-              />
-              <FaSearch className={GlobalStyle.searchBarIcon} />
-          </div>
+                />
+                <FaSearch className={GlobalStyle.searchBarIcon} />
+              </div>
             </div>
             <div className={`${GlobalStyle.tableContainer} overflow-x-auto w-full`}>
               <table className={GlobalStyle.table}>
@@ -766,7 +770,7 @@ export default function DirectLODSendingIncident() {
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Incident ID
                     </th>
-               
+
                     <th scope="col" className={GlobalStyle.tableHeader}>
                       Service Type
                     </th>
@@ -802,12 +806,11 @@ export default function DirectLODSendingIncident() {
                           onChange={() => handleRowCheckboxChange(row.id)}
                         />
                       </td>
-                      <td className={GlobalStyle.tableData}>
-                        <a href={`#${row.id}`} className="hover:underline">
-                          {row.id}
-                        </a>
+                      <td className={`${GlobalStyle.tableData} text-black hover:underline cursor-pointer`}
+                        onClick={() => naviIncidentID(row.id)}>
+                        {row.id || ""}
                       </td>
-                      
+
                       <td className={GlobalStyle.tableData}>
                         {row.drc_commision_rule}
                       </td>

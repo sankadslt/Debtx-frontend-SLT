@@ -209,6 +209,10 @@ export default function CollectOnlyCPECollect() {
     }
   };
 
+  const naviIncidentID = (incidentId) => {
+    navigate("/Incident/Incident_Details", { state: { IncidentID: incidentId } });
+  }
+
   // Function to handle the proceed button click
   const handleProceed = async (Incident_Id) => {
     if (!selectedRows.includes(Incident_Id) && !Incident_Id) {
@@ -749,10 +753,9 @@ export default function CollectOnlyCPECollect() {
                           onChange={() => handleRowCheckboxChange(row.id)}
                         />
                       </td>
-                      <td className={GlobalStyle.tableData}>
-                        <a href={`#${row.id}`} className="hover:underline">
-                          {row.id}
-                        </a>
+                      <td className={`${GlobalStyle.tableData} text-black hover:underline cursor-pointer`}
+                        onClick={() => naviIncidentID(row.id)}>
+                        {row.id || ""}
                       </td>
 
                    

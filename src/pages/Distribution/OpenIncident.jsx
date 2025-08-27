@@ -20,9 +20,9 @@ import { getLoggedUserId } from "../../services/auth/authService";
 import { FaSearch, FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import { List_Distribution_Ready_Incidents, distribution_ready_incidents_group_by_arrears_band, Create_Case_for_incident } from "../../services/Incidents/incidentService";
 import Open_No_Agent from "../../assets/images/incidents/Open_No_Agent.png";
-import {  Create_Task_for_Create_CaseFromIncident, Open_Task_Count_Incident_To_Case } from "../../services/task/taskService";
+import { Create_Task_for_Create_CaseFromIncident, Open_Task_Count_Incident_To_Case } from "../../services/task/taskService";
 //import { Create_Task_for_OpenNoAgent} from "../../services/task/taskService";
-import { Create_Task_for_OpenNoAgent} from "../../services/task/taskIncidentService";
+import { Create_Task_for_OpenNoAgent } from "../../services/task/taskIncidentService";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
@@ -87,7 +87,7 @@ export default function OpenIncident() {
     try {
       const response = await List_Distribution_Ready_Incidents();
       setData(response.data);
-      
+
       const distributionResponse = await distribution_ready_incidents_group_by_arrears_band();
       setDistributionData(distributionResponse);
 
@@ -181,6 +181,10 @@ export default function OpenIncident() {
       });
     }
   };
+
+  const naviIncidentID = (incidentId) => {
+    navigate("/Incident/Incident_Details", { state: { IncidentID: incidentId } });
+  }
 
   // Function to handle case creation for incidents
   const handleCaseforIncident = async () => {
@@ -420,16 +424,15 @@ export default function OpenIncident() {
                         onChange={() => handleRowCheckboxChange(row.Incident_Id)}
                       />
                     </td>
-                    <td className={GlobalStyle.tableData}>
-                      <a href={`#${row.Incident_Id}`} className="hover:underline">
-                        {row.Incident_Id}
-                      </a>
+                    <td className={`${GlobalStyle.tableData} text-black hover:underline cursor-pointer`}
+                      onClick={() => naviIncidentID(row.Incident_Id)}>
+                      {row.Incident_Id || ""}
                     </td>
                     {/* <td className={GlobalStyle.tableData}>{row.Incident_direction}
                     </td> */}
                     <td className={GlobalStyle.tableData}>
-                     
-                    {row.drc_commision_rule}
+
+                      {row.drc_commision_rule}
                     </td>
                     <td className={GlobalStyle.tableData}>{row.Account_Num}</td>
                     <td className={GlobalStyle.tableData}>{row.Actions}</td>
