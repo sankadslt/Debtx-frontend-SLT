@@ -147,6 +147,7 @@ import Case_Closed_Log from "../pages/Abnormal/Case_Closed_Log";
 
 //Configuration
 import F1Criteria from "../pages/Configuration/F1Criteria";
+ 
 
 const Routers = () => {
   return (

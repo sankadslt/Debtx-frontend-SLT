@@ -49,6 +49,26 @@ export const Case_Details_Settlement_LOD_FTL_LOD = async (case_id) => {
     throw error.response?.data?.message || "Failed to fetch case details";
   }
 };
+export const FLT_LOD_Case_Details = async (case_id) => {
+  try {
+    const response = await axios.post(
+      `${URL}/FLT_LOD_Case_Details`,
+      { case_id }
+    );
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+
+    return response.data; // Return the full response data as-is
+  } catch (error) {
+    console.error(
+      "Error retrieving response:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
 
 export const Create_Customer_Response = async (payload) => {
   try {
@@ -73,7 +93,7 @@ export const Create_Customer_Response = async (payload) => {
 
 export const Create_FTL_LOD = async (payload) => {
   try {
-    const response = await axios.post(`${URL}/Create_FTL_LOD`, payload);
+    const response = await axios.post(`${URL}/Create_FLT_LOD`, payload);
 
     if (response.data.status === "error") {
       throw new Error(response.data.message);
@@ -89,10 +109,30 @@ export const Create_FTL_LOD = async (payload) => {
   }
 }
 
+export const Change_Details_FLT_LOD = async (payload) => {
+  try {
+    const response = await axios.post(`${URL}/Change_Details_FLT_LOD`, payload);
+
+    if (response.data.status === "error") {
+      throw new Error(response.data.message);
+    }
+
+    return response.data; // Return the full response data as-is
+  } catch (error) {
+    console.error(
+      "Error creating FTL LOD:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+
+
 export const FTL_LOD_Case_Details = async (case_id) => {
   try {
     const response = await axios.post(
-      `${BASE_URL}/FTL_LOD_Case_Details`,
+      `${URL}/FLT_LOD_Case_Details`,
       { case_id }
     );
 
