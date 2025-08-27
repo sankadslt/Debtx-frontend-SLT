@@ -54,7 +54,8 @@ const AddUser = () => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const user = await getLoggedUserId();
+        const id = await getLoggedUserId();
+        const user = id.toString();
         setLoggedUserData(user);
       } catch (error) {
         console.error("Failed to fetch logged user:", error);
@@ -198,8 +199,10 @@ const AddUser = () => {
         return;
       }
 
-      const result = await createUser(payload);
+      console.log("create user payload:", payload);
 
+      const result = await createUser(payload);
+      console.log("create user result:", result);
       if (result.status === "success") {
         goBack();
         Swal.fire({
