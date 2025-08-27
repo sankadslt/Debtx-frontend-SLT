@@ -155,8 +155,6 @@ const [signatureOwner, setSignatureOwner] = useState("");
   ))}
 </div>
 
-
-
         {/* Sending Mode */}
         <div style={{ marginBottom: "20px" }}>
           <strong>{letterData.sending_mode}</strong><br />
