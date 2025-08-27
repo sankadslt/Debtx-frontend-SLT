@@ -91,7 +91,7 @@ export const Create_Task_for_Create_CaseFromIncident = async (
       Template_Task_Id: 15,
       task_type: "Create Case from Incident Direct NO Agent",
       Created_By: user_id,
-      task_status: "open",
+      task_status: "Open",
       Incident_direction: "Open No Agent",
       ...filteredParams,
     };

@@ -21,32 +21,34 @@ const CaseDetails = () => {
 
     const caseId = location.state?.CaseID;
 
-    // Check token validity on mount
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
         if (!token) return;
     
         try {
-            let decoded = jwtDecode(token);
-            const currentTime = Date.now() / 1000;
+          let decoded = jwtDecode(token);
+          const currentTime = Date.now() / 1000;
     
-            if (decoded.exp < currentTime) {
-                refreshAccessToken().then((newToken) => {
-                    if (!newToken) return;
-                    const newDecoded = jwtDecode(newToken);
-                    setUserRole(newDecoded.role);
-                });
-            } else {
-                setUserRole(decoded.role);
-            }
+          if (decoded.exp < currentTime) {
+            refreshAccessToken().then((newToken) => {
+              if (!newToken) return;
+              const newDecoded = jwtDecode(newToken);
+              setUserRole(newDecoded.role);
+            });
+          } else {
+            setUserRole(decoded.role);
+          }
         } catch (error) {
-            console.error("Invalid token:", error);
+          console.error("Invalid token:", error);
         }
-    }, []);
+      }, []);
 
     useEffect(() => {
         const loadCaseDetails = async () => {
             try {
+                if (!caseId) {
+                    return;
+                }
                 const response = await fetchCaseDetails(caseId);
 
                 if (response.success) {
@@ -73,10 +75,8 @@ const CaseDetails = () => {
             }
         };
 
-        if (caseId) {
-            loadCaseDetails();
-        }
-    }, [caseId]);
+        loadCaseDetails();
+    }, []);
 
     const toggleSection = (sectionName) => {
         setOpenSections(prev => ({
@@ -131,8 +131,8 @@ const CaseDetails = () => {
             'roRequests': caseData?.roRequests,
             'litigation': caseData?.litigationInfo,
             'lodFinalReminder': caseData?.lodFinalReminder,
-            'currentContactDetails': caseData?.currentContactDetails, // NEW
-            'currentCustomerIdentification': caseData?.currentCustomerIdentification // NEW
+            'currentContactDetails': caseData?.current_contact_details,
+            'currentCustomerIdentification': caseData?.current_customer_identification
         };
         
         return sectionMap[sectionKey];
@@ -409,41 +409,49 @@ const CaseDetails = () => {
         if (!basicInfo) return null;
 
         const infoFields = [
-            [
+             [
                 { label: 'Account No', value: basicInfo.accountNo || '' },
                 { label: 'Customer Ref', value: basicInfo.customerRef || '' },
                 { label: 'Incident ID', value: basicInfo.incidentId || '' },
+ 
                 { label: 'Customer Name', value: basicInfo.customerName || '' },
                 { label: 'Customer Type', value: basicInfo.customerType || '' },
                 { label: 'Arrears Band', value: basicInfo.arrearsBand || '' },
-            ],
-            [
+                 
+                
+              ],
+              
+               [
                 { label: 'Rtom', value: basicInfo.rtom || '' },
                 { label: 'Arrears Amount', value: basicInfo.arrearsAmount || '' },
                 { label: 'Action Type', value: basicInfo.actionType || '' },
                 { label: 'Area', value: basicInfo.area || '' },
                 { label: 'Implemented Dtm', value: formatDate(basicInfo.implementedDtm) },
                 { label: 'Account Manager Code', value: basicInfo.accountManagerCode || '' },
-            ],
+                
+               
+              ],
             [
-                { label: 'Service Type', value: basicInfo.drcCommissionRule || '' },
-                { label: 'Monitor Months', value: basicInfo.monitorMonths || '' },
-                { label: 'Commission', value: basicInfo.commission || '' },
-                { label: 'Case Distribution Batch ID', value: basicInfo.caseDistributionBatchId || '' },
-                { label: 'Filtered Reason', value: basicInfo.filteredReason || '' },
-                { label: 'BSS Arrears Amount', value: basicInfo.bssArrearsAmount || '' },
-            ],
-            [
-                { label: 'Current Status', value: caseData?.caseInfo?.currentStatus || '' },
-                { label: 'Last Payment Date', value: formatDate(basicInfo.lastPaymentDate) },
-                { label: 'Last BSS Reading Date', value: formatDate(basicInfo.lastBssReadingDate) },
-                { label: 'Remark', value: basicInfo.remark || '' },
+              { label: 'Service Type', value: basicInfo.drcCommissionRule || '' },
+              { label: 'Monitor Months', value: basicInfo.monitorMonths || '' },
+              { label: 'Commission', value: caseData.basicInfo.commission || '' },
+              { label: 'Case Distribution Batch ID', value: caseData.basicInfo.caseDistributionBatchId || '' },
+              { label: 'Filtered Reason', value: caseData.basicInfo.filteredReason || '' },
+              { label: 'BSS Arrears Amount', value: caseData.basicInfo.bssArrearsAmount || '' },
+               ],
+              [
+                { label: 'Current Status', value: caseData.caseInfo.currentStatus || '' },
+                { label: 'Last Payment Date', value: formatDate(caseData.basicInfo.lastPaymentDate) },
+                { label: 'Last BSS Reading Date', value: formatDate(caseData.basicInfo.lastBssReadingDate) },
+                { label: 'Remark', value: caseData.basicInfo.remark || '' },
                 { label: 'Region', value: basicInfo.region || '' },
-            ],
+                
+              ],
+              
         ];
 
-        return (
-            <div className={`${GlobalStyle.cardContainer} p-6 mb-8`}>
+                return (
+            <div className={`${GlobalStyle.cardContainer}p-6 mb-8`}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                     {infoFields.map((column, colIndex) => (
                         <div key={`col-${colIndex}`} className="space-y-4">
@@ -471,7 +479,6 @@ const CaseDetails = () => {
         );
     };
 
-    // Reusable collapsible section component
     const CollapsibleSection = ({ title, children, sectionKey }) => {
         const isOpen = openSections[sectionKey];
         const currentIndex = currentIndices[sectionKey] || 0;
@@ -526,28 +533,29 @@ const CaseDetails = () => {
     };
 
     const handleDownloadClick = async () => {
-        const userData = await getLoggedUserId(); 
-        setIsCreatingTask(true);
+         const userData = await getLoggedUserId(); 
+         setIsCreatingTask(true);
 
-        try {
+         try {
             const response = await Create_Task_For_Download_Case_Details(userData);
-            if(response === "success"){
+            if(response==="success"){
                 Swal.fire({
-                    title: response,
-                    text: 'Task created successfully!',
-                    icon: "success",
-                    confirmButtonColor: "#28a745"
+                    title:response,
+                    text:'Task created successfully!',
+                    icon:"success",
+                    confirmButtonColor:"#28a745"
                 });
             }
-        } catch(error) {
+        } catch(error){
             Swal.fire({
-                title: "Error",
-                text: error.message || "Failed to create task.",
-                icon: "error",
-                confirmButtonColor: "#d33"
+                title:"Error",
+                text:error.message || "Failed to create task.",
+                icon:"error",
+                confirmButtonColor:"#d33"
             });
-        } finally {
-            setIsCreatingTask(false);
+        
+        }finally{
+            setIsCreatingTask(false)
         }
     };
 
@@ -596,7 +604,7 @@ const CaseDetails = () => {
                             <div className="space-y-2">
                                 {[
                                     { label: 'Proceed DTM', value: formatDate(caseData.caseInfo.proceedDtm) },
-                                    { label: 'Proceed By', value: caseData.caseInfo.proceedBy },
+                                    { label: 'Proceed By', value: caseData.caseInfo.ProceedBy },
                                     { label: 'Current Status', value: caseData.caseInfo.currentStatus },
                                     { label: 'Current Phase', value: caseData.caseInfo.caseCurrentPhase },
                                 ].map((item, index) => (
@@ -710,17 +718,17 @@ const CaseDetails = () => {
                     </CollapsibleSection>
                 )}
 
-                {/* NEW: Current Contact Details Section */}
-                {caseData.currentContactDetails && (
+              
+                {caseData.current_contact_details && (
                     <CollapsibleSection title="Current Contact Details" sectionKey="currentContactDetails">
-                        {renderCard(caseData.currentContactDetails[currentIndices['currentContactDetails'] || 0], "Current Contact Details")}
+                        {renderCard(caseData.current_contact_details[currentIndices['currentContactDetails'] || 0], "Current Contact Details")}
                     </CollapsibleSection>
                 )}
 
-                {/* NEW: Current Customer Identification Section */}
-                {caseData.currentCustomerIdentification && (
+             
+                {caseData.current_customer_identification && (
                     <CollapsibleSection title="Current Customer Identification" sectionKey="currentCustomerIdentification">
-                        {renderCard(caseData.currentCustomerIdentification[currentIndices['currentCustomerIdentification'] || 0], "Current Customer Identification")}
+                        {renderCard(caseData.current_customer_identification[currentIndices['currentCustomerIdentification'] || 0], "Current Customer Identification")}
                     </CollapsibleSection>
                 )}
             </div>

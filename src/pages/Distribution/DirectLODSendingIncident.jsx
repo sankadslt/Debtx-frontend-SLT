@@ -28,6 +28,7 @@ import { Tooltip } from "react-tooltip";
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
 import { getLoggedUserId } from "../../services/auth/authService.js";
+import Incident from "../Incident/Incident.jsx";
 
 export default function DirectLODSendingIncident() {
   // Table data exactly matching the image
@@ -362,6 +363,7 @@ export default function DirectLODSendingIncident() {
             // Inncident_Ids: selectedRows,
             Proceed_Dtm: new Date().toISOString().split("T")[0],
             Proceed_By: user_id,
+            Incident_Status:"Done"
 
           };
 

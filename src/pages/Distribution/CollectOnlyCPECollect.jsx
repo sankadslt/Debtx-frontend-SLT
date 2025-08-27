@@ -323,7 +323,8 @@ export default function CollectOnlyCPECollect() {
 
         const parameters = {
           Proceed_Dtm: new Date(),
-          Proceed_By: userId
+          Proceed_By: userId,
+          Incident_Status:"Forward"
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
 

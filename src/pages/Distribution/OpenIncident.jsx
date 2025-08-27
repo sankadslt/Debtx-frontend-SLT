@@ -247,6 +247,7 @@ export default function OpenIncident() {
           Incident_direction: "Open No Agent",
           Proceed_By: user,
           Proceed_Dtm: new Date(),
+          Incident_Status:"Open"
         };
 
         const response = await Create_Task_for_Create_CaseFromIncident(taskParams);
