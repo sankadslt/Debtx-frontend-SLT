@@ -138,6 +138,7 @@ import ListAllTasks from "../pages/Task/ListAllTasks";
 //Abnormal
 import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
 import AbandonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
+import WRIT_List from "../pages/Abnormal/WRIT_List";
 
 //Dispute
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
@@ -1064,6 +1065,19 @@ const Routers = () => {
         }
       />
 
+
+    <Route
+        path="/pages/Abnormal/WRIT_List"
+        element={
+          <ProtectedRoute
+            element={<WRIT_List />}
+            allowedRoles={["superadmin"]}
+          />
+        }
+      />  
+
+ 
+ 
       {/* FTL LOD Routes */}
       <Route
         path="/pages/flt-lod/ftl-lod-list"
