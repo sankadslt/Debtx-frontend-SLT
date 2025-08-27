@@ -27,6 +27,7 @@ const FTL_LOD_Case_Details = () => {
         item?.case_id
       );
       setData(CaseDetails);
+      console.log("Case Details:", CaseDetails);
     } catch (error) {
       setData([]);
     } finally {
@@ -303,11 +304,11 @@ const FTL_LOD_Case_Details = () => {
                   } border-b`}
                 >
                   <td className={GlobalStyle.tableData}>
-                    {log.settlement_plan[0]?.installment_seq}
+                    {log.settlement_id}
                   </td>
                   <td className={GlobalStyle.tableCurrency}>
-                    {log?.settlement_plan[0]?.Installment_Settle_Amount &&
-                      log.settlement_plan[0]?.Installment_Settle_Amount.toLocaleString(
+                    {log?.Installment_Settle_Amount &&
+                      log.Installment_Settle_Amount.toLocaleString(
                         "en-LK",
                         {
                           style: "currency",
@@ -316,9 +317,9 @@ const FTL_LOD_Case_Details = () => {
                       )}
                   </td>
                   <td className={GlobalStyle.tableData}>
-                    {log?.settlement_plan[0]?.Plan_Date &&
+                    {log?.Plan_Date &&
                       new Date(
-                        log.settlement_plan[0]?.Plan_Date
+                        log.Plan_Date
                       ).toLocaleString("en-GB", {
                         year: "numeric",
                         month: "2-digit",
@@ -330,8 +331,8 @@ const FTL_LOD_Case_Details = () => {
                       })}
                   </td>
                   <td className={GlobalStyle.tableCurrency}>
-                    {log?.settlement_plan[0]?.Installment_Paid_Amount &&
-                      log.settlement_plan[0]?.Installment_Paid_Amount.toLocaleString(
+                    {log?.Installment_Paid_Amount &&
+                      log.Installment_Paid_Amount.toLocaleString(
                         "en-LK",
                         {
                           style: "currency",
