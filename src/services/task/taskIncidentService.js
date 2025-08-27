@@ -36,7 +36,7 @@ export const Task_for_Download_Incidents_Full_List = async (filteredParams) => {
         const user_id = await getLoggedUserId();
         const taskData = {
             Template_Task_Id: 21,
-            task_type: "Incident distribution download",
+            task_type: "incident distribution download",
             Created_By: user_id,
             task_status: "open",
             created_dtm: new Date(),
@@ -60,10 +60,11 @@ export const Create_Task_for_OpenNoAgent = async (filteredParams) => {
     const user_id = await getLoggedUserId();
     const taskData = {
       Template_Task_Id: 21,
-      task_type: "Incident distribution download",
+      task_type: "incident  distribution download",
       Created_By: user_id,
-      task_status: "open",
+      task_status: "Open",
       Incident_direction: "Open No Agent",
+    
       ...filteredParams,
     };
 
@@ -80,7 +81,7 @@ export const Create_Task_for_OpenNoAgent = async (filteredParams) => {
         const user = await getUserData();
         const taskData = {
             Template_Task_Id: 21,
-            task_type: "Incident distribution download",
+            task_type: " incident  distribution download",
             Created_By: user.user_id, 
             task_status: "open",
             ...filteredParams,
@@ -99,7 +100,7 @@ export const Create_Task_for_OpenNoAgent = async (filteredParams) => {
        
         const taskData = {
             Template_Task_Id: 21,
-            task_type: "Incident distribution download",
+            task_type: "incident  distribution download",
             Created_By: user.user_id, 
             task_status: "open",
             ...filteredParams,
@@ -118,7 +119,7 @@ export const Create_Task_for_OpenNoAgent = async (filteredParams) => {
 
     const taskData = {
       Template_Task_Id: 21,
-      task_type: "Incident distribution download",
+      task_type: "incident  distribution download",
       Created_By: user_id,
       task_status: "open",
       ...filteredParams,
@@ -140,7 +141,7 @@ export const Create_Rejected_List_for_Download = async (filteredParams) => {
       const user = await getUserData();
       const taskData = {
           Template_Task_Id: 21,
-          task_type: "Incident distribution download",
+          task_type: " incident  distribution download",
           Created_By: user.user_id, 
           task_status: "open",
           ...filteredParams,

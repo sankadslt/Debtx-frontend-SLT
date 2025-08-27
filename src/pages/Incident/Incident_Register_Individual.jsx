@@ -22,15 +22,15 @@ import { refreshAccessToken } from "../../services/auth/authService";
 
 
 const Incident_Register_Individual = () => {
-  const [accountNo, setAccountNo] = useState(""); // Account number state
-  const [actionType, setActionType] = useState(""); // Action type state
+  const [accountNo, setAccountNo] = useState(""); 
+  const [actionType, setActionType] = useState(""); 
   const [sourceType, setSourceType] = useState("");
   const [reason, setreason] = useState("")
-  const [calendarMonth, setCalendarMonth] = useState(3); // Calendar month state (default to 3)
-  const [contactNumber, setContactNumber] = useState("");  // Contact number state (only for "collect CPE" action type)
+  const [calendarMonth, setCalendarMonth] = useState(3); 
+  const [contactNumber, setContactNumber] = useState("");  
 
-  const [errors, setErrors] = useState({}); // Validation errors state
-  const [errors1, setErrors1] = useState({}); // Additional validation errors state
+  const [errors, setErrors] = useState({}); 
+  const [errors1, setErrors1] = useState({}); 
 
   const [userRole, setUserRole] = useState(null); // Role-Based Buttons
 

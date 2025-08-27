@@ -327,7 +327,8 @@ export default function CollectOnlyCPECollect() {
 
         const parameters = {
           Proceed_Dtm: new Date(),
-          Proceed_By: userId
+          Proceed_By: userId,
+          Incident_Status:"Forward"
         };
         const response = await Create_Task_for_Forward_CPECollect(parameters);
 
@@ -607,7 +608,13 @@ export default function CollectOnlyCPECollect() {
               Incidents for Distribute to Collect Only CPE
             </h1>
           </div>
-          
+          <p className="text-gray-600 mb-4 font-medium">
+  Incident Direction: Open CPE Collect
+</p>  
+<p className="text-gray-600 mb-4 font-medium">
+  Incident Status:Forward
+</p>
+ 
           <div className="flex justify-end items-center w-full mb-4">
             {paginatedData.length > 0 && (
               <div>

@@ -29,6 +29,7 @@ import { getLoggedUserId } from "../../services/auth/authService";
 
 import { jwtDecode } from "jwt-decode";
 import { refreshAccessToken } from "../../services/auth/authService";
+import Incident from "../Incident/Incident.jsx";
 
 export default function RejectIncident() {
   const navigate = useNavigate();
@@ -367,7 +368,8 @@ export default function RejectIncident() {
         const response = await Create_Task_Download_Pending_Reject({
           Source_Type: selectedSource,
           From_Date: fromDate,
-          To_Date: toDate
+          To_Date: toDate,
+          Incident_Status
         });
         if (response.status === 201) {
           Swal.fire({
@@ -528,9 +530,10 @@ export default function RejectIncident() {
           const user = await getLoggedUserId();
 
           const parameters = {
-            Status: "Reject Pending",
+            Incident_direction: "Reject Pending",
             Proceed_Dtm: new Date(),
-            Proceed_By: user
+            Proceed_By: user,
+            Incident_Status:"Reject"
           }
           const response = await Create_Task_Reject_F1_Filtered(parameters);
           if (response.status === 201) {
@@ -642,9 +645,10 @@ export default function RejectIncident() {
           const user = await getLoggedUserId();
 
           const parameters = {
-            Status: "Reject Pending",
+            Incident_direction: "Reject Pending",
             Incident_Forwarded_By: user,
             Incident_Forwarded_On: new Date(),
+            Incident_Status:"Reject"
           }
           const response = await Create_Task_Forward_F1_Filtered(parameters);
           if (response.status === 201) {
@@ -717,7 +721,12 @@ export default function RejectIncident() {
             </h1>
 
           </div>
-
+          <p className="text-gray-600 mb-4 font-medium">
+  Incident Direction:Reject Pending
+</p>
+<p className="text-gray-600 mb-4 font-medium">
+  Incident Status:Reject
+</p>
           <div className="flex justify-end items-center mb-4">
             {paginatedData.length > 0 && (
               <button
@@ -726,7 +735,8 @@ export default function RejectIncident() {
                   handleCreateTaskForDownload({
                     source_type: selectedSource,
                     fromDate: fromDate,
-                    toDate: toDate
+                    toDate: toDate,
+
                   })
                 }}
                 disabled={isCreatingTask}

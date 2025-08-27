@@ -325,6 +325,7 @@ const Case_List = () => {
     );
   };
 
+  // useEffect to fetch initial data on component mount
   useEffect(() => {
     const fetchRTOM = async () => {
       try {
@@ -374,7 +375,7 @@ const Case_List = () => {
         setServiceTypes([]);
       }
     };
-
+ // Fetch all initial data
     fetchRTOM();
     fetchActiveDRCs();
     fetchArrearsBands();
@@ -402,6 +403,8 @@ const Case_List = () => {
     }
   }, []);
 
+
+  // Function to validate filters before API call
   const filterValidation = () => {
     if (!rtom && !selectedDRC && !selectedBand && !selectedCaseStatus && !selectedServiceType && !accountNo && !fromDate && !toDate) {
       Swal.fire({
@@ -433,7 +436,7 @@ const Case_List = () => {
 
     return true;
   }
-
+  // Function to call API with filters
   const CallAPI = async (filters) => {
     try {
       const formatDate = (date) => {
@@ -510,6 +513,7 @@ const Case_List = () => {
     }
   };
 
+    // useEffect to handle pagination and API calls
   useEffect(() => {
     if (isMoreDataAvailable && currentPage > maxCurrentPage) {
       setMaxCurrentPage(currentPage);
@@ -582,7 +586,7 @@ const Case_List = () => {
       }
     }
   };
-
+  // Handler for pagination buttons
   const handlePrevNext = (direction) => {
     if (direction === "prev" && currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -596,7 +600,7 @@ const Case_List = () => {
       }
     }
   };
-
+  // Handler for clear filters
   const handleClear = () => {
     setRtom("");
     setSelectedDRC("");
@@ -628,7 +632,7 @@ const Case_List = () => {
       setTimeout(() => setCurrentPage(1), 0);
     }
   };
-
+  // Handler for creating download task
   const HandleCreateTaskDownloadCaseList = async () => {
     if (!fromDate || !toDate) {
       Swal.fire({
@@ -673,10 +677,11 @@ const Case_List = () => {
     }
   };
 
+  // Function to navigate to case details
   const naviCaseID = (caseId) => {
     navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
   }
-
+ // Filter data based on search query
   const filteredDataBySearch = filteredData.filter((row) => {
     const searchableValues = [
       row.caseid,
@@ -947,7 +952,7 @@ const Case_List = () => {
           </tbody>
         </table>
       </div>
-
+   {/* Pagination Controls */}
       {filteredDataBySearch.length > 0 && (
         <div className={GlobalStyle.navButtonContainer}>
           <button
@@ -994,12 +999,12 @@ const Case_List = () => {
             onClick={HandleCreateTaskDownloadCaseList}
             className={`${GlobalStyle.buttonPrimary} ${isCreatingTask ? 'opacity-50' : ''}`}
             disabled={isCreatingTask}
-            // className={GlobalStyle.buttonPrimary}
+            
             style={{ display: 'flex', alignItems: 'center' }}
           >
             {!isCreatingTask && <FaDownload style={{ marginRight: '8px' }} />}
             {isCreatingTask ? 'Creating Tasks...' : 'Create task and let me know'}
-            {/* <FaDownload style={{ marginRight: '8px' }} /> */}
+       
           </button>
         )}
       </div>

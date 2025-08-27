@@ -215,6 +215,7 @@ export const List_Reject_Incident = async (payload) => {
   }
 };
 
+
 export const List_Abundant_Incident = async (payload) => {
   try {
     const response = await axios.post(`${URL}/List_Abundant_Incident`, payload);
@@ -227,7 +228,6 @@ export const List_Abundant_Incident = async (payload) => {
     throw error;
   }
 };
-
 
 /*export const Create_Rejected_List_for_Download = async (filteredParams) => {
   try {

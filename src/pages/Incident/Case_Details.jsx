@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchCaseDetails ,Create_Task_For_Download_Case_Details} from '../../services/case/CaseServices.js';
+import { fetchCaseDetails, Create_Task_For_Download_Case_Details } from '../../services/case/CaseServices.js';
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -17,9 +17,9 @@ const CaseDetails = () => {
     const location = useLocation();  
     const navigate = useNavigate();
     const [isCreatingTask, setIsCreatingTask] = useState(false);
+    const [userRole, setUserRole] = useState(null);
 
-    const caseId = location.state?.CaseID ;
-
+    const caseId = location.state?.CaseID;
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
@@ -42,7 +42,6 @@ const CaseDetails = () => {
           console.error("Invalid token:", error);
         }
       }, []);
-
 
     useEffect(() => {
         const loadCaseDetails = async () => {
@@ -131,7 +130,9 @@ const CaseDetails = () => {
             'refProducts': caseData?.refProducts,
             'roRequests': caseData?.roRequests,
             'litigation': caseData?.litigationInfo,
-            'lodFinalReminder': caseData?.lodFinalReminder
+            'lodFinalReminder': caseData?.lodFinalReminder,
+            'currentContactDetails': caseData?.current_contact_details,
+            'currentCustomerIdentification': caseData?.current_customer_identification
         };
         
         return sectionMap[sectionKey];
@@ -450,9 +451,7 @@ const CaseDetails = () => {
         ];
 
                 return (
-            // <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-gray-200">
             <div className={`${GlobalStyle.cardContainer}p-6 mb-8`}>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                     {infoFields.map((column, colIndex) => (
                         <div key={`col-${colIndex}`} className="space-y-4">
@@ -534,7 +533,6 @@ const CaseDetails = () => {
     };
 
     const handleDownloadClick = async () => {
-
          const userData = await getLoggedUserId(); 
          setIsCreatingTask(true);
 
@@ -559,9 +557,7 @@ const CaseDetails = () => {
         }finally{
             setIsCreatingTask(false)
         }
-            };
-        
-    
+    };
 
     if (loading) {
         return (
@@ -586,41 +582,40 @@ const CaseDetails = () => {
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Case Details</h1>
 
                     <div className="bg-white rounded-lg shadow-md p-6 min-w-64">
-  <div className="grid grid-cols-2 gap-x-8">
-    {/* Left column: first 4 items */}
-    <div className="space-y-2">
-      {[
-        { label: 'Case ID', value: caseData.caseInfo.caseId },
-        { label: 'Created dtm', value: formatDate(caseData.caseInfo.createdDtm) },
-        { label: 'Days count', value: caseData.caseInfo.daysCount },
-        { label: 'Current Arrears Band', value: caseData.caseInfo.currentArrearsBand },
-      ].map((item, index) => (
-        <div key={`left-case-info-${index}`} className="flex justify-between">
-          <span className="text-sm text-gray-600">{item.label}:</span>
-          <span className={`text-sm ${index === 0 ? 'font-bold' : ''} text-gray-900`}>
-            {item.value}
-          </span>
-        </div>
-      ))}
-    </div>
+                        <div className="grid grid-cols-2 gap-x-8">
+                            {/* Left column: first 4 items */}
+                            <div className="space-y-2">
+                                {[
+                                    { label: 'Case ID', value: caseData.caseInfo.caseId },
+                                    { label: 'Created dtm', value: formatDate(caseData.caseInfo.createdDtm) },
+                                    { label: 'Days count', value: caseData.caseInfo.daysCount },
+                                    { label: 'Current Arrears Band', value: caseData.caseInfo.currentArrearsBand },
+                                ].map((item, index) => (
+                                    <div key={`left-case-info-${index}`} className="flex justify-between">
+                                        <span className="text-sm text-gray-600">{item.label}:</span>
+                                        <span className={`text-sm ${index === 0 ? 'font-bold' : ''} text-gray-900`}>
+                                            {item.value}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
 
-    {/* Right column: remaining items */}
-    <div className="space-y-2">
-      {[
-        { label: 'Proceed DTM', value: formatDate(caseData.caseInfo.proceedDtm) },
-        { label: 'Proceed By', value: caseData.caseInfo.ProceedBy },
-        { label: 'Current Status', value: caseData.caseInfo.currentStatus },
-        { label: 'Current Phase', value: caseData.caseInfo.caseCurrentPhase },
-      ].map((item, index) => (
-        <div key={`right-case-info-${index}`} className="flex justify-between">
-          <span className="text-sm text-gray-600">{item.label}:</span>
-          <span className="text-sm text-gray-900">{item.value}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-</div>
-
+                            {/* Right column: remaining items */}
+                            <div className="space-y-2">
+                                {[
+                                    { label: 'Proceed DTM', value: formatDate(caseData.caseInfo.proceedDtm) },
+                                    { label: 'Proceed By', value: caseData.caseInfo.ProceedBy },
+                                    { label: 'Current Status', value: caseData.caseInfo.currentStatus },
+                                    { label: 'Current Phase', value: caseData.caseInfo.caseCurrentPhase },
+                                ].map((item, index) => (
+                                    <div key={`right-case-info-${index}`} className="flex justify-between">
+                                        <span className="text-sm text-gray-600">{item.label}:</span>
+                                        <span className="text-sm text-gray-900">{item.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -722,6 +717,20 @@ const CaseDetails = () => {
                         {renderCard(caseData.lodFinalReminder[currentIndices['lodFinalReminder'] || 0], "LOD Final Reminder")}
                     </CollapsibleSection>
                 )}
+
+              
+                {caseData.current_contact_details && (
+                    <CollapsibleSection title="Current Contact Details" sectionKey="currentContactDetails">
+                        {renderCard(caseData.current_contact_details[currentIndices['currentContactDetails'] || 0], "Current Contact Details")}
+                    </CollapsibleSection>
+                )}
+
+             
+                {caseData.current_customer_identification && (
+                    <CollapsibleSection title="Current Customer Identification" sectionKey="currentCustomerIdentification">
+                        {renderCard(caseData.current_customer_identification[currentIndices['currentCustomerIdentification'] || 0], "Current Customer Identification")}
+                    </CollapsibleSection>
+                )}
             </div>
 
             <div className="flex justify-between items-center">
@@ -735,8 +744,9 @@ const CaseDetails = () => {
                 <button
                     className={`${GlobalStyle.buttonPrimary} px-6 py-2`}
                     onClick={handleDownloadClick}
+                    disabled={isCreatingTask}
                 >
-                    Download
+                    {isCreatingTask ? 'Creating Task...' : 'Download'}
                 </button>
             </div>
         </div>
@@ -744,4 +754,3 @@ const CaseDetails = () => {
 };
 
 export default CaseDetails;
- 
