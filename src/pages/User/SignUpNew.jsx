@@ -38,16 +38,22 @@ const AddUser = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // User roles for dropdown
-  const userRoles = [
+  // SLT roles for dropdown
+  const sltRoles = [
     { value: "GM", label: "GM" },
     { value: "DGM", label: "DGM" },
-    { value: "legal_officer", label: "Legal Officer" },
+    { value: "legal_officer", label: "Legal officer" },
     { value: "manager", label: "Manager" },
-    { value: "slt_coordinator", label: "SLT Coordinator" },
-    { value: "DRC_user", label: "DRC User" },
-    { value: "recovery_staff", label: "Recovery Staff" },
-    { value: "superadmin", label: "Super Admin" },
+    { value: "slt_coordinator", label: "SLT coordinator" },
+  ];
+
+  // DRC roles for dropdown
+  const drcRoles = [
+    { value: "drc_coordinator", label: "DRC Coordinator" },
+    { value: "call_center", label: "call center" },
+    { value: "drc_staff", label: "DRC staff" },
+    { value: "ro", label: "ro" },
+    { value: "drc_officer", label: "drc_officer" },
   ];
 
   // Get logged-in user on mount
@@ -405,7 +411,7 @@ const AddUser = () => {
                         <option value="" disabled hidden>
                           Select Role
                         </option>
-                        {userRoles.map((role) => (
+                        {sltRoles.map((role) => (
                           <option key={role.value} value={role.value}>
                             {role.label}
                           </option>
@@ -580,7 +586,7 @@ const AddUser = () => {
                         <option value="" disabled hidden>
                           Select Role
                         </option>
-                        {userRoles.map((role) => (
+                        {drcRoles.map((role) => (
                           <option key={role.value} value={role.value}>
                             {role.label}
                           </option>
