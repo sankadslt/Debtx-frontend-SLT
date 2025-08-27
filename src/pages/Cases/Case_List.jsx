@@ -679,7 +679,7 @@ const Case_List = () => {
 
   // Function to navigate to case details
   const naviCaseID = (caseId) => {
-    navigate("/Incident/Case_Details", { state: { CaseID: caseId } });
+    navigate("/Cases/Case_Details", { state: { CaseID: caseId } });
   }
  // Filter data based on search query
   const filteredDataBySearch = filteredData.filter((row) => {

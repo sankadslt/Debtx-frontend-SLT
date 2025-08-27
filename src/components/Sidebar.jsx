@@ -188,7 +188,7 @@ const Sidebar = ({ onHoverChange }) => {
           icon: CgEditFade,
           label: "Case List",
           roles: ["superadmin", "admin"],
-          link: "/Incident/Case_List",
+          link: "/Cases/Case_List",
         },
         {
           icon: CgEditFade,
