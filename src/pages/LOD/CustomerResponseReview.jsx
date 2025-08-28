@@ -151,8 +151,8 @@ const CustomerResponseReview = () => {
                             <div className="table-cell px-4 py-2">
                                 {LODdata?.arrears_amount &&
                                     LODdata.arrears_amount.toLocaleString("en-LK", {
-                                        style: "currency",
-                                        currency: "LKR",
+                                        // style: "currency",
+                                        // currency: "LKR",
                                     })
                                 }
                             </div>
@@ -377,16 +377,16 @@ const CustomerResponseReview = () => {
                                     <td className={GlobalStyle.tableCurrency}>
                                         {log?.payment &&
                                             log.payment.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
+                                                // style: "currency",
+                                                // currency: "LKR",
                                             })
                                         }
                                     </td>
                                     <td className={GlobalStyle.tableCurrency}>
                                         {log?.cummilative_settled_balance &&
                                             log.cummilative_settled_balance.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
+                                                // style: "currency",
+                                                // currency: "LKR",
                                             })
                                         }
                                     </td>
@@ -394,8 +394,8 @@ const CustomerResponseReview = () => {
                                     <td className={GlobalStyle.tableCurrency}>
                                         {log?.money_transaction_amount &&
                                             log.money_transaction_amount.toLocaleString("en-LK", {
-                                                style: "currency",
-                                                currency: "LKR",
+                                                // style: "currency",
+                                                // currency: "LKR",
                                             })
                                         }
                                     </td>
