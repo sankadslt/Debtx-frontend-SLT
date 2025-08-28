@@ -152,3 +152,21 @@ export const Create_Rejected_List_for_Download = async (filteredParams) => {
       throw error.response?.data || error; 
     }
 }
+
+export const Create_Abundant_List_for_Download = async (filteredParams) => {
+  try {
+      const user = await getUserData();
+      const taskData = {
+          Template_Task_Id: 21,
+          task_type: "Create incident  distribution download",
+          Created_By: user.user_id, 
+          task_status: "open",
+          ...filteredParams,
+      };
+      const response = await axios.post(`${TASK_URL}/Create_Task`, taskData);
+      return response; 
+  } catch (error) {
+      console.error("Error creating task:", error.response?.data || error.message);
+      throw error.response?.data || error; 
+    }
+}

@@ -151,8 +151,8 @@ const FTL_LOD_Case_Details = () => {
               <div className="table-cell px-4 py-2">
                 {data?.arrears_amount &&
                   data.arrears_amount.toLocaleString("en-LK", {
-                    style: "currency",
-                    currency: "LKR",
+                    // style: "currency",
+                    // currency: "LKR",
                   })}
               </div>
             </div>
@@ -311,8 +311,8 @@ const FTL_LOD_Case_Details = () => {
                       log.Installment_Settle_Amount.toLocaleString(
                         "en-LK",
                         {
-                          style: "currency",
-                          currency: "LKR",
+                          // style: "currency",
+                          // currency: "LKR",
                         }
                       )}
                   </td>
@@ -335,8 +335,8 @@ const FTL_LOD_Case_Details = () => {
                       log.Installment_Paid_Amount.toLocaleString(
                         "en-LK",
                         {
-                          style: "currency",
-                          currency: "LKR",
+                          // style: "currency",
+                          // currency: "LKR",
                         }
                       )}
                   </td>
@@ -420,15 +420,15 @@ const FTL_LOD_Case_Details = () => {
                   <td className={GlobalStyle.tableCurrency}>
                     {log?.payment &&
                       log.payment.toLocaleString("en-LK", {
-                        style: "currency",
-                        currency: "LKR",
+                        // style: "currency",
+                        // currency: "LKR",
                       })}
                   </td>
                   <td className={GlobalStyle.tableCurrency}>
                     {log?.cummilative_settled_balance &&
                       log.cummilative_settled_balance.toLocaleString("en-LK", {
-                        style: "currency",
-                        currency: "LKR",
+                        // style: "currency",
+                        // currency: "LKR",
                       })}
                   </td>
                   <td className={GlobalStyle.tableData}>
@@ -437,8 +437,8 @@ const FTL_LOD_Case_Details = () => {
                   <td className={GlobalStyle.tableCurrency}>
                     {log?.money_transaction_amount &&
                       log.money_transaction_amount.toLocaleString("en-LK", {
-                        style: "currency",
-                        currency: "LKR",
+                        // style: "currency",
+                        // currency: "LKR",
                       })}
                   </td>
                   <td className={GlobalStyle.tableData}>
