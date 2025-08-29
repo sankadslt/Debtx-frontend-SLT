@@ -1131,9 +1131,6 @@ const handleSave = async () => {
                         {userInfo.created_by || "Not specified"}
                       </td>
                     </tr>
-
-                                   
-          
                   </tbody>
                 </table>
               </div>

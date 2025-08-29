@@ -589,7 +589,7 @@ const UserApproval = () => {
                         onClick={() =>
                           approveSelectedUsers(
                             approval.parameters_user_id,
-                            approval.drc_id
+                            approval.drc_id,
                           )
                         }
                         className={GlobalStyle.buttonPrimary}
