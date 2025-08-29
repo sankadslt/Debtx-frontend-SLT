@@ -20,8 +20,11 @@ const FTL_LOD_Creation = () => {
 
 
 
+
+
   // State to hold case details
   const [caseDetails, setCaseDetails] = useState(null);
+
   const [template, setTemplate] = useState("Default");
   const [signatureOwner, setSignatureOwner] = useState("Attorney-at-Law");
   const [pdfUrl, setPdfUrl] = useState("");
@@ -38,6 +41,7 @@ const FTL_LOD_Creation = () => {
       state: {item},
     });
   };
+
 
   // Create default layout plugin
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
@@ -85,6 +89,7 @@ const FTL_LOD_Creation = () => {
   };
   // Generate PDF when case details change
 
+
     // Fetch letter template
   const fetchLetterTemplate = async () => {
     try {
@@ -107,6 +112,7 @@ const FTL_LOD_Creation = () => {
     }
   };
 
+
   // Fetch case details and letter template when case_id is available
   useEffect(() => {
     if (!case_id) {
@@ -124,6 +130,7 @@ const FTL_LOD_Creation = () => {
       generatePDF();
     }
   }, [caseDetails, signatureOwner, template]);
+
 
   // Function to generate PDF using pdf-lib
   const generatePDF = async () => {
@@ -344,8 +351,10 @@ const FTL_LOD_Creation = () => {
 
       // Add paragraphs with text wrapping and justification
 
+
   
  
+
 
       y -= 5;
 
@@ -466,6 +475,7 @@ if (!case_id) {
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Loading...</h2>
         <p className="text-gray-600">Waiting for case information...</p>
+
       </div>
     </div>
   );

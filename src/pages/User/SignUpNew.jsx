@@ -372,29 +372,6 @@ const AddUser = () => {
                       />
                     </td>
                   </tr>
-                  {/* <tr className="block md:table-row mb-2">
-                    <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
-                      <span className="inline-block min-w-[180px] text-left">
-                        Login Method<span className="text-red-500">*</span>
-                      </span>{" "}
-                      :
-                    </td>
-                    <td className="block md:table-cell md:w-2/3 pb-2">
-                      <select
-                        name="loginMethod"
-                        value={formData.loginMethod}
-                        onChange={handleInputChange}
-                        className={`${GlobalStyle.inputText} w-3/4`}
-                      >
-                        <option value="" disabled hidden>
-                          Select Login Method
-                        </option>
-                        <option value="gmail">Gmail</option>
-                        <option value="mobile">Mobile</option>
-                        <option value="slt">SLT</option>
-                      </select>
-                    </td>
-                  </tr> */}
                   <tr className="block md:table-row mb-2">
                     <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
                       <span className="inline-block min-w-[180px] text-left">
@@ -547,29 +524,6 @@ const AddUser = () => {
                       />
                     </td>
                   </tr>
-                  {/* <tr className="block md:table-row mb-2">
-                    <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
-                      <span className="inline-block min-w-[180px] text-left">
-                        Login Method<span className="text-red-500">*</span>
-                      </span>{" "}
-                      :
-                    </td>
-                    <td className="block md:table-cell md:w-2/3 pb-2">
-                      <select
-                        name="loginMethod"
-                        value={formData.loginMethod}
-                        onChange={handleInputChange}
-                        className={`${GlobalStyle.inputText} w-3/4`}
-                      >
-                        <option value="" disabled hidden>
-                          Select Login Method
-                        </option>
-                        <option value="gmail">Gmail</option>
-                        <option value="mobile">Mobile</option>
-                        <option value="slt">SLT</option>
-                      </select>
-                    </td>
-                  </tr> */}
                   <tr className="block md:table-row mb-2">
                     <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
                       <span className="inline-block min-w-[180px] text-left">
