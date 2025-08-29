@@ -88,7 +88,9 @@ const UserInfo = () => {
 
   const loadUser = async () => {
     try {
-      const user = await getLoggedUserId();
+      const id = await getLoggedUserId();
+      const user = id.toString();
+      // const user = await getUserDetailsById(user);
       setLoggedUserData(user);
     } catch (err) {
       console.error("Error fetching logged user:", err);
@@ -426,65 +428,65 @@ const handleSave = async () => {
     await Promise.all(updatePromises);
 
     const fetchedData = await getUserDetailsById(user_id);
-    if (fetchedData && fetchedData.status === "Success") {
-      const updatedStatusHistory = fetchedData.user_status || [];
-      const updatedStatus = updatedStatusHistory.length > 0 
-        ? String(updatedStatusHistory[updatedStatusHistory.length - 1].status).toLowerCase()
-        : 'inactive';
+      if (fetchedData && fetchedData.status === "Success") {
+        const updatedStatusHistory = fetchedData.user_status || [];
+        const updatedStatus = updatedStatusHistory.length > 0 
+          ? String(updatedStatusHistory[updatedStatusHistory.length - 1].status).toLowerCase()
+          : 'inactive';
 
-      setIsActive(updatedStatus === "active");
-      
-      setUserInfo({
-        ...fetchedData,
-        Remark: fetchedData.Remark || [],
-        user_status: updatedStatusHistory
+        setIsActive(updatedStatus === "active");
+        
+        setUserInfo({
+          ...fetchedData,
+          Remark: fetchedData.Remark || [],
+          user_status: updatedStatusHistory
+        });
+
+        const updatedContacts = fetchedData.contact_numbers || [];
+        while (updatedContacts.length < 2) updatedContacts.push("");
+        setContactNumbers([...updatedContacts]);
+        setOriginalContactNumbers([...updatedContacts]);
+        setUserRolesList([]);
+        
+        // Reset remark after successful save
+        setRemark("");
+      }
+
+      setEditMode(false);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "User updated successfully",
       });
 
-      const updatedContacts = fetchedData.contact_numbers || [];
-      while (updatedContacts.length < 2) updatedContacts.push("");
-      setContactNumbers([...updatedContacts]);
-      setOriginalContactNumbers([...updatedContacts]);
-      setUserRolesList([]);
-      
-      // Reset remark after successful save
-      setRemark("");
+    } catch (err) {
+      console.error("Update Error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.response?.data?.message || "Failed to update user",
+      });
+    } finally {
+      setLoading(false);
     }
-
-    setEditMode(false);
-    Swal.fire({
-      icon: "success",
-      title: "Success",
-      text: "User updated successfully",
-    });
-
-  } catch (err) {
-    console.error("Update Error:", err);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: err?.response?.data?.message || "Failed to update user",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "Not specified";
-    const date = new Date(dateString);
-    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
-  // Format date to YYYY-MM-DD HH:mm:ss
-  const formatDateTime = (date) => {
-    if (!date) return "";
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
+    const formatDate = (date) => {
+    if (!date) return null;
+    
+    // If it's already a Date object, use it directly
+    // If it's a string, convert it to a Date object
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    if (isNaN(dateObj.getTime())) return null; // Invalid date
+    
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const hours = String(dateObj.getHours()).padStart(2, "0");
+    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+    const seconds = String(dateObj.getSeconds()).padStart(2, "0");
+    
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
@@ -511,10 +513,13 @@ const handleSave = async () => {
       return;
     }
 
-    // Ensure end_dtm is in the future
+    // Use the endDate directly (already in YYYY-MM-DD format)
+    const selectedEndDate = new Date(`${endDate} 23:59:59`);
     const now = new Date();
-    const selectedEndDate = new Date(endDate);
-    // Set time to 23:59:59 of the selected date to ensure it's in the future
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    // Set time to 23:59:59 of the selected date
     selectedEndDate.setHours(23, 59, 59, 999);
 
     if (selectedEndDate <= now) {
@@ -565,11 +570,12 @@ const handleSave = async () => {
         },
       });
 
+      // Use endDate directly (already in YYYY-MM-DD format)
       const payload = {
         user_id: Number(user_id),
         created_by: loggedUserData,
         status_reason: remark,
-        end_dtm: formatDate(selectedEndDate),
+        end_dtm: `${endDate} ${hours}:${minutes}:${seconds}`,
       };
 
       console.log("Sending payload to endUser:", payload);
@@ -577,35 +583,8 @@ const handleSave = async () => {
       const response = await endUser(payload);
       console.log("endUser response:", response);
 
-      const isSuccess = response && (
-        (typeof response === 'object' && response.message && response.message.includes("terminated successfully")) ||
-        (typeof response === 'string' && response.includes("terminated successfully"))
-      );
-
-      if (isSuccess) {
-        const fetchedData = await getUserDetailsById(user_id);
-        if (fetchedData?.status === "Success") {
-          setUserInfo({
-            username: fetchedData.username || "",
-            user_type: fetchedData.user_type || "",
-            email: fetchedData.email || "",
-            contact_numbers: fetchedData.contact_numbers || [],
-            can_user_login: fetchedData.can_user_login || "",
-            roles: fetchedData.roles || [],
-            user_nic: fetchedData.user_nic || "",
-            user_designation: fetchedData.user_designation || "",
-            created_on: fetchedData.created_on || "",
-            created_by: fetchedData.created_by || "",
-            status_on: fetchedData.user_status?.[fetchedData.user_status.length - 1]?.status_on || "",
-            status_by: fetchedData.user_status?.[fetchedData.user_status.length - 1]?.status_by || "",
-            Remark: fetchedData.Remark || [],
-          });
-        }
-
-        setShowEndSection(false);
-        setRemark("");
-        setEndDate(null);
-
+      if (response?.status === "success") {
+        setIsActive(false);
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -1176,19 +1155,22 @@ const handleSave = async () => {
                   <td className={`${GlobalStyle.tableData} hidden sm:table-cell`}>
                     <div className="flex justify-start w-full">
                       <DatePicker
-                        selected={endDate}
-                        onChange={(date) => setEndDate(date)}
-                        // showTimeSelect
-                        // timeFormat="HH:mm"
-                        // timeIntervals={15}
+                        selected={endDate ? new Date(endDate) : null}
+                        onChange={(date) => {
+                          if (!date) {
+                            setEndDate(null);
+                            return;
+                          }
+                          // Format the date to YYYY-MM-DD
+                          const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                          setEndDate(formatted);
+                        }}
                         dateFormat="yyyy-MM-dd"
-                        // timeCaption="Time"
                         className={`${GlobalStyle.inputText} w-full text-left`}
                         minDate={new Date()}
                         filterTime={(time) => {
                           const now = new Date();
-                          const selectedDate = endDate || now;
-                          // If selected date is today, disable times before now
+                          const selectedDate = endDate ? new Date(endDate) : now;
                           if (
                             selectedDate.getDate() === now.getDate() &&
                             selectedDate.getMonth() === now.getMonth() &&
@@ -1196,11 +1178,9 @@ const handleSave = async () => {
                           ) {
                             return time.getTime() > now.getTime();
                           }
-                          return true; // allow all times for future dates
+                          return true;
                         }}
                       />
-
-
                     </div>
                   </td>
                 </tr>
