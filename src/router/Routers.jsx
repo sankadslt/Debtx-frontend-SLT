@@ -113,7 +113,6 @@ import FTL_LOD_Change_Details_Form from "../pages/FLT_LOD/FTL_LOD_Change_Details
 import FTL_LOD_Case_Details from "../pages/FLT_LOD/FTL_LOD_Case_Details";
 
 //Rtom
-
 import RtomList from "../pages/Rtom/RtomList";
 import RtomInfo from "../pages/Rtom/Rtominfo";
 import AddRtom from "../pages/Rtom/AddRtom";
@@ -139,6 +138,7 @@ import ListAllTasks from "../pages/Task/ListAllTasks";
 //Abnormal
 import WithdrawalCaseLog from "../pages/Abnormal/Withdrawal_Case_Log";
 import AbandonedCaseLog from "../pages/Abnormal/Abandoned_Case_Log";
+import WRIT_List from "../pages/Abnormal/WRIT_List";
 
 //Dispute
 import Dispute_Letter_creation from "../pages/Dispute/Dispute_Letter_creation";
@@ -247,7 +247,6 @@ const Routers = () => {
       />
 
       {/* //DISTRIBUTION */}
-
       <Route path="/Distribution/open-incident" element={<OpenIncident />} />
       <Route
         path="/Distribution/collect-only-cpe-collect"
@@ -569,7 +568,6 @@ const Routers = () => {
       />
 
       {/* //INCIDENT */}
-
       <Route
         path="/Incident/Case_Details"
         element={
@@ -588,8 +586,7 @@ const Routers = () => {
           />
         }
       />
-        {/* //INCIDENT */}
-        <Route
+      <Route
         path="/Incident/Incident_List"
         element={
           <ProtectedRoute
@@ -644,7 +641,7 @@ const Routers = () => {
         }
       />
 
-       <Route
+      <Route
         path="/Incident/Incident_Details"
         element={
           <ProtectedRoute
@@ -965,12 +962,6 @@ const Routers = () => {
         }
       />
 
-      {/* //MASTER DRC
-    <Route path="/pages/DRC/Add_DRC" element={<ProtectedRoute element={<Add_DRC />} allowedRoles={['superadmin']} />} />
-    <Route path="/pages/DRC/DRCList" element={<ProtectedRoute element={<DRCList />} allowedRoles={['superadmin']} />} />
-    <Route path="/pages/DRC/DRCInfo" element={<ProtectedRoute element={<DRCInfo />} allowedRoles={['superadmin']} />} />
-    <Route path="/pages/DRC/DRCInfoEdit" element={<DRCInfoEdit />} /> */}
-
       {/* User */}
       <Route
         path="/pages/User/UserList"
@@ -1032,7 +1023,7 @@ const Routers = () => {
           />
         }
       />
-      {/* Tasks*/}
+      {/* Tasks */}
       <Route
         path="/pages/Task/ListAllTasks"
         element={
@@ -1043,7 +1034,7 @@ const Routers = () => {
         }
       />
 
-      {/* Abnormal*/}
+      {/* Abnormal */}
       <Route
         path="/pages/Abnormal/Withdraw_Case_Log"
         element={
@@ -1064,18 +1055,18 @@ const Routers = () => {
         }
       />
 
-<Route
+      <Route
         path="/pages/Abnormal/Case_Closed_Log"
         element={
           <ProtectedRoute
-            element={<Case_Closed_Log/>}
+            element={<Case_Closed_Log />}
             allowedRoles={["superadmin"]}
           />
         }
       />
 
 
-    {/* <Route
+    <Route
         path="/pages/Abnormal/WRIT_List"
         element={
           <ProtectedRoute
@@ -1083,7 +1074,7 @@ const Routers = () => {
             allowedRoles={["superadmin"]}
           />
         }
-      />   */}
+      />  
 
  
  
@@ -1126,7 +1117,6 @@ const Routers = () => {
       />
 
       {/* Dispute */}
-
       <Route
         path="/Dispute/Dispute_Letter_creation"
         element={
@@ -1157,9 +1147,9 @@ const Routers = () => {
         }
       />
 
-      {/* //Configuration */}
+      {/* Configuration */}
       <Route
-        path="/pages/Configuration/F1Critiria"
+        path="/pages/Configuration/F1Criteria"
         element={
           <ProtectedRoute
             element={<F1Criteria />}
