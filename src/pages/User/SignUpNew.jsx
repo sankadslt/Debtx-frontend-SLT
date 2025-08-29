@@ -38,23 +38,30 @@ const AddUser = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // User roles for dropdown
-  const userRoles = [
+  // SLT roles for dropdown
+  const sltRoles = [
     { value: "GM", label: "GM" },
     { value: "DGM", label: "DGM" },
-    { value: "legal_officer", label: "Legal Officer" },
+    { value: "legal_officer", label: "Legal officer" },
     { value: "manager", label: "Manager" },
-    { value: "slt_coordinator", label: "SLT Coordinator" },
-    { value: "DRC_user", label: "DRC User" },
-    { value: "recovery_staff", label: "Recovery Staff" },
-    { value: "superadmin", label: "Super Admin" },
+    { value: "slt_coordinator", label: "SLT coordinator" },
+  ];
+
+  // DRC roles for dropdown
+  const drcRoles = [
+    { value: "drc_coordinator", label: "DRC Coordinator" },
+    { value: "call_center", label: "call center" },
+    { value: "drc_staff", label: "DRC staff" },
+    { value: "ro", label: "ro" },
+    { value: "drc_officer", label: "drc_officer" },
   ];
 
   // Get logged-in user on mount
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const user = await getLoggedUserId();
+        const id = await getLoggedUserId();
+        const user = id.toString();
         setLoggedUserData(user);
       } catch (error) {
         console.error("Failed to fetch logged user:", error);
@@ -198,8 +205,10 @@ const AddUser = () => {
         return;
       }
 
-      const result = await createUser(payload);
+      console.log("create user payload:", payload);
 
+      const result = await createUser(payload);
+      console.log("create user result:", result);
       if (result.status === "success") {
         goBack();
         Swal.fire({
@@ -363,29 +372,6 @@ const AddUser = () => {
                       />
                     </td>
                   </tr>
-                  {/* <tr className="block md:table-row mb-2">
-                    <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
-                      <span className="inline-block min-w-[180px] text-left">
-                        Login Method<span className="text-red-500">*</span>
-                      </span>{" "}
-                      :
-                    </td>
-                    <td className="block md:table-cell md:w-2/3 pb-2">
-                      <select
-                        name="loginMethod"
-                        value={formData.loginMethod}
-                        onChange={handleInputChange}
-                        className={`${GlobalStyle.inputText} w-3/4`}
-                      >
-                        <option value="" disabled hidden>
-                          Select Login Method
-                        </option>
-                        <option value="gmail">Gmail</option>
-                        <option value="mobile">Mobile</option>
-                        <option value="slt">SLT</option>
-                      </select>
-                    </td>
-                  </tr> */}
                   <tr className="block md:table-row mb-2">
                     <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
                       <span className="inline-block min-w-[180px] text-left">
@@ -403,7 +389,7 @@ const AddUser = () => {
                         <option value="" disabled hidden>
                           Select Role
                         </option>
-                        {userRoles.map((role) => (
+                        {sltRoles.map((role) => (
                           <option key={role.value} value={role.value}>
                             {role.label}
                           </option>
@@ -538,29 +524,6 @@ const AddUser = () => {
                       />
                     </td>
                   </tr>
-                  {/* <tr className="block md:table-row mb-2">
-                    <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
-                      <span className="inline-block min-w-[180px] text-left">
-                        Login Method<span className="text-red-500">*</span>
-                      </span>{" "}
-                      :
-                    </td>
-                    <td className="block md:table-cell md:w-2/3 pb-2">
-                      <select
-                        name="loginMethod"
-                        value={formData.loginMethod}
-                        onChange={handleInputChange}
-                        className={`${GlobalStyle.inputText} w-3/4`}
-                      >
-                        <option value="" disabled hidden>
-                          Select Login Method
-                        </option>
-                        <option value="gmail">Gmail</option>
-                        <option value="mobile">Mobile</option>
-                        <option value="slt">SLT</option>
-                      </select>
-                    </td>
-                  </tr> */}
                   <tr className="block md:table-row mb-2">
                     <td className="block md:table-cell md:w-1/3 text-right pr-2 mt-5 whitespace-nowrap">
                       <span className="inline-block min-w-[180px] text-left">
@@ -578,7 +541,7 @@ const AddUser = () => {
                         <option value="" disabled hidden>
                           Select Role
                         </option>
-                        {userRoles.map((role) => (
+                        {drcRoles.map((role) => (
                           <option key={role.value} value={role.value}>
                             {role.label}
                           </option>

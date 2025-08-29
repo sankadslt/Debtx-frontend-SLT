@@ -152,8 +152,8 @@ const PaymentPreview = () => {
                                 {Paymentdata?.cumulative_settled_balance
  &&
                                     Paymentdata.cumulative_settled_balance.toLocaleString("en-LK", {
-                                        style: "currency",
-                                        currency: "LKR",
+                                        // style: "currency",
+                                        // currency: "LKR",
                                     })
                                 }
                             </div>

@@ -110,6 +110,16 @@ export const Reject_DRC_Agreement_Approval = async (requestData) => {
   }
 }
 
+export const User_Approval = async (requestData) => {
+  try {
+    const response = await axios.post(`https://debtx.slt.lk:6500/users/login/confirm`, requestData);
+    return response.data;
+  } catch (error) {
+    console.error('Error approving User:', error.response?.data || error.message);
+    throw error.response?.data || { status: 'error', message: 'Something went wrong while approving User.' };
+  }
+};
+
 export const Download_User_Approval_List = async (requestData) => {
   try {
     const response = await axios.post(`${USER_URL3}/Download_User_Approval_List`, 
@@ -266,6 +276,48 @@ export const updateUserProfile = async (requestData = {}) => {
       error?.response?.data || {
         status: "error",
         message: "Unable to update user profile",
+      }
+    );
+  }
+};
+
+
+export const updateUserRemarks = async (requestData = {}) => {
+  try {
+    console.log("Sending remark update request:", {
+      user_id: Number(requestData.user_id),
+      remark_payload: {
+        remark: requestData.remark_payload.remark,
+        remark_by: requestData.remark_payload.remark_by,
+        remark_on: requestData.remark_payload.remark_on
+      }
+    });
+    
+    const response = await axios.post(
+      "https://debtx.slt.lk:6500/users/update/remarks",
+      {
+        user_id: Number(requestData.user_id),
+        remark_payload: {
+          remark: requestData.remark_payload.remark,
+          remark_by: requestData.remark_payload.remark_by,
+          remark_on: requestData.remark_payload.remark_on
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log("Remark update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user remarks:", error);
+    throw (
+      error?.response?.data || {
+        status: "error",
+        message: "Unable to update user remarks",
       }
     );
   }

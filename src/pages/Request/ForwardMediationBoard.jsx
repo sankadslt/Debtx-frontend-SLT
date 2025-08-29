@@ -356,8 +356,8 @@ const ForwardMediationBoard = () => {
                 <td className="py-2">
                   {Data?.current_arrears_amount !== undefined
                     ? Data.current_arrears_amount.toLocaleString("en-LK", {
-                      style: "currency",
-                      currency: "LKR",
+                      // style: "currency",
+                      // currency: "LKR",
                     })
                     : ""}
                 </td>
