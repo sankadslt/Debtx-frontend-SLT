@@ -2,8 +2,6 @@
 Purpose: Abundant Incident Log View
 Created Date: 2025.08.07
 Created By: sadinsa
-
-
 Version: React v18
 ui number : 1.7.4
 Dependencies: Tailwind CSS
@@ -22,7 +20,7 @@ import { refreshAccessToken } from "../../services/auth/authService";
 import GlobalStyle from "../../assets/prototype/GlobalStyle";
 import Incident_Reject from "../../assets/images/incidents/Incident_Reject.png";
 import {List_Abundant_Incident } from "../../services/distribution/distributionService";
-import {Create_Rejected_List_for_Download} from "../../services/task/taskIncidentService";
+import {Create_Abundant_List_for_Download} from "../../services/task/taskIncidentService";
 
 const AbundantIncidentlog = () => {
   const navigate = useNavigate();
@@ -516,8 +514,8 @@ const AbundantIncidentlog = () => {
                       <td className={GlobalStyle.tableCurrency}>
   {typeof row.Arrears === 'number'
     ? row.Arrears.toLocaleString("en-LK", {
-        style: "currency",
-        currency: "LKR",
+        // style: "currency",
+        // currency: "LKR",
       })
     : ""}
 </td>
